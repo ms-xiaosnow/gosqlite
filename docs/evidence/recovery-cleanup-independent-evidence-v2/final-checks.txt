@@ -1,0 +1,49 @@
++ cd /workspace/scratch/5e06a74e5f65/durable-restart/recovery-cleanup-independent-final-v2
++ export PATH=/workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/override:/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin:/opt/codex/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/agent/.local/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/fallback
++ PATH=/workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/override:/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin:/opt/codex/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/agent/.local/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/fallback
++ export GOCACHE=/workspace/scratch/5e06a74e5f65/durable-restart/go-cache
++ GOCACHE=/workspace/scratch/5e06a74e5f65/durable-restart/go-cache
++ export GOPATH=/workspace/scratch/5e06a74e5f65/durable-restart/go-path
++ GOPATH=/workspace/scratch/5e06a74e5f65/durable-restart/go-path
++ export GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off GOFLAGS=-buildvcs=false CGO_ENABLED=0
++ GOTOOLCHAIN=local
++ GOPROXY=off
++ GOSUMDB=off
++ GOFLAGS=-buildvcs=false
++ CGO_ENABLED=0
++ go version
+go version go1.27.2 linux/amd64
++ go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ go test -count=1 -run '^TestPlainRecoveryCleanup(Memory|Source)' ./internal/pager
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.009s
++ go test -count=1 -run '^(TestTxCreatePageSizesAndReadSnapshot|TestTxCommitPreservesUnrelatedHeaderAndPages)$' ./internal/pager
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.020s
++ CGO_ENABLED=1
++ go test -race -count=1 -run '^TestPlainRecoveryCleanup(Memory|Source)' ./internal/pager
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.070s
++ CGO_ENABLED=1
++ go test -race -count=1 -run '^(TestTxCreatePageSizesAndReadSnapshot|TestTxCommitPreservesUnrelatedHeaderAndPages)$' ./internal/pager
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.052s
++ go vet ./internal/pager
++ go build ./...
++ for target in 'linux arm64' 'darwin amd64' 'darwin arm64' 'windows amd64'
++ set -- linux arm64
++ GOOS=linux
++ GOARCH=arm64
++ go test -c -o /workspace/scratch/5e06a74e5f65/durable-restart/recovery-cleanup-independent-evidence-v2/pager-linux-arm64.test ./internal/pager
++ for target in 'linux arm64' 'darwin amd64' 'darwin arm64' 'windows amd64'
++ set -- darwin amd64
++ GOOS=darwin
++ GOARCH=amd64
++ go test -c -o /workspace/scratch/5e06a74e5f65/durable-restart/recovery-cleanup-independent-evidence-v2/pager-darwin-amd64.test ./internal/pager
++ for target in 'linux arm64' 'darwin amd64' 'darwin arm64' 'windows amd64'
++ set -- darwin arm64
++ GOOS=darwin
++ GOARCH=arm64
++ go test -c -o /workspace/scratch/5e06a74e5f65/durable-restart/recovery-cleanup-independent-evidence-v2/pager-darwin-arm64.test ./internal/pager
++ for target in 'linux arm64' 'darwin amd64' 'darwin arm64' 'windows amd64'
++ set -- windows amd64
++ GOOS=windows
++ GOARCH=amd64
++ go test -c -o /workspace/scratch/5e06a74e5f65/durable-restart/recovery-cleanup-independent-evidence-v2/pager-windows-amd64.test ./internal/pager

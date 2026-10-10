@@ -1,0 +1,39 @@
+{
+  "baseline_files": 1226,
+  "freeze_files": 1228,
+  "exact_owned_paths": {
+    "docs/compatibility.md": {
+      "before": "214e9e29abea3806cf10b8ab3e78952802652ef3e08331912bb4cf3fbda038dd",
+      "after": "02d10913ce0d23eb32233ac078dc4349f7b99aa68839c469dea890cf0ec6bb77"
+    },
+    "docs/decisions/0004-exclusive-wal-and-recovery-gates.md": {
+      "before": "052a7cc9dc3dfb5015781a22634a102bb1a62d420c3c069a9bd27d1968d24b25",
+      "after": "a2c19215d0173b00fdfd383c3bed38b618fad25f552c84a174aa63be330834d6"
+    },
+    "docs/file-formats.md": {
+      "before": "bd74f54a8d40a7de5f717257da06db76908e6a98a69c26c0d9fbb4f1dca79e98",
+      "after": "13587119d6e164dfef689f16072f2baaddb6e23efd72c4597f5dc76d683521c1"
+    },
+    "docs/progress.md": {
+      "before": "6ffe9cd346ba916f7be33cfd075df945a6d97ae2a2d04e3c409f195c94374758",
+      "after": "ddf35ec979eab14f113380f1e7f7b872f1c7ed503a9f3a93413b958ac1684dd7"
+    },
+    "docs/rollback-replay-memory.md": {
+      "before": null,
+      "after": "7a8c79ca0633ac3a29da56bf484d955b2c63a59da951174f4d8beb2dc3cac10b"
+    },
+    "internal/journal/replay.go": {
+      "before": "466c0a5b6c4f0a53571191051c7b13571b52bda263f2dc7c20e410539d1e29f9",
+      "after": "d8263d7a29d7d56509066057524a6df56b6914081569730225cf1981b60aa404"
+    },
+    "internal/journal/replay_segments_test.go": {
+      "before": null,
+      "after": "3a57d7318c15ccb9ea03064e2e1bd5eeb07143dd03452e8ad3f273739082c624"
+    },
+    "internal/journal/replay_test.go": {
+      "before": "3f6c6912074176629a47a953bdc7122015845393cf9210bd3f2ff121ec85c910",
+      "after": "1f70cf4f9bae35ad57e9a9a7daa04394bdf19a4d6710846c2770fdb5a9e6ce17"
+    }
+  },
+  "unexpected_changes": []
+}

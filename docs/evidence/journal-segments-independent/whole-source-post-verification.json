@@ -1,0 +1,97 @@
+{
+  "frozen_files": 1228,
+  "work_all_frozen_hashes_identical": true,
+  "work_additions": [
+    "docs/evidence/journal-segments-independent/baseline-full-post-verification.txt",
+    "docs/evidence/journal-segments-independent/baseline-full-verification.txt",
+    "docs/evidence/journal-segments-independent/baseline-negative-control.exit",
+    "docs/evidence/journal-segments-independent/baseline-negative-control.txt",
+    "docs/evidence/journal-segments-independent/baseline-post-tree.txt",
+    "docs/evidence/journal-segments-independent/baseline-tree.txt",
+    "docs/evidence/journal-segments-independent/frozen-full-post-verification.txt",
+    "docs/evidence/journal-segments-independent/frozen-full-pre-verification.txt",
+    "docs/evidence/journal-segments-independent/frozen-post-tree.txt",
+    "docs/evidence/journal-segments-independent/frozen-tree.txt",
+    "docs/evidence/journal-segments-independent/fuzz-checks.exit",
+    "docs/evidence/journal-segments-independent/fuzz-checks.txt",
+    "docs/evidence/journal-segments-independent/negative-controls.exit",
+    "docs/evidence/journal-segments-independent/negative-controls.json",
+    "docs/evidence/journal-segments-independent/negative-controls.txt",
+    "docs/evidence/journal-segments-independent/negative-nonce.patch",
+    "docs/evidence/journal-segments-independent/negative-nonce.txt",
+    "docs/evidence/journal-segments-independent/negative-ownership.patch",
+    "docs/evidence/journal-segments-independent/negative-ownership.txt",
+    "docs/evidence/journal-segments-independent/negative-partial.patch",
+    "docs/evidence/journal-segments-independent/negative-partial.txt",
+    "docs/evidence/journal-segments-independent/negative-quota.patch",
+    "docs/evidence/journal-segments-independent/negative-quota.txt",
+    "docs/evidence/journal-segments-independent/owned-delta-verification.json",
+    "docs/evidence/journal-segments-independent/patch-replay-full-verification.txt",
+    "docs/evidence/journal-segments-independent/patch-tree.txt",
+    "docs/evidence/journal-segments-independent/replay_independent_test.go.txt",
+    "docs/evidence/journal-segments-independent/run-fuzz.sh",
+    "docs/evidence/journal-segments-independent/run-negative-controls.sh",
+    "docs/evidence/journal-segments-independent/run-selected.sh",
+    "docs/evidence/journal-segments-independent/run-single-compatibility.sh",
+    "docs/evidence/journal-segments-independent/selected-checks.exit",
+    "docs/evidence/journal-segments-independent/selected-checks.txt",
+    "docs/evidence/journal-segments-independent/selected-final-audited-checks.exit",
+    "docs/evidence/journal-segments-independent/selected-final-audited-checks.txt",
+    "docs/evidence/journal-segments-independent/single-compatibility-baseline-digest.txt",
+    "docs/evidence/journal-segments-independent/single-compatibility-baseline.txt",
+    "docs/evidence/journal-segments-independent/single-compatibility-work-digest.txt",
+    "docs/evidence/journal-segments-independent/single-compatibility-work.txt",
+    "docs/evidence/journal-segments-independent/single-compatibility.exit",
+    "docs/evidence/journal-segments-independent/single-compatibility.txt",
+    "docs/evidence/journal-segments-independent/single_compatibility_test.go.txt",
+    "docs/evidence/journal-segments-independent/source-scope-audit.md",
+    "docs/evidence/journal-segments-independent/upstream-pin.json",
+    "docs/evidence/journal-segments-independent/verify_tree.py",
+    "docs/evidence/journal-segments-independent/work-source-post-verification.txt",
+    "internal/journal/replay_independent_test.go",
+    "internal/journal/single_compatibility_test.go"
+  ],
+  "negative_control_exact_deltas": {
+    "nonce": {
+      "internal/journal/replay.go": {
+        "frozen": "d8263d7a29d7d56509066057524a6df56b6914081569730225cf1981b60aa404",
+        "actual": "a21bdde1ac5445d2278f52736234afe29ca2a881d621ba5e139bcc42aabcfa8d"
+      },
+      "internal/journal/replay_independent_test.go": {
+        "frozen": null,
+        "actual": "6b95503c10dd9743c45e7e6547a38e2219691109572aadea5fb79d9c57c2f041"
+      }
+    },
+    "quota": {
+      "internal/journal/replay.go": {
+        "frozen": "d8263d7a29d7d56509066057524a6df56b6914081569730225cf1981b60aa404",
+        "actual": "f812b760b0f4e4c435dd7d119d90c6e1a87fa95cb770b7fd72b985266dc2c992"
+      },
+      "internal/journal/replay_independent_test.go": {
+        "frozen": null,
+        "actual": "6b95503c10dd9743c45e7e6547a38e2219691109572aadea5fb79d9c57c2f041"
+      }
+    },
+    "partial": {
+      "internal/journal/replay.go": {
+        "frozen": "d8263d7a29d7d56509066057524a6df56b6914081569730225cf1981b60aa404",
+        "actual": "1643ee3f634d7bfda6b512b98d8afba4c3a3e0670d257da7bddf2c53cec91c7d"
+      },
+      "internal/journal/replay_independent_test.go": {
+        "frozen": null,
+        "actual": "6b95503c10dd9743c45e7e6547a38e2219691109572aadea5fb79d9c57c2f041"
+      }
+    },
+    "ownership": {
+      "internal/journal/replay.go": {
+        "frozen": "d8263d7a29d7d56509066057524a6df56b6914081569730225cf1981b60aa404",
+        "actual": "caf13106acb2913d0c48260914fe53582b521afa1e763126c486fc3477901971"
+      },
+      "internal/journal/replay_independent_test.go": {
+        "frozen": null,
+        "actual": "6b95503c10dd9743c45e7e6547a38e2219691109572aadea5fb79d9c57c2f041"
+      }
+    }
+  },
+  "patch_and_inventory_hashes_unchanged": true
+}

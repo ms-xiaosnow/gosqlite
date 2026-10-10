@@ -1,0 +1,6 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+--- FAIL: TestPlainRecoveryCleanupSourceAdmissionAndRetirementBoundary (0.00s)
+    plain_recovery_cleanup_test.go:237: expected cleanup.closeTemporary before lockExclusive: [ctx.Err plainRetirements.reserve  finishPlainRecovery filepath.Abs resolveNativePath openRecoveryFile statNativeFile  info.Mode fmt.Errorf validateWritableFile lockShared recoveryCheckPath recoveryCheckWAL nativeLstatForCreate recoveryCheckReserved recoveryOpenJournal readNativeAt closeNativeFile fmt.Errorf ctx.Err lockExclusive recoveryCheckReserved recoveryCheckPath recoveryCheckWAL statNativeFile info.Size fmt.Errorf recoveryOpenJournal statNativeFile  ji.Size uint64 ji.Size uint64 ji.Size uint64 uint fmt.Errorf make int ji.Size io.ReadFull nativeFileError journal.ParseReplay recoveryPlanError plan.ValidateExtent info.Size recoveryPlanError recoveryValidateHeader recoveryCheckUnchanged ctx.Err jf.Sync nativeFileError syncDirectory recoveryCheckUnchanged recoveryCheckPath ctx.Err writeFullAt int64 int64 db.Truncate db.Sync recoveryCheckUnchanged recoveryCheckPath cleanup.closeTemporary os.Remove syncDirectory uint32 len]
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/pager	0.011s
+FAIL

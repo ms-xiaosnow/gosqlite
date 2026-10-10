@@ -1,0 +1,13 @@
+{
+  "artifact": "Supplemental CLI, importer verification, grouped/cache and transaction harness candidates",
+  "final_delivery": false,
+  "remote_main_at_snapshot": "39a06cbf4d787d5e480c1d038c00d2a812c8d993",
+  "library_file_id": "libfile_c01f1617b0d88191b80e1945ca68c503",
+  "file_id": "file_0000000028d881f59a606fc5571f38b4",
+  "library_version": 0,
+  "archive_name": "gosqlite-cli-verification-harnesses-pending.tar.gz",
+  "bytes": 19902753,
+  "sha256": "8db834d5d4c2ad381d82487ebb1c61150b1ad0edd558a7d55fcba68422330cdb",
+  "verified": "Byte-identical Library readback, 8120 regular files/8119 SHA256 entries and six complete immutable source bytes/modes PASS2026-10-10T21:07:00Z. All tree identities and bounded statuses are in archive README/FROZEN-TREES.json. Import v1 failed numeric bound; v2 independent review pending. Transaction harness v1 failed rollback concurrency; v2 passing sample does not repair engine. Group/cache full gate pending; CLI/cache scoped independent reviews passed. No large or two-hour soak run.",
+  "restricted_tests": "NOT_RUN; no authority for execution or relocation"
+}

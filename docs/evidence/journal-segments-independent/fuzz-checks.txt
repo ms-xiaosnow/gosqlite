@@ -1,0 +1,28 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+fuzz: elapsed: 0s, gathering baseline coverage: 0/4 completed
+fuzz: elapsed: 0s, gathering baseline coverage: 4/4 completed, now fuzzing with 2 workers
+fuzz: elapsed: 3s, execs: 10920 (3639/sec), new interesting: 1 (total: 5)
+fuzz: elapsed: 6s, execs: 10920 (0/sec), new interesting: 1 (total: 5)
+fuzz: elapsed: 9s, execs: 10920 (0/sec), new interesting: 1 (total: 5)
+fuzz: elapsed: 11s, execs: 10920 (0/sec), new interesting: 1 (total: 5)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/journal	11.061s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+fuzz: elapsed: 0s, gathering baseline coverage: 0/4 completed
+fuzz: elapsed: 0s, gathering baseline coverage: 4/4 completed, now fuzzing with 2 workers
+fuzz: elapsed: 3s, execs: 17 (6/sec), new interesting: 0 (total: 4)
+fuzz: elapsed: 6s, execs: 17 (0/sec), new interesting: 0 (total: 4)
+fuzz: elapsed: 9s, execs: 158273 (52751/sec), new interesting: 2 (total: 6)
+fuzz: elapsed: 11s, execs: 342897 (91296/sec), new interesting: 3 (total: 7)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/journal	11.029s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+fuzz: elapsed: 0s, gathering baseline coverage: 0/6 completed
+fuzz: elapsed: 0s, gathering baseline coverage: 6/6 completed, now fuzzing with 2 workers
+fuzz: elapsed: 3s, execs: 36237 (12059/sec), new interesting: 16 (total: 22)
+fuzz: elapsed: 6s, execs: 73340 (12376/sec), new interesting: 16 (total: 22)
+fuzz: elapsed: 9s, execs: 115726 (14138/sec), new interesting: 16 (total: 22)
+fuzz: elapsed: 10s, execs: 132941 (16679/sec), new interesting: 16 (total: 22)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/journal	10.039s
+THREE BOUNDED PURE-MEMORY FUZZ TARGETS PASS

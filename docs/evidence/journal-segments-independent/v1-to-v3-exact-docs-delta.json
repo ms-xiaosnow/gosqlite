@@ -1,0 +1,10 @@
+{
+  "docs/compatibility.md": {
+    "v1": "02d10913ce0d23eb32233ac078dc4349f7b99aa68839c469dea890cf0ec6bb77",
+    "v3": "39daa2b7badcb5f2e470ec6d0c18ed1cdac7e063b0fd1eff653174a221d748bb"
+  },
+  "docs/progress.md": {
+    "v1": "ddf35ec979eab14f113380f1e7f7b872f1c7ed503a9f3a93413b958ac1684dd7",
+    "v3": "0c66a41ddd6ff575c087bed67208b630ebf7ad6e52c16acf8a01bba9df429e11"
+  }
+}

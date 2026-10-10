@@ -1,0 +1,306 @@
+package journal_test
+
+import (
+	"bytes"
+	"encoding/binary"
+	"errors"
+	"math/rand"
+	"reflect"
+	"testing"
+
+	j "github.com/ms-xiaosnow/gosqlite/internal/journal"
+)
+
+// Independent fixtures and models are exclusively byte slices. No database,
+// journal file, native pager, CLI, filesystem mutation, or recovery is used.
+var independentMagic = []byte{0xd9, 0xd5, 0x05, 0xf9, 0x20, 0xa1, 0x63, 0xd7}
+
+type independentSegment struct {
+	nonce uint32
+	nums  []uint32
+}
+type independentFixture struct {
+	raw          []byte
+	starts, ends []int
+	pages        []j.PageImage
+	first        j.Header
+}
+
+func independentSum(page []byte, nonce uint32) uint32 {
+	// Enumerate sampled indices ascending rather than using the production loop.
+	for k := 1; k*200 < len(page); k++ {
+		nonce += uint32(page[len(page)-k*200])
+	}
+	return nonce
+}
+func independentBuild(ps, ss, extent uint32, segs []independentSegment) independentFixture {
+	f := independentFixture{}
+	for n, s := range segs {
+		for len(f.raw)%int(ss) != 0 {
+			f.raw = append(f.raw, byte(0x91+n))
+		}
+		start := len(f.raw)
+		f.starts = append(f.starts, start)
+		h := j.Header{Records: uint32(len(s.nums)), Nonce: s.nonce, OriginalPages: extent, SectorSize: ss, PageSize: ps}
+		if n == 0 {
+			f.first = h
+		}
+		header := bytes.Repeat([]byte{byte(0xa1 + n)}, int(ss))
+		copy(header, independentMagic)
+		for i, v := range []uint32{h.Records, h.Nonce, h.OriginalPages, h.SectorSize, h.PageSize} {
+			binary.BigEndian.PutUint32(header[8+4*i:], v)
+		}
+		f.raw = append(f.raw, header...)
+		for _, num := range s.nums {
+			rec := make([]byte, int(ps)+8)
+			binary.BigEndian.PutUint32(rec, num)
+			page := rec[4 : 4+int(ps)]
+			for i := range page {
+				page[i] = byte(uint64(num)*29 + uint64(i)*17 + uint64(s.nonce)*7)
+			}
+			binary.BigEndian.PutUint32(rec[4+int(ps):], independentSum(page, s.nonce))
+			f.raw = append(f.raw, rec...)
+			f.pages = append(f.pages, j.PageImage{Number: num, Data: append([]byte(nil), page...)})
+		}
+		f.ends = append(f.ends, len(f.raw))
+	}
+	return f
+}
+func independentPlan(t *testing.T, f independentFixture, limits j.ReplayLimits) *j.ReplayPlan {
+	t.Helper()
+	p, err := j.ParseReplay(f.raw, limits)
+	if err != nil || p == nil {
+		t.Fatalf("valid fixture rejected: %v", err)
+	}
+	if p.Header != f.first || p.DatabaseBytes != int64(f.first.OriginalPages)*int64(f.first.PageSize) || len(p.Pages) != len(f.pages) {
+		t.Fatalf("metadata mismatch: header=%+v first=%+v pages=%d want=%d", p.Header, f.first, len(p.Pages), len(f.pages))
+	}
+	for i, q := range p.Pages {
+		if q.Number != f.pages[i].Number || !bytes.Equal(q.Data, f.pages[i].Data) {
+			t.Fatalf("page %d differs", i)
+		}
+	}
+	return p
+}
+func independentReject(t *testing.T, b []byte, limits j.ReplayLimits, want error) {
+	t.Helper()
+	p, err := j.ParseReplay(b, limits)
+	if p != nil || err == nil || (want != nil && !errors.Is(err, want)) {
+		t.Fatalf("rejection: plan=%v error=%v want=%v", p, err, want)
+	}
+}
+
+func TestIndependentSegmentGeometryAndOwnership(t *testing.T) {
+	for ps := uint32(512); ps <= 65536; ps *= 2 {
+		for ss := uint32(32); ss <= 65536; ss *= 2 {
+			f := independentBuild(ps, ss, 5, []independentSegment{{0xffffffff, []uint32{5}}, {0, nil}, {0x87654321, []uint32{1, 3}}, {77, nil}})
+			original := append([]byte(nil), f.raw...)
+			p := independentPlan(t, f, j.ReplayLimits{})
+			if !bytes.Equal(original, f.raw) {
+				t.Fatal("parser mutated input")
+			}
+			q := independentPlan(t, f, j.ReplayLimits{})
+			for i := range f.raw {
+				f.raw[i] ^= 0xff
+			}
+			for i, pg := range p.Pages {
+				if !bytes.Equal(pg.Data, f.pages[i].Data) {
+					t.Fatal("input and output alias")
+				}
+				pg.Data[0] ^= 0x7f
+				if !bytes.Equal(q.Pages[i].Data, f.pages[i].Data) {
+					t.Fatal("independent plans alias")
+				}
+			}
+		}
+	}
+}
+
+func TestIndependentSegmentEveryPrefixAndTail(t *testing.T) {
+	fixtures := []independentFixture{
+		independentBuild(512, 32, 4, []independentSegment{{19, nil}, {71, []uint32{1}}, {131, nil}, {2, []uint32{4, 3}}}),
+		independentBuild(512, 4096, 4, []independentSegment{{19, []uint32{2}}, {71, []uint32{1}}, {131, nil}, {2, []uint32{4, 3}}}),
+	}
+	for _, f := range fixtures {
+		ends := map[int]int{}
+		count := 0
+		for i, end := range f.ends {
+			count += int(binary.BigEndian.Uint32(f.raw[f.starts[i]+8:]))
+			ends[end] = count
+		}
+		for cut := 0; cut <= len(f.raw); cut++ {
+			p, err := j.ParseReplay(f.raw[:cut], j.ReplayLimits{})
+			if n, ok := ends[cut]; ok {
+				if err != nil || p == nil || len(p.Pages) != n {
+					t.Fatalf("complete prefix %d: %v", cut, err)
+				}
+			} else if err == nil || p != nil {
+				t.Fatalf("partial prefix %d accepted", cut)
+			}
+		}
+		for _, tail := range [][]byte{{0}, bytes.Repeat([]byte{0}, int(f.first.SectorSize)), independentMagic, append([]byte{0, 0, 0, 1}, independentMagic...)} {
+			independentReject(t, append(append([]byte(nil), f.raw...), tail...), j.ReplayLimits{}, nil)
+		}
+	}
+}
+
+func TestIndependentSegmentLaterFieldsAndChecksums(t *testing.T) {
+	f := independentBuild(512, 512, 9, []independentSegment{{0xffffffb0, []uint32{1}}, {17, []uint32{4}}, {87, []uint32{9}}})
+	independentPlan(t, f, j.ReplayLimits{})
+	later := f.starts[1]
+	cases := []struct {
+		name  string
+		off   int
+		value uint32
+		want  error
+	}{
+		{"zero magic", later, 0, nil},
+		{"no-sync count", later + 8, 0xffffffff, j.ErrReplayUnsupported},
+		{"huge count", later + 8, 0xfffffffe, j.ErrReplayLimit},
+		{"zero count hiding record", later + 8, 0, nil},
+		{"second segment uses first nonce", later + 12, f.first.Nonce, j.ErrFormat},
+		{"later smaller extent", later + 16, 8, j.ErrReplayUnsupported},
+		{"later larger extent", later + 16, 10, j.ErrReplayUnsupported},
+		{"later sector", later + 20, 1024, j.ErrReplayUnsupported},
+		{"later page", later + 24, 1024, j.ErrReplayUnsupported},
+		{"later legacy page", later + 24, 0, j.ErrReplayUnsupported},
+		{"later duplicate", later + 512, 1, j.ErrReplayUnsupported},
+		{"later zero page", later + 512, 0, j.ErrFormat},
+		{"later out-of-range page", later + 512, 10, j.ErrFormat},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			b := append([]byte(nil), f.raw...)
+			binary.BigEndian.PutUint32(b[tc.off:], tc.value)
+			independentReject(t, b, j.ReplayLimits{}, tc.want)
+		})
+	}
+	for _, n := range []int{1, 2} {
+		b := append([]byte(nil), f.raw...)
+		b[f.starts[n]+512+4+312] ^= 1
+		independentReject(t, b, j.ReplayLimits{}, j.ErrFormat)
+	}
+	// Reusing a nonce is allowed; uniqueness applies to original page numbers.
+	independentPlan(t, independentBuild(512, 64, 2, []independentSegment{{1, []uint32{1}}, {1, []uint32{2}}}), j.ReplayLimits{})
+}
+
+func TestIndependentSegmentLimitsAndOverflow(t *testing.T) {
+	f := independentBuild(512, 32, 3, []independentSegment{{1, []uint32{1}}, {2, []uint32{2}}, {3, []uint32{3}}})
+	exact := j.ReplayLimits{MaxJournalBytes: uint64(len(f.raw)), MaxRecords: 3, MaxDatabaseBytes: 1536}
+	independentPlan(t, f, exact)
+	for _, limits := range []j.ReplayLimits{{MaxJournalBytes: uint64(len(f.raw) - 1)}, {MaxRecords: 2}, {MaxDatabaseBytes: 1535}} {
+		independentReject(t, f.raw, limits, j.ErrReplayLimit)
+	}
+	// Every individual count fits this quota, but their cumulative count does not.
+	independentReject(t, f.raw, j.ReplayLimits{MaxRecords: 1}, j.ErrReplayLimit)
+	// Huge advertised counts cannot cause allocation or integer wrapping.
+	huge := append([]byte(nil), f.raw...)
+	binary.BigEndian.PutUint32(huge[8:], 0xfffffffe)
+	independentReject(t, huge, j.ReplayLimits{MaxRecords: 0xffffffff, MaxDatabaseBytes: ^uint64(0)}, nil)
+	huge = append([]byte(nil), f.raw...)
+	binary.BigEndian.PutUint32(huge[f.starts[2]+8:], 0xfffffffe)
+	independentReject(t, huge, j.ReplayLimits{MaxRecords: 0xffffffff, MaxDatabaseBytes: ^uint64(0)}, nil)
+	// Max uint32 original extent times max supported page size stays exact int64.
+	max := independentBuild(65536, 32, 0xfffffffe, []independentSegment{{1, nil}, {2, nil}})
+	p := independentPlan(t, max, j.ReplayLimits{MaxDatabaseBytes: ^uint64(0)})
+	if p.DatabaseBytes != 281474976579584 {
+		t.Fatal("extent overflow")
+	}
+	independentReject(t, max.raw, j.ReplayLimits{}, j.ErrReplayLimit)
+	// Empty chunks must be bounded by input bytes even without page records.
+	zeros := make([]independentSegment, 1024)
+	many := independentBuild(512, 32, 0, zeros)
+	independentPlan(t, many, j.ReplayLimits{MaxJournalBytes: uint64(len(many.raw)), MaxRecords: 1})
+	independentReject(t, many.raw, j.ReplayLimits{MaxJournalBytes: uint64(len(many.raw) - 1)}, j.ErrReplayLimit)
+	// Lock page is excluded independently of which segment contains it.
+	lock := uint32(0x40000000/65536 + 1)
+	forbidden := independentBuild(65536, 32, lock, []independentSegment{{1, []uint32{1}}, {2, []uint32{lock}}})
+	independentReject(t, forbidden.raw, j.ReplayLimits{}, j.ErrFormat)
+}
+
+func TestIndependentSegmentModelHistories(t *testing.T) {
+	rng := rand.New(rand.NewSource(8675309))
+	for it := 0; it < 500; it++ {
+		ps, ss := uint32(512<<rng.Intn(4)), uint32(32<<rng.Intn(8))
+		extent := uint32(1 + rng.Intn(24))
+		nums := rng.Perm(int(extent))
+		count := rng.Intn(int(extent) + 1)
+		segs := make([]independentSegment, 1+rng.Intn(8))
+		for i := range segs {
+			segs[i].nonce = rng.Uint32()
+		}
+		// Keep arbitrary record order while randomly inserting zero-count chunks.
+		for _, n := range nums[:count] {
+			k := rng.Intn(len(segs))
+			segs[k].nums = append(segs[k].nums, uint32(n+1))
+		}
+		f := independentBuild(ps, ss, extent, segs)
+		p := independentPlan(t, f, j.ReplayLimits{})
+		present := map[uint32]bool{}
+		for _, pg := range f.pages {
+			present[pg.Number] = true
+		}
+		for current := int64(0); current <= p.DatabaseBytes+int64(ps); current += int64(ps) / 2 {
+			want := true
+			for n := uint32(current/int64(ps)) + 1; n <= extent; n++ {
+				if !present[n] {
+					want = false
+					break
+				}
+			}
+			if err := p.ValidateExtent(current); (err == nil) != want {
+				t.Fatalf("iteration=%d extent=%d: %v want=%v", it, current, err, want)
+			}
+		}
+		apply := func(input []byte) []byte {
+			b := make([]byte, int(p.DatabaseBytes))
+			copy(b, input)
+			for _, pg := range p.Pages {
+				copy(b[int(pg.Number-1)*int(ps):], pg.Data)
+			}
+			return b
+		}
+		before := bytes.Repeat([]byte{0x5d}, int(p.DatabaseBytes)+int(ps))
+		once := apply(before)
+		if !bytes.Equal(once, apply(once)) {
+			t.Fatal("replay is not idempotent")
+		}
+		for n := uint32(1); n <= extent; n++ {
+			if !present[n] && !bytes.Equal(once[int(n-1)*int(ps):int(n)*int(ps)], before[int(n-1)*int(ps):int(n)*int(ps)]) {
+				t.Fatal("unjournaled page changed")
+			}
+		}
+		exact := j.ReplayLimits{MaxJournalBytes: uint64(len(f.raw)), MaxRecords: uint32(count), MaxDatabaseBytes: uint64(p.DatabaseBytes)}
+		independentPlan(t, f, exact)
+		if count > 1 {
+			exact.MaxRecords = uint32(count - 1)
+			independentReject(t, f.raw, exact, j.ErrReplayLimit)
+		}
+	}
+}
+
+func FuzzIndependentSegmentStructured(f *testing.F) {
+	for _, seed := range []uint64{0, 1, 17, 65536, 0xffffffff, 0xffffffffffffffff} {
+		f.Add(seed, uint8(3), uint8(2))
+	}
+	f.Fuzz(func(t *testing.T, seed uint64, width, which uint8) {
+		rng := rand.New(rand.NewSource(int64(seed)))
+		n := int(width%12) + 2
+		segs := make([]independentSegment, n)
+		for i := range segs {
+			segs[i] = independentSegment{rng.Uint32(), []uint32{uint32(i + 1)}}
+		}
+		fixture := independentBuild(512, 32<<uint(which%5), uint32(n), segs)
+		p := independentPlan(t, fixture, j.ReplayLimits{MaxJournalBytes: 1 << 18, MaxRecords: 32})
+		if !reflect.DeepEqual(p.Pages, fixture.pages) {
+			t.Fatal("structured output differs")
+		}
+		k := int(which) % n
+		bad := append([]byte(nil), fixture.raw...)
+		binary.BigEndian.PutUint32(bad[fixture.starts[k]+12:], segs[k].nonce+1)
+		independentReject(t, bad, j.ReplayLimits{}, j.ErrFormat)
+		if n > 1 {
+			independentReject(t, fixture.raw, j.ReplayLimits{MaxRecords: uint32(n - 1)}, j.ErrReplayLimit)
+		}
+	})
+}

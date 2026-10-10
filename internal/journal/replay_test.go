@@ -224,7 +224,7 @@ func FuzzReplayPlanBytesOnly(f *testing.F) {
 			}
 			return
 		}
-		if int(plan.Header.Records) != len(plan.Pages) || plan.DatabaseBytes != int64(plan.Header.OriginalPages)*int64(plan.Header.PageSize) {
+		if int(plan.Header.Records) > len(plan.Pages) || len(plan.Pages) > 1024 || plan.DatabaseBytes != int64(plan.Header.OriginalPages)*int64(plan.Header.PageSize) {
 			t.Fatal("invalid successful plan")
 		}
 		if err := plan.ValidateExtent(plan.DatabaseBytes); err != nil {

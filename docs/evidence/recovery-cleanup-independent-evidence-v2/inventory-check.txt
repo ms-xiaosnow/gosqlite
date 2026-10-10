@@ -1,0 +1,15 @@
+plain-final-verify 7d3184f87165e11e12560884ec6e4f92c9bfd039
+recovery-cleanup-freeze-v2 201dca235ee217594d231f2f583d3ccf65aa8093
+all 1255 file hashes/byte lengths/modes match (modes included in Git tree)
+recovery-cleanup-independent-final-v2 201dca235ee217594d231f2f583d3ccf65aa8093
+all 1255 file hashes/byte lengths/modes match (modes included in Git tree)
+recovery-cleanup-independent-patch-v2 201dca235ee217594d231f2f583d3ccf65aa8093
+all 1255 file hashes/byte lengths/modes match (modes included in Git tree)
+only owned delta:
+docs/plaintext-recovery-cleanup.md
+internal/pager/plain_recovery_cleanup.go
+internal/pager/plain_recovery_cleanup_test.go
+internal/pager/recovery.go
+v1-to-v2 literal comment-only delta PASS
+source.patch SHA256 e05bcffffc0388e9033a5e9cff212fed8b5eac370157d7284f13ad8e719e3c5c
+patch check/replay exact PASS

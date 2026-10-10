@@ -1,0 +1,38 @@
+{
+  "verdict": "PASS within pure-memory planner scope; v1 documentation finding resolved in v3",
+  "baseline_tree": "1e413b466d10db5c7304ba231fd5d4536dfc5fa5",
+  "v1_tree": "a422c80a53886292c2bdd6661a26d1791ebee385",
+  "final_tree": "0182810a1ff30ed77209fced474191ee8ddff7fc",
+  "final_freeze": "journal-multisegment-freeze-v3",
+  "final_files": 1228,
+  "final_inventory_sha256": "16b7f77947fee0a84e3657872517241225954b2fdcebb2524e2dfd1b46215299",
+  "final_patch_sha256": "dea7d4d4c721ee5c82137e4e43bc6e4a78dc571155ed4de9556628982764066e",
+  "all_final_source_hashes_verified_before_and_after": true,
+  "v1_to_v3_only_docs": [
+    "docs/compatibility.md",
+    "docs/progress.md"
+  ],
+  "go_source_and_tests_identical_to_reviewed_v1": true,
+  "selected_final_normal": "PASS",
+  "selected_v1_final_audited_normal_race_vet_build": "PASS",
+  "bounded_fuzz": {
+    "FuzzReplayPlanBytesOnly": 10920,
+    "FuzzReplaySegmentsBytesOnly": 342897,
+    "FuzzIndependentSegmentStructured": 132941
+  },
+  "negative_controls": {
+    "baseline_multi_segment_rejection": "EXPECTED FAIL",
+    "wrong_segment_nonce": "EXPECTED FAIL",
+    "noncumulative_quota": "EXPECTED FAIL",
+    "partial_plan": "EXPECTED FAIL",
+    "input_alias": "EXPECTED FAIL"
+  },
+  "single_segment_compatibility_samples": 576,
+  "single_segment_compatibility_digest": "f404724d8de2ccfa6a9f0d4d6c717b68b98d0a5f5fd12289f244c5fe5017bf35",
+  "native_recovery_execution": "NOT_RUN",
+  "automatic_open_integration": "NOT_ADDED",
+  "physical_durability": "NOT_RUN",
+  "native_platform_runtime": "NOT_RUN",
+  "M3_acceptance": "NOT_GRANTED",
+  "lead_repository_modified": false
+}

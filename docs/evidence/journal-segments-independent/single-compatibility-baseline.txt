@@ -1,0 +1,6 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestIndependentSingleSegmentCompatibilityDigest
+    single_compatibility_test.go:41: COMPATIBILITY samples=576 sha256=f404724d8de2ccfa6a9f0d4d6c717b68b98d0a5f5fd12289f244c5fe5017bf35
+--- PASS: TestIndependentSingleSegmentCompatibilityDigest (0.13s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/journal	0.140s

@@ -1,0 +1,20 @@
+{
+  "source_tree": "201dca235ee217594d231f2f583d3ccf65aa8093",
+  "patch_sha256": "e05bcffffc0388e9033a5e9cff212fed8b5eac370157d7284f13ad8e719e3c5c",
+  "source_files": 1255,
+  "source_changed_after_checks": false,
+  "guard": "PASS before every selected executed suite",
+  "new_laws": "7 descriptor-free memory/source AST tests",
+  "adjacent_laws": "PASS: plaintext retirement/admission/absence; VFS bounded owner and provenance; byte-only parser",
+  "intact_lifecycles": "PASS: pager page-size create/read/commit/close and public/database/sql open/create/read/write/commit/close/reopen",
+  "race": "PASS: selected pager/VFS laws and intact pager/public/database/sql lifecycles",
+  "compile_targets": "PASS: linux/amd64 linux/arm64 darwin/arm64 windows/amd64; all packages; no cross-target test execution",
+  "physical_recovery": "NOT_RUN",
+  "automatic_open_recovery": "ABSENT",
+  "manual_tagged_tests": "NOT_RUN",
+  "prohibited_workflows": "NOT_RUN",
+  "remote_writes_commits_uploads": "NONE",
+  "initial_build_issue": "VCS stamping unavailable in archived tree; initial failure retained under recovery-cleanup-evidence-v1; corrected with -buildvcs=false",
+  "independent_review": "APPROVED for source ownership scope, no blocking finding; final tree/patch/inventory independently match; report ../recovery-cleanup-independent-evidence-v2/review.md",
+  "independent_negative_controls": "PASS: doubleclose/admission/rawclose source-only controls each fail intentionally with exit 1"
+}

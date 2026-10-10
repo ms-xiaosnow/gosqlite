@@ -1,0 +1,801 @@
+diff --git a/docs/compatibility.md b/docs/compatibility.md
+index 0a6494b..40e88fc 100644
+--- a/docs/compatibility.md
++++ b/docs/compatibility.md
+@@ -18,7 +18,7 @@ Behavior baseline: official SQLite 3.54.0. M2 implements a deliberately bounded
+ | WAL binary codec | partial | native header/frame/salt/checksum validation, both byteorders, bounded committed-prefix index and strict tail refusal; memory tests |
+ | Exclusive WAL | partial | explicit WALExclusive; one connection-lifetime EXCLUSIVE lock and one local lease; ordinary commit/read/checkpoint/normal-close interop; requires writable access |
+ | Shared concurrent WAL | partial | actual Linux mmap dual-header/hash/readmark protocol; single writer/multiple readers, live SQLite interop, reader-safe checkpoint/reset; conservative imported-sector gates |
+-| Hot-journal recovery | partial source only | explicit internal RecoverRollback, single finite-count segment; memory parser tests and static review; physical replay NOT_RUN, no automatic Open integration |
++| Hot-journal recovery | partial source only | explicit internal RecoverRollback; bounded multi-segment finite-count memory planner with identical geometry and globally unique pages; memory-only tests/static review; physical replay NOT_RUN, no automatic Open integration |
+ | grams13 / indexed LIKE | conditional ordinary implementation | legal persistent posting/frequency trees, registry, transactional deltas/reindex, actual LIKE/MATCH candidate plans, diagnostics, external-write invalidation; restricted recovery unverified |
+ | similarity / threshold / top-K | conditional ordinary implementation | SQL Dice/Jaccard/Levenshtein, native exact posting-union or scan search, business WHERE, diagnostics and same-snapshot text/vector Go RRF |
+ | dense vectors / exact KNN | conditional ordinary implementation | VECTOR(n), strict versioned BLOB writes, native exact search, four distance operators/nine functions, bounded SQL Top-K, driver and ordinary SQLite interop |
+@@ -46,7 +46,7 @@ Writable SQL limits: single rowid table; declared simple types; INTEGER PRIMARY
+ Path resolution occurs once per connection; later working-directory changes or retargeting the original symlink cannot redirect that connection. Writable Open accepts absent files (unless NoCreate); existing zero-length files are currently rejected. Context cancellation is honored before commit I/O, but cannot abandon a commit once physical publication begins. All normal opens still return ErrRecoveryRequired for existing journals. Default rollback opens reject mode2; WALExclusive and WALShared explicitly permit their documented subsets. ErrPoisoned or ErrCommitUncertain requires stopping use and preserving evidence; no success may be inferred.
+ 
+ 
+-Exclusive WAL boundaries: native format3 UTF-8 rowid schema, writable file access, local Linux locking, configured sector assumption, no shared-WAL concurrency or mode switch back to DELETE. Normal close checkpoints unless KeepWALOnClose is explicit. Checkpoint requires no active lease and protects sector neighbors, including imported WAL generated under a smaller sector assumption. Main database size may lag logical WAL extent; reads use the committed overlay. Limits default to1GiB WAL,1,048,576 frames/index entries and16,777,216 charged index-work units; index accounting includes committed and pending entries. Growth can return ErrMemoryLimit and require a checkpoint. Transaction page budget includes unchanged sector-neighbor images. Valid but unsupported reset tails, cold journals, multi-segment recovery, no-sync journals and ambiguous files fail closed without deletion.
++Exclusive WAL boundaries: native format3 UTF-8 rowid schema, writable file access, local Linux locking, configured sector assumption, no shared-WAL concurrency or mode switch back to DELETE. Normal close checkpoints unless KeepWALOnClose is explicit. Checkpoint requires no active lease and protects sector neighbors, including imported WAL generated under a smaller sector assumption. Main database size may lag logical WAL extent; reads use the committed overlay. Limits default to1GiB WAL,1,048,576 frames/index entries and16,777,216 charged index-work units; index accounting includes committed and pending entries. Growth can return ErrMemoryLimit and require a checkpoint. Transaction page budget includes unchanged sector-neighbor images. Valid but unsupported reset tails, cold journals, no-sync journals and ambiguous files fail closed without deletion. The source-only internal recovery consumer can receive the supported multi-segment memory plan described above; repeated pages, disagreeing geometry and other unsupported multi-segment profiles still reject. Physical multi-segment replay remains NOT_RUN and automatic Open recovery remains absent.
+ 
+ 
+ A first append to a reopened committed WAL may copy/pad and atomically replace only the WAL file under retained EXCLUSIVE before appending. This requires extra temporary space up to the WAL limit and local atomic-rename/file/directory-sync semantics. Main-file replacement never occurs. Interrupted WAL replacement is unqualified; ordinary interop and independent source review are the current evidence only.
+diff --git a/docs/decisions/0004-exclusive-wal-and-recovery-gates.md b/docs/decisions/0004-exclusive-wal-and-recovery-gates.md
+index dd144de..0210b04 100644
+--- a/docs/decisions/0004-exclusive-wal-and-recovery-gates.md
++++ b/docs/decisions/0004-exclusive-wal-and-recovery-gates.md
+@@ -26,7 +26,7 @@ Existing -shm data is not used as an index and is invalidated/removed only while
+ 
+ ## Rollback recovery boundary
+ 
+-internal/journal.ParseReplay constructs a bounded owned replay plan in memory. The first implementation supports exactly one finite-count journal segment with validated geometry/checksums/page numbers and no unsupported master-journal trailer, duplicate originals or extra segments. Partial/cold/ambiguous inputs fail closed and are preserved.
++internal/journal.ParseReplay constructs a bounded owned replay plan in memory. The conservative multi-segment subset accepts published finite-count segments with matching first-header geometry/extent, per-segment nonces, globally unique original pages and exact final consumption. Cumulative input/record/image-memory bounds apply before any plan escapes; page copies occur only after complete validation. The first Header is preserved unchanged and len(Pages) is cumulative. Super/master-journal trailers, repeated originals, geometry disagreement, no-sync counts and unpublished/ambiguous tails remain rejected. See [the full parser contract and source proof](../rollback-replay-memory.md). Partial/cold/ambiguous inputs never produce a partial plan.
+ 
+ internal/pager.RecoverRollback is explicit and is not called by Open, OpenTx, Session or SQL. Its source takes SHARED, checks another writer's RESERVED lock, escalates PENDING→EXCLUSIVE without RESERVED, rechecks identities, validates the complete plan/restored header, syncs journal, restores/truncates/syncs main, then removes journal and syncs directory. Physical replay is NOT_RUN. A doubly gated manual-only test source can be compiled/reviewed but must not execute in ordinary CI or this environment.
+ 
+diff --git a/docs/file-formats.md b/docs/file-formats.md
+index 4eb4f0c..54cd837 100644
+--- a/docs/file-formats.md
++++ b/docs/file-formats.md
+@@ -19,7 +19,7 @@ WAL uses SQLite's32-byte header and24-byte frame header plus a complete page. St
+ 
+ The committed overlay selects the newest page image through the last complete commit marker, with logical extent from that marker and strict bounded scanning. Invalid, incomplete, uncommitted and salt-mismatching tails are classified and refused; this does not implement SQLite's full recovery policy. Checkpoint retains synced WAL images for every extant main-file sector neighbor before overwriting pages. Header mode2 remains after normal checkpoint/close, even when the WAL is removed.
+ 
+-Rollback replay plans support one finite-count header/record segment, page geometry, nonce-seeded sparse checksums, exact original extent and complete missing-original coverage if the current extent is shorter. Physical replay is deliberately isolated and unqualified. See ADR0004 and the source-only manual harness. The separate [experimental authenticated snapshot format](encryption-storage.md) does not implement encrypted WAL.
++Rollback replay plans support a bounded sequence of published finite-count segments with identical page/sector/original-extent geometry, globally unique original pages and per-segment nonce-seeded sparse checksums. The first header remains authoritative; cumulative limits and exact input consumption are required. Complete missing-original coverage is checked if the current extent is shorter. See [the memory-only supported/unsupported matrix](rollback-replay-memory.md). Physical replay is deliberately isolated and unqualified. See ADR0004 and the source-only manual harness. The separate [experimental authenticated snapshot format](encryption-storage.md) does not implement encrypted WAL.
+ 
+ ## M3 shared WAL-index
+ 
+diff --git a/docs/progress.md b/docs/progress.md
+index 7497148..21ca22b 100644
+--- a/docs/progress.md
++++ b/docs/progress.md
+@@ -688,3 +688,33 @@ unpublished encrypted patch while that gate runs; it is not a remote milestone
+ or final delivery. Plain rollback Reader/Tx/import-source and exclusive-WAL
+ ownership remain required code. Native failure/runtime and M3/M8/M10 acceptance
+ remain NOT_RUN. See encrypted-cleanup.md and its independent review.
++
++### M3 conservative multi-segment rollback plans, memory only
++
++- Status: PARTIAL storage-code slice; full M3 durability acceptance remains
++  BLOCKED / NOT_RUN. No automatic Open recovery was added; native replay
++  source was not edited or executed.
++- Implemented `internal/journal.ParseReplay` support for sector-aligned published
++  finite-count segments with first-header geometry/extent, per-segment nonce,
++  globally unique original pages and exact final consumption. Cumulative
++  input/record/retained-image/extent bounds preserve exported structure layouts.
++  Full validation precedes owned page copies; every error returns no plan.
++- Contract/source proof and explicit unsupported matrix:
++  `docs/rollback-replay-memory.md`; ADR0004 and compatibility/file-format text
++  updated. Repeated pages, geometry disagreement, super-journals, no-sync and
++  unpublished/ambiguous tails remain rejected.
++- Pinned Go 1.27.2 selected memory-only normal/race checks PASS; source guard ran
++  before each suite. Independent byte-array tests cover 96 geometry pairs, every
++  partial prefix, cumulative count overflow, copy ownership and 128 deterministic
++  extent/application histories. Bounded multi-segment fuzz PASS (2717 executions)
++  and existing replay fuzz PASS (7983 executions), each 5-second requested budget
++  with two workers. No fixture was written to a journal/database file.
++- Scoped journal/pager vet/build and untagged pager compile-only check PASS.
++  Exact shell command/output evidence is retained by the lead; these results
++  are selected checks, not a full aggregate or physical recovery acceptance.
++- Public SQLite 3.54.0 `src/pager.c` was read as the format reference. No CLI,
++  crash simulation, hot journal, RecoverRollback execution, native fault test,
++  manual tag, namespace replacement or interrupted publication ran.
++- Next: independently review the immutable parser/test/docs slice, then let the
++  lead validate the exact aggregate. Physical recovery remains a separate,
++  unqualified acceptance gate and is not a permitted follow-on test here.
+diff --git a/docs/rollback-replay-memory.md b/docs/rollback-replay-memory.md
+new file mode 100644
+index 0000000..9cf401d
+--- /dev/null
++++ b/docs/rollback-replay-memory.md
+@@ -0,0 +1,145 @@
++# Bounded multi-segment rollback replay plans (memory only)
++
++Status: implemented conservative parser subset; selected pure-memory evidence
++only. Physical rollback recovery, interruption, native failures and automatic
++Open recovery remain **NOT_RUN / unqualified**. This slice neither changes
++`internal/pager/recovery.go` nor invokes its `RecoverRollback` function.
++
++## Supported input and stable result contract
++
++`internal/journal.ParseReplay` accepts one or more complete sector-aligned,
++published, finite-count segments with the following restrictions:
++
++- The first header supplies page size (power of two, 512..65536), sector size
++  (power of two, 32..65536), and original page count (0..0xfffffffe).
++- Every later header must repeat those three values exactly. Each header's own
++  nonce and finite record count apply only to its records. Equal nonces are
++  permitted; nonce uniqueness is not a format or authentication guarantee.
++- The next header is at the sector boundary at or immediately after the prior
++  segment's record end. Alignment always uses the first header's sector size.
++  Header-sector and inter-segment padding are unspecified, including nonzero
++  bytes and apparent magic away from the prescribed boundary.
++- Published zero-count segments, including first, interior and final segments,
++  contain no records. No unpublished count is inferred from remaining bytes.
++- Every record has a valid original page number and nonce-seeded sparse
++  checksum. Page zero, the locking page and pages beyond the original extent
++  are rejected. Original page numbers are globally unique across all segments.
++- The final segment ends exactly at the end of the supplied bytes. There is no
++  trailing padding-only success, magic search, stale-tail inference or partial
++  replay plan. Every error returns a nil plan and leaves the input unchanged.
++
++The exported structures are unchanged. `ReplayPlan.Header` remains the first
++header exactly, including its first-segment `Records` and `Nonce`. The cumulative
++image count is `len(ReplayPlan.Pages)`; callers must not reinterpret
++`Header.Records` as that count. Images are in journal order and own independent
++byte slices. Copies occur only after every segment passes validation.
++`DatabaseBytes` and `ValidateExtent` still use the first original extent.
++
++Every previously successful single-segment input retains the same values and
++owned-image semantics. Existing malformed/unsupported single-segment fixtures
++retain rejection. An exact prefix ending at an earlier segment's record end is
++itself a complete supported journal: byte parsing cannot know that another
++segment was omitted. All other partial prefixes reject. Neither a valid plan nor
++a valid prefix proves the journal's generation, database identity or hotness.
++
++## Cumulative limits and arithmetic
++
++The existing three-field `ReplayLimits` layout is preserved; zero defaults are
++64 MiB input, 65536 records, and 1 TiB original database extent.
++
++- `MaxJournalBytes` applies to the entire byte slice, including every header and
++  padding gap, before parsing.
++- `MaxRecords` applies to the sum of all segments' advertised finite counts,
++  using uint64 subtraction before addition. A pair of individually permitted
++  uint32 counts cannot wrap the cumulative budget. Counts are also checked
++  against remaining bytes before any per-record metadata is allocated.
++- Total copied page-image bytes equal `len(Pages) * first.PageSize`. Records are
++  disjoint input ranges, so this is no greater than actual input bytes and
++  `MaxJournalBytes`. It is also at most `MaxRecords * first.PageSize` and, because
++  original page numbers are unique, at most the original database extent.
++- Page metadata and the global duplicate set are O(cumulative records); there
++  is no retained list of segment headers. A zero-record segment still advances
++  by a complete sector, at least 32 bytes, so input size bounds traversal work.
++  These algorithmic limits do not promise an exact allocator or process RSS cap.
++- Record-count multiplication uses uint64 (uint32 count times at most 65544).
++  Remaining-input subtraction is checked before offset addition/indexing.
++  Alignment padding is at most sector size minus one and checked before adding.
++  Valid original extents fit int64: at most 0xfffffffe times 65536 bytes.
++
++`ValidateExtent` continues to require an image for every original page absent
++or only partially present in a shortened in-memory extent, except the unused
++locking page. The tests apply plans only to byte arrays and check exact results,
++unaffected pages, planned truncation and idempotence.
++
++## Explicit unsupported matrix
++
++| Input or operation | Result / boundary |
++|---|---|
++| Published finite-count, consistent geometry, globally unique pages | Bounded owned memory plan |
++| Repeated page within/across segments, even identical bytes | Unsupported; no first/last-wins policy |
++| Later geometry or original-extent disagreement | Unsupported; first geometry is never overwritten |
++| 0xffffffff count (no-sync / safe-append), any segment | Unsupported |
++| Legacy first page size zero | Unsupported |
++| Unpublished first header | Invalid; no plan |
++| Unpublished or unrecognized subsequent header | Unsupported; no partial plan |
++| Partial published header-sector/records | Rejected; no partial plan |
++| Trailing partial header/padding/extra data or unaligned header | Unsupported |
++| Apparent super/master-journal trailer, including malformed magic trailer | Unsupported; no external lookup |
++| Invalid page/checksum/first geometry | Invalid; no partial plan |
++| Any cumulative quota violation | Resource-limit error; no partial plan |
++| Native replay, hotness/identity/locking, crash or I/O-failure behavior | Unchanged source only; NOT_RUN |
++| Automatic recovery through Open, public SQL or driver | Not implemented by this slice |
++
++## Pinned public-source basis
++
++Read-only reference: official SQLite 3.54.0 source archive already pinned in
++[upstream.md](upstream.md), source ID
++`be8d059e9a49089ab2dce5ed26dd87aaf598fdc5fbe0b107c0dd758464bcd5e3`.
++The reviewed `src/pager.c` SHA-256 is
++`96d7bb9c4a5a6da0909ce0ab4714311e1ffa5f13007dc4c69f028a2760104ba4`.
++
++- `journalHdrOffset`, lines 1388..1413: next boundary at or after record end.
++- `writeJournalHdr`, lines 1471..1608: fields, finite-count publication, fresh
++  checksum initializer and unused header-sector bytes.
++- `readJournalHdr`, lines 1627..1731: each segment's count/nonce; page/sector
++  geometry is read only from the first header.
++- `pager_playback`, lines 2909..3005: hot zero counts mean zero records; no-sync
++  count inference is a separate case; original extent is adopted only once.
++- `pager_playback_one_page`, lines 2336..2420: ordinary playback receives no
++  duplicate-suppression bitset and replays in order. This planner deliberately
++  rejects repeated pages rather than adopting savepoint first-wins semantics.
++- `syncJournal`, lines 4356..4434: published finite counts and invalidation of
++  an apparent old next header. This parser does not infer stale-tail provenance.
++
++No SQLite CLI was run and no hot journal or database fixture was generated for
++this slice. Public-source inspection is not physical recovery acceptance.
++
++## Reproducible selected checks
++
++The fixture builder uses only byte arrays and independent alignment/checksum
++math, never the production journal encoder. Coverage includes 96 page/sector
++pairs, every prefix of a multi-segment fixture, nonzero padding, zero-count
++chains, equal/different nonces, cross-segment duplicates, late errors, cumulative
++quota boundaries and uint32 overflow advertisements, independent-copy ownership,
++128 deterministic randomized extent/application models, and bounded byte fuzz.
++
++All ordinary test sources and helpers in `internal/journal` were behaviorally
++reviewed as memory-only; no `TestMain`, init hook, filesystem or pager path is
++present. Before each selected normal/race/fuzz suite, run the source guard:
++
++```sh
++go run ./internal/testscope
++go test ./internal/journal -run '^(TestReplay.*InMemory|TestSQLiteRollbackFormatInMemory|TestRejectMalformedJournalBytesInMemory|FuzzReplay.*BytesOnly)$' -count=1
++# Repeat the source guard before this separate race-tooling gate:
++CGO_ENABLED=1 go test -race ./internal/journal -run '^(TestReplay.*InMemory|TestSQLiteRollbackFormatInMemory|TestRejectMalformedJournalBytesInMemory|FuzzReplay.*BytesOnly)$' -count=1
++# Repeat the source guard before each bounded pure-memory fuzz gate:
++go test ./internal/journal -run '^$' -fuzz '^FuzzReplaySegmentsBytesOnly$' -fuzztime=5s -parallel=2
++go test ./internal/journal -run '^$' -fuzz '^FuzzReplayPlanBytesOnly$' -fuzztime=5s -parallel=2
++```
++
++Use pinned Go 1.27.2, `GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off
++GOFLAGS=-buildvcs=false`, sibling shared Go cache/path, and `GOMAXPROCS=2`.
++Normal and fuzz runs use `CGO_ENABLED=0`; only race tooling uses CGO. Build/vet
++and untagged pager test compilation are separate non-executing checks. No manual
++build tag, restricted physical/native-failure test, or aggregate gate is part of
++these commands. The lead owns aggregate validation and independent review.
+diff --git a/internal/journal/replay.go b/internal/journal/replay.go
+index a9cc382..3a9b886 100644
+--- a/internal/journal/replay.go
++++ b/internal/journal/replay.go
+@@ -12,10 +12,12 @@ var (
+ 	ErrReplayLimit       = errors.New("SQLite rollback journal recovery resource limit exceeded")
+ )
+ 
+-// ReplayLimits bounds input, page-image allocation, and the resulting database
+-// extent. Zero values select 64 MiB, 65536 records, and 1 TiB, respectively.
+-// Replay keeps independent copies of page images, so allow roughly twice the
+-// input size plus per-record metadata when loading a journal into memory.
++// ReplayLimits bounds the entire input, cumulative records across all segments,
++// and the resulting database extent. Zero values select 64 MiB, 65536 records,
++// and 1 TiB, respectively. Owned page-image bytes never exceed MaxJournalBytes
++// (each image occupies a disjoint input record); page and duplicate-detection
++// metadata are O(MaxRecords). Allow roughly twice the input size plus that
++// metadata when loading a journal. These are not a bound on total process RSS.
+ type ReplayLimits struct {
+ 	MaxJournalBytes  uint64
+ 	MaxRecords       uint32
+@@ -41,22 +43,35 @@ type PageImage struct {
+ 	Data   []byte
+ }
+ 
+-// ReplayPlan is a fully validated, single-segment journal. Its pages must be
+-// restored, its database truncated to DatabaseBytes, and that database synced
+-// before the journal may be removed. Parsing and extent validation perform no
+-// I/O. Neither operation establishes that an on-disk journal is actually hot.
++// ReplayPlan is a fully validated journal from the supported finite-count
++// subset. Header is the first segment's unmodified header: Header.Records is
++// not the cumulative page count. Pages contains all segments' unique images in
++// journal order. Its pages must be restored, its database truncated to
++// DatabaseBytes, and that database synced before the journal may be removed.
++// Parsing and extent validation perform no I/O. Neither operation establishes
++// that an on-disk journal is actually hot.
+ type ReplayPlan struct {
+ 	Header        Header
+ 	Pages         []PageImage
+ 	DatabaseBytes int64
+ }
+ 
+-// ParseReplay validates the entire journal before producing a replay plan.
++// ParseReplay validates the entire journal before producing an owned plan.
+ // It is deliberately stricter than SQLite's stop-at-invalid-record playback:
+-// partial headers, checksum failures, duplicate pages, and trailing bytes
+-// never yield a partially usable plan. Exactly one finite-count segment is
+-// supported. Super/master-journals, no-sync counts, legacy unspecified page
+-// sizes, and multiple segments require a different recovery implementation.
++// partial headers, checksum failures, duplicate pages (within or across
++// segments), and ambiguous trailing bytes never yield a partially usable plan.
++// Every segment must have published magic and a finite count, and repeat the
++// first header's page size, sector size, and original extent. Only the first
++// header controls geometry/extent in SQLite; disagreement is outside this
++// conservative subset. Each segment's own nonce checks its records.
++//
++// Headers after the first start at the next sector boundary at or after the
++// preceding segment's exact end. The last segment must end at the input end;
++// padding without another complete published segment is not accepted. Published
++// zero-count segments are allowed; unpublished counts are never inferred from
++// remaining bytes. Super/master-journals, no-sync counts and legacy unspecified
++// page sizes remain unsupported. No page or header is found by scanning for
++// magic in padding or page data.
+ //
+ // Sector sizes 32..65536 follow SQLite 3.54 src/pager.c readJournalHdr(). The
+ // existing writer's Header.Validate intentionally has a narrower minimum of
+@@ -96,36 +111,74 @@ func ParseReplay(data []byte, limits ReplayLimits) (*ReplayPlan, error) {
+ 	if extent > limits.MaxDatabaseBytes {
+ 		return nil, fmt.Errorf("%w: original database extent", ErrReplayLimit)
+ 	}
+-	// These multiplications cannot overflow uint64: the operands are uint32
+-	// and the validated page and sector sizes are at most 65536.
++	// The first header alone determines alignment, record size and extent.
++	// No segment/header list is retained: even zero-record segments consume a
++	// full sector of bounded input and advance the cursor.
++	size, sector := uint64(len(data)), uint64(h.SectorSize)
+ 	recordBytes := uint64(h.PageSize) + 8
+-	end := uint64(h.SectorSize) + uint64(h.Records)*recordBytes
+-	if uint64(len(data)) < end {
+-		return nil, fmt.Errorf("%w: truncated header sector or records", ErrFormat)
+-	}
+-	if uint64(len(data)) != end {
+-		return nil, fmt.Errorf("%w: trailing bytes or multiple segments", ErrReplayUnsupported)
+-	}
+-	if h.Records > h.OriginalPages {
+-		return nil, fmt.Errorf("%w: more records than original pages", ErrFormat)
+-	}
+-	plan := &ReplayPlan{Header: h, DatabaseBytes: int64(extent), Pages: make([]PageImage, 0, int(h.Records))}
+-	seen := make(map[uint32]struct{}, int(h.Records))
+-	for offset := uint64(h.SectorSize); offset < end; offset += recordBytes {
+-		record := data[offset : offset+recordBytes]
+-		number := binary.BigEndian.Uint32(record)
+-		if number == 0 || number > h.OriginalPages || number == 0x40000000/h.PageSize+1 {
+-			return nil, fmt.Errorf("%w: page number %d", ErrFormat, number)
++	plan := &ReplayPlan{Header: h, DatabaseBytes: int64(extent), Pages: make([]PageImage, 0)}
++	seen := make(map[uint32]struct{})
++	var total uint64
++	for headerOffset := uint64(0); ; {
++		segment := Header{
++			Records: binary.BigEndian.Uint32(data[headerOffset+8:]), Nonce: binary.BigEndian.Uint32(data[headerOffset+12:]),
++			OriginalPages: binary.BigEndian.Uint32(data[headerOffset+16:]), SectorSize: binary.BigEndian.Uint32(data[headerOffset+20:]),
++			PageSize: binary.BigEndian.Uint32(data[headerOffset+24:]),
++		}
++		if segment.Records == 0xffffffff {
++			return nil, fmt.Errorf("%w: no-sync count", ErrReplayUnsupported)
++		}
++		if segment.OriginalPages != h.OriginalPages || segment.SectorSize != h.SectorSize || segment.PageSize != h.PageSize {
++			return nil, fmt.Errorf("%w: segment geometry differs from first header", ErrReplayUnsupported)
++		}
++		// Subtract before adding to keep cumulative counts bounded even when
++		// individual advertised uint32 counts would wrap a uint32 sum.
++		if uint64(segment.Records) > uint64(limits.MaxRecords)-total {
++			return nil, fmt.Errorf("%w: cumulative record count", ErrReplayLimit)
++		}
++		total += uint64(segment.Records)
++		// A uint32 count times (at most) 65544 fits uint64. Check remaining
++		// input before adding offsets or allocating record metadata/images.
++		bodyBytes := uint64(segment.Records) * recordBytes
++		if sector > size-headerOffset || bodyBytes > size-headerOffset-sector {
++			return nil, fmt.Errorf("%w: truncated header sector or records", ErrFormat)
+ 		}
+-		if _, exists := seen[number]; exists {
+-			return nil, fmt.Errorf("%w: duplicate original page %d", ErrReplayUnsupported, number)
++		end := headerOffset + sector + bodyBytes
++		if segment.Records > h.OriginalPages {
++			return nil, fmt.Errorf("%w: more records than original pages", ErrFormat)
+ 		}
+-		page := record[4 : len(record)-4]
+-		if binary.BigEndian.Uint32(record[len(record)-4:]) != Checksum(page, h.Nonce) {
+-			return nil, fmt.Errorf("%w: checksum of page %d", ErrFormat, number)
++		for offset := headerOffset + sector; offset < end; offset += recordBytes {
++			record := data[offset : offset+recordBytes]
++			number := binary.BigEndian.Uint32(record)
++			if number == 0 || number > h.OriginalPages || number == 0x40000000/h.PageSize+1 {
++				return nil, fmt.Errorf("%w: page number %d", ErrFormat, number)
++			}
++			if _, exists := seen[number]; exists {
++				return nil, fmt.Errorf("%w: duplicate original page %d", ErrReplayUnsupported, number)
++			}
++			page := record[4 : len(record)-4]
++			if binary.BigEndian.Uint32(record[len(record)-4:]) != Checksum(page, segment.Nonce) {
++				return nil, fmt.Errorf("%w: checksum of page %d", ErrFormat, number)
++			}
++			seen[number] = struct{}{}
++			// These input views never escape. Copy only after every segment
++			// has passed validation, so a late error owns no page-image bytes.
++			plan.Pages = append(plan.Pages, PageImage{number, page})
+ 		}
+-		seen[number] = struct{}{}
+-		plan.Pages = append(plan.Pages, PageImage{number, append([]byte(nil), page...)})
++		if end == size {
++			break
++		}
++		padding := (sector - end%sector) % sector
++		if padding > size-end || size-end-padding < 28 {
++			return nil, fmt.Errorf("%w: trailing bytes without a complete published header", ErrReplayUnsupported)
++		}
++		headerOffset = end + padding
++		if !bytes.Equal(data[headerOffset:headerOffset+8], magic[:]) {
++			return nil, fmt.Errorf("%w: unpublished or ambiguous next segment", ErrReplayUnsupported)
++		}
++	}
++	for i := range plan.Pages {
++		plan.Pages[i].Data = append([]byte(nil), plan.Pages[i].Data...)
+ 	}
+ 	return plan, nil
+ }
+diff --git a/internal/journal/replay_segments_test.go b/internal/journal/replay_segments_test.go
+new file mode 100644
+index 0000000..4907d0a
+--- /dev/null
++++ b/internal/journal/replay_segments_test.go
+@@ -0,0 +1,378 @@
++package journal
++
++import (
++	"bytes"
++	"encoding/binary"
++	"errors"
++	"math/rand"
++	"reflect"
++	"testing"
++)
++
++// All helpers and tests in this file operate solely on byte arrays. They do
++// not use the production journal encoders, any pager, database, filesystem,
++// native fault hook, or external SQLite process.
++type replayMemorySegment struct {
++	nonce   uint32
++	numbers []uint32
++}
++
++type replayMemoryFixture struct {
++	data    []byte
++	headers []int
++	ends    []int
++	first   Header
++	pages   []PageImage
++}
++
++func makeReplayMemoryFixture(geometry Header, segments ...replayMemorySegment) replayMemoryFixture {
++	var f replayMemoryFixture
++	f.first = geometry
++	f.first.Records = uint32(len(segments[0].numbers))
++	f.first.Nonce = segments[0].nonce
++	for si, segment := range segments {
++		// Independent alignment model: append bytes until divisible, rather
++		// than using the parser's rounding expression.
++		for len(f.data)%int(geometry.SectorSize) != 0 {
++			f.data = append(f.data, 0xa6)
++		}
++		off := len(f.data)
++		f.headers = append(f.headers, off)
++		header := bytes.Repeat([]byte{0x5b}, int(geometry.SectorSize))
++		copy(header, []byte{0xd9, 0xd5, 0x05, 0xf9, 0x20, 0xa1, 0x63, 0xd7})
++		for i, value := range []uint32{uint32(len(segment.numbers)), segment.nonce, geometry.OriginalPages, geometry.SectorSize, geometry.PageSize} {
++			binary.BigEndian.PutUint32(header[8+4*i:], value)
++		}
++		f.data = append(f.data, header...)
++		for ri, number := range segment.numbers {
++			page := make([]byte, geometry.PageSize)
++			for i := range page {
++				page[i] = byte(i*7 + int(number)*13 + si*17 + ri*23)
++			}
++			record := make([]byte, len(page)+8)
++			binary.BigEndian.PutUint32(record, number)
++			copy(record[4:], page)
++			// Equivalent mathematical checksum using positive strides from
++			// the page end, without the production Checksum function.
++			sum := uint64(segment.nonce)
++			for stride := 200; stride < len(page); stride += 200 {
++				sum += uint64(page[len(page)-stride])
++			}
++			binary.BigEndian.PutUint32(record[len(record)-4:], uint32(sum))
++			f.data = append(f.data, record...)
++			f.pages = append(f.pages, PageImage{number, page})
++		}
++		f.ends = append(f.ends, len(f.data))
++	}
++	return f
++}
++
++func checkReplayMemoryPlan(t *testing.T, f replayMemoryFixture, limits ReplayLimits) *ReplayPlan {
++	t.Helper()
++	plan, err := ParseReplay(f.data, limits)
++	if err != nil {
++		t.Fatal(err)
++	}
++	if plan.Header != f.first || plan.DatabaseBytes != int64(f.first.OriginalPages)*int64(f.first.PageSize) || len(plan.Pages) != len(f.pages) {
++		t.Fatalf("plan header/extent/count: %+v, first=%+v pages=%d", plan, f.first, len(f.pages))
++	}
++	for i, want := range f.pages {
++		if plan.Pages[i].Number != want.Number || !bytes.Equal(plan.Pages[i].Data, want.Data) {
++			t.Fatalf("page %d differs from independent image model", i)
++		}
++	}
++	return plan
++}
++
++func TestReplaySegmentsGeometryAndOwnershipInMemory(t *testing.T) {
++	for page := uint32(512); page <= 65536; page *= 2 {
++		for sector := uint32(32); sector <= 65536; sector *= 2 {
++			f := makeReplayMemoryFixture(Header{PageSize: page, SectorSize: sector, OriginalPages: 7},
++				replayMemorySegment{0xfffffff0, []uint32{7, 2}},
++				replayMemorySegment{71, nil},
++				replayMemorySegment{0, []uint32{1}},
++				replayMemorySegment{0xdeadbeef, []uint32{4, 6}})
++			plan := checkReplayMemoryPlan(t, f, ReplayLimits{})
++			// A completely unrelated edit to every input byte leaves each
++			// result intact; result edits cannot reach input or other pages.
++			for i := range f.data {
++				f.data[i] ^= 0xff
++			}
++			for i := range plan.Pages {
++				if !bytes.Equal(plan.Pages[i].Data, f.pages[i].Data) {
++					t.Fatal("owned image aliases input")
++				}
++			}
++			inputCopy := bytes.Clone(f.data)
++			for i := range plan.Pages[0].Data {
++				plan.Pages[0].Data[i] ^= 0x3c
++			}
++			if !bytes.Equal(inputCopy, f.data) || !bytes.Equal(plan.Pages[1].Data, f.pages[1].Data) {
++				t.Fatal("owned image aliases input or another page")
++			}
++		}
++	}
++}
++
++func TestReplaySegmentsZeroCountsAndAlignedHeadersInMemory(t *testing.T) {
++	// Empty first/final headers are explicit published segments. Equal
++	// nonces are legal too: randomness is not a uniqueness/authentication law.
++	f := makeReplayMemoryFixture(Header{PageSize: 512, SectorSize: 32, OriginalPages: 6},
++		replayMemorySegment{9, nil}, replayMemorySegment{9, []uint32{1, 2, 3, 4}},
++		replayMemorySegment{9, []uint32{5, 6}}, replayMemorySegment{9, nil})
++	if f.headers[1] != f.ends[0] || f.headers[2] != f.ends[1] {
++		t.Fatal("fixture does not exercise an already-aligned next header")
++	}
++	p := checkReplayMemoryPlan(t, f, ReplayLimits{})
++	if p.Header.Records != 0 || len(p.Pages) != 6 || p.ValidateExtent(0) != nil {
++		t.Fatal("first header/cumulative count or all-original coverage differs")
++	}
++	// Neither padding contents nor magic found away from the prescribed
++	// header boundary changes segment recognition.
++	f = makeReplayMemoryFixture(Header{PageSize: 512, SectorSize: 512, OriginalPages: 2},
++		replayMemorySegment{1, []uint32{1}}, replayMemorySegment{2, []uint32{2}})
++	copy(f.data[f.ends[0]:], []byte{0xd9, 0xd5, 0x05, 0xf9, 0x20, 0xa1, 0x63, 0xd7})
++	checkReplayMemoryPlan(t, f, ReplayLimits{})
++}
++
++func TestReplaySegmentsExactBoundaryTruncationsInMemory(t *testing.T) {
++	f := makeReplayMemoryFixture(Header{PageSize: 512, SectorSize: 512, OriginalPages: 4},
++		replayMemorySegment{11, []uint32{4}}, replayMemorySegment{22, nil},
++		replayMemorySegment{33, []uint32{1, 3}})
++	ends := map[int]int{f.ends[0]: 1, f.ends[1]: 1, f.ends[2]: 3}
++	for length := 0; length <= len(f.data); length++ {
++		plan, err := ParseReplay(f.data[:length], ReplayLimits{})
++		if count, boundary := ends[length]; boundary {
++			// An exact earlier segment end is itself a complete supported
++			// input; a parser cannot infer an omitted subsequent segment.
++			if err != nil || len(plan.Pages) != count {
++				t.Fatalf("complete prefix %d: plan=%v err=%v", length, plan, err)
++			}
++		} else if err == nil || plan != nil {
++			t.Fatalf("partial prefix %d: plan=%v err=%v", length, plan, err)
++		}
++	}
++}
++
++func TestReplaySegmentsRejectAmbiguityInMemory(t *testing.T) {
++	geometry := Header{PageSize: 512, SectorSize: 512, OriginalPages: 9}
++	f := makeReplayMemoryFixture(geometry, replayMemorySegment{11, []uint32{1, 3}}, replayMemorySegment{22, []uint32{7, 9}})
++	next, body := f.headers[1], f.headers[1]+512
++	cases := []struct {
++		name string
++		edit func([]byte) []byte
++		want error
++	}{
++		{"later-unpublished-magic", func(b []byte) []byte { b[next] = 0; return b }, ErrReplayUnsupported},
++		{"later-unpublished-zero-body", func(b []byte) []byte { binary.BigEndian.PutUint32(b[next+8:], 0); return b }, ErrReplayUnsupported},
++		{"later-no-sync", func(b []byte) []byte { binary.BigEndian.PutUint32(b[next+8:], 0xffffffff); return b }, ErrReplayUnsupported},
++		{"later-page-size", func(b []byte) []byte { binary.BigEndian.PutUint32(b[next+24:], 1024); return b }, ErrReplayUnsupported},
++		{"later-legacy-size", func(b []byte) []byte { binary.BigEndian.PutUint32(b[next+24:], 0); return b }, ErrReplayUnsupported},
++		{"later-sector-size", func(b []byte) []byte { binary.BigEndian.PutUint32(b[next+20:], 32); return b }, ErrReplayUnsupported},
++		{"later-original-extent", func(b []byte) []byte { binary.BigEndian.PutUint32(b[next+16:], 10); return b }, ErrReplayUnsupported},
++		{"later-extent-invalid", func(b []byte) []byte { binary.BigEndian.PutUint32(b[next+16:], 0xffffffff); return b }, ErrReplayUnsupported},
++		{"later-zero-page", func(b []byte) []byte { binary.BigEndian.PutUint32(b[body:], 0); return b }, ErrFormat},
++		{"later-outside-first-extent", func(b []byte) []byte { binary.BigEndian.PutUint32(b[body:], 10); return b }, ErrFormat},
++		{"duplicate-across-segments", func(b []byte) []byte { binary.BigEndian.PutUint32(b[body:], 1); return b }, ErrReplayUnsupported},
++		{"duplicate-within-later-segment", func(b []byte) []byte { binary.BigEndian.PutUint32(b[body+520:], 7); return b }, ErrReplayUnsupported},
++		{"wrong-later-nonce", func(b []byte) []byte { binary.BigEndian.PutUint32(b[next+12:], 11); return b }, ErrFormat},
++		{"last-record-checksum", func(b []byte) []byte { b[len(b)-1] ^= 1; return b }, ErrFormat},
++		{"last-record-sampled-byte", func(b []byte) []byte { b[body+520+4+312] ^= 1; return b }, ErrFormat},
++		{"later-advertised-truncated-record", func(b []byte) []byte { binary.BigEndian.PutUint32(b[next+8:], 3); return b }, ErrFormat},
++		{"trailing-one-byte", func(b []byte) []byte { return append(b, 0) }, ErrReplayUnsupported},
++		{"trailing-padding-only", func(b []byte) []byte {
++			for len(b)%512 != 0 {
++				b = append(b, 0xa6)
++			}
++			return b
++		}, ErrReplayUnsupported},
++		{"trailing-unpublished-header", func(b []byte) []byte {
++			for len(b)%512 != 0 {
++				b = append(b, 0xa6)
++			}
++			return append(b, make([]byte, 512)...)
++		}, ErrReplayUnsupported},
++		{"unaligned-next-header", func(b []byte) []byte { return append(b[:f.ends[0]], b[next:]...) }, ErrReplayUnsupported},
++		{"magic-away-from-aligned-header", func(b []byte) []byte {
++			b[next] = 0
++			copy(b[f.ends[0]:], []byte{0xd9, 0xd5, 0x05, 0xf9, 0x20, 0xa1, 0x63, 0xd7})
++			return b
++		}, ErrReplayUnsupported},
++		{"apparent-super-journal-trailer", func(b []byte) []byte { return append(b, []byte{0xd9, 0xd5, 0x05, 0xf9, 0x20, 0xa1, 0x63, 0xd7}...) }, ErrReplayUnsupported},
++	}
++	for _, tc := range cases {
++		t.Run(tc.name, func(t *testing.T) {
++			data := tc.edit(bytes.Clone(f.data))
++			unchanged := bytes.Clone(data)
++			plan, err := ParseReplay(data, ReplayLimits{})
++			if plan != nil || !errors.Is(err, tc.want) || !bytes.Equal(data, unchanged) {
++				t.Fatalf("partial plan, wrong error or changed input: plan=%v err=%v want=%v", plan, err, tc.want)
++			}
++		})
++	}
++	// Locking page is invalid even in a later segment.
++	geometry.OriginalPages = 0x40000000/geometry.PageSize + 1
++	locked := makeReplayMemoryFixture(geometry, replayMemorySegment{11, []uint32{1}}, replayMemorySegment{22, []uint32{geometry.OriginalPages}})
++	if p, err := ParseReplay(locked.data, ReplayLimits{}); p != nil || !errors.Is(err, ErrFormat) {
++		t.Fatalf("locking page: plan=%v err=%v", p, err)
++	}
++}
++
++func TestReplaySegmentsCumulativeBudgetsInMemory(t *testing.T) {
++	f := makeReplayMemoryFixture(Header{PageSize: 512, SectorSize: 512, OriginalPages: 7},
++		replayMemorySegment{1, []uint32{1, 3}}, replayMemorySegment{2, []uint32{5, 7}})
++	exact := ReplayLimits{MaxJournalBytes: uint64(len(f.data)), MaxRecords: 4, MaxDatabaseBytes: 7 * 512}
++	plan := checkReplayMemoryPlan(t, f, exact)
++	var imageBytes uint64
++	for _, page := range plan.Pages {
++		imageBytes += uint64(len(page.Data))
++	}
++	if imageBytes != 4*512 || imageBytes > exact.MaxJournalBytes || imageBytes > exact.MaxDatabaseBytes {
++		t.Fatalf("retained image bound: %d", imageBytes)
++	}
++	for _, limits := range []ReplayLimits{
++		{MaxJournalBytes: uint64(len(f.data) - 1)}, {MaxRecords: 3}, {MaxDatabaseBytes: 7*512 - 1},
++	} {
++		if p, err := ParseReplay(f.data, limits); p != nil || !errors.Is(err, ErrReplayLimit) {
++			t.Fatalf("cumulative quota=%+v plan=%v err=%v", limits, p, err)
++		}
++	}
++	// Both advertised counts individually fit MaxRecords; their sum must
++	// not wrap a uint32 or reach any allocation based on that bogus count.
++	huge := bytes.Clone(f.data)
++	for _, header := range f.headers {
++		binary.BigEndian.PutUint32(huge[header+16:], 0xfffffffe)
++	}
++	binary.BigEndian.PutUint32(huge[f.headers[1]+8:], 0xfffffffe)
++	if p, err := ParseReplay(huge, ReplayLimits{MaxRecords: 0xffffffff, MaxDatabaseBytes: ^uint64(0)}); p != nil || !errors.Is(err, ErrReplayLimit) {
++		t.Fatalf("cumulative uint32 overflow: plan=%v err=%v", p, err)
++	}
++	// Maximal geometry/finite count multiplication has to fail as short
++	// input, rather than wrap into a small accepted extent or allocation.
++	large := makeReplayMemoryFixture(Header{PageSize: 65536, SectorSize: 65536, OriginalPages: 0xfffffffe}, replayMemorySegment{1, nil})
++	binary.BigEndian.PutUint32(large.data[8:], 0xfffffffe)
++	if p, err := ParseReplay(large.data, ReplayLimits{MaxRecords: 0xffffffff, MaxDatabaseBytes: ^uint64(0)}); p != nil || !errors.Is(err, ErrFormat) {
++		t.Fatalf("record byte overflow: plan=%v err=%v", p, err)
++	}
++	// Zero-record segments consume no record budget, but still consume
++	// sector-sized bounded input and cannot create an unbounded header list.
++	segments := make([]replayMemorySegment, 257)
++	for i := range segments {
++		segments[i].nonce = uint32(i)
++	}
++	empty := makeReplayMemoryFixture(Header{PageSize: 512, SectorSize: 32}, segments...)
++	checkReplayMemoryPlan(t, empty, ReplayLimits{MaxJournalBytes: uint64(len(empty.data)), MaxRecords: 1})
++	if p, err := ParseReplay(empty.data, ReplayLimits{MaxJournalBytes: uint64(len(empty.data) - 1)}); p != nil || !errors.Is(err, ErrReplayLimit) {
++		t.Fatalf("zero-record segment input budget: plan=%v err=%v", p, err)
++	}
++}
++
++func TestReplaySegmentsExactApplicationModelInMemory(t *testing.T) {
++	rng := rand.New(rand.NewSource(3540000))
++	for iteration := 0; iteration < 128; iteration++ {
++		pageSize := 512 << rng.Intn(4)
++		pageCount := 1 + rng.Intn(20)
++		order := rng.Perm(pageCount)
++		chosen := rng.Intn(pageCount + 1)
++		segments := make([]replayMemorySegment, 1+rng.Intn(8))
++		for i := range segments {
++			segments[i].nonce = rng.Uint32()
++		}
++		// Assign each selected page exactly once to a randomly selected
++		// segment, without depending on parser traversal or checksum code.
++		for _, number := range order[:chosen] {
++			s := rng.Intn(len(segments))
++			segments[s].numbers = append(segments[s].numbers, uint32(number+1))
++		}
++		f := makeReplayMemoryFixture(Header{PageSize: uint32(pageSize), SectorSize: uint32(32 << rng.Intn(7)), OriginalPages: uint32(pageCount)}, segments...)
++		plan := checkReplayMemoryPlan(t, f, ReplayLimits{})
++		current := bytes.Repeat([]byte{0x71}, (pageCount+2)*pageSize)
++		want := bytes.Clone(current[:pageCount*pageSize])
++		coverage := make(map[uint32]bool)
++		for _, p := range f.pages {
++			copy(want[int(p.Number-1)*pageSize:int(p.Number)*pageSize], p.Data)
++			coverage[p.Number] = true
++		}
++		apply := func(in []byte) []byte {
++			out := make([]byte, int(plan.DatabaseBytes))
++			copy(out, in)
++			for _, p := range plan.Pages {
++				copy(out[int(p.Number-1)*pageSize:int(p.Number)*pageSize], p.Data)
++			}
++			return out
++		}
++		if got := apply(current); !bytes.Equal(got, want) || !bytes.Equal(apply(got), want) {
++			t.Fatalf("iteration %d: exact image/unaffected/truncation/idempotence model differs", iteration)
++		}
++		for fullPages := 0; fullPages <= pageCount+1; fullPages++ {
++			for _, extra := range []int{0, pageSize - 1} {
++				length := fullPages*pageSize + extra
++				complete := true
++				for number := fullPages + 1; number <= pageCount; number++ {
++					complete = complete && coverage[uint32(number)]
++				}
++				if err := plan.ValidateExtent(int64(length)); (err == nil) != complete {
++					t.Fatalf("iteration %d extent %d: complete=%v err=%v", iteration, length, complete, err)
++				}
++			}
++		}
++	}
++}
++
++func FuzzReplaySegmentsBytesOnly(f *testing.F) {
++	fixture := makeReplayMemoryFixture(Header{PageSize: 512, SectorSize: 32, OriginalPages: 4},
++		replayMemorySegment{0xffffffff, []uint32{4}}, replayMemorySegment{0, nil}, replayMemorySegment{7, []uint32{1, 3}})
++	f.Add(fixture.data)
++	f.Add(fixture.data[:fixture.ends[0]])
++	f.Add([]byte{})
++	f.Fuzz(func(t *testing.T, data []byte) {
++		const inputLimit = 1 << 16
++		// Bound all copies made by the fuzz harness as well as the parser.
++		if len(data) > inputLimit {
++			return
++		}
++		input := bytes.Clone(data)
++		limits := ReplayLimits{MaxJournalBytes: inputLimit, MaxRecords: 64, MaxDatabaseBytes: 1 << 20}
++		plan, err := ParseReplay(input, limits)
++		if !bytes.Equal(input, data) {
++			t.Fatal("parser changed input")
++		}
++		if err != nil {
++			if plan != nil {
++				t.Fatal("error returned partial plan")
++			}
++			if !errors.Is(err, ErrFormat) && !errors.Is(err, ErrReplayUnsupported) && !errors.Is(err, ErrReplayLimit) {
++				t.Fatal(err)
++			}
++			return
++		}
++		other, err := ParseReplay(input, limits)
++		if err != nil || !reflect.DeepEqual(plan, other) {
++			t.Fatal("non-deterministic plan")
++		}
++		if plan.Header.Records > uint32(len(plan.Pages)) || len(plan.Pages) > 64 || plan.DatabaseBytes != int64(plan.Header.OriginalPages)*int64(plan.Header.PageSize) {
++			t.Fatal("invalid first header, cumulative count or extent")
++		}
++		var retained uint64
++		seen := map[uint32]bool{}
++		for _, p := range plan.Pages {
++			if seen[p.Number] || p.Number == 0 || p.Number > plan.Header.OriginalPages || p.Number == 0x40000000/plan.Header.PageSize+1 || len(p.Data) != int(plan.Header.PageSize) {
++				t.Fatal("invalid successful page image")
++			}
++			seen[p.Number] = true
++			retained += uint64(len(p.Data))
++		}
++		if retained > uint64(len(data)) || retained > limits.MaxJournalBytes || retained > limits.MaxDatabaseBytes {
++			t.Fatal("unbounded retained image bytes")
++		}
++		if err := plan.ValidateExtent(plan.DatabaseBytes); err != nil {
++			t.Fatal(err)
++		}
++		for i := range input {
++			input[i] ^= 0xff
++		}
++		if !reflect.DeepEqual(plan, other) {
++			t.Fatal("result aliases input")
++		}
++	})
++}
+diff --git a/internal/journal/replay_test.go b/internal/journal/replay_test.go
+index dd2bc15..a9edfca 100644
+--- a/internal/journal/replay_test.go
++++ b/internal/journal/replay_test.go
+@@ -224,7 +224,7 @@ func FuzzReplayPlanBytesOnly(f *testing.F) {
+ 			}
+ 			return
+ 		}
+-		if int(plan.Header.Records) != len(plan.Pages) || plan.DatabaseBytes != int64(plan.Header.OriginalPages)*int64(plan.Header.PageSize) {
++		if int(plan.Header.Records) > len(plan.Pages) || len(plan.Pages) > 1024 || plan.DatabaseBytes != int64(plan.Header.OriginalPages)*int64(plan.Header.PageSize) {
+ 			t.Fatal("invalid successful plan")
+ 		}
+ 		if err := plan.ValidateExtent(plan.DatabaseBytes); err != nil {

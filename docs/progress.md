@@ -833,3 +833,29 @@ CLI backup/rekey, caller-dataset distance checks, normalized corpus and benchmar
 soak/performance-CI work take priority over optional SQL breadth. Current-tense
 architecture/security contradictions are corrected; original documents remain in
 history. The user's manual verification commands remain intact. M10 is not complete.
+
+
+### Bounded multi-segment rollback parsing and native recovery ownership
+
+Exact combined source 293a25e4ed905f970b437c28ce6419c1e1b89176 extends verified secondary source 60d8a2d68c36c1a48333baf9af2c22eb5fb83188 with ten
+checked paths. The parser accepts aligned published finite-count segments with
+matching geometry, per-segment checksums and bounded unique original pages. Its
+576 legacy single-segment digests remain unchanged. Unpublished/no-sync/master,
+ambiguous and other unsupported forms still fail closed. Native RecoverRollback
+consumes this broader parser, so unchanged former consumer bytes would not have
+proved unchanged native behavior.
+
+The consumer now reserves bounded cleanup before resolution/acquisition, retains
+metadata and temporary/main obligations, distinguishes initial absence, and
+retires children before their protecting main owner. Retrying cleanup cannot
+replay, truncate, Sync, unlink or republish. Independent negative memory/AST laws
+and all prior findings remain in evidence. No RecoverRollback call or physical
+recovery workflow was executed. Automatic public Open recovery is still absent.
+
+Exact combined full guarded ordinary unit/vet/build, complete pinned oracle,
+full race, five builds, modules and inventory passed exit0 at 2026-10-10T21:12:23Z.
+All published non-document bytes equal that fixed source. Journal predecessor
+full-source results are retained separately, not substituted for this combined
+identity. Native failure/crash/namespace recovery remains NOT_RUN. Shared legacy
+absence provenance and the separately reproduced ordinary rollback reader-open
+stat/SHARED timing race remain genuine engineering gaps. M10 is unfinished.

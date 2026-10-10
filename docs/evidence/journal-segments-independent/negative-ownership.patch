@@ -1,0 +1,11 @@
+--- a/internal/journal/replay.go
++++ b/internal/journal/replay.go
+@@ -178,7 +178,7 @@
+ 		}
+ 	}
+ 	for i := range plan.Pages {
+-		plan.Pages[i].Data = append([]byte(nil), plan.Pages[i].Data...)
++		plan.Pages[i].Data = plan.Pages[i].Data
+ 	}
+ 	return plan, nil
+ }

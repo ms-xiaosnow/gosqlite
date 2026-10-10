@@ -1,0 +1,31 @@
+{
+  "base": "7d3184f87165e11e12560884ec6e4f92c9bfd039",
+  "tree": "e825d3096dd521a730caaaca2f5c85af0e9d76de",
+  "owned": {
+    "docs/decisions/0004-exclusive-wal-and-recovery-gates.md": "a2c19215d0173b00fdfd383c3bed38b618fad25f552c84a174aa63be330834d6",
+    "docs/file-formats.md": "13587119d6e164dfef689f16072f2baaddb6e23efd72c4597f5dc76d683521c1",
+    "docs/rollback-replay-memory.md": "7a8c79ca0633ac3a29da56bf484d955b2c63a59da951174f4d8beb2dc3cac10b",
+    "docs/sql-secondary-ranges.md": "cc460e7c0be8bfc772ad5a4a608b9002cc00fc1dd3d8646ed11dd6e6df6efd92",
+    "driver/secondary_range_test.go": "1644e0ff0e2806b54e0a856c7b29883f1cbe3841156eb543548a8c7ac0d4b1aa",
+    "internal/journal/replay.go": "d8263d7a29d7d56509066057524a6df56b6914081569730225cf1981b60aa404",
+    "internal/journal/replay_segments_test.go": "3a57d7318c15ccb9ea03064e2e1bd5eeb07143dd03452e8ad3f273739082c624",
+    "internal/journal/replay_test.go": "1f70cf4f9bae35ad57e9a9a7daa04394bdf19a4d6710846c2770fdb5a9e6ce17",
+    "internal/testkit/secondary_range_conformance_test.go": "266e01474e9c4578242a9bab07a8685b9c4018143d63c39ef3c0a86f934a7575",
+    "sqlite/plan_index_test.go": "0655f9d06d73e75ff4ba82fcf2332284df8914b1ab12ada75318ceb08b2eb64f",
+    "sqlite/plan_secondary_range.go": "798ecff28bd2b34704aab3df3059a16324471f00ff6b2c0bf08bbfa925f7543f",
+    "sqlite/plan_secondary_range_internal_test.go": "80ec91e0da52d523a0ebb8bf210637bdddc0959bad3709d3f741f717cdc82aff",
+    "sqlite/plan_secondary_range_test.go": "fb15a534e15dc7a211efd84df69c4ff18c1eee2a2ead9ca42fcd41f04e91a53c",
+    "sqlite/query.go": "6b765cf8ed97f8c8b0d53923f1900db77a3e6582ee361dd86327defec052a9f8"
+  },
+  "patches": [
+    [
+      "sql-secondary-range-v1-source.patch",
+      "180e9226e6839c8498f0b1ab1405c1cffe6e743bf8fffadf00ae30c175e04752"
+    ],
+    [
+      "journal-multisegment-v3.patch",
+      "dea7d4d4c721ee5c82137e4e43bc6e4a78dc571155ed4de9556628982764066e"
+    ]
+  ],
+  "merged": "query.go preserves previously integrated global aggregate dispatch; only secondary hook added"
+}

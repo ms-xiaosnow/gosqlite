@@ -1,0 +1,7 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+--- FAIL: TestIndependentSegmentGeometryAndOwnership (0.00s)
+    replay_independent_test.go:108: input and output alias
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/journal	0.007s
+FAIL
+EXPECTED NEGATIVE CONTROL EXIT: 1

@@ -1,0 +1,187 @@
+Pure-memory journal tests only. Independent source/scope audit recorded separately.
+go version go1.27.2 linux/amd64
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestSQLiteRollbackFormatInMemory
+--- PASS: TestSQLiteRollbackFormatInMemory (0.00s)
+=== RUN   TestRejectMalformedJournalBytesInMemory
+--- PASS: TestRejectMalformedJournalBytesInMemory (0.00s)
+=== RUN   TestReplaySegmentsGeometryAndOwnershipInMemory
+--- PASS: TestReplaySegmentsGeometryAndOwnershipInMemory (0.06s)
+=== RUN   TestReplaySegmentsZeroCountsAndAlignedHeadersInMemory
+--- PASS: TestReplaySegmentsZeroCountsAndAlignedHeadersInMemory (0.00s)
+=== RUN   TestReplaySegmentsExactBoundaryTruncationsInMemory
+--- PASS: TestReplaySegmentsExactBoundaryTruncationsInMemory (0.00s)
+=== RUN   TestReplaySegmentsRejectAmbiguityInMemory
+=== RUN   TestReplaySegmentsRejectAmbiguityInMemory/later-unpublished-magic
+=== RUN   TestReplaySegmentsRejectAmbiguityInMemory/later-unpublished-zero-body
+=== RUN   TestReplaySegmentsRejectAmbiguityInMemory/later-no-sync
+=== RUN   TestReplaySegmentsRejectAmbiguityInMemory/later-page-size
+=== RUN   TestReplaySegmentsRejectAmbiguityInMemory/later-legacy-size
+=== RUN   TestReplaySegmentsRejectAmbiguityInMemory/later-sector-size
+=== RUN   TestReplaySegmentsRejectAmbiguityInMemory/later-original-extent
+=== RUN   TestReplaySegmentsRejectAmbiguityInMemory/later-extent-invalid
+=== RUN   TestReplaySegmentsRejectAmbiguityInMemory/later-zero-page
+=== RUN   TestReplaySegmentsRejectAmbiguityInMemory/later-outside-first-extent
+=== RUN   TestReplaySegmentsRejectAmbiguityInMemory/duplicate-across-segments
+=== RUN   TestReplaySegmentsRejectAmbiguityInMemory/duplicate-within-later-segment
+=== RUN   TestReplaySegmentsRejectAmbiguityInMemory/wrong-later-nonce
+=== RUN   TestReplaySegmentsRejectAmbiguityInMemory/last-record-checksum
+=== RUN   TestReplaySegmentsRejectAmbiguityInMemory/last-record-sampled-byte
+=== RUN   TestReplaySegmentsRejectAmbiguityInMemory/later-advertised-truncated-record
+=== RUN   TestReplaySegmentsRejectAmbiguityInMemory/trailing-one-byte
+=== RUN   TestReplaySegmentsRejectAmbiguityInMemory/trailing-padding-only
+=== RUN   TestReplaySegmentsRejectAmbiguityInMemory/trailing-unpublished-header
+=== RUN   TestReplaySegmentsRejectAmbiguityInMemory/unaligned-next-header
+=== RUN   TestReplaySegmentsRejectAmbiguityInMemory/magic-away-from-aligned-header
+=== RUN   TestReplaySegmentsRejectAmbiguityInMemory/apparent-super-journal-trailer
+--- PASS: TestReplaySegmentsRejectAmbiguityInMemory (0.00s)
+    --- PASS: TestReplaySegmentsRejectAmbiguityInMemory/later-unpublished-magic (0.00s)
+    --- PASS: TestReplaySegmentsRejectAmbiguityInMemory/later-unpublished-zero-body (0.00s)
+    --- PASS: TestReplaySegmentsRejectAmbiguityInMemory/later-no-sync (0.00s)
+    --- PASS: TestReplaySegmentsRejectAmbiguityInMemory/later-page-size (0.00s)
+    --- PASS: TestReplaySegmentsRejectAmbiguityInMemory/later-legacy-size (0.00s)
+    --- PASS: TestReplaySegmentsRejectAmbiguityInMemory/later-sector-size (0.00s)
+    --- PASS: TestReplaySegmentsRejectAmbiguityInMemory/later-original-extent (0.00s)
+    --- PASS: TestReplaySegmentsRejectAmbiguityInMemory/later-extent-invalid (0.00s)
+    --- PASS: TestReplaySegmentsRejectAmbiguityInMemory/later-zero-page (0.00s)
+    --- PASS: TestReplaySegmentsRejectAmbiguityInMemory/later-outside-first-extent (0.00s)
+    --- PASS: TestReplaySegmentsRejectAmbiguityInMemory/duplicate-across-segments (0.00s)
+    --- PASS: TestReplaySegmentsRejectAmbiguityInMemory/duplicate-within-later-segment (0.00s)
+    --- PASS: TestReplaySegmentsRejectAmbiguityInMemory/wrong-later-nonce (0.00s)
+    --- PASS: TestReplaySegmentsRejectAmbiguityInMemory/last-record-checksum (0.00s)
+    --- PASS: TestReplaySegmentsRejectAmbiguityInMemory/last-record-sampled-byte (0.00s)
+    --- PASS: TestReplaySegmentsRejectAmbiguityInMemory/later-advertised-truncated-record (0.00s)
+    --- PASS: TestReplaySegmentsRejectAmbiguityInMemory/trailing-one-byte (0.00s)
+    --- PASS: TestReplaySegmentsRejectAmbiguityInMemory/trailing-padding-only (0.00s)
+    --- PASS: TestReplaySegmentsRejectAmbiguityInMemory/trailing-unpublished-header (0.00s)
+    --- PASS: TestReplaySegmentsRejectAmbiguityInMemory/unaligned-next-header (0.00s)
+    --- PASS: TestReplaySegmentsRejectAmbiguityInMemory/magic-away-from-aligned-header (0.00s)
+    --- PASS: TestReplaySegmentsRejectAmbiguityInMemory/apparent-super-journal-trailer (0.00s)
+=== RUN   TestReplaySegmentsCumulativeBudgetsInMemory
+--- PASS: TestReplaySegmentsCumulativeBudgetsInMemory (0.00s)
+=== RUN   TestReplaySegmentsExactApplicationModelInMemory
+--- PASS: TestReplaySegmentsExactApplicationModelInMemory (0.01s)
+=== RUN   TestReplayPlanGeometryInMemory
+--- PASS: TestReplayPlanGeometryInMemory (0.00s)
+=== RUN   TestReplayRejectsEveryTruncationInMemory
+--- PASS: TestReplayRejectsEveryTruncationInMemory (0.00s)
+=== RUN   TestReplayRejectsAmbiguousInputInMemory
+=== RUN   TestReplayRejectsAmbiguousInputInMemory/magic
+=== RUN   TestReplayRejectsAmbiguousInputInMemory/zero-page
+=== RUN   TestReplayRejectsAmbiguousInputInMemory/beyond-original
+=== RUN   TestReplayRejectsAmbiguousInputInMemory/checksum
+=== RUN   TestReplayRejectsAmbiguousInputInMemory/duplicate
+=== RUN   TestReplayRejectsAmbiguousInputInMemory/no-sync
+=== RUN   TestReplayRejectsAmbiguousInputInMemory/legacy-page-size
+=== RUN   TestReplayRejectsAmbiguousInputInMemory/odd-page-size
+=== RUN   TestReplayRejectsAmbiguousInputInMemory/small-page-size
+=== RUN   TestReplayRejectsAmbiguousInputInMemory/large-page-size
+=== RUN   TestReplayRejectsAmbiguousInputInMemory/small-sector
+=== RUN   TestReplayRejectsAmbiguousInputInMemory/odd-sector
+=== RUN   TestReplayRejectsAmbiguousInputInMemory/large-sector
+=== RUN   TestReplayRejectsAmbiguousInputInMemory/invalid-db-pages
+=== RUN   TestReplayRejectsAmbiguousInputInMemory/too-many-records
+=== RUN   TestReplayRejectsAmbiguousInputInMemory/trailing-byte
+=== RUN   TestReplayRejectsAmbiguousInputInMemory/unpublished-extra-record
+=== RUN   TestReplayRejectsAmbiguousInputInMemory/zero-count-with-body
+=== RUN   TestReplayRejectsAmbiguousInputInMemory/second-aligned-segment
+=== RUN   TestReplayRejectsAmbiguousInputInMemory/super-journal
+=== RUN   TestReplayRejectsAmbiguousInputInMemory/malformed-super-trailer
+--- PASS: TestReplayRejectsAmbiguousInputInMemory (0.00s)
+    --- PASS: TestReplayRejectsAmbiguousInputInMemory/magic (0.00s)
+    --- PASS: TestReplayRejectsAmbiguousInputInMemory/zero-page (0.00s)
+    --- PASS: TestReplayRejectsAmbiguousInputInMemory/beyond-original (0.00s)
+    --- PASS: TestReplayRejectsAmbiguousInputInMemory/checksum (0.00s)
+    --- PASS: TestReplayRejectsAmbiguousInputInMemory/duplicate (0.00s)
+    --- PASS: TestReplayRejectsAmbiguousInputInMemory/no-sync (0.00s)
+    --- PASS: TestReplayRejectsAmbiguousInputInMemory/legacy-page-size (0.00s)
+    --- PASS: TestReplayRejectsAmbiguousInputInMemory/odd-page-size (0.00s)
+    --- PASS: TestReplayRejectsAmbiguousInputInMemory/small-page-size (0.00s)
+    --- PASS: TestReplayRejectsAmbiguousInputInMemory/large-page-size (0.00s)
+    --- PASS: TestReplayRejectsAmbiguousInputInMemory/small-sector (0.00s)
+    --- PASS: TestReplayRejectsAmbiguousInputInMemory/odd-sector (0.00s)
+    --- PASS: TestReplayRejectsAmbiguousInputInMemory/large-sector (0.00s)
+    --- PASS: TestReplayRejectsAmbiguousInputInMemory/invalid-db-pages (0.00s)
+    --- PASS: TestReplayRejectsAmbiguousInputInMemory/too-many-records (0.00s)
+    --- PASS: TestReplayRejectsAmbiguousInputInMemory/trailing-byte (0.00s)
+    --- PASS: TestReplayRejectsAmbiguousInputInMemory/unpublished-extra-record (0.00s)
+    --- PASS: TestReplayRejectsAmbiguousInputInMemory/zero-count-with-body (0.00s)
+    --- PASS: TestReplayRejectsAmbiguousInputInMemory/second-aligned-segment (0.00s)
+    --- PASS: TestReplayRejectsAmbiguousInputInMemory/super-journal (0.00s)
+    --- PASS: TestReplayRejectsAmbiguousInputInMemory/malformed-super-trailer (0.00s)
+=== RUN   TestReplayLimitsAndZeroRecordsInMemory
+--- PASS: TestReplayLimitsAndZeroRecordsInMemory (0.00s)
+=== RUN   TestReplayExtentAndApplicationInMemory
+--- PASS: TestReplayExtentAndApplicationInMemory (0.00s)
+=== RUN   TestIndependentSegmentGeometryAndOwnership
+--- PASS: TestIndependentSegmentGeometryAndOwnership (0.04s)
+=== RUN   TestIndependentSegmentEveryPrefixAndTail
+--- PASS: TestIndependentSegmentEveryPrefixAndTail (0.01s)
+=== RUN   TestIndependentSegmentLaterFieldsAndChecksums
+=== RUN   TestIndependentSegmentLaterFieldsAndChecksums/zero_magic
+=== RUN   TestIndependentSegmentLaterFieldsAndChecksums/no-sync_count
+=== RUN   TestIndependentSegmentLaterFieldsAndChecksums/huge_count
+=== RUN   TestIndependentSegmentLaterFieldsAndChecksums/zero_count_hiding_record
+=== RUN   TestIndependentSegmentLaterFieldsAndChecksums/second_segment_uses_first_nonce
+=== RUN   TestIndependentSegmentLaterFieldsAndChecksums/later_smaller_extent
+=== RUN   TestIndependentSegmentLaterFieldsAndChecksums/later_larger_extent
+=== RUN   TestIndependentSegmentLaterFieldsAndChecksums/later_sector
+=== RUN   TestIndependentSegmentLaterFieldsAndChecksums/later_page
+=== RUN   TestIndependentSegmentLaterFieldsAndChecksums/later_legacy_page
+=== RUN   TestIndependentSegmentLaterFieldsAndChecksums/later_duplicate
+=== RUN   TestIndependentSegmentLaterFieldsAndChecksums/later_zero_page
+=== RUN   TestIndependentSegmentLaterFieldsAndChecksums/later_out-of-range_page
+--- PASS: TestIndependentSegmentLaterFieldsAndChecksums (0.00s)
+    --- PASS: TestIndependentSegmentLaterFieldsAndChecksums/zero_magic (0.00s)
+    --- PASS: TestIndependentSegmentLaterFieldsAndChecksums/no-sync_count (0.00s)
+    --- PASS: TestIndependentSegmentLaterFieldsAndChecksums/huge_count (0.00s)
+    --- PASS: TestIndependentSegmentLaterFieldsAndChecksums/zero_count_hiding_record (0.00s)
+    --- PASS: TestIndependentSegmentLaterFieldsAndChecksums/second_segment_uses_first_nonce (0.00s)
+    --- PASS: TestIndependentSegmentLaterFieldsAndChecksums/later_smaller_extent (0.00s)
+    --- PASS: TestIndependentSegmentLaterFieldsAndChecksums/later_larger_extent (0.00s)
+    --- PASS: TestIndependentSegmentLaterFieldsAndChecksums/later_sector (0.00s)
+    --- PASS: TestIndependentSegmentLaterFieldsAndChecksums/later_page (0.00s)
+    --- PASS: TestIndependentSegmentLaterFieldsAndChecksums/later_legacy_page (0.00s)
+    --- PASS: TestIndependentSegmentLaterFieldsAndChecksums/later_duplicate (0.00s)
+    --- PASS: TestIndependentSegmentLaterFieldsAndChecksums/later_zero_page (0.00s)
+    --- PASS: TestIndependentSegmentLaterFieldsAndChecksums/later_out-of-range_page (0.00s)
+=== RUN   TestIndependentSegmentLimitsAndOverflow
+--- PASS: TestIndependentSegmentLimitsAndOverflow (0.00s)
+=== RUN   TestIndependentSegmentModelHistories
+--- PASS: TestIndependentSegmentModelHistories (0.05s)
+=== RUN   FuzzReplaySegmentsBytesOnly
+=== RUN   FuzzReplaySegmentsBytesOnly/seed#0
+=== RUN   FuzzReplaySegmentsBytesOnly/seed#1
+=== RUN   FuzzReplaySegmentsBytesOnly/seed#2
+--- PASS: FuzzReplaySegmentsBytesOnly (0.00s)
+    --- PASS: FuzzReplaySegmentsBytesOnly/seed#0 (0.00s)
+    --- PASS: FuzzReplaySegmentsBytesOnly/seed#1 (0.00s)
+    --- PASS: FuzzReplaySegmentsBytesOnly/seed#2 (0.00s)
+=== RUN   FuzzReplayPlanBytesOnly
+=== RUN   FuzzReplayPlanBytesOnly/seed#0
+=== RUN   FuzzReplayPlanBytesOnly/seed#1
+=== RUN   FuzzReplayPlanBytesOnly/seed#2
+--- PASS: FuzzReplayPlanBytesOnly (0.00s)
+    --- PASS: FuzzReplayPlanBytesOnly/seed#0 (0.00s)
+    --- PASS: FuzzReplayPlanBytesOnly/seed#1 (0.00s)
+    --- PASS: FuzzReplayPlanBytesOnly/seed#2 (0.00s)
+=== RUN   FuzzIndependentSegmentStructured
+=== RUN   FuzzIndependentSegmentStructured/seed#0
+=== RUN   FuzzIndependentSegmentStructured/seed#1
+=== RUN   FuzzIndependentSegmentStructured/seed#2
+=== RUN   FuzzIndependentSegmentStructured/seed#3
+=== RUN   FuzzIndependentSegmentStructured/seed#4
+=== RUN   FuzzIndependentSegmentStructured/seed#5
+--- PASS: FuzzIndependentSegmentStructured (0.00s)
+    --- PASS: FuzzIndependentSegmentStructured/seed#0 (0.00s)
+    --- PASS: FuzzIndependentSegmentStructured/seed#1 (0.00s)
+    --- PASS: FuzzIndependentSegmentStructured/seed#2 (0.00s)
+    --- PASS: FuzzIndependentSegmentStructured/seed#3 (0.00s)
+    --- PASS: FuzzIndependentSegmentStructured/seed#4 (0.00s)
+    --- PASS: FuzzIndependentSegmentStructured/seed#5 (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/journal	0.182s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/journal	2.646s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+SELECTED NORMAL / RACE / VET / BUILDS PASS

@@ -1,0 +1,7 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+--- FAIL: TestIndependentSegmentGeometryAndOwnership (0.00s)
+    replay_independent_test.go:98: valid fixture rejected: invalid SQLite rollback journal: checksum of page 1
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/journal	0.005s
+FAIL
+EXPECTED NEGATIVE CONTROL EXIT: 1

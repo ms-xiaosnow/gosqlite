@@ -424,5 +424,19 @@
     "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38084417388",
     "remote_ci_status": "COMPLETED SUCCESS for exact SHA, updated2026-10-10T20:50:02Z, observed20:52:43Z. Ordinary job114307787868 and complete pinned-oracle job114307788002 both SUCCESS.",
     "open_gates": "Native recovery cleanup remains a separate source-only correction; shared/recovery legacy absence coupling, remaining SQL/migration/mandatory CLI and benchmark code are open. Native failure/recovery, non-Linux runtime and independent M10 qualification NOT_RUN."
+  },
+  {
+    "stage": "Leading secondary-index inequalities and original-goal acceptance traceability",
+    "remote_commit": "39a06cbf4d787d5e480c1d038c00d2a812c8d993",
+    "local_commit": "39a06cbf4d787d5e480c1d038c00d2a812c8d993",
+    "tree": "70dd02d0791af8e7c9eaf25a1d875c74e605a392",
+    "bundle_sha256": "6a28777d0839787825d23279208bb2e11d9009b99d8d09d17332761cb83ac7a0",
+    "bundle_bytes": 3487805,
+    "library_file_id": "libfile_835a74d1f40881918f603410d320f51e",
+    "library_version": 0,
+    "verified": "Expected-SHA remote main readback and exact local mirror2026-10-10T21:03:52Z. Full-history bundle byte-identical Library readback/clone/fsck/original goal PASS21:04:14Z. Exact source60d8a2d68c36c1a48333baf9af2c22eb5fb83188 full ordinary unit/vet/build20:35:13, complete pinned oracle20:44:14, full race(SQLite748.256s), five builds/modules/inventory PASS exit0 at20:58:20Z. All non-document changed bytes equal source. Exact restored focused secondary range unit/race/oracle and full builds pending. Exact Library-restored secondary range unit/race (SQLite13.002s/33.035s), pinned secondary oracle52.657s, full vet/build, five target builds, modules and clean tree PASS exit0 at2026-10-10T21:07:01Z.",
+    "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38086179344",
+    "remote_ci_status": "IN_PROGRESS observed2026-10-10T21:04:15Z for exact SHA.",
+    "open_gates": "Original-goal matrix distinguishes code, automatically runnable tests, restricted manual gates and real environments. Newly observed rollback reader-open stat/SHARED timing and high-dimensional importer tolerance v1 are held engineering failures, not acceptance-only items. New CLI/import/bench/soak/group/counter/recovery sources excluded from this checkpoint. Native failures/recovery, target runtime and independent M10 remain unqualified."
   }
 ]

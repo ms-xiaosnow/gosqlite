@@ -1,0 +1,11 @@
+--- a/internal/journal/replay.go
++++ b/internal/journal/replay.go
+@@ -157,7 +157,7 @@
+ 				return nil, fmt.Errorf("%w: duplicate original page %d", ErrReplayUnsupported, number)
+ 			}
+ 			page := record[4 : len(record)-4]
+-			if binary.BigEndian.Uint32(record[len(record)-4:]) != Checksum(page, segment.Nonce) {
++			if binary.BigEndian.Uint32(record[len(record)-4:]) != Checksum(page, h.Nonce) {
+ 				return nil, fmt.Errorf("%w: checksum of page %d", ErrFormat, number)
+ 			}
+ 			seen[number] = struct{}{}

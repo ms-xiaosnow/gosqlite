@@ -1,0 +1,9 @@
+Scope: only independent pure-memory byte parser tests; source helper review complete, no file or database operations. Baseline multi-segment rejection expected.
+go version go1.27.2 linux/amd64
+Ordinary test source-reference guard PASS; behavioral review is still required.
+--- FAIL: TestIndependentSegmentGeometryAndOwnership (0.00s)
+    replay_independent_test.go:98: valid fixture rejected: unsupported SQLite rollback journal recovery: trailing bytes or multiple segments
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/journal	0.002s
+FAIL
+EXPECTED NEGATIVE CONTROL EXIT: 1

@@ -1,0 +1,26 @@
+{
+  "nonce": {
+    "path": "../journal-segments-independent-negative-nonce-v1",
+    "test": "TestIndependentSegmentGeometryAndOwnership",
+    "before_sha256": "d8263d7a29d7d56509066057524a6df56b6914081569730225cf1981b60aa404",
+    "mutant_sha256": "a21bdde1ac5445d2278f52736234afe29ca2a881d621ba5e139bcc42aabcfa8d"
+  },
+  "quota": {
+    "path": "../journal-segments-independent-negative-quota-v1",
+    "test": "TestIndependentSegmentLimitsAndOverflow",
+    "before_sha256": "d8263d7a29d7d56509066057524a6df56b6914081569730225cf1981b60aa404",
+    "mutant_sha256": "f812b760b0f4e4c435dd7d119d90c6e1a87fa95cb770b7fd72b985266dc2c992"
+  },
+  "partial": {
+    "path": "../journal-segments-independent-negative-partial-v1",
+    "test": "TestIndependentSegmentEveryPrefixAndTail",
+    "before_sha256": "d8263d7a29d7d56509066057524a6df56b6914081569730225cf1981b60aa404",
+    "mutant_sha256": "1643ee3f634d7bfda6b512b98d8afba4c3a3e0670d257da7bddf2c53cec91c7d"
+  },
+  "ownership": {
+    "path": "../journal-segments-independent-negative-ownership-v1",
+    "test": "TestIndependentSegmentGeometryAndOwnership",
+    "before_sha256": "d8263d7a29d7d56509066057524a6df56b6914081569730225cf1981b60aa404",
+    "mutant_sha256": "caf13106acb2913d0c48260914fe53582b521afa1e763126c486fc3477901971"
+  }
+}

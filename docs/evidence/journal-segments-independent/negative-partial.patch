@@ -1,0 +1,11 @@
+--- a/internal/journal/replay.go
++++ b/internal/journal/replay.go
+@@ -165,7 +165,7 @@
+ 			// has passed validation, so a late error owns no page-image bytes.
+ 			plan.Pages = append(plan.Pages, PageImage{number, page})
+ 		}
+-		if end == size {
++		if end <= size {
+ 			break
+ 		}
+ 		padding := (sector - end%sector) % sector

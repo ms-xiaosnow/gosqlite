@@ -26,7 +26,7 @@ Existing -shm data is not used as an index and is invalidated/removed only while
 
 ## Rollback recovery boundary
 
-internal/journal.ParseReplay constructs a bounded owned replay plan in memory. The first implementation supports exactly one finite-count journal segment with validated geometry/checksums/page numbers and no unsupported master-journal trailer, duplicate originals or extra segments. Partial/cold/ambiguous inputs fail closed and are preserved.
+internal/journal.ParseReplay constructs a bounded owned replay plan in memory. The conservative multi-segment subset accepts published finite-count segments with matching first-header geometry/extent, per-segment nonces, globally unique original pages and exact final consumption. Cumulative input/record/image-memory bounds apply before any plan escapes; page copies occur only after complete validation. The first Header is preserved unchanged and len(Pages) is cumulative. Super/master-journal trailers, repeated originals, geometry disagreement, no-sync counts and unpublished/ambiguous tails remain rejected. See [the full parser contract and source proof](../rollback-replay-memory.md). Partial/cold/ambiguous inputs never produce a partial plan.
 
 internal/pager.RecoverRollback is explicit and is not called by Open, OpenTx, Session or SQL. Its source takes SHARED, checks another writer's RESERVED lock, escalates PENDING→EXCLUSIVE without RESERVED, rechecks identities, validates the complete plan/restored header, syncs journal, restores/truncates/syncs main, then removes journal and syncs directory. Physical replay is NOT_RUN. A doubly gated manual-only test source can be compiled/reviewed but must not execute in ordinary CI or this environment.
 

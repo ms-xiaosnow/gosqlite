@@ -92,7 +92,7 @@ and encrypted constructors/copies retain bounded minimal managed obligations
 with explicit pending/retry APIs. Public metadata admission precedes native
 acquisition. Children retire before the protecting database owner; retries
 retire obligations rather than repeating logical publication or checkpoint.
-Recovery ownership and Open integration remain distinct pending corrections.
+Explicit native recovery now uses bounded minimal ownership and initial-absence provenance. Automatic Open recovery, remaining shared absence handling and the newly observed rollback reader-open timing race remain code work; no physical recovery execution is claimed.
 
 The SQL executor remains in sqlite with scoped pull operators, bound expression
 metadata and conservative shared budgets. Global aggregates are implemented;

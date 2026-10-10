@@ -19,7 +19,7 @@ WAL uses SQLite's32-byte header and24-byte frame header plus a complete page. St
 
 The committed overlay selects the newest page image through the last complete commit marker, with logical extent from that marker and strict bounded scanning. Invalid, incomplete, uncommitted and salt-mismatching tails are classified and refused; this does not implement SQLite's full recovery policy. Checkpoint retains synced WAL images for every extant main-file sector neighbor before overwriting pages. Header mode2 remains after normal checkpoint/close, even when the WAL is removed.
 
-Rollback replay plans support one finite-count header/record segment, page geometry, nonce-seeded sparse checksums, exact original extent and complete missing-original coverage if the current extent is shorter. Physical replay is deliberately isolated and unqualified. See ADR0004 and the source-only manual harness. The separate [experimental authenticated snapshot format](encryption-storage.md) does not implement encrypted WAL.
+Rollback replay plans support a bounded sequence of published finite-count segments with identical page/sector/original-extent geometry, globally unique original pages and per-segment nonce-seeded sparse checksums. The first header remains authoritative; cumulative limits and exact input consumption are required. Complete missing-original coverage is checked if the current extent is shorter. See [the memory-only supported/unsupported matrix](rollback-replay-memory.md). Physical replay is deliberately isolated and unqualified. See ADR0004 and the source-only manual harness. The separate [experimental authenticated snapshot format](encryption-storage.md) does not implement encrypted WAL.
 
 ## M3 shared WAL-index
 

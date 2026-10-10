@@ -1,0 +1,17 @@
+{
+  "base": "e825d3096dd521a730caaaca2f5c85af0e9d76de",
+  "tree": "293a25e4ed905f970b437c28ce6419c1e1b89176",
+  "owned": {
+    "docs/plaintext-recovery-cleanup.md": "886eecae6621cd4dc2da90d52051739715d6975439a1973c9a0db9e22bd44358",
+    "internal/pager/plain_recovery_cleanup.go": "dbadcce474871efd8c54089ab3d6dfd5f126a3b526c80a87a0c94458c8aa4741",
+    "internal/pager/plain_recovery_cleanup_test.go": "75fe3205fe51abfc489fc7447adf7d51b8454ba3b28c3aa09dfca057e0153167",
+    "internal/pager/recovery.go": "6e24520255d37c471df9ca18a09fde8cf73e8b51188329f6b92748256598f17b"
+  },
+  "patches": [
+    [
+      "recovery-cleanup-evidence-v2/source.patch",
+      "e05bcffffc0388e9033a5e9cff212fed8b5eac370157d7284f13ad8e719e3c5c"
+    ]
+  ],
+  "method": "Every layer checked and applied by exact Git hunks; no whole-file stale overwrite"
+}

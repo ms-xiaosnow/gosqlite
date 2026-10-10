@@ -1,0 +1,15 @@
+{
+  "review.md": "6b49a818c6cf5cd888dfde39c8026955414bd300d215a982eb9bce3ef76037a1",
+  "negative-admission.exit": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+  "final-checks.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+  "post-check-inventory.txt": "1662d2a8ca5b2646689954b1ec6d30232844ce72fc1bfe2a76e1d5aa2acfea6f",
+  "verify.py": "e6e9c870f26ff67566402651a2b0dd70eb760885c853846eb4e59b0e15fe47f0",
+  "negative-doubleclose.txt": "6d2ca2dfbef07dcfb1be561d9b1e86009ac5d906bf5711508150c23f9db52388",
+  "negative-rawclose.exit": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+  "negative-admission.txt": "69fcea036c7f2098806b79624a1f53db85de7899cff6a2421f26843b4076aa4b",
+  "final-checks.txt": "54c4a86e7088a1c2ee6251c516e0474444e708aaf860ad4c9425ab8105736bd0",
+  "negative-rawclose.txt": "3564227420626b2b2e7ad3ac7bbb0eb2824ac79438036d44811f33c33cc5d74c",
+  "negative-doubleclose.exit": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+  "final-checks.sh": "dfca01899712cad9e22767cc83e18c4ed8ddb0b2aa526f47f4bd91bc85ece54d",
+  "inventory-check.txt": "1662d2a8ca5b2646689954b1ec6d30232844ce72fc1bfe2a76e1d5aa2acfea6f"
+}

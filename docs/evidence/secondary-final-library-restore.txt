@@ -1,0 +1,19 @@
+Exact Library-restored leading secondary range checkpoint. Audited intact SQL/index/BUSY/cancel/snapshot/lifecycle and pure-memory bounds/quota laws only. Full source60d8a2d gates are separately retained. Known rollback reader-open timing race is an open engineering issue, not covered by this focused range result. No physical native fault/namespace/crash/recovery workflow.
+39a06cbf4d787d5e480c1d038c00d2a812c8d993
+2026-10-10T21:04:14Z
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	13.002s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.034s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	33.035s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.054s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	52.657s
+restored cross-build linux/arm64 PASS
+restored cross-build darwin/arm64 PASS
+restored cross-build darwin/amd64 PASS
+restored cross-build windows/amd64 PASS
+restored cross-build windows/arm64 PASS
+all modules verified
+2026-10-10T21:07:01Z
+EXACT RESTORED SECONDARY RANGES FOCUSED CHECKPOINT PASS

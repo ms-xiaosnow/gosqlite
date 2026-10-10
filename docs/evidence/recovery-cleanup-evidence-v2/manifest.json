@@ -1,0 +1,27 @@
+{
+  "baseline_tree": "7d3184f87165e11e12560884ec6e4f92c9bfd039",
+  "final_tree": "201dca235ee217594d231f2f583d3ccf65aa8093",
+  "file_count": 1255,
+  "owned_paths": {
+    "docs/plaintext-recovery-cleanup.md": {
+      "baseline_sha256": null,
+      "final_sha256": "886eecae6621cd4dc2da90d52051739715d6975439a1973c9a0db9e22bd44358"
+    },
+    "internal/pager/plain_recovery_cleanup.go": {
+      "baseline_sha256": null,
+      "final_sha256": "dbadcce474871efd8c54089ab3d6dfd5f126a3b526c80a87a0c94458c8aa4741"
+    },
+    "internal/pager/plain_recovery_cleanup_test.go": {
+      "baseline_sha256": null,
+      "final_sha256": "75fe3205fe51abfc489fc7447adf7d51b8454ba3b28c3aa09dfca057e0153167"
+    },
+    "internal/pager/recovery.go": {
+      "baseline_sha256": "d95f59bb48da4de190a4c3257a215310598aea0c06e80aa9b39674d2a381754e",
+      "final_sha256": "6e24520255d37c471df9ca18a09fde8cf73e8b51188329f6b92748256598f17b"
+    }
+  },
+  "patch_sha256": "e05bcffffc0388e9033a5e9cff212fed8b5eac370157d7284f13ad8e719e3c5c",
+  "patch_check": "PASS: git apply --cached --check plus reconstructed tree equals final",
+  "freeze": "/workspace/scratch/5e06a74e5f65/durable-restart/recovery-cleanup-freeze-v2",
+  "physical_recovery": "NOT_RUN"
+}

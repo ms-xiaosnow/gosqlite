@@ -1,0 +1,231 @@
++ go version
+go version go1.27.2 linux/amd64
++ go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ go build ./...
++ go test ./... -run '^$' -count=1 -timeout=60s
+?   	github.com/ms-xiaosnow/gosqlite/benchmarks/ann	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.008s [no tests to run]
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.004s [no tests to run]
+ok  	github.com/ms-xiaosnow/gosqlite/encryption	0.008s [no tests to run]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ann	0.011s [no tests to run]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/bit-rerank	0.054s [no tests to run]
+?   	github.com/ms-xiaosnow/gosqlite/examples/encrypted	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-shared	0.047s [no tests to run]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-wal	0.016s [no tests to run]
+?   	github.com/ms-xiaosnow/gosqlite/examples/grams	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/half-rerank	0.017s [no tests to run]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ivfflat	0.008s [no tests to run]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/migrate-pgembedding	0.015s [no tests to run]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/migration-full-table	0.011s [no tests to run]
+?   	github.com/ms-xiaosnow/gosqlite/examples/migration-transition	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/pgembedding-import	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/readonly	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/similarity	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/sparse-exact	0.008s [no tests to run]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/typed-ann-rerank	0.011s [no tests to run]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/vector	0.019s [no tests to run]
+?   	github.com/ms-xiaosnow/gosqlite/examples/wal	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/write	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/extension/grams13	0.010s [no tests to run]
+ok  	github.com/ms-xiaosnow/gosqlite/extension/registry	0.015s [no tests to run]
+ok  	github.com/ms-xiaosnow/gosqlite/extension/similarity	0.017s [no tests to run]
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	0.009s [no tests to run]
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector/ann	0.014s [no tests to run]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	0.021s [no tests to run]
+?   	github.com/ms-xiaosnow/gosqlite/internal/buildinfo	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/darwinfile	0.009s [no tests to run]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	0.012s [no tests to run]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/journal	0.008s [no tests to run]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.004s [no tests to run]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/record	0.007s [no tests to run]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.005s [no tests to run]
+?   	github.com/ms-xiaosnow/gosqlite/internal/testkit/fileview	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testscope	0.005s [no tests to run]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.003s [no tests to run]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/wal	0.004s [no tests to run]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	0.004s [no tests to run]
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	0.006s [no tests to run]
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.002s [no tests to run]
++ go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ go test ./internal/pager -run '^Test(PlainRecoveryCleanup(Memory|Source)|PlainCleanupMemory|PlainTxCleanupMemory)' -count=1 -timeout=60s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.059s
++ go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ go test ./internal/vfs -run '^Test(CleanupOwnersBoundedMemory|PathAbsenceMemory)' -count=1 -timeout=60s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.036s
++ go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ go test ./internal/journal -run '^TestReplay.*InMemory$' -count=1 -timeout=60s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/journal	0.011s
++ go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ go test ./internal/pager -run '^TestTxCreatePageSizesAndReadSnapshot$' -count=1 -timeout=60s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.004s
++ go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ go test ./sqlite -run '^TestPlaintextCleanupOrdinary(ReaderRowsAndReopen|DatabaseSQLZeroIdle)$' -count=1 -timeout=60s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.005s
++ go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ CGO_ENABLED=1
++ go test -race ./internal/pager -run '^Test(PlainRecoveryCleanup(Memory|Source)|PlainCleanupMemory|PlainTxCleanupMemory|TxCreatePageSizesAndReadSnapshot$)' -count=1 -timeout=90s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.301s
++ go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ CGO_ENABLED=1
++ go test -race ./internal/vfs -run '^Test(CleanupOwnersBoundedMemory|PathAbsenceMemory)' -count=1 -timeout=90s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	1.164s
++ go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ CGO_ENABLED=1
++ go test -race ./sqlite -run '^TestPlaintextCleanupOrdinary(ReaderRowsAndReopen|DatabaseSQLZeroIdle)$' -count=1 -timeout=90s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	1.037s
++ for target in linux/arm64 darwin/arm64 windows/amd64
++ export GOOS=linux GOARCH=arm64
++ GOOS=linux
++ GOARCH=arm64
++ go build ./...
++ go test ./... -run '^$' -exec=true -count=1 -timeout=60s
+?   	github.com/ms-xiaosnow/gosqlite/benchmarks/ann	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.005s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.004s
+ok  	github.com/ms-xiaosnow/gosqlite/encryption	0.001s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ann	0.004s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/bit-rerank	0.005s
+?   	github.com/ms-xiaosnow/gosqlite/examples/encrypted	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-shared	0.002s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-wal	0.001s
+?   	github.com/ms-xiaosnow/gosqlite/examples/grams	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/half-rerank	0.001s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ivfflat	0.001s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/migrate-pgembedding	0.001s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/migration-full-table	0.001s
+?   	github.com/ms-xiaosnow/gosqlite/examples/migration-transition	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/pgembedding-import	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/readonly	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/similarity	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/sparse-exact	0.001s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/typed-ann-rerank	0.002s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/vector	0.017s
+?   	github.com/ms-xiaosnow/gosqlite/examples/wal	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/write	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/extension/grams13	0.003s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/registry	0.005s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/similarity	0.002s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	0.002s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector/ann	0.004s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	0.006s
+?   	github.com/ms-xiaosnow/gosqlite/internal/buildinfo	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/darwinfile	0.004s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	0.006s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/journal	0.001s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.002s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/record	0.003s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.002s
+?   	github.com/ms-xiaosnow/gosqlite/internal/testkit/fileview	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testscope	0.002s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.001s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/wal	0.002s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	0.001s
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	0.001s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.002s
++ for target in linux/arm64 darwin/arm64 windows/amd64
++ export GOOS=darwin GOARCH=arm64
++ GOOS=darwin
++ GOARCH=arm64
++ go build ./...
++ go test ./... -run '^$' -exec=true -count=1 -timeout=60s
+?   	github.com/ms-xiaosnow/gosqlite/benchmarks/ann	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.002s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.003s
+ok  	github.com/ms-xiaosnow/gosqlite/encryption	0.004s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ann	0.001s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/bit-rerank	0.005s
+?   	github.com/ms-xiaosnow/gosqlite/examples/encrypted	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-shared	0.005s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-wal	0.020s
+?   	github.com/ms-xiaosnow/gosqlite/examples/grams	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/half-rerank	0.015s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ivfflat	0.006s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/migrate-pgembedding	0.007s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/migration-full-table	0.003s
+?   	github.com/ms-xiaosnow/gosqlite/examples/migration-transition	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/pgembedding-import	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/readonly	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/similarity	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/sparse-exact	0.003s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/typed-ann-rerank	0.003s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/vector	0.006s
+?   	github.com/ms-xiaosnow/gosqlite/examples/wal	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/write	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/extension/grams13	0.007s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/registry	0.006s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/similarity	0.010s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	0.004s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector/ann	0.027s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	0.003s
+?   	github.com/ms-xiaosnow/gosqlite/internal/buildinfo	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/darwinfile	0.006s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	0.011s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/journal	0.009s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.001s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/record	0.001s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.001s
+?   	github.com/ms-xiaosnow/gosqlite/internal/testkit/fileview	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testscope	0.005s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.005s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/wal	0.002s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	0.001s
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	0.002s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.001s
++ for target in linux/arm64 darwin/arm64 windows/amd64
++ export GOOS=windows GOARCH=amd64
++ GOOS=windows
++ GOARCH=amd64
++ go build ./...
++ go test ./... -run '^$' -exec=true -count=1 -timeout=60s
+?   	github.com/ms-xiaosnow/gosqlite/benchmarks/ann	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.004s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.019s
+ok  	github.com/ms-xiaosnow/gosqlite/encryption	0.008s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ann	0.005s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/bit-rerank	0.006s
+?   	github.com/ms-xiaosnow/gosqlite/examples/encrypted	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-shared	0.003s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-wal	0.002s
+?   	github.com/ms-xiaosnow/gosqlite/examples/grams	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/half-rerank	0.003s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ivfflat	0.005s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/migrate-pgembedding	0.003s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/migration-full-table	0.001s
+?   	github.com/ms-xiaosnow/gosqlite/examples/migration-transition	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/pgembedding-import	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/readonly	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/similarity	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/sparse-exact	0.004s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/typed-ann-rerank	0.001s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/vector	0.009s
+?   	github.com/ms-xiaosnow/gosqlite/examples/wal	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/write	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/extension/grams13	0.015s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/registry	0.001s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/similarity	0.004s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	0.004s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector/ann	0.006s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	0.005s
+?   	github.com/ms-xiaosnow/gosqlite/internal/buildinfo	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/darwinfile	0.014s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	0.001s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/journal	0.002s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.005s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/record	0.002s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.002s
+?   	github.com/ms-xiaosnow/gosqlite/internal/testkit/fileview	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testscope	0.005s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.002s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/wal	0.003s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	0.003s
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	0.002s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.001s

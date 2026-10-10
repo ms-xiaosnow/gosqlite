@@ -50,7 +50,20 @@ func RecoverRollback(ctx context.Context, path string, opts RecoveryOptions) (re
 	if err := ctx.Err(); err != nil {
 		return result, err
 	}
-	path, err := filepath.Abs(path)
+	// Charge the fixed main/temporary ownership slots before path resolution,
+	// including metadata probes that can return an error-carried native owner.
+	cleanup, err := plainRetirements.reserve()
+	if err != nil {
+		return result, err
+	}
+	touched, removed := false, false
+	defer func() {
+		retErr = finishPlainRecovery(cleanup, retErr, touched, removed)
+		if retErr != nil {
+			result = RecoveryResult{}
+		}
+	}()
+	path, err = filepath.Abs(path)
 	if err != nil {
 		return result, err
 	}
@@ -59,26 +72,12 @@ func RecoverRollback(ctx context.Context, path string, opts RecoveryOptions) (re
 		return result, err
 	}
 	db, err := openRecoveryFile(path, os.O_RDWR)
+	if db != nil {
+		cleanup.main = plainFile{db}
+	}
 	if err != nil {
 		return result, err
 	}
-	touched, removed := false, false
-	defer func() {
-		if closeErr := closeNativeFile(db); closeErr != nil {
-			retErr = errors.Join(retErr, closeErr)
-		}
-		if retErr != nil && touched {
-			retErr = errors.Join(ErrPoisoned, retErr)
-			if removed {
-				retErr = errors.Join(ErrCommitUncertain, retErr)
-			} else {
-				retErr = errors.Join(ErrRecoveryRequired, retErr)
-			}
-		}
-		if retErr != nil {
-			result = RecoveryResult{}
-		}
-	}()
 	info, err := statNativeFile(db)
 	if err != nil {
 		return result, err
@@ -99,28 +98,29 @@ func RecoverRollback(ctx context.Context, path string, opts RecoveryOptions) (re
 		return result, err
 	}
 	jpath := path + "-journal"
-	if _, err = nativeLstat(jpath); os.IsNotExist(err) {
+	if _, absent, probeErr := nativeLstatForCreate(jpath); absent {
 		return result, nil
-	} else if err != nil {
-		return result, err
+	} else if probeErr != nil {
+		return result, probeErr
 	}
 	if err = recoveryCheckReserved(db); err != nil {
 		return result, err
 	}
 	// The first-byte check is SQLite's hot-candidate test, not proof that the
 	// journal is valid. Cold files are left untouched and fail closed.
-	candidate, err := recoveryOpenJournal(jpath)
+	candidate, _, err := recoveryOpenJournal(jpath, cleanup)
 	if err != nil {
 		return result, err
 	}
 	var first [1]byte
 	_, readErr := readNativeAt(candidate, first[:], 0)
-	closeErr := closeNativeFile(candidate)
-	if readErr != nil && !errors.Is(readErr, io.EOF) {
-		return result, errors.Join(readErr, closeErr)
+	// Only the direct EOF from this one-byte read is an empty candidate. A
+	// wrapped/joined EOF may carry another diagnostic or ownership obligation.
+	if readErr == io.EOF {
+		readErr = nil
 	}
-	if closeErr != nil {
-		return result, closeErr
+	if err = cleanup.closeTemporary(readErr); err != nil {
+		return result, err
 	}
 	if first[0] == 0 {
 		return result, fmt.Errorf("%w: cold or empty journal preserved", ErrRecoveryRequired)
@@ -151,18 +151,13 @@ func RecoverRollback(ctx context.Context, path string, opts RecoveryOptions) (re
 	if info.Size() == 0 {
 		return result, fmt.Errorf("%w: journal beside empty database is ambiguous", ErrRecoveryRequired)
 	}
-	jf, err := recoveryOpenJournal(jpath)
-	if os.IsNotExist(err) {
+	jf, absent, err := recoveryOpenJournal(jpath, cleanup)
+	if absent {
 		return result, nil
 	}
 	if err != nil {
 		return result, err
 	}
-	defer func() {
-		if jf != nil {
-			retErr = errors.Join(retErr, closeNativeFile(jf))
-		}
-	}()
 	ji, err := statNativeFile(jf)
 	if err != nil {
 		return result, err
@@ -225,9 +220,7 @@ func RecoverRollback(ctx context.Context, path string, opts RecoveryOptions) (re
 	if err = recoveryCheckPath(path, db, info); err != nil {
 		return result, err
 	}
-	err = closeNativeFile(jf)
-	jf = nil
-	if err != nil {
+	if err = cleanup.closeTemporary(nil); err != nil {
 		return result, err
 	}
 	if err = os.Remove(jpath); err != nil {
@@ -253,26 +246,37 @@ func recoveryCheckReserved(db *vfs.File) error {
 
 func recoveryCheckWAL(path string) error {
 	for _, suffix := range []string{"-wal", "-shm"} {
-		if _, err := nativeLstat(path + suffix); err == nil {
-			return fmt.Errorf("%w: rollback recovery with WAL sidecar %s", ErrUnsupported, suffix)
-		} else if !os.IsNotExist(err) {
+		if _, absent, err := nativeLstatForCreate(path + suffix); absent {
+			continue
+		} else if err != nil {
 			return err
 		}
+		return fmt.Errorf("%w: rollback recovery with WAL sidecar %s", ErrUnsupported, suffix)
 	}
 	return nil
 }
 
-func recoveryOpenJournal(path string) (*vfs.File, error) {
-	info, err := nativeLstat(path)
+// The same precharged temporary slot owns the candidate and later replay
+// journal, sequentially. Never close here: constructor/metadata errors must be
+// adopted before either this child or its protecting main can retire. Only an
+// initial no-handle metadata absence can authorize the caller's no-journal path.
+func recoveryOpenJournal(path string, cleanup *plainRetirement) (*vfs.File, bool, error) {
+	if err := cleanup.reserveTemporary(); err != nil {
+		return nil, false, err
+	}
+	info, absent, err := nativeLstatForCreate(path)
 	if err != nil {
-		return nil, err
+		cleanup.acquiredTemporary(nil)
+		return nil, absent, err
 	}
 	if !info.Mode().IsRegular() {
-		return nil, fmt.Errorf("%w: recovery journal must be a regular file", ErrUnsupported)
+		cleanup.acquiredTemporary(nil)
+		return nil, false, fmt.Errorf("%w: recovery journal must be a regular file", ErrUnsupported)
 	}
 	file, err := openJournal(path, os.O_RDWR)
+	cleanup.acquiredTemporary(file)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 	opened, err := statNativeFile(file)
 	if err == nil {
@@ -282,9 +286,9 @@ func recoveryOpenJournal(path string) (*vfs.File, error) {
 		err = ErrChanged
 	}
 	if err != nil {
-		return nil, errors.Join(err, closeNativeFile(file))
+		return nil, false, err
 	}
-	return file, nil
+	return file, false, nil
 }
 
 func recoveryCheckPath(path string, file *vfs.File, original os.FileInfo) error {

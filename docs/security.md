@@ -81,6 +81,6 @@ raw OS close. Native WALShared successful Close and driver disposal now have a
 separate bounded ownership correction. Encrypted acquisition/selection/copy/session retirement now has bounded scope
 ownership and explicit discovery/retry, with native exceptional branches still
 unexecuted. Rollback Reader/Tx, exclusive WAL and public metadata adoption now
-have bounded ownership corrections. Recovery ownership/integration, remaining
-shared absence provenance and physical native failures are still open; complete
+have bounded ownership corrections. Recovery ownership is source-reviewed; automatic integration, remaining
+shared absence provenance, rollback reader-open timing and physical native failures are still open; complete
 public-lifecycle safety is not established.

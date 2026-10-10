@@ -1,0 +1,631 @@
+diff --git a/docs/plaintext-recovery-cleanup.md b/docs/plaintext-recovery-cleanup.md
+new file mode 100644
+index 0000000..1628c14
+--- /dev/null
++++ b/docs/plaintext-recovery-cleanup.md
+@@ -0,0 +1,84 @@
++# Explicit rollback recovery: managed cleanup ownership
++
++Date: 2026-10-10. This is a source-level extension of the bounded plaintext
++ownership protocol to the internal `pager.RecoverRollback` operation. It does
++not enable recovery from Open, OpenTx or SQL. The replay parser, replay geometry,
++page application, locking order and on-disk formats are unchanged. Parser support
++is independently specified by `internal/journal`; this change does not impose a
++permanent single-segment restriction.
++
++## Admission and ownership
++
++Recovery reserves one of the existing 1024 opening/live/pending plaintext roots
++before absolute-path resolution, metadata probes or main acquisition. The fixed
++main and temporary slots already exist in every root. The temporary slot is
++explicitly reserved before each candidate/replay journal metadata acquisition.
++The candidate and replay file occupy that slot sequentially. A successful file
++is adopted immediately, before stat, link validation or identity checks. A failed
++constructor never directly closes its acquired journal: the outer ownership
++scope adopts its error-carried metadata/constructor obligations first.
++
++Retirement order is nested obligations, candidate/replay journal, then protecting
++main descriptor/locks. `RetirementComplete` controls advancement independently
++of diagnostics. An incomplete nil result remains pending; a consumed error is
++still returned. A failed explicit journal close stops all later logical work,
++including unlink, and the defer does not immediately retry that same close.
++The main owner remains protected until the child conclusively retires.
++
++The registry retains managed owners, bounded diagnostics and its current immutable
++token only. It does not retain the recovery function, replay plan, page data,
++options, result, DB/Tx/Rows or application callbacks. Existing 4096-node bounded
++owner discovery, opaque unsafe-graph barriers, immutable tokens, snapshot behavior,
++first-cause retention and no-eviction semantics apply unchanged. This is a bound
++on library-owned records; custom opaque errors can retain arbitrary caller data.
++
++The existing `PendingPlaintextCleanups` and `RetryPlaintextCleanup` routes include
++these internal recovery roots because they use the same registry. A discarded
++recovery error cannot discard pending ownership. Root admission and snapshot
++operations never perform native retirement or wait on an owner mutex.
++
++## Absence, diagnostics and retry
++
++No-journal and no-WAL-sidecar decisions use the existing VFS initial no-handle
++metadata absence provenance. A later open, stat, identity or close error cannot
++be suppressed merely because it matches NotExist. The candidate first-byte read
++ignores only direct EOF; a wrapped or joined EOF remains a diagnostic and is
++adopted before candidate retirement.
++
++Once database replay starts, operation and retirement errors keep the existing
++poison plus RecoveryRequired classification before journal removal, and poison
++plus CommitUncertain classification after removal. Those classifications enter
++the retained token as well as the immediate return. Any error clears the returned
++RecoveryResult. A successful retirement does not invent an error classification.
++
++Explicit retry only advances already-owned managed retirement. It never repeats
++journal parsing, page replay, truncation, Sync, directory synchronization, unlink,
++path acquisition, lock acquisition or another logical recovery attempt. Historical
++tokens retain their marker after completion; completed retry is a no-op. A retained
++terminal native owner can consume capacity for process lifetime.
++
++## Verification scope
++
++New `TestPlainRecoveryCleanupMemory*` laws exercise nested/journal/main barriers,
++consumed diagnostics, skipped duplicate child attempts, root/temporary admission,
++sequential child reuse, snapshot survival, first causes, classification, bounded
++error discovery, and mixed EOF diagnostics. They use descriptor-free fake owners.
++`TestPlainRecoveryCleanupSourceAdmissionAndRetirementBoundary` reads source ASTs
++and checks admission/adoption ordering, no raw closes or IsNotExist suppression,
++child-before-unlink placement and the retirement helper's restricted call surface.
++It does not execute recovery. Existing bounded VFS owner/absence laws, plaintext
++retirement laws and byte-slice parser tests provide adjacent regression coverage.
++
++The selection is guarded by `go run ./internal/testscope`; ordinary intact
++Reader/transaction/database/sql create/read/write/commit/close/reopen tests are
++separately selected. Compilation targets Linux amd64/arm64, Darwin arm64 and
++Windows amd64 without CGO; race checks are limited to selected memory laws and
++ordinary intact lifecycle tests with CGO enabled for the detector only. Source
++and evidence inventories accompany the frozen patch.
++
++**NOT_RUN:** physical recovery, native recovery fixtures, manual tagged tests,
++corruption/tamper/wrong-key/missing-selected-file workflows, namespace replacement/
++retarget/race injection, crash/kill/process exit/hot recovery, failed native I/O/
++lock/unmap/close/Sync/shortwrite/diskfull/permissions, interrupted publication/rekey,
++and Darwin/Windows native runtime qualification. Nothing in this increment
++qualifies physical recovery, release readiness, or full M3/M8/M10 acceptance.
+diff --git a/internal/pager/plain_recovery_cleanup.go b/internal/pager/plain_recovery_cleanup.go
+new file mode 100644
+index 0000000..179ce4a
+--- /dev/null
++++ b/internal/pager/plain_recovery_cleanup.go
+@@ -0,0 +1,22 @@
++package pager
++
++import "errors"
++
++// finishPlainRecovery ends only ownership. The bounded registry retains no
++// replay plan, page bytes, recovery options, result or application callback.
++// A failed explicit child close must not be attempted again by this operation's
++// defer; subsequent token/snapshot retry performs managed retirement only.
++func finishPlainRecovery(cleanup *plainRetirement, cause error, touched, removed bool) error {
++	var failureClass error
++	if touched {
++		if removed {
++			failureClass = errors.Join(ErrPoisoned, ErrCommitUncertain)
++		} else {
++			failureClass = errors.Join(ErrPoisoned, ErrRecoveryRequired)
++		}
++		if cause != nil {
++			cause = errors.Join(failureClass, cause)
++		}
++	}
++	return cleanup.beginClass(cause, failureClass, !cleanup.childClosePending())
++}
+diff --git a/internal/pager/plain_recovery_cleanup_test.go b/internal/pager/plain_recovery_cleanup_test.go
+new file mode 100644
+index 0000000..c8d8cf1
+--- /dev/null
++++ b/internal/pager/plain_recovery_cleanup_test.go
+@@ -0,0 +1,322 @@
++package pager
++
++import (
++	"errors"
++	"fmt"
++	"go/ast"
++	"go/parser"
++	"go/token"
++	"io"
++	"reflect"
++	"strings"
++	"testing"
++)
++
++// These laws use only descriptor-free owners and source ASTs. They never call
++// the native recovery entry point or its path/descriptor helpers.
++func TestPlainRecoveryCleanupMemoryChildBarrierAndSnapshot(t *testing.T) {
++	for _, touched := range []bool{false, true} {
++		for _, stage := range []string{"nested", "journal", "main"} {
++			t.Run(fmt.Sprintf("touched=%v/%s", touched, stage), func(t *testing.T) {
++				reg := &plainRetirementRegistry{limit: 1}
++				g, nested, main, events := plainMemoryGroup(t, reg)
++				journal := &plainMemoryOwner{name: "journal", events: events, cause: errors.New("memory journal diagnostic")}
++				g.temporary = journal
++				failing := map[string]*plainMemoryOwner{"nested": nested, "journal": journal, "main": main}[stage]
++				failing.remaining = 1
++				operation := errors.New("memory recovery operation")
++				token := finishPlainRecovery(g, operation, touched, false)
++				if !errors.Is(token, ErrPlaintextCleanupPending) || !errors.Is(token, operation) || !errors.Is(token, failing.cause) || errors.Is(token, ErrRecoveryRequired) != touched {
++					t.Fatal(token)
++				}
++				if stage != "main" && main.calls != 0 || stage == "nested" && journal.calls != 0 {
++					t.Fatal("protector retired before incomplete child", *events)
++				}
++				if len(reg.snapshot()) != 1 || !errors.Is(reg.snapshot()[0], operation) {
++					t.Fatal("discarded return loses ownership")
++				}
++				if _, err := reg.reserve(); !errors.Is(err, ErrLimit) {
++					t.Fatal("pending recovery stopped counting toward admission", err)
++				}
++				if err := RetryPlaintextCleanup(reg.snapshot()[0]); err != nil || !g.done || len(reg.groups) != 0 {
++					t.Fatal(err)
++				}
++				if main.calls != 1 && stage != "main" || journal.calls != 1 && stage != "journal" {
++					t.Fatal("completed stage retried", *events)
++				}
++				before := append([]string(nil), (*events)...)
++				if err := RetryPlaintextCleanup(token); err != nil || !reflect.DeepEqual(before, *events) {
++					t.Fatal("retired token repeated work", err)
++				}
++			})
++		}
++	}
++}
++
++func TestPlainRecoveryCleanupMemoryExplicitChildCloseIsNotRepeated(t *testing.T) {
++	for _, touched := range []bool{false, true} {
++		for _, nilPending := range []bool{false, true} {
++			reg := &plainRetirementRegistry{limit: 1}
++			g, err := reg.reserve()
++			if err != nil {
++				t.Fatal(err)
++			}
++			main := &plainMemoryOwner{name: "main"}
++			journal := &plainMemoryOwner{name: "journal", remaining: 1, nilPending: nilPending, cause: errors.New("memory close diagnostic")}
++			g.main, g.temporary = main, journal
++			operation := errors.New("memory candidate read or replay cause")
++			first := g.closeTemporary(operation)
++			token := finishPlainRecovery(g, first, touched, false)
++			if !errors.Is(token, ErrPlaintextCleanupPending) || !errors.Is(token, operation) || errors.Is(token, ErrRecoveryRequired) != touched || journal.calls != 1 || main.calls != 0 {
++				t.Fatal("deferred closure repeated failed child or lost class", token)
++			}
++			journal.nilPending, journal.remaining = false, 0
++			if err := RetryPlaintextCleanup(token); err != nil || !g.done || journal.calls != 2 || main.calls != 1 {
++				t.Fatal("retry did not retire child before main", err)
++			}
++		}
++	}
++}
++
++func TestPlainRecoveryCleanupMemoryClassificationAndConsumedDiagnostics(t *testing.T) {
++	for _, touched := range []bool{false, true} {
++		for _, removed := range []bool{false, true} {
++			for _, operationError := range []bool{false, true} {
++				reg := &plainRetirementRegistry{limit: 1}
++				g, err := reg.reserve()
++				if err != nil {
++					t.Fatal(err)
++				}
++				main := &plainMemoryOwner{consumed: true, cause: errors.New("memory consumed diagnostic")}
++				g.main = main
++				var cause error
++				if operationError {
++					cause = errors.New("memory operation")
++				}
++				err = finishPlainRecovery(g, cause, touched, removed)
++				if !errors.Is(err, main.cause) || cause != nil && !errors.Is(err, cause) || !g.done || errors.Is(err, ErrPlaintextCleanupPending) || len(reg.snapshot()) != 0 {
++					t.Fatal("consumed diagnostic lost or mistaken for ownership", err)
++				}
++				if errors.Is(err, ErrCommitUncertain) != (touched && removed) || errors.Is(err, ErrRecoveryRequired) != (touched && !removed) {
++					t.Fatal("wrong recovery outcome class", touched, removed, err)
++				}
++			}
++		}
++	}
++	reg := &plainRetirementRegistry{limit: 1}
++	g, _ := reg.reserve()
++	g.main = &plainMemoryOwner{}
++	if err := finishPlainRecovery(g, nil, true, true); err != nil || !g.done {
++		t.Fatal("successful disposal gained an error", err)
++	}
++}
++
++func TestPlainRecoveryCleanupMemoryMixedEOFPreservesCause(t *testing.T) {
++	reg := &plainRetirementRegistry{limit: 1}
++	g, _ := reg.reserve()
++	main, candidate := &plainMemoryOwner{}, &plainMemoryOwner{}
++	g.main, g.temporary = main, candidate
++	operation := errors.New("memory additional candidate diagnostic")
++	cause := errors.Join(io.EOF, operation)
++	cause = g.closeTemporary(cause)
++	cause = finishPlainRecovery(g, cause, false, false)
++	if !errors.Is(cause, io.EOF) || !errors.Is(cause, operation) || errors.Is(cause, ErrPlaintextCleanupPending) || !g.done || candidate.calls != 1 || main.calls != 1 {
++		t.Fatal("mixed EOF cause was discarded", cause)
++	}
++}
++
++func TestPlainRecoveryCleanupMemoryAdmissionSequentialSlot(t *testing.T) {
++	reg := &plainRetirementRegistry{limit: 1}
++	g, err := reg.reserve()
++	if err != nil {
++		t.Fatal(err)
++	}
++	if len(reg.snapshot()) != 0 {
++		t.Fatal("opening recovery prematurely marked pending")
++	}
++	if _, err = reg.reserve(); !errors.Is(err, ErrLimit) {
++		t.Fatal("opening recovery not charged", err)
++	}
++	main := &plainMemoryOwner{name: "main"}
++	g.main = main
++	for _, phase := range []string{"candidate", "replay"} {
++		if err = g.reserveTemporary(); err != nil {
++			t.Fatal(err)
++		}
++		if err = g.reserveTemporary(); !errors.Is(err, ErrLimit) {
++			t.Fatal("slot duplicated", err)
++		}
++		g.acquiredTemporary(nil) // memory model of an empty acquisition
++		child := &plainMemoryOwner{name: phase}
++		g.temporary = child
++		if err = g.closeTemporary(nil); err != nil || child.calls != 1 || main.calls != 0 {
++			t.Fatal("temporary retirement consumed main", err)
++		}
++	}
++	if err = finishPlainRecovery(g, nil, false, false); err != nil || !g.done || main.calls != 1 {
++		t.Fatal(err)
++	}
++}
++
++func TestPlainRecoveryCleanupMemoryUnsafeErrorAndDiscoveryBeforeEffects(t *testing.T) {
++	reg := &plainRetirementRegistry{limit: 2}
++	g, _, main, _ := plainMemoryGroup(t, reg)
++	g.nested = nil
++	journal := &plainMemoryOwner{name: "journal"}
++	g.temporary = journal
++	token := finishPlainRecovery(g, plainMemoryCycle{}, true, false)
++	if !errors.Is(token, ErrPlaintextCleanupPending) || !errors.Is(token, ErrLimit) || main.calls != 0 || journal.calls != 0 {
++		t.Fatal("unsafe operation graph released protector", token)
++	}
++	other, child, otherMain, _ := plainMemoryGroup(t, reg)
++	child.remaining = 1
++	otherToken := finishPlainRecovery(other, nil, false, false)
++	input := errors.Join(otherToken, plainMemoryCycle{}, token)
++	if err := RetryPlaintextCleanup(input); !errors.Is(err, ErrLimit) || child.calls != 1 || otherMain.calls != 0 || main.calls != 0 || journal.calls != 0 {
++		t.Fatal("partial token discovery performed retirement", err)
++	}
++	if err := RetryPlaintextCleanup(errors.Join(otherToken, otherToken)); err != nil || !other.done || child.calls != 2 {
++		t.Fatal("duplicate discovery repeated owner", err)
++	}
++}
++
++// Static source laws complement the owner models without executing recovery or
++// providing a native fault hook. They pin admission/adoption and retry surfaces.
++func TestPlainRecoveryCleanupSourceAdmissionAndRetirementBoundary(t *testing.T) {
++	set := token.NewFileSet()
++	file, err := parser.ParseFile(set, "recovery.go", nil, 0)
++	if err != nil {
++		t.Fatal(err)
++	}
++	functions := map[string]*ast.FuncDecl{}
++	for _, decl := range file.Decls {
++		if fn, ok := decl.(*ast.FuncDecl); ok {
++			functions[fn.Name.Name] = fn
++		}
++	}
++	callName := func(call *ast.CallExpr) string {
++		switch fn := call.Fun.(type) {
++		case *ast.Ident:
++			return fn.Name
++		case *ast.SelectorExpr:
++			if x, ok := fn.X.(*ast.Ident); ok {
++				return x.Name + "." + fn.Sel.Name
++			}
++		}
++		return ""
++	}
++	calls := func(fn *ast.FuncDecl) []string {
++		var out []string
++		ast.Inspect(fn.Body, func(n ast.Node) bool {
++			if call, ok := n.(*ast.CallExpr); ok {
++				out = append(out, callName(call))
++			}
++			return true
++		})
++		return out
++	}
++	before := func(names []string, a, b string) {
++		t.Helper()
++		ai, bi := -1, -1
++		for i, name := range names {
++			if name == a && ai < 0 {
++				ai = i
++			}
++			if name == b && bi < 0 {
++				bi = i
++			}
++		}
++		if ai < 0 || bi < 0 || ai >= bi {
++			t.Fatalf("expected %s before %s: %v", a, b, names)
++		}
++	}
++	recovery := calls(functions["RecoverRollback"])
++	before(recovery, "plainRetirements.reserve", "filepath.Abs")
++	before(recovery, "plainRetirements.reserve", "resolveNativePath")
++	before(recovery, "plainRetirements.reserve", "openRecoveryFile")
++	before(recovery, "cleanup.closeTemporary", "lockExclusive")
++	childCloses, unlinkAt, finalChildAt := 0, -1, -1
++	for i, name := range recovery {
++		if name == "cleanup.closeTemporary" {
++			childCloses++
++			finalChildAt = i
++		}
++		if name == "os.Remove" {
++			unlinkAt = i
++		}
++	}
++	if childCloses != 2 || finalChildAt < 0 || unlinkAt <= finalChildAt {
++		t.Fatal("journal retirement no longer precedes unlink", recovery)
++	}
++	literalEOF := false
++	ast.Inspect(functions["RecoverRollback"].Body, func(n ast.Node) bool {
++		if condition, ok := n.(*ast.BinaryExpr); ok && condition.Op == token.EQL {
++			left, lhs := condition.X.(*ast.Ident)
++			right, rhs := condition.Y.(*ast.SelectorExpr)
++			if lhs && rhs && left.Name == "readErr" && right.Sel.Name == "EOF" {
++				if qualifier, ok := right.X.(*ast.Ident); ok && qualifier.Name == "io" {
++					literalEOF = true
++				}
++			}
++		}
++		return true
++	})
++	if !literalEOF {
++		t.Fatal("candidate EOF suppression must preserve joined diagnostics")
++	}
++	journal := calls(functions["recoveryOpenJournal"])
++	before(journal, "cleanup.reserveTemporary", "nativeLstatForCreate")
++	// Check successful acquisition's immediate next statement specifically.
++	found := false
++	body := functions["recoveryOpenJournal"].Body.List
++	for i, stmt := range body {
++		assign, ok := stmt.(*ast.AssignStmt)
++		if !ok || len(assign.Rhs) != 1 {
++			continue
++		}
++		call, ok := assign.Rhs[0].(*ast.CallExpr)
++		if !ok || callName(call) != "openJournal" {
++			continue
++		}
++		next, ok := body[i+1].(*ast.ExprStmt)
++		if !ok {
++			t.Fatal("journal acquisition not immediately adopted")
++		}
++		adopt, ok := next.X.(*ast.CallExpr)
++		if !ok || callName(adopt) != "cleanup.acquiredTemporary" {
++			t.Fatal("journal acquisition not immediately adopted")
++		}
++		found = true
++	}
++	if !found {
++		t.Fatal("journal acquisition missing")
++	}
++	for _, fn := range functions {
++		for _, name := range calls(fn) {
++			if name == "closeNativeFile" || name == "os.IsNotExist" {
++				t.Fatal("raw cleanup or ambiguous absence returned", name)
++			}
++		}
++	}
++	finish, err := parser.ParseFile(set, "plain_recovery_cleanup.go", nil, 0)
++	if err != nil {
++		t.Fatal(err)
++	}
++	ast.Inspect(finish, func(n ast.Node) bool {
++		if call, ok := n.(*ast.CallExpr); ok {
++			name := callName(call)
++			if name != "errors.Join" && name != "cleanup.beginClass" && name != "cleanup.childClosePending" {
++				t.Fatal("retirement retained or repeated logical/native work", name)
++			}
++		}
++		if field, ok := n.(*ast.Field); ok {
++			if _, callback := field.Type.(*ast.FuncType); callback {
++				t.Fatal("cleanup helper acquired callback")
++			}
++		}
++		return true
++	})
++	if !strings.Contains(strings.Join(recovery, ","), "finishPlainRecovery") {
++		t.Fatal("recovery lost its ownership defer")
++	}
++}
+diff --git a/internal/pager/recovery.go b/internal/pager/recovery.go
+index dba674f..ca82048 100644
+--- a/internal/pager/recovery.go
++++ b/internal/pager/recovery.go
+@@ -50,7 +50,20 @@ func RecoverRollback(ctx context.Context, path string, opts RecoveryOptions) (re
+ 	if err := ctx.Err(); err != nil {
+ 		return result, err
+ 	}
+-	path, err := filepath.Abs(path)
++	// Charge the fixed main/temporary ownership slots before path resolution,
++	// including metadata probes that can return an error-carried native owner.
++	cleanup, err := plainRetirements.reserve()
++	if err != nil {
++		return result, err
++	}
++	touched, removed := false, false
++	defer func() {
++		retErr = finishPlainRecovery(cleanup, retErr, touched, removed)
++		if retErr != nil {
++			result = RecoveryResult{}
++		}
++	}()
++	path, err = filepath.Abs(path)
+ 	if err != nil {
+ 		return result, err
+ 	}
+@@ -59,26 +72,12 @@ func RecoverRollback(ctx context.Context, path string, opts RecoveryOptions) (re
+ 		return result, err
+ 	}
+ 	db, err := openRecoveryFile(path, os.O_RDWR)
++	if db != nil {
++		cleanup.main = plainFile{db}
++	}
+ 	if err != nil {
+ 		return result, err
+ 	}
+-	touched, removed := false, false
+-	defer func() {
+-		if closeErr := closeNativeFile(db); closeErr != nil {
+-			retErr = errors.Join(retErr, closeErr)
+-		}
+-		if retErr != nil && touched {
+-			retErr = errors.Join(ErrPoisoned, retErr)
+-			if removed {
+-				retErr = errors.Join(ErrCommitUncertain, retErr)
+-			} else {
+-				retErr = errors.Join(ErrRecoveryRequired, retErr)
+-			}
+-		}
+-		if retErr != nil {
+-			result = RecoveryResult{}
+-		}
+-	}()
+ 	info, err := statNativeFile(db)
+ 	if err != nil {
+ 		return result, err
+@@ -99,28 +98,29 @@ func RecoverRollback(ctx context.Context, path string, opts RecoveryOptions) (re
+ 		return result, err
+ 	}
+ 	jpath := path + "-journal"
+-	if _, err = nativeLstat(jpath); os.IsNotExist(err) {
++	if _, absent, probeErr := nativeLstatForCreate(jpath); absent {
+ 		return result, nil
+-	} else if err != nil {
+-		return result, err
++	} else if probeErr != nil {
++		return result, probeErr
+ 	}
+ 	if err = recoveryCheckReserved(db); err != nil {
+ 		return result, err
+ 	}
+ 	// The first-byte check is SQLite's hot-candidate test, not proof that the
+ 	// journal is valid. Cold files are left untouched and fail closed.
+-	candidate, err := recoveryOpenJournal(jpath)
++	candidate, _, err := recoveryOpenJournal(jpath, cleanup)
+ 	if err != nil {
+ 		return result, err
+ 	}
+ 	var first [1]byte
+ 	_, readErr := readNativeAt(candidate, first[:], 0)
+-	closeErr := closeNativeFile(candidate)
+-	if readErr != nil && !errors.Is(readErr, io.EOF) {
+-		return result, errors.Join(readErr, closeErr)
++	// Only the direct EOF from this one-byte read is an empty candidate. A
++	// wrapped/joined EOF may carry another diagnostic or ownership obligation.
++	if readErr == io.EOF {
++		readErr = nil
+ 	}
+-	if closeErr != nil {
+-		return result, closeErr
++	if err = cleanup.closeTemporary(readErr); err != nil {
++		return result, err
+ 	}
+ 	if first[0] == 0 {
+ 		return result, fmt.Errorf("%w: cold or empty journal preserved", ErrRecoveryRequired)
+@@ -151,18 +151,13 @@ func RecoverRollback(ctx context.Context, path string, opts RecoveryOptions) (re
+ 	if info.Size() == 0 {
+ 		return result, fmt.Errorf("%w: journal beside empty database is ambiguous", ErrRecoveryRequired)
+ 	}
+-	jf, err := recoveryOpenJournal(jpath)
+-	if os.IsNotExist(err) {
++	jf, absent, err := recoveryOpenJournal(jpath, cleanup)
++	if absent {
+ 		return result, nil
+ 	}
+ 	if err != nil {
+ 		return result, err
+ 	}
+-	defer func() {
+-		if jf != nil {
+-			retErr = errors.Join(retErr, closeNativeFile(jf))
+-		}
+-	}()
+ 	ji, err := statNativeFile(jf)
+ 	if err != nil {
+ 		return result, err
+@@ -225,9 +220,7 @@ func RecoverRollback(ctx context.Context, path string, opts RecoveryOptions) (re
+ 	if err = recoveryCheckPath(path, db, info); err != nil {
+ 		return result, err
+ 	}
+-	err = closeNativeFile(jf)
+-	jf = nil
+-	if err != nil {
++	if err = cleanup.closeTemporary(nil); err != nil {
+ 		return result, err
+ 	}
+ 	if err = os.Remove(jpath); err != nil {
+@@ -253,26 +246,37 @@ func recoveryCheckReserved(db *vfs.File) error {
+ 
+ func recoveryCheckWAL(path string) error {
+ 	for _, suffix := range []string{"-wal", "-shm"} {
+-		if _, err := nativeLstat(path + suffix); err == nil {
+-			return fmt.Errorf("%w: rollback recovery with WAL sidecar %s", ErrUnsupported, suffix)
+-		} else if !os.IsNotExist(err) {
++		if _, absent, err := nativeLstatForCreate(path + suffix); absent {
++			continue
++		} else if err != nil {
+ 			return err
+ 		}
++		return fmt.Errorf("%w: rollback recovery with WAL sidecar %s", ErrUnsupported, suffix)
+ 	}
+ 	return nil
+ }
+ 
+-func recoveryOpenJournal(path string) (*vfs.File, error) {
+-	info, err := nativeLstat(path)
++// The same precharged temporary slot owns the candidate and later replay
++// journal, sequentially. Never close here: constructor/metadata errors must be
++// adopted before either this child or its protecting main can retire. Only an
++// initial no-handle metadata absence can authorize the caller's no-journal path.
++func recoveryOpenJournal(path string, cleanup *plainRetirement) (*vfs.File, bool, error) {
++	if err := cleanup.reserveTemporary(); err != nil {
++		return nil, false, err
++	}
++	info, absent, err := nativeLstatForCreate(path)
+ 	if err != nil {
+-		return nil, err
++		cleanup.acquiredTemporary(nil)
++		return nil, absent, err
+ 	}
+ 	if !info.Mode().IsRegular() {
+-		return nil, fmt.Errorf("%w: recovery journal must be a regular file", ErrUnsupported)
++		cleanup.acquiredTemporary(nil)
++		return nil, false, fmt.Errorf("%w: recovery journal must be a regular file", ErrUnsupported)
+ 	}
+ 	file, err := openJournal(path, os.O_RDWR)
++	cleanup.acquiredTemporary(file)
+ 	if err != nil {
+-		return nil, err
++		return nil, false, err
+ 	}
+ 	opened, err := statNativeFile(file)
+ 	if err == nil {
+@@ -282,9 +286,9 @@ func recoveryOpenJournal(path string) (*vfs.File, error) {
+ 		err = ErrChanged
+ 	}
+ 	if err != nil {
+-		return nil, errors.Join(err, closeNativeFile(file))
++		return nil, false, err
+ 	}
+-	return file, nil
++	return file, false, nil
+ }
+ 
+ func recoveryCheckPath(path string, file *vfs.File, original os.FileInfo) error {

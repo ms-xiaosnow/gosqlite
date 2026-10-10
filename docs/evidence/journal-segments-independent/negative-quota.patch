@@ -1,0 +1,11 @@
+--- a/internal/journal/replay.go
++++ b/internal/journal/replay.go
+@@ -133,7 +133,7 @@
+ 		}
+ 		// Subtract before adding to keep cumulative counts bounded even when
+ 		// individual advertised uint32 counts would wrap a uint32 sum.
+-		if uint64(segment.Records) > uint64(limits.MaxRecords)-total {
++		if uint64(segment.Records) > uint64(limits.MaxRecords) {
+ 			return nil, fmt.Errorf("%w: cumulative record count", ErrReplayLimit)
+ 		}
+ 		total += uint64(segment.Records)

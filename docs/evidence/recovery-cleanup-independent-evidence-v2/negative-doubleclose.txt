@@ -1,0 +1,14 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+--- FAIL: TestPlainRecoveryCleanupMemoryExplicitChildCloseIsNotRepeated (0.00s)
+    plain_recovery_cleanup_test.go:71: deferred closure repeated failed child or lost class SQLite transaction cannot continue after an I/O failure
+        memory candidate read or replay cause
+        SQLite transaction cannot continue after an I/O failure
+        memory close diagnostic
+        plaintext cleanup pending: SQLite transaction cannot continue after an I/O failure
+        memory candidate read or replay cause
+        SQLite transaction cannot continue after an I/O failure
+        memory close diagnostic
+        memory close diagnostic
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/pager	0.008s
+FAIL

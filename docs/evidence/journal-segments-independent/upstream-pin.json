@@ -1,0 +1,7 @@
+{
+  "archive_bytes": 14881448,
+  "archive_sha3_256": "a5c29342ca185abcda332448fbb27c536661245be27e20199b46c49099b0e15e",
+  "pager_c_sha256": "96d7bb9c4a5a6da0909ce0ab4714311e1ffa5f13007dc4c69f028a2760104ba4",
+  "archive_pager_equals_extracted": true,
+  "sqlite_source_id": "be8d059e9a49089ab2dce5ed26dd87aaf598fdc5fbe0b107c0dd758464bcd5e3"
+}

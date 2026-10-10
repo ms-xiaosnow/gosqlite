@@ -1,0 +1,42 @@
+package journal_test
+
+import (
+	"crypto/sha256"
+	"encoding/binary"
+	"math/rand"
+	"testing"
+
+	j "github.com/ms-xiaosnow/gosqlite/internal/journal"
+)
+
+// Produces only a digest in test output; journal and page fixtures stay in memory.
+func TestIndependentSingleSegmentCompatibilityDigest(t *testing.T) {
+	hash := sha256.New()
+	rng := rand.New(rand.NewSource(31415926))
+	samples := 0
+	for ps := uint32(512); ps <= 65536; ps *= 2 {
+		for ss := uint32(32); ss <= 65536; ss *= 2 {
+			for n := 0; n < 6; n++ {
+				nums := rng.Perm(7)[:n]
+				pages := make([]uint32, n)
+				for i, num := range nums {
+					pages[i] = uint32(num + 1)
+				}
+				f := independentBuild(ps, ss, 7, []independentSegment{{rng.Uint32(), pages}})
+				p := independentPlan(t, f, j.ReplayLimits{})
+				var word [8]byte
+				for _, value := range []uint64{uint64(p.Header.Records), uint64(p.Header.Nonce), uint64(p.Header.OriginalPages), uint64(p.Header.SectorSize), uint64(p.Header.PageSize), uint64(p.DatabaseBytes), uint64(len(p.Pages))} {
+					binary.BigEndian.PutUint64(word[:], value)
+					hash.Write(word[:])
+				}
+				for _, page := range p.Pages {
+					binary.BigEndian.PutUint64(word[:], uint64(page.Number))
+					hash.Write(word[:])
+					hash.Write(page.Data)
+				}
+				samples++
+			}
+		}
+	}
+	t.Logf("COMPATIBILITY samples=%d sha256=%x", samples, hash.Sum(nil))
+}
