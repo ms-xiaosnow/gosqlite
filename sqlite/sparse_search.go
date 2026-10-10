@@ -9,6 +9,7 @@ import (
 	"io"
 
 	"github.com/ms-xiaosnow/gosqlite/extension/vector"
+	"github.com/ms-xiaosnow/gosqlite/extension/vector/ann"
 	"github.com/ms-xiaosnow/gosqlite/internal/btree"
 	sqlast "github.com/ms-xiaosnow/gosqlite/internal/sql"
 )
@@ -39,16 +40,21 @@ func sparseLimits(l SparseSearchLimits) (SparseSearchLimits, error) {
 }
 
 // SparseSearchOptions selects exact Top-K over one physical SPARSEVEC(n) column. Empty
-// Metric selects L2. Only L2/L1/negative-inner-product/cosine identities are accepted. There
-// is no sparse ANN mode in this checkpoint. Where is one bound SQL expression,
+// Metric selects L2. Only L2/L1/negative-inner-product/cosine identities are accepted. Mode defaults to exact; approximate mode opts into a matching typed ANN index.
+// Where is one bound SQL expression,
 // evaluated before sparse decoding/scoring. Limit must be nonnegative; zero
 // validates query/options but visits no rows. NULL query yields EMPTY.
 type SparseSearchOptions struct {
-	Metric vector.MetricKind
-	Limit  int
-	Where  string
-	Args   []any
-	Limits SparseSearchLimits
+	Mode                  VectorSearchMode
+	Index                 string
+	EFSearch, MaxEFSearch int
+	Probes, MaxProbes     int
+	ANNLimits             ANNWorkLimits
+	Metric                vector.MetricKind
+	Limit                 int
+	Where                 string
+	Args                  []any
+	Limits                SparseSearchLimits
 }
 
 // SparsePlan describes native exact sparse search. Embedded SQL ranking fields stay
@@ -63,12 +69,13 @@ type SparsePlan struct {
 }
 
 func (p SparsePlan) Detail() string {
-	return fmt.Sprintf("%s %s; representation=sparsevec; sparse_field=%s; sparse_metric=%s; dimensions=%d; limit=%d; exact=%t; distance_order=ASC,rowid_ASC; null_candidates=excluded; reason=%s", p.Access, p.Table, p.Field, p.Metric, p.Dimensions, p.Limit, p.Exact, p.Reason)
+	return fmt.Sprintf("%s %s; representation=sparsevec; sparse_field=%s; sparse_metric=%s; dimensions=%d; limit=%d; exact=%t; distance_order=ASC,rowid_ASC; null_candidates=excluded; reason=%s", p.Access, p.Table, p.Field, p.Metric, p.Dimensions, p.Limit, p.Exact, p.Reason) + p.annDetail()
 }
 
 // SparseStats separates fetched, excluded and scored source rows. Support work
 // follows SparseSearchLimits; it does not measure arbitrary SQL expression work.
 type SparseStats struct {
+	ANNWork ANNWorkStats
 	QueryStats
 	FilteredRows   int64
 	ScoredRows     int64
@@ -76,7 +83,7 @@ type SparseStats struct {
 	ScoredNonzeros int64
 }
 
-// SparseResult contains a complete exact ranking and value-only diagnostics.
+// SparseResult contains a complete requested ranking and explicit recall diagnostics.
 type SparseResult struct {
 	Hits  []vector.Hit
 	Plan  SparsePlan
@@ -84,7 +91,7 @@ type SparseResult struct {
 }
 
 // SparseSearch owns one ordinary database snapshot and returns only complete
-// exact results. A failure/cancellation returns the zero result, never hits.
+// requested results. A failure/cancellation returns the zero result, never hits.
 func (d *DB) SparseSearch(ctx context.Context, table, field string, query any, options SparseSearchOptions) (SparseResult, error) {
 	if err := checkContext(ctx); err != nil {
 		return SparseResult{}, wrap("sparse search", err)
@@ -160,6 +167,10 @@ func sparseQueryValue(ctx context.Context, query any) (any, error) {
 }
 
 func (d *DB) sparseSearch(ctx context.Context, reader btree.PageReader, tableName, fieldName string, query any, options SparseSearchOptions) (SparseResult, error) {
+	annOptions, err := normalizeVectorANNOptions(VectorSearchOptions{Mode: options.Mode, Index: options.Index, Limit: options.Limit, EFSearch: options.EFSearch, MaxEFSearch: options.MaxEFSearch, Probes: options.Probes, MaxProbes: options.MaxProbes, ANNLimits: options.ANNLimits})
+	if err != nil {
+		return SparseResult{}, err
+	}
 	limits, err := sparseLimits(options.Limits)
 	if err != nil {
 		return SparseResult{}, err
@@ -266,6 +277,18 @@ func (d *DB) sparseSearch(ctx context.Context, reader btree.PageReader, tableNam
 		result.Plan.Access, result.Plan.Reason = "EMPTY", "zero limit; query validated without source reads"
 		return result, nil
 	}
+	if annOptions.Mode == VectorModeApproximate {
+		result.Plan.VectorRepresentation = "sparsevec"
+		hits, done, err := d.typedSearchANN(ctx, reader, tab, ordinal, ann.SparseValue(q), vector.MetricKind(metric), annOptions, vector.SearchLimits{MaxCandidates: limits.MaxCandidates, MaxResults: limits.MaxResults, MaxComponents: limits.MaxNonzeros}, filter, &result.Plan.QueryPlan, &result.Stats.QueryStats, &result.Stats.ANNWork, &result.Stats.ScoredNonzeros, &result.Stats.ScoredRows, &result.Stats.FilteredRows)
+		if err != nil {
+			return SparseResult{}, err
+		}
+		if done {
+			result.Hits = hits
+			result.Plan.Exact = false
+			return result, nil
+		}
+	}
 	// Reserve query support and the result heap before retaining
 	// row identities. Duplicate detection is bounded, never silently truncated.
 	reserve := int64(options.Limit)*64 + queryScratch
@@ -332,7 +355,7 @@ func (d *DB) sparseSearch(ctx context.Context, reader btree.PageReader, tableNam
 			return SparseResult{}, e
 		}
 		needed := uint64(queryEntries) + uint64(candidateEntries)
-		used := uint64(result.Stats.ScoredNonzeros)
+		used := uint64(result.Stats.ScoredNonzeros) + uint64(result.Stats.ANNWork.ComponentWork)
 		if used > limits.MaxNonzeros || needed > limits.MaxNonzeros-used {
 			return SparseResult{}, fmt.Errorf("%w: sparse nonzeros", vector.ErrLimit)
 		}

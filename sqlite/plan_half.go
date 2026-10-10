@@ -21,7 +21,7 @@ func (v *vectorRank) scoreHalf(r *Rows, value any) (any, error) {
 		if !v.prepared {
 			needed += components
 		}
-		used := uint64(r.queryStats.VectorRankComponents)
+		used := uint64(r.queryStats.VectorRankComponents) + uint64(r.annWork.ComponentWork)
 		if used > v.limits.MaxComponents || needed > v.limits.MaxComponents-used {
 			return nil, fmt.Errorf("%w: half components", vector.ErrLimit)
 		}

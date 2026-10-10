@@ -4,7 +4,8 @@ This slice integrates the existing immutable `vector.HalfVector` into typed SQL,
 ordinary SQLite-compatible storage, `database/sql`, and exact native/SQL ranking.
 It stores actual IEEE-754 binary16 bits with the distinct **GSH v1** codec;
 existing dense GSV v1, packed-bit GSB v1 and dense search APIs are unchanged.
-Half ANN remains required work; SPARSEVEC SQL/native exact search is covered in [sparse-vector.md](sparse-vector.md).
+Persistent half HNSW/IVFFlat is documented in [typed-ann.md](typed-ann.md).
+SPARSEVEC SQL/native exact search is covered in [sparse-vector.md](sparse-vector.md).
 
 ## SQL type and representation
 
@@ -119,7 +120,8 @@ DB and Tx expose `HalfSearch`. It requires a physical `HALFVEC(n)` column;
 `VectorSearch` remains dense-only. Query values may be half text, GSH,
 `HalfVector`, `NullHalfVector`, normal `driver.Valuer` values or NULL. The
 metric is a closed `vector.MetricKind`: L2 (default), L1, NegativeIP or Cosine.
-Arbitrary callbacks and approximate modes are not supported.
+Exact remains the default. Explicit approximate mode is documented in
+[typed ANN](typed-ann.md); arbitrary metric callbacks reject.
 
 Each operation uses one snapshot; explicit transactions see their own writes.
 WHERE runs before candidate decoding and scoring. Native NULL candidates are
@@ -155,15 +157,15 @@ existing MaxSortBytes-bounded general sorter.
 `QueryPlan.VectorRepresentation="halfvec"`, `VectorMetric`, dimensions and
 `VectorExact=true` identify the stage; `VectorRanking="bounded_heap"` is never
 an index claim. `VectorRankComponents` charges query and scored candidate
-dimensions; packed-bit and ANN counters stay zero. SQL decoding remains lazy:
+dimensions. Exact ranking keeps packed-bit and ANN counters zero. SQL decoding remains lazy:
 EXPLAIN and LIMIT 0 do not decode the query, and an all-NULL/filtered eligible
 set need not decode it. Default exact-ranking work limits apply to the
 recognized heap, not every scalar expression.
 
-Plans explicitly report `HALFVEC(n) ANN is unsupported; exact binary16 ranking`.
-Dense HNSW/IVFFlat creation rejects half columns. No half ANN index, opclass,
-4000-dimension indexing capability or approximate recall claim is made here;
-type-aware ANN metadata and indexing remain a separate checkpoint.
+Eligible NOT NULL half distance queries can now use matching typed HNSW or
+IVFFlat indexes. Exact NOT INDEXED/default-native paths remain unchanged.
+The [typed ANN checkpoint](typed-ann.md) documents v2 metadata, the 4000-dimension
+indexed bound, accepted metrics, actual recall evidence and limitations.
 
 ## Driver, example and verification scope
 

@@ -3,8 +3,8 @@
 This slice integrates immutable `vector.SparseVector` into typed SQL, ordinary
 SQLite-compatible storage, `database/sql`, and exact DB/Tx/SQL search. The
 representation is **GSS v1**, independent of dense GSV, half GSH and bit GSB.
-Sparse ANN, PostgreSQL wire compatibility and PostgreSQL vector equality are
-not implemented or implied.
+The later [typed ANN checkpoint](typed-ann.md) adds persistent support-bounded
+HNSW. PostgreSQL wire compatibility and vector equality are not implied.
 
 ## Values and ordinary storage
 
@@ -103,8 +103,9 @@ result, err := db.SparseSearch(ctx, "items", "s", query,
 
 DB and Tx require a physical SPARSEVEC column. Query input may be sparse TEXT,
 GSS, `SparseVector`, `NullSparseVector`, an ordinary Valuer or NULL. Metrics are
-closed to L2 (default), L1, NegativeIP and Cosine; no arbitrary callbacks or
-approximate mode. Each operation uses one snapshot and explicit transactions
+closed to L2 (default), L1, NegativeIP and Cosine. Exact remains the default;
+explicit approximate mode is documented in [typed ANN](typed-ann.md). Arbitrary
+callbacks reject. Each operation uses one snapshot and explicit transactions
 see their own writes. WHERE precedes candidate decoding/scoring. Native NULL
 candidates are excluded; NULL query yields EMPTY. Limit zero validates the
 non-NULL query, including cosine norm, without source reads. Results order by
@@ -151,9 +152,10 @@ are charged together. Cancellation checks surround parsing/encoding and occur
 at most every 256 support positions during metric/norm arithmetic; parsing is
 bounded by 1 MiB text and 16,000 entries.
 
-Plans say `SPARSEVEC(n) ANN is unsupported; exact sparse ranking`. Dense HNSW
-and IVFFlat constructors reject sparse columns. There is no sparse ANN index,
-opclass, 1000-nnz HNSW claim or approximate recall claim in this checkpoint.
+Eligible NOT NULL sparse queries may now use a matching real HNSW index with
+a 1000-nonzero value bound. Sparse IVFFlat remains explicitly unsupported.
+Exact NOT INDEXED/default-native paths remain available. See [typed ANN](typed-ann.md)
+for source identity, metadata, actual work/recall evidence and limitations.
 
 ## Evidence and runnable example
 

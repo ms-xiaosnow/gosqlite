@@ -1,0 +1,267 @@
+M9 typed ANN final focused verification, 2026-10-10 UTC
+
+Frozen source tree: 27de0d52d2ab16d17d4e78484046e940e9a53b7a
+Durable baseline: f5663cc47f7e3f30f7b239cab674c47b6ad54b34
+Frozen archive: ../typed-ann-final-verify.Vyw9xC
+Source inventory: docs/evidence/m9-typed-ann-owned-paths.txt (54 paths)
+Source SHA256 manifest: docs/evidence/m9-typed-ann-source-sha256.txt
+Manifest SHA256: 662dd503b5aa4bc11f6a4c7adc5cecf40f5f8b6c7bd8328435ec7e7a932fb000
+
+The freeze used an external temporary Git index and object directory, initialized
+from the durable baseline, adding only the 54 owned source paths. It did not
+stage the shared main index or include in-flight native/pager changes. Evidence
+logs were added after verification and are not part of the source manifest.
+
+Environment:
+  GO=/workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go
+  GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off GOFLAGS=-buildvcs=false
+  GOCACHE=/tmp/typed-ann-gocache
+  GOMODCACHE=/workspace/scratch/5e06a74e5f65/durable-restart/go-path/pkg/mod
+  CGO_ENABLED=0 except the separately selected race run (CGO_ENABLED=1)
+
+Scope: source-reviewed ordinary intact storage and pure-memory algorithms/codecs.
+The mandatory `go run ./internal/testscope` guard passed before tests; the guard
+is source-reference screening, not a substitute for behavioral source review.
+No physical fault, crash, process-exit, hot recovery, disk tamper, wrong-key,
+missing selected files, namespace-mutation race, or interrupted-publication
+scenario was run. No aggregate, native-platform qualification, independent
+security/legal, or M10 gate was run or represented as passed by this slice.
+
+Commands, from the frozen archive:
+  "$GO" run ./internal/testscope
+  "$GO" test ./extension/vector/ann -count=1 -v
+  "$GO" test ./sqlite ./driver ./examples/typed-ann-rerank -run 'Test(Bit|Half|Sparse|Vector|ANN|IVF|TypedANN|Driver(Bit|Half|Sparse|DenseVector|HNSW|IVFFlat|TypedANN))' -count=2
+  "$GO" vet ./extension/vector/ann ./sqlite ./driver ./examples/typed-ann-rerank
+  "$GO" build ./extension/vector/ann ./sqlite ./driver ./examples/typed-ann-rerank
+
+Results: PASS. Full ANN package includes preserved legacy tests, pure-memory
+bounded codec fuzz seeds, typed HNSW/IVF quality, source-compatibility fixtures,
+and deterministic dense legacy/typed bridge checks. This is not a timed fuzz
+campaign on the final source. Focused SQLite/driver/example selections ran twice.
+
+Supported persistent matrix:
+  HNSW: halfvec L2/IP/cosine/L1; bit Hamming/Jaccard;
+        sparsevec L2/IP/cosine/L1, without densification.
+  IVFFlat: halfvec L2/IP/cosine; bit Hamming.
+  Unsupported: sparse IVFFlat; IVFFlat L1/Jaccard. These fail explicitly.
+  Limits: halfvec 4000 dimensions, bit 64000 bits, sparsevec HNSW 1000 nonzeros
+          with declared dimension metadata up to 1,000,000,000.
+
+Review correction: SQL sparse query scratch is admitted before decode, with
+lazy exact fallback for invalid or overbudget query preflight. Query and source
+explicit-zero TEXT entries retain exact input-entry work charges. Native and
+SQL source work admission precedes source decode. Graph work counts canonical
+nonzero support independently. Focused regressions cover zero-bearing input,
+WHERE 0 laziness, exact-limit success and one-short rejection.
+
+Quality scope: high recall in the seeded pure-memory matrices uses large EF or
+probe counts and visits much of the corpus. The smaller persisted IVF matrix
+at one initial probe measures recall@10 .90/.80/.60/.30 for half L2/IP/cosine
+and bit Hamming; it is intentionally not hidden behind an accuracy claim.
+No universal recall, default 95% quality, latency advantage or speedup is claimed.
+Timings below are observed test execution durations, not performance guarantees.
+See docs/typed-ann.md for the persistent-fixture and logical-quota caveats.
+
+Related evidence:
+  m9-typed-ann-race.txt
+  m9-typed-ann-oracle.txt
+  m9-typed-ann-dense-interop.txt and m9-typed-ann-dense-interop.go.txt
+  m9-typed-ann-example.json
+  m9-typed-ann-mixed-tree-race-blocker.txt (historical failed mixed-tree build)
+  typed-ann-independent-review.txt (independent reviewer-owned artifact)
+
+Unmodified command output follows:
+
+Frozen tree 27de0d52d2ab16d17d4e78484046e940e9a53b7a on baseline f5663cc47f7e3f30f7b239cab674c47b6ad54b34
+go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
+go test ./extension/vector/ann -count=1 -v
+=== RUN   TestConfigCanonicalAndClosedIdentity
+--- PASS: TestConfigCanonicalAndClosedIdentity (0.00s)
+=== RUN   TestAdjacencyValidationAndRoundtrip
+--- PASS: TestAdjacencyValidationAndRoundtrip (0.00s)
+=== RUN   TestDeterministicMultilayerAndSignedTies
+--- PASS: TestDeterministicMultilayerAndSignedTies (0.07s)
+=== RUN   TestTombstonesTraverseAndRowidReuse
+--- PASS: TestTombstonesTraverseAndRowidReuse (0.00s)
+=== RUN   TestAllMetricsAndCosineZeroPolicy
+=== RUN   TestAllMetricsAndCosineZeroPolicy/l2
+=== RUN   TestAllMetricsAndCosineZeroPolicy/l1
+=== RUN   TestAllMetricsAndCosineZeroPolicy/cosine
+=== RUN   TestAllMetricsAndCosineZeroPolicy/negative_inner_product
+--- PASS: TestAllMetricsAndCosineZeroPolicy (0.00s)
+    --- PASS: TestAllMetricsAndCosineZeroPolicy/l2 (0.00s)
+    --- PASS: TestAllMetricsAndCosineZeroPolicy/l1 (0.00s)
+    --- PASS: TestAllMetricsAndCosineZeroPolicy/cosine (0.00s)
+    --- PASS: TestAllMetricsAndCosineZeroPolicy/negative_inner_product (0.00s)
+=== RUN   TestLimitsCancellationAndFailedWriteState
+--- PASS: TestLimitsCancellationAndFailedWriteState (0.01s)
+=== RUN   TestMalformedNodesFailClosed
+--- PASS: TestMalformedNodesFailClosed (0.00s)
+=== RUN   TestDefaultRecallAndReducedDistancePath
+    hnsw_test.go:488: seeded independent Gaussian dataset: rows=2048 dims=12 held_out=48 recall@10=0.997917 mean graph distances=557.67 mean node reads=524.73 exact candidate distances=2048 max_level=3
+    hnsw_test.go:491: memory-store algorithm only: recall@1(ef40)=1.000000 recall@100(ef100)=1.000000 mean ef100 distances=929.08 build=4.01262597s logical vector+adjacency bytes=586724; ANN p50=600.585µs p95=3.05589ms; M6 exact k10 p50=416.828µs p95=1.59271ms (wall times are observations, not asserted speedup)
+--- PASS: TestDefaultRecallAndReducedDistancePath (4.19s)
+=== RUN   TestIVFLloydObjectiveImprovesAcrossRealIterations
+--- PASS: TestIVFLloydObjectiveImprovesAcrossRealIterations (0.00s)
+=== RUN   TestIVFSubsetListQualityAndOriginalRescoring
+=== RUN   TestIVFSubsetListQualityAndOriginalRescoring/l2
+    ivf_quality_test.go:147: memory-only IVF quality: rows=1024 dims=8 held_out=24 lists=32 probes=8 metric=l2 recall@1=0.958333 @10=0.962500 @100=0.740417 mean_original_candidate_scores=264.38 centroid_scores=32 exact_scores=1024 training_iterations=20 component_work=5670528 peak_logical_bytes=377088
+=== RUN   TestIVFSubsetListQualityAndOriginalRescoring/cosine
+    ivf_quality_test.go:147: memory-only IVF quality: rows=1024 dims=8 held_out=24 lists=32 probes=8 metric=cosine recall@1=1.000000 @10=0.983333 @100=0.812083 mean_original_candidate_scores=255.96 centroid_scores=32 exact_scores=1024 training_iterations=14 component_work=4066432 peak_logical_bytes=377088
+=== RUN   TestIVFSubsetListQualityAndOriginalRescoring/negative_inner_product
+    ivf_quality_test.go:147: memory-only IVF quality: rows=1024 dims=8 held_out=24 lists=32 probes=8 metric=negative_inner_product recall@1=1.000000 @10=0.900000 @100=0.777083 mean_original_candidate_scores=255.96 centroid_scores=32 exact_scores=1024 training_iterations=14 component_work=4066432 peak_logical_bytes=377088
+--- PASS: TestIVFSubsetListQualityAndOriginalRescoring (0.24s)
+    --- PASS: TestIVFSubsetListQualityAndOriginalRescoring/l2 (0.08s)
+    --- PASS: TestIVFSubsetListQualityAndOriginalRescoring/cosine (0.09s)
+    --- PASS: TestIVFSubsetListQualityAndOriginalRescoring/negative_inner_product (0.07s)
+=== RUN   TestIVFReviewSphericalObjectiveAndExactQuotaBoundaries
+=== RUN   TestIVFReviewSphericalObjectiveAndExactQuotaBoundaries/l2
+=== RUN   TestIVFReviewSphericalObjectiveAndExactQuotaBoundaries/cosine
+=== RUN   TestIVFReviewSphericalObjectiveAndExactQuotaBoundaries/negative_inner_product
+--- PASS: TestIVFReviewSphericalObjectiveAndExactQuotaBoundaries (0.02s)
+    --- PASS: TestIVFReviewSphericalObjectiveAndExactQuotaBoundaries/l2 (0.00s)
+    --- PASS: TestIVFReviewSphericalObjectiveAndExactQuotaBoundaries/cosine (0.01s)
+    --- PASS: TestIVFReviewSphericalObjectiveAndExactQuotaBoundaries/negative_inner_product (0.01s)
+=== RUN   TestIVFConfigAndLegacyHNSWCanonical
+--- PASS: TestIVFConfigAndLegacyHNSWCanonical (0.00s)
+=== RUN   TestIVFSamplerBoundedDeterministicAndValidation
+--- PASS: TestIVFSamplerBoundedDeterministicAndValidation (0.00s)
+=== RUN   TestIVFLloydMeansConvergenceAndOrderInvariance
+--- PASS: TestIVFLloydMeansConvergenceAndOrderInvariance (0.00s)
+=== RUN   TestIVFSphericalTrainingOriginalIPAndCancellationPolicy
+--- PASS: TestIVFSphericalTrainingOriginalIPAndCancellationPolicy (0.00s)
+=== RUN   TestIVFUntrainedDuplicateEmptyAndExtremeValues
+--- PASS: TestIVFUntrainedDuplicateEmptyAndExtremeValues (0.00s)
+=== RUN   TestIVFResourceAndCancellationNoPartialResults
+--- PASS: TestIVFResourceAndCancellationNoPartialResults (0.00s)
+=== RUN   TestIVFProbeValidationExactMetricAndStableTies
+--- PASS: TestIVFProbeValidationExactMetricAndStableTies (0.00s)
+=== RUN   TestIVFConcurrentImmutableTrainingAndProbing
+--- PASS: TestIVFConcurrentImmutableTrainingAndProbing (0.01s)
+=== RUN   TestConcurrentSnapshotSearch
+--- PASS: TestConcurrentSnapshotSearch (0.09s)
+=== RUN   TestRejectedConstructionPreservesStateAndStore
+--- PASS: TestRejectedConstructionPreservesStateAndStore (0.00s)
+=== RUN   TestUpdateDeleteAndRebuildRecall
+    mutation_test.go:191: after_mutations: live=659 tombstones=169 recall@10=1.000000 mean graph distances=402.28
+    mutation_test.go:191: after_rebuild: live=659 tombstones=0 recall@10=1.000000 mean graph distances=340.56
+--- PASS: TestUpdateDeleteAndRebuildRecall (1.50s)
+=== RUN   TestTypedIVFBitRealMajorityTrainingAndDeterministicTies
+--- PASS: TestTypedIVFBitRealMajorityTrainingAndDeterministicTies (0.00s)
+=== RUN   TestTypedIVFHalfDerivedRoundingAndOriginalMagnitudes
+--- PASS: TestTypedIVFHalfDerivedRoundingAndOriginalMagnitudes (0.00s)
+=== RUN   TestTypedIVFSamplingUntrainedAndExactBudgets
+--- PASS: TestTypedIVFSamplingUntrainedAndExactBudgets (0.00s)
+=== RUN   TestTypedIVFMaximumBitWidthAndInFlightCancellation
+--- PASS: TestTypedIVFMaximumBitWidthAndInFlightCancellation (0.00s)
+=== RUN   TestTypedIVFSeededRecallAllAdvertisedTuples
+=== RUN   TestTypedIVFSeededRecallAllAdvertisedTuples/halfvec/l2
+    typed_ivf_test.go:292: kind=halfvec metric=l2 seed=20261010/27 n=512 queries=16 lists=24 probes=20 recall@10=0.99375 mean candidate rescoring=439.94 training work=2144976
+=== RUN   TestTypedIVFSeededRecallAllAdvertisedTuples/halfvec/negative_inner_product
+    typed_ivf_test.go:292: kind=halfvec metric=negative_inner_product seed=20261010/27 n=512 queries=16 lists=24 probes=20 recall@10=1.00000 mean candidate rescoring=429.06 training work=2160720
+=== RUN   TestTypedIVFSeededRecallAllAdvertisedTuples/halfvec/cosine
+    typed_ivf_test.go:292: kind=halfvec metric=cosine seed=20261010/27 n=512 queries=16 lists=24 probes=20 recall@10=1.00000 mean candidate rescoring=429.19 training work=2160720
+=== RUN   TestTypedIVFSeededRecallAllAdvertisedTuples/bit/hamming
+    typed_ivf_test.go:292: kind=bit metric=hamming seed=20261010/27 n=512 queries=16 lists=24 probes=20 recall@10=0.96250 mean candidate rescoring=430.94 training work=1811904
+--- PASS: TestTypedIVFSeededRecallAllAdvertisedTuples (0.18s)
+    --- PASS: TestTypedIVFSeededRecallAllAdvertisedTuples/halfvec/l2 (0.05s)
+    --- PASS: TestTypedIVFSeededRecallAllAdvertisedTuples/halfvec/negative_inner_product (0.07s)
+    --- PASS: TestTypedIVFSeededRecallAllAdvertisedTuples/halfvec/cosine (0.05s)
+    --- PASS: TestTypedIVFSeededRecallAllAdvertisedTuples/bit/hamming (0.01s)
+=== RUN   TestTypedConfigMatrixCanonicalAndLimits
+--- PASS: TestTypedConfigMatrixCanonicalAndLimits (0.00s)
+=== RUN   TestTypedValuesCodecsAndSparseSupportBounds
+--- PASS: TestTypedValuesCodecsAndSparseSupportBounds (0.00s)
+=== RUN   TestTypedHNSWRealTraversalMutationAndWorkBudgets
+--- PASS: TestTypedHNSWRealTraversalMutationAndWorkBudgets (0.00s)
+=== RUN   TestTypedHNSWSeededRecallAllAdvertisedTuples
+=== RUN   TestTypedHNSWSeededRecallAllAdvertisedTuples/halfvec/l2
+    typed_test.go:349: kind=halfvec metric=l2 seed=20261010/19 n=384 queries=16 ef=100 recall@10=1.00000 mean node reads=357.88 component work=74772
+=== RUN   TestTypedHNSWSeededRecallAllAdvertisedTuples/halfvec/l1
+    typed_test.go:349: kind=halfvec metric=l1 seed=20261010/19 n=384 queries=16 ef=100 recall@10=1.00000 mean node reads=365.31 component work=75816
+=== RUN   TestTypedHNSWSeededRecallAllAdvertisedTuples/halfvec/negative_inner_product
+    typed_test.go:349: kind=halfvec metric=negative_inner_product seed=20261010/19 n=384 queries=16 ef=100 recall@10=1.00000 mean node reads=357.38 component work=74460
+=== RUN   TestTypedHNSWSeededRecallAllAdvertisedTuples/halfvec/cosine
+    typed_test.go:349: kind=halfvec metric=cosine seed=20261010/19 n=384 queries=16 ef=100 recall@10=1.00000 mean node reads=357.25 component work=74400
+=== RUN   TestTypedHNSWSeededRecallAllAdvertisedTuples/bit/hamming
+    typed_test.go:349: kind=bit metric=hamming seed=20261010/19 n=384 queries=16 ef=100 recall@10=1.00000 mean node reads=381.62 component work=53880
+=== RUN   TestTypedHNSWSeededRecallAllAdvertisedTuples/bit/jaccard
+    typed_test.go:349: kind=bit metric=jaccard seed=20261010/19 n=384 queries=16 ef=100 recall@10=1.00000 mean node reads=381.06 component work=53408
+=== RUN   TestTypedHNSWSeededRecallAllAdvertisedTuples/sparsevec/l2
+    typed_test.go:349: kind=sparsevec metric=l2 seed=20261010/19 n=384 queries=16 ef=100 recall@10=1.00000 mean node reads=357.88 component work=149544
+=== RUN   TestTypedHNSWSeededRecallAllAdvertisedTuples/sparsevec/l1
+    typed_test.go:349: kind=sparsevec metric=l1 seed=20261010/19 n=384 queries=16 ef=100 recall@10=1.00000 mean node reads=365.31 component work=151632
+=== RUN   TestTypedHNSWSeededRecallAllAdvertisedTuples/sparsevec/negative_inner_product
+    typed_test.go:349: kind=sparsevec metric=negative_inner_product seed=20261010/19 n=384 queries=16 ef=100 recall@10=1.00000 mean node reads=357.44 component work=148944
+=== RUN   TestTypedHNSWSeededRecallAllAdvertisedTuples/sparsevec/cosine
+    typed_test.go:349: kind=sparsevec metric=cosine seed=20261010/19 n=384 queries=16 ef=100 recall@10=1.00000 mean node reads=357.25 component work=148800
+--- PASS: TestTypedHNSWSeededRecallAllAdvertisedTuples (4.66s)
+    --- PASS: TestTypedHNSWSeededRecallAllAdvertisedTuples/halfvec/l2 (0.46s)
+    --- PASS: TestTypedHNSWSeededRecallAllAdvertisedTuples/halfvec/l1 (0.56s)
+    --- PASS: TestTypedHNSWSeededRecallAllAdvertisedTuples/halfvec/negative_inner_product (0.62s)
+    --- PASS: TestTypedHNSWSeededRecallAllAdvertisedTuples/halfvec/cosine (0.44s)
+    --- PASS: TestTypedHNSWSeededRecallAllAdvertisedTuples/bit/hamming (0.44s)
+    --- PASS: TestTypedHNSWSeededRecallAllAdvertisedTuples/bit/jaccard (0.40s)
+    --- PASS: TestTypedHNSWSeededRecallAllAdvertisedTuples/sparsevec/l2 (0.37s)
+    --- PASS: TestTypedHNSWSeededRecallAllAdvertisedTuples/sparsevec/l1 (0.63s)
+    --- PASS: TestTypedHNSWSeededRecallAllAdvertisedTuples/sparsevec/negative_inner_product (0.37s)
+    --- PASS: TestTypedHNSWSeededRecallAllAdvertisedTuples/sparsevec/cosine (0.35s)
+=== RUN   TestTypedSparseNoImplicitDenseMaterialization
+--- PASS: TestTypedSparseNoImplicitDenseMaterialization (0.00s)
+=== RUN   TestTypedDenseBridgePreservesCanonicalTopologyAndCentroids
+--- PASS: TestTypedDenseBridgePreservesCanonicalTopologyAndCentroids (0.01s)
+=== RUN   TestDensePublicStructAndFunctionSourceCompatibility
+--- PASS: TestDensePublicStructAndFunctionSourceCompatibility (0.00s)
+=== RUN   FuzzAdjacencyDecode
+=== RUN   FuzzAdjacencyDecode/seed#0
+--- PASS: FuzzAdjacencyDecode (0.00s)
+    --- PASS: FuzzAdjacencyDecode/seed#0 (0.00s)
+=== RUN   FuzzIVFTrainingAndProbe
+=== RUN   FuzzIVFTrainingAndProbe/seed#0
+=== RUN   FuzzIVFTrainingAndProbe/seed#1
+--- PASS: FuzzIVFTrainingAndProbe (0.00s)
+    --- PASS: FuzzIVFTrainingAndProbe/seed#0 (0.00s)
+    --- PASS: FuzzIVFTrainingAndProbe/seed#1 (0.00s)
+=== RUN   FuzzConfigCanonical
+=== RUN   FuzzConfigCanonical/seed#0
+=== RUN   FuzzConfigCanonical/seed#1
+=== RUN   FuzzConfigCanonical/seed#2
+=== RUN   FuzzConfigCanonical/seed#3
+=== RUN   FuzzConfigCanonical/seed#4
+=== RUN   FuzzConfigCanonical/seed#5
+--- PASS: FuzzConfigCanonical (0.00s)
+    --- PASS: FuzzConfigCanonical/seed#0 (0.00s)
+    --- PASS: FuzzConfigCanonical/seed#1 (0.00s)
+    --- PASS: FuzzConfigCanonical/seed#2 (0.00s)
+    --- PASS: FuzzConfigCanonical/seed#3 (0.00s)
+    --- PASS: FuzzConfigCanonical/seed#4 (0.00s)
+    --- PASS: FuzzConfigCanonical/seed#5 (0.00s)
+=== RUN   FuzzBoundedGraphOperations
+=== RUN   FuzzBoundedGraphOperations/seed#0
+--- PASS: FuzzBoundedGraphOperations (0.00s)
+    --- PASS: FuzzBoundedGraphOperations/seed#0 (0.00s)
+=== RUN   FuzzTypedConfigCanonical
+=== RUN   FuzzTypedConfigCanonical/seed#0
+=== RUN   FuzzTypedConfigCanonical/seed#1
+=== RUN   FuzzTypedConfigCanonical/seed#2
+--- PASS: FuzzTypedConfigCanonical (0.00s)
+    --- PASS: FuzzTypedConfigCanonical/seed#0 (0.00s)
+    --- PASS: FuzzTypedConfigCanonical/seed#1 (0.00s)
+    --- PASS: FuzzTypedConfigCanonical/seed#2 (0.00s)
+=== RUN   FuzzTypedValueCodec
+=== RUN   FuzzTypedValueCodec/seed#0
+=== RUN   FuzzTypedValueCodec/seed#1
+=== RUN   FuzzTypedValueCodec/seed#2
+--- PASS: FuzzTypedValueCodec (0.00s)
+    --- PASS: FuzzTypedValueCodec/seed#0 (0.00s)
+    --- PASS: FuzzTypedValueCodec/seed#1 (0.00s)
+    --- PASS: FuzzTypedValueCodec/seed#2 (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector/ann	11.019s
+go test ./sqlite ./driver ./examples/typed-ann-rerank focused selection count=2
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	62.181s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	8.959s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/typed-ann-rerank	0.945s
+go vet ./extension/vector/ann ./sqlite ./driver ./examples/typed-ann-rerank
+go build ./extension/vector/ann ./sqlite ./driver ./examples/typed-ann-rerank

@@ -1,0 +1,10 @@
+f36f065c2b96cf4bed00834f2128f7c0d17b730d0ce01a20cabd19eecad932d9  docs/evidence/m9-typed-ann-components.txt
+3e81cbf38e1ff4472a6c6da04175dcf09d95343c017dd3a4be2e45b1d2e2b5b9  docs/evidence/m9-typed-ann-dense-interop.go.txt
+f5cc59b039ddd89ee051fb5c784b2920da07779a0aa0d996fdf21cbeedfc185b  docs/evidence/m9-typed-ann-dense-interop.txt
+6ab9dea12d3f6485e71b47f96b6fcfb9ac8e1c8e916acd7689be612f042682cf  docs/evidence/m9-typed-ann-example.json
+49f3941c86c40dc61dce1d845095e4a921cb64df247caf09a56937af6d8d81b2  docs/evidence/m9-typed-ann-mixed-tree-race-blocker.txt
+d463a331b375e95952a7e5ae74b72893e4e4b53034ffd2f66e96f91d4fdcbea1  docs/evidence/m9-typed-ann-oracle.txt
+b797b1d7accbeb1222d841d4d352723528c9bda80f53c60ac04abdadd3a8043e  docs/evidence/m9-typed-ann-owned-paths.txt
+283c40318a86bb39046658cd4b7a9131624fd7e3e5424726fee770830bcf7b68  docs/evidence/m9-typed-ann-race.txt
+662dd503b5aa4bc11f6a4c7adc5cecf40f5f8b6c7bd8328435ec7e7a932fb000  docs/evidence/m9-typed-ann-source-sha256.txt
+689eb88335cb803d325817240b6c340f5e5a44d3ed7ebf0c5070e87b2a6eeef8  docs/evidence/typed-ann-independent-review.txt

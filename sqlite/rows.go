@@ -28,6 +28,7 @@ type resultRow struct {
 // Next, Values, Err and Close are synchronized, but callers must not interleave
 // multiple consumers because their logical Next/Values pair is not atomic.
 type Rows struct {
+	annWork                         ANNWorkStats
 	vectorRank                      *vectorRank
 	queryPlan                       QueryPlan
 	queryStats                      QueryStats

@@ -7,6 +7,7 @@ import (
 	"math"
 
 	"github.com/ms-xiaosnow/gosqlite/extension/vector"
+	"github.com/ms-xiaosnow/gosqlite/extension/vector/ann"
 	sqlast "github.com/ms-xiaosnow/gosqlite/internal/sql"
 )
 
@@ -24,7 +25,7 @@ type vectorRank struct {
 	bitLimits           BitSearchLimits
 	parsedBit           vector.BitVector
 	ann                 *annCandidateQuery
-	expected            *vector.Vector
+	expected            *ann.Value
 	annCandidate        bool
 	ordinal, dimensions int
 	query               any
@@ -168,6 +169,9 @@ func (r *Rows) prepareVectorRank() error {
 }
 
 func (v *vectorRank) score(r *Rows, value any) (any, error) {
+	if v.annCandidate && (v.sparse || v.half || v.bitMetric != "") {
+		return v.scoreTypedANN(r, value)
+	}
 	if v.sparse {
 		return v.scoreSparse(r, value)
 	}

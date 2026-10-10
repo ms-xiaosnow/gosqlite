@@ -42,12 +42,13 @@ func TestIVFQueryPersistedMemoryAdmissionBeforeCentroidRead(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	x := &extensionIndex{ann: &cfg, method: ann.IVFFlat}
+	typedCfg := ann.TypedConfig{Config: cfg}
+	x := &extensionIndex{ann: &typedCfg, method: ann.IVFFlat}
 	o, err = annIndexQueryOptions(x, o)
 	if err != nil {
 		t.Fatal(err)
 	}
-	a := annCandidateQuery{db: &DB{opts: Options{MaxSortBytes: 64 << 20}}, index: x, query: q, retain: 1, options: o, limits: vector.DefaultSearchLimits(), plan: &QueryPlan{}, stats: &QueryStats{}, components: func() int64 { return 2000 }, retainedBytes: func() int64 { return 0 }}
+	a := annCandidateQuery{db: &DB{opts: Options{MaxSortBytes: 64 << 20}}, index: x, query: ann.DenseValue(q), retain: 1, options: o, limits: vector.DefaultSearchLimits(), plan: &QueryPlan{}, stats: &QueryStats{}, components: func() int64 { return 2000 }, retainedBytes: func() int64 { return 0 }}
 	_, _, err = a.runIVF(context.Background(), newANNStore(nil, x), ann.State{Live: 1}, nil)
 	if !errors.Is(err, ErrMemoryLimit) || a.stats.ANNCentroidReads != 0 {
 		t.Fatal(err, a.stats)

@@ -26,18 +26,6 @@ func (r *Rows) prepareANNVector(reader btree.PageReader) error {
 		}
 		return nil
 	}
-	if v.sparse {
-		r.queryPlan.ANNFallback = "SPARSEVEC(n) ANN is unsupported; exact sparse ranking"
-		return nil
-	}
-	if v.half {
-		r.queryPlan.ANNFallback = "HALFVEC(n) ANN is unsupported; exact binary16 ranking"
-		return nil
-	}
-	if v.bitMetric != "" {
-		r.queryPlan.ANNFallback = "BIT(n) ANN is unsupported; exact packed-bit ranking"
-		return nil
-	}
 	if r.sel.NotIndexed {
 		r.queryPlan.ANNFallback = "NOT INDEXED requested"
 		return nil
@@ -53,7 +41,11 @@ func (r *Rows) prepareANNVector(reader btree.PageReader) error {
 		r.queryPlan.ANNFallback = "NULL query retains SQL NULL-first ordering"
 		return nil
 	}
-	x, why, err := r.db.selectANNIndex(r.ctx, reader, r.table, v.ordinal, v.metric, v.dimensions, "")
+	metric := v.metric
+	if v.bitMetric != "" {
+		metric = vector.MetricKind(v.bitMetric)
+	}
+	x, why, err := r.db.selectANNIndex(r.ctx, reader, r.table, v.ordinal, metric, v.dimensions, "")
 	if err != nil {
 		return err
 	}
@@ -70,7 +62,7 @@ func (r *Rows) prepareANNVector(reader btree.PageReader) error {
 		return err
 	}
 	applyANNPlan(&r.queryPlan, x, options)
-	v.ann = &annCandidateQuery{db: r.db, reader: reader, table: r.table, index: x, retain: v.retain, options: options, limits: v.limits, plan: &r.queryPlan, stats: &r.queryStats, components: func() int64 { return r.queryStats.VectorRankComponents }}
+	v.ann = &annCandidateQuery{db: r.db, reader: reader, table: r.table, index: x, retain: v.retain, options: options, limits: v.limits, plan: &r.queryPlan, stats: &r.queryStats, annWork: &r.annWork, components: func() int64 { return v.rankWork(&r.queryStats) }}
 	if x.method == ann.IVFFlat {
 		// State is eligibility metadata. EXPLAIN never reads centroids or lists.
 		state, err := newANNStore(reader, x).GetState(r.ctx)
@@ -115,20 +107,41 @@ func (r *Rows) materializeANNVector() error {
 	a := v.ann
 	// SQL keeps its scalar laziness: invalid queries are evaluated only when an
 	// eligible source row needs the distance. EXPLAIN never reaches this code.
-	q, _, err := decodeVectorColumn(v.query, v.dimensions)
+
+	// Preserve lazy SQL errors while admitting the full input representation
+	// before parsing. TEXT sparse zeros still consume parse/support work.
+	queryWork, queryScratch, preflightErr := annQueryPreflight(v.query, *a.index.ann)
+	if preflightErr != nil || queryWork > v.limits.MaxComponents || queryScratch >= r.db.opts.MaxSortBytes {
+		return r.fallbackANNVector("query validation deferred to eligible source rows")
+	}
+	q, _, err := decodeANNColumn(v.query, *a.index.ann)
 	if err != nil {
 		return r.fallbackANNVector("query validation deferred to eligible source rows")
 	}
-	if err = ann.ValidateVector(q, *a.index.ann); err != nil {
+	if err = ann.ValidateValue(q, *a.index.ann); err != nil {
 		return r.fallbackANNVector("query validation deferred to eligible source rows")
 	}
-	if uint64(v.dimensions) > v.limits.MaxComponents {
+	if queryWork > v.limits.MaxComponents {
 		return fmt.Errorf("%w: vector components", vector.ErrLimit)
 	}
 	v.prepared = true
-	v.parsed = q
-	r.queryStats.VectorRankComponents = int64(q.Dims())
+	switch q.Kind() {
+	case ann.DenseKind:
+		v.parsed = q.Dense()
+		r.queryStats.VectorRankComponents = int64(q.WorkUnits())
+	case ann.HalfKind:
+		v.parsedHalf = q.Half()
+		r.queryStats.VectorRankComponents = int64(q.WorkUnits())
+	case ann.BitKind:
+		v.parsedBit = q.Bit()
+		r.queryStats.VectorRankPackedBytes = int64(q.WorkUnits())
+	case ann.SparseKind:
+		v.parsedSparse = q.Sparse()
+		v.sparseQueryEntries = int(queryWork)
+		r.queryStats.VectorRankNonzeros = int64(queryWork)
+	}
 	a.query = q
+	r.queryStats.ANNPeakBytes = max(r.queryStats.ANNPeakBytes, queryScratch)
 	if r.source != nil {
 		if err := r.source.Close(); err != nil {
 			return err
@@ -138,7 +151,7 @@ func (r *Rows) materializeANNVector() error {
 	retained := vectorRowHeap{}
 	var used int64
 	a.retainedBytes = func() int64 { return used }
-	_, why, err := a.run(r.ctx, func(id int64, raw []any, expected *vector.Vector) (float64, bool, error) {
+	_, why, err := a.run(r.ctx, func(id int64, raw []any, expected *ann.Value) (float64, bool, error) {
 		v.expected = expected
 		v.annCandidate = true
 		row, cost, keep, err := r.evaluateSourceRow(id, raw)

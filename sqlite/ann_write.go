@@ -6,9 +6,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/ms-xiaosnow/gosqlite/extension/vector"
 	"github.com/ms-xiaosnow/gosqlite/extension/vector/ann"
-	sqlast "github.com/ms-xiaosnow/gosqlite/internal/sql"
 )
 
 func (t *Tx) validateANNField(x *extensionIndex, tab *writeTable) error {
@@ -19,8 +17,8 @@ func (t *Tx) validateANNField(x *extensionIndex, tab *writeTable) error {
 	if f.ordinal < 0 || f.ordinal >= len(tab.columns) {
 		return fmt.Errorf("%w: ANN field changed", ErrReindexRequired)
 	}
-	dims, ok := sqlast.VectorDimensions(tab.columns[f.ordinal].Type)
-	if !ok || dims != x.ann.Dimensions {
+	kind, dims, ok := annColumnType(tab.columns[f.ordinal].Type)
+	if !ok || dims != x.ann.Dimensions || kind != x.ann.Kind {
 		return fmt.Errorf("%w: ANN vector declaration changed", ErrReindexRequired)
 	}
 	return nil
@@ -39,23 +37,23 @@ func (t *Tx) applyANNDelta(ctx context.Context, c *writeCatalog, x *extensionInd
 		return t.applyIVFDelta(ctx, c, x, oldID, old, newID, next)
 	}
 	ordinal := x.fields[0].ordinal
-	var before, after vector.Vector
+	var before, after ann.Value
 	var beforeNull, afterNull = true, true
 	var err error
 	if old != nil {
-		before, beforeNull, err = decodeVectorColumn(old[ordinal], x.ann.Dimensions)
+		before, beforeNull, err = decodeANNColumn(old[ordinal], *x.ann)
 		if err != nil {
 			return err
 		}
 	}
 	if next != nil {
-		after, afterNull, err = decodeVectorColumn(next[ordinal], x.ann.Dimensions)
+		after, afterNull, err = decodeANNColumn(next[ordinal], *x.ann)
 		if err != nil {
 			return err
 		}
 	}
 	if !afterNull {
-		if err = ann.ValidateVector(after, *x.ann); err != nil {
+		if err = ann.ValidateValue(after, *x.ann); err != nil {
 			return fmt.Errorf("%w: indexed vector: %w", ErrConstraint, err)
 		}
 	}
@@ -96,12 +94,12 @@ func (t *Tx) applyANNDelta(ctx context.Context, c *writeCatalog, x *extensionInd
 		if !node.Live || node.RowID != oldID {
 			return extensionCorrupt("ANN old source identity differs")
 		}
-		a, _ := node.Vector.MarshalBinary()
+		a, _ := ann.NodeValue(node).MarshalBinary()
 		b, _ := before.MarshalBinary()
 		if !bytes.Equal(a, b) {
 			return extensionCorrupt("ANN old source vector differs")
 		}
-		if err = ann.Tombstone(ctx, store, &state, nodeID, cfg); err != nil {
+		if err = ann.TombstoneValue(ctx, store, &state, nodeID, cfg); err != nil {
 			return annWriteError(err)
 		}
 		if err = store.removeLive(ctx, oldID); err != nil {
@@ -110,7 +108,7 @@ func (t *Tx) applyANNDelta(ctx context.Context, c *writeCatalog, x *extensionInd
 	}
 	if !afterNull {
 		nodeID := state.NextID
-		if err = ann.Insert(ctx, store, &state, newID, after, cfg); err != nil {
+		if err = ann.InsertValue(ctx, store, &state, newID, after, cfg); err != nil {
 			return annWriteError(err)
 		}
 		if err = store.addLive(ctx, newID, nodeID); err != nil {

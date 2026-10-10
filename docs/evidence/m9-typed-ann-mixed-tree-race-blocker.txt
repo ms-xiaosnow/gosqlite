@@ -1,0 +1,20 @@
+Historical failed mixed-working-tree compile, retained without suppression.
+
+The first focused race attempt used the shared working tree while unrelated
+pager/native changes were in flight. Compilation failed before tests ran.
+This output is not evidence of a typed ANN race failure or an aggregate pass.
+The final scoped verification instead used the independently frozen baseline
+plus the 54 owned typed ANN source paths; see m9-typed-ann-race.txt for that PASS.
+The shared working tree's unrelated compilation state is outside this slice.
+
+Original output:
+
+# github.com/ms-xiaosnow/gosqlite/internal/pager
+internal/pager/shared_session.go:82:18: undefined: sharedOpenRetirements
+internal/pager/shared_session.go:118:17: undefined: sharedOpenFileOwner
+internal/pager/shared_session.go:168:16: undefined: sharedOpenFileOwner
+internal/pager/shared_session.go:173:18: undefined: sharedOpenIndexOwner
+FAIL	github.com/ms-xiaosnow/gosqlite/sqlite [build failed]
+FAIL	github.com/ms-xiaosnow/gosqlite/driver [build failed]
+FAIL	github.com/ms-xiaosnow/gosqlite/examples/typed-ann-rerank [build failed]
+FAIL

@@ -1,0 +1,68 @@
+M9 typed ANN final focused verification, 2026-10-10 UTC
+
+Frozen source tree: 27de0d52d2ab16d17d4e78484046e940e9a53b7a
+Durable baseline: f5663cc47f7e3f30f7b239cab674c47b6ad54b34
+Frozen archive: ../typed-ann-final-verify.Vyw9xC
+Source inventory: docs/evidence/m9-typed-ann-owned-paths.txt (54 paths)
+Source SHA256 manifest: docs/evidence/m9-typed-ann-source-sha256.txt
+Manifest SHA256: 662dd503b5aa4bc11f6a4c7adc5cecf40f5f8b6c7bd8328435ec7e7a932fb000
+
+The freeze used an external temporary Git index and object directory, initialized
+from the durable baseline, adding only the 54 owned source paths. It did not
+stage the shared main index or include in-flight native/pager changes. Evidence
+logs were added after verification and are not part of the source manifest.
+
+Environment:
+  GO=/workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go
+  GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off GOFLAGS=-buildvcs=false
+  GOCACHE=/tmp/typed-ann-gocache
+  GOMODCACHE=/workspace/scratch/5e06a74e5f65/durable-restart/go-path/pkg/mod
+  CGO_ENABLED=0 except the separately selected race run (CGO_ENABLED=1)
+
+Scope: source-reviewed ordinary intact storage and pure-memory algorithms/codecs.
+The mandatory `go run ./internal/testscope` guard passed before tests; the guard
+is source-reference screening, not a substitute for behavioral source review.
+No physical fault, crash, process-exit, hot recovery, disk tamper, wrong-key,
+missing selected files, namespace-mutation race, or interrupted-publication
+scenario was run. No aggregate, native-platform qualification, independent
+security/legal, or M10 gate was run or represented as passed by this slice.
+
+Prior source:
+  ../expressions-final-verify
+  parent frozen tree db470d2ec208a690202253db840620b219a6abdc
+Current source: final typed ANN frozen archive above.
+Harness: m9-typed-ann-dense-interop.go.txt, identical to the executed harness.
+
+With the environment above, H=/tmp/typed-ann-dense-interop.go and
+D=/tmp/typed-ann-dense-interop.JWyeD6, the ordinary commands were:
+  (cd ../expressions-final-verify; "$GO" run "$H" prior create "$D/old.db")
+  (cd ../typed-ann-final-verify.Vyw9xC; "$GO" run "$H" current mutate "$D/old.db")
+  (cd ../expressions-final-verify; "$GO" run "$H" prior mutate "$D/old.db")
+  (cd ../typed-ann-final-verify.Vyw9xC; "$GO" run "$H" current check "$D/old.db")
+  (cd ../typed-ann-final-verify.Vyw9xC; "$GO" run "$H" current create "$D/new.db")
+  (cd ../expressions-final-verify; "$GO" run "$H" prior mutate "$D/new.db")
+  (cd ../typed-ann-final-verify.Vyw9xC; "$GO" run "$H" current check "$D/new.db")
+
+All seven output records explicitly report PASS. Each open checks both dense
+HNSW and IVFFlat extension integrity and genuine approximate MethodVersion 1.
+Mutations are ordinary SQL UPDATE and REINDEX, followed by normal close/reopen.
+The independently created databases have identical canonical-config, node,
+centroid and list-membership hashes. The deterministic rebuilt payload hashes
+also match in both directions; config hashes remain unchanged. The harness
+hashes ordered, type-framed SQL field representations, including every byte of
+the encoded vector/adjacency/centroid BLOBs. This is logical format/payload
+compatibility evidence, not a whole-file byte-identical layout claim.
+
+No process is deliberately terminated, no files are removed from a selected
+database, and no physical bytes are changed outside ordinary database APIs.
+
+Unmodified command output follows:
+
+Frozen prior module: expressions-final-verify (parent tree db470d2ec208a690202253db840620b219a6abdc)
+{"check":"PASS","hashes_before_mutation":{"centroids":"52f7ecd4465befc0146cd7b3b10f191db2885084e247cbb74966fdba57754de9","config":"c173b41dd644bac681e5607cf78cca54744eabfb96f9d6e4af07b2731f2cc4b3","members":"af2bfde0fe354c8c7759887de88b1a42e7129c77a3d2a145f8d203ab5ad8e030","nodes":"12baa961ba4475b17c50e393f16a015eff1c22e357cd25ef8513a0551ef32260"},"mode":"create","source":"prior"}
+{"check":"PASS","hashes_before_mutation":{"centroids":"52f7ecd4465befc0146cd7b3b10f191db2885084e247cbb74966fdba57754de9","config":"c173b41dd644bac681e5607cf78cca54744eabfb96f9d6e4af07b2731f2cc4b3","members":"af2bfde0fe354c8c7759887de88b1a42e7129c77a3d2a145f8d203ab5ad8e030","nodes":"12baa961ba4475b17c50e393f16a015eff1c22e357cd25ef8513a0551ef32260"},"mode":"mutate","source":"current"}
+{"check":"PASS","hashes_before_mutation":{"centroids":"3c39b134584f07fcf34d9274b58a94983618c3ee5dd26d13e171328e03947fba","config":"c173b41dd644bac681e5607cf78cca54744eabfb96f9d6e4af07b2731f2cc4b3","members":"61db8c10c37fd1cee252757e1d7e5fb8f458650ddba02d16469b9656fc943442","nodes":"27be9886e6c59371f7061fd17315d54917ef6488e6edd0df8663eabed1d7bd19"},"mode":"mutate","source":"prior"}
+{"check":"PASS","hashes_before_mutation":{"centroids":"3c39b134584f07fcf34d9274b58a94983618c3ee5dd26d13e171328e03947fba","config":"c173b41dd644bac681e5607cf78cca54744eabfb96f9d6e4af07b2731f2cc4b3","members":"61db8c10c37fd1cee252757e1d7e5fb8f458650ddba02d16469b9656fc943442","nodes":"27be9886e6c59371f7061fd17315d54917ef6488e6edd0df8663eabed1d7bd19"},"mode":"check","source":"current"}
+{"check":"PASS","hashes_before_mutation":{"centroids":"52f7ecd4465befc0146cd7b3b10f191db2885084e247cbb74966fdba57754de9","config":"c173b41dd644bac681e5607cf78cca54744eabfb96f9d6e4af07b2731f2cc4b3","members":"af2bfde0fe354c8c7759887de88b1a42e7129c77a3d2a145f8d203ab5ad8e030","nodes":"12baa961ba4475b17c50e393f16a015eff1c22e357cd25ef8513a0551ef32260"},"mode":"create","source":"current"}
+{"check":"PASS","hashes_before_mutation":{"centroids":"52f7ecd4465befc0146cd7b3b10f191db2885084e247cbb74966fdba57754de9","config":"c173b41dd644bac681e5607cf78cca54744eabfb96f9d6e4af07b2731f2cc4b3","members":"af2bfde0fe354c8c7759887de88b1a42e7129c77a3d2a145f8d203ab5ad8e030","nodes":"12baa961ba4475b17c50e393f16a015eff1c22e357cd25ef8513a0551ef32260"},"mode":"mutate","source":"prior"}
+{"check":"PASS","hashes_before_mutation":{"centroids":"3c39b134584f07fcf34d9274b58a94983618c3ee5dd26d13e171328e03947fba","config":"c173b41dd644bac681e5607cf78cca54744eabfb96f9d6e4af07b2731f2cc4b3","members":"61db8c10c37fd1cee252757e1d7e5fb8f458650ddba02d16469b9656fc943442","nodes":"27be9886e6c59371f7061fd17315d54917ef6488e6edd0df8663eabed1d7bd19"},"mode":"check","source":"current"}

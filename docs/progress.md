@@ -484,3 +484,21 @@ including corrected Windows and reviewed typed ANN, completed focused native/ANN
 unit/race, full vet/build, typed/transaction oracle, six cross-builds, module and
 unchanged-source checks at2026-10-10T15:49:53Z. That is source-composition evidence,
 not an exact restored-commit or native-platform acceptance claim.
+
+### M9 typed persistent HNSW/IVF
+
+Delivered genuine graph/list algorithms for half/bit/sparse supported opclasses,
+version2 typed identities, original payloads, native/driver/SQL selection, bounded
+work, cancellation, DML/savepoint/delete/reindex/reopen, and explicit fallback.
+Old dense production/test paths and public layouts are preserved; independent
+bidirectional legacy fixtures verify dense v1 bytes. Review found/fixed sparse
+TEXT explicit-zero predecode work/scratch bypass; raw entry charges now precede
+decode while preserving WHERE0 laziness. Sparse IVF/IVF L1/Jaccard unsupported.
+
+Immutable typed source27de0d52d2ab16d17d4e78484046e940e9a53b7a completed full
+CGO0 unit/vet/build, separate CGO1 race, full pinned ordinary SQLite oracle, four
+cross-builds, modules/no-CGO and complete source/fixture hashes at15:51:11Z exit0.
+Source49f2749ffb838f936cc6066fb3496a4914cb1626 separately passed focused combined
+native/Darwin/failed-open/typed integration at15:49:53Z. Neither replaces exact
+commit CI/Library restore, native-OS or restricted/independent acceptance. Fixture
+HNSW recall@10=1 is dataset-specific; IVF one-probe recall spans0.30–0.90.

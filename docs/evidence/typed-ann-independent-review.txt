@@ -1,0 +1,258 @@
+M9 typed ANN independent source and behavioral review
+Date: 2026-10-10
+Status: REVIEWED WITH CORRECTION; focused experimental feature acceptance only.
+No remaining blocking typed ANN finding identified in the reviewed scope.
+This is not M3/M8 physical durability, security, platform-runtime, or M10 release qualification.
+
+Source boundary
+---------------
+Review began with /tmp/typed-ann-frozen-source-sha256.txt (14 algorithm paths),
+manifest SHA256 3f067b14571f69678e5925eaf615dc38271c2c4a34ed7323f1caf967ad03c265.
+Every listed initial algorithm hash matched before source review. The full first
+54-path manifest was d1946838028920c5da0ee2d08c9c3af5cdf46afed7275f496c869e7582107756.
+
+Final 54-path source inventory: docs/evidence/m9-typed-ann-owned-paths.txt.
+Final source hashes: docs/evidence/m9-typed-ann-source-sha256.txt, SHA256
+662dd503b5aa4bc11f6a4c7adc5cecf40f5f8b6c7bd8328435ec7e7a932fb000.
+Every listed final hash independently matched the isolated final source directory
+../typed-ann-final-verify.Vyw9xC. Owner reports isolated source tree
+27de0d52d2ab16d17d4e78484046e940e9a53b7a on durable baseline
+f5663cc47f7e3f30f7b239cab674c47b6ad54b34. Final focused test execution below used
+that isolated directory, not the concurrently changing native-platform tree.
+
+Read goal.md in full, the relevant engineering skill, docs/ann.md,
+docs/half-vector.md, docs/bit-vector.md, docs/sparse-vector.md,
+docs/typed-ann.md and extension/vector/ann/README.md. No applicable repository
+AGENTS.md was present in this checkout/ancestor scope. docs/ivfflat.md does not
+exist; the IVF contract is in docs/ann.md and the algorithm README.
+
+Reviewed every new typed algorithm production file and its new tests; traced
+SQLite storage/catalog/creation/delta/check/query/planner/native-search/Rows
+changes, the new driver matrix, ordinary oracle helpers and typed oracle tests,
+and the reranking example. Also inspected shared exact-support arithmetic,
+source-value admission, statement rollback and Rows ownership/release paths.
+No staging, commits, central documentation edits, or production-code edits were
+made by this reviewer. The implementation owner made the coordinated corrections.
+
+Finding and correction
+----------------------
+F1, resource/diagnostic contract violation, FIXED:
+The initial materializeANNVector decoded typed query input before scratch
+admission, then charged sparse input using canonical NNZ. Explicit zero entries
+in legal sparse TEXT disappeared from query and exact-source rescore work.
+Native sparseSearch correctly precharged original query entries, but its ANN
+candidate rescoring still used canonical support counts. SQL ANN also lost the
+initial raw-input entry charge. Existing exact sparse paths correctly counted
+these input entries and rejected excessive scratch.
+
+Independent ordinary-file reproduction before correction:
+- SPARSEVEC(1000000000) NOT NULL, one zero-support row, real HNSW index.
+- Normally close/reopen with MaxSortBytes=16384.
+- Query text contains 1000 distinct explicit zero entries.
+- Indexed SQL returned one row, method=hnsw, VectorRankNonzeros=0,
+  ANNWork.ComponentWork=0, no error.
+- Same query with NOT INDEXED returned ErrMemoryLimit.
+
+The owner added annQueryPreflight before SQL query decoding, with lazy exact
+fallback for inadmissible/invalid inputs; retained original sparse query entry
+counts; and added annRescoreWork using original source TEXT entry counts.
+Both work and scratch admission now precede candidate decoding. Graph metric
+ANNWork still correctly counts actual canonical NNZ support, independently of
+conservative source/parser work. The reviewer requested and verified the final
+admission ordering as well as the first query-preflight fix.
+
+Independent reproduction after correction: both indexed and NOT INDEXED queries
+reject with ErrMemoryLimit. TestTypedANNSparseInputZeroEntryBudgets additionally
+passes: a 160-zero query under 4096 bytes rejects, WHERE 0 preserves lazy empty
+semantics, a three-zero query charges six exact-source entries and zero graph
+support, and a five-unit native ceiling fails without partial results.
+The ordinary official-SQLite TEXT source regression checks a two-zero query
+against a three-zero stored TEXT value: exact/native ANN/SQL ANN/NOT INDEXED all
+charge seven source units and zero graph support. Its source was reviewed; the
+owner's oracle result is recorded separately.
+
+Compatibility and algorithm findings
+------------------------------------
+- All 14 preexisting ANN .go files (production and tests) are byte-for-byte
+  unchanged versus f5663cc47f7e3f30f7b239cab674c47b6ad54b34; only the preexisting
+  README is extended. No union fields were added to legacy dense structures.
+- External-package positional-literal fixtures preserve Config, Node, Sample,
+  Centroid, Limits, Stats and State layouts and the old function signatures.
+  SQLite dense HNSWIndexOptions/IVFFlatIndexOptions/QueryStats positional shapes
+  also compile. Typed work is exposed separately by Rows.ANNWork and typed stats.
+- Dense Config/ParseConfig/defaults/canonical JSON remain original v1. TypedConfig
+  uses v2 only for half/bit/sparse, with strict canonical kind/codec/opclass/
+  metric/dimension/transform/centroid identities. Canonical re-encoding rejects
+  unknown fields, duplicate/noncanonical input and changed policies.
+- Typed v1 and dense v2 do not silently reinterpret. Codecs remain original
+  GSH-v1, GSB-v1, GSS-v1, with indexed-payload bounds before broader decoders.
+  HNSW adjacency remains byte-identical GHA-v1. Source/node bytes are compared
+  after same-snapshot identity checks and WHERE, including signed half zero.
+- Dense bridge tests compare complete graph topology, source/adjacency bytes,
+  candidates and IVF centroids against the unchanged dense entry points.
+- testdata/ann/hnsw-v1.db SHA256 remains
+  5e11c357723a134217b2f3f110c1e80770d758dad1ab2efc8cf4a9d503817401.
+  TestIVFStorageOldHNSWCanonicalSurvives copies this genuine old-version fixture,
+  opens/checks it, adds IVF, updates/deletes/inserts/reindexes, preserves original
+  HNSW config bytes, normally reopens and confirms the tracked fixture is intact.
+- Owner's additional bidirectional old/current executable helper and output were
+  source-reviewed: old source is ../expressions-final-verify (reported tree
+  db470d2ec208a690202253db840620b219a6abdc). Old-created and current-created dense
+  HNSW+IVF fixtures have identical pre-mutation config/node/centroid/member hashes;
+  each implementation opens/checks/queries/mutates/reindexes the other's ordinary
+  file, followed by current verification. Seven explicit JSON PASS records were
+  inspected. This is payload/config compatibility, not a claim of byte-identical
+  entire database files or old software understanding new typed-v2 indexes.
+- HNSW is genuine deterministic multilayer insertion/search, greedy descent,
+  bounded best-first layer traversal, diversity/reciprocal pruning and persistent
+  node/live identity storage. Tombstones retain values/links and new identities
+  are not reused. Actual graph/node/edge/metric diagnostics remain observable.
+- Half IVF performs true farthest-first Lloyd/spherical training. Half source
+  magnitudes/bits are retained; only derived centroids round f64 -> f32 ->
+  binary16. Half spherical tolerance is 1e-3; dense remains 1e-6.
+- Bit IVF performs real Hamming assignments and per-bit majority means. The test
+  generates a centroid absent from all samples, excluding an exemplar stub.
+  Tied bits and empty clusters retain prior centers. Bit counts, packed backing,
+  and training iterations/work are bounded before large workspace allocation.
+- IVF opens actual selected membership B-tree ranges after centroid ordering,
+  validates covering/table/reverse identities, and rescoring uses original source
+  values. Untrained state needs explicit rebuild. Full-probe requests choose an
+  explained exact scan. No scan is labeled graph traversal or selected-list ANN.
+- Sparse HNSW supports dimension metadata up to 1e9, with indexed/query NNZ <=1000.
+  Metric arithmetic merges supports in O(nnz(a)+nnz(b)); storage/memory/work never
+  scale with declared sparse width. Empty support remains valid for L2/L1/IP.
+- Accepted matrix: half HNSW L2/IP/cosine/L1 and IVF L2/IP/cosine; bit HNSW
+  Hamming/Jaccard and IVF Hamming only; sparse HNSW L2/IP/cosine/L1. Sparse IVF,
+  IVF L1 and IVF Jaccard explicitly reject. Numeric cosine zeros reject; IP zeros
+  remain source values (only spherical training skips their direction); bit zeros
+  remain indexed and local Jaccard zero/zero is one. NULL remains distinct.
+- Native exact mode remains default. SQL ANN requires an eligible one-distance
+  ASC bounded-LIMIT shape and NOT NULL source. Nullable/NOT INDEXED/unsupported
+  shapes keep explicit exact paths. Mismatched source/kind/opclass/metric/dimension
+  is never used as an ANN index. No new cost model or SQL named ANN hint is claimed.
+
+Resources, transactions and ownership
+------------------------------------
+Config and query quotas use bounded arithmetic; dimensions/support/list/sample
+caps bound every multiplication. Numeric component, packed-byte and sparse
+support units stay separate. Limits include spent widening and abandoned ANN
+attempts before exact fallback. Exhaustion/cancellation produces an error and
+no successful partial native result; SQL consumers must check Rows.Err.
+
+Graph/list/query/result bookkeeping and source decode/identity scratch are
+jointly admitted. Typed node/sample/centroid fixed allowances cover the larger
+Value union; legacy exported dense formulas remain unchanged. The shared SQLite
+adapter can conservatively reject tight old budgets earlier; documentation
+explicitly distinguishes logical admission from RSS and broad SQL/pager work.
+
+Source rows and graph/list/catalog updates share the existing storage.Statement
+undo path, savepoints and transactions. Reindex builds in that same atomic scope.
+Ordinary mutation/savepoint/rollback/rebuild/reopen tests pass for every supported
+typed method. Shared-WAL snapshot tests keep prior graph/source generation while
+a peer writes/reindexes; normal writer BUSY and subsequent rollback/write pass.
+
+annStore owns snapshot-bound roots and no cross-query mutable graph cache. Query
+candidate results retain immutable values or copied row data. Graph caches do
+not escape SearchValue; SQL heap values retain appropriate row backing costs.
+Rows.close clears sorted/current/query/parameter references, closes source,
+releases the snapshot, removes DB tracking and decrements transaction activeRows.
+
+Independent supplementary late-cancellation checks on the final frozen tree
+used a counting context that triggers ordinary context cancellation ten Err()
+checks before a previously measured successful materialization endpoint. For
+half/bit HNSW, half/bit IVF and sparse HNSW, db.Query returned cancellation with
+no Rows; a normal peer UPDATE plus Checkpoint then succeeded. This checks query
+cleanup and snapshot release, not interrupted physical publication/recovery.
+
+Independent commands and results
+--------------------------------
+Toolchain: ../toolchains/go1.27.2/bin/go, go1.27.2 linux/amd64.
+Environment for all final ordinary commands:
+  GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off
+  GOPATH=$PWD/../go-path GOMODCACHE=$PWD/../go-path/pkg/mod
+  GOCACHE=$PWD/../go-cache CGO_ENABLED=0
+Run directory: ../typed-ann-final-verify.Vyw9xC.
+
+1. go run ./internal/testscope
+   PASS before execution, and again after the correction. Behavioral sources of
+   selected tests/helpers were inspected separately; the guard is not the audit.
+
+2. go test ./extension/vector/ann ./sqlite ./driver ./examples/typed-ann-rerank \
+     -run '^(TestTyped|TestDensePublicStruct|TestDriverTyped|TestIVFStorageOldHNSWCanonicalSurvives$|TestIVFQueryPersistedMemoryAdmissionBeforeCentroidRead$)' -count=1 -v
+   PASS on the final isolated boundary:
+   extension/vector/ann 7.071s; sqlite 18.181s; driver 2.969s;
+   examples/typed-ann-rerank 0.830s.
+   Raw review output: /tmp/typed-ann-independent-final-focused.log.
+
+3. Separate CGO_ENABLED=1 race (production remains CGO_ENABLED=0):
+   go test -race ./sqlite ./driver \
+     -run '^(TestTypedANNSharedSnapshotAndBusy|TestTypedANNSparseInputZeroEntryBudgets|TestDriverTypedANNPreparedSavepointReopen)$' -count=1 -v
+   PASS on the final isolated boundary: sqlite 1.190s; driver 7.668s.
+   Raw review output: /tmp/typed-ann-independent-final-race.log.
+
+4. Pure-memory algorithm fuzz smoke (unchanged algorithm freeze):
+   go test ./extension/vector/ann -run '^$' -fuzz '^FuzzTypedConfigCanonical$' -fuzztime=5s -parallel=2
+   PASS, 6.020s, 5 executions (3 initial seeds); very limited coverage, not broad fuzz qualification.
+   go test ./extension/vector/ann -run '^$' -fuzz '^FuzzTypedValueCodec$' -fuzztime=5s -parallel=2
+   PASS, 5.096s, 116152 executions, 21 new interesting inputs, no failing case.
+   Malformed config/value inputs were exclusively in memory.
+
+5. Independent 64-row ordinary native budget probes (half/bit HNSW+IVF, sparse
+   HNSW): tested MaxSortBytes 4096/16384/65536/1048576; every successful result
+   reported ANNPeakBytes <= its configured cap. Every successful query repeated
+   successfully at exact total source+ANN work, and failed with no hits at one
+   unit less. Final successful work totals: half HNSW 300, half IVF 69,
+   bit HNSW 214, bit IVF 42, sparse HNSW 398. Corresponding peak logical bytes:
+   66500, 5070, 71960, 4754, 67080. Small graph caps safely rejected.
+   Raw output: /tmp/typed-ann-independent-budgets.log.
+
+6. Final-tree late cancellation/ordinary peer checkpoint probes:
+   half HNSW: 4103 successful context checks; canceled at 4093, PASS.
+   half IVF: 498; canceled at 488, PASS.
+   bit HNSW: 4234; canceled at 4224, PASS.
+   bit IVF: 439; canceled at 429, PASS.
+   sparse HNSW: 4351; canceled at 4341, PASS.
+   Raw output: /tmp/typed-ann-independent-cancel.log.
+
+Supplementary probe source SHA256:
+  sparse admission reproducer: 23abd471e9738d58aa143659458cbc60195194936413e36b7836e849db7c77f3
+  native budget probe: 9618b9c139335814e424e880e57dac4e130b89605aa7bcad877a388cd22a23a3
+  late cancellation probe: 3e24a3ce83214a0f38842bafe897b6f34d6b934aba63f7eff65779bdedb56661
+Sources retained during this review as /tmp/typed-ann-independent-probe.go,
+/tmp/typed-ann-independent-budgets.go, /tmp/typed-ann-independent-cancel.go.
+The persistent regression for F1 is in the owned source inventory; the extra
+probes supplement it rather than replace repository acceptance tests.
+
+Initial environment-only attempts did not count as passes: default module-cache
+creation under /home/agent/go was read-only; an empty /workspace/shared/go-mod-cache
+then failed offline dependency resolution. Using the already populated approved
+../go-path/pkg/mod resolved those setup failures with GOPROXY=off unchanged.
+
+Quality evidence and remaining limits
+------------------------------------
+Independent focused runs reproduce persistent HNSW recall@10=1 for the ten small
+96-row/single-query fixtures. Persistent IVF 128-row/single-query initial-probe
+recall is half L2 .9, IP .8, cosine .6, bit Hamming .3; IP/cosine widened to two
+of four lists. Distances were checked against independent math, while source
+fetches/counters show actual graph/list access. These are narrow descriptive
+fixtures, not a universal 95% recall, latency advantage or default-quality claim.
+
+The larger seeded pure-memory HNSW 384-row/16-query tests visit most nodes;
+IVF 512-row/16-query tests use 20 of 24 lists. Documentation discloses this and does
+not turn high-work recall into a speedup claim. Reranking example uses true typed
+HNSW candidates and original dense values in one snapshot, and demonstrates
+candidate truncation loss that exact rescoring cannot recover.
+
+The owner's official pinned SQLite oracle, full dense regressions, vet/build,
+bidirectional executable payload compatibility and component reports are
+separate evidence. This independent review exercised the focused commands
+above, not the entire combined tree or every platform. Cross-compilation is
+not target runtime. No Windows/macOS runtime result is claimed here.
+
+No database corruption/tampering, wrong key, missing selected file, namespace
+replacement/race injection, crash/kill/process-exit recovery, hot recovery,
+failed native IO/lock/unmap/close/Sync, short write, disk full, permission fault,
+interrupted publication or rekey was executed. Negative ANN data remained
+in memory. Native files were intact ordinary databases; external SQLite activity
+was ordinary valid SQL only. Restricted physical safety gates, long soak,
+security/legal review and M10 remain open and separately owned.

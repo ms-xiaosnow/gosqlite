@@ -150,7 +150,7 @@ func TestHalfSQLNativeIndependentRanking(t *testing.T) {
 		op := map[vector.MetricKind]string{vector.L2: "<->", vector.L1: "<+>", vector.NegativeIP: "<#>", vector.Cosine: "<=>"}[metric]
 		for _, expr := range []string{"h " + op + " ?", "? " + op + " h"} {
 			rows, p, s := reviewVectorQuery(t, db, "SELECT id,"+expr+" AS distance FROM halves WHERE active=1 ORDER BY distance LIMIT 8", query)
-			if len(rows) != 8 || rows[0][0] != int64(-100) || rows[0][1] != nil || p.VectorRepresentation != "halfvec" || p.VectorMetric != metric || p.VectorRanking != "bounded_heap" || !p.VectorExact || p.ANNFallback != "HALFVEC(n) ANN is unsupported; exact binary16 ranking" || s.VectorRankComponents != got.Stats.ScoredComponents || s.VectorRankPackedBytes != 0 {
+			if len(rows) != 8 || rows[0][0] != int64(-100) || rows[0][1] != nil || p.VectorRepresentation != "halfvec" || p.VectorMetric != metric || p.VectorRanking != "bounded_heap" || !p.VectorExact || p.ANNFallback != "SQL NULL-first ordering requires a declared NOT NULL vector column" || s.VectorRankComponents != got.Stats.ScoredComponents || s.VectorRankPackedBytes != 0 {
 				t.Fatal(rows, p, s)
 			}
 			for i, r := range rows[1:] {
@@ -163,10 +163,10 @@ func TestHalfSQLNativeIndependentRanking(t *testing.T) {
 	if _, e := db.VectorSearch(context.Background(), "halves", "h", query, VectorSearchOptions{Limit: 1}); !errors.Is(e, ErrMismatch) {
 		t.Fatal(e)
 	}
-	if e := db.CreateHNSWIndex(context.Background(), "hh", "halves", "h"); !errors.Is(e, ErrMismatch) {
+	if e := db.CreateHNSWIndex(context.Background(), "hh", "halves", "h"); e != nil {
 		t.Fatal(e)
 	}
-	if e := db.CreateIVFFlatIndex(context.Background(), "hi", "halves", "h"); !errors.Is(e, ErrMismatch) {
+	if e := db.CreateIVFFlatIndex(context.Background(), "hi", "halves", "h"); e != nil {
 		t.Fatal(e)
 	}
 }

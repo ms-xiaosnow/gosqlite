@@ -27,7 +27,7 @@ Behavior baseline: official SQLite 3.54.0. M2 implements a deliberately bounded 
 | encrypted snapshot / rekey / backup | experimental ordinary slice | authenticated root/base, Linux stable locks, full snapshot publication, correct-key rekey/backup/restore and plaintext import/export; retained history and namespace/freshness limitations |
 | encrypted WAL | experimental ordinary slice | immutable authenticated final-dirty-page segments, bounded complete-head replay, checkpoint/rekey/copy and explicit snapshot upgrade; explicit Linux EncryptionWALShared adds single writer/immutable concurrent readers, pinned copies, stale-promotion refusal and quiescent rekey |
 | pg_embedding migration tooling | partial | bounded catalog/real-array inspector and typed source-span SQL converter with local execution fixtures and review-only PostgreSQL text; bounded resumable native import and review-only retained-array/shadow-column transition bundles with CLI; full-table/dependency recreation and online transition remain required code; no live PostgreSQL execution |
-| extended vector values | partial | distinct half/bit/sparse memory codecs and metrics; BIT(n), HALFVEC(n) and SPARSEVEC(n) SQL/storage/driver/exact ranking, explicit half conversion/loss reports and dense/half transforms implemented; all extended ANN remains required code |
+| extended vector values | partial | distinct half/bit/sparse memory codecs and metrics; BIT(n), HALFVEC(n) and SPARSEVEC(n) SQL/storage/driver/exact ranking, explicit half conversion/loss reports and dense/half transforms implemented; typed HNSW half/bit/sparse and IVF half/bit implemented with explicit opclass/bounds; sparse IVF, IVF L1 and bit Jaccard unsupported |
 | release audits / native OS evidence | unsupported | M10 not started; cross-build success is not native-runtime evidence |
 
 Unimplemented SQL/PRAGMAs return explicit errors. JOIN, aggregate/grouping, subqueries, CTEs, window functions, DISTINCT, UNION, scalar COLLATE (CREATE INDEX COLLATE BINARY is accepted), CASE, IN/BETWEEN, general views/triggers, STRICT, WITHOUT ROWID, autovacuum, UTF-16 and unlisted schema grammar remain unsupported. Some storage mechanisms can safely coexist in a read-only file without their SQL being executable.
@@ -83,7 +83,7 @@ sparse dimensions can reach 1e9 while work scales with at most 16000 nonzeros.
 Bit zero/zero Jaccard is 1 per the pinned reference. Finite float64 accumulation
 and stricter malformed sparse-zero-index validation intentionally differ from
 some upstream outputs. Published fixtures are source evidence, not a running
-PostgreSQL comparison. BIT(n) now has typed SQL/storage/driver and exact search with distinct Hamming/Jaccard diagnostics. HALFVEC now has typed SQL and exact search with explicit conversion loss; SPARSEVEC now has support-bounded SQL/native exact ranking and all extended ANN remains unsupported. See bit-vector.md, half-vector.md and sparse-vector.md.
+PostgreSQL comparison. BIT(n) now has typed SQL/storage/driver and exact search with distinct Hamming/Jaccard diagnostics. HALFVEC now has typed SQL and exact search with explicit conversion loss; SPARSEVEC now has support-bounded SQL/native exact ranking and typed HNSW and supported half/bit IVF now use representation-specific version2 identities while dense version1 bytes remain unchanged. See bit-vector.md, half-vector.md and sparse-vector.md.
 
 
 Transaction control now supports BEGIN [DEFERRED|IMMEDIATE|EXCLUSIVE], COMMIT/END,
@@ -149,7 +149,7 @@ parse/SQL preflight. SQL support scratch is combined with retained heap rows bef
 decoding the next candidate. Native MaxNonzeros and SQL SQLVectorRankNonzeros bound
 query support plus examined row support; no allocation depends on declared1e9
 coordinates. Exact scalar/native/heap/full-sort results agree. Dense conversion is
-explicit and bounded by dense limits; sparse ANN is required future code.
+explicit and bounded by dense limits; sparse HNSW now supports all four numeric metrics up to1000 nonzeros; sparse IVF remains unsupported.
 
 Offline import is explicitly mapped, one-table local CSV/NDJSON ingestion, never
 live PostgreSQL execution. New destinations are exclusively reserved; existing
@@ -205,3 +205,14 @@ RetryOpenCleanup handles wrapped/joined groups with bounded discovery. Successfu
 sessions release this admission slot. It therefore does not cover successful
 session Close, public DB.Close retry or driver disposal. Those remain code gaps.
 Native cleanup-error behavior is not qualified by memory-only laws.
+
+## Typed ANN checkpoint
+
+Typed HNSW/IVF use genuine persistent graph and selected-list access, original
+GSH/GSB/GSS source identities, same-snapshot rescoring, transactional maintenance
+and explained exact fallback. Indexed limits: half4000 dimensions, bit64000 bits,
+sparse HNSW1000 nonzeros within dimension1e9. Native exact defaults and SQL NULL
+semantics are preserved. Dense old-to-new-to-old and new-to-old-to-new ordinary
+fixtures verify v1 bytes/configuration and existing public structs. The supported
+opclass matrix, budget accounting and explicit unsupported combinations are in
+typed-ann.md; neither full PostgreSQL compatibility nor exact ANN recall follows.

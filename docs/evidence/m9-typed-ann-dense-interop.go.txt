@@ -1,0 +1,12 @@
+package main
+import("context";"crypto/sha256";"encoding/hex";"encoding/json";"errors";"fmt";"os";"github.com/ms-xiaosnow/gosqlite/sqlite")
+func run() (err error){
+ if len(os.Args)!=4{return fmt.Errorf("usage: source_label mode db")};ctx:=context.Background();db,err:=sqlite.Open(os.Args[3],sqlite.Options{});if err!=nil{return err};defer func(){err=errors.Join(err,db.Close())}()
+ if os.Args[2]=="create"{if _,err=db.Exec(ctx,"CREATE TABLE items(id INTEGER PRIMARY KEY,embedding VECTOR(3) NOT NULL)");err!=nil{return err};for i:=1;i<=32;i++{if _,err=db.Exec(ctx,"INSERT INTO items VALUES(?,?)",i,fmt.Sprintf("[%d,%d,1]",i,i%7));err!=nil{return err}};if err=db.CreateHNSWIndex(ctx,"h","items","embedding");err!=nil{return err};if err=db.CreateIVFFlatIndex(ctx,"i","items","embedding",sqlite.IVFFlatIndexOptions{Lists:3});err!=nil{return err}}
+ for _,name:=range []string{"h","i"}{if err=db.CheckExtensionIndex(ctx,name);err!=nil{return err};r,e:=db.VectorSearch(ctx,"items","embedding","[10,3,1]",sqlite.VectorSearchOptions{Mode:sqlite.VectorModeApproximate,Index:name,Limit:3});if e!=nil{return e};if r.Plan.Exact||r.Plan.MethodVersion!=1||len(r.Hits)!=3{return fmt.Errorf("incorrect legacy ANN identity: %+v",r.Plan)}}
+ hashes:=map[string]string{};queries:=map[string]string{"config":"SELECT config FROM __gosqlite_ext_catalog ORDER BY id","nodes":"SELECT original_vector,adjacency FROM __gosqlite_ext_ann_nodes ORDER BY node_id","centroids":"SELECT centroid,member_count FROM __gosqlite_ext_ann_centroids ORDER BY list_id","members":"SELECT list_id,content_rowid FROM __gosqlite_ext_ann_members ORDER BY id"}
+ for key,q:=range queries{rows,e:=db.Query(ctx,q);if e!=nil{return e};hash:=sha256.New();for rows.Next(){for _,v:=range rows.Values(){fmt.Fprintf(hash,"%T:%v;",v,v)}};e=errors.Join(rows.Err(),rows.Close());if e!=nil{return e};hashes[key]=hex.EncodeToString(hash.Sum(nil))}
+ if os.Args[2]=="mutate"{if _,err=db.Exec(ctx,"UPDATE items SET embedding='[7,8,1]' WHERE id=1");err!=nil{return err};for _,name:=range []string{"h","i"}{if err=db.Reindex(ctx,name);err!=nil{return err};if err=db.CheckExtensionIndex(ctx,name);err!=nil{return err}}}
+ return json.NewEncoder(os.Stdout).Encode(map[string]any{"source":os.Args[1],"mode":os.Args[2],"hashes_before_mutation":hashes,"check":"PASS"})
+}
+func main(){if err:=run();err!=nil{fmt.Println("FAILED:",err)}}

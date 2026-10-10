@@ -67,9 +67,10 @@ remain code work; unsupported is a safe interim behavior, not removal from goal.
   evidence; modern bit<~> remains Hamming.
 - Strict distinct half/bit/sparse memory values/codecs and metrics now exist;
   BIT, HALFVEC and SPARSEVEC typed storage/SQL/driver/exact ranking, explicit half
-  loss reports and bounded transforms are integrated. Add versioned supported
-  ANN identities while preserving dense
-  GSVv1. Retain exhaustive half rounding and O(nonzeros) sparse contracts;
+  loss reports and bounded transforms are integrated. Typed HNSW half/bit/sparse
+  and supported half/bit IVF now use version2 identities while preserving dense
+  v1 bytes and public struct layouts. Sparse IVF, IVF L1 and bit Jaccard remain
+  unsupported combinations. Retain half rounding and O(nonzeros) sparse contracts;
   quantized/half approximate search requires explicit lossy/rerank semantics.
 - The requested current Neon page was retrieved on2026-10-10; its migration chapter
   is absent. The historical official chapter is in

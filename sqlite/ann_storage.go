@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ms-xiaosnow/gosqlite/extension/vector"
 	"github.com/ms-xiaosnow/gosqlite/extension/vector/ann"
 	"github.com/ms-xiaosnow/gosqlite/internal/btree"
 	sqlast "github.com/ms-xiaosnow/gosqlite/internal/sql"
@@ -143,7 +142,7 @@ func (s *annStore) GetState(ctx context.Context) (ann.State, error) {
 		return ann.State{}, extensionCorrupt("ANN state field types")
 	}
 	state := ann.State{Entry: e, MaxLevel: int(ml), Live: live, Tombstones: dead, NextID: next, TrainingState: training}
-	if err := state.Validate(*s.x.ann); err != nil {
+	if err := state.ValidateTyped(*s.x.ann); err != nil {
 		return ann.State{}, fmt.Errorf("%w: ANN state values: %w", ErrCorrupt, err)
 	}
 	return state, nil
@@ -160,16 +159,16 @@ func (s *annStore) putState(ctx context.Context, state ann.State) error {
 	_, err = s.tx.insertExtensionRow(ctx, s.catalog, annStateName, values)
 	return err
 }
-func (s *annStore) GetNode(ctx context.Context, nodeID int64) (ann.Node, error) {
+func (s *annStore) GetNode(ctx context.Context, nodeID int64) (ann.TypedNode, error) {
 	if nodeID < 1 || nodeID > s.x.ann.MaxNodes {
-		return ann.Node{}, extensionCorrupt("ANN node identity outside limits")
+		return ann.TypedNode{}, extensionCorrupt("ANN node identity outside limits")
 	}
 	_, v, ok, err := s.row(ctx, annNodesName, annNodesLookup, 2, []any{s.x.id, nodeID})
 	if err != nil {
-		return ann.Node{}, err
+		return ann.TypedNode{}, err
 	}
 	if !ok || len(v) != 8 {
-		return ann.Node{}, extensionCorrupt("ANN missing node")
+		return ann.TypedNode{}, extensionCorrupt("ANN missing node")
 	}
 	row, rok := v[3].(int64)
 	live, lok := v[4].(int64)
@@ -177,34 +176,34 @@ func (s *annStore) GetNode(ctx context.Context, nodeID int64) (ann.Node, error) 
 	encoded, vok := v[6].([]byte)
 	adj, aok := v[7].([]byte)
 	if !rok || !lok || !levok || !vok || !aok || (live != 0 && live != 1) || level < 0 || level > ann.MaxLevel {
-		return ann.Node{}, extensionCorrupt("ANN node shape")
+		return ann.TypedNode{}, extensionCorrupt("ANN node shape")
 	}
-	vec, err := vector.Decode(encoded)
+	vec, err := ann.DecodeValue(encoded, *s.x.ann)
 	if err != nil {
-		return ann.Node{}, fmt.Errorf("%w: ANN stored vector: %w", ErrCorrupt, err)
+		return ann.TypedNode{}, fmt.Errorf("%w: ANN stored vector: %w", ErrCorrupt, err)
 	}
-	neighbors, err := ann.DecodeAdjacency(adj, nodeID, int(level), *s.x.ann)
+	neighbors, err := ann.DecodeTypedAdjacency(adj, nodeID, int(level), *s.x.ann)
 	if err != nil {
-		return ann.Node{}, fmt.Errorf("%w: ANN adjacency: %w", ErrCorrupt, err)
+		return ann.TypedNode{}, fmt.Errorf("%w: ANN adjacency: %w", ErrCorrupt, err)
 	}
-	node := ann.Node{ID: nodeID, RowID: row, Live: live == 1, Level: int(level), Vector: vec, Neighbors: neighbors}
-	if err = ann.ValidateNode(node, *s.x.ann); err != nil {
-		return ann.Node{}, fmt.Errorf("%w: ANN node: %w", ErrCorrupt, err)
+	node := ann.TypedNode{ID: nodeID, RowID: row, Live: live == 1, Level: int(level), Value: vec, Neighbors: neighbors}
+	if err = ann.ValidateTypedNode(node, *s.x.ann); err != nil {
+		return ann.TypedNode{}, fmt.Errorf("%w: ANN node: %w", ErrCorrupt, err)
 	}
 	return node, nil
 }
-func (s *annStore) PutNode(ctx context.Context, node ann.Node) error {
+func (s *annStore) PutNode(ctx context.Context, node ann.TypedNode) error {
 	if s.tx == nil {
 		return ErrReadOnly
 	}
-	if err := ann.ValidateNode(node, *s.x.ann); err != nil {
+	if err := ann.ValidateTypedNode(node, *s.x.ann); err != nil {
 		return err
 	}
-	encoded, err := node.Vector.MarshalBinary()
+	encoded, err := ann.EncodeValue(ann.NodeValue(node), *s.x.ann)
 	if err != nil {
 		return err
 	}
-	adjacent, err := ann.EncodeAdjacency(node, *s.x.ann)
+	adjacent, err := ann.EncodeTypedAdjacency(node, *s.x.ann)
 	if err != nil {
 		return err
 	}

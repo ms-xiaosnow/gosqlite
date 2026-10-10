@@ -405,3 +405,12 @@ Native Darwin/Windows runtime remains NOT_RUN. Restricted failure cases remain
 BLOCKED and must not be run here or relocated. Successful-session Close, public
 DB.Close retry, driver disposal, Windows shared rekey and Darwin Unicode
 inventory are still actual required code work, separate from these manual gates.
+
+## Typed ANN ordinary verification boundary
+
+See typed-ann.md, typed-ann-independent-review.txt and m9-typed-ann-* evidence.
+Frozen27de0d52… full ordinary unit/race/oracle and cross-build PASS is source-tree
+evidence. Dense v1 cross-version fixtures retain original byte/config/layout
+contracts. Approximate recall uses actual graph/list work and fixture-specific
+measurements. No physical tamper/crash workflow or native Darwin/Windows runtime
+was executed. All earlier manual prohibitions and independent M10 gates remain.

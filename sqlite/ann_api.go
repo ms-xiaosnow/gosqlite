@@ -10,8 +10,9 @@ import (
 )
 
 // HNSWIndexOptions selects persisted construction parameters. Zero fields use
-// fixed version-one defaults. Dimensions come from the declared VECTOR(n)
-// column; zero Metric selects L2. Opclass, when supplied, must match Metric.
+// fixed defaults. Dimensions and representation come from the declared typed
+// column. Numeric kinds default to L2; bit defaults to Hamming. Opclass
+// must match the representation/metric.
 // Cosine indexes impose a zero-norm constraint on every indexed non-NULL value.
 // Limits apply to construction and each algorithm operation; ordinary pager
 // dirty-page and connection memory limits can reject a statement earlier.
@@ -54,15 +55,15 @@ func (t *Tx) createHNSWIndex(ctx context.Context, c *writeCatalog, name, table, 
 	if !ok {
 		return fmt.Errorf("no such column: %s", column)
 	}
-	dims, ok := sqlast.VectorDimensions(tab.columns[ordinal].Type)
+	kind, dims, ok := annColumnType(tab.columns[ordinal].Type)
 	if !ok {
-		return fmt.Errorf("%w: ANN requires a VECTOR(n) column", ErrMismatch)
+		return fmt.Errorf("%w: ANN requires a declared vector column", ErrMismatch)
 	}
-	metric, err := vectorMetric(o.Metric)
+	metric, err := annCreationMetric(kind, o.Metric, o.Opclass)
 	if err != nil {
 		return err
 	}
-	cfg, err := (ann.Config{Method: ann.HNSW, Dimensions: dims, Metric: metric, Opclass: o.Opclass, M: o.M, EFConstruction: o.EFConstruction, Seed: o.Seed, MaxNodes: o.MaxNodes, MaxTombstones: o.MaxTombstones, MaxVisited: o.MaxVisited, MaxDistanceEvaluations: o.MaxDistanceEvaluations, MaxMemoryBytes: o.MaxMemoryBytes}).Normalize()
+	cfg, err := (ann.TypedConfig{Kind: kind, Config: ann.Config{Method: ann.HNSW, Dimensions: dims, Metric: metric, Opclass: o.Opclass, M: o.M, EFConstruction: o.EFConstruction, Seed: o.Seed, MaxNodes: o.MaxNodes, MaxTombstones: o.MaxTombstones, MaxVisited: o.MaxVisited, MaxDistanceEvaluations: o.MaxDistanceEvaluations, MaxMemoryBytes: o.MaxMemoryBytes}}).Normalize()
 	if err != nil {
 		return err
 	}
@@ -70,7 +71,7 @@ func (t *Tx) createHNSWIndex(ctx context.Context, c *writeCatalog, name, table, 
 	if err != nil {
 		return err
 	}
-	return t.createMethodIndex(ctx, c, name, table, []string{column}, ann.HNSW, ann.MethodVersion, canonical, ifNotExists)
+	return t.createMethodIndex(ctx, c, name, table, []string{column}, ann.HNSW, cfg.Version, canonical, ifNotExists)
 }
 func (t *Tx) createSQLHNSWIndex(ctx context.Context, c *writeCatalog, s *sqlast.CreateIndex) error {
 	if len(s.Columns) != 1 {
@@ -143,13 +144,13 @@ func (t *Tx) createSQLHNSWIndex(ctx context.Context, c *writeCatalog, s *sqlast.
 	// metric is also present, in which case canonical validation requires equality.
 	if o.Metric == "" && o.Opclass != "" {
 		switch o.Opclass {
-		case "vector_l2_ops":
+		case "vector_l2_ops", "halfvec_l2_ops", "sparsevec_l2_ops":
 			o.Metric = vector.L2
-		case "vector_l1_ops":
+		case "vector_l1_ops", "halfvec_l1_ops", "sparsevec_l1_ops":
 			o.Metric = vector.L1
-		case "vector_ip_ops":
+		case "vector_ip_ops", "halfvec_ip_ops", "sparsevec_ip_ops":
 			o.Metric = vector.NegativeIP
-		case "vector_cosine_ops":
+		case "vector_cosine_ops", "halfvec_cosine_ops", "sparsevec_cosine_ops":
 			o.Metric = vector.Cosine
 		}
 	}

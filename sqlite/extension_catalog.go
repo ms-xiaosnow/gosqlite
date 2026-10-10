@@ -59,7 +59,7 @@ type extensionIndex struct {
 	generation, documentCount             int64
 	canonical                             []byte
 	instance                              registry.Index
-	ann                                   *ann.Config
+	ann                                   *ann.TypedConfig
 	fields                                []extensionField
 	likeConfig, matchConfig               grams13.Config
 	usable                                bool
@@ -180,16 +180,16 @@ func (d *DB) loadExtensionsEntries(ctx context.Context, reader btree.PageReader,
 		names[fold(strs[0])] = true
 		configHashMismatch := extensionHash(strs[4]) != strs[5]
 		var instance registry.Index
-		var annConfig *ann.Config
+		var annConfig *ann.TypedConfig
 		if strs[3] == ann.HNSW || strs[3] == ann.IVFFlat {
-			if mv != ann.MethodVersion || c.roots[annStateName] == 0 {
+			if (mv != ann.MethodVersion && mv != ann.TypedMethodVersion) || c.roots[annStateName] == 0 {
 				return fmt.Errorf("%w: ANN method/storage version", ErrUnsupported)
 			}
-			cfg, err := ann.ParseConfig([]byte(strs[4]))
+			cfg, err := ann.ParseTypedConfig([]byte(strs[4]))
 			if err != nil {
 				return fmt.Errorf("%w: ANN configuration: %w", ErrUnsupported, err)
 			}
-			if cfg.Method != strs[3] {
+			if cfg.Method != strs[3] || int64(cfg.Version) != mv {
 				return extensionCorrupt("ANN configuration method differs")
 			}
 			annConfig = &cfg
@@ -292,8 +292,8 @@ func (d *DB) loadExtensionsEntries(ctx context.Context, reader btree.PageReader,
 						x.usable = false
 						x.fallback = "indexed field changed; REINDEX required"
 					} else if x.ann != nil {
-						dims, ok := sqlast.VectorDimensions(def.Columns[f.ordinal].Type)
-						if !ok || dims != x.ann.Dimensions {
+						kind, dims, ok := annColumnType(def.Columns[f.ordinal].Type)
+						if !ok || dims != x.ann.Dimensions || kind != x.ann.Kind {
 							x.usable = false
 							x.fallback = "indexed vector type changed; REINDEX required"
 						}

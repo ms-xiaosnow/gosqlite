@@ -1,0 +1,63 @@
+M9 typed ANN final focused verification, 2026-10-10 UTC
+
+Frozen source tree: 27de0d52d2ab16d17d4e78484046e940e9a53b7a
+Durable baseline: f5663cc47f7e3f30f7b239cab674c47b6ad54b34
+Frozen archive: ../typed-ann-final-verify.Vyw9xC
+Source inventory: docs/evidence/m9-typed-ann-owned-paths.txt (54 paths)
+Source SHA256 manifest: docs/evidence/m9-typed-ann-source-sha256.txt
+Manifest SHA256: 662dd503b5aa4bc11f6a4c7adc5cecf40f5f8b6c7bd8328435ec7e7a932fb000
+
+The freeze used an external temporary Git index and object directory, initialized
+from the durable baseline, adding only the 54 owned source paths. It did not
+stage the shared main index or include in-flight native/pager changes. Evidence
+logs were added after verification and are not part of the source manifest.
+
+Environment:
+  GO=/workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go
+  GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off GOFLAGS=-buildvcs=false
+  GOCACHE=/tmp/typed-ann-gocache
+  GOMODCACHE=/workspace/scratch/5e06a74e5f65/durable-restart/go-path/pkg/mod
+  CGO_ENABLED=0 except the separately selected race run (CGO_ENABLED=1)
+
+Scope: source-reviewed ordinary intact storage and pure-memory algorithms/codecs.
+The mandatory `go run ./internal/testscope` guard passed before tests; the guard
+is source-reference screening, not a substitute for behavioral source review.
+No physical fault, crash, process-exit, hot recovery, disk tamper, wrong-key,
+missing selected files, namespace-mutation race, or interrupted-publication
+scenario was run. No aggregate, native-platform qualification, independent
+security/legal, or M10 gate was run or represented as passed by this slice.
+
+Additional environment:
+  SQLITE_ORACLE=/workspace/scratch/5e06a74e5f65/durable-restart/toolchains/sqlite-build-3540000/sqlite3
+
+Command from frozen archive:
+  "$GO" test -tags oracle ./internal/testkit -run '^TestOracleTypedANN' -count=1 -v
+
+Result: PASS. Official SQLite 3.54.0 is a test-only storage oracle. Production
+runtime is native Go. Six intact-file cases cover page sizes 512/4096/65536 and
+rollback/shared WAL, typed source/shadow BLOB parity, ordinary external SQL
+writes marking guards dirty, normal rebuild, and integrity_check. A separate
+legal TEXT sparse source case verifies explicit-zero entry accounting in native
+and SQL exact/ANN scoring. No disk tampering or recovery fault is involved.
+
+Unmodified command output follows:
+
+Official SQLite 3.54.0 valid-file-only typed ANN oracle selection
+=== RUN   TestOracleTypedANNStorageAndDirtyGuards
+=== RUN   TestOracleTypedANNStorageAndDirtyGuards/page512/sharedfalse
+=== RUN   TestOracleTypedANNStorageAndDirtyGuards/page512/sharedtrue
+=== RUN   TestOracleTypedANNStorageAndDirtyGuards/page4096/sharedfalse
+=== RUN   TestOracleTypedANNStorageAndDirtyGuards/page4096/sharedtrue
+=== RUN   TestOracleTypedANNStorageAndDirtyGuards/page65536/sharedfalse
+=== RUN   TestOracleTypedANNStorageAndDirtyGuards/page65536/sharedtrue
+--- PASS: TestOracleTypedANNStorageAndDirtyGuards (14.00s)
+    --- PASS: TestOracleTypedANNStorageAndDirtyGuards/page512/sharedfalse (1.25s)
+    --- PASS: TestOracleTypedANNStorageAndDirtyGuards/page512/sharedtrue (1.53s)
+    --- PASS: TestOracleTypedANNStorageAndDirtyGuards/page4096/sharedfalse (1.29s)
+    --- PASS: TestOracleTypedANNStorageAndDirtyGuards/page4096/sharedtrue (1.58s)
+    --- PASS: TestOracleTypedANNStorageAndDirtyGuards/page65536/sharedfalse (3.75s)
+    --- PASS: TestOracleTypedANNStorageAndDirtyGuards/page65536/sharedtrue (4.61s)
+=== RUN   TestOracleTypedANNSparseTextEntryAccounting
+--- PASS: TestOracleTypedANNSparseTextEntryAccounting (0.01s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	14.024s

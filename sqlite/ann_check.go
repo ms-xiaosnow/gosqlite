@@ -37,7 +37,7 @@ func (d *DB) checkANNIndex(ctx context.Context, reader btree.PageReader, x *exte
 	if err != nil {
 		return err
 	}
-	if err = state.Validate(*x.ann); err != nil {
+	if err = state.ValidateTyped(*x.ann); err != nil {
 		return fmt.Errorf("%w: %w", ErrCorrupt, err)
 	}
 	var sourceRows, liveRows int64
@@ -59,7 +59,7 @@ func (d *DB) checkANNIndex(ctx context.Context, reader btree.PageReader, x *exte
 		if err != nil {
 			return err
 		}
-		vec, null, err := decodeVectorColumn(values[x.fields[0].ordinal], x.ann.Dimensions)
+		vec, null, err := decodeANNColumn(values[x.fields[0].ordinal], *x.ann)
 		if err != nil {
 			return err
 		}
@@ -73,7 +73,7 @@ func (d *DB) checkANNIndex(ctx context.Context, reader btree.PageReader, x *exte
 			}
 			continue
 		}
-		if err = ann.ValidateVector(vec, *x.ann); err != nil {
+		if err = ann.ValidateValue(vec, *x.ann); err != nil {
 			return fmt.Errorf("%w: ANN source value: %w", ErrCorrupt, err)
 		}
 		if !found {
@@ -87,7 +87,7 @@ func (d *DB) checkANNIndex(ctx context.Context, reader btree.PageReader, x *exte
 			return extensionCorrupt("ANN source/live node identity differs")
 		}
 		a, _ := vec.MarshalBinary()
-		b, _ := node.Vector.MarshalBinary()
+		b, _ := ann.NodeValue(node).MarshalBinary()
 		if !bytes.Equal(a, b) {
 			return extensionCorrupt("ANN source/node vector differs")
 		}

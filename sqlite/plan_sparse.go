@@ -35,7 +35,7 @@ func (v *vectorRank) scoreSparse(r *Rows, value any) (any, error) {
 	if !v.prepared {
 		needed += uint64(queryEntries)
 	}
-	used := uint64(r.queryStats.VectorRankNonzeros)
+	used := uint64(r.queryStats.VectorRankNonzeros) + uint64(r.annWork.ComponentWork)
 	if v.query != nil && (used > v.limits.MaxComponents || needed > v.limits.MaxComponents-used) {
 		return nil, fmt.Errorf("%w: sparse nonzeros", vector.ErrLimit)
 	}

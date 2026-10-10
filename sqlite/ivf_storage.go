@@ -5,16 +5,15 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/ms-xiaosnow/gosqlite/extension/vector"
 	"github.com/ms-xiaosnow/gosqlite/extension/vector/ann"
 	"github.com/ms-xiaosnow/gosqlite/internal/btree"
 )
 
 // Centroids reads only this index's bounded centroid range. It never scans
 // source vectors or list memberships. Each logical list has one ordinary row.
-func (s *annStore) Centroids(ctx context.Context, maxBytes int64) ([]ann.Centroid, error) {
+func (s *annStore) Centroids(ctx context.Context, maxBytes int64) ([]ann.TypedCentroid, error) {
 	cfg := s.x.ann
-	need := int64(cfg.Lists) * (int64(cfg.Dimensions)*4 + 160)
+	need := ann.TypedCentroidMemoryBytes(*cfg) + int64(cfg.Lists)*32
 	if need > maxBytes {
 		return nil, ErrMemoryLimit
 	}
@@ -24,7 +23,7 @@ func (s *annStore) Centroids(ctx context.Context, maxBytes int64) ([]ann.Centroi
 		return nil, err
 	}
 	defer cur.Close()
-	var result []ann.Centroid
+	var result []ann.TypedCentroid
 	for {
 		key, err := cur.Next()
 		if err == io.EOF {
@@ -56,30 +55,30 @@ func (s *annStore) Centroids(ctx context.Context, maxBytes int64) ([]ann.Centroi
 	}
 	return result, nil
 }
-func (s *annStore) decodeCentroid(row []any, exists bool, listID int) (ann.Centroid, int64, error) {
+func (s *annStore) decodeCentroid(row []any, exists bool, listID int) (ann.TypedCentroid, int64, error) {
 	if !exists || len(row) != 5 || row[0] != nil || row[1] != s.x.id || row[2] != int64(listID) {
-		return ann.Centroid{}, 0, extensionCorrupt("IVF centroid table/index mismatch")
+		return ann.TypedCentroid{}, 0, extensionCorrupt("IVF centroid table/index mismatch")
 	}
 	encoded, ok := row[3].([]byte)
 	count, cok := row[4].(int64)
 	if !ok || !cok || count < 0 || count > s.x.ann.MaxNodes {
-		return ann.Centroid{}, 0, extensionCorrupt("IVF centroid row shape")
+		return ann.TypedCentroid{}, 0, extensionCorrupt("IVF centroid row shape")
 	}
-	vec, err := vector.Decode(encoded)
+	vec, err := ann.DecodeValue(encoded, *s.x.ann)
 	if err != nil || vec.Dims() != s.x.ann.Dimensions {
-		return ann.Centroid{}, 0, fmt.Errorf("%w: IVF centroid vector", ErrCorrupt)
+		return ann.TypedCentroid{}, 0, fmt.Errorf("%w: IVF centroid vector", ErrCorrupt)
 	}
-	centroid := ann.Centroid{ID: listID, Vector: vec}
-	if err := ann.ValidateCentroid(centroid, *s.x.ann); err != nil {
-		return ann.Centroid{}, 0, fmt.Errorf("%w: IVF centroid: %w", ErrCorrupt, err)
+	centroid := ann.TypedCentroid{ID: listID, Value: vec}
+	if err := ann.ValidateTypedCentroid(centroid, *s.x.ann); err != nil {
+		return ann.TypedCentroid{}, 0, fmt.Errorf("%w: IVF centroid: %w", ErrCorrupt, err)
 	}
-	return ann.Centroid{ID: listID, Vector: vec}, count, nil
+	return centroid, count, nil
 }
-func (s *annStore) putCentroid(ctx context.Context, centroid ann.Centroid, count int64) error {
+func (s *annStore) putCentroid(ctx context.Context, centroid ann.TypedCentroid, count int64) error {
 	if centroid.ID < 1 || centroid.ID > s.x.ann.Lists || count < 0 || count > s.x.ann.MaxNodes {
 		return extensionCorrupt("IVF centroid identity/count")
 	}
-	blob, err := centroid.Vector.MarshalBinary()
+	blob, err := ann.EncodeValue(ann.CentroidValue(centroid), *s.x.ann)
 	if err != nil {
 		return err
 	}

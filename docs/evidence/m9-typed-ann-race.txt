@@ -1,0 +1,89 @@
+M9 typed ANN final focused verification, 2026-10-10 UTC
+
+Frozen source tree: 27de0d52d2ab16d17d4e78484046e940e9a53b7a
+Durable baseline: f5663cc47f7e3f30f7b239cab674c47b6ad54b34
+Frozen archive: ../typed-ann-final-verify.Vyw9xC
+Source inventory: docs/evidence/m9-typed-ann-owned-paths.txt (54 paths)
+Source SHA256 manifest: docs/evidence/m9-typed-ann-source-sha256.txt
+Manifest SHA256: 662dd503b5aa4bc11f6a4c7adc5cecf40f5f8b6c7bd8328435ec7e7a932fb000
+
+The freeze used an external temporary Git index and object directory, initialized
+from the durable baseline, adding only the 54 owned source paths. It did not
+stage the shared main index or include in-flight native/pager changes. Evidence
+logs were added after verification and are not part of the source manifest.
+
+Environment:
+  GO=/workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go
+  GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off GOFLAGS=-buildvcs=false
+  GOCACHE=/tmp/typed-ann-gocache
+  GOMODCACHE=/workspace/scratch/5e06a74e5f65/durable-restart/go-path/pkg/mod
+  CGO_ENABLED=0 except the separately selected race run (CGO_ENABLED=1)
+
+Scope: source-reviewed ordinary intact storage and pure-memory algorithms/codecs.
+The mandatory `go run ./internal/testscope` guard passed before tests; the guard
+is source-reference screening, not a substitute for behavioral source review.
+No physical fault, crash, process-exit, hot recovery, disk tamper, wrong-key,
+missing selected files, namespace-mutation race, or interrupted-publication
+scenario was run. No aggregate, native-platform qualification, independent
+security/legal, or M10 gate was run or represented as passed by this slice.
+
+Command from frozen archive:
+  CGO_ENABLED=1 "$GO" test -race ./sqlite ./driver ./examples/typed-ann-rerank -run 'TestTypedANN(Ordinary|Query|Maximum|Shared|IVFUntrained|ExactRepresentation|SparseInput)|TestDriverTypedANN|TestTypedANNRerank' -count=1 -v
+
+Result: PASS for this focused selection on the frozen slice. It is not a
+whole-repository race gate. Ordinary shared-WAL snapshot/BUSY is included;
+physical fault and namespace-race tests are excluded.
+
+Unmodified command output follows:
+
+CGO_ENABLED=1 go test -race focused typed ordinary lifecycle/query/driver/example selection
+=== RUN   TestTypedANNOrdinaryLifecycleSavepointAndReindex
+=== RUN   TestTypedANNOrdinaryLifecycleSavepointAndReindex/halfvec
+=== RUN   TestTypedANNOrdinaryLifecycleSavepointAndReindex/bit
+=== RUN   TestTypedANNOrdinaryLifecycleSavepointAndReindex/sparsevec
+--- PASS: TestTypedANNOrdinaryLifecycleSavepointAndReindex (2.62s)
+    --- PASS: TestTypedANNOrdinaryLifecycleSavepointAndReindex/halfvec (0.92s)
+    --- PASS: TestTypedANNOrdinaryLifecycleSavepointAndReindex/bit (0.82s)
+    --- PASS: TestTypedANNOrdinaryLifecycleSavepointAndReindex/sparsevec (0.88s)
+=== RUN   TestTypedANNQueryOptionsQuotasFallbackAndCancellation
+--- PASS: TestTypedANNQueryOptionsQuotasFallbackAndCancellation (3.24s)
+=== RUN   TestTypedANNMaximumValuesAndNullPolicies
+--- PASS: TestTypedANNMaximumValuesAndNullPolicies (0.13s)
+=== RUN   TestTypedANNSharedSnapshotAndBusy
+--- PASS: TestTypedANNSharedSnapshotAndBusy (0.18s)
+=== RUN   TestTypedANNIVFUntrainedAndExplicitAllProbeFallback
+--- PASS: TestTypedANNIVFUntrainedAndExplicitAllProbeFallback (0.03s)
+=== RUN   TestTypedANNExactRepresentationRecheckAndSQLWork
+--- PASS: TestTypedANNExactRepresentationRecheckAndSQLWork (0.30s)
+=== RUN   TestTypedANNSparseInputZeroEntryBudgets
+--- PASS: TestTypedANNSparseInputZeroEntryBudgets (0.02s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	7.728s
+=== RUN   TestDriverTypedANNPreparedSavepointReopen
+=== RUN   TestDriverTypedANNPreparedSavepointReopen/halfvec/hnsw/sharedfalse
+=== RUN   TestDriverTypedANNPreparedSavepointReopen/halfvec/ivfflat/sharedfalse
+=== RUN   TestDriverTypedANNPreparedSavepointReopen/bit/hnsw/sharedfalse
+=== RUN   TestDriverTypedANNPreparedSavepointReopen/bit/ivfflat/sharedfalse
+=== RUN   TestDriverTypedANNPreparedSavepointReopen/sparsevec/hnsw/sharedfalse
+=== RUN   TestDriverTypedANNPreparedSavepointReopen/halfvec/hnsw/sharedtrue
+=== RUN   TestDriverTypedANNPreparedSavepointReopen/halfvec/ivfflat/sharedtrue
+=== RUN   TestDriverTypedANNPreparedSavepointReopen/bit/hnsw/sharedtrue
+=== RUN   TestDriverTypedANNPreparedSavepointReopen/bit/ivfflat/sharedtrue
+=== RUN   TestDriverTypedANNPreparedSavepointReopen/sparsevec/hnsw/sharedtrue
+--- PASS: TestDriverTypedANNPreparedSavepointReopen (6.48s)
+    --- PASS: TestDriverTypedANNPreparedSavepointReopen/halfvec/hnsw/sharedfalse (0.93s)
+    --- PASS: TestDriverTypedANNPreparedSavepointReopen/halfvec/ivfflat/sharedfalse (0.18s)
+    --- PASS: TestDriverTypedANNPreparedSavepointReopen/bit/hnsw/sharedfalse (0.77s)
+    --- PASS: TestDriverTypedANNPreparedSavepointReopen/bit/ivfflat/sharedfalse (0.18s)
+    --- PASS: TestDriverTypedANNPreparedSavepointReopen/sparsevec/hnsw/sharedfalse (0.77s)
+    --- PASS: TestDriverTypedANNPreparedSavepointReopen/halfvec/hnsw/sharedtrue (0.99s)
+    --- PASS: TestDriverTypedANNPreparedSavepointReopen/halfvec/ivfflat/sharedtrue (0.30s)
+    --- PASS: TestDriverTypedANNPreparedSavepointReopen/bit/hnsw/sharedtrue (1.06s)
+    --- PASS: TestDriverTypedANNPreparedSavepointReopen/bit/ivfflat/sharedtrue (0.27s)
+    --- PASS: TestDriverTypedANNPreparedSavepointReopen/sparsevec/hnsw/sharedtrue (1.02s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/driver	7.672s
+=== RUN   TestTypedANNRerankSameSnapshot
+--- PASS: TestTypedANNRerankSameSnapshot (1.93s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/examples/typed-ann-rerank	3.072s

@@ -145,17 +145,17 @@ func (t *Tx) createMethodIndex(ctx context.Context, c *writeCatalog, name, table
 		return ErrMemoryLimit
 	}
 	var instance registry.Index
-	var annConfig *ann.Config
+	var annConfig *ann.TypedConfig
 	var err error
 	if methodName == ann.HNSW || methodName == ann.IVFFlat {
-		if version != ann.MethodVersion {
+		if version != ann.MethodVersion && version != ann.TypedMethodVersion {
 			return fmt.Errorf("%w: ANN method version", ErrUnsupported)
 		}
-		cfg, parseErr := ann.ParseConfig(canonical)
+		cfg, parseErr := ann.ParseTypedConfig(canonical)
 		if parseErr != nil {
 			return parseErr
 		}
-		if cfg.Method != methodName {
+		if cfg.Method != methodName || cfg.Version != version {
 			return ann.ErrConfig
 		}
 		annConfig = &cfg
@@ -192,8 +192,8 @@ func (t *Tx) createMethodIndex(ctx context.Context, c *writeCatalog, name, table
 		if len(fields) != 1 {
 			return fmt.Errorf("%w: ANN requires one vector field", ErrUnsupported)
 		}
-		dims, ok := sqlast.VectorDimensions(tab.columns[fields[0].ordinal].Type)
-		if !ok || dims != annConfig.Dimensions {
+		kind, dims, ok := annColumnType(tab.columns[fields[0].ordinal].Type)
+		if !ok || dims != annConfig.Dimensions || kind != annConfig.Kind {
 			return fmt.Errorf("%w: ANN vector dimensions", ErrMismatch)
 		}
 	}

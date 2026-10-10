@@ -228,7 +228,7 @@ func TestBitSQLAndNativeIndependentRanking(t *testing.T) {
 								t.Fatal(rows, want)
 							}
 						}
-						if plan.VectorRanking != "bounded_heap" || plan.VectorRepresentation != "bit" || plan.VectorBitMetric != metric || plan.VectorMetric != "" || !plan.VectorExact || plan.VectorDimensions != 17 || plan.ANNFallback != "BIT(n) ANN is unsupported; exact packed-bit ranking" {
+						if plan.VectorRanking != "bounded_heap" || plan.VectorRepresentation != "bit" || plan.VectorBitMetric != metric || plan.VectorMetric != "" || !plan.VectorExact || plan.VectorDimensions != 17 || plan.ANNFallback != "SQL NULL-first ordering requires a declared NOT NULL vector column" {
 							t.Fatal(plan)
 						}
 						if stats.VectorRankComponents != 0 || stats.VectorRankPackedBytes != 3*(1+int64(len(native))) || stats.VectorRankedRows != int64(len(native)) || stats.VectorNullRows != nulls || stats.VectorFilteredRows != filtered {
@@ -261,10 +261,10 @@ func TestBitSQLAndNativeIndependentRanking(t *testing.T) {
 	if _, err := db.VectorSearch(context.Background(), "bits", "b", equal, VectorSearchOptions{Limit: 1}); !errors.Is(err, ErrMismatch) {
 		t.Fatal(err)
 	}
-	if err := db.CreateHNSWIndex(context.Background(), "bits_hnsw", "bits", "b"); !errors.Is(err, ErrMismatch) {
+	if err := db.CreateHNSWIndex(context.Background(), "bits_hnsw", "bits", "b"); err != nil {
 		t.Fatal(err)
 	}
-	if err := db.CreateIVFFlatIndex(context.Background(), "bits_ivf", "bits", "b"); !errors.Is(err, ErrMismatch) {
+	if err := db.CreateIVFFlatIndex(context.Background(), "bits_ivf", "bits", "b"); err != nil {
 		t.Fatal(err)
 	}
 }

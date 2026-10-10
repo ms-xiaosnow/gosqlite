@@ -6,9 +6,10 @@ adds dense `subvector` and `binary_quantize` SQL functions. Existing dense
 `VECTOR(n)`, GSV v1 bytes, numeric metrics and `VectorSearch` APIs are unchanged.
 
 HALFVEC SQL and native typed search are now documented in half-vector.md.
-SPARSEVEC SQL remains a subsequent checkpoint; its memory value/codec alone
-does not imply database integration. Bit, half and sparse ANN remain unsupported. No PostgreSQL runtime,
-wire format, cast, operator-class or general SQL compatibility is claimed.
+SPARSEVEC SQL/native exact search is documented in sparse-vector.md.
+The later [typed ANN checkpoint](typed-ann.md) adds persistent bit HNSW
+(Hamming/Jaccard) and IVFFlat (Hamming). No PostgreSQL runtime, wire format,
+cast or general SQL compatibility is claimed.
 
 ## Typed SQL and strict representation identity
 
@@ -84,7 +85,8 @@ Both DB and Tx expose `BitSearch`. The query accepts normal driver values,
 including `BitVector`/`NullBitVector`, bit text, canonical BLOB and NULL. A
 physical `BIT(n)` column is required. `VectorSearch` remains dense-only. Empty
 metric selects Hamming; only closed Hamming/Jaccard identities are valid.
-There is no bit approximate mode or arbitrary metric callback.
+Exact remains the default. Explicit approximate mode and its bounded controls
+are described in [typed ANN](typed-ann.md); arbitrary metric callbacks reject.
 
 One snapshot is used for the whole operation; transactions see their own writes.
 The source is a full scan with WHERE evaluated before bit decoding/scoring.
@@ -118,7 +120,7 @@ SQL retains ordinary NULL-first ascending ordering, unlike native exclusion.
 
 Plan `VectorRepresentation="bit"` and `VectorBitMetric` identify the type and
 metric; dense `VectorMetric` stays empty. `VectorRankPackedBytes` counts packed
-work, while `VectorRankComponents` and ANN distance counters remain zero.
+work. Exact ranking keeps `VectorRankComponents` and ANN counters zero.
 `VectorRanking="bounded_heap"` is an exact ranking stage, never an index claim.
 Source access can independently use a sound ordinary/grams index.
 
@@ -128,9 +130,10 @@ DESC, transformed query expressions and unlimited sorts retain the existing
 MaxSortBytes-bounded general sorter. Default candidate/result/packed-byte quotas
 apply to the recognized heap, not all scalar expressions in a query.
 
-SQL reports an explicit `BIT(n) ANN is unsupported; exact packed-bit ranking`
-fallback. Dense HNSW/IVFFlat creation and dense native search reject BIT columns;
-they never treat GSB bytes as GSV. Typed bit ANN is a later implementation.
+Eligible NOT NULL bit distance queries may now use a matching real typed ANN
+index. With no matching index, nullable columns or NOT INDEXED, exact ranking
+remains available with an explicit reason. Dense native VectorSearch still
+rejects BIT columns. See [typed ANN](typed-ann.md) for v2 identities and limits.
 
 ## Driver bindings and dense SQL transforms
 

@@ -298,5 +298,19 @@
     "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38073597982",
     "remote_ci_status": "IN_PROGRESS observed2026-10-10T17:55:34Z; no terminal pass inferred.",
     "open_gates": "Windows native execution and physical failure acceptance NOT_RUN; Windows shared rekey, successful-session/public/driver close ownership, broad SQL and remaining migration/platform code are open. Default Windows VFS vet mapping diagnostic remains disclosed."
+  },
+  {
+    "stage": "Darwin encrypted coordination and bounded failed-open shared retirement",
+    "remote_commit": "b8c5ffa44809f9058eb7b13654e9edf9e54a91ad",
+    "local_commit": "b8c5ffa44809f9058eb7b13654e9edf9e54a91ad",
+    "tree": "bf63e800aaa276c92be8561ea7c6db9bfba1bb86",
+    "bundle_sha256": "5845fc1ed34918aef595c937b1cf8bbf4d655e88b4d9eb0467cb03c0334c6440",
+    "bundle_bytes": 1788563,
+    "library_file_id": "libfile_11c0e5e2a10c8191b8a6096dae773bdb",
+    "library_version": 0,
+    "verified": "Expected-SHA remote main readback and exact local mirror; full-history bundle byte-identical Library readback, clean clone/fsck and original goal hash verified2026-10-10T17:58:45Z. Scoped independent source/memory/ordinary/race/crosscompile evidence and combined source49f2749ffb838f936cc6066fb3496a4914cb1626 checks passed; exact restored scoped suite started17:58:59Z and remains pending at this record. Historical22-path Darwin manifest is explicitly superseded only for bounded first-poison retention delta.",
+    "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38073896992",
+    "remote_ci_status": "IN_PROGRESS observed2026-10-10T17:58:45Z; no terminal pass inferred.",
+    "open_gates": "Native Darwin/Windows runtime and physical cleanup failures NOT_RUN; Darwin Unicode inventory, Windows shared rekey, successful-session/public/driver close ownership and broader SQL/migration/recovery code remain. Failed-open API is scoped, not whole-lifecycle acceptance."
   }
 ]

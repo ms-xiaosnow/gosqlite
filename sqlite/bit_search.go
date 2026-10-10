@@ -9,6 +9,7 @@ import (
 	"io"
 
 	"github.com/ms-xiaosnow/gosqlite/extension/vector"
+	"github.com/ms-xiaosnow/gosqlite/extension/vector/ann"
 	"github.com/ms-xiaosnow/gosqlite/internal/btree"
 	sqlast "github.com/ms-xiaosnow/gosqlite/internal/sql"
 )
@@ -39,16 +40,21 @@ func bitLimits(l BitSearchLimits) (BitSearchLimits, error) {
 }
 
 // BitSearchOptions selects exact Top-K over one physical BIT(n) column. Empty
-// Metric selects Hamming. Only Hamming/Jaccard identities are accepted. There
-// is no bit ANN mode in this checkpoint. Where is one bound SQL expression,
+// Metric selects Hamming. Only Hamming/Jaccard identities are accepted. Mode defaults to exact; approximate mode opts into a matching typed ANN index.
+// Where is one bound SQL expression,
 // evaluated before bit decoding/scoring. Limit must be nonnegative; zero
 // validates query/options but visits no rows. NULL query yields EMPTY.
 type BitSearchOptions struct {
-	Metric vector.BitMetricKind
-	Limit  int
-	Where  string
-	Args   []any
-	Limits BitSearchLimits
+	Mode                  VectorSearchMode
+	Index                 string
+	EFSearch, MaxEFSearch int
+	Probes, MaxProbes     int
+	ANNLimits             ANNWorkLimits
+	Metric                vector.BitMetricKind
+	Limit                 int
+	Where                 string
+	Args                  []any
+	Limits                BitSearchLimits
 }
 
 // BitPlan describes native exact bit search. Embedded SQL ranking fields stay
@@ -63,12 +69,13 @@ type BitPlan struct {
 }
 
 func (p BitPlan) Detail() string {
-	return fmt.Sprintf("%s %s; representation=bit; bit_field=%s; bit_metric=%s; dimensions=%d; limit=%d; exact=%t; distance_order=ASC,rowid_ASC; null_candidates=excluded; reason=%s", p.Access, p.Table, p.Field, p.Metric, p.Dimensions, p.Limit, p.Exact, p.Reason)
+	return fmt.Sprintf("%s %s; representation=bit; bit_field=%s; bit_metric=%s; dimensions=%d; limit=%d; exact=%t; distance_order=ASC,rowid_ASC; null_candidates=excluded; reason=%s", p.Access, p.Table, p.Field, p.Metric, p.Dimensions, p.Limit, p.Exact, p.Reason) + p.annDetail()
 }
 
 // BitStats separates fetched, excluded and scored source rows. Packed work
 // follows BitSearchLimits; it does not measure arbitrary SQL expression work.
 type BitStats struct {
+	ANNWork ANNWorkStats
 	QueryStats
 	FilteredRows      int64
 	ScoredRows        int64
@@ -76,7 +83,7 @@ type BitStats struct {
 	ScoredPackedBytes int64
 }
 
-// BitResult contains a complete exact ranking and value-only diagnostics.
+// BitResult contains a complete requested ranking and explicit recall diagnostics.
 type BitResult struct {
 	Hits  []vector.Hit
 	Plan  BitPlan
@@ -84,7 +91,7 @@ type BitResult struct {
 }
 
 // BitSearch owns one ordinary database snapshot and returns only complete
-// exact results. A failure/cancellation returns the zero result, never hits.
+// requested results. A failure/cancellation returns the zero result, never hits.
 func (d *DB) BitSearch(ctx context.Context, table, field string, query any, options BitSearchOptions) (BitResult, error) {
 	if err := checkContext(ctx); err != nil {
 		return BitResult{}, wrap("bit search", err)
@@ -160,6 +167,10 @@ func bitQueryValue(ctx context.Context, query any) (any, error) {
 }
 
 func (d *DB) bitSearch(ctx context.Context, reader btree.PageReader, tableName, fieldName string, query any, options BitSearchOptions) (BitResult, error) {
+	annOptions, err := normalizeVectorANNOptions(VectorSearchOptions{Mode: options.Mode, Index: options.Index, Limit: options.Limit, EFSearch: options.EFSearch, MaxEFSearch: options.MaxEFSearch, Probes: options.Probes, MaxProbes: options.MaxProbes, ANNLimits: options.ANNLimits})
+	if err != nil {
+		return BitResult{}, err
+	}
 	limits, err := bitLimits(options.Limits)
 	if err != nil {
 		return BitResult{}, err
@@ -227,6 +238,18 @@ func (d *DB) bitSearch(ctx context.Context, reader btree.PageReader, tableName, 
 		result.Plan.Access, result.Plan.Reason = "EMPTY", "zero limit; query validated without source reads"
 		return result, nil
 	}
+	if annOptions.Mode == VectorModeApproximate {
+		result.Plan.VectorRepresentation = "bit"
+		hits, done, err := d.typedSearchANN(ctx, reader, tab, ordinal, ann.BitValue(q), vector.MetricKind(metric), annOptions, vector.SearchLimits{MaxCandidates: limits.MaxCandidates, MaxResults: limits.MaxResults, MaxComponents: limits.MaxPackedBytes}, filter, &result.Plan.QueryPlan, &result.Stats.QueryStats, &result.Stats.ANNWork, &result.Stats.ScoredPackedBytes, &result.Stats.ScoredRows, &result.Stats.FilteredRows)
+		if err != nil {
+			return BitResult{}, err
+		}
+		if done {
+			result.Hits = hits
+			result.Plan.Exact = false
+			return result, nil
+		}
+	}
 	// Reserve both query/candidate packed storage and result heap before retaining
 	// row identities. Duplicate detection is bounded, never silently truncated.
 	reserve := int64(options.Limit)*64 + int64(packedBytes)*2
@@ -292,7 +315,7 @@ func (d *DB) bitSearch(ctx context.Context, reader btree.PageReader, tableName, 
 			result.Stats.NullRows++
 			continue
 		}
-		used := uint64(result.Stats.ScoredPackedBytes)
+		used := uint64(result.Stats.ScoredPackedBytes) + uint64(result.Stats.ANNWork.ComponentWork)
 		if used > limits.MaxPackedBytes || packedBytes > limits.MaxPackedBytes-used {
 			return BitResult{}, fmt.Errorf("%w: bit packed bytes", vector.ErrLimit)
 		}

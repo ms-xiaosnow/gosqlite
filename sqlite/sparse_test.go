@@ -221,7 +221,7 @@ func TestSparseIndependentNativeHeapAndFullSort(t *testing.T) {
 					base := "SELECT id," + expr + " AS distance FROM sparse_items WHERE " + where + " ORDER BY distance"
 					rows, p, stats := reviewVectorQuery(t, db, base+suffix, query)
 					full, fp, _ := reviewVectorQuery(t, db, base+",id"+suffix, query)
-					if !reflect.DeepEqual(rows, full) || p.VectorRepresentation != "sparsevec" || p.VectorMetric != metric || p.VectorRanking != "bounded_heap" || !p.VectorExact || p.ANNFallback != "SPARSEVEC(n) ANN is unsupported; exact sparse ranking" || fp.VectorRanking != "" || stats.VectorRankComponents != 0 || stats.VectorRankPackedBytes != 0 || stats.VectorRankNonzeros != nonzeros {
+					if !reflect.DeepEqual(rows, full) || p.VectorRepresentation != "sparsevec" || p.VectorMetric != metric || p.VectorRanking != "bounded_heap" || !p.VectorExact || p.ANNFallback != "SQL NULL-first ordering requires a declared NOT NULL vector column" || fp.VectorRanking != "" || stats.VectorRankComponents != 0 || stats.VectorRankPackedBytes != 0 || stats.VectorRankNonzeros != nonzeros {
 						t.Fatal(rows, full, p, stats)
 					}
 					var all [][]any
@@ -251,10 +251,10 @@ func TestSparseIndependentNativeHeapAndFullSort(t *testing.T) {
 	if _, e := db.VectorSearch(context.Background(), "sparse_items", "s", query, VectorSearchOptions{Limit: 1}); !errors.Is(e, ErrMismatch) {
 		t.Fatal(e)
 	}
-	if e := db.CreateHNSWIndex(context.Background(), "sh", "sparse_items", "s"); !errors.Is(e, ErrMismatch) {
+	if e := db.CreateHNSWIndex(context.Background(), "sh", "sparse_items", "s"); e != nil {
 		t.Fatal(e)
 	}
-	if e := db.CreateIVFFlatIndex(context.Background(), "si", "sparse_items", "s"); !errors.Is(e, ErrMismatch) {
+	if e := db.CreateIVFFlatIndex(context.Background(), "si", "sparse_items", "s"); !errors.Is(e, ErrUnsupported) {
 		t.Fatal(e)
 	}
 }

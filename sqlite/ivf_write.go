@@ -7,18 +7,17 @@ import (
 	"io"
 	"math"
 
-	"github.com/ms-xiaosnow/gosqlite/extension/vector"
 	"github.com/ms-xiaosnow/gosqlite/extension/vector/ann"
 	"github.com/ms-xiaosnow/gosqlite/internal/btree"
 )
 
-func (t *Tx) ivfOperationConfig(x *extensionIndex) (ann.Config, error) {
+func (t *Tx) ivfOperationConfig(x *extensionIndex) (ann.TypedConfig, error) {
 	cfg := *x.ann
 	if cfg.MaxMemoryBytes > t.db.opts.MaxSortBytes {
 		cfg.MaxMemoryBytes = t.db.opts.MaxSortBytes
 	}
 	if cfg.MaxMemoryBytes < 1024 {
-		return ann.Config{}, ErrMemoryLimit
+		return ann.TypedConfig{}, ErrMemoryLimit
 	}
 	return cfg, cfg.Validate()
 }
@@ -30,7 +29,7 @@ func (t *Tx) buildIVF(ctx context.Context, c *writeCatalog, x *extensionIndex, t
 	if err != nil {
 		return err
 	}
-	sampler, err := ann.NewIVFSampler(cfg)
+	sampler, err := ann.NewTypedIVFSampler(cfg)
 	if err != nil {
 		return annWriteError(err)
 	}
@@ -57,21 +56,21 @@ func (t *Tx) buildIVF(ctx context.Context, c *writeCatalog, x *extensionIndex, t
 		if err != nil {
 			return err
 		}
-		v, null, err := decodeVectorColumn(values[x.fields[0].ordinal], cfg.Dimensions)
+		v, null, err := decodeANNColumn(values[x.fields[0].ordinal], cfg)
 		if err != nil {
 			return err
 		}
 		if null {
 			continue
 		}
-		if err = ann.ValidateVector(v, cfg); err != nil {
+		if err = ann.ValidateValue(v, cfg); err != nil {
 			return fmt.Errorf("%w: indexed IVF vector: %w", ErrConstraint, err)
 		}
 		if state.Live >= cfg.MaxNodes {
 			return annWriteError(fmt.Errorf("%w: IVF eligible rows", ann.ErrLimit))
 		}
 		state.Live++
-		if err = sampler.Add(ctx, id, v); err != nil {
+		if err = sampler.AddValue(ctx, id, v); err != nil {
 			return annWriteError(fmt.Errorf("indexed IVF vector: %w", err))
 		}
 	}
@@ -82,7 +81,7 @@ func (t *Tx) buildIVF(ctx context.Context, c *writeCatalog, x *extensionIndex, t
 	if err != nil {
 		return annWriteError(err)
 	}
-	centroids, work, ready, err := ann.Train(ctx, samples, cfg)
+	centroids, work, ready, err := ann.TrainValues(ctx, samples, cfg)
 	if err != nil {
 		return annWriteError(err)
 	}
@@ -118,14 +117,14 @@ func (t *Tx) buildIVF(ctx context.Context, c *writeCatalog, x *extensionIndex, t
 		if err != nil {
 			return err
 		}
-		v, null, err := decodeVectorColumn(values[x.fields[0].ordinal], cfg.Dimensions)
+		v, null, err := decodeANNColumn(values[x.fields[0].ordinal], cfg)
 		if err != nil {
 			return err
 		}
 		if null {
 			continue
 		}
-		remaining := (cfg.MaxTrainingWork - used) / int64(cfg.Dimensions)
+		remaining := (cfg.MaxTrainingWork - used) / int64(max(1, v.WorkUnits()))
 		if remaining < 1 {
 			return annWriteError(fmt.Errorf("%w: IVF assignment component work", ann.ErrLimit))
 		}
@@ -133,8 +132,8 @@ func (t *Tx) buildIVF(ctx context.Context, c *writeCatalog, x *extensionIndex, t
 		if remaining < int64(limit) {
 			limit = int(remaining)
 		}
-		list, stats, err := ann.Assign(ctx, v, centroids, cfg, ann.Limits{MaxDistanceEvaluations: limit})
-		used += int64(stats.DistanceEvaluations) * int64(cfg.Dimensions)
+		list, stats, err := ann.AssignValue(ctx, v, centroids, cfg, ann.TypedLimits{Limits: ann.Limits{MaxDistanceEvaluations: limit}})
+		used += stats.ComponentWork
 		if err != nil {
 			return annWriteError(err)
 		}
@@ -151,23 +150,23 @@ func (t *Tx) buildIVF(ctx context.Context, c *writeCatalog, x *extensionIndex, t
 }
 func (t *Tx) applyIVFDelta(ctx context.Context, c *writeCatalog, x *extensionIndex, oldID int64, old []any, newID int64, next []any) error {
 	ordinal := x.fields[0].ordinal
-	var before, after vector.Vector
+	var before, after ann.Value
 	beforeNull, afterNull := true, true
 	var err error
 	if old != nil {
-		before, beforeNull, err = decodeVectorColumn(old[ordinal], x.ann.Dimensions)
+		before, beforeNull, err = decodeANNColumn(old[ordinal], *x.ann)
 		if err != nil {
 			return err
 		}
 	}
 	if next != nil {
-		after, afterNull, err = decodeVectorColumn(next[ordinal], x.ann.Dimensions)
+		after, afterNull, err = decodeANNColumn(next[ordinal], *x.ann)
 		if err != nil {
 			return err
 		}
 	}
 	if !afterNull {
-		if err = ann.ValidateVector(after, *x.ann); err != nil {
+		if err = ann.ValidateValue(after, *x.ann); err != nil {
 			return fmt.Errorf("%w: indexed IVF vector: %w", ErrConstraint, err)
 		}
 	}
@@ -222,7 +221,7 @@ func (t *Tx) applyIVFDelta(ctx context.Context, c *writeCatalog, x *extensionInd
 		if err != nil {
 			return err
 		}
-		list, _, err := ann.Assign(ctx, after, centers, cfg, ann.Limits{})
+		list, _, err := ann.AssignValue(ctx, after, centers, cfg, ann.TypedLimits{})
 		if err != nil {
 			return annWriteError(err)
 		}

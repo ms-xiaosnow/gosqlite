@@ -2,7 +2,7 @@
 
 ## Implemented scope and recall contract
 
-M7 implements **HNSW and IVFFlat** over legal SQLite tables and B-trees, using
+M7 implements dense **HNSW and IVFFlat** over legal SQLite tables and B-trees, using
 independently written Go algorithms. HNSW performs real multilayer graph
 traversal. IVFFlat trains centroids, persists source-row membership in lists,
 then reads only selected list ranges. Neither path substitutes an exact scan
@@ -16,6 +16,10 @@ Exact candidate distances do **not** imply exact recall. `Plan.Exact` and SQL
 approximate ranking, scans the source and reports `SCAN`, `exact_vector`, an
 exact flag and the fallback reason. Normal lifecycle tests and benchmark reopen
 checks do not qualify physical crash/recovery durability or production readiness.
+
+Typed HALFVEC/BIT/SPARSEVEC version-2 indexes and their supported method/metric
+matrix are documented in [typed-ann.md](typed-ann.md). Dense version-1 identities
+and public algorithm structures remain unchanged.
 
 ## Choosing exact or approximate search
 
@@ -98,7 +102,8 @@ an ANN index either. Explicit probes on a selected HNSW index reject.
 
 ## Metrics and creation controls
 
-Both methods index one typed vector field with dimensions 1..2000. A
+The dense version-1 profile indexes one VECTOR field with dimensions 1..2000.
+The typed version-2 bounds are listed in [typed-ann.md](typed-ann.md). A
 metric/opclass/dimension/source mismatch never reuses an index. Unknown versions,
 noncanonical configuration or inconsistent owned storage fail closed.
 

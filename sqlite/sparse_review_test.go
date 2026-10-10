@@ -346,10 +346,10 @@ func TestSparseReviewExactBytesStatementsAndUnsupportedBoundaries(t *testing.T) 
 	} else if !errors.Is(e, vector.ErrLimit) {
 		t.Fatal(e)
 	}
-	if e := db.CreateHNSWIndex(ctx, "sparse_hnsw", "sparse_review", "s"); !errors.Is(e, ErrMismatch) {
+	if e := db.CreateHNSWIndex(ctx, "sparse_hnsw", "sparse_review", "s"); e != nil {
 		t.Fatal(e)
 	}
-	if e := db.CreateIVFFlatIndex(ctx, "sparse_ivf", "sparse_review", "s"); !errors.Is(e, ErrMismatch) {
+	if e := db.CreateIVFFlatIndex(ctx, "sparse_ivf", "sparse_review", "s"); !errors.Is(e, ErrUnsupported) {
 		t.Fatal(e)
 	}
 	if got, e := db.VectorSearch(ctx, "sparse_review", "s", want, VectorSearchOptions{Limit: 1}); !errors.Is(e, ErrMismatch) || !reflect.DeepEqual(got, VectorResult{}) {

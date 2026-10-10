@@ -60,7 +60,7 @@ SQLITE_ORACLE=/absolute/path/to/verified/sqlite3 ./scripts/test-oracle.sh
 
 See [progress](docs/progress.md), [compatibility](docs/compatibility.md), [architecture](docs/architecture.md), [sources](docs/upstream.md), and [manual verification](docs/manual-verification.md). The unchanged [original goal](goal.md) remains the contract. [Restart protocol](docs/restart.md) and checkpoint records preserve durable development history.
 
-Qualified crash recovery, Windows shared rekey and Darwin Unicode inventory, broader SQL and extended-vector ANN integration, and full-table/online pg_embedding transition work remain unfinished implementation work. Full SQLite/PostgreSQL semantics, SEE file compatibility and production security are not claimed.
+Qualified crash recovery, Windows shared rekey and Darwin Unicode inventory, broader SQL and full-table/online pg_embedding transition work remain unfinished implementation work. Full SQLite/PostgreSQL semantics, SEE file compatibility and production security are not claimed.
 
 
 ## Explicit exclusive WAL
@@ -150,7 +150,7 @@ local import commands. See [migration scope and examples](docs/migration-pgembed
 
 `extension/vector` also supplies distinct immutable half, packed-bit and sparse
 values, codecs, exact metrics, nullable adapters, subvector and quantization.
-BIT, HALFVEC and SPARSEVEC also have typed SQL/storage/exact search. Extended ANN integration remains open.
+BIT, HALFVEC and SPARSEVEC also have typed SQL/storage/exact search. HALFVEC/BIT/SPARSEVEC now have supported real HNSW and IVF paths; see the exact matrix in docs/typed-ann.md.
 See [extended value contracts](extension/vector/extended-values.md).
 
 ## Transaction controls and packed-bit search
@@ -162,7 +162,8 @@ and current active-Rows restrictions. A one-statement CLI invocation cannot carr
 a transaction into another invocation.
 
 BIT(1..64000) stores strict packed GSB values. Hamming/<~>, Jaccard/<%>, native
-DB/Tx.BitSearch and eligible SQL bounded-heap ranking are exact; no bit ANN exists.
+DB/Tx.BitSearch defaults exact; matching HNSW Hamming/Jaccard and IVF Hamming
+indexes provide explicitly approximate paths, with genuine graph/list visits.
 Dense subvector and binary_quantize are explicit transforms. See
 [bit SQL and search](docs/bit-vector.md) and the runnable examples/bit-rerank;
 its deliberately truncated bit candidates demonstrate lost dense recall.
@@ -186,7 +187,8 @@ HALFVEC(1..16000) stores distinct GSH binary16 values, with strict typed SQL,
 DB/Tx.HalfSearch and exact bounded ranking. Conversions and loss-report functions
 are explicit; dense and half representations do not silently mix. See
 [half-precision SQL](docs/half-vector.md) and examples/half-rerank, which measures
-lost dense recall from a truncated rounded candidate set. Half ANN is unfinished.
+lost dense recall from a truncated rounded candidate set. Half HNSW supports all four numeric metrics; half IVF supports L2/IP/cosine,
+with a narrower indexed4000-dimension limit.
 
 ## Native platform and encrypted concurrency boundaries
 
@@ -212,8 +214,9 @@ external freshness guarantees and independent security acceptance remain open.
 SPARSEVEC(1..1e9) stores a distinct GSS value with at most16000 nonzero binary32
 entries. Native and SQL exact ranking charge actual supports, never the declared
 billion-dimensional coordinate space. Four numeric metrics, strict driver/default/
-DML semantics and explicit bounded conversion are implemented. Sparse ANN and
-unbounded densification remain refused. See [sparse SQL](docs/sparse-vector.md)
+DML semantics and explicit bounded conversion are implemented. Sparse HNSW
+supports all four metrics with at most1000 nonzeros per indexed/query value;
+sparse IVF and unbounded densification remain refused. See [sparse SQL](docs/sparse-vector.md)
 and examples/sparse-exact for true large-dimension, small-support operations.
 
 ## Offline CSV/NDJSON import and verification
@@ -267,3 +270,12 @@ directory enumeration. Native execution is still NOT_RUN. See
 now retains nested owners and protection in bounded groups, with explicit
 [retry API](docs/shared-open-cleanup.md). Successful-session Close and driver
 disposal ownership remain separate required code corrections.
+
+## Persistent typed ANN
+
+HALFVEC and SPARSEVEC support real HNSW L2/IP/cosine/L1; BIT supports real HNSW
+Hamming/Jaccard. Half IVF supports L2/IP/cosine, bit IVF Hamming. Sparse IVF, IVF
+L1 and IVF Jaccard remain unsupported. Dense v1 bytes and existing public struct
+layouts remain unchanged, with bidirectional old/new fixture checks. See
+[typed ANN limits and evidence](docs/typed-ann.md) and examples/typed-ann-rerank.
+Ordinary measured recall depends on workload/probes and is not an exact guarantee.

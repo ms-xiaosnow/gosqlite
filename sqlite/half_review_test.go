@@ -124,7 +124,7 @@ func TestHalfReviewIndependentNativeHeapAndFullSort(t *testing.T) {
 					if !reflect.DeepEqual(got, full) || p.VectorRepresentation != "halfvec" || p.VectorRanking != "bounded_heap" || !p.VectorExact || p.VectorMetric != metric || p.VectorTopK != int64(limit+offset) || fp.VectorRanking != "" {
 						t.Fatal(metric, window, got, full, p, fp)
 					}
-					if p.ANNFallback != "HALFVEC(n) ANN is unsupported; exact binary16 ranking" || s.VectorRankPackedBytes != 0 || s.ANNExactRescores != 0 || s.VectorRankedRows != int64(len(nativeWant)) || s.VectorRankComponents != 3*(1+int64(len(nativeWant))) || s.BaseRowFetches != int64(len(items)) {
+					if p.ANNFallback != "SQL NULL-first ordering requires a declared NOT NULL vector column" || s.VectorRankPackedBytes != 0 || s.ANNExactRescores != 0 || s.VectorRankedRows != int64(len(nativeWant)) || s.VectorRankComponents != 3*(1+int64(len(nativeWant))) || s.BaseRowFetches != int64(len(items)) {
 						t.Fatal(p, s)
 					}
 					start := min(offset, len(want))

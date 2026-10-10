@@ -41,7 +41,7 @@ func (d *DB) checkIVFIndex(ctx context.Context, reader btree.PageReader, x *exte
 		return ErrMemoryLimit
 	}
 	ready := state.TrainingState == "ready"
-	var centers []ann.Centroid
+	var centers []ann.TypedCentroid
 	var counts []int64
 	if ready {
 		countBytes := int64(cfg.Lists) * 16
@@ -73,7 +73,7 @@ func (d *DB) checkIVFIndex(ctx context.Context, reader btree.PageReader, x *exte
 		if err != nil {
 			return err
 		}
-		v, null, err := decodeVectorColumn(values[x.fields[0].ordinal], cfg.Dimensions)
+		v, null, err := decodeANNColumn(values[x.fields[0].ordinal], cfg)
 		if err != nil {
 			return err
 		}
@@ -87,7 +87,7 @@ func (d *DB) checkIVFIndex(ctx context.Context, reader btree.PageReader, x *exte
 			}
 			continue
 		}
-		if err = ann.ValidateVector(v, cfg); err != nil {
+		if err = ann.ValidateValue(v, cfg); err != nil {
 			return fmt.Errorf("%w: IVF source vector: %w", ErrCorrupt, err)
 		}
 		live++
@@ -100,7 +100,7 @@ func (d *DB) checkIVFIndex(ctx context.Context, reader btree.PageReader, x *exte
 		if !found {
 			return extensionCorrupt("IVF source missing membership")
 		}
-		remaining := (cfg.MaxTrainingWork - work) / int64(cfg.Dimensions)
+		remaining := (cfg.MaxTrainingWork - work) / int64(max(1, v.WorkUnits()))
 		if remaining < 1 {
 			return annWriteError(fmt.Errorf("%w: IVF integrity assignment work", ann.ErrLimit))
 		}
@@ -108,8 +108,8 @@ func (d *DB) checkIVFIndex(ctx context.Context, reader btree.PageReader, x *exte
 		if remaining < int64(limit) {
 			limit = int(remaining)
 		}
-		expected, stats, err := ann.Assign(ctx, v, centers, cfg, ann.Limits{MaxDistanceEvaluations: limit})
-		work += int64(stats.DistanceEvaluations) * int64(cfg.Dimensions)
+		expected, stats, err := ann.AssignValue(ctx, v, centers, cfg, ann.TypedLimits{Limits: ann.Limits{MaxDistanceEvaluations: limit}})
+		work += stats.ComponentWork
 		if err != nil {
 			return annWriteError(err)
 		}

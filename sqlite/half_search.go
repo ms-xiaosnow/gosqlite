@@ -9,6 +9,7 @@ import (
 	"io"
 
 	"github.com/ms-xiaosnow/gosqlite/extension/vector"
+	"github.com/ms-xiaosnow/gosqlite/extension/vector/ann"
 	"github.com/ms-xiaosnow/gosqlite/internal/btree"
 	sqlast "github.com/ms-xiaosnow/gosqlite/internal/sql"
 )
@@ -35,16 +36,21 @@ func halfLimits(l HalfSearchLimits) (HalfSearchLimits, error) {
 }
 
 // HalfSearchOptions selects exact Top-K over one physical HALFVEC(n) column. Empty
-// Metric selects L2. Only L2/L1/negative-inner-product/cosine identities are accepted. There
-// is no half ANN mode in this checkpoint. Where is one bound SQL expression,
+// Metric selects L2. Only L2/L1/negative-inner-product/cosine identities are accepted. Mode defaults to exact; approximate mode opts into a matching typed ANN index.
+// Where is one bound SQL expression,
 // evaluated before half decoding/scoring. Limit must be nonnegative; zero
 // validates query/options but visits no rows. NULL query yields EMPTY.
 type HalfSearchOptions struct {
-	Metric vector.MetricKind
-	Limit  int
-	Where  string
-	Args   []any
-	Limits HalfSearchLimits
+	Mode                  VectorSearchMode
+	Index                 string
+	EFSearch, MaxEFSearch int
+	Probes, MaxProbes     int
+	ANNLimits             ANNWorkLimits
+	Metric                vector.MetricKind
+	Limit                 int
+	Where                 string
+	Args                  []any
+	Limits                HalfSearchLimits
 }
 
 // HalfPlan describes native exact half search. Embedded SQL ranking fields stay
@@ -59,12 +65,13 @@ type HalfPlan struct {
 }
 
 func (p HalfPlan) Detail() string {
-	return fmt.Sprintf("%s %s; representation=halfvec; half_field=%s; half_metric=%s; dimensions=%d; limit=%d; exact=%t; distance_order=ASC,rowid_ASC; null_candidates=excluded; reason=%s", p.Access, p.Table, p.Field, p.Metric, p.Dimensions, p.Limit, p.Exact, p.Reason)
+	return fmt.Sprintf("%s %s; representation=halfvec; half_field=%s; half_metric=%s; dimensions=%d; limit=%d; exact=%t; distance_order=ASC,rowid_ASC; null_candidates=excluded; reason=%s", p.Access, p.Table, p.Field, p.Metric, p.Dimensions, p.Limit, p.Exact, p.Reason) + p.annDetail()
 }
 
 // HalfStats separates fetched, excluded and scored source rows. Component work
 // follows HalfSearchLimits; it does not measure arbitrary SQL expression work.
 type HalfStats struct {
+	ANNWork ANNWorkStats
 	QueryStats
 	FilteredRows     int64
 	ScoredRows       int64
@@ -72,7 +79,7 @@ type HalfStats struct {
 	ScoredComponents int64
 }
 
-// HalfResult contains a complete exact ranking and value-only diagnostics.
+// HalfResult contains a complete requested ranking and explicit recall diagnostics.
 type HalfResult struct {
 	Hits  []vector.Hit
 	Plan  HalfPlan
@@ -80,7 +87,7 @@ type HalfResult struct {
 }
 
 // HalfSearch owns one ordinary database snapshot and returns only complete
-// exact results. A failure/cancellation returns the zero result, never hits.
+// requested results. A failure/cancellation returns the zero result, never hits.
 func (d *DB) HalfSearch(ctx context.Context, table, field string, query any, options HalfSearchOptions) (HalfResult, error) {
 	if err := checkContext(ctx); err != nil {
 		return HalfResult{}, wrap("half search", err)
@@ -156,6 +163,10 @@ func halfQueryValue(ctx context.Context, query any) (any, error) {
 }
 
 func (d *DB) halfSearch(ctx context.Context, reader btree.PageReader, tableName, fieldName string, query any, options HalfSearchOptions) (HalfResult, error) {
+	annOptions, err := normalizeVectorANNOptions(VectorSearchOptions{Mode: options.Mode, Index: options.Index, Limit: options.Limit, EFSearch: options.EFSearch, MaxEFSearch: options.MaxEFSearch, Probes: options.Probes, MaxProbes: options.MaxProbes, ANNLimits: options.ANNLimits})
+	if err != nil {
+		return HalfResult{}, err
+	}
 	limits, err := halfLimits(options.Limits)
 	if err != nil {
 		return HalfResult{}, err
@@ -257,6 +268,18 @@ func (d *DB) halfSearch(ctx context.Context, reader btree.PageReader, tableName,
 		result.Plan.Access, result.Plan.Reason = "EMPTY", "zero limit; query validated without source reads"
 		return result, nil
 	}
+	if annOptions.Mode == VectorModeApproximate {
+		result.Plan.VectorRepresentation = "halfvec"
+		hits, done, err := d.typedSearchANN(ctx, reader, tab, ordinal, ann.HalfValue(q), vector.MetricKind(metric), annOptions, vector.SearchLimits{MaxCandidates: limits.MaxCandidates, MaxResults: limits.MaxResults, MaxComponents: limits.MaxComponents}, filter, &result.Plan.QueryPlan, &result.Stats.QueryStats, &result.Stats.ANNWork, &result.Stats.ScoredComponents, &result.Stats.ScoredRows, &result.Stats.FilteredRows)
+		if err != nil {
+			return HalfResult{}, err
+		}
+		if done {
+			result.Hits = hits
+			result.Plan.Exact = false
+			return result, nil
+		}
+	}
 	// Reserve both query/candidate binary16 storage and result heap before retaining
 	// row identities. Duplicate detection is bounded, never silently truncated.
 	reserve := int64(options.Limit)*64 + int64(components)*16
@@ -314,7 +337,7 @@ func (d *DB) halfSearch(ctx context.Context, reader btree.PageReader, tableName,
 				continue
 			}
 		}
-		used := uint64(result.Stats.ScoredComponents)
+		used := uint64(result.Stats.ScoredComponents) + uint64(result.Stats.ANNWork.ComponentWork)
 		if values[ordinal] != nil && (used > limits.MaxComponents || components > limits.MaxComponents-used) {
 			return HalfResult{}, fmt.Errorf("%w: half components", vector.ErrLimit)
 		}

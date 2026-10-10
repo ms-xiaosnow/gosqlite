@@ -101,7 +101,11 @@ func (d *DB) selectANNIndex(ctx context.Context, reader btree.PageReader, tab *t
 	if err != nil {
 		return nil, "", err
 	}
-	opclass, err := ann.Opclass(metric)
+	kind, _, ok := annColumnType(tab.columns[ordinal].Type)
+	if !ok {
+		return nil, "source is not a declared vector", nil
+	}
+	opclass, err := ann.OpclassFor(kind, metric)
 	if err != nil {
 		return nil, "", err
 	}
@@ -122,7 +126,7 @@ func (d *DB) selectANNIndex(ctx context.Context, reader btree.PageReader, tab *t
 			}
 			continue
 		}
-		if x.ann.Metric != metric || x.ann.Opclass != opclass || x.ann.Dimensions != dims {
+		if x.ann.Kind != kind || x.ann.Metric != metric || x.ann.Opclass != opclass || x.ann.Dimensions != dims {
 			reason = "ANN metric, opclass, or dimensions do not match"
 			continue
 		}
@@ -165,6 +169,14 @@ func exactANNFallback(p *QueryPlan, reason string) {
 	p.Access = "SCAN"
 	p.Indexes = nil
 	p.Method = "exact_vector"
+	switch p.VectorRepresentation {
+	case "halfvec":
+		p.Method = "exact_halfvec"
+	case "bit":
+		p.Method = "exact_bit"
+	case "sparsevec":
+		p.Method = "exact_sparsevec"
+	}
 	p.MethodVersion = 1
 	p.Namespace = ""
 	p.GramLengths = nil
@@ -205,7 +217,7 @@ type annCandidateQuery struct {
 	reader  btree.PageReader
 	table   *table
 	index   *extensionIndex
-	query   vector.Vector
+	query   ann.Value
 	retain  int
 	options VectorSearchOptions
 	limits  vector.SearchLimits
@@ -216,6 +228,8 @@ type annCandidateQuery struct {
 	components func() int64
 	// Caller-owned result memory retained in addition to query/hit bookkeeping.
 	retainedBytes func() int64
+	annWork       *ANNWorkStats
+	activeBytes   int64 // current candidate bookkeeping; shared with typed scratch admission
 }
 
 type annCountedReader struct {
@@ -223,9 +237,9 @@ type annCountedReader struct {
 	reads, limit int
 }
 
-func (r *annCountedReader) GetNode(ctx context.Context, id int64) (ann.Node, error) {
+func (r *annCountedReader) GetNode(ctx context.Context, id int64) (ann.TypedNode, error) {
 	if r.reads >= r.limit {
-		return ann.Node{}, fmt.Errorf("%w: cumulative ANN node reads", vector.ErrLimit)
+		return ann.TypedNode{}, fmt.Errorf("%w: cumulative ANN node reads", vector.ErrLimit)
 	}
 	r.reads++
 	return r.store.GetNode(ctx, id)
@@ -245,7 +259,7 @@ func annHitBetter(a, b vector.Hit) bool {
 // run does not filter traversal. Repeated graph searches charge every actual
 // read/distance; source rechecks are deduplicated by immutable node identity.
 // A short discovered frontier is not proof of exact source exhaustion.
-func (a *annCandidateQuery) run(ctx context.Context, visit func(int64, []any, *vector.Vector) (float64, bool, error)) ([]vector.Hit, string, error) {
+func (a *annCandidateQuery) run(ctx context.Context, visit func(int64, []any, *ann.Value) (float64, bool, error)) ([]vector.Hit, string, error) {
 	store := newANNStore(a.reader, a.index)
 	var state ann.State
 	var err error
@@ -295,14 +309,12 @@ func (a *annCandidateQuery) run(ctx context.Context, visit func(int64, []any, *v
 		}
 		remainingReads := a.options.ANNLimits.MaxNodeReads - int(a.stats.ANNNodeReads)
 		remainingDistances := a.options.ANNLimits.MaxDistanceEvaluations - int(a.stats.ANNDistanceEvaluations)
-		used := uint64(a.components()) + uint64(a.stats.ANNDistanceEvaluations)*uint64(a.query.Dims())
+		used := uint64(a.components()) + uint64(a.work().ComponentWork)
 		if used > a.limits.MaxComponents {
 			return nil, "", fmt.Errorf("%w: cumulative ANN components", vector.ErrLimit)
 		}
-		if remainingDistances > 0 {
-			remainingDistances = int(min(uint64(remainingDistances), (a.limits.MaxComponents-used)/uint64(a.query.Dims())))
-		}
-		reserved := int64(a.query.Dims())*4 + int64(retain)*128 + int64(len(seen))*128 + a.retainedBytes()
+
+		reserved := a.query.MemoryBytes() + int64(retain)*128 + int64(len(seen))*128 + a.retainedBytes()
 		memory := min(a.options.ANNLimits.MaxBytes, a.db.opts.MaxSortBytes-reserved)
 		if remainingReads < 1 || remainingDistances < 1 {
 			return nil, "", fmt.Errorf("%w: cumulative ANN work", vector.ErrLimit)
@@ -311,12 +323,13 @@ func (a *annCandidateQuery) run(ctx context.Context, visit func(int64, []any, *v
 			return nil, "", ErrMemoryLimit
 		}
 		counted := &annCountedReader{store: store, limit: remainingReads}
-		candidates, work, err := ann.Search(ctx, counted, state, a.query, cfg, ef, ann.Limits{MaxVisited: min(cfg.MaxVisited, remainingReads), MaxDistanceEvaluations: min(cfg.MaxDistanceEvaluations, remainingDistances), MaxBytes: min(cfg.MaxMemoryBytes, memory)})
+		candidates, work, err := ann.SearchValue(ctx, counted, state, a.query, cfg, ef, ann.TypedLimits{Limits: ann.Limits{MaxVisited: min(cfg.MaxVisited, remainingReads), MaxDistanceEvaluations: min(cfg.MaxDistanceEvaluations, remainingDistances), MaxBytes: min(cfg.MaxMemoryBytes, memory)}, ComponentWorkLimited: true, MaxComponentWork: a.limits.MaxComponents - used})
 		a.stats.ANNIterations++
 		a.stats.ANNNodeReads += int64(counted.reads)
 		a.stats.ANNEdgeReads += int64(work.EdgeReads)
 		a.stats.ANNVisited += int64(work.Visited)
 		a.stats.ANNDistanceEvaluations += int64(work.DistanceEvaluations)
+		a.work().ComponentWork += work.ComponentWork
 		a.stats.ANNPeakBytes = max(a.stats.ANNPeakBytes, work.PeakBytes+reserved)
 		a.plan.ANNEffectiveEF = ef
 		a.plan.ANNStopReason = work.StopReason
@@ -334,7 +347,7 @@ func (a *annCandidateQuery) run(ctx context.Context, visit func(int64, []any, *v
 			if node, ok := rowNodes[candidate.RowID]; ok && node != candidate.NodeID {
 				return nil, "", extensionCorrupt("duplicate live ANN source identity")
 			}
-			if candidateBytes+int64(len(seen)+1)*128+int64(retain)*128+int64(a.query.Dims())*4+a.retainedBytes() > a.db.opts.MaxSortBytes {
+			if candidateBytes+int64(len(seen)+1)*128+int64(retain)*128+a.query.MemoryBytes()+a.retainedBytes() > a.db.opts.MaxSortBytes {
 				return nil, "", ErrMemoryLimit
 			}
 			seen[candidate.NodeID] = candidate.RowID
@@ -362,8 +375,8 @@ func (a *annCandidateQuery) run(ctx context.Context, visit func(int64, []any, *v
 			if !node.Live || node.RowID != candidate.RowID || node.ID != candidate.NodeID {
 				return nil, "", extensionCorrupt("ANN candidate node mismatch")
 			}
-			reserved := candidateBytes + int64(len(seen))*128 + int64(retain)*128 + int64(a.query.Dims())*4 + a.retainedBytes()
-			if ann.NodeMemoryBytes(node) > a.db.opts.MaxSortBytes-reserved {
+			reserved := candidateBytes + int64(len(seen))*128 + int64(retain)*128 + a.query.MemoryBytes() + a.retainedBytes()
+			if ann.TypedNodeMemoryBytes(node) > a.db.opts.MaxSortBytes-reserved {
 				return nil, "", ErrMemoryLimit
 			}
 			if a.stats.BaseRowFetches >= int64(a.limits.MaxCandidates) {
@@ -376,14 +389,17 @@ func (a *annCandidateQuery) run(ctx context.Context, visit func(int64, []any, *v
 			if !found {
 				return nil, "", extensionCorrupt("ANN candidate refers to missing source row")
 			}
-			distance, keep, err := visit(candidate.RowID, raw, &node.Vector)
+
+			a.activeBytes = reserved + ann.TypedNodeMemoryBytes(node)
+			value := ann.NodeValue(node)
+			distance, keep, err := visit(candidate.RowID, raw, &value)
 			if err != nil {
 				return nil, "", err
 			}
 			if err = ctx.Err(); err != nil {
 				return nil, "", err
 			}
-			recheckBytes := candidateBytes + int64(len(seen))*128 + int64(retain)*128 + int64(a.query.Dims())*4 + a.retainedBytes() + ann.NodeMemoryBytes(node)
+			recheckBytes := candidateBytes + int64(len(seen))*128 + int64(retain)*128 + a.query.MemoryBytes() + a.retainedBytes() + ann.TypedNodeMemoryBytes(node)
 			a.stats.ANNPeakBytes = max(a.stats.ANNPeakBytes, recheckBytes)
 			if recheckBytes > a.db.opts.MaxSortBytes {
 				return nil, "", ErrMemoryLimit
@@ -441,8 +457,8 @@ func (d *DB) vectorSearchANN(ctx context.Context, reader btree.PageReader, tab *
 	*exactSourceBound = x.documentCount
 	result.Plan.Exact = false
 	helper := &writeTable{table: tab}
-	run := annCandidateQuery{db: d, reader: reader, table: tab, index: x, query: q, retain: options.Limit, options: options, limits: limits, plan: &result.Plan.QueryPlan, stats: &result.Stats.QueryStats, components: func() int64 { return result.Stats.ScoredComponents }, retainedBytes: func() int64 { return 0 }}
-	hits, why, err := run.run(ctx, func(id int64, raw []any, expected *vector.Vector) (float64, bool, error) {
+	run := annCandidateQuery{db: d, reader: reader, table: tab, index: x, query: ann.DenseValue(q), retain: options.Limit, options: options, limits: limits, plan: &result.Plan.QueryPlan, stats: &result.Stats.QueryStats, components: func() int64 { return result.Stats.ScoredComponents }, retainedBytes: func() int64 { return 0 }}
+	hits, why, err := run.run(ctx, func(id int64, raw []any, expected *ann.Value) (float64, bool, error) {
 		result.Stats.BaseRowFetches++
 		values, err := helper.values(id, raw)
 		if err != nil {

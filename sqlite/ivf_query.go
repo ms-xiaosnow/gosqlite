@@ -43,9 +43,9 @@ func annDistanceComponents(s *QueryStats, dims int) uint64 {
 // IVF memberships contain source identity, not a duplicate vector. Guards and
 // schema epochs protect source changes; the full checker verifies assignment.
 // HNSW additionally checks the original node-vector bits using expected.
-func decodeANNCandidate(value any, dims int, expected *vector.Vector) (vector.Vector, error) {
+func decodeANNCandidate(value any, dims int, expected *ann.Value) (vector.Vector, error) {
 	if expected != nil {
-		return decodeANNVector(value, dims, *expected)
+		return decodeANNVector(value, dims, expected.Dense())
 	}
 	v, null, err := decodeVectorColumn(value, dims)
 	if err != nil {
@@ -60,7 +60,7 @@ func decodeANNCandidate(value any, dims int, expected *vector.Vector) (vector.Ve
 // runIVF scores the bounded centroid set exactly once and opens only selected
 // covering list ranges. Filter compensation extends that ordered list prefix,
 // never rereads an earlier list, and cannot return a successful partial result.
-func (a *annCandidateQuery) runIVF(ctx context.Context, store *annStore, state ann.State, visit func(int64, []any, *vector.Vector) (float64, bool, error)) ([]vector.Hit, string, error) {
+func (a *annCandidateQuery) runIVF(ctx context.Context, store *annStore, state ann.State, visit func(int64, []any, *ann.Value) (float64, bool, error)) ([]vector.Hit, string, error) {
 	cfg := *a.index.ann
 	if a.options.Probes == cfg.Lists {
 		a.plan.ANNStopReason = "all_lists_requested"
@@ -74,7 +74,7 @@ func (a *annCandidateQuery) runIVF(ctx context.Context, store *annStore, state a
 	if state.Live < int64(retain) {
 		retain = int(state.Live)
 	}
-	reserved := int64(a.query.Dims())*4 + int64(retain)*128 + a.retainedBytes()
+	reserved := a.query.MemoryBytes() + int64(retain)*128 + a.retainedBytes()
 	memory := min(cfg.MaxMemoryBytes, a.options.ANNLimits.MaxBytes, a.db.opts.MaxSortBytes-reserved)
 	if memory < 1 {
 		return nil, "", ErrMemoryLimit
@@ -82,12 +82,12 @@ func (a *annCandidateQuery) runIVF(ctx context.Context, store *annStore, state a
 	if cfg.Lists > a.options.ANNLimits.MaxCentroidReads-int(a.stats.ANNCentroidReads) {
 		return nil, "", fmt.Errorf("%w: cumulative centroid reads", vector.ErrLimit)
 	}
-	usedComponents := uint64(a.components()) + annDistanceComponents(a.stats, a.query.Dims())
+	usedComponents := uint64(a.components()) + uint64(a.work().ComponentWork)
 	if usedComponents > a.limits.MaxComponents {
 		return nil, "", fmt.Errorf("%w: cumulative vector components", vector.ErrLimit)
 	}
 	remainingDistances := a.options.ANNLimits.MaxDistanceEvaluations - int(a.stats.ANNDistanceEvaluations+a.stats.ANNCentroidScores)
-	remainingDistances = int(min(uint64(max(0, remainingDistances)), (a.limits.MaxComponents-usedComponents)/uint64(a.query.Dims())))
+	remainingDistances = max(0, remainingDistances)
 	if remainingDistances < cfg.Lists {
 		return nil, "", fmt.Errorf("%w: cumulative centroid scores/components", vector.ErrLimit)
 	}
@@ -96,8 +96,9 @@ func (a *annCandidateQuery) runIVF(ctx context.Context, store *annStore, state a
 		return nil, "", err
 	}
 	a.stats.ANNCentroidReads += int64(len(centers))
-	ordered, work, err := ann.Probe(ctx, a.query, centers, cfg, ann.Limits{MaxVisited: min(cfg.MaxVisited, a.options.ANNLimits.MaxCentroidReads), MaxDistanceEvaluations: min(cfg.MaxDistanceEvaluations, remainingDistances), MaxBytes: min(cfg.MaxMemoryBytes, memory)})
+	ordered, work, err := ann.ProbeValue(ctx, a.query, centers, cfg, ann.TypedLimits{Limits: ann.Limits{MaxVisited: min(cfg.MaxVisited, a.options.ANNLimits.MaxCentroidReads), MaxDistanceEvaluations: min(cfg.MaxDistanceEvaluations, remainingDistances), MaxBytes: min(cfg.MaxMemoryBytes, memory)}, ComponentWorkLimited: true, MaxComponentWork: a.limits.MaxComponents - usedComponents})
 	a.stats.ANNCentroidScores += int64(work.DistanceEvaluations)
+	a.work().ComponentWork += work.ComponentWork
 	a.stats.ANNVisited += int64(work.Visited)
 	a.stats.ANNPeakBytes = max(a.stats.ANNPeakBytes, work.PeakBytes+reserved)
 	a.plan.ANNStopReason = work.StopReason
@@ -106,7 +107,7 @@ func (a *annCandidateQuery) runIVF(ctx context.Context, store *annStore, state a
 	}
 	// Include both the storage reader's conservative reservation and the
 	// algorithm's centroid/probe-order reservation, without counting twice.
-	centroidBytes := max(ann.CentroidMemoryBytes(cfg), int64(cfg.Lists)*int64(4*cfg.Dimensions+160))
+	centroidBytes := ann.TypedCentroidMemoryBytes(cfg) + int64(cfg.Lists)*32
 	seen := make(map[int64]int)
 	retained := annHitHeap{}
 	memoryCheck := func(next bool) error {
@@ -114,7 +115,7 @@ func (a *annCandidateQuery) runIVF(ctx context.Context, store *annStore, state a
 		if next {
 			n++
 		}
-		bookkeeping := centroidBytes + int64(a.query.Dims())*4 + int64(retain)*128 + int64(n)*128
+		bookkeeping := centroidBytes + a.query.MemoryBytes() + int64(retain)*128 + int64(n)*128
 		actual := bookkeeping + a.retainedBytes()
 		a.stats.ANNPeakBytes = max(a.stats.ANNPeakBytes, actual)
 		if bookkeeping > min(cfg.MaxMemoryBytes, a.options.ANNLimits.MaxBytes) || actual > a.db.opts.MaxSortBytes {
@@ -190,6 +191,8 @@ func (a *annCandidateQuery) runIVF(ctx context.Context, store *annStore, state a
 					if !found {
 						return extensionCorrupt("IVF membership refers to missing source row")
 					}
+
+					a.activeBytes = centroidBytes + a.query.MemoryBytes() + int64(retain)*128 + int64(len(seen))*128 + a.retainedBytes()
 					distance, keep, err := visit(rowID, raw, nil)
 					if err != nil {
 						return err

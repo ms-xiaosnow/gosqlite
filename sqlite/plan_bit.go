@@ -60,7 +60,7 @@ func (v *vectorRank) scoreBit(r *Rows, value any) (any, error) {
 		v.parsedBit, v.prepared = q, true
 		r.queryStats.VectorRankPackedBytes = int64(packedBytes)
 	}
-	used := uint64(r.queryStats.VectorRankPackedBytes)
+	used := uint64(r.queryStats.VectorRankPackedBytes) + uint64(r.annWork.ComponentWork)
 	if used > v.bitLimits.MaxPackedBytes || packedBytes > v.bitLimits.MaxPackedBytes-used {
 		return nil, fmt.Errorf("%w: bit packed bytes", vector.ErrLimit)
 	}

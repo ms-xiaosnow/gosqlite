@@ -13,7 +13,8 @@ import (
 // fields inherit fixed defaults. L2 uses ordinary k-means; cosine/IP use
 // spherical centroids while exact results always score original source vectors.
 // Insufficient trainable samples persist an untrained index requiring REINDEX.
-// L1 is explicitly unsupported by this pgvector-compatible method family.
+// Half uses explicitly rounded derived binary16 centers; bit uses Hamming
+// with packed majority centers. Sparse, L1, and bit Jaccard are unsupported.
 type IVFFlatIndexOptions struct {
 	Metric                                     vector.MetricKind
 	Opclass                                    string
@@ -54,18 +55,24 @@ func (t *Tx) createIVFIndex(ctx context.Context, c *writeCatalog, name, table, c
 	if !ok {
 		return fmt.Errorf("no such column: %s", column)
 	}
-	dims, ok := sqlast.VectorDimensions(tab.columns[ordinal].Type)
+	kind, dims, ok := annColumnType(tab.columns[ordinal].Type)
 	if !ok {
-		return fmt.Errorf("%w: IVF requires a VECTOR(n) column", ErrMismatch)
+		return fmt.Errorf("%w: IVF requires a declared vector column", ErrMismatch)
 	}
-	metric, err := vectorMetric(o.Metric)
+	metric, err := annCreationMetric(kind, o.Metric, o.Opclass)
 	if err != nil {
 		return err
+	}
+	if kind == ann.SparseKind {
+		return fmt.Errorf("%w: sparse IVFFlat is not supported", ErrUnsupported)
+	}
+	if kind == ann.BitKind && metric != vector.MetricKind(vector.Hamming) {
+		return fmt.Errorf("%w: bit IVFFlat supports Hamming only", ErrUnsupported)
 	}
 	if metric == vector.L1 {
 		return fmt.Errorf("%w: IVFFlat does not support L1", ErrUnsupported)
 	}
-	cfg, err := (ann.Config{Method: ann.IVFFlat, Dimensions: dims, Metric: metric, Opclass: o.Opclass, Lists: o.Lists, TrainingSamples: o.TrainingSamples, TrainingIterations: o.TrainingIterations, Seed: o.Seed, MaxNodes: o.MaxNodes, MaxTrainingWork: o.MaxTrainingWork, MaxVisited: o.MaxVisited, MaxDistanceEvaluations: o.MaxDistanceEvaluations, MaxMemoryBytes: o.MaxMemoryBytes}).Normalize()
+	cfg, err := (ann.TypedConfig{Kind: kind, Config: ann.Config{Method: ann.IVFFlat, Dimensions: dims, Metric: metric, Opclass: o.Opclass, Lists: o.Lists, TrainingSamples: o.TrainingSamples, TrainingIterations: o.TrainingIterations, Seed: o.Seed, MaxNodes: o.MaxNodes, MaxTrainingWork: o.MaxTrainingWork, MaxVisited: o.MaxVisited, MaxDistanceEvaluations: o.MaxDistanceEvaluations, MaxMemoryBytes: o.MaxMemoryBytes}}).Normalize()
 	if err != nil {
 		return err
 	}
@@ -73,7 +80,7 @@ func (t *Tx) createIVFIndex(ctx context.Context, c *writeCatalog, name, table, c
 	if err != nil {
 		return err
 	}
-	return t.createMethodIndex(ctx, c, name, table, []string{column}, ann.IVFFlat, ann.MethodVersion, canonical, ifNotExists)
+	return t.createMethodIndex(ctx, c, name, table, []string{column}, ann.IVFFlat, cfg.Version, canonical, ifNotExists)
 }
 func (t *Tx) createSQLIVFIndex(ctx context.Context, c *writeCatalog, s *sqlast.CreateIndex) error {
 	if len(s.Columns) != 1 {
@@ -133,13 +140,13 @@ func (t *Tx) createSQLIVFIndex(ctx context.Context, c *writeCatalog, s *sqlast.C
 	}
 	if o.Metric == "" && o.Opclass != "" {
 		switch o.Opclass {
-		case "vector_l2_ops":
+		case "vector_l2_ops", "halfvec_l2_ops", "sparsevec_l2_ops":
 			o.Metric = vector.L2
-		case "vector_ip_ops":
+		case "vector_ip_ops", "halfvec_ip_ops", "sparsevec_ip_ops":
 			o.Metric = vector.NegativeIP
-		case "vector_cosine_ops":
+		case "vector_cosine_ops", "halfvec_cosine_ops", "sparsevec_cosine_ops":
 			o.Metric = vector.Cosine
-		case "vector_l1_ops":
+		case "vector_l1_ops", "halfvec_l1_ops", "sparsevec_l1_ops":
 			return fmt.Errorf("%w: IVFFlat L1 is not supported", ErrUnsupported)
 		}
 	}
