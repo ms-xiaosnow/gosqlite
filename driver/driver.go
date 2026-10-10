@@ -37,7 +37,8 @@ func (*Driver) OpenConnector(dsn string) (sqldriver.Connector, error) {
 	return NewConnector(dsn, sqlite.Options{})
 }
 
-// Connector creates independently owned connections.
+// Connector creates independently owned connections. WALExclusive users must
+// set sql.DB.SetMaxOpenConns(1): a second connection cannot share its file lock.
 type Connector struct {
 	path string
 	opts sqlite.Options
@@ -69,7 +70,7 @@ func (c *Connector) Connect(ctx context.Context) (sqldriver.Conn, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
-	db, err := sqlite.Open(c.path, c.opts)
+	db, err := sqlite.OpenContext(ctx, c.path, c.opts)
 	if err != nil {
 		return nil, err
 	}

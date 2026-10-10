@@ -10,4 +10,13 @@ Table and index pages use native SQLite leaf/interior formats, payload-locality 
 
 Writes require UTF-8, rollback mode, no reserved bytes, schema format 4 (or new empty format 0), no autovacuum, no unknown schema object/constraint, and a single-link regular file. A whole-file ownership preflight rejects overlapping live/free pages, cross-root reuse, duplicate roots and unowned physical pages before the first mutation. This is structural preflight, not a complete logical integrity checker.
 
-The journal uses SQLite's documented magic, sector-aligned header, big-endian page numbers and nonce-seeded page checksums. Original pages and touched-sector neighbors precede physical database changes. Sector size defaults to an explicit 4096-byte assumption, configurable through SectorSize; hardware-specific atomicity is not certified. Existing journals are refused pending implemented recovery. No WAL format is supported yet. Commit ordering and error outcomes are specified in ADR0003; interrupted/failed-I/O execution remains NOT_RUN.
+The journal uses SQLite's documented magic, sector-aligned header, big-endian page numbers and nonce-seeded page checksums. Original pages and touched-sector neighbors precede physical database changes. Sector size defaults to an explicit 4096-byte assumption, configurable through SectorSize; hardware-specific atomicity is not certified. Existing journals are refused pending implemented recovery. Default rollback opens reject WAL; the explicit M3 exclusive mode is described below. Commit ordering and error outcomes are specified in ADR0003; interrupted/failed-I/O execution remains NOT_RUN.
+
+
+## M3 WAL and recovery source
+
+WAL uses SQLite's32-byte header and24-byte frame header plus a complete page. Stored integers are big-endian; magic selects little/big-endian checksum input words. Frame salts bind the WAL generation, while checksum recurrence follows the public format. They do not authenticate the owning database. File pairing and cooperative native locks remain required.
+
+The committed overlay selects the newest page image through the last complete commit marker, with logical extent from that marker and strict bounded scanning. Invalid, incomplete, uncommitted and salt-mismatching tails are classified and refused; this does not implement SQLite's full recovery policy. Checkpoint retains synced WAL images for every extant main-file sector neighbor before overwriting pages. Header mode2 remains after normal checkpoint/close, even when the WAL is removed.
+
+Rollback replay plans support one finite-count header/record segment, page geometry, nonce-seeded sparse checksums, exact original extent and complete missing-original coverage if the current extent is shorter. Physical replay is deliberately isolated and unqualified. See ADR0004 and the source-only manual harness; no encrypted format exists yet.

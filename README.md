@@ -1,6 +1,6 @@
 # gosqlite
 
-A native Go database kernel targeting tested subsets of SQLite 3.54.0 files and SQL. Current development milestone: M2 SQL/write MVP. It is not production-ready. No CGO, SQLite subprocess, C ABI, or remote SQL engine is used in production.
+A native Go database kernel targeting tested subsets of SQLite 3.54.0 files and SQL. Current development milestone: M3 restricted WAL/recovery development (ordinary M2 SQL/write MVP verified). It is not production-ready. No CGO, SQLite subprocess, C ABI, or remote SQL engine is used in production.
 
 ## Try the implemented SQL path
 
@@ -58,4 +58,16 @@ SQLITE_ORACLE=/absolute/path/to/verified/sqlite3 ./scripts/test-oracle.sh
 
 See [progress](docs/progress.md), [compatibility](docs/compatibility.md), [architecture](docs/architecture.md), [sources](docs/upstream.md), and [manual verification](docs/manual-verification.md). The unchanged [original goal](goal.md) remains the contract. [Restart protocol](docs/restart.md) and checkpoint records preserve durable development history.
 
-Native recovery/WAL, grams13 indices, similarity, vectors, independent authenticated encryption and pg_embedding migration are still future milestones. Full SQLite/PostgreSQL semantics, SEE file compatibility and production security are not claimed.
+Shared concurrent WAL, qualified crash recovery, grams13 indices, similarity, vectors, independent authenticated encryption and pg_embedding migration remain unfinished milestones. Full SQLite/PostgreSQL semantics, SEE file compatibility and production security are not claimed.
+
+
+## Explicit exclusive WAL
+
+The developing M3 mode is opt-in: sqlite.Options{WALExclusive:true}, or driver.NewConnector with that option and sql.DB.SetMaxOpenConns(1). It holds an EXCLUSIVE database lock for the connection lifetime, including idle time, and permits one active query/transaction lease. Other connections correctly receive BUSY. It is not shared concurrent WAL.
+
+```sh
+CGO_ENABLED=0 go run ./examples/wal disposable-wal.db
+CGO_ENABLED=0 go run ./cmd/gosqlite query --wal-exclusive disposable-wal.db 'SELECT id,text FROM notes'
+```
+
+Native DB.Checkpoint(ctx) performs an explicit normal checkpoint. Default Close checkpoints; KeepWALOnClose retains successful committed frames after normal close. A WAL connection requires writable file access even for SELECT. Plain read-only Open/CLI inspect still refuse mode2. Unsupported WAL tails and existing journals fail closed. Hot rollback-recovery code is isolated and source-only; no crash/fault durability gate has passed. See ADR0004 and manual-verification.md.

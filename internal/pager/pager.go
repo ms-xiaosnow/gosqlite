@@ -10,8 +10,9 @@ import (
 	"sync"
 )
 
-// Reader owns a read-only descriptor and a SQLite-compatible shared lock.
-// It has no write method, page cache, journal recovery, or WAL interpretation.
+// Reader owns either a read-only descriptor with a SQLite-compatible SHARED
+// lock, or a read-only lease on an exclusive WAL Session. It has no write
+// method, page cache, or rollback-journal recovery.
 // Concurrent ReadPage and Close are safe; each page returned is caller-owned.
 type Reader struct {
 	mu        sync.RWMutex
@@ -20,6 +21,7 @@ type Reader struct {
 	info      os.FileInfo
 	header    Header
 	rawHeader [100]byte
+	lease     *Tx
 }
 
 func Open(path string) (*Reader, error) {
@@ -91,7 +93,12 @@ func checkSidecars(path string) error {
 	return nil
 }
 
-func (r *Reader) Header() Header { return r.header }
+func (r *Reader) Header() Header {
+	if r.lease != nil {
+		return r.lease.Header()
+	}
+	return r.header
+}
 
 func (r *Reader) checkStable() error {
 	if err := checkSidecars(r.path); err != nil {
@@ -104,11 +111,11 @@ func (r *Reader) checkStable() error {
 	if st.Size() != r.info.Size() || !st.ModTime().Equal(r.info.ModTime()) {
 		return ErrChanged
 	}
-	pathInfo, err := os.Stat(r.path)
+	pathInfo, err := os.Lstat(r.path)
 	if err != nil {
 		return fmt.Errorf("%w: database path: %v", ErrChanged, err)
 	}
-	if !os.SameFile(st, pathInfo) {
+	if !pathInfo.Mode().IsRegular() || !os.SameFile(st, pathInfo) {
 		return ErrChanged
 	}
 	var raw [100]byte
@@ -122,6 +129,9 @@ func (r *Reader) checkStable() error {
 }
 
 func (r *Reader) ReadPage(ctx context.Context, pageNo uint32) ([]byte, error) {
+	if r.lease != nil {
+		return r.lease.ReadPage(ctx, pageNo)
+	}
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
@@ -150,6 +160,9 @@ func (r *Reader) ReadPage(ctx context.Context, pageNo uint32) ([]byte, error) {
 }
 
 func (r *Reader) Close() error {
+	if r.lease != nil {
+		return r.lease.Rollback()
+	}
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	if r.file == nil {

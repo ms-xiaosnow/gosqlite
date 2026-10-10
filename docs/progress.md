@@ -35,8 +35,18 @@ Fresh restart, 2026-10-10 UTC. Historical work and test results are not acceptan
 - Risk/safety/migration: standard SQLite plaintext file format, no custom data encoding or hidden SQL delegation; source-only physical-error branches and all restricted crash/fault gates remain BLOCKED/NOT_RUN. No acceptance or production claim beyond ordinary M2 evidence.
 - Next: persist verified M2 checkpoint, then M3 native recovery/WAL implementation and allowed concurrency/interop evidence; restricted gates remain manual and later milestone acceptance conditional.
 
-### M3–M10
-- Status: NOT_STARTED (M3 journal publication/locks foundations implemented in M2)
-- Deliverables/tests/oracle evidence: no complete fresh milestone evidence yet.
-- Limits and risks: all remaining acceptance criteria remain open; restricted crash/fault/process-exit tests require independent authorized manual evidence and may not be executed here or redirected elsewhere.
-- Next: prioritize native recovery and WAL implementation; preserve honest gate status while continuing later independent development allowed by the user's revised sequencing.
+### M3: Durability and concurrency
+- Status: PARTIAL / BLOCKED; ordinary exclusive-WAL intermediate slice VERIFIED. M3 is not complete.
+- Implemented slice: native WAL codecs/committed-prefix index, connection-owned EXCLUSIVE session, same-descriptor read/write leases, ordinary append/checkpoint/normal-close retention, public native/driver/CLI integration; isolated single-segment rollback-recovery source and doubly gated manual harness.
+- ADR: 0004-exclusive-wal-and-recovery-gates. All live clients are excluded while an exclusive session is open; this is sequential interoperability, not the goal's single-writer/multiple-reader WAL concurrency.
+- Evidence: component memory tests/fuzz/race, native valid-data WAL operations and official SQLite roundtrips pass; full CGO0 unit/vet/build, separate race, pinned oracle suite and four cross-builds PASSED after independently reviewed WAL-only normalization; manual recovery compiled only. All fixture/goal hashes unchanged. See docs/evidence/m3-exclusive-aggregate.txt. See docs/evidence/m3-components.md.
+- Required implementation still open: full shared-memory WAL-index protocol, checked dual headers/hash blocks, read marks and reader/writer/checkpoint/recovery locks; simultaneous cross-process reader/writer snapshots; broader journal recovery/mode support. These are code gaps, not merely manual acceptance gaps, and remain active development work.
+- Required execution evidence blocked: physical hot rollback replay, failed/short/wrong-offset I/O, disk-full/permission faults, forced exit/power loss and interrupted checkpoint. Source-only recovery compilation is not runtime recovery verification. These gates remain BLOCKED/NOT_RUN and cannot be moved elsewhere to evade the restriction.
+- Other limits: Linux-only native runtime; strict WAL tail refusal; writable access required for exclusive WAL; one local lease; bounded growth/work; sector assumptions explicit; no qualification for interrupted publication.
+- Next: persist the independently reviewed exclusive-WAL slice, then implement shared-WAL concurrency. A dedicated shared-WAL implementation task is active in design. Later independent feature work may proceed under revised user sequencing without treating M3 code gaps or restricted tests as complete.
+
+### M4–M10
+- Status: NOT_STARTED (M4 persistent-index design research only)
+- Deliverables/tests/oracle evidence: no fresh implementation/acceptance evidence yet.
+- Limits and risks: all remaining required code and acceptance gates stay open. Independent native-OS, security, crypto/legal and long-soak acceptance cannot be fabricated.
+- Next: finish required M3 shared-concurrency code while developing genuinely independent later components; every meaningful checkpoint stays remotely committed and independently backed up.

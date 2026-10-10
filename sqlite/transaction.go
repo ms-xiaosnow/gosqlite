@@ -64,7 +64,7 @@ func (d *DB) beginLocked(ctx context.Context, opts TxOptions) (*Tx, error) {
 	}
 	tx := &Tx{db: d, ctx: ctx}
 	if d.opts.ReadOnly || opts.ReadOnly {
-		r, err := pager.Open(d.path)
+		r, err := d.openReader(ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -75,7 +75,13 @@ func (d *DB) beginLocked(ctx context.Context, opts TxOptions) (*Tx, error) {
 		// Open already created the database if authorized. A later removal
 		// must not silently replace that database with an empty one.
 		pagerOptions.Create = false
-		p, err := pager.OpenTx(ctx, d.path, pagerOptions)
+		var p *pager.Tx
+		var err error
+		if d.session != nil {
+			p, err = d.session.Begin(ctx)
+		} else {
+			p, err = pager.OpenTx(ctx, d.path, pagerOptions)
+		}
 		if err != nil {
 			return nil, err
 		}

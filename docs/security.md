@@ -10,3 +10,8 @@ Known platform-restricted crash/fault/process-exit workflows must not run here o
 
 
 A writable connection resolves its database path once; symlink/cwd changes must not redirect later operations to a different database. Physical pathname/inode stability is checked while a transaction is open. Shared snapshots are held by Rows/Tx lifetimes, not by idle connections. Index maintenance is atomic at statement-overlay level; operational failures during physical publication are conservatively poisoned and remain unqualified without restricted manual evidence. Journals are plaintext and mode0600; M2 provides no encryption/confidentiality protection.
+
+
+M3 exclusive WAL is an explicitly restricted coordination model. The connection owns one exclusive database descriptor until Close; lease operations do not release that lock. A strict WAL scanner bounds retained index entries, total frames/bytes and index-processing work, rejects unknown versions/salts/checksums and refuses unsupported tails. WAL checksums provide accidental-damage detection, not authenticity; a correctly checksummed WAL from another database cannot be cryptographically distinguished. No encrypted WAL or historical rollback defense exists.
+
+The source-only rollback recovery operation is not automatically reachable through normal Open/Query/Exec. Cold, unknown and ambiguous journal files remain untouched. Its restricted physical replay/error branches have no executed acceptance evidence. Sector-neighbor and sync-order source fixes plus normal checkpoint tests are not a power-loss guarantee. Full shared-memory concurrency and non-Linux native runtime remain unsupported.

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/ms-xiaosnow/gosqlite/internal/buildinfo"
 	sqlast "github.com/ms-xiaosnow/gosqlite/internal/sql"
@@ -14,7 +15,7 @@ import (
 )
 
 func run(args []string, out io.Writer) error { return runContext(context.Background(), args, out) }
-func runContext(ctx context.Context, args []string, out io.Writer) error {
+func runContext(ctx context.Context, args []string, out io.Writer) (resultErr error) {
 	if err := ctx.Err(); err != nil {
 		return err
 	}
@@ -23,13 +24,17 @@ func runContext(ctx context.Context, args []string, out io.Writer) error {
 		return err
 	}
 	if len(args) == 0 || (len(args) == 1 && args[0] == "help") {
-		_, err := fmt.Fprintln(out, "usage: gosqlite version\n       gosqlite query <db> '<sql>'\n       gosqlite inspect <db>\nSQLite SQL MVP. One statement per invocation; SELECT emits JSON Lines, writes emit a result.")
+		_, err := fmt.Fprintln(out, "usage: gosqlite version\n       gosqlite query [--wal-exclusive] <db> '<sql>'\n       gosqlite inspect <db>\nSQLite SQL MVP. One statement per invocation; SELECT emits JSON Lines, writes emit a result.")
 		return err
 	}
 	switch args[0] {
 	case "query":
+		walExclusive := len(args) > 1 && args[1] == "--wal-exclusive"
+		if walExclusive {
+			args = append([]string{args[0]}, args[2:]...)
+		}
 		if len(args) != 3 {
-			return fmt.Errorf("usage: gosqlite query <db> '<sql>'")
+			return fmt.Errorf("usage: gosqlite query [--wal-exclusive] <db> '<sql>'")
 		}
 		stmt, err := sqlast.Parse(args[2])
 		if err != nil {
@@ -39,11 +44,11 @@ func runContext(ctx context.Context, args []string, out io.Writer) error {
 			return fmt.Errorf("CLI executes one statement per connection; use the Go API for explicit transactions")
 		}
 		_, selectOnly := stmt.(*sqlast.Select)
-		db, err := sqlite.Open(args[1], sqlite.Options{ReadOnly: selectOnly})
+		db, err := sqlite.OpenContext(ctx, args[1], sqlite.Options{ReadOnly: selectOnly && !walExclusive, NoCreate: selectOnly, WALExclusive: walExclusive})
 		if err != nil {
 			return err
 		}
-		defer db.Close()
+		defer func() { resultErr = errors.Join(resultErr, db.Close()) }()
 		if !selectOnly {
 			result, err := db.Exec(ctx, args[2])
 			if err != nil {
@@ -88,7 +93,7 @@ func runContext(ctx context.Context, args []string, out io.Writer) error {
 		if err != nil {
 			return err
 		}
-		defer db.Close()
+		defer func() { resultErr = errors.Join(resultErr, db.Close()) }()
 		schema, err := db.Schema(ctx)
 		if err != nil {
 			return err

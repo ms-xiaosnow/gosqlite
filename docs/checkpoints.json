@@ -32,5 +32,17 @@
     "verified": "Guarded remote commit; ref and branch readback confirmed after one initial mismatched observation; no mutation retried; exact local commit mirror; complete-history bundle verify; clean clone/fsck and ordinary/race/oracle checks; persisted Library readback bytes identical",
     "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38041930194",
     "remote_ci_status": "PASSED for exact checkpoint SHA; observed 2026-10-10T09:38:33Z"
+  },
+  {
+    "stage": "M2 verified ordinary SQL/write MVP",
+    "remote_commit": "9feb20357fedb2bff7901a97a462e9bf4821e279",
+    "local_commit": "9feb20357fedb2bff7901a97a462e9bf4821e279",
+    "tree": "75ec5a8853cfac01304d3f06526088bc84e8350d",
+    "bundle_sha256": "c0dde67c7e31887f2abdceae974c8aa526239a94654b7374ab555280fdd97ada",
+    "library_file_id": "libfile_2d45288b7a9c8191b2bedbc479533b9f",
+    "library_version": 0,
+    "verified": "Guarded remote commit/ref readback; exact local commit mirror; complete-history bundle verify; clean clone/fsck; persisted Library readback bytes identical; original goal and all fixture manifest hashes unchanged; Library-restored clean clone passed scripts/check.sh and pinned oracle suite",
+    "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38043149889",
+    "remote_ci_status": "PASSED for exact checkpoint SHA; observed 2026-10-10T09:58:48Z; only ordinary checks"
   }
 ]

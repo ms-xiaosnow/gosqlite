@@ -19,12 +19,14 @@ var (
 	ErrMisuse           = errors.New("invalid SQLite transaction operation")
 )
 
-// Options controls native rollback-mode transactions. A zero PageSize chooses
+// Options controls native rollback transactions and exclusive WAL sessions.
+// A zero PageSize chooses
 // 4096 for a newly created database; existing databases retain their page size.
 // SectorSize is a conservative storage-sector assumption, not autodetection.
 // Set it no smaller than the actual storage sector. Default: 4096 bytes.
 // MaxDirtyPages bounds the overlay; an active statement may retain an equally
-// large undo snapshot. No dirty data spills to disk before Commit.
+// large undo snapshot. WAL commits also reserve unchanged sector neighbors
+// within this bound. No dirty data spills to disk before Commit.
 // MaxFreelistPages bounds validation metadata, default 1,048,576 pages.
 type Options struct {
 	Create           bool
@@ -32,9 +34,13 @@ type Options struct {
 	MaxDirtyPages    uint32
 	MaxFreelistPages uint32
 	SectorSize       uint32
+	// KeepWALOnClose retains a synced WAL on normal Session.Close. It has no
+	// effect on the default rollback-mode OpenTx API.
+	KeepWALOnClose bool
 }
 
-// Tx owns one writable file descriptor and its SHARED snapshot lock. Promotion
+// Tx owns either a writable descriptor with its SHARED snapshot lock, or the
+// sole transaction lease on an exclusive WAL Session. Rollback-mode promotion
 // obtains RESERVED on that same descriptor. Each method is data-race safe, but
 // callers must serialize transaction-level operations, including Statement's
 // callback. A successful Commit or Rollback closes the transaction. BUSY from
@@ -53,6 +59,11 @@ type Tx struct {
 	reserved       bool
 	statement      bool
 	poisoned       error
+	session        *Session
+	readOnly       bool
+	// keepFile is private to the rollback-journal WAL-mode transition. The
+	// Session already holds EXCLUSIVE and retains the same descriptor.
+	keepFile bool
 }
 
 func normalizedOptions(o Options) (Options, error) {
@@ -213,6 +224,9 @@ func (t *Tx) checkOpen() error {
 func (t *Tx) checkSidecars() error { return checkSidecars(t.path) }
 
 func (t *Tx) checkStable() error {
+	if t.session != nil {
+		return t.session.checkStable()
+	}
 	if err := t.checkSidecars(); err != nil {
 		return err
 	}
@@ -220,11 +234,11 @@ func (t *Tx) checkStable() error {
 	if err != nil {
 		return err
 	}
-	other, err := os.Stat(t.path)
+	other, err := os.Lstat(t.path)
 	if err != nil {
 		return fmt.Errorf("%w: database pathname: %v", ErrChanged, err)
 	}
-	if !os.SameFile(st, other) || st.Size() != t.info.Size() || !st.ModTime().Equal(t.info.ModTime()) {
+	if !other.Mode().IsRegular() || !os.SameFile(st, other) || st.Size() != t.info.Size() || !st.ModTime().Equal(t.info.ModTime()) {
 		return ErrChanged
 	}
 	if err = validateWritableFile(st); err != nil {
@@ -257,6 +271,9 @@ func (t *Tx) readLocked(ctx context.Context, n uint32) ([]byte, error) {
 	if err := t.checkStable(); err != nil {
 		return nil, err
 	}
+	if t.session != nil {
+		return t.session.readPage(ctx, n)
+	}
 	p := make([]byte, t.header.PageSize)
 	if _, err := t.file.ReadAt(p, int64(n-1)*int64(t.header.PageSize)); err != nil {
 		return nil, err
@@ -278,6 +295,9 @@ func (t *Tx) promoteLocked(ctx context.Context) error {
 	}
 	if err := t.checkOpen(); err != nil {
 		return err
+	}
+	if t.readOnly {
+		return fmt.Errorf("%w: read-only snapshot", ErrMisuse)
 	}
 	if t.reserved {
 		return nil
@@ -426,6 +446,13 @@ func (t *Tx) Rollback() error {
 		return fmt.Errorf("%w: rollback inside statement", ErrMisuse)
 	}
 	if t.file == nil {
+		return t.poisoned
+	}
+	if t.session != nil {
+		t.session.release(t)
+		t.file = nil
+		t.dirty = nil
+		t.free = nil
 		return t.poisoned
 	}
 	err := t.file.Close()

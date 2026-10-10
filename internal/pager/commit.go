@@ -91,11 +91,17 @@ func (t *Tx) Commit(ctx context.Context) error {
 	if t.statement {
 		return fmt.Errorf("%w: commit inside statement", ErrMisuse)
 	}
+	if t.session != nil {
+		return t.commitWALLocked(ctx)
+	}
 	if err := t.checkStable(); err != nil {
 		return err
 	}
 	if len(t.dirty) == 0 {
-		err := t.file.Close()
+		var err error
+		if !t.keepFile {
+			err = t.file.Close()
+		}
 		t.file = nil
 		t.free = nil
 		return err
@@ -143,6 +149,9 @@ func (t *Tx) Commit(ctx context.Context) error {
 	// Pre-I/O failures remain retryable and release PENDING/EXCLUSIVE while
 	// retaining this transaction's SHARED+RESERVED locks.
 	preflight := func(e error) error {
+		if t.keepFile {
+			return e
+		}
 		if unlock := unlockExclusive(t.file); unlock != nil {
 			return t.poison(errors.Join(e, unlock), false)
 		}
@@ -231,7 +240,9 @@ func (t *Tx) Commit(ctx context.Context) error {
 		return t.poison(errors.Join(ErrCommitUncertain, err), false)
 	}
 	t.header = finalHeader
-	err = t.file.Close()
+	if !t.keepFile {
+		err = t.file.Close()
+	}
 	t.file = nil
 	t.dirty = nil
 	t.free = nil
@@ -242,6 +253,14 @@ func (t *Tx) Commit(ctx context.Context) error {
 	return nil
 }
 func (t *Tx) poison(cause error, recovery bool) error {
+	if t.session != nil {
+		t.session.mu.Lock()
+		t.poisoned = t.session.poisonLocked(cause)
+		t.session.active = nil
+		t.session.mu.Unlock()
+		t.file, t.dirty, t.free = nil, nil, nil
+		return t.poisoned
+	}
 	if t.file != nil {
 		cause = errors.Join(cause, t.file.Close())
 		t.file = nil

@@ -1,5 +1,6 @@
-// Package pager provides bounded SQLite page reads and native rollback-mode
-// write transactions. Interrupted-commit recovery remains unverified.
+// Package pager provides bounded SQLite page reads, native rollback-mode write
+// transactions, and opt-in connection-exclusive WAL sessions. Interrupted-I/O
+// recovery and durability remain unverified.
 package pager
 
 import (
@@ -38,6 +39,13 @@ type Header struct {
 // ParseHeader validates SQLite's 100-byte header against the physical file
 // length. Unsupported formats fail closed, before page data is interpreted.
 func ParseHeader(p []byte, fileSize int64) (Header, error) {
+	return parseHeader(p, fileSize, false, 0)
+}
+
+// parseHeader keeps the physical main-file extent distinct from a committed
+// WAL snapshot's logical extent. Only an exclusive Session may enable WAL.
+// A nonzero logicalPages comes from a validated WAL commit marker.
+func parseHeader(p []byte, fileSize int64, allowWAL bool, logicalPages uint32) (Header, error) {
 	var h Header
 	if len(p) < 100 || !bytes.Equal(p[:16], []byte("SQLite format 3\x00")) {
 		return h, fmt.Errorf("%w: invalid 100-byte header or magic", ErrCorrupt)
@@ -51,7 +59,7 @@ func ParseHeader(p []byte, fileSize int64) (Header, error) {
 		return h, fmt.Errorf("%w: invalid page size", ErrCorrupt)
 	}
 	h.WriteVersion, h.ReadVersion = p[18], p[19]
-	if p[18] != 1 || p[19] != 1 {
+	if (p[18] != 1 || p[19] != 1) && !(allowWAL && p[18] == 2 && p[19] == 2) {
 		return h, fmt.Errorf("%w: WAL or unknown read/write version", ErrUnsupported)
 	}
 	h.ReservedBytes = p[20]
@@ -72,7 +80,12 @@ func ParseHeader(p []byte, fileSize int64) (Header, error) {
 	h.ChangeCounter = u32(24)
 	h.VersionValidFor = u32(92)
 	h.PageCount = u32(28)
-	if h.PageCount == 0 || h.ChangeCounter != h.VersionValidFor {
+	if logicalPages != 0 {
+		if logicalPages > 0xfffffffe {
+			return h, fmt.Errorf("%w: invalid WAL database extent", ErrCorrupt)
+		}
+		h.PageCount = logicalPages
+	} else if h.PageCount == 0 || h.ChangeCounter != h.VersionValidFor {
 		h.PageCount = uint32(physical)
 	} else if uint64(h.PageCount) > physical {
 		return h, fmt.Errorf("%w: header page count exceeds file", ErrCorrupt)

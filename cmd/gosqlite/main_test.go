@@ -83,3 +83,17 @@ func TestSQLRejectedBeforeCreation(t *testing.T) {
 		t.Fatalf("cancel created: %v", err)
 	}
 }
+
+func TestCLIExclusiveWAL(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "wal-cli.db")
+	var b bytes.Buffer
+	for _, q := range []string{"CREATE TABLE t(id INTEGER PRIMARY KEY, title TEXT)", "INSERT INTO t VALUES(1,'WAL')", "SELECT id,title FROM t"} {
+		b.Reset()
+		if err := run([]string{"query", "--wal-exclusive", path, q}, &b); err != nil {
+			t.Fatalf("%s: %v", q, err)
+		}
+	}
+	if !strings.Contains(b.String(), `{"row":[1,"WAL"]}`) {
+		t.Fatal(b.String())
+	}
+}

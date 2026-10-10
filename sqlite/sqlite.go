@@ -109,6 +109,14 @@ func wrap(op string, err error) error {
 type Options struct {
 	ReadOnly bool
 	NoCreate bool
+	// WALExclusive enables the restricted native WAL mode. It retains an
+	// EXCLUSIVE database lock for the connection lifetime and allows one active
+	// query or transaction lease. It requires writable access even for reads.
+	WALExclusive bool
+	// KeepWALOnClose retains normally committed, synced WAL data without an
+	// implicit checkpoint. Only meaningful with WALExclusive; default Close
+	// checkpoints and removes the WAL. This is not a crash-safety guarantee.
+	KeepWALOnClose bool
 	// MaxSortBytes bounds retained ORDER BY rows and UPDATE/DELETE rowid lists.
 	// Zero selects 64 MiB. Sorting never spills plaintext to disk.
 	MaxSortBytes int64
@@ -124,7 +132,10 @@ type Options struct {
 }
 
 // FileInfo describes validated on-disk metadata.
-type FileInfo struct{ PageSize, UsableSize, PageCount, SchemaCookie, SchemaFormat, TextEncoding uint32 }
+type FileInfo struct {
+	PageSize, UsableSize, PageCount, SchemaCookie, SchemaFormat, TextEncoding uint32
+	ReadVersion, WriteVersion                                                 byte
+}
 
 // SchemaEntry is an entry from sqlite_schema. SQL is empty for internal indexes.
 type SchemaEntry struct {
@@ -132,24 +143,42 @@ type SchemaEntry struct {
 	RootPage                   uint32
 }
 
-// DB is a connection. Idle connections hold no shared lock. Each Query owns
+// DB is a connection. Idle rollback-mode connections hold no shared lock.
+// WALExclusive connections retain an exclusive lock for their full lifetime. Each Query owns
 // its snapshot until Rows.Close or exhaustion; explicit transactions own one
 // snapshot and overlay until Commit/Rollback. Concurrent methods are serialized
 // per connection. Independent DB handles can be used concurrently.
 type DB struct {
-	mu     sync.RWMutex
-	path   string
-	info   FileInfo
-	opts   Options
-	closed bool
-	tx     *Tx
-	rows   map[*Rows]struct{}
+	mu      sync.RWMutex
+	path    string
+	info    FileInfo
+	opts    Options
+	closed  bool
+	tx      *Tx
+	rows    map[*Rows]struct{}
+	session *pager.Session
 }
 
 // Open opens a SQLite-format file. An absent file is created unless ReadOnly
 // or NoCreate is set. Existing unsupported schemas are readable where possible,
 // but are validated conservatively before any SQL mutation.
 func Open(path string, opts Options) (*DB, error) {
+	return OpenContext(context.Background(), path, opts)
+}
+
+// OpenContext opens a connection while honoring cancellation before physical
+// publication. Once a mode-switch commit starts I/O it must finish or report
+// an uncertain/poisoned result rather than abandon partially published data.
+func OpenContext(ctx context.Context, path string, opts Options) (*DB, error) {
+	if err := checkContext(ctx); err != nil {
+		return nil, wrap("open", err)
+	}
+	if opts.ReadOnly && opts.WALExclusive {
+		return nil, wrap("open", fmt.Errorf("%w: exclusive WAL requires writable access", ErrUnsupported))
+	}
+	if opts.KeepWALOnClose && !opts.WALExclusive {
+		return nil, wrap("open", fmt.Errorf("KeepWALOnClose requires WALExclusive"))
+	}
 	if opts.MaxSortBytes < 0 {
 		return nil, wrap("open", fmt.Errorf("MaxSortBytes must not be negative"))
 	}
@@ -188,6 +217,15 @@ func Open(path string, opts Options) (*DB, error) {
 			return nil, wrap("open", err)
 		}
 	}
+	if opts.WALExclusive {
+		session, err := pager.OpenSession(ctx, path, d.pagerOptions())
+		if err != nil {
+			return nil, wrap("open", err)
+		}
+		d.session = session
+		d.info = fileInfo(session.Header())
+		return d, nil
+	}
 	// Prefer a read-only probe for existing files, so opening a handle does not
 	// acquire a writer lock or rewrite an unchanged database header.
 	r, err := pager.Open(path)
@@ -196,10 +234,10 @@ func Open(path string, opts Options) (*DB, error) {
 		err = r.Close()
 	} else if !opts.ReadOnly && !opts.NoCreate && errors.Is(err, os.ErrNotExist) {
 		var p *pager.Tx
-		p, err = pager.OpenTx(context.Background(), path, d.pagerOptions())
+		p, err = pager.OpenTx(ctx, path, d.pagerOptions())
 		if err == nil {
 			d.info = fileInfo(p.Header())
-			err = p.Commit(context.Background())
+			err = p.Commit(ctx)
 			if err != nil {
 				_ = p.Rollback()
 			}
@@ -211,10 +249,10 @@ func Open(path string, opts Options) (*DB, error) {
 	return d, nil
 }
 func fileInfo(h pager.Header) FileInfo {
-	return FileInfo{h.PageSize, h.UsableSize, h.PageCount, h.SchemaCookie, h.SchemaFormat, h.TextEncoding}
+	return FileInfo{PageSize: h.PageSize, UsableSize: h.UsableSize, PageCount: h.PageCount, SchemaCookie: h.SchemaCookie, SchemaFormat: h.SchemaFormat, TextEncoding: h.TextEncoding, ReadVersion: h.ReadVersion, WriteVersion: h.WriteVersion}
 }
 func (d *DB) pagerOptions() pager.Options {
-	return pager.Options{Create: !d.opts.NoCreate && !d.opts.ReadOnly, PageSize: d.opts.PageSize, MaxDirtyPages: d.opts.MaxTransactionPages, SectorSize: d.opts.SectorSize}
+	return pager.Options{Create: !d.opts.NoCreate && !d.opts.ReadOnly, PageSize: d.opts.PageSize, MaxDirtyPages: d.opts.MaxTransactionPages, SectorSize: d.opts.SectorSize, KeepWALOnClose: d.opts.KeepWALOnClose}
 }
 
 // Info returns the most recently observed header metadata.
@@ -238,7 +276,7 @@ func (d *DB) Schema(ctx context.Context) ([]SchemaEntry, error) {
 		}
 		reader = d.tx.reader
 	} else {
-		r, err := pager.Open(d.path)
+		r, err := d.openReader(ctx)
 		if err != nil {
 			return nil, wrap("schema", err)
 		}
@@ -279,6 +317,9 @@ func (d *DB) Close() error {
 	if d.tx != nil {
 		err = errors.Join(err, d.tx.rollbackLocked())
 	}
+	if d.session != nil {
+		err = errors.Join(err, d.session.Close())
+	}
 	return wrap("close", err)
 }
 
@@ -315,7 +356,7 @@ func (d *DB) Query(ctx context.Context, query string, args ...any) (*Rows, error
 	if err != nil {
 		return nil, wrap("bind", err)
 	}
-	reader, err := pager.Open(d.path)
+	reader, err := d.openReader(ctx)
 	if err != nil {
 		return nil, wrap("query", err)
 	}
@@ -340,4 +381,42 @@ func fold(s string) string {
 		}
 	}
 	return string(b)
+}
+
+// openReader is called under the connection lock. A WAL session reader is a
+// lease on its existing descriptor; opening another descriptor would conflict
+// with that session's retained EXCLUSIVE lock.
+func (d *DB) openReader(ctx context.Context) (*pager.Reader, error) {
+	if d.session != nil {
+		return d.session.Reader(ctx)
+	}
+	if err := checkContext(ctx); err != nil {
+		return nil, err
+	}
+	return pager.Open(d.path)
+}
+
+// Checkpoint copies committed WAL images into the main file and durably ends
+// that WAL generation. It requires WALExclusive and no active query/Tx lease.
+// Normal-success tests do not establish interrupted-checkpoint durability.
+func (d *DB) Checkpoint(ctx context.Context) error {
+	if err := checkContext(ctx); err != nil {
+		return wrap("checkpoint", err)
+	}
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	if d.closed {
+		return wrap("checkpoint", ErrClosed)
+	}
+	if d.session == nil {
+		return wrap("checkpoint", fmt.Errorf("%w: checkpoint requires WALExclusive", ErrUnsupported))
+	}
+	if d.tx != nil || len(d.rows) != 0 {
+		return wrap("checkpoint", ErrBusy)
+	}
+	err := d.session.Checkpoint(ctx)
+	if err == nil {
+		d.info = fileInfo(d.session.Header())
+	}
+	return wrap("checkpoint", err)
 }

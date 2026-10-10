@@ -1,6 +1,6 @@
 # Architecture
 
-The goal is a native Go engine, with SQLite 3 pages as its plaintext compatibility boundary. M2 adds native transaction overlays, local B-tree mutation, rollback-journal publication and SQL writes. Recovery/WAL and extension/security stages remain unimplemented.
+The goal is a native Go engine, with SQLite 3 pages as its plaintext compatibility boundary. M2 adds native transaction overlays, local B-tree mutation, rollback-journal publication and SQL writes. M3 adds an explicit connection-owned exclusive-WAL path and isolated recovery source; full concurrent WAL, qualified recovery and extension/security stages remain unfinished.
 
 Target data path:
 
@@ -21,3 +21,8 @@ Implemented M2 write path: parsed CREATE/INSERT/UPDATE/DELETE → full supported
 Idle connections release snapshots; each query or transaction owns its file handle and locks. Native Commit returning BUSY before physical I/O can be retried after readers close. database/sql invalidates a Tx after any Commit result, so its adapter rolls back after a failed commit. Once commit physical I/O begins, cancellation is deferred until the operation resolves. Any ambiguous physical-I/O result poisons the handle; it cannot be used as a successful commit.
 
 Recovery of an existing journal is not yet implemented. All writable opens refuse any journal sidecar. Source-ordering review and normal commit tests do not prove crash atomicity. See ADR0003 and manual-verification.md. Planned packages are created only with real implementation, not placeholder interfaces.
+
+
+M3 WAL route: DB(WALExclusive) → pager.Session retaining one EXCLUSIVE descriptor → Reader/Tx lease → dirty overlay → native WAL codec/committed-page index → synced WAL frames. Query, Schema and Begin all use the owning session; they never open an independent file descriptor against its lock. Checkpoint extends sector protection for imported logs, syncs WAL, copies committed images to main, syncs main, then removes sidecars and syncs the directory. Default Close checkpoints; explicit KeepWALOnClose preserves normally committed frames. Shared-memory WAL is not implemented.
+
+Rollback recovery is a separate explicit internal operation. Its parser/planner is tested only in memory; physical replay is source-reviewed and compile-checked but not executed. Normal Open retains the fail-closed journal policy. This boundary prevents an ordinary test or user query from implicitly entering an unqualified recovery workflow.
