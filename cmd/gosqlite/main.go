@@ -24,7 +24,7 @@ func runContext(ctx context.Context, args []string, out io.Writer) (resultErr er
 		return err
 	}
 	if len(args) == 0 || (len(args) == 1 && args[0] == "help") {
-		_, err := fmt.Fprintln(out, "usage: gosqlite version\n       gosqlite query [--wal-exclusive|--wal-shared] <db> '<sql>'\n       gosqlite inspect <db>\nSQLite SQL MVP. One statement per invocation; SELECT emits JSON Lines, writes emit a result.")
+		_, err := fmt.Fprintln(out, "usage: gosqlite version\n       gosqlite query [--wal-exclusive|--wal-shared] <db> '<sql>'\n       gosqlite inspect <db>\n       gosqlite check [--wal-exclusive|--wal-shared] <db> <index>\nSQLite SQL MVP. One statement per invocation; SELECT emits JSON Lines, writes emit a result.")
 		return err
 	}
 	switch args[0] {
@@ -86,6 +86,28 @@ func runContext(ctx context.Context, args []string, out io.Writer) (resultErr er
 			}
 		}
 		return rows.Err()
+	case "check":
+		walExclusive := len(args) > 1 && args[1] == "--wal-exclusive"
+		walShared := len(args) > 1 && args[1] == "--wal-shared"
+		if walExclusive || walShared {
+			args = append([]string{args[0]}, args[2:]...)
+		}
+		if len(args) != 3 {
+			return fmt.Errorf("usage: gosqlite check [--wal-exclusive|--wal-shared] <db> <index>; checks extension consistency, not full SQLite integrity")
+		}
+		db, err := sqlite.OpenContext(ctx, args[1], sqlite.Options{ReadOnly: !walExclusive && !walShared, NoCreate: true, WALExclusive: walExclusive, WALShared: walShared, KeepWALOnClose: walExclusive || walShared})
+		if err != nil {
+			return err
+		}
+		defer func() { resultErr = errors.Join(resultErr, db.Close()) }()
+		if err = db.CheckExtensionIndex(ctx, args[2]); err != nil {
+			return err
+		}
+		return json.NewEncoder(out).Encode(struct {
+			Status string `json:"status"`
+			Scope  string `json:"scope"`
+			Index  string `json:"index"`
+		}{"ok", "extension source/posting/frequency consistency only", args[2]})
 	case "inspect":
 		if len(args) != 2 {
 			return fmt.Errorf("usage: gosqlite inspect <db>")

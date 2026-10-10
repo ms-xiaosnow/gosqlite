@@ -23,6 +23,10 @@ type resultRow struct{ values, keys []any }
 // Next, Values, Err and Close are synchronized, but callers must not interleave
 // multiple consumers because their logical Next/Values pair is not atomic.
 type Rows struct {
+	queryPlan                       QueryPlan
+	queryStats                      QueryStats
+	explainDetail                   string
+	functions                       map[string]sqlast.Function
 	mu                              sync.Mutex
 	db                              *DB
 	ctx                             context.Context
@@ -79,6 +83,7 @@ func (r *Rows) close() error {
 	r.current = nil
 	r.sorted = nil
 	r.params = nil
+	r.functions = nil
 	var err error
 	if r.source != nil {
 		err = r.source.Close()
@@ -121,6 +126,15 @@ func (r *Rows) Next() bool {
 			return r.fail(err)
 		}
 	}
+	if r.explainDetail != "" {
+		if r.emitted != 0 {
+			return r.fail(io.EOF)
+		}
+		r.current = []any{int64(0), int64(0), int64(0), r.explainDetail}
+		r.emitted++
+		r.queryStats.ReturnedRows++
+		return true
+	}
 	if r.limit >= 0 && r.emitted >= r.limit {
 		return r.fail(io.EOF)
 	}
@@ -146,6 +160,7 @@ func (r *Rows) Next() bool {
 		}
 		r.current = row.values
 		r.emitted++
+		r.queryStats.ReturnedRows++
 		return true
 	}
 }
@@ -158,6 +173,9 @@ func (r *Rows) fetch() (resultRow, int64, error) {
 		rowid, values, err := r.source.Next()
 		if err != nil {
 			return resultRow{}, 0, err
+		}
+		if r.table != nil {
+			r.queryStats.BaseRowFetches++
 		}
 		rawCost := valuesSize(values)
 		if r.table != nil {
@@ -193,7 +211,7 @@ func (r *Rows) fetch() (resultRow, int64, error) {
 				}
 			}
 		}
-		ec := &sqlast.EvalContext{Params: r.params}
+		ec := &sqlast.EvalContext{Params: r.params, Functions: r.functions}
 		ec.Resolver = func(q, name string) (any, error) {
 			i, err := r.table.column(q, name)
 			if err != nil {
@@ -223,7 +241,7 @@ func (r *Rows) fetch() (resultRow, int64, error) {
 				return value, err
 			}
 			if i, ok := r.aliases[fold(name)]; ok {
-				return sqlast.Eval(r.exprs[i], &sqlast.EvalContext{Params: r.params, Resolver: physicalResolver, Affinity: physicalAffinity})
+				return sqlast.Eval(r.exprs[i], &sqlast.EvalContext{Params: r.params, Resolver: physicalResolver, Affinity: physicalAffinity, Functions: r.functions})
 			}
 			return nil, err
 		}

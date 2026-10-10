@@ -1,0 +1,10 @@
+=== RUN   TestOraclePersistentGramsInterop
+=== RUN   TestOraclePersistentGramsInterop/page4096/sharedfalse
+=== RUN   TestOraclePersistentGramsInterop/page4096/sharedtrue
+--- PASS: TestOraclePersistentGramsInterop (61.53s)
+    --- PASS: TestOraclePersistentGramsInterop/page4096/sharedfalse (29.69s)
+    --- PASS: TestOraclePersistentGramsInterop/page4096/sharedtrue (31.83s)
+=== RUN   TestOracleGramsVacuumEpoch
+--- PASS: TestOracleGramsVacuumEpoch (0.18s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	62.734s

@@ -62,3 +62,15 @@ CGO_ENABLED=1 go test -race ./sqlite ./driver ./cmd/gosqlite -run 'TestSharedWAL
 ```
 
 The live oracle helper starts a cooperating official CLI, exchanges bounded marker-delimited SQL, and closes with ordinary .quit/EOF plus Wait. It does not kill, signal, timeout-terminate or crash a process. The spilled UPDATE→ROLLBACK regression uses valid SQL and normal closure to check a checksum-valid discarded suffix, followed by normal native commit/reopen/checkpoint. It is not hot-journal replay or fault simulation. Shared protocol error branches and ambiguous cold-tail recovery are not qualified by these tests.
+
+## M4 ordinary index verification
+
+The ordinary suite now includes real persistent index build, delta maintenance, full posting/frequency reconciliation, statement/transaction rollback, normal checkpoint/reopen, exact indexed-versus-NOT INDEXED comparison, external SQLite DML invalidation, missing guard repair and ordinary VACUUM. These are valid-data lifecycle operations, not physical fault simulations. The shared oracle helper no longer has a CommandContext auto-kill hook; disk processes finish through normal SQL/EOF/Wait.
+
+```sh
+./scripts/check.sh
+SQLITE_ORACLE=/absolute/path/to/verified/sqlite3 ./scripts/test-oracle.sh
+CGO_ENABLED=1 SQLITE_ORACLE=/absolute/path/to/verified/sqlite3 go test -race -tags oracle ./internal/testkit -run 'TestOraclePersistentGramsInterop/page4096|TestOracleGramsVacuumEpoch|TestOracleM4Review'
+```
+
+Actual commands/results belong in evidence/m4-aggregate.txt and m4-review.md. No checkpoint or ordinary rollback result qualifies interrupted index publication/recovery. Those gates remain BLOCKED/NOT_RUN, and full M4 acceptance is conditional on them.

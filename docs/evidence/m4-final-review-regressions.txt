@@ -1,0 +1,5 @@
+Final validation-only review fixes: ordinary and race, no physical faults
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.538s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	3.965s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/similarity	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/extension/similarity	(cached)

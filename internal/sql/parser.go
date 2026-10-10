@@ -35,6 +35,26 @@ func Parse(text string) (Statement, error) {
 	switch {
 	case p.take("SELECT"):
 		stmt, err = p.selectStmt()
+	case p.take("EXPLAIN"):
+		if err = p.need("QUERY"); err != nil {
+			return nil, err
+		}
+		if err = p.need("PLAN"); err != nil {
+			return nil, err
+		}
+		if err = p.need("SELECT"); err != nil {
+			return nil, err
+		}
+		var sel *Select
+		sel, err = p.selectStmt()
+		if err == nil {
+			sel.Explain = true
+			stmt = sel
+		}
+	case p.take("REINDEX"):
+		var name string
+		name, err = p.name()
+		stmt = &Reindex{Name: name}
 	case p.take("CREATE"):
 		stmt, err = p.createStmt()
 	case p.take("INSERT"):
@@ -78,6 +98,8 @@ func Parse(text string) (Statement, error) {
 	case *CreateTable:
 		x.Base = b
 	case *CreateIndex:
+		x.Base = b
+	case *Reindex:
 		x.Base = b
 	case *Insert:
 		x.Base = b
@@ -149,7 +171,7 @@ func (p *parser) name() (string, error) {
 }
 func reserved(s string) bool {
 	switch s {
-	case "SELECT", "FROM", "WHERE", "ORDER", "BY", "LIMIT", "OFFSET", "GROUP", "HAVING", "JOIN", "LEFT", "RIGHT", "FULL", "INNER", "OUTER", "CROSS", "ON", "USING", "UNION", "INTERSECT", "EXCEPT", "AS", "ASC", "DESC", "NULL", "NOT", "AND", "OR", "IS", "LIKE", "ESCAPE", "IN", "BETWEEN", "COLLATE", "WHEN", "THEN", "ELSE", "END", "CASE", "DISTINCT", "ALL", "SET", "VALUES", "RETURNING", "DEFAULT", "PRIMARY", "KEY", "UNIQUE", "CHECK", "FOREIGN", "REFERENCES", "CONSTRAINT", "WITHOUT", "STRICT", "AUTOINCREMENT", "CREATE", "TABLE", "INDEX", "INSERT", "UPDATE", "DELETE", "DROP", "ALTER", "IF", "EXISTS", "INTO", "BEGIN", "COMMIT", "ROLLBACK", "TRANSACTION", "REPLACE", "DO", "CONFLICT", "TRUE", "FALSE", "WINDOW", "OVER", "FILTER", "NULLS":
+	case "SELECT", "FROM", "WHERE", "ORDER", "BY", "LIMIT", "OFFSET", "GROUP", "HAVING", "JOIN", "LEFT", "RIGHT", "FULL", "INNER", "OUTER", "CROSS", "ON", "USING", "UNION", "INTERSECT", "EXCEPT", "AS", "ASC", "DESC", "NULL", "NOT", "AND", "OR", "IS", "LIKE", "ESCAPE", "IN", "BETWEEN", "COLLATE", "WHEN", "THEN", "ELSE", "END", "CASE", "DISTINCT", "ALL", "SET", "VALUES", "RETURNING", "DEFAULT", "PRIMARY", "KEY", "UNIQUE", "CHECK", "FOREIGN", "REFERENCES", "CONSTRAINT", "WITHOUT", "STRICT", "AUTOINCREMENT", "CREATE", "TABLE", "INDEX", "INSERT", "UPDATE", "DELETE", "DROP", "ALTER", "IF", "EXISTS", "INTO", "BEGIN", "COMMIT", "ROLLBACK", "TRANSACTION", "REPLACE", "DO", "CONFLICT", "TRUE", "FALSE", "WINDOW", "OVER", "FILTER", "NULLS", "INDEXED", "REINDEX", "EXPLAIN":
 		return true
 	}
 	return false
@@ -207,6 +229,15 @@ func (p *parser) selectStmt() (*Select, error) {
 		if err != nil {
 			return nil, err
 		}
+	}
+	if p.take("NOT") {
+		if s.From == "" {
+			return nil, p.unsupported("NOT INDEXED without a table")
+		}
+		if err := p.need("INDEXED"); err != nil {
+			return nil, err
+		}
+		s.NotIndexed = true
 	}
 	if p.take("WHERE") {
 		var err error
@@ -429,7 +460,60 @@ func (p *parser) createIndex() (*CreateIndex, error) {
 	if err = p.need(")"); err != nil {
 		return nil, err
 	}
+	if p.take("USING") {
+		s.Method, err = p.name()
+		if err != nil {
+			return nil, err
+		}
+		if p.take("WITH") {
+			if err = p.need("("); err != nil {
+				return nil, err
+			}
+			s.Options = map[string]any{}
+			for {
+				name, err := p.name()
+				if err != nil {
+					return nil, err
+				}
+				name = FoldName(name)
+				if _, exists := s.Options[name]; exists {
+					return nil, p.syntax("duplicate index option " + name)
+				}
+				if err = p.need("="); err != nil {
+					return nil, err
+				}
+				e, err := p.expression(0)
+				if err != nil {
+					return nil, err
+				}
+				if !extensionOptionLiteral(e) {
+					return nil, p.unsupported("index option must be a literal")
+				}
+				v, err := Eval(e, nil)
+				if err != nil {
+					return nil, err
+				}
+				s.Options[name] = v
+				if !p.take(",") {
+					break
+				}
+			}
+			if err = p.need(")"); err != nil {
+				return nil, err
+			}
+		}
+	}
 	return s, nil
+}
+
+func extensionOptionLiteral(e Expr) bool {
+	switch x := e.(type) {
+	case *Literal:
+		return true
+	case *Unary:
+		return (x.Op == "+" || x.Op == "-") && extensionOptionLiteral(x.Expr)
+	}
+	return false
 }
 func (p *parser) insertStmt() (*Insert, error) {
 	s := &Insert{}

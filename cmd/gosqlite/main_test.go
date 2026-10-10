@@ -111,3 +111,30 @@ func TestCLISharedWAL(t *testing.T) {
 		t.Fatal(b.String())
 	}
 }
+
+func TestCLIGramsQueryAndCheck(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "grams.db")
+	for _, q := range []string{"CREATE TABLE docs(id INTEGER PRIMARY KEY,title TEXT)", "INSERT INTO docs VALUES(1,'数据库'),(2,'x'),(3,'y'),(4,'z')", "CREATE INDEX docs_grams ON docs(title) USING grams13"} {
+		var out bytes.Buffer
+		if err := run([]string{"query", path, q}, &out); err != nil {
+			t.Fatal(err)
+		}
+	}
+	var out bytes.Buffer
+	if err := run([]string{"query", path, "EXPLAIN QUERY PLAN SELECT id FROM docs WHERE title LIKE '%数据库%'"}, &out); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(out.String(), "SEARCH") {
+		t.Fatalf("plan: %s", out.String())
+	}
+	out.Reset()
+	if err := run([]string{"check", path, "docs_grams"}, &out); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(out.String(), `"status":"ok"`) || !strings.Contains(out.String(), "consistency only") {
+		t.Fatalf("check: %s", out.String())
+	}
+	if err := run([]string{"check", path, "missing"}, &out); err == nil {
+		t.Fatal("missing index accepted")
+	}
+}

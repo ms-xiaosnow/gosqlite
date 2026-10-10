@@ -298,27 +298,24 @@ func (t *Tx) execLocked(ctx context.Context, stmt sqlast.Statement, params []any
 		if err != nil {
 			return err
 		}
-		if !t.ownershipValidated {
-			var roots []btree.RootSpec
-			for _, tab := range catalog.tables {
-				roots = append(roots, btree.RootSpec{Page: tab.root, Kind: btree.TableTree})
-				for _, idx := range tab.indexes {
-					roots = append(roots, btree.RootSpec{Page: idx.root, Kind: btree.IndexTree, KeyInfo: btree.KeyInfo{Columns: len(idx.columns)}})
-				}
-			}
-			if err = btree.CheckOwnership(ctx, t.reader, roots, t.storage.FreePages()); err != nil {
-				return err
-			}
-			t.ownershipValidated = true
+		if err = t.checkWriteOwnership(ctx, catalog); err != nil {
+			return err
 		}
 		if err = t.storage.PromoteWrite(ctx); err != nil {
 			return err
 		}
+		beforeSchema := t.reader.Header().SchemaCookie
 		switch s := stmt.(type) {
 		case *sqlast.CreateTable:
 			err = t.createTable(ctx, catalog, s)
 		case *sqlast.CreateIndex:
-			err = t.createIndex(ctx, catalog, s)
+			if s.Method != "" {
+				err = t.createSQLMethodIndex(ctx, catalog, s)
+			} else {
+				err = t.createIndex(ctx, catalog, s)
+			}
+		case *sqlast.Reindex:
+			err = t.reindexExtension(ctx, catalog, s.Name)
 		case *sqlast.Insert:
 			result, err = t.insert(ctx, catalog, s, params)
 		case *sqlast.Update:
@@ -328,7 +325,10 @@ func (t *Tx) execLocked(ctx context.Context, stmt sqlast.Statement, params []any
 		default:
 			err = fmt.Errorf("%w: Exec requires CREATE, INSERT, UPDATE or DELETE", ErrUnsupported)
 		}
-		return err
+		if err != nil {
+			return err
+		}
+		return t.refreshExtensionSchemaCookies(ctx, catalog, beforeSchema)
 	})
 	if err != nil {
 		return Result{}, wrap("exec", err)

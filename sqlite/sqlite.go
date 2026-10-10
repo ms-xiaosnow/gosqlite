@@ -11,6 +11,8 @@ import (
 	"path/filepath"
 	"sync"
 
+	"github.com/ms-xiaosnow/gosqlite/extension/grams13"
+	"github.com/ms-xiaosnow/gosqlite/extension/registry"
 	"github.com/ms-xiaosnow/gosqlite/internal/btree"
 	"github.com/ms-xiaosnow/gosqlite/internal/pager"
 	"github.com/ms-xiaosnow/gosqlite/internal/record"
@@ -108,8 +110,12 @@ func wrap(op string, err error) error {
 // Options configures a connection. Zero-value options open read/write and
 // create an absent database. ReadOnly never creates or modifies files.
 type Options struct {
-	ReadOnly bool
-	NoCreate bool
+	// IndexMethods selects an immutable snapshot of registered native index
+	// methods. Nil installs the built-in grams13 method. Stored metadata never
+	// loads code or changes this connection registry.
+	IndexMethods *registry.Registry
+	ReadOnly     bool
+	NoCreate     bool
 	// WALExclusive enables the restricted native WAL mode. It retains an
 	// EXCLUSIVE database lock for the connection lifetime and allows one active
 	// query or transaction lease. It requires writable access even for reads.
@@ -166,6 +172,7 @@ type DB struct {
 	tx      *Tx
 	rows    map[*Rows]struct{}
 	session pageSession
+	methods *registry.Registry
 }
 
 // Open opens a SQLite-format file. An absent file is created unless ReadOnly
@@ -226,7 +233,17 @@ func OpenContext(ctx context.Context, path string, opts Options) (*DB, error) {
 		}
 	}
 	path = canonical
-	d := &DB{path: path, opts: opts, rows: make(map[*Rows]struct{})}
+	methods := opts.IndexMethods
+	if methods == nil {
+		methods, err = registry.New(grams13.Method())
+		if err != nil {
+			return nil, wrap("open index registry", err)
+		}
+	} else {
+		methods = methods.Snapshot()
+	}
+	opts.IndexMethods = methods
+	d := &DB{path: path, opts: opts, rows: make(map[*Rows]struct{}), methods: methods}
 	if !opts.ReadOnly {
 		if err := pager.ValidateOptions(d.pagerOptions()); err != nil {
 			return nil, wrap("open", err)

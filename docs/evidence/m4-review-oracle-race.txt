@@ -1,0 +1,8 @@
+=== RUN   TestOracleM4ReviewDirtyPeerSchemaEpochs
+=== RUN   TestOracleM4ReviewDirtyPeerSchemaEpochs/rollback
+=== RUN   TestOracleM4ReviewDirtyPeerSchemaEpochs/shared-WAL
+--- PASS: TestOracleM4ReviewDirtyPeerSchemaEpochs (4.31s)
+    --- PASS: TestOracleM4ReviewDirtyPeerSchemaEpochs/rollback (2.33s)
+    --- PASS: TestOracleM4ReviewDirtyPeerSchemaEpochs/shared-WAL (1.98s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	5.334s

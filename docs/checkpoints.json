@@ -57,5 +57,18 @@
     "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38044412625",
     "remote_ci_status": "PASSED for exact SHA, observed 2026-10-10T10:20:05Z; ordinary-only",
     "open_gates": "Shared concurrent WAL implementation; restricted crash/fault/physical recovery acceptance; independent native-OS/security/legal gates"
+  },
+  {
+    "stage": "M3 shared-WAL ordinary implementation; M4 range/tokenizer prerequisites",
+    "remote_commit": "bc89c50f2a1c39172aec76195539560b8e36def2",
+    "local_commit": "bc89c50f2a1c39172aec76195539560b8e36def2",
+    "tree": "ba79d23ef3e0e471541aac2efd3e4b3bb166a2c9",
+    "bundle_sha256": "027245f4bbc359d3383fb8619ab6015c1a7256e4198f1caa61bb458d442d51cd",
+    "library_file_id": "libfile_399536a669d48191ab0f05c950bc8116",
+    "library_version": 0,
+    "verified": "Guarded remote ref and commit readback; exact local mirror; full-history bundle verify; Library byte-identical readback; clean restore/fsck; restored scripts/check.sh and pinned oracle suite passed; source/fixture hashes unchanged",
+    "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38045438964",
+    "remote_ci_status": "PASSED for exact SHA, observed 2026-10-10T10:37:24Z; ordinary-only",
+    "open_gates": "Broader recovery/platform implementation, restricted physical recovery/crash/fault acceptance; M4 persistent index/planner and all later milestones; independent native-OS/security/legal/soak acceptance"
   }
 ]

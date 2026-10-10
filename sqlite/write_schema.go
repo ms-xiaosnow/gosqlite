@@ -17,11 +17,13 @@ type writeIndex struct {
 }
 type writeTable struct {
 	*table
-	indexes []writeIndex
+	indexes    []writeIndex
+	extensions []*extensionIndex
 }
 type writeCatalog struct {
-	tables map[string]*writeTable
-	names  map[string]string
+	tables     map[string]*writeTable
+	names      map[string]string
+	extensions *extensionCatalog
 }
 
 // Every stored definition is parsed before mutation. Unknown constraints,
@@ -32,9 +34,25 @@ func (t *Tx) validateCatalog(ctx context.Context) (*writeCatalog, error) {
 	if err != nil {
 		return nil, err
 	}
-	c := &writeCatalog{tables: map[string]*writeTable{}, names: map[string]string{}}
+	extensions, err := t.db.loadExtensionsEntries(ctx, t.reader, entries)
+	if err != nil {
+		return nil, err
+	}
+	c := &writeCatalog{tables: map[string]*writeTable{}, names: map[string]string{}, extensions: extensions}
 	roots := map[uint32]bool{1: true}
 	for _, e := range entries {
+		if e.Type == "trigger" {
+			if _, owned := extensions.guards[fold(e.Name)]; owned {
+				continue
+			}
+			for _, x := range extensions.indexes {
+				for _, op := range []string{"INSERT", "UPDATE", "DELETE"} {
+					if fold(e.Name) == extensionGuardName(x.id, op) {
+						return nil, fmt.Errorf("%w: changed guard %q must be removed before REINDEX", ErrReindexRequired, e.Name)
+					}
+				}
+			}
+		}
 		if e.Type != "table" && e.Type != "index" {
 			return nil, fmt.Errorf("%w: writing a database containing %s %q", ErrUnsupported, e.Type, e.Name)
 		}
@@ -88,6 +106,12 @@ func (t *Tx) validateCatalog(ctx context.Context) (*writeCatalog, error) {
 		}
 		tab.indexes = append(tab.indexes, index)
 	}
+	for _, x := range extensions.indexes {
+		c.names[fold(x.name)] = "extension index"
+		if tab := c.tables[fold(x.sourceTable)]; tab != nil {
+			tab.extensions = append(tab.extensions, x)
+		}
+	}
 	return c, nil
 }
 func writableTable(def *sqlast.CreateTable, root uint32) (*writeTable, error) {
@@ -121,6 +145,9 @@ func writableTable(def *sqlast.CreateTable, root uint32) (*writeTable, error) {
 }
 func writableIndex(def *sqlast.CreateIndex, tab *writeTable, root uint32) (writeIndex, error) {
 	idx := writeIndex{name: def.Name, root: root}
+	if def.Method != "" {
+		return idx, fmt.Errorf("%w: extension syntax in sqlite_schema", ErrUnsupported)
+	}
 	if len(def.Columns) == 0 {
 		return idx, fmt.Errorf("index requires columns")
 	}
@@ -137,7 +164,10 @@ func writableIndex(def *sqlast.CreateIndex, tab *writeTable, root uint32) (write
 	return idx, nil
 }
 func newSchemaName(name string) error {
-	if strings.HasPrefix(fold(name), "sqlite_") {
+	if name == "" {
+		return fmt.Errorf("%w: empty schema object name", ErrUnsupported)
+	}
+	if strings.HasPrefix(fold(name), "sqlite_") || extensionReserved(name) {
 		return fmt.Errorf("%w: reserved schema object name", ErrUnsupported)
 	}
 	return nil
@@ -170,6 +200,9 @@ func (t *Tx) createIndex(ctx context.Context, c *writeCatalog, def *sqlast.Creat
 			return nil
 		}
 		return fmt.Errorf("object already exists: %s", def.Name)
+	}
+	if extensionReserved(def.Table) {
+		return fmt.Errorf("%w: owned extension table", ErrUnsupported)
 	}
 	tab := c.tables[fold(def.Table)]
 	if tab == nil {

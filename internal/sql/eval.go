@@ -212,10 +212,15 @@ func Eval(e Expr, ctx *EvalContext) (any, error) {
 		if a == nil || pattern == nil {
 			return nil, nil
 		}
-		if !utf8.ValidString(textValue(a)) || !utf8.ValidString(textValue(pattern)) {
-			return nil, &ErrUnsupported{Feature: "invalid UTF-8 in LIKE"}
+		valueText, err := LikeText(a)
+		if err != nil {
+			return nil, err
 		}
-		matched := LikeMatch(textValue(a), textValue(pattern), escape)
+		patternText, err := LikeText(pattern)
+		if err != nil {
+			return nil, err
+		}
+		matched := LikeMatch(valueText, patternText, escape)
 		if x.Not {
 			matched = !matched
 		}
@@ -585,6 +590,22 @@ func comparisonAffinity(ae, be Expr, a, b any, ctx *EvalContext) (any, any, erro
 	}
 	return a, b, err
 }
+
+// LikeText is the LIKE evaluator's exact SQL text coercion and UTF-8 check.
+// It preserves NUL and validates the entire input; matching/tokenization apply
+// first-NUL termination afterward. Callers handle SQL NULL separately.
+func LikeText(v any) (string, error) {
+	s := textValue(v)
+	if !utf8.ValidString(s) {
+		return "", &ErrUnsupported{Feature: "invalid UTF-8 in LIKE"}
+	}
+	return s, nil
+}
+
+// TextValue is the evaluator's SQL text coercion, shared with extension indexing.
+// NULL converts to empty text here; callers must preserve their own NULL semantics.
+func TextValue(v any) string { return textValue(v) }
+
 func textValue(v any) string {
 	switch x := v.(type) {
 	case nil:

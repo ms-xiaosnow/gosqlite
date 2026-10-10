@@ -237,13 +237,17 @@ func (d *DB) plan(ctx context.Context, reader btree.PageReader, sel *sqlast.Sele
 			r.offset = 0
 		}
 	}
-	if t == nil {
-		r.source = &constantSource{}
-	} else {
-		r.source, err = btree.NewCursor(ctx, reader, t.root)
-		if err != nil {
-			return nil, err
-		}
+	if err = d.prepareGramFunctions(ctx, reader, r); err != nil {
+		return nil, err
+	}
+	if err = d.planSource(ctx, reader, r); err != nil {
+		return nil, err
+	}
+	if sel.Explain {
+		r.explainDetail = r.queryPlan.Detail()
+		r.columns = []string{"id", "parent", "notused", "detail"}
+		r.limit, r.offset = -1, 0
+		return r, nil
 	}
 	if len(r.order) > 0 && r.limit != 0 {
 		if err = r.materialize(); err != nil {
@@ -334,6 +338,12 @@ func validate(e sqlast.Expr, t *table, aliases map[string]int) error {
 			if err := validate(arg, t, aliases); err != nil {
 				return err
 			}
+		}
+		if fold(x.Name) == "grams13_match" {
+			if len(x.Args) != 3 {
+				return fmt.Errorf("wrong number of arguments to grams13_match()")
+			}
+			return nil
 		}
 		return sqlast.ValidateFunction(x.Name, len(x.Args))
 	default:

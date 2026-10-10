@@ -1,10 +1,10 @@
 # ADR 0005: Persistent grams13 design
 
-Status: proposed design; range cursor and tokenizer prerequisites are implemented and tested. Persistent registry/postings/planner are NOT implemented by this document.
+Status: implemented for the documented ordinary M4 subset; physical crash/recovery gates remain BLOCKED/NOT_RUN. The actual interfaces and evidence are in grams13.md and progress.md.
 
 ## Legal SQLite storage and ownership
 
-Extension definitions must not be stored as unknown CREATE syntax in sqlite_schema. Use owned legal ordinary tables and ascending BINARY covering indices under __gosqlite_ext_*. Catalog rows contain logical index name/id, source table/schema hash, method/storage/tokenizer versions, canonical config/hash, actual Unicode/dependency versions, generation and needs_reindex. Field rows resolve column names/ordinals from the current schema. Posting rows contain index_id, field_id, namespace, gram_length, gram and content_rowid; their INTEGER PRIMARY KEY is a distinct posting id. The covering lookup index ends with content_rowid followed by SQLite's implicit posting rowid. Frequency rows maintain document counts in the same transaction. Current unsupported UNIQUE syntax must not be introduced into stored schemas; native maintenance enforces logical uniqueness.
+Extension definitions must not be stored as unknown CREATE syntax in sqlite_schema. Use owned legal ordinary tables and ascending BINARY covering indices under __gosqlite_ext_*. Catalog rows contain logical index name/id, source table/schema hash and schema cookie, method/storage/tokenizer versions, canonical config/hash, actual Unicode/dependency versions, generation and needs_reindex. Field rows resolve column names/ordinals from the current schema. Posting rows contain index_id, field_id, namespace, gram_length, gram and content_rowid; their INTEGER PRIMARY KEY is a distinct posting id. The covering lookup index ends with content_rowid followed by SQLite's implicit posting rowid. Frequency rows maintain document counts in the same transaction. Current unsupported UNIQUE syntax must not be introduced into stored schemas; native maintenance enforces logical uniqueness.
 
 Physical roots are resolved from the current sqlite_schema snapshot. Metadata does not authorize dynamic code loading or SQL execution. Unknown versions/configs fail closed. Users cannot directly mutate owned shadow data through the native SQL API.
 
@@ -20,7 +20,7 @@ Proof for indexed LIKE: a successful LIKE match contains each escaped literal ru
 
 Generated legal AFTER INSERT/UPDATE/DELETE source-table triggers set the corresponding catalog needs_reindex=1. Official SQLite executes these guards; native writes maintain postings directly and recognize only exact owned generated guard SQL, source table, name and rootpage0. A prefix alone never proves ownership. General triggers remain unsupported. Guard roots are not B-tree ownership roots.
 
-Dirty, missing/changed guard or schema-fingerprint mismatch disables index plans and yields an explicit scan fallback. Native source writes require successful REINDEX first. REINDEX needs a narrow repair path for exact owned guards without executing unexpected trigger code; unrelated triggers remain a blocker. Header change counters alone are not a safe external WAL invalidation mechanism.
+Dirty, missing/changed guard or schema-fingerprint mismatch disables index plans and yields an explicit scan fallback. Native source writes require successful REINDEX first. REINDEX needs a narrow repair path for exact owned guards without executing unexpected trigger code; unrelated triggers remain a blocker. Header change counters alone are not a safe external WAL invalidation mechanism. Persisted schema-cookie comparison additionally detects VACUUM and other schema changes; only proven-clean or explicitly rebuilt indices are refreshed after native schema mutations.
 
 ## Real index ranges and plans
 
@@ -38,7 +38,7 @@ Registry is immutable per connection, with registered method/version handlers; n
 
 Build/DML/REINDEX run inside pager.Statement. INSERT/UPDATE/DELETE compute bounded old/new token sets and apply only deltas plus frequencies; rowid changes remove old/add new. Missing/duplicate logical postings are errors. Rebuild is one cancellable statement, clears dirty state only on success and preserves the previous index/earlier transaction statements on failure. Do not mutate via a retained cursor while deleting the same tree.
 
-Proposed actual extension grammar: CREATE INDEX name ON table(columns) USING grams13 WITH (...), REINDEX name, EXPLAIN QUERY PLAN SELECT. Standard CREATE INDEX remains unchanged. Configured matching can initially use an explicitly documented grams13_match function/native Match API rather than pretending virtual-table JOIN/FTS semantics exist.
+Implemented extension grammar: CREATE INDEX name ON table(columns) USING grams13 WITH (...), REINDEX name, EXPLAIN QUERY PLAN SELECT. Standard CREATE INDEX remains unchanged. Configured matching uses the snapshot-bound grams13_match(index_name,value,needle) SELECT function; virtual-table JOIN/FTS syntax remains unsupported.
 
 ## Ordinary evidence required
 

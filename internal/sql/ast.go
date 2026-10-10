@@ -31,6 +31,8 @@ type Select struct {
 	Where         Expr
 	OrderBy       []OrderTerm
 	Limit, Offset Expr
+	// Explain requests plan rows; NotIndexed explicitly disables index filtering.
+	Explain, NotIndexed bool
 }
 
 func (*Select) statement() {}
@@ -65,9 +67,19 @@ type CreateIndex struct {
 	IfNotExists bool
 	Columns     []string
 	Desc        []bool
+	// Method and Options are project extension grammar, never stored as SQL schema.
+	Method  string
+	Options map[string]any
 }
 
 func (*CreateIndex) statement() {}
+
+type Reindex struct {
+	Base
+	Name string
+}
+
+func (*Reindex) statement() {}
 
 type Insert struct {
 	Base

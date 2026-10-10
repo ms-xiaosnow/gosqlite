@@ -13,9 +13,17 @@ import (
 )
 
 func (c *writeCatalog) find(name string) (*writeTable, error) {
+	if extensionReserved(name) {
+		return nil, fmt.Errorf("%w: owned extension table", ErrUnsupported)
+	}
 	tab := c.tables[fold(name)]
 	if tab == nil {
 		return nil, fmt.Errorf("no such table: %s", name)
+	}
+	for _, x := range tab.extensions {
+		if !x.usable {
+			return nil, fmt.Errorf("%w: %s: %s", ErrReindexRequired, x.name, x.fallback)
+		}
 	}
 	return tab, nil
 }
@@ -208,6 +216,9 @@ func (t *Tx) insert(ctx context.Context, c *writeCatalog, stmt *sqlast.Insert, p
 		if err = t.addIndexes(ctx, tab, rowid, values); err != nil {
 			return result, err
 		}
+		if err = t.applyExtensions(ctx, c, tab, 0, nil, rowid, values); err != nil {
+			return result, err
+		}
 		result.affected++
 		result.lastID = rowid
 	}
@@ -360,6 +371,9 @@ func (t *Tx) update(ctx context.Context, c *writeCatalog, stmt *sqlast.Update, p
 		if err = t.addIndexes(ctx, tab, newID, values); err != nil {
 			return result, err
 		}
+		if err = t.applyExtensions(ctx, c, tab, oldID, oldValues, newID, values); err != nil {
+			return result, err
+		}
 		result.affected++
 	}
 	return result, nil
@@ -388,6 +402,9 @@ func (t *Tx) delete(ctx context.Context, c *writeCatalog, stmt *sqlast.Delete, p
 			return result, err
 		}
 		if err = t.removeIndexes(ctx, tab, id, values); err != nil {
+			return result, err
+		}
+		if err = t.applyExtensions(ctx, c, tab, id, values, 0, nil); err != nil {
 			return result, err
 		}
 		if _, err = btree.DeleteTable(ctx, t.storage, tab.root, id); err != nil {
