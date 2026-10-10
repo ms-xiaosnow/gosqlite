@@ -1,0 +1,6 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+5cf11e5aeac9e200228a8eea44f00b7aaafc58452fce4c430e44a3bf166a970f  ../cli-backup-rekey-evidence/gosqlite-v2
+{"status":"ok","operation":"backup","format":"gosqlite-encrypted-archive","mode":"snapshot","page_size":4096,"page_count":2,"retains_history":false}
+{"status":"ok","operation":"rekey","format":"gosqlite-encrypted-family","mode":"snapshot","page_size":4096,"page_count":2,"retains_history":true}
+Correct-key CLI backup/rekey, native restore, and both data readbacks passed; disposable files will be removed.
+v2 exact binary example and frozen source readback PASS

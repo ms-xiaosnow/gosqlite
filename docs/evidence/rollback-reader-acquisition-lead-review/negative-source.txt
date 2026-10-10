@@ -1,0 +1,7 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestReaderAcquisitionSourceSnapshotAfterShared
+    reader_acquisition_test.go:68: missing constructor step "info, err = statNativeFile(file)"
+--- FAIL: TestReaderAcquisitionSourceSnapshotAfterShared (0.00s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/pager	0.005s
+FAIL

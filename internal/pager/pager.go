@@ -66,6 +66,12 @@ func OpenAdmitted(path string, admission *PlainOpenAdmission) (result *Reader, r
 	if err = lockShared(file); err != nil {
 		return nil, err
 	}
+	// Capture the snapshot metadata under SHARED. A cooperating writer may
+	// commit after the initial regular-file check but before this lock succeeds.
+	info, err = statNativeFile(file)
+	if err != nil {
+		return nil, err
+	}
 	r := &Reader{file: file, path: path, info: info, cleanup: cleanup}
 	if err = checkSidecars(path); err != nil {
 		return nil, err

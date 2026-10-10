@@ -1,0 +1,4 @@
+Independent and owner v2 trimpath executable bytes match exactly.
+Independent and owner smoke corpus bytes match exactly.
+7c80d5a732adc95b534a8b04b128c51bdfc5f0ff6a64160b9e5f356f170ef40f  /workspace/scratch/5e06a74e5f65/durable-restart/grams-independent-evidence-v2/grams-independent
+e3ed9f485418869a1af81d930bb2822148eaae72570d5025fd356422a368e3e9  /workspace/scratch/5e06a74e5f65/durable-restart/grams-independent-evidence-v2/smoke-corpus-a.json

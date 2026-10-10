@@ -1,0 +1,343 @@
+diff --git a/docs/rollback-reader-acquisition.md b/docs/rollback-reader-acquisition.md
+new file mode 100644
+index 0000000..ca9f6b0
+--- /dev/null
++++ b/docs/rollback-reader-acquisition.md
+@@ -0,0 +1,49 @@
++# Rollback Reader snapshot acquisition
++
++`pager.OpenAdmitted` must establish SHARED before capturing the metadata used
++for a read snapshot. Its preliminary descriptor stat rejects non-regular files;
++that preliminary size and modification time cannot describe the later snapshot.
++A cooperating writer can complete an ordinary commit between that stat and the
++successful lock. Retaining the old metadata makes a valid newly committed
++snapshot fail with `ErrChanged`, or supplies stale physical extent to header
++parsing. The writable `OpenTx` path already refreshes metadata after SHARED.
++
++The Reader now refreshes stat on the same owned descriptor immediately after
++SHARED succeeds. It propagates a metadata error through the existing retirement
++owner. The initial regular-file rejection, descriptor adoption, sidecar checks,
++header validation, pathname identity and subsequent snapshot checks remain in
++place. `ErrChanged` has not been converted to BUSY or silently retried.
++
++## Focused verification
++
++`TestReaderAcquisitionSourceSnapshotAfterShared` parses the constructor source
++and pins adoption, regular-file validation, lock, snapshot stat, error handling,
++Reader/header use, stability checking and deferred retirement ordering. It fails
++on the old constructor without exercising a physical race or a native fault.
++
++`TestReaderAcquisitionOrdinaryCooperatingWriter` uses a fresh ordinary database,
++128 schema-cookie commits, 32 intentional rollbacks and two independent readers.
++Each reader checks a pinned valid page twice and checks its committed generation.
++BUSY permits a bounded cooperative retry; joined unknown diagnostics fail. All
++workers close normally and join before the final generation check. Its
++20-second cooperative bound is an incomplete-work failure, not early success.
++`TestReaderAcquisitionMemoryBusyClassification` checks these error decisions
++using only in-memory values.
++
++After reviewing the selected bodies and helpers, use the pinned local Go and
++module caches, with no manual tags:
++
++```sh
++CGO_ENABLED=0 go run ./internal/testscope
++CGO_ENABLED=0 go test ./internal/pager -run '^TestReaderAcquisition' -count=20
++CGO_ENABLED=1 go test -race ./internal/pager -run '^TestReaderAcquisition' -count=5
++```
++
++The live test is scheduler-dependent coverage; a passing sample alone does not
++prove absence of every timing race. The previously observed ordinary rollback
++soak failure is preserved, even when subsequent bounded samples pass. The
++separate fixed-workload transaction harness verifies exact SQL row histories,
++normal savepoints/rollback/close/reopen and bounded cooperating readers/writer.
++Those reports must identify the exact engine plus harness composition and retain
++all failed attempts. No long-run, crash/recovery, native-fault, hostile namespace
++or cross-platform execution acceptance follows from these focused checks.
+diff --git a/internal/pager/pager.go b/internal/pager/pager.go
+index 1510b80..962cc69 100644
+--- a/internal/pager/pager.go
++++ b/internal/pager/pager.go
+@@ -66,6 +66,12 @@ func OpenAdmitted(path string, admission *PlainOpenAdmission) (result *Reader, r
+ 	if err = lockShared(file); err != nil {
+ 		return nil, err
+ 	}
++	// Capture the snapshot metadata under SHARED. A cooperating writer may
++	// commit after the initial regular-file check but before this lock succeeds.
++	info, err = statNativeFile(file)
++	if err != nil {
++		return nil, err
++	}
+ 	r := &Reader{file: file, path: path, info: info, cleanup: cleanup}
+ 	if err = checkSidecars(path); err != nil {
+ 		return nil, err
+diff --git a/internal/pager/reader_acquisition_test.go b/internal/pager/reader_acquisition_test.go
+new file mode 100644
+index 0000000..a2bbfcb
+--- /dev/null
++++ b/internal/pager/reader_acquisition_test.go
+@@ -0,0 +1,265 @@
++package pager
++
++import (
++	"bytes"
++	"context"
++	"encoding/binary"
++	"errors"
++	"fmt"
++	"go/ast"
++	"go/format"
++	"go/parser"
++	"go/token"
++	"runtime"
++	"sync"
++	"testing"
++	"time"
++
++	"github.com/ms-xiaosnow/gosqlite/internal/vfs"
++)
++
++// This checks constructor source only, without opening a database or injecting
++// scheduling/native-operation hooks. The ordinary workload below supplies live
++// cooperating-reader/writer evidence, not deterministic race reproduction.
++func TestReaderAcquisitionSourceSnapshotAfterShared(t *testing.T) {
++	set := token.NewFileSet()
++	file, err := parser.ParseFile(set, "pager.go", nil, 0)
++	if err != nil {
++		t.Fatal(err)
++	}
++	var body []ast.Stmt
++	for _, decl := range file.Decls {
++		if fn, ok := decl.(*ast.FuncDecl); ok && fn.Name.Name == "OpenAdmitted" {
++			body = fn.Body.List
++		}
++	}
++	if body == nil {
++		t.Fatal("OpenAdmitted source missing")
++	}
++	text := func(node ast.Node) string {
++		var out bytes.Buffer
++		if err := format.Node(&out, set, node); err != nil {
++			t.Fatal(err)
++		}
++		return out.String()
++	}
++	index := func(want string) int {
++		t.Helper()
++		found := -1
++		for i, stmt := range body {
++			if text(stmt) == want {
++				if found >= 0 {
++					t.Fatalf("duplicate constructor step %q", want)
++				}
++				found = i
++			}
++		}
++		if found < 0 {
++			t.Fatalf("missing constructor step %q", want)
++		}
++		return found
++	}
++	guard := "if err != nil {\n\treturn nil, err\n}"
++	open := index("file, err := openReadOnlyDatabase(path)")
++	own := index("cleanup.main = plainFile{file}")
++	initial := index("info, err := statNativeFile(file)")
++	regular := index("if !info.Mode().IsRegular() {\n\treturn nil, fmt.Errorf(\"%w: database must be a regular file\", ErrUnsupported)\n}")
++	lock := index("if err = lockShared(file); err != nil {\n\treturn nil, err\n}")
++	snapshot := index("info, err = statNativeFile(file)")
++	reader := index("r := &Reader{file: file, path: path, info: info, cleanup: cleanup}")
++	parse := index("r.header, err = ParseHeader(r.rawHeader[:], info.Size())")
++	stable := index("if err = r.checkStable(); err != nil {\n\treturn nil, err\n}")
++	if own != open+2 || text(body[open+1]) != guard || initial != own+1 ||
++		text(body[initial+1]) != guard || regular != initial+2 || lock != regular+1 ||
++		snapshot != lock+1 || text(body[snapshot+1]) != guard || reader != snapshot+2 ||
++		parse <= reader || text(body[parse+1]) != guard || stable <= parse {
++		t.Fatal("reader ownership, regular-file check, SHARED snapshot or validation ordering changed")
++	}
++	// The original retirement owner still handles every unsuccessful constructor
++	// exit, including the added metadata acquisition. No raw native close path.
++	index("defer func() {\n\tif result == nil {\n\t\tretErr = cleanup.begin(retErr)\n\t}\n}()")
++}
++
++// The writer changes only valid schema-cookie metadata through normal pager
++// transactions. Independent readers acquire SHARED repeatedly and verify a
++// pinned page twice while commits/intentional rollbacks contend normally.
++// There are no native hooks, replaced files, injected faults or forced exits.
++func TestReaderAcquisitionOrdinaryCooperatingWriter(t *testing.T) {
++	path := createEmpty(t, 4096)
++	ctx := context.Background()
++	const commits = 128
++	deadline := time.Now().Add(20 * time.Second)
++	stop := make(chan struct{})
++	type outcome struct {
++		reads int
++		err   error
++	}
++	results := make(chan outcome, 2)
++	var started sync.WaitGroup
++	started.Add(2)
++	for range 2 {
++		go func() {
++			started.Done()
++			out := outcome{}
++			defer func() { results <- out }()
++			for {
++				select {
++				case <-stop:
++					return
++				default:
++				}
++				if time.Now().After(deadline) {
++					out.err = errors.New("ordinary reader exceeded cooperative deadline")
++					return
++				}
++				r, err := Open(path)
++				if readerAcquisitionBusy(err) {
++					time.Sleep(100 * time.Microsecond)
++					continue
++				}
++				if err != nil {
++					out.err = fmt.Errorf("reader open: %w", err)
++					return
++				}
++				err = func() (retErr error) {
++					defer func() { retErr = errors.Join(retErr, r.Close()) }()
++					h := r.Header()
++					if h.SchemaCookie > commits || h.ChangeCounter != h.SchemaCookie+1 || h.PageCount != 1 {
++						return fmt.Errorf("reader header inconsistent: %+v", h)
++					}
++					first, err := r.ReadPage(ctx, 1)
++					if err != nil {
++						return err
++					}
++					runtime.Gosched()
++					second, err := r.ReadPage(ctx, 1)
++					if err != nil {
++						return err
++					}
++					if !bytes.Equal(first, second) || binary.BigEndian.Uint32(first[40:]) != h.SchemaCookie || binary.BigEndian.Uint32(first[24:]) != h.ChangeCounter {
++						return errors.New("reader lost its pinned committed generation")
++					}
++					return nil
++				}()
++				if err != nil {
++					out.err = fmt.Errorf("reader snapshot: %w", err)
++					return
++				}
++				out.reads++
++				time.Sleep(100 * time.Microsecond)
++			}
++		}()
++	}
++	started.Wait()
++	writeErr := func() error {
++		for generation := uint32(0); generation < commits; generation++ {
++			// Each fourth committed generation also has an intentional rollback.
++			if generation%4 == 0 {
++				tx, err := OpenTx(ctx, path, Options{})
++				if err != nil {
++					return err
++				}
++				err = tx.BumpSchemaCookie(ctx)
++				if err = errors.Join(err, tx.Rollback()); err != nil {
++					return err
++				}
++			}
++			tx, err := OpenTx(ctx, path, Options{})
++			if err != nil {
++				return err
++			}
++			err = func() (retErr error) {
++				defer func() { retErr = errors.Join(retErr, tx.Close()) }()
++				if tx.Header().SchemaCookie != generation {
++					return fmt.Errorf("writer generation %d, want %d", tx.Header().SchemaCookie, generation)
++				}
++				if err := tx.BumpSchemaCookie(ctx); err != nil {
++					return err
++				}
++				for {
++					if time.Now().After(deadline) {
++						return errors.New("ordinary writer exceeded cooperative deadline")
++					}
++					err := tx.Commit(ctx)
++					if !readerAcquisitionBusy(err) {
++						return err
++					}
++					time.Sleep(100 * time.Microsecond)
++				}
++			}()
++			if err != nil {
++				return err
++			}
++		}
++		return nil
++	}()
++	close(stop)
++	for range 2 {
++		result := <-results // every worker closes its owned Reader before returning
++		if result.err != nil {
++			t.Error(result.err)
++		}
++		if result.reads == 0 {
++			t.Error("reader acquired no successful snapshot")
++		}
++	}
++	if writeErr != nil {
++		t.Fatal(writeErr)
++	}
++	r, err := Open(path)
++	if err != nil {
++		t.Fatal(err)
++	}
++	if got := r.Header().SchemaCookie; got != commits {
++		t.Errorf("final generation = %d, want %d", got, commits)
++	}
++	if err := r.Close(); err != nil {
++		t.Fatal(err)
++	}
++}
++
++// Accept only an error tree made exclusively of known BUSY leaves. An unknown
++// joined close/ownership/metadata diagnostic must fail this ordinary workload.
++func readerAcquisitionBusy(err error) bool {
++	if err == nil {
++		return false
++	}
++	pending := []error{err}
++	for nodes := 0; len(pending) != 0; nodes++ {
++		if nodes == 64 {
++			return false
++		}
++		e := pending[len(pending)-1]
++		pending = pending[:len(pending)-1]
++		if e == nil {
++			return false
++		}
++		switch u := e.(type) {
++		case interface{ Unwrap() []error }:
++			children := u.Unwrap()
++			if len(children) == 0 || len(children)+len(pending) > 64 {
++				return false
++			}
++			pending = append(pending, children...)
++		case interface{ Unwrap() error }:
++			pending = append(pending, u.Unwrap())
++		default:
++			if e != ErrBusy && e != vfs.ErrBusy {
++				return false
++			}
++		}
++	}
++	return true
++}
++
++func TestReaderAcquisitionMemoryBusyClassification(t *testing.T) {
++	busy := fmt.Errorf("%w: %w", ErrBusy, vfs.ErrBusy)
++	if !readerAcquisitionBusy(errors.Join(busy)) {
++		t.Fatal("ordinary BUSY rejected")
++	}
++	for _, err := range []error{nil, ErrChanged, errors.Join(busy, ErrChanged), errors.Join(busy, ErrPlaintextCleanupPending), errors.Join(busy, errors.New("memory cleanup diagnostic"))} {
++		if readerAcquisitionBusy(err) {
++			t.Fatal("unexpected diagnostic accepted as ordinary BUSY", err)
++		}
++	}
++}

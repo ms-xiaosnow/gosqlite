@@ -1,0 +1,306 @@
+package main
+
+import (
+	"bytes"
+	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
+	"errors"
+	"io"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strings"
+	"testing"
+
+	"github.com/ms-xiaosnow/gosqlite/encryption"
+	"github.com/ms-xiaosnow/gosqlite/sqlite"
+)
+
+func TestReviewMemoryEnvironmentAlphabet(t *testing.T) {
+	for b := 0; b < 256; b++ {
+		c := byte(b)
+		first := c == '_' || c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z'
+		next := first || c >= '0' && c <= '9'
+		if validEnvironmentName(string([]byte{c})) != first || validEnvironmentName("A"+string([]byte{c})) != next {
+			t.Fatal("environment alphabet mismatch")
+		}
+	}
+	if !validEnvironmentName(strings.Repeat("A", 128)) || validEnvironmentName(strings.Repeat("A", 129)) {
+		t.Fatal("environment length mismatch")
+	}
+	for _, descriptor := range []string{"ENV-HEX:KEY", "env-hex:KEY=VALUE", "env-hex:KEY\n", "env-hex:../KEY", "env-hex:$(key)", "env-hex:A:B", "stdin-hex ", " stdin-password", "stdin-password:any", "env-password:密钥", "env-password:A\x00B"} {
+		if p, e := newCLIKeyProvider(descriptor, credentialInput{}); e == nil || p != nil {
+			t.Fatal("invalid descriptor accepted")
+		}
+	}
+	reads := 0
+	p, e := newCLIKeyProvider("env-password:EXPLICIT_NAME", credentialInput{lookupEnv: func(name string) (string, bool) {
+		reads++
+		if name != "EXPLICIT_NAME" {
+			t.Fatal("untrusted request changed secret selection")
+		}
+		return "synthetic-memory-password", true
+	}})
+	if e != nil {
+		t.Fatal(e)
+	}
+	defer p.close()
+	for _, request := range []encryption.KeyRequest{{Kind: encryption.PasswordArgon2id, Path: "env-password:OTHER"}, {Kind: encryption.PasswordArgon2id, Path: "https://invalid.example/secret"}} {
+		m, e := p.Acquire(context.Background(), request)
+		if e != nil {
+			t.Fatal(e)
+		}
+		m.Release()
+	}
+	if reads != 1 {
+		t.Fatal("provider did not cache exact selection")
+	}
+}
+
+type reviewEndlessReader struct{ bytes int }
+
+func (r *reviewEndlessReader) Read(b []byte) (int, error) {
+	for i := range b {
+		b[i] = 'p'
+	}
+	r.bytes += len(b)
+	return len(b), nil
+}
+
+func TestReviewMemoryInputBoundaries(t *testing.T) {
+	for _, descriptor := range []string{"stdin-password", "stdin-hex"} {
+		r := &reviewEndlessReader{}
+		calls := 0
+		p, e := newCLIKeyProvider(descriptor, credentialInput{stdin: func() (io.Reader, error) { calls++; return r, nil }})
+		if e != nil {
+			t.Fatal(e)
+		}
+		max := encryption.MaxPasswordBytes + 1
+		if p.kind == encryption.RawKey256 {
+			max = encryption.KeySize*2 + 3
+		}
+		m, e := p.Acquire(context.Background(), encryption.KeyRequest{Kind: p.kind})
+		if e == nil || m != nil || r.bytes != max {
+			t.Fatal("oversized input was not rejected at exact bounded lookahead")
+		}
+		if m, e = p.Acquire(context.Background(), encryption.KeyRequest{Kind: p.kind}); e == nil || m != nil || calls != 1 {
+			t.Fatal("failed input was consumed again")
+		}
+		p.close()
+	}
+	for _, length := range []int{1, encryption.MaxPasswordBytes} {
+		value := strings.Repeat("\x00", length-1) + "\n"
+		for _, descriptor := range []string{"env-password:KEY", "stdin-password"} {
+			p, e := newCLIKeyProvider(descriptor, credentialInput{lookupEnv: func(string) (string, bool) { return value, true }, stdin: func() (io.Reader, error) { return strings.NewReader(value), nil }})
+			if e != nil {
+				t.Fatal(e)
+			}
+			a, e := p.Acquire(context.Background(), encryption.KeyRequest{Kind: p.kind})
+			if e != nil || string(a.Bytes()) != value {
+				t.Fatal("exact password boundary changed")
+			}
+			b, e := p.Acquire(context.Background(), encryption.KeyRequest{Kind: p.kind})
+			if e != nil {
+				t.Fatal(e)
+			}
+			a.Bytes()[0] ^= 1
+			if string(b.Bytes()) != value || string(p.key) != value {
+				t.Fatal("borrow aliases cached credential")
+			}
+			a.Release()
+			b.Release()
+			owned := p.key
+			p.close()
+			if !bytes.Equal(owned, make([]byte, len(owned))) {
+				t.Fatal("cache not cleared")
+			}
+		}
+	}
+	key := disposableCLIKey(t)
+	for _, value := range []string{strings.ToUpper(hex.EncodeToString(key)), hex.EncodeToString(key) + "\n", hex.EncodeToString(key) + "\r\n"} {
+		p, e := newCLIKeyProvider("stdin-hex", credentialInput{stdin: func() (io.Reader, error) { return strings.NewReader(value), nil }})
+		if e != nil {
+			t.Fatal(e)
+		}
+		m, e := p.Acquire(context.Background(), encryption.KeyRequest{Kind: p.kind})
+		if e != nil || !bytes.Equal(m.Bytes(), key) {
+			t.Fatal("permitted hex encoding rejected")
+		}
+		m.Release()
+		p.close()
+	}
+}
+
+func TestReviewMemoryErrorsHaveNoPrivateChain(t *testing.T) {
+	private := errors.New("synthetic-private-diagnostic")
+	for _, cause := range []error{private, errors.Join(private, sqlite.ErrBusy), errors.Join(private, sqlite.ErrBusy, sqlite.ErrRecoveryRequired), errors.Join(private, sqlite.ErrBusy, sqlite.ErrPoisoned), errors.Join(private, sqlite.ErrBusy, sqlite.ErrCommitUncertain)} {
+		redacted := maintenanceError("rekey", cause)
+		if errors.Is(redacted, private) || strings.Contains(redacted.Error(), private.Error()) {
+			t.Fatal("private error chain retained")
+		}
+		if errors.Is(cause, sqlite.ErrPoisoned) && !errors.Is(redacted, sqlite.ErrPoisoned) {
+			t.Fatal("poison lost to busy")
+		}
+		if errors.Is(cause, sqlite.ErrRecoveryRequired) && !errors.Is(redacted, sqlite.ErrRecoveryRequired) {
+			t.Fatal("recovery lost to busy")
+		}
+	}
+}
+
+func TestReviewActualCLICorrectKeyModes(t *testing.T) {
+	binary := os.Getenv("GOSQLITE_REVIEW_BINARY")
+	if binary == "" {
+		t.Fatal("review binary not configured")
+	}
+	for _, tc := range []struct {
+		name string
+		mode sqlite.EncryptionMode
+	}{{"snapshot", sqlite.EncryptionSnapshot}, {"wal", sqlite.EncryptionWAL}, {"shared", sqlite.EncryptionWALShared}} {
+		t.Run(tc.name, func(t *testing.T) {
+			keys := [][]byte{disposableCLIKey(t), disposableCLIKey(t), disposableCLIKey(t)}
+			values := map[string]string{"SOURCE": hex.EncodeToString(keys[0]), "ARCHIVE": hex.EncodeToString(keys[1]), "NEW": hex.EncodeToString(keys[2])}
+			input := credentialInput{lookupEnv: func(name string) (string, bool) { v, ok := values[name]; return v, ok }}
+			cfg := func(name string, mode sqlite.EncryptionMode) sqlite.EncryptionOptions {
+				return sqlite.EncryptionOptions{KeyProvider: testCLIProvider(t, "env-hex:"+name, input), CredentialKind: encryption.RawKey256, Mode: mode}
+			}
+			oldCfg, newCfg, archiveCfg := cfg("SOURCE", tc.mode), cfg("NEW", tc.mode), cfg("ARCHIVE", sqlite.EncryptionSnapshot)
+			dir := t.TempDir()
+			source, archive, restored := filepath.Join(dir, "source.gse"), filepath.Join(dir, "archive.gse"), filepath.Join(dir, "restored.gse")
+			before := cliFixture(t, source, oldCfg)
+			rootBytes, e := os.ReadFile(source)
+			if e != nil {
+				t.Fatal(e)
+			}
+			// An idle cooperative shared-mode writer remains open during a successful backup.
+			var live *sqlite.DB
+			if tc.mode == sqlite.EncryptionWALShared {
+				live, e = sqlite.Open(source, sqlite.Options{Encryption: &oldCfg, NoCreate: true, KeepWALOnClose: true})
+				if e != nil {
+					t.Fatal(e)
+				}
+				defer live.Close()
+			}
+			run := func(operation string, args []string, env []string, stdin io.Reader) maintenanceResult {
+				t.Helper()
+				cmd := exec.Command(binary, append([]string{operation, source}, args...)...)
+				cmd.Env = env
+				cmd.Stdin = stdin
+				var output bytes.Buffer
+				cmd.Stdout = &output
+				cmd.Stderr = &output
+				if e := cmd.Run(); e != nil {
+					t.Fatal("normal CLI operation failed; diagnostic deliberately withheld")
+				}
+				for _, v := range values {
+					if strings.Contains(output.String(), v) {
+						t.Fatal("credential leaked to CLI output")
+					}
+				}
+				if strings.Contains(output.String(), source) || strings.Contains(output.String(), "env-hex") {
+					t.Fatal("CLI output included path or descriptor")
+				}
+				var result maintenanceResult
+				dec := json.NewDecoder(&output)
+				if e := dec.Decode(&result); e != nil {
+					t.Fatal(e)
+				}
+				var extra any
+				if e := dec.Decode(&extra); e != io.EOF {
+					t.Fatal("more than one result")
+				}
+				if result.Status != "ok" || result.Operation != operation {
+					t.Fatal("incorrect result")
+				}
+				return result
+			}
+			got := run("backup", []string{"--out", archive, "--key-provider", "env-hex:SOURCE", "--out-key-provider", "stdin-hex", "--mode", tc.name}, []string{"SOURCE=" + values["SOURCE"]}, strings.NewReader(values["ARCHIVE"]+"\r\n"))
+			if got.Mode != "snapshot" || got.Format != "gosqlite-encrypted-archive" || got.RetainsHistory || got.PageCount != before.PageCount {
+				t.Fatal("incorrect backup metadata")
+			}
+			if live != nil {
+				if e := live.Close(); e != nil {
+					t.Fatal(e)
+				}
+			}
+			afterBytes, e := os.ReadFile(source)
+			if e != nil || !bytes.Equal(rootBytes, afterBytes) {
+				t.Fatal("read-only backup changed source root")
+			}
+			archiveBytes, e := os.ReadFile(archive)
+			if e != nil {
+				t.Fatal(e)
+			}
+			archiveHash := sha256.Sum256(archiveBytes)
+			restoreInfo, e := sqlite.RestoreEncrypted(context.Background(), archive, restored, archiveCfg, newCfg)
+			if e != nil {
+				t.Fatal(e)
+			}
+			if restoreInfo.DatabaseID == before.DatabaseID || restoreInfo.Mode != tc.mode {
+				t.Fatal("restore identity or mode was not independent")
+			}
+			checkCLIRestoredRows(t, restored, newCfg)
+			archiveBytes, e = os.ReadFile(archive)
+			if e != nil || sha256.Sum256(archiveBytes) != archiveHash {
+				t.Fatal("restore changed archive")
+			}
+			got = run("rekey", []string{"--current-key-provider", "env-hex:SOURCE", "--key-provider", "stdin-hex", "--mode", tc.name}, []string{"SOURCE=" + values["SOURCE"]}, strings.NewReader(values["NEW"]))
+			if got.Mode != tc.name || !got.RetainsHistory || got.Format != "gosqlite-encrypted-family" {
+				t.Fatal("incorrect rekey metadata")
+			}
+			after := checkCLIRestoredRows(t, source, newCfg)
+			if after.DatabaseID != before.DatabaseID || after.CommitSequence != before.CommitSequence+1 || after.WALSegments != 0 {
+				t.Fatal("rekey identity, sequence or selected WAL mismatch")
+			}
+		})
+	}
+}
+
+// The reader retains only aliases to supplied memory so cleanup can be inspected.
+// It neither opens files nor injects a native I/O fault.
+type reviewCaptureReader struct {
+	data      []byte
+	views     [][]byte
+	synthetic error
+}
+
+func (r *reviewCaptureReader) Read(dst []byte) (int, error) {
+	r.views = append(r.views, dst)
+	n := copy(dst, r.data)
+	r.data = r.data[n:]
+	if len(r.data) == 0 {
+		if r.synthetic != nil {
+			return n, r.synthetic
+		}
+		return n, io.EOF
+	}
+	return n, nil
+}
+func TestReviewMemoryStdinBackingCleared(t *testing.T) {
+	key := disposableCLIKey(t)
+	for _, tc := range []struct {
+		value     string
+		synthetic error
+		ok        bool
+	}{{hex.EncodeToString(key) + "\r\n", nil, true}, {strings.Repeat("z", 64), nil, false}, {"synthetic-private-partial", errors.New("synthetic-memory-input-error"), false}} {
+		r := &reviewCaptureReader{data: []byte(tc.value), synthetic: tc.synthetic}
+		p, e := newCLIKeyProvider("stdin-hex", credentialInput{stdin: func() (io.Reader, error) { return r, nil }})
+		if e != nil {
+			t.Fatal(e)
+		}
+		m, e := p.Acquire(context.Background(), encryption.KeyRequest{Kind: p.kind})
+		if (e == nil) != tc.ok {
+			t.Fatal("unexpected provider result")
+		}
+		if m != nil {
+			m.Release()
+		}
+		p.close()
+		for _, view := range r.views {
+			if !bytes.Equal(view, make([]byte, len(view))) {
+				t.Fatal("credential input backing allocation was not cleared")
+			}
+		}
+	}
+}

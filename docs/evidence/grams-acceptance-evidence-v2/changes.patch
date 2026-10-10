@@ -1,0 +1,1092 @@
+diff --git a/benchmarks/grams/README.md b/benchmarks/grams/README.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..93b1a034d0a28581d4ae75bafffd6da53d2d7545
+--- /dev/null
++++ b/benchmarks/grams/README.md
+@@ -0,0 +1,148 @@
++# Ordinary persisted grams benchmark
++
++This CGO-free runnable harness measures the real native database and persisted
++`grams13` posting B-trees. It never shells out to another SQL engine. It builds
++one joint 1/2/3-gram index, normally closes the database, reopens it, and compares
++complete ordered ID results to actual `NOT INDEXED` source scans. A required
++selective query that does not execute real `LIKE_RAW_V1` gram SEARCH with the
++specified length fails the run. Fallback controls must remain explained scans.
++
++This is ordinary measurement code, not release/production acceptance or a
++recovery harness. No fault injection, OS-cache flush, namespace interference,
++process crash, damaged-file test, or recovery timing occurs. Temporary files
++belong to the harness and are removed only after ordinary resource cleanup.
++
++## Run
++
++Use the project's pinned Go 1.27.2, with its existing offline module cache.
++From the repository root, after reviewing the selected tests and running the
++ordinary source guard:
++
++```sh
++export CGO_ENABLED=0 GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off
++# Set SOURCE_ID to the exact reviewed tree/commit or complete source-manifest hash.
++# Set HARDWARE_ID to an actual machine description and measurement conditions.
++go run ./internal/testscope
++go test ./benchmarks/grams -count=1
++go test ./sqlite -run '^TestGrams' -count=1
++go build -trimpath -o /tmp/gosqlite-grams ./benchmarks/grams
++/tmp/gosqlite-grams -rows 128 -queries 6 -repeats 2 \
++  -seed 2026101052 -page-size 4096 -max-pages 32768 \
++  -source-id "$SOURCE_ID" -environment "$HARDWARE_ID" > grams-smoke.json
++```
++
++The default workload is 256 rows, 12 queries per length, 3 independent builds.
++`source-id` and `environment` are required for timing runs; they are clearly
++operator-supplied, not machine attestation. Capture CPU model, memory/storage
++context, other load/isolation and executable/source hashes alongside the JSON.
++The report also captures the actual Go build settings, dependencies, OS,
++architecture, visible CPUs and GOMAXPROCS. Production/native execution uses
++CGO0. A separate `CGO_ENABLED=1 go test -race` is a detector-only check; race
++instrumented samples are not performance measurements.
++
++Options are bounded: 64..20,000 source rows, 1..128 queries **per gram length**,
++2..10 database builds, page size 512/4096/65536, and 4,096..65,536 dirty pages.
++A larger allowed option value is not evidence that it was run or can complete
++within native budgets. Quota failures are errors, not silent dataset reduction.
++On a run failure, stdout retains partial JSON with `status: failed`, error and
++completed/partial trial data; stderr and exit status also report failure. Failed
++run directories are retained and reported, rather than removing a namespace
++after a possibly incomplete native operation or close.
++Invalid CLI options fail before opening a database.
++
++## Predeclared profiles
++
++- Smoke: 128 rows, 6 queries per length, 2 database builds, page 4096, max 32768 pages.
++- Medium: 512 rows, 12 queries per length, 3 builds, page 4096, max 32768 pages.
++- Proposed larger release profile: 10,000 rows, 96 queries per length, 5 builds,
++  page 4096, max 65536 pages. This is not yet approved or executed by this work.
++  It increases source cardinality about 20× from medium and retains repeated
++  builds and hundreds of selective queries. The original goal defines no
++  numeric “large” threshold; this proposal is a bounded engineering choice,
++  not an original contractual number or proof of representative user traffic.
++
++All use seed 2026101052 and both cache profiles. Each additionally runs two
++fallback controls per cache profile per build. Do not run the larger release
++profile until the lead approves the resource/workload commitment. Controlled
++fixed-hardware release measurements, broader selectivities, document lengths,
++page-size matrix and real workloads remain separate follow-up qualification.
++
++## Corpus and exactness
++
++`grams-nfc-selectivity-v1` generates deterministic mixed-Unicode random text,
++normalizes each complete input to NFC, and adds controlled unique markers.
++Markers have exactly 1/2/3 Unicode code points and approximately 1/32 source
++selectivity. There are 32 marker groups; query draws may repeat, especially
++above 32 queries/length. Timed queries are explicitly controlled synthetic
++substring probes, not independent natural-language search samples. `%` and
++`%common%` are literal-free/high-frequency SCAN controls. The joint index stores
++both raw LIKE and configured MATCH namespaces.
++
++Only the generated input is normalized. Production LIKE semantics remain
++`LIKE_RAW_V1`, including raw decomposed substring behavior and ASCII folding.
++The existing adversarial tests are unchanged. New
++`sqlite/plan_grams_normalized_test.go` separately tests 100 randomized patterns
++against 128 randomized NFC texts: 12,800 query/text memberships, **not12,800
++queries**. All input strings and patterns are asserted NFC, a fixed
++length-prefixed UTF-8 SHA256 pins their identity, and 100 pre-index scans plus
++post-index SEARCH/forced-scan comparisons establish complete equality. It also
++requires actual 1/2/3-gram plans. Ordinary rollback/shared-WAL lifecycle tests
++reconcile posting/source state through DML, rowid changes, read-own-writes,
++rollback/savepoint, REINDEX, cross-connection visibility, checkpoint and normal
++reopen. No physical recovery claim follows.
++
++The benchmark hashes the compact Go JSON corpus including version, seed, all
++texts and query definitions, and records it as `workload_sha256`. To inspect or
++compare deterministic artifacts without opening a database:
++
++```sh
++/tmp/gosqlite-grams -rows 128 -queries 6 -repeats 2 -corpus-only > corpus-a.json
++/tmp/gosqlite-grams -rows 128 -queries 6 -repeats 2 -corpus-only > corpus-b.json
++cmp corpus-a.json corpus-b.json
++```
++
++The SHA256 of these indented files differs from the compact corpus identity by
++formatting. Timing reports deliberately include variable timestamps/timings;
++they are not expected to be byte-identical. Raw per-query result hashes,
++complete plans and logical work support checking their deterministic content.
++Each normally closed build's database SHA256 is recorded without asserting
++that physical page bytes are guaranteed stable across future engine versions.
++
++## Timing, space and uncertainty
++
++- Build time is the actual native `CreateGramsIndex` operation including its
++  ordinary commit. Insert time is recorded separately. The build statistic is
++  for the single joint 1/2/3 index, not three independently built indexes.
++- Before/after database file bytes give incremental index allocation,
++  with-index/before DB amplification, and incremental bytes/source UTF-8 text
++  bytes. Increment includes catalog, both namespaces, frequencies, postings,
++  B-tree structure and allocated slack; it is not isolated payload, peak
++  temporary disk usage, resident memory or per-gram attributable space.
++- `cold_connection`: every query gets a fresh read-only connection with no
++  workload warmup. The process and OS caches can already be warm from building
++  the DB and prior queries. There is no cold-OS-cache claim.
++- `warm_process`: the reopened connection executes the whole automatic and
++  scan workload unmeasured once, then collects samples on that connection.
++  The OS cache remains uncontrolled. Cache-profile order alternates by build.
++- Each query latency includes parsing, planning, native execution, consuming
++  every result, and Rows.Close. Connection Open/Close, result comparison,
++  warmup and consistency checks are excluded. Automatic/scan order alternates
++  by query and build. No concurrent writer changes the persisted corpus.
++- JSON retains every query timing, plan and source/index-work observation.
++  P50/P95 are nearest-rank empirical quantiles. Mean, sample standard deviation,
++  minimum, maximum and sample count are descriptive. Repeats build separate
++  databases but share a process/host and corpus; these are correlated
++  observations. `confidence_method` states this, and CI bounds are null.
++  Tiny-sample P95 may be the maximum. No statistical or speedup claim is made.
++- Work counters are native logical frequency lookups, actual posting records,
++  candidates, source fetches and returned rows; they do not measure physical
++  I/O. Forced scans must fetch every source row and read no postings. Full
++  ordered result equality is required 100%; selective paths also require
++  positive posting work and fewer source fetches than scan. Fallback latency
++  is separately labeled and is never presented as indexed performance.
++
++Source/API layouts outside these added tests/harness files are unchanged.
++Transactions, ANN, soak, CI regression policy and restricted recovery timing
++are separate deliverables. This harness supplies measured inputs for later
++reviewed CI comparison; it does not invent performance thresholds or install
++any CI workflow.
+diff --git a/benchmarks/grams/main.go b/benchmarks/grams/main.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..5cc01de9ce647975a457f9eb98550bcef8dfdbf2
+--- /dev/null
++++ b/benchmarks/grams/main.go
+@@ -0,0 +1,572 @@
++// Command grams measures the native persisted grams13 engine against genuine
++// NOT INDEXED scans. It does not invoke another database, flush OS caches, or
++// exercise faults, crashes, recovery, or interrupted publication.
++package main
++
++import (
++	"context"
++	"crypto/sha256"
++	"encoding/hex"
++	"encoding/json"
++	"errors"
++	"flag"
++	"fmt"
++	"io"
++	"math"
++	"math/rand"
++	"os"
++	"path/filepath"
++	"reflect"
++	"runtime"
++	"runtime/debug"
++	"sort"
++	"strings"
++	"time"
++
++	"github.com/ms-xiaosnow/gosqlite/sqlite"
++	"golang.org/x/text/unicode/norm"
++)
++
++const corpusVersion = "grams-nfc-selectivity-v1"
++
++type config struct {
++	Rows        int    `json:"rows"`
++	Queries     int    `json:"queries_per_gram_length"`
++	Repeats     int    `json:"independent_database_builds"`
++	Seed        int64  `json:"dataset_seed"`
++	PageSize    uint32 `json:"page_size"`
++	MaxPages    uint32 `json:"max_transaction_pages"`
++	SourceID    string `json:"source_id"`
++	Environment string `json:"hardware_id"`
++	CorpusOnly  bool   `json:"-"`
++}
++
++func (c config) validate() error {
++	if c.Rows < 64 || c.Rows > 20000 || c.Queries < 1 || c.Queries > 128 || c.Repeats < 2 || c.Repeats > 10 || c.MaxPages < 4096 || c.MaxPages > 65536 {
++		return fmt.Errorf("bounded options: rows 64..20000, queries 1..128 per length, repeats 2..10, max-pages 4096..65536")
++	}
++	if c.PageSize != 512 && c.PageSize != 4096 && c.PageSize != 65536 {
++		return fmt.Errorf("page-size must be 512, 4096 or 65536")
++	}
++	if !c.CorpusOnly && (strings.TrimSpace(c.SourceID) == "" || strings.TrimSpace(c.Environment) == "") {
++		return fmt.Errorf("source-id and environment are required; describe the actual source and hardware/measurement conditions")
++	}
++	return nil
++}
++
++type query struct {
++	Length     int    `json:"gram_length"`
++	Pattern    string `json:"pattern"`
++	WantSearch bool   `json:"require_real_search"`
++}
++type corpus struct {
++	Version string   `json:"version"`
++	Seed    int64    `json:"dataset_seed"`
++	Texts   []string `json:"texts"`
++	Queries []query  `json:"queries"`
++}
++
++func marker(n, group int) string {
++	var s strings.Builder
++	for j := 0; j < n; j++ {
++		s.WriteRune(rune(0x7800 + n*512 + j*128 + group))
++	}
++	return s.String()
++}
++func makeCorpus(c config) (corpus, string, int64) {
++	rng := rand.New(rand.NewSource(c.Seed))
++	out := corpus{Version: corpusVersion, Seed: c.Seed, Texts: make([]string, c.Rows)}
++	tokens := []string{"a", "B", "z", "数", "据", "库", "か", "な", "한", "글", "🙂", "e\u0301", "A\u030a", "か\u3099", "한", "_", "%", "\\", " "}
++	var bytes int64
++	for i := range out.Texts {
++		var b strings.Builder
++		b.WriteString("common ")
++		for k := 8 + rng.Intn(17); k > 0; k-- {
++			b.WriteString(tokens[rng.Intn(len(tokens))])
++		}
++		// Every planted marker has approximately 1/32 selectivity. These controlled
++		// queries isolate 1/2/3-gram paths, not a claim about natural-language traffic.
++		for n := 1; n <= 3; n++ {
++			b.WriteString(" ")
++			b.WriteString(marker(n, i%32))
++		}
++		out.Texts[i] = norm.NFC.String(b.String())
++		bytes += int64(len(out.Texts[i]))
++	}
++	for n := 1; n <= 3; n++ {
++		for i := 0; i < c.Queries; i++ {
++			out.Queries = append(out.Queries, query{n, "%" + marker(n, rng.Intn(32)) + "%", true})
++		}
++	}
++	out.Queries = append(out.Queries, query{0, "%", false}, query{0, "%common%", false})
++	raw, _ := json.Marshal(out)
++	sum := sha256.Sum256(raw)
++	return out, hex.EncodeToString(sum[:]), bytes
++}
++
++type work struct {
++	FrequencyLookups int64 `json:"frequency_lookups"`
++	PostingKeysRead  int64 `json:"posting_keys_read"`
++	Candidates       int64 `json:"candidates"`
++	BaseRowFetches   int64 `json:"base_row_fetches"`
++	ReturnedRows     int64 `json:"returned_rows"`
++}
++
++func workOf(s sqlite.QueryStats) work {
++	return work{s.FrequencyLookups, s.PostingKeysRead, s.Candidates, s.BaseRowFetches, s.ReturnedRows}
++}
++
++type observation struct {
++	Query         query            `json:"query"`
++	AutomaticMS   float64          `json:"automatic_ms"`
++	ScanMS        float64          `json:"real_scan_ms"`
++	AutomaticPlan sqlite.QueryPlan `json:"automatic_plan"`
++	ScanPlan      sqlite.QueryPlan `json:"scan_plan"`
++	AutomaticWork work             `json:"automatic_work"`
++	ScanWork      work             `json:"scan_work"`
++	Equal         bool             `json:"full_ordered_results_equal"`
++	ResultSHA256  string           `json:"result_sha256"`
++}
++type distribution struct {
++	Mean             float64  `json:"mean_ms"`
++	SampleStddev     float64  `json:"sample_stddev_ms"`
++	ConfidenceMethod string   `json:"confidence_method"`
++	CILow            *float64 `json:"ci_low_ms"`
++	CIHigh           *float64 `json:"ci_high_ms"`
++	N                int      `json:"sample_count"`
++	P50              float64  `json:"p50_ms"`
++	P95              float64  `json:"p95_ms"`
++	Min              float64  `json:"min_ms"`
++	Max              float64  `json:"max_ms"`
++}
++
++func summarize(v []float64) distribution {
++	if len(v) == 0 {
++		return distribution{}
++	}
++	v = append([]float64(nil), v...)
++	sort.Float64s(v)
++	p := func(p float64) float64 { return v[max(0, int(math.Ceil(p*float64(len(v))))-1)] }
++	var mean, squared float64
++	for _, x := range v {
++		mean += x
++	}
++	mean /= float64(len(v))
++	for _, x := range v {
++		squared += (x - mean) * (x - mean)
++	}
++	sd := 0.0
++	if len(v) > 1 {
++		sd = math.Sqrt(squared / float64(len(v)-1))
++	}
++	return distribution{N: len(v), P50: p(.5), P95: p(.95), Min: v[0], Max: v[len(v)-1], Mean: mean, SampleStddev: sd, ConfidenceMethod: "descriptive only; correlated shared-host observations; no inferential CI"}
++}
++
++type sample struct {
++	Cache                 string        `json:"cache_condition"`
++	Length                int           `json:"gram_length_0_is_fallback_control"`
++	Automatic             distribution  `json:"automatic_query_latency"`
++	Scan                  distribution  `json:"real_scan_query_latency"`
++	SearchCount           int           `json:"actual_grams_search_queries"`
++	FallbackCount         int           `json:"actual_scan_fallback_queries"`
++	MembershipComparisons int64         `json:"query_text_membership_comparisons"`
++	Observations          []observation `json:"observations"`
++}
++type trial struct {
++	RetainedTemporaryDirectory string   `json:"retained_temporary_directory_on_error,omitempty"`
++	Number                     int      `json:"repeat"`
++	InsertMS                   float64  `json:"source_insert_ms"`
++	BuildMS                    float64  `json:"index_build_ms"`
++	BeforeBytes                int64    `json:"database_bytes_before_index"`
++	AfterBytes                 int64    `json:"database_bytes_with_index"`
++	IndexBytes                 int64    `json:"incremental_database_bytes"`
++	DBAmplification            float64  `json:"database_with_index_over_before"`
++	IndexOverText              float64  `json:"incremental_bytes_over_utf8_text_bytes"`
++	DatabaseSHA256             string   `json:"database_sha256_after_build_close"`
++	IntegrityBeforeClose       bool     `json:"extension_consistency_before_close"`
++	IntegrityAfterReopen       bool     `json:"extension_consistency_after_reopen"`
++	Samples                    []sample `json:"samples"`
++}
++type report struct {
++	SchemaVersion     int                  `json:"schema_version"`
++	Benchmark         string               `json:"benchmark"`
++	WorkloadVersion   string               `json:"workload_version"`
++	Finished          string               `json:"finished_utc"`
++	ElapsedSeconds    float64              `json:"elapsed_seconds"`
++	SourceID          string               `json:"source_id"`
++	HardwareID        string               `json:"hardware_id"`
++	DatasetSeed       int64                `json:"dataset_seed"`
++	CacheCondition    string               `json:"cache_condition"`
++	PageSize          uint32               `json:"page_size"`
++	Errors            []string             `json:"errors"`
++	Format            string               `json:"format"`
++	Status            string               `json:"status"`
++	Error             string               `json:"error,omitempty"`
++	Started           string               `json:"started_utc"`
++	Config            config               `json:"config"`
++	GoVersion         string               `json:"go_version"`
++	GOOS              string               `json:"goos"`
++	GOARCH            string               `json:"goarch"`
++	CPUs              int                  `json:"cpus"`
++	GOMAXPROCS        int                  `json:"gomaxprocs"`
++	BuildSettings     []debug.BuildSetting `json:"go_build_settings"`
++	Modules           []*debug.Module      `json:"modules"`
++	DatasetSHA256     string               `json:"workload_sha256"`
++	SourceTextBytes   int64                `json:"source_utf8_text_bytes"`
++	Trials            []trial              `json:"trials"`
++	BuildDistribution distribution         `json:"index_build_latency_across_repeats"`
++	Notes             []string             `json:"notes"`
++}
++
++func elapsed(start time.Time) float64 { return float64(time.Since(start)) / float64(time.Millisecond) }
++func size(path string) (int64, error) {
++	f, e := os.Stat(path)
++	if e != nil {
++		return 0, e
++	}
++	return f.Size(), nil
++}
++func fileHash(path string) (string, error) {
++	f, e := os.Open(path)
++	if e != nil {
++		return "", e
++	}
++	h := sha256.New()
++	_, e = io.Copy(h, f)
++	e = errors.Join(e, f.Close())
++	return hex.EncodeToString(h.Sum(nil)), e
++}
++func execute(db *sqlite.DB, q string, args ...any) error {
++	_, e := db.Exec(context.Background(), q, args...)
++	return e
++}
++
++type queryResult struct {
++	ids   []int64
++	plan  sqlite.QueryPlan
++	stats sqlite.QueryStats
++	ms    float64
++}
++
++func runQuery(db *sqlite.DB, q query, scan bool) (r queryResult, err error) {
++	sql := "SELECT id FROM docs"
++	if scan {
++		sql += " NOT INDEXED"
++	}
++	sql += " WHERE title LIKE ? ORDER BY id"
++	start := time.Now()
++	rows, e := db.Query(context.Background(), sql, q.Pattern)
++	if e != nil {
++		return r, e
++	}
++	for rows.Next() {
++		v := rows.Values()
++		id, ok := v[0].(int64)
++		if !ok {
++			err = fmt.Errorf("noninteger rowid %T", v[0])
++			break
++		}
++		r.ids = append(r.ids, id)
++	}
++	r.plan = rows.Plan()
++	r.stats = rows.Stats()
++	err = errors.Join(err, rows.Err(), rows.Close())
++	r.ms = elapsed(start)
++	return r, err
++}
++func readFresh(path string, q query, scan bool) (r queryResult, err error) {
++	db, e := sqlite.Open(path, sqlite.Options{ReadOnly: true, NoCreate: true})
++	if e != nil {
++		return r, e
++	}
++	r, err = runQuery(db, q, scan)
++	err = errors.Join(err, db.Close())
++	return r, err
++}
++func observe(db *sqlite.DB, path, cache string, q query, index int, rowCount int) (observation, error) {
++	var a, b queryResult
++	var err error
++	run := func(scan bool) (queryResult, error) {
++		if cache == "cold_connection" {
++			return readFresh(path, q, scan)
++		}
++		return runQuery(db, q, scan)
++	}
++	if index%2 == 0 {
++		a, err = run(false)
++		if err == nil {
++			b, err = run(true)
++		}
++	} else {
++		b, err = run(true)
++		if err == nil {
++			a, err = run(false)
++		}
++	}
++	o := observation{Query: q, AutomaticMS: a.ms, ScanMS: b.ms, AutomaticPlan: a.plan, ScanPlan: b.plan, AutomaticWork: workOf(a.stats), ScanWork: workOf(b.stats), Equal: reflect.DeepEqual(a.ids, b.ids)}
++	raw, _ := json.Marshal(a.ids)
++	sum := sha256.Sum256(raw)
++	o.ResultSHA256 = hex.EncodeToString(sum[:])
++	if err != nil {
++		return o, err
++	}
++	if !o.Equal {
++		return o, fmt.Errorf("full-result mismatch for %q", q.Pattern)
++	}
++	if b.plan.Access != "SCAN" || b.plan.Reason != "NOT INDEXED requested" || b.stats.BaseRowFetches != int64(rowCount) || b.stats.PostingKeysRead != 0 {
++		return o, fmt.Errorf("reference is not a real full scan: %+v %+v", b.plan, b.stats)
++	}
++	if q.WantSearch {
++		if a.plan.Access != "SEARCH" || a.plan.Method != "grams13" || a.plan.Namespace != "LIKE_RAW_V1" || !a.plan.Recheck || !reflect.DeepEqual(a.plan.GramLengths, []int{q.Length}) || a.stats.PostingKeysRead <= 0 || a.stats.Candidates <= 0 || a.stats.BaseRowFetches != a.stats.Candidates || a.stats.BaseRowFetches >= b.stats.BaseRowFetches || len(a.ids) == 0 {
++			return o, fmt.Errorf("required actual %d-gram SEARCH not established: %+v %+v", q.Length, a.plan, a.stats)
++		}
++	} else if a.plan.Access != "SCAN" || a.plan.Reason == "" || a.stats.BaseRowFetches != b.stats.BaseRowFetches || (q.Pattern == "%common%" && !strings.Contains(a.plan.Reason, "frequency")) {
++		return o, fmt.Errorf("fallback control is not an explained scan: %+v %+v", a.plan, a.stats)
++	}
++	return o, nil
++}
++func measure(path, cache string, data corpus, repeat int) (out []sample, err error) {
++	var db *sqlite.DB
++	if cache == "warm_process" {
++		db, err = sqlite.Open(path, sqlite.Options{ReadOnly: true, NoCreate: true})
++		if err != nil {
++			return nil, err
++		}
++		defer func() { err = errors.Join(err, db.Close()) }()
++		// Full untimed workload on the same connection; still no OS-cache claim.
++		for _, q := range data.Queries {
++			for _, scan := range []bool{false, true} {
++				if _, err = runQuery(db, q, scan); err != nil {
++					return nil, err
++				}
++			}
++		}
++	}
++	for _, n := range []int{1, 2, 3, 0} {
++		s := sample{Cache: cache, Length: n}
++		var a, b []float64
++		for i, q := range data.Queries {
++			if q.Length != n {
++				continue
++			}
++			o, e := observe(db, path, cache, q, i+repeat, len(data.Texts))
++			s.Observations = append(s.Observations, o)
++			if e != nil {
++				return append(out, s), e
++			}
++			a = append(a, o.AutomaticMS)
++			b = append(b, o.ScanMS)
++			if o.AutomaticPlan.Access == "SEARCH" {
++				s.SearchCount++
++			} else {
++				s.FallbackCount++
++			}
++			s.MembershipComparisons += int64(len(data.Texts))
++		}
++		s.Automatic = summarize(a)
++		s.Scan = summarize(b)
++		out = append(out, s)
++	}
++	return out, nil
++}
++func runTrial(c config, data corpus, textBytes int64, number int) (t trial, err error) {
++	t.Number = number
++	dir, e := os.MkdirTemp("", "gosqlite-grams-benchmark-")
++	if e != nil {
++		return t, e
++	}
++	// The directory contains only this harness's normally closed temporary DB.
++	// No removal or mutation of a live/selected database namespace is performed.
++	defer func() {
++		// Preserve a failed run's files. In particular, never retire the namespace
++		// when any native operation or resource close could still be incomplete.
++		if err != nil {
++			t.RetainedTemporaryDirectory = dir
++			return
++		}
++		if e := os.RemoveAll(dir); e != nil {
++			err = e
++			t.RetainedTemporaryDirectory = dir
++		}
++	}()
++	path := filepath.Join(dir, "benchmark.db")
++	db, e := sqlite.Open(path, sqlite.Options{PageSize: c.PageSize, MaxTransactionPages: c.MaxPages})
++	if e != nil {
++		return t, e
++	}
++	defer func() {
++		if db != nil {
++			err = errors.Join(err, db.Close())
++		}
++	}()
++	if info := db.Info(); info.PageSize != c.PageSize {
++		return t, fmt.Errorf("actual page size %d differs from requested %d", info.PageSize, c.PageSize)
++	}
++	if e = execute(db, "CREATE TABLE docs(id INTEGER PRIMARY KEY,title TEXT NOT NULL)"); e != nil {
++		return t, e
++	}
++	start := time.Now()
++	tx, e := db.Begin(context.Background())
++	if e != nil {
++		return t, e
++	}
++	for i, s := range data.Texts {
++		if _, e = tx.Exec(context.Background(), "INSERT INTO docs VALUES(?,?)", int64(i+1), s); e != nil {
++			return t, errors.Join(e, tx.Rollback())
++		}
++	}
++	if e = tx.Commit(context.Background()); e != nil {
++		return t, e
++	}
++	t.InsertMS = elapsed(start)
++	t.BeforeBytes, e = size(path)
++	if e != nil {
++		return t, e
++	}
++	start = time.Now()
++	e = db.CreateGramsIndex(context.Background(), "docs_grams", "docs", []string{"title"})
++	t.BuildMS = elapsed(start)
++	if e != nil {
++		return t, e
++	}
++	t.AfterBytes, e = size(path)
++	if e != nil {
++		return t, e
++	}
++	t.IndexBytes = t.AfterBytes - t.BeforeBytes
++	t.DBAmplification = float64(t.AfterBytes) / float64(t.BeforeBytes)
++	t.IndexOverText = float64(t.IndexBytes) / float64(textBytes)
++	if e = db.CheckExtensionIndex(context.Background(), "docs_grams"); e != nil {
++		return t, e
++	}
++	t.IntegrityBeforeClose = true
++	if e = db.Close(); e != nil {
++		return t, e
++	}
++	db = nil
++	t.DatabaseSHA256, e = fileHash(path)
++	if e != nil {
++		return t, e
++	}
++	// Both profiles run against this normally closed persisted DB. The first
++	// profile alternates across builds to expose, not conceal, order/cache effects.
++	caches := []string{"cold_connection", "warm_process"}
++	if number%2 == 0 {
++		caches[0], caches[1] = caches[1], caches[0]
++	}
++	for _, cache := range caches {
++		samples, e := measure(path, cache, data, number)
++		t.Samples = append(t.Samples, samples...)
++		if e != nil {
++			return t, e
++		}
++	}
++	db, e = sqlite.Open(path, sqlite.Options{ReadOnly: true, NoCreate: true})
++	if e != nil {
++		return t, e
++	}
++	if e = db.CheckExtensionIndex(context.Background(), "docs_grams"); e != nil {
++		return t, e
++	}
++	t.IntegrityAfterReopen = true
++	return t, nil
++}
++func run(c config) (r report, err error) {
++	started := time.Now()
++	defer func() {
++		r.Finished = time.Now().UTC().Format(time.RFC3339Nano)
++		r.ElapsedSeconds = time.Since(started).Seconds()
++		if err != nil {
++			r.Status = "failed"
++			r.Error = err.Error()
++			r.Errors = append(r.Errors, err.Error())
++		}
++	}()
++	r = report{SchemaVersion: 1, Benchmark: "grams", WorkloadVersion: corpusVersion, SourceID: c.SourceID, HardwareID: c.Environment, DatasetSeed: c.Seed, PageSize: c.PageSize, CacheCondition: "cold_connection and warm_process; uncontrolled OS caches; no cache flush", Errors: []string{}, Format: "gosqlite-grams-benchmark-v1", Status: "incomplete", Started: time.Now().UTC().Format(time.RFC3339Nano), Config: c, GoVersion: runtime.Version(), GOOS: runtime.GOOS, GOARCH: runtime.GOARCH, CPUs: runtime.NumCPU(), GOMAXPROCS: runtime.GOMAXPROCS(0), Notes: []string{
++		"Native persisted SQLite-format DB and grams13 shadow B-trees; no SQL oracle or external engine.",
++		"Source identity and environment description are operator supplied, not automatically attested. Record the source manifest with this report.",
++		"NFC-normalized synthetic input only; production LIKE_RAW_V1 is raw ASCII-folded LIKE and is not normalized.",
++		"Joint grams13 index stores 1/2/3-grams in both LIKE_RAW_V1 and MATCH_CONFIG_V1; build time and incremental file bytes measure the whole index, not separate per-length builds.",
++		"Incremental database bytes include catalog, postings, frequencies, both namespaces, B-tree structure and allocated slack; they are not isolated live payload bytes or peak disk/RSS.",
++		"cold_connection: each query opens its own read-only connection without workload warmup. The process and OS caches may already be warm from build/prior queries; no cold-OS-cache claim or cache flush.",
++		"warm_process: one reopened read-only connection runs the complete automatic/scan workload once unmeasured before timed queries. OS cache state is uncontrolled.",
++		"Query timings include parse, planning, native execution, full result consumption and Rows.Close; exclude connection Open/Close, warmup, result comparison and integrity checks.",
++		"Independent builds reuse exactly the same corpus and process; cache profile order alternates by build, automatic/scan query order alternates by query/build. Sequential single-threaded workload, rollback-journal mode, no concurrent writers.",
++		"P50/P95 use nearest-rank empirical quantiles; raw timings are retained. Repeats expose descriptive variability only: correlated samples, shared host, no confidence interval or speedup claim. Small sample P95 can equal the maximum.",
++		"Logical source/posting/frequency counters are not physical I/O counters. Fallback controls are reported separately and never called indexed latency.",
++		"Normal close/reopen and extension consistency are checked, not timed as recovery. No crash, fault injection, OS-cache eviction, or recovery measurement.",
++	}}
++	if b, ok := debug.ReadBuildInfo(); ok {
++		r.BuildSettings = b.Settings
++		r.Modules = b.Deps
++	}
++	if err = c.validate(); err != nil {
++		return r, err
++	}
++	data, hash, bytes := makeCorpus(c)
++	r.DatasetSHA256 = hash
++	r.SourceTextBytes = bytes
++	var builds []float64
++	for i := 1; i <= c.Repeats; i++ {
++		t, e := runTrial(c, data, bytes, i)
++		r.Trials = append(r.Trials, t)
++		if e != nil {
++			return r, fmt.Errorf("repeat %d: %w", i, e)
++		}
++		builds = append(builds, t.BuildMS)
++	}
++	r.BuildDistribution = summarize(builds)
++	r.Status = "pass"
++	return r, nil
++}
++func main() {
++	c := config{}
++	flag.IntVar(&c.Rows, "rows", 256, "source rows (64..20000)")
++	flag.IntVar(&c.Queries, "queries", 12, "queries per gram length (1..128)")
++	flag.IntVar(&c.Repeats, "repeats", 3, "separate database builds (2..10)")
++	flag.Int64Var(&c.Seed, "seed", 2026101052, "fixed corpus seed")
++	page := flag.Uint("page-size", 4096, "database page size (512, 4096, 65536)")
++	pages := flag.Uint("max-pages", 32768, "index-build dirty-page budget (4096..65536)")
++	flag.StringVar(&c.SourceID, "source-id", "", "exact source commit/tree or manifest identity, required")
++	flag.StringVar(&c.Environment, "environment", "", "hardware and measurement conditions, required")
++	flag.BoolVar(&c.CorpusOnly, "corpus-only", false, "emit deterministic corpus JSON only; no DB or timings")
++	flag.Parse()
++	c.PageSize = uint32(*page)
++	c.MaxPages = uint32(*pages)
++	// Reject out-of-range platform uint values before using the narrowed fields.
++	if *page > 65536 || *pages > 65536 || flag.NArg() != 0 {
++		fmt.Fprintln(os.Stderr, "invalid bounded options or positional arguments")
++		returnWithFailure()
++	}
++	if e := c.validate(); e != nil {
++		fmt.Fprintln(os.Stderr, e)
++		returnWithFailure()
++	}
++	enc := json.NewEncoder(os.Stdout)
++	enc.SetIndent("", "  ")
++	if c.CorpusOnly {
++		data, _, _ := makeCorpus(c)
++		if e := enc.Encode(data); e != nil {
++			fmt.Fprintln(os.Stderr, e)
++			returnWithFailure()
++		}
++		return
++	}
++	r, e := run(c)
++	if e != nil {
++		r.Status = "failed"
++		r.Error = e.Error()
++	}
++	if writeErr := enc.Encode(r); writeErr != nil {
++		fmt.Fprintln(os.Stderr, writeErr)
++		returnWithFailure()
++	}
++	if e != nil {
++		fmt.Fprintln(os.Stderr, e)
++		returnWithFailure()
++	}
++}
++
++// This is an ordinary CLI failure exit after run's deferred native cleanup, not
++// a process-exit/crash test or an interrupted database operation.
++func returnWithFailure() { os.Exit(1) }
+diff --git a/benchmarks/grams/main_test.go b/benchmarks/grams/main_test.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..54f53fd73dec803d80d4795fc371320c0e6a1a2c
+--- /dev/null
++++ b/benchmarks/grams/main_test.go
+@@ -0,0 +1,122 @@
++package main
++
++import (
++	"encoding/json"
++	"math"
++	"reflect"
++	"testing"
++	"unicode/utf8"
++
++	"golang.org/x/text/unicode/norm"
++)
++
++func testConfig() config {
++	return config{Rows: 64, Queries: 2, Repeats: 2, Seed: 2026101052, PageSize: 4096, MaxPages: 4096, SourceID: "unit-test-source", Environment: "ordinary native unit test; timings not benchmark evidence"}
++}
++func TestCorpusDeterministicNFCAndMarkers(t *testing.T) {
++	c := testConfig()
++	a, hash, bytes := makeCorpus(c)
++	b, again, againBytes := makeCorpus(c)
++	if !reflect.DeepEqual(a, b) || hash != again || bytes != againBytes {
++		t.Fatal("nondeterministic corpus")
++	}
++	const want = "849da59e3ab52ca6411b1df4d7141a5877d85bee3bdabca91edc9266dab395a6"
++	if hash != want {
++		t.Fatalf("corpus identity changed: %s", hash)
++	}
++	total := int64(0)
++	for _, s := range a.Texts {
++		if !norm.NFC.IsNormalString(s) {
++			t.Fatalf("not NFC: %q", s)
++		}
++		total += int64(len(s))
++	}
++	if total != bytes || len(a.Queries) != 3*c.Queries+2 {
++		t.Fatal("corpus accounting")
++	}
++	for n := 1; n <= 3; n++ {
++		for g := 0; g < 32; g++ {
++			if utf8.RuneCountInString(marker(n, g)) != n {
++				t.Fatal("marker is not rune-counted")
++			}
++		}
++	}
++	c.Seed++
++	_, changed, _ := makeCorpus(c)
++	if changed == hash {
++		t.Fatal("seed ignored")
++	}
++	c = testConfig()
++	c.Queries++
++	_, changed, _ = makeCorpus(c)
++	if changed == hash {
++		t.Fatal("query list omitted from identity")
++	}
++}
++func TestEmpiricalDistributionAndUncertainty(t *testing.T) {
++	input := []float64{5, 1, 4, 2, 3}
++	got := summarize(input)
++	if got.N != 5 || got.P50 != 3 || got.P95 != 5 || got.Min != 1 || got.Max != 5 || got.Mean != 3 || math.Abs(got.SampleStddev-math.Sqrt(2.5)) > 1e-12 || input[0] != 5 || got.CILow != nil || got.CIHigh != nil || got.ConfidenceMethod == "" {
++		t.Fatal(got, input)
++	}
++	if one := summarize([]float64{7}); one.N != 1 || one.P50 != 7 || one.P95 != 7 || one.SampleStddev != 0 {
++		t.Fatal(one)
++	}
++	if empty := summarize(nil); empty.N != 0 {
++		t.Fatal(empty)
++	}
++}
++func TestBoundedConfiguration(t *testing.T) {
++	if e := testConfig().validate(); e != nil {
++		t.Fatal(e)
++	}
++	cases := []func(*config){func(c *config) { c.Rows = 63 }, func(c *config) { c.Rows = 20001 }, func(c *config) { c.Queries = 0 }, func(c *config) { c.Queries = 129 }, func(c *config) { c.Repeats = 1 }, func(c *config) { c.Repeats = 11 }, func(c *config) { c.PageSize = 1024 }, func(c *config) { c.MaxPages = 4095 }, func(c *config) { c.MaxPages = 65537 }, func(c *config) { c.SourceID = "" }, func(c *config) { c.Environment = "" }}
++	for i, edit := range cases {
++		c := testConfig()
++		edit(&c)
++		if e := c.validate(); e == nil {
++			t.Fatalf("accepted invalid case %d", i)
++		}
++	}
++	c := testConfig()
++	c.CorpusOnly = true
++	c.SourceID = ""
++	c.Environment = ""
++	if e := c.validate(); e != nil {
++		t.Fatal(e)
++	}
++}
++func TestNativePersistedGramsBenchmarkSmoke(t *testing.T) {
++	r, err := run(testConfig())
++	if err != nil {
++		t.Fatal(err)
++	}
++	if r.Status != "pass" || r.SchemaVersion != 1 || len(r.Trials) != 2 || r.BuildDistribution.N != 2 || r.DatasetSHA256 == "" || r.SourceTextBytes == 0 || r.Finished == "" || r.ElapsedSeconds <= 0 || len(r.Errors) != 0 {
++		t.Fatalf("incomplete report: %+v", r)
++	}
++	for _, trial := range r.Trials {
++		if trial.BuildMS <= 0 || trial.BeforeBytes <= 0 || trial.AfterBytes <= trial.BeforeBytes || trial.IndexBytes != trial.AfterBytes-trial.BeforeBytes || !trial.IntegrityBeforeClose || !trial.IntegrityAfterReopen || len(trial.Samples) != 8 || len(trial.DatabaseSHA256) != 64 {
++			t.Fatalf("invalid persisted-build accounting: %+v", trial)
++		}
++		for _, s := range trial.Samples {
++			if s.Automatic.N != 2 || s.Scan.N != 2 || s.MembershipComparisons != 128 {
++				t.Fatal(s)
++			}
++			if s.Length == 0 {
++				if s.SearchCount != 0 || s.FallbackCount != 2 {
++					t.Fatal(s)
++				}
++			} else if s.SearchCount != 2 || s.FallbackCount != 0 {
++				t.Fatal(s)
++			}
++			for _, o := range s.Observations {
++				if !o.Equal || o.ScanWork.BaseRowFetches != 64 || o.ResultSHA256 == "" {
++					t.Fatal(o)
++				}
++			}
++		}
++	}
++	if _, err = json.Marshal(r); err != nil {
++		t.Fatal(err)
++	}
++}
+diff --git a/sqlite/plan_grams_normalized_test.go b/sqlite/plan_grams_normalized_test.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..b4824402f042ed8ea5f13c4bf516e39b5eccec8e
+--- /dev/null
++++ b/sqlite/plan_grams_normalized_test.go
+@@ -0,0 +1,226 @@
++package sqlite_test
++
++import (
++	"context"
++	"crypto/sha256"
++	"encoding/binary"
++	"fmt"
++	"math/rand"
++	"reflect"
++	"strings"
++	"testing"
++
++	"github.com/ms-xiaosnow/gosqlite/sqlite"
++	"golang.org/x/text/unicode/norm"
++)
++
++// This is an additional NFC-normalized INPUT corpus for goal §5.2. Production
++// LIKE_RAW_V1 is intentionally unchanged, as are the separate raw/decomposed
++// adversarial fixtures. The counting unit is query/text memberships, not queries.
++func TestGramsNFCInputs12800RandomizedMemberships(t *testing.T) {
++	const rows, queries = 128, 100
++	const seed int64 = 2026101052
++	rng := rand.New(rand.NewSource(seed))
++	tokens := []string{"a", "B", "z", "数据库", "日本語", "かな", "한글", "🙂", "👩‍💻", "e\u0301", "A\u030a", "か\u3099", "한", "%", "_", "\\", " ", "\t", "é", "ß", "Σ"}
++	texts := make([]string, rows)
++	changed := 0
++	hash := sha256.New()
++	hashString := func(s string) {
++		var size [8]byte
++		binary.LittleEndian.PutUint64(size[:], uint64(len(s)))
++		hash.Write(size[:])
++		hash.Write([]byte(s))
++	}
++	for i := range texts {
++		var raw strings.Builder
++		for n := 4 + rng.Intn(12); n > 0; n-- {
++			raw.WriteString(tokens[rng.Intn(len(tokens))])
++		}
++		texts[i] = norm.NFC.String(raw.String())
++		if texts[i] != raw.String() {
++			changed++
++		}
++		if !norm.NFC.IsNormalString(texts[i]) {
++			t.Fatal("non-NFC input")
++		}
++		hashString(texts[i])
++	}
++	if changed < 32 {
++		t.Fatalf("only %d randomized inputs changed under NFC", changed)
++	}
++	db, _ := writable(t, sqlite.Options{MaxTransactionPages: 8192})
++	execute(t, db, "CREATE TABLE docs(id INTEGER PRIMARY KEY,title TEXT)")
++	tx, err := db.Begin(context.Background())
++	if err != nil {
++		t.Fatal(err)
++	}
++	for i, s := range texts {
++		txExecute(t, tx, "INSERT INTO docs VALUES(?,?)", i+1, s)
++	}
++	if err = tx.Commit(context.Background()); err != nil {
++		t.Fatal(err)
++	}
++	// Record the real pre-index scan too; NOT INDEXED below is independently
++	// required to remain a real scan once the persisted index exists.
++	patterns := make([]string, queries)
++	preIndex := make([][][]any, queries)
++	for i := range patterns {
++		rr := []rune(texts[rng.Intn(rows)])
++		start := rng.Intn(len(rr))
++		n := min(1+rng.Intn(5), len(rr)-start)
++		literal := norm.NFC.String(string(rr[start : start+n]))
++		pattern := escapeGramLiteral(literal, '\\')
++		switch i % 4 {
++		case 0:
++			pattern = "%" + pattern + "%"
++		case 1:
++			pattern = "_" + pattern + "%"
++		case 2:
++			pattern = "%" + pattern + "_"
++		}
++		if !norm.NFC.IsNormalString(pattern) {
++			t.Fatalf("pattern not NFC: %q", pattern)
++		}
++		patterns[i] = pattern
++		hashString(pattern)
++		var p sqlite.QueryPlan
++		preIndex[i], p, _ = gramResults(t, db, "SELECT id FROM docs WHERE title LIKE ? ESCAPE '\\' ORDER BY id", pattern)
++		if p.Access != "SCAN" {
++			t.Fatalf("pre-index path: %+v", p)
++		}
++	}
++	execute(t, db, "CREATE INDEX docs_nfc ON docs(title) USING grams13")
++	searches, nonempty := 0, 0
++	lengths := map[int]bool{}
++	for i, pattern := range patterns {
++		p, s, scan := gramCompare(t, db, "title LIKE ? ESCAPE '\\'", pattern)
++		got, _, _ := gramResults(t, db, "SELECT id FROM docs WHERE title LIKE ? ESCAPE '\\' ORDER BY id", pattern)
++		if !reflect.DeepEqual(got, preIndex[i]) {
++			t.Fatalf("pre-build/full-scan mismatch for %q", pattern)
++		}
++		if p.Access == "SEARCH" {
++			searches++
++			if p.Method != "grams13" || p.Namespace != "LIKE_RAW_V1" || !p.Recheck {
++				t.Fatalf("not raw grams: %+v", p)
++			}
++			if s.PostingKeysRead <= 0 || s.BaseRowFetches > scan.BaseRowFetches {
++				t.Fatalf("not genuine posting work: %+v", s)
++			}
++			for _, n := range p.GramLengths {
++				lengths[n] = true
++			}
++			if s.ReturnedRows > 0 {
++				nonempty++
++			}
++		} else if p.Access != "SCAN" || p.Reason == "" {
++			t.Fatalf("unexplained fallback: %+v", p)
++		}
++	}
++	if searches < 60 || nonempty < 10 || !lengths[1] || !lengths[2] || !lengths[3] {
++		t.Fatalf("SEARCH=%d nonempty=%d lengths=%v", searches, nonempty, lengths)
++	}
++	if err := db.CheckExtensionIndex(context.Background(), "docs_nfc"); err != nil {
++		t.Fatal(err)
++	}
++	const wantHash = "ab4a4a4d2cbb9d85630b88d0d7b1bdeabf7d74820f69702ba4cf5431f3472944"
++	if got := fmt.Sprintf("%x", hash.Sum(nil)); got != wantHash {
++		t.Fatalf("corpus identity changed: %s", got)
++	}
++	t.Logf("seed=%d NFC-changed=%d; %d patterns x %d randomized NFC texts = %d memberships; SEARCH=%d SCAN=%d nonempty_SEARCH=%d; length-prefixed UTF-8 corpus/pattern SHA256=%x", seed, changed, queries, rows, queries*rows, searches, queries-searches, nonempty, hash.Sum(nil))
++}
++
++// Ordinary DML/savepoint/rollback/checkpoint/reopen only. No fault/recovery path.
++func TestGramsNFCLifecyclePostingConsistency(t *testing.T) {
++	ctx := context.Background()
++	for _, shared := range []bool{false, true} {
++		t.Run(fmt.Sprintf("shared=%t", shared), func(t *testing.T) {
++			opts := sqlite.Options{WALShared: shared}
++			db, path := writable(t, opts)
++			execute(t, db, "CREATE TABLE docs(id INTEGER PRIMARY KEY,title TEXT)")
++			tx, err := db.Begin(ctx)
++			if err != nil {
++				t.Fatal(err)
++			}
++			for i := 0; i < 48; i++ {
++				txExecute(t, tx, "INSERT INTO docs VALUES(?,?)", i+1, norm.NFC.String(fmt.Sprintf("filler%d e\u0301", i)))
++			}
++			txExecute(t, tx, "INSERT INTO docs VALUES(100,'甲'),(101,'甲乙'),(102,'甲乙丙')")
++			if err = tx.Commit(ctx); err != nil {
++				t.Fatal(err)
++			}
++			execute(t, db, "CREATE INDEX docs_nfc ON docs(title) USING grams13")
++			check := func(q gramQuerier, checkIndex func(context.Context, string) error) {
++				t.Helper()
++				for n, needle := range []string{"甲", "甲乙", "甲乙丙"} {
++					p, s, ss := gramCompare(t, q, "title LIKE ?", "%"+needle+"%")
++					if p.Access != "SEARCH" || p.Method != "grams13" || p.Namespace != "LIKE_RAW_V1" || !p.Recheck || !reflect.DeepEqual(p.GramLengths, []int{n + 1}) || s.PostingKeysRead < 1 || s.BaseRowFetches >= ss.BaseRowFetches {
++						t.Fatalf("plan/work %+v %+v %+v", p, s, ss)
++					}
++				}
++				if err := checkIndex(ctx, "docs_nfc"); err != nil {
++					t.Fatal(err)
++				}
++			}
++			check(db, db.CheckExtensionIndex)
++			tx, err = db.Begin(ctx)
++			if err != nil {
++				t.Fatal(err)
++			}
++			txExecute(t, tx, "INSERT INTO docs VALUES(200,'甲乙丙')")
++			txExecute(t, tx, "UPDATE docs SET id=201,title='甲乙丙é' WHERE id=100")
++			txExecute(t, tx, "DELETE FROM docs WHERE id=101")
++			check(tx, tx.CheckExtensionIndex)
++			if err = tx.Rollback(); err != nil {
++				t.Fatal(err)
++			}
++			check(db, db.CheckExtensionIndex)
++			execute(t, db, "SAVEPOINT undo")
++			execute(t, db, "UPDATE docs SET title='rolled back' WHERE id=102")
++			if err = db.CheckExtensionIndex(ctx, "docs_nfc"); err != nil {
++				t.Fatal(err)
++			}
++			execute(t, db, "ROLLBACK TO undo")
++			execute(t, db, "RELEASE undo")
++			check(db, db.CheckExtensionIndex)
++			execute(t, db, "UPDATE docs SET id=201,title='甲乙丙é' WHERE id=100")
++			execute(t, db, "DELETE FROM docs WHERE id=101")
++			execute(t, db, "INSERT INTO docs VALUES(200,'甲乙丙')")
++			check(db, db.CheckExtensionIndex)
++			execute(t, db, "REINDEX docs_nfc")
++			check(db, db.CheckExtensionIndex)
++			if shared {
++				peer, err := sqlite.Open(path, opts)
++				if err != nil {
++					t.Fatal(err)
++				}
++				check(peer, peer.CheckExtensionIndex)
++				if err = peer.Close(); err != nil {
++					t.Fatal(err)
++				}
++				if err = db.Checkpoint(ctx); err != nil {
++					t.Fatal(err)
++				}
++				check(db, db.CheckExtensionIndex)
++			}
++			if err = db.Close(); err != nil {
++				t.Fatal(err)
++			}
++			reopened, err := sqlite.Open(path, opts)
++			if err != nil {
++				t.Fatal(err)
++			}
++			defer reopened.Close()
++			check(reopened, reopened.CheckExtensionIndex)
++			got, _, _ := gramResults(t, reopened, "SELECT id FROM docs WHERE title LIKE '%甲%' ORDER BY id")
++			if !reflect.DeepEqual(got, [][]any{{int64(102)}, {int64(200)}, {int64(201)}}) {
++				t.Fatal(got)
++			}
++			for _, pattern := range []string{"%", "%e%"} {
++				p, _, _ := gramCompare(t, reopened, "title LIKE ?", pattern)
++				if p.Access != "SCAN" || p.Reason == "" {
++					t.Fatalf("fallback changed: %+v", p)
++				}
++			}
++		})
++	}
++}

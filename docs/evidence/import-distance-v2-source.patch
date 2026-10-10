@@ -1,0 +1,1760 @@
+diff --git a/cmd/gosqlite/migrate_import.go b/cmd/gosqlite/migrate_import.go
+index ed471c6..3b63f55 100644
+--- a/cmd/gosqlite/migrate_import.go
++++ b/cmd/gosqlite/migrate_import.go
+@@ -23,6 +23,10 @@ func runMigrateImport(ctx context.Context, args []string, out io.Writer, verify
+ 	var onError string
+ 	var batchRows int
+ 	var batchBytes, stopAfter int64
++	var distanceOptions string
++	if verify {
++		flags.StringVar(&distanceOptions, "distances", "", "strict bounded exact-distance options JSON; read-only")
++	}
+ 	if !verify {
+ 		flags.BoolVar(&apply, "apply", false, "explicitly write local SQLite destination")
+ 		flags.BoolVar(&resume, "resume", false, "resume matching committed job")
+@@ -60,6 +64,9 @@ func runMigrateImport(ctx context.Context, args []string, out io.Writer, verify
+ 	if err = errors.Join(decodeErr, file.Close()); err != nil {
+ 		return err
+ 	}
++	if verify && distanceOptions != "" {
++		return runMigrateImportDistances(ctx, *input, *output, distanceOptions, m, out)
++	}
+ 	var result postgres.ImportResult
+ 	if verify {
+ 		result, err = postgres.VerifyImport(ctx, *input, *output, m)
+diff --git a/cmd/gosqlite/migrate_import_distance_independent_review_test.go b/cmd/gosqlite/migrate_import_distance_independent_review_test.go
+new file mode 100644
+index 0000000..4f72eb7
+--- /dev/null
++++ b/cmd/gosqlite/migrate_import_distance_independent_review_test.go
+@@ -0,0 +1,89 @@
++package main
++
++import (
++	"bytes"
++	"context"
++	"crypto/sha256"
++	"encoding/hex"
++	"encoding/json"
++	"os"
++	"path/filepath"
++	"strings"
++	"testing"
++
++	"github.com/ms-xiaosnow/gosqlite/migration/postgres"
++)
++
++// Native data is imported once and remains intact; negatives are only new
++// options documents or argument lists. No failed I/O or native mutation probes.
++func TestIndependentMigrateImportDistanceCLIReportsFailure(t *testing.T) {
++	d := t.TempDir()
++	data := []byte("{\"key\":-5,\"v\":[3,4]}\n{\"key\":12,\"v\":[4,3]}\n")
++	sum := sha256.Sum256(data)
++	m := postgres.ImportManifest{FormatVersion: 1, SourceProfile: "pg_embedding-real-float4-v1", SourceID: "independent-cli-distance", SourceSHA256: hex.EncodeToString(sum[:]), SourceSize: int64(len(data)), Format: "ndjson", RowOrder: "ascending", DecimalFidelity: "roundtrip_binary32", Table: "mapped", Fields: []postgres.ImportField{{Source: "key", Target: "signed_pk", Type: "int64", Encoding: "integer", PrimaryKey: true}, {Source: "v", Target: "embedding", Type: "vector", Encoding: "json_array", Dimensions: 2}}, Indexes: []postgres.ImportIndex{}}
++	in, out, manifest := filepath.Join(d, "export.ndjson"), filepath.Join(d, "result.db"), filepath.Join(d, "manifest.json")
++	raw, err := json.Marshal(m)
++	if err != nil {
++		t.Fatal(err)
++	}
++	for p, b := range map[string][]byte{in: data, manifest: raw} {
++		if err = os.WriteFile(p, b, 0600); err != nil {
++			t.Fatal(err)
++		}
++	}
++	if _, err = postgres.Import(context.Background(), in, out, m, postgres.ImportOptions{Apply: true}); err != nil {
++		t.Fatal(err)
++	}
++	hash := func(p string) [32]byte {
++		b, e := os.ReadFile(p)
++		if e != nil {
++			t.Fatal(e)
++		}
++		return sha256.Sum256(b)
++	}
++	before := hash(out)
++	for _, tc := range []struct {
++		name, options, status string
++		wantErr               bool
++	}{
++		{"valid", `{"column":"embedding","query_pks":[12],"metrics":["l1"],"top_k":1}`, "passed", false},
++		{"budget", `{"column":"embedding","max_rows":1}`, "failed", true},
++		{"query", `{"column":"embedding","query_pks":[99]}`, "failed", true},
++	} {
++		t.Run(tc.name, func(t *testing.T) {
++			p := filepath.Join(d, tc.name+"-options.json")
++			if e := os.WriteFile(p, []byte(tc.options), 0600); e != nil {
++				t.Fatal(e)
++			}
++			var buf bytes.Buffer
++			e := run([]string{"migrate", "pgembedding", "verify", "--input", in, "--output", out, "--manifest", manifest, "--distances", p}, &buf)
++			if (e != nil) != tc.wantErr {
++				t.Fatal("unexpected command result", e, buf.String())
++			}
++			var got postgres.ImportDistanceVerification
++			if e = json.Unmarshal(buf.Bytes(), &got); e != nil {
++				t.Fatal(e, buf.String())
++			}
++			if got.Distances.Status != tc.status {
++				t.Fatal(got)
++			}
++			if tc.wantErr && got.Import.Status != "verification_failed" {
++				t.Fatal(got.Import)
++			}
++			if !strings.HasPrefix(got.Import.ANNRecall, "not_run") || !strings.HasPrefix(got.Distances.ANNRecall, "not_run") {
++				t.Fatal("ANN changed", got)
++			}
++		})
++	}
++	var buf bytes.Buffer
++	if err = run([]string{"migrate", "pgembedding", "verify", "--input", in, "--output", out, "--manifest", manifest}, &buf); err != nil {
++		t.Fatal(err)
++	}
++	var plain postgres.ImportResult
++	if err = json.Unmarshal(buf.Bytes(), &plain); err != nil || plain.Status != "complete_verified" || !strings.HasPrefix(plain.ExactDistances, "not_run") {
++		t.Fatal(plain, err)
++	}
++	if hash(out) != before {
++		t.Fatal("CLI verification changed database bytes")
++	}
++}
+diff --git a/cmd/gosqlite/migrate_import_distances.go b/cmd/gosqlite/migrate_import_distances.go
+new file mode 100644
+index 0000000..dcacf6c
+--- /dev/null
++++ b/cmd/gosqlite/migrate_import_distances.go
+@@ -0,0 +1,24 @@
++package main
++
++import (
++	"context"
++	"encoding/json"
++	"errors"
++	"io"
++	"os"
++
++	"github.com/ms-xiaosnow/gosqlite/migration/postgres"
++)
++
++func runMigrateImportDistances(ctx context.Context, input, output, optionsPath string, m postgres.ImportManifest, out io.Writer) error {
++	file, err := os.Open(optionsPath)
++	if err != nil {
++		return err
++	}
++	options, decodeErr := postgres.DecodeImportDistanceOptions(file)
++	if err = errors.Join(decodeErr, file.Close()); err != nil {
++		return err
++	}
++	result, err := postgres.VerifyImportDistances(ctx, input, output, m, options)
++	return errors.Join(err, json.NewEncoder(out).Encode(result))
++}
+diff --git a/cmd/gosqlite/migrate_import_distances_test.go b/cmd/gosqlite/migrate_import_distances_test.go
+new file mode 100644
+index 0000000..fff450a
+--- /dev/null
++++ b/cmd/gosqlite/migrate_import_distances_test.go
+@@ -0,0 +1,53 @@
++package main
++
++import (
++	"bytes"
++	"crypto/sha256"
++	"encoding/hex"
++	"encoding/json"
++	"os"
++	"path/filepath"
++	"strings"
++	"testing"
++
++	"github.com/ms-xiaosnow/gosqlite/migration/postgres"
++)
++
++func TestMigrateImportDatasetDistancesCLI(t *testing.T) {
++	dir := t.TempDir()
++	data := []byte("{\"key\":-4,\"v\":[3,4]}\n{\"key\":7,\"v\":[1,1]}\n{\"key\":9,\"v\":[-1,1]}\n")
++	sum := sha256.Sum256(data)
++	manifest := postgres.ImportManifest{FormatVersion: 1, SourceProfile: "pg_embedding-real-float4-v1", SourceID: "cli-distance-fixture", SourceSHA256: hex.EncodeToString(sum[:]), SourceSize: int64(len(data)), Format: "ndjson", RowOrder: "ascending", DecimalFidelity: "roundtrip_binary32", Table: "mapped", Fields: []postgres.ImportField{{Source: "key", Target: "pk", Type: "int64", Encoding: "integer", PrimaryKey: true}, {Source: "v", Target: "embedding", Type: "vector", Encoding: "json_array", Dimensions: 2}}, Indexes: []postgres.ImportIndex{}}
++	raw, err := json.Marshal(manifest)
++	if err != nil {
++		t.Fatal(err)
++	}
++	input, meta, output, options := filepath.Join(dir, "source.ndjson"), filepath.Join(dir, "manifest.json"), filepath.Join(dir, "result.db"), filepath.Join(dir, "options.json")
++	for path, content := range map[string][]byte{input: data, meta: raw, options: []byte(`{"column":"embedding","query_pks":[-4,9],"top_k":2}`)} {
++		if err = os.WriteFile(path, content, 0600); err != nil {
++			t.Fatal(err)
++		}
++	}
++	if err = run([]string{"migrate", "pgembedding", "--input", input, "--manifest", meta, "--output", output, "--apply"}, &bytes.Buffer{}); err != nil {
++		t.Fatal(err)
++	}
++	args := []string{"migrate", "pgembedding", "verify", "--input", input, "--manifest", meta, "--output", output, "--distances", options}
++	var out bytes.Buffer
++	if err = run(args, &out); err != nil {
++		t.Fatal(err, out.String())
++	}
++	var result postgres.ImportDistanceVerification
++	if err = json.Unmarshal(out.Bytes(), &result); err != nil {
++		t.Fatal(err)
++	}
++	if result.Distances.Status != "passed" || result.Distances.DistancesChecked != 24 || result.Distances.TopKChecked != 16 || result.Import.Status != "complete_verified" || !strings.HasPrefix(result.Import.ANNRecall, "not_run") {
++		t.Fatal(result)
++	}
++	if err = run(append(append([]string(nil), args...), "--distances", options), &bytes.Buffer{}); err == nil {
++		t.Fatal("duplicate option accepted")
++	}
++	applyArgs := []string{"migrate", "pgembedding", "--input", input, "--manifest", meta, "--distances", options}
++	if err = run(applyArgs, &bytes.Buffer{}); err == nil {
++		t.Fatal("verify-only option accepted for import")
++	}
++}
+diff --git a/docs/import-distance-verification.md b/docs/import-distance-verification.md
+new file mode 100644
+index 0000000..6f027ca
+--- /dev/null
++++ b/docs/import-distance-verification.md
+@@ -0,0 +1,201 @@
++# Bounded imported-dataset distance verification
++
++This implements the norm/distance-result portion of goal §9.2(2) for arbitrary
++caller-owned offline exports accepted by the importer, within explicit limits.
++It uses the real importer, native typed VECTOR columns, native SQL functions and
++native exact search. No PostgreSQL connection, credentials, external server or
++ANN recall claim is involved. CSV and NDJSON use the same mapping contract.
++
++## Opt-in API and CLI
++
++Existing `ImportOptions`, `ImportResult`, `ImportManifest` and `VerifyImport`
++layouts/signatures are unchanged. Ordinary import/verify reports still say
++`exact_distances: not_run`. The intentional API extension is a separate
++`VerifyImportDistances(ctx, input, output, manifest, ImportDistanceOptions)`
++returning `ImportDistanceVerification { Import, Distances }`, and the strict
++`DecodeImportDistanceOptions` reader. The new wrapper's `import.exact_distances`
++summarizes its additional report; it does not change the database's job status.
++
++Create a local options file, for example `distances.json`:
++
++```json
++{"column":"embedding","query_count":4,"top_k":10,
++ "metrics":["l2","l1","negative_inner_product","cosine"],
++ "max_rows":10000,"max_pairs":100000,"max_component_work":8000000}
++```
++
++Then use the normal read-only verification command:
++
++```sh
++gosqlite migrate pgembedding verify --input source.ndjson \
++  --manifest export.json --output imported.db --distances distances.json
++```
++
++`--distances` is accepted only for `verify`, never silently for apply/dry-run.
++The CLI emits the full wrapper JSON and returns an error for failed verification.
++The options JSON is at most 64 KiB; duplicate/unknown fields, malformed/trailing
++JSON, unsupported metrics, invalid limits and duplicate query PKs are errors.
++The required `column` names an explicitly mapped target VECTOR field exactly.
++Only that column receives mathematical verification. Other vector columns are
++listed as `unselected_vector_columns`; exhaustive typed fidelity still checks
++all fields. Repeat explicitly for other columns. No inference from an ANN index
++name, SQL expression or source column name is made.
++
++Instead of `query_count`, supply e.g. `"query_pks":[-42,9223372036854775807]`.
++These identify non-NULL accepted vectors in the immutable source export; decimal
++int64 keys never pass through float64. Missing/rejected/NULL query keys error.
++The two selection mechanisms are mutually exclusive. Queries are not arbitrary
++new vectors in this version. Unsupported metrics error; they never pass or
++silently disappear.
++
++## What is checked
++
++All ordinary verification remains intact: source SHA-256, every accepted value
++and component bit, PK/source-record provenance, source/destination/metadata
++counts, rejection identity, batches/cursors, schema fingerprint, requested index
++identity/consistency and expected source count. Additional verification runs
++inside the **same native read snapshot**, and the source is rehashed afterward.
++No verification path writes or publishes completion state.
++
++A second bounded source replay supplies reference vectors and PKs, excluding
++only already-reconciled rejected source records. It never obtains reference
++components from database rows or native search results. Source framing/float4
++parsing is shared with the importer and documented as such; independent 768-bit
++`math/big` mathematics supplies the norm/distance oracle. It does not call native
++vector metrics, native `Norm`, `Scan` or SQL. This verifies the supplied binary32
++export, not bits lost before export or a PostgreSQL server's arithmetic.
++
++A complete native SQL scan checks mapped signed PKs, NULLs, VECTOR dimensions and
++norms against the source references. For every selected query and supported,
++defined metric, one native exact search returns **all** accepted non-NULL rows.
++Every PK, duplicate/omitted hit, distance, native exact plan and source/NULL/scored
++count is checked. A second native Top-K execution must exactly match the prefix
++of the complete native distance-ascending, signed-PK-ascending result. Every
++complete hit and Top-K hit is returned with native/reference values and its
++absolute error bound. The result is bounded, not a digest-only spot check.
++
++Query defaults are four evenly spaced ranks in the sorted signed-PK non-NULL
++population, including both endpoints when two or more queries are selected;
++integer division fixes intermediate ranks. At most the population size is used.
++One query selects the smallest PK. Explicit PKs retain caller order. Reports
++show selected PKs, selection method, candidate/NULL/zero counts and whether all
++source vectors or only sampled queries were used. **Candidates are never
++sampled**. A query sample is deterministic but not a statistical confidence or
++application-workload coverage guarantee.
++
++## Numeric and ranking contract
++
++The reference has 768-bit precision, enough to accumulate the entire finite
++binary32 product/difference exponent range and 16,000 terms exactly before
++high-precision square root/division and final binary64 rounding. Cosine's product
++of the accumulated squared norms may also round at 768 bits; component products
++and sums remain exact. Native metrics widen binary32 inputs and use Neumaier compensation. With epsilon = 2^-52:
++
++- L1, L2 and norms: absolute bound `64 * epsilon * abs(reference)`
++- Cosine: absolute bound `64 * epsilon`, with both results clamped to [0,2]
++- Negative inner product: outward-rounded `4 * u * abs(reference) +
++  (1 + u) * gamma_n^2 * S_upper`, where `u = 2^-53`,
++  `gamma_n = n*u/(1-n*u)`, `n = dimensions`, and `S_upper` is an upward-rounded
++  accumulation of `abs(source products)`
++
++The nonnegative metrics avoid sum cancellation; the conservative relative
++coefficient covers subtraction, accumulation and square root. There is no
++absolute floor that could hide a zero replacing a small/subnormal norm or L2.
++Widened binary32 products are exact in binary64. The signed-IP bound includes
++second-order error in the separately accumulated Neumaier correction, which is
++summed ordinarily rather than recursively compensated. The v1 linear-dimension
++second-order bound was insufficient; v2 retains the dimension-squared term.
++Neither native arithmetic nor source-reference arithmetic is loosened or changed.
++
++For exact products `p_i`, let `S = sum(abs(p_i))`, `s_i` be the ordinary native
++partial sum, and `e_i = (s_(i-1) + p_i) - s_i` the exact FastTwoSum residual.
++Nonzero binary32 product magnitudes/residuals stay in binary64's normal range;
++there is no overflow or underflow in this argument. For `n <= 16000`:
++
++1. `abs(s_i) <= S_i/(1-n*u)`, hence
++   `sum(abs(e_i)) <= n*u*S/(1-n*u) = gamma_n*S`.
++2. Ordinary summation of those residuals contributes at most
++   `gamma_n * sum(abs(e_i)) <= gamma_n^2*S` error.
++3. Final native rounding adds `u*abs(exact_sum)` plus `u` times that correction
++   error. Rounding the exact source reference to binary64 adds another
++   `u*abs(exact_sum)`. Their sum is at most
++   `2*u/(1-u)*abs(reference) + (1+u)*gamma_n^2*S`.
++4. `4*u*abs(reference)` safely dominates the first term. Every nonzero positive
++   scale addition and every bound multiplication/addition/division rounds
++   outward with `math.Nextafter`; denominator subtractions round downward.
++   Thus neither the positive scale sum nor the computed bound can silently
++   round below the claimed upper bound. All-zero products keep an exact zero
++   bound. These operations remain finite throughout the supported domain.
++
++Each comparison uses its own reported bound, and NaN/Inf always fail. These
++bounds apply to this native widened/compensated arithmetic contract, not upstream
++float32/FMA bit-exact results or arbitrary third-party metric implementations.
++The independently reported uncertainty intervals remain necessary near severe
++cancellation; a nonunique mathematical Top-K boundary is never promoted to exact
++mathematical ordering.
++
++Reference ordering is required outside the source-derived uncertainty intervals.
++`top_k_boundary` is `clear_under_reference_error_bounds` only when every selected
++reference upper bound is below every excluded lower bound. Overlap, including a
++mathematical tie or near tie, is explicitly
++`ambiguous_within_error_bounds; native distance/signed-PK contract checked`.
++Returning every candidate is `all_candidates`. An ambiguous boundary is not a
++claim of uniquely ordered mathematical neighbors. Native deterministic ordering
++and exact Top-K/prefix equality are still required in every successful search.
++
++## Caps and skipped outcomes
++
++Defaults equal hard maxima: 10,000 accepted rows (including NULLs), 16 queries,
++100,000 reported full-plus-Top-K comparisons, 8,000,000 planned component work,
++and 1,000,000 retained source components. Top-K defaults to 10 and is 1..10,000;
++the effective count is min(K, non-NULL candidates). Callers may lower row/pair/
++component-work limits. Preflight charges two norm passes and four per-query /
++metric candidate passes (reference, error-bound scale and two native searches),
++plus native query validation; skipped cosine metrics are charged conservatively.
++Reference mathematics starts only after preflight. Budgets are logical work /
++retention bounds, not total process RSS or wall time. Native engine quotas may
++fail earlier. Parsing/replay and exhaustive fidelity retain their original
++1 GiB source / 1,000,000 record / 1 MiB record limits and costs; these checks are
++not made partial by smaller mathematical budgets. Exceeding any mathematical
++cap errors rather than truncating candidates or fabricating a pass.
++
++NULL vectors are counted and excluded from native search. Empty/all-NULL data
++has `skipped_no_nonnull_vectors`, zero query comparisons and explicit coverage.
++Cosine rejects a zero norm in any eligible candidate/query. This verifier reports
++`skipped_zero_norm` for that query/metric instead of filtering rows, inventing
++values or treating an expected error as a numerical pass. Other metrics can pass,
++producing `partial_skipped_metrics`. If nothing is defined the status is
++`skipped_no_defined_metrics`. `passed` means all requested nonempty query/metric
++checks ran; sampled query coverage and boundary ambiguity remain separately
++visible. Errors after verification starts yield a partial `failed` report and must be
++inspected. Invalid arguments/options return an error with `not_run` before any
++database verification. Unsupported metrics are named explicitly in that error.
++
++`ann_recall` remains `not_run` in both report sections, even if imported native
++ANN indexes exist. Existing fixed ANN examples are independent evidence only.
++
++## Verification scope
++
++New tests exercise CSV/NDJSON mapped PKs/columns, ordinary committed pause/resume,
++quarantine, complete candidate and Top-K results, deterministic/explicit queries,
++MinInt64/MaxInt64, signed zero/subnormals/MaxFloat32, cancellation, near ties,
++empty/NULL/zero datasets, budgets and strict option decoding. Negative comparison
++controls fabricate only in-memory result slices. Native files stay intact.
++No physical tamper/corruption/wrong-key/missing-selected-file, namespace mutation,
++crash/kill/process-exit/hot recovery, failed native I/O/lock/unmap/close/Sync,
++shortwrite/diskfull/permissions or interrupted publication/rekey is exercised.
++Central goal/progress/compatibility documents are deliberately untouched.
++
++## Retained v1 regression and v2 repair
++
++Independent review found a valid 16,000-dimensional signed-IP dataset falsely
++rejected by the v1 verifier. Native absolute error was
++`7.4377592676582054e-25`, exceeding the old `5.2853384343223043e-26` bound by
++14.0724 times. The v1 frozen source and normal/race failure evidence are retained
++separately. The deterministic pure-math and ordinary intact two-row import
++regressions, independent rational/1024-bit oracle, max-dimension/resume/read-only
++checks, and all existing negative controls are preserved unchanged in v2.
++The repair changes only the verifier's justified rounding allowance and precision
++wording; it does not alter native metric values, source references, search,
++ordering, candidate coverage, tolerance-independent rejection controls or ANN
++status.
+diff --git a/docs/import-pgembedding.md b/docs/import-pgembedding.md
+index 2a3b475..62295b7 100644
+--- a/docs/import-pgembedding.md
++++ b/docs/import-pgembedding.md
+@@ -249,3 +249,11 @@ Component evidence is in `docs/evidence/m9-import-components.txt`; independent
+ review evidence is owned separately by the reviewer. These focused checks do
+ not replace the lead's whole-repository aggregate, cross-platform release gates,
+ or official SQLite interoperability checks.
++
++## Opt-in caller-dataset mathematical verification
++
++Use `VerifyImportDistances` or add `--distances distances.json` to `verify` for
++bounded caller-dataset norms, complete exact distances and native Top-K checks
++against source-export high-precision references. See
++[the options, caps, sampling, uncertainty and skipped-status contract](import-distance-verification.md).
++This is separate from unchanged ordinary-import reports and ANN recall.
+diff --git a/migration/postgres/import_distance_bound_test.go b/migration/postgres/import_distance_bound_test.go
+new file mode 100644
+index 0000000..71314cd
+--- /dev/null
++++ b/migration/postgres/import_distance_bound_test.go
+@@ -0,0 +1,53 @@
++package postgres
++
++import (
++	"math"
++	"math/big"
++	"testing"
++
++	"github.com/ms-xiaosnow/gosqlite/extension/vector"
++)
++
++// Pure-memory certification against an exact rational evaluation of the bound
++// itself. This supplements unchanged independent native/import regressions.
++func TestImportDistanceIPBoundRoundsOutward(t *testing.T) {
++	for _, n := range []int{1, 3, 17, 16000} {
++		a, b := make([]float32, n), make([]float32, n)
++		for i := range a {
++			a[i] = math.Float32frombits(uint32((i*47)%255)<<23 | uint32((i*104729+1)&0x7fffff))
++			b[i] = math.Float32frombits(uint32((i*71+11)%255)<<23 | uint32((i*65537+3)&0x7fffff))
++			if i%2 == 0 {
++				b[i] = -b[i]
++			}
++		}
++		ref := independentReviewDistance(a, b, vector.NegativeIP)
++		actual := importDistanceErrorBound(a, b, vector.NegativeIP, ref)
++		one := new(big.Rat).SetInt64(1)
++		unit := new(big.Rat).SetFrac(big.NewInt(1), new(big.Int).Lsh(big.NewInt(1), 53))
++		nu := new(big.Rat).Mul(new(big.Rat).SetInt64(int64(n)), unit)
++		gamma := new(big.Rat).Quo(nu, new(big.Rat).Sub(one, nu))
++		scale := new(big.Rat)
++		for i, x := range a {
++			product := new(big.Rat).Mul(new(big.Rat).SetFloat64(float64(x)), new(big.Rat).SetFloat64(float64(b[i])))
++			scale.Add(scale, new(big.Rat).Abs(product))
++		}
++		correction := new(big.Rat).Mul(gamma, gamma)
++		correction.Mul(correction, scale)
++		correction.Mul(correction, new(big.Rat).Add(one, unit))
++		final := new(big.Rat).Mul(new(big.Rat).SetInt64(4), unit)
++		final.Mul(final, new(big.Rat).SetFloat64(math.Abs(ref)))
++		exact := new(big.Rat).Add(final, correction)
++		rounded := new(big.Rat).SetFloat64(actual)
++		if rounded == nil || rounded.Cmp(exact) < 0 {
++			t.Fatalf("n=%d bound rounded below exact formula: %g", n, actual)
++		}
++		// The outward machinery should cost rounding slack, not orders of magnitude.
++		twice := new(big.Rat).Mul(new(big.Rat).SetInt64(2), exact)
++		if rounded.Cmp(twice) > 0 {
++			t.Fatalf("n=%d unexpectedly loose bound: %g", n, actual)
++		}
++	}
++	if bound := importDistanceErrorBound([]float32{0, 0}, []float32{1, -1}, vector.NegativeIP, 0); bound != 0 {
++		t.Fatal("all-zero products lost exact-zero bound", bound)
++	}
++}
+diff --git a/migration/postgres/import_distance_cancellation_review_test.go b/migration/postgres/import_distance_cancellation_review_test.go
+new file mode 100644
+index 0000000..7480ff0
+--- /dev/null
++++ b/migration/postgres/import_distance_cancellation_review_test.go
+@@ -0,0 +1,86 @@
++package postgres
++
++import (
++	"context"
++	"fmt"
++	"math"
++	"strings"
++	"testing"
++
++	"github.com/ms-xiaosnow/gosqlite/extension/vector"
++)
++
++// Valid finite binary32 input only. The main Neumaier sum remains 1 until
++// the final -1; swallowed small products collect in the separately rounded
++// correction. Greedy deterministic selection exposes its accumulated error.
++func independentReviewCancellationInputs() ([]float32, []float32) {
++	const dims = 16000
++	a, b := make([]float32, dims), make([]float32, dims)
++	a[0], b[0], a[dims-1], b[dims-1] = 1, 1, 1, -1
++	state := uint32(100)
++	correction := 0.0
++	for i := 1; i < dims-1; i++ {
++		a[i] = math.Float32frombits(0x327fffff)
++		bestErr := math.Inf(-1)
++		var best float32
++		var bestSum float64
++		for j := 0; j < 12; j++ {
++			state = 1664525*state + 1013904223
++			candidate := math.Float32frombits(0x31800000 | (state & 0x7fffff))
++			product := float64(a[i]) * float64(candidate)
++			next := correction + product
++			rounding := (next - correction) - product
++			if rounding > bestErr {
++				bestErr, best, bestSum = rounding, candidate, next
++			}
++		}
++		b[i] = best
++		correction = bestSum
++	}
++	return a, b
++}
++
++func TestIndependentImportDistanceCancellationBound(t *testing.T) {
++	a, b := independentReviewCancellationInputs()
++	av, _ := vector.New(a)
++	bv, _ := vector.New(b)
++	native, err := vector.NegativeInnerProduct(av, bv)
++	if err != nil {
++		t.Fatal(err)
++	}
++	reference := independentReviewDistance(a, b, vector.NegativeIP)
++	if got := importDistanceReference(a, b, vector.NegativeIP); got != reference {
++		t.Fatal("production reference disagrees with rational sum", got, reference)
++	}
++	bound := importDistanceErrorBound(a, b, vector.NegativeIP, reference)
++	actual := math.Abs(native - reference)
++	t.Logf("dims=%d native=%.17g rational=%.17g absolute_error=%.17g reported_bound=%.17g ratio=%.9g", len(a), native, reference, actual, bound, actual/bound)
++	if actual > bound {
++		t.Fatalf("valid native compensated IP exceeds verifier's claimed bound by %.9gx", actual/bound)
++	}
++}
++
++func TestIndependentImportDistanceCancellationDataset(t *testing.T) {
++	a, b := independentReviewCancellationInputs()
++	var data strings.Builder
++	for row, v := range [][]float32{a, b} {
++		fmt.Fprintf(&data, "{\"id\":%d,\"embedding\":[", row+1)
++		for i, x := range v {
++			if i > 0 {
++				data.WriteByte(',')
++			}
++			fmt.Fprintf(&data, "%.9g", x)
++		}
++		data.WriteString("]}\n")
++	}
++	m, in, out := importFixture(t, "ndjson", data.String())
++	m.Fields[1].Dimensions = len(a)
++	ctx := context.Background()
++	if _, err := Import(ctx, in, out, m, ImportOptions{Apply: true}); err != nil {
++		t.Fatal(err)
++	}
++	report, err := VerifyImportDistances(ctx, in, out, m, ImportDistanceOptions{Column: "embedding", QueryPKs: []int64{1}, Metrics: []vector.MetricKind{vector.NegativeIP}, TopK: 2})
++	if err != nil || report.Distances.Status != "passed" {
++		t.Fatalf("ordinary intact finite dataset incorrectly rejected: status=%s error=%v", report.Distances.Status, err)
++	}
++}
+diff --git a/migration/postgres/import_distance_independent_review_test.go b/migration/postgres/import_distance_independent_review_test.go
+new file mode 100644
+index 0000000..a183b43
+--- /dev/null
++++ b/migration/postgres/import_distance_independent_review_test.go
+@@ -0,0 +1,220 @@
++package postgres
++
++import (
++	"context"
++	"crypto/sha256"
++	"encoding/json"
++	"fmt"
++	"math"
++	"math/big"
++	"os"
++	"reflect"
++	"strings"
++	"testing"
++
++	"github.com/ms-xiaosnow/gosqlite/extension/vector"
++)
++
++// These independent regressions only create ordinary source exports, import,
++// committed pause/resume, and read intact native databases. Error controls are
++// in-memory format/math/options. No physical faults or recovery are exercised.
++
++// Rational sums differ from the production reference's floating accumulation.
++// Only irrational sqrt/division is rounded, using independent 1024-bit floats.
++func independentReviewDistance(a, b []float32, metric vector.MetricKind) float64 {
++	rat := func(x float32) *big.Rat { return new(big.Rat).SetFloat64(float64(x)) }
++	dot, aa, bb, l1, l2 := new(big.Rat), new(big.Rat), new(big.Rat), new(big.Rat), new(big.Rat)
++	for i, x := range a {
++		av, bv := rat(x), rat(b[i])
++		d := new(big.Rat).Sub(av, bv)
++		dot.Add(dot, new(big.Rat).Mul(av, bv))
++		aa.Add(aa, new(big.Rat).Mul(av, av))
++		bb.Add(bb, new(big.Rat).Mul(bv, bv))
++		l1.Add(l1, new(big.Rat).Abs(d))
++		l2.Add(l2, new(big.Rat).Mul(d, d))
++	}
++	f := func(r *big.Rat) *big.Float { return new(big.Float).SetPrec(1024).SetRat(r) }
++	var v *big.Float
++	switch metric {
++	case vector.L1:
++		v = f(l1)
++	case vector.L2:
++		v = f(l2)
++		v.Sqrt(v)
++	case vector.NegativeIP:
++		v = f(dot)
++		v.Neg(v)
++	case vector.Cosine:
++		den := f(new(big.Rat).Mul(aa, bb))
++		den.Sqrt(den)
++		v = f(dot)
++		v.Quo(v, den)
++		v.Sub(new(big.Float).SetPrec(1024).SetInt64(1), v)
++	default:
++		panic("unsupported review metric")
++	}
++	n, _ := v.Float64()
++	if metric == vector.Cosine {
++		n = max(0, min(2, n))
++	}
++	return n
++}
++
++func TestIndependentImportDistanceRationalOracle(t *testing.T) {
++	// Full exponent span, both product signs, subnormals, cancellation, tiny norms.
++	for _, dims := range []int{1, 3, 17, 129, 16000} {
++		a, b := make([]float32, dims), make([]float32, dims)
++		for i := range a {
++			bits := uint32((i*37)%255)<<23 | uint32((i*104729+1)&0x7fffff)
++			if bits == 0 {
++				bits = 1
++			}
++			if i%2 == 0 {
++				bits |= 1 << 31
++			}
++			a[i] = math.Float32frombits(bits)
++			bits = uint32((i*67+13)%255)<<23 | uint32((i*65537+3)&0x7fffff)
++			if i%3 == 0 {
++				bits |= 1 << 31
++			}
++			b[i] = math.Float32frombits(bits)
++		}
++		for _, metric := range []vector.MetricKind{vector.L1, vector.L2, vector.NegativeIP, vector.Cosine} {
++			want := independentReviewDistance(a, b, metric)
++			got := importDistanceReference(a, b, metric)
++			if got != want {
++				t.Fatalf("dims=%d metric=%s production reference=%.17g rational=%.17g", dims, metric, got, want)
++			}
++			av, _ := vector.New(a)
++			bv, _ := vector.New(b)
++			native, err := metric.Distance(av, bv)
++			bound := importDistanceErrorBound(a, b, metric, want)
++			if err != nil || !importDistanceClose(native, want, bound) {
++				t.Fatalf("native bound dims=%d metric=%s native=%.17g rational=%.17g bound=%g err=%v", dims, metric, native, want, bound, err)
++			}
++		}
++	}
++	maxf, tiny := float32(math.MaxFloat32), float32(math.SmallestNonzeroFloat32)
++	a, b := []float32{maxf, tiny, maxf}, []float32{maxf, tiny, -maxf}
++	if want := independentReviewDistance(a, b, vector.NegativeIP); want != -float64(tiny)*float64(tiny) || importDistanceReference(a, b, vector.NegativeIP) != want {
++		t.Fatal("lost low exponent cancellation residual", want)
++	}
++}
++
++func TestIndependentImportDistanceMaxDimensionsAndReadOnly(t *testing.T) {
++	const dims = 16000
++	var data strings.Builder
++	source := map[int64][]float32{}
++	for _, pk := range []int64{math.MaxInt64, 17, math.MinInt64} {
++		v := make([]float32, dims)
++		for j := range v {
++			v[j] = float32(j%31-15) / 16
++		}
++		v[0] = float32(pk%7 + 1)
++		source[pk] = v
++		fmt.Fprintf(&data, "{\"id\":%d,\"embedding\":[", pk)
++		for j, x := range v {
++			if j > 0 {
++				data.WriteByte(',')
++			}
++			fmt.Fprintf(&data, "%.9g", x)
++		}
++		data.WriteString("]}\n")
++	}
++	m, in, out := importFixture(t, "ndjson", data.String())
++	m.Fields[0].Target = "mapped_pk"
++	m.Fields[1].Target = "mapped_vector"
++	m.Fields[1].Dimensions = dims
++	ctx := context.Background()
++	paused, err := Import(ctx, in, out, m, ImportOptions{Apply: true, BatchRows: 1, StopAfterBatches: 1})
++	if err != nil || paused.Status != "paused_committed" {
++		t.Fatal(paused, err)
++	}
++	if _, err = Import(ctx, in, out, m, ImportOptions{Apply: true, Resume: true, BatchRows: 1}); err != nil {
++		t.Fatal(err)
++	}
++	hash := func(p string) [32]byte {
++		b, e := os.ReadFile(p)
++		if e != nil {
++			t.Fatal(e)
++		}
++		return sha256.Sum256(b)
++	}
++	sourceBefore, dbBefore := hash(in), hash(out)
++	opts := ImportDistanceOptions{Column: "mapped_vector", QueryCount: 3, TopK: 2}
++	got, err := VerifyImportDistances(ctx, in, out, m, opts)
++	if err != nil {
++		t.Fatal(err)
++	}
++	r := got.Distances
++	if r.Status != "passed" || r.QueryCoverage != "all_source_vectors_as_queries_all_candidates" || r.NormsChecked != 3 || r.NativeRowsChecked != 3 || r.DistancesChecked != 36 || r.TopKChecked != 24 || r.RetainedComponents != 48000 || r.PlannedComponentWork != 2784000 {
++		t.Fatalf("report %+v", r)
++	}
++	if !reflect.DeepEqual(r.QueryPKs, []int64{math.MinInt64, 17, math.MaxInt64}) {
++		t.Fatal(r.QueryPKs)
++	}
++	for _, q := range r.Queries {
++		for _, h := range q.All {
++			want := independentReviewDistance(source[h.PK], source[q.QueryPK], q.Metric)
++			if h.Reference != want || math.Abs(h.Native-want) > h.Tolerance {
++				t.Fatalf("query=%+v hit=%+v independent=%.17g", q, h, want)
++			}
++		}
++		if !reflect.DeepEqual(q.TopK, q.All[:2]) {
++			t.Fatal("top-k prefix differs")
++		}
++	}
++	if hash(in) != sourceBefore || hash(out) != dbBefore {
++		t.Fatal("verification changed ordinary source/database bytes")
++	}
++	plain, err := VerifyImport(ctx, in, out, m)
++	if err != nil || !strings.HasPrefix(plain.ExactDistances, "not_run") || plain.CanonicalSHA256 != got.Import.CanonicalSHA256 {
++		t.Fatal(plain, err)
++	}
++	if !strings.HasPrefix(got.Import.ANNRecall, "not_run") || !strings.HasPrefix(r.ANNRecall, "not_run") {
++		t.Fatal("ANN promoted")
++	}
++	encoded, err := json.Marshal(got)
++	if err != nil || !json.Valid(encoded) {
++		t.Fatal(err)
++	}
++	// Exact pair/component limits pass; one fewer is an intact read-only budget error.
++	opts.MaxPairs = r.PlannedComparisons
++	opts.MaxComponentWork = r.PlannedComponentWork
++	if _, err = VerifyImportDistances(ctx, in, out, m, opts); err != nil {
++		t.Fatal("exact budget rejected", err)
++	}
++	opts.MaxPairs--
++	bad, err := VerifyImportDistances(ctx, in, out, m, opts)
++	if err == nil || bad.Distances.Status != "failed" {
++		t.Fatal("under-budget accepted", err)
++	}
++}
++
++func TestIndependentImportDistanceFormatsAndFalseControls(t *testing.T) {
++	for _, raw := range []string{`{}`, `{"Column":"embedding"}`, `{"column":"embedding","Column":"other"}`, `{"column":"embedding","query_pks":null}`, `{"column":"embedding","metrics":[null]}`, `{"column":"embedding","query_count":1.5}`, `{"column":"embedding","query_pks":[9223372036854775808]}`, `{"column":"embedding","metrics":[["l2"]]}`, `{"column":"\ud800"}`} {
++		if _, err := DecodeImportDistanceOptions(strings.NewReader(raw)); err == nil {
++			t.Fatalf("invalid format accepted: %s", raw)
++		}
++	}
++	tiny := float32(math.SmallestNonzeroFloat32)
++	norm := independentReviewDistance([]float32{tiny}, []float32{0}, vector.L2)
++	refs := map[int64]importDistanceReferenceValue{1: {norm, ImportDistanceTolerance * norm}}
++	for _, distance := range []float64{0, math.Inf(1), math.Inf(-1), math.NaN(), norm * 2} {
++		if _, err := checkImportDistanceHits([]vector.Hit{{RowID: 1, Distance: distance}}, refs); err == nil {
++			t.Fatal("false distance accepted", distance)
++		}
++	}
++	if _, err := checkImportDistanceHits([]vector.Hit{{RowID: 1, Distance: norm}}, refs); err != nil {
++		t.Fatal(err)
++	}
++	near := []ImportDistanceHit{{PK: 1, Reference: 0, Tolerance: 2}, {PK: 2, Reference: 1, Tolerance: 0}, {PK: 3, Reference: 4, Tolerance: 0}}
++	if !strings.HasPrefix(importDistanceBoundary(near, 1), "ambiguous") || !strings.HasPrefix(importDistanceBoundary(near, 2), "clear") {
++		t.Fatal("boundary classification")
++	}
++	// A bad signed-PK tie fails even if both distances are individually accurate.
++	tie := map[int64]importDistanceReferenceValue{-9: {1, 1e-14}, 7: {1, 1e-14}}
++	if _, err := checkImportDistanceHits([]vector.Hit{{RowID: 7, Distance: 1}, {RowID: -9, Distance: 1}}, tie); err == nil {
++		t.Fatal("bad signed-PK tie accepted")
++	}
++}
+diff --git a/migration/postgres/import_distances.go b/migration/postgres/import_distances.go
+new file mode 100644
+index 0000000..1fd2c12
+--- /dev/null
++++ b/migration/postgres/import_distances.go
+@@ -0,0 +1,618 @@
++package postgres
++
++import (
++	"context"
++	"errors"
++	"fmt"
++	"io"
++	"math"
++	"math/big"
++	"os"
++	"sort"
++
++	"github.com/ms-xiaosnow/gosqlite/extension/vector"
++	"github.com/ms-xiaosnow/gosqlite/sqlite"
++)
++
++const (
++	MaxImportDistanceRows                     = 10000
++	MaxImportDistanceQueries                  = 16
++	MaxImportDistancePairs                    = 100000
++	MaxImportDistanceComponents         int64 = 8000000
++	MaxImportDistanceRetainedComponents int64 = 1000000
++	ImportDistanceTolerance                   = 64 * (1.0 / (1 << 52))
++)
++
++// ImportDistanceOptions is an opt-in, read-only verification contract for one
++// explicitly mapped target VECTOR column. Zero budgets use bounded defaults.
++// QueryPKs selects accepted, non-NULL source vectors; otherwise QueryCount
++// (default four) evenly spaced signed-PK ranks select queries deterministically.
++// Every query uses ALL accepted non-NULL candidates, never a candidate sample.
++// No caller tolerance, ANN mode, SQL predicate or external connection is allowed.
++type ImportDistanceOptions struct {
++	Column           string              `json:"column"`
++	Metrics          []vector.MetricKind `json:"metrics,omitempty"`
++	QueryCount       int                 `json:"query_count,omitempty"`
++	QueryPKs         []int64             `json:"query_pks,omitempty"`
++	TopK             int                 `json:"top_k,omitempty"`
++	MaxRows          int                 `json:"max_rows,omitempty"`
++	MaxPairs         int                 `json:"max_pairs,omitempty"`
++	MaxComponentWork int64               `json:"max_component_work,omitempty"`
++}
++
++// ImportDistanceVerification deliberately wraps, rather than extends, the
++// existing positional ImportResult/ImportOptions public struct layouts.
++type ImportDistanceVerification struct {
++	Import    ImportResult         `json:"import"`
++	Distances ImportDistanceReport `json:"distance_verification"`
++}
++type ImportDistanceReport struct {
++	Version                   int                         `json:"version"`
++	Status                    string                      `json:"status"`
++	Options                   ImportDistanceOptions       `json:"options"`
++	SourceField               string                      `json:"source_field"`
++	PrimaryKeyField           string                      `json:"primary_key_field"`
++	Dimensions                int                         `json:"dimensions"`
++	AcceptedRows              int64                       `json:"accepted_rows"`
++	CandidateRows             int                         `json:"candidate_rows"`
++	NullRows                  int                         `json:"null_rows"`
++	ZeroNormRows              int                         `json:"zero_norm_rows"`
++	NormsChecked              int                         `json:"norms_checked"`
++	NativeRowsChecked         int                         `json:"native_rows_checked"`
++	QuerySelection            string                      `json:"query_selection"`
++	QueryCoverage             string                      `json:"query_coverage"`
++	QueryPKs                  []int64                     `json:"query_pks"`
++	UnselectedVectorColumns   []string                    `json:"unselected_vector_columns"`
++	Reference                 string                      `json:"reference"`
++	DistanceRelativeTolerance float64                     `json:"distance_relative_tolerance"`
++	CosineAbsoluteTolerance   float64                     `json:"cosine_absolute_tolerance"`
++	ErrorBounds               string                      `json:"error_bounds"`
++	NormRelativeTolerance     float64                     `json:"norm_relative_tolerance"`
++	Ordering                  string                      `json:"ordering"`
++	RetainedComponents        int64                       `json:"retained_components"`
++	MaxRetainedComponents     int64                       `json:"max_retained_components"`
++	PlannedComparisons        int                         `json:"planned_comparisons"`
++	PlannedComponentWork      int64                       `json:"planned_component_work"`
++	DistancesChecked          int                         `json:"distances_checked"`
++	TopKChecked               int                         `json:"top_k_checked"`
++	Queries                   []ImportDistanceQueryReport `json:"queries"`
++	ANNRecall                 string                      `json:"ann_recall"`
++}
++type ImportDistanceQueryReport struct {
++	QueryPK      int64               `json:"query_pk"`
++	Metric       vector.MetricKind   `json:"metric"`
++	Status       string              `json:"status"`
++	Reason       string              `json:"reason,omitempty"`
++	Exact        bool                `json:"native_exact"`
++	TopKBoundary string              `json:"top_k_boundary"`
++	All          []ImportDistanceHit `json:"all"`
++	TopK         []ImportDistanceHit `json:"top_k"`
++}
++type ImportDistanceHit struct {
++	PK        int64   `json:"pk"`
++	Native    float64 `json:"native"`
++	Reference float64 `json:"reference"`
++	Tolerance float64 `json:"tolerance"`
++}
++
++func (o ImportDistanceOptions) normalized(m ImportManifest) (ImportDistanceOptions, int, error) {
++	bad := func() (ImportDistanceOptions, int, error) {
++		return o, -1, fmt.Errorf("import distances: invalid column, metric, query selection or resource limits")
++	}
++	field := -1
++	for i, f := range m.Fields {
++		if f.Target == o.Column && f.Type == "vector" {
++			field = i
++		}
++	}
++	if field < 0 {
++		return bad()
++	}
++	if len(o.Metrics) == 0 {
++		o.Metrics = []vector.MetricKind{vector.L2, vector.L1, vector.NegativeIP, vector.Cosine}
++	}
++	if len(o.Metrics) > 4 {
++		return bad()
++	}
++	seen := map[vector.MetricKind]bool{}
++	for _, metric := range o.Metrics {
++		switch metric {
++		case vector.L2, vector.L1, vector.NegativeIP, vector.Cosine:
++		default:
++			return o, -1, fmt.Errorf("import distances: unsupported metric %q", metric)
++		}
++		if seen[metric] {
++			return bad()
++		}
++		seen[metric] = true
++	}
++	if len(o.QueryPKs) > 0 {
++		if o.QueryCount != 0 || len(o.QueryPKs) > MaxImportDistanceQueries {
++			return bad()
++		}
++		seen := map[int64]bool{}
++		for _, pk := range o.QueryPKs {
++			if seen[pk] {
++				return bad()
++			}
++			seen[pk] = true
++		}
++		o.QueryPKs = append([]int64(nil), o.QueryPKs...)
++	} else {
++		if o.QueryCount == 0 {
++			o.QueryCount = 4
++		}
++		if o.QueryCount < 1 || o.QueryCount > MaxImportDistanceQueries {
++			return bad()
++		}
++	}
++	if o.TopK == 0 {
++		o.TopK = 10
++	}
++	if o.MaxRows == 0 {
++		o.MaxRows = MaxImportDistanceRows
++	}
++	if o.MaxPairs == 0 {
++		o.MaxPairs = MaxImportDistancePairs
++	}
++	if o.MaxComponentWork == 0 {
++		o.MaxComponentWork = MaxImportDistanceComponents
++	}
++	if o.TopK < 1 || o.TopK > MaxImportDistanceRows || o.MaxRows < 1 || o.MaxRows > MaxImportDistanceRows || o.MaxPairs < 1 || o.MaxPairs > MaxImportDistancePairs || o.MaxComponentWork < 1 || o.MaxComponentWork > MaxImportDistanceComponents {
++		return bad()
++	}
++	o.Metrics = append([]vector.MetricKind(nil), o.Metrics...)
++	return o, field, nil
++}
++
++// DecodeImportDistanceOptions reads at most 64 KiB of strict options JSON.
++// Unknown/duplicate fields and trailing JSON are rejected. Manifest-dependent
++// validation is performed by VerifyImportDistances before opening either file.
++func DecodeImportDistanceOptions(r io.Reader) (ImportDistanceOptions, error) {
++	var o ImportDistanceOptions
++	if r == nil {
++		return o, fmt.Errorf("import distances: nil options reader")
++	}
++	raw, err := io.ReadAll(io.LimitReader(r, MaxImportManifestBytes+1))
++	if err != nil {
++		return o, err
++	}
++	if len(raw) > MaxImportManifestBytes {
++		return o, fmt.Errorf("import distances: options byte limit")
++	}
++	l := DefaultLimits()
++	l.MaxBytes = MaxImportManifestBytes
++	l.MaxTokens = 1024
++	l.MaxDepth = 4
++	if err = strictJSON(raw, &o, l); err != nil {
++		return o, fmt.Errorf("import distances: %w", err)
++	}
++	return o, nil
++}
++
++// VerifyImportDistances retains every fidelity/count/provenance/index check of
++// VerifyImport. It additionally checks native SQL dimensions/norms and full exact
++// search plus an independent Top-K execution against source-export references,
++// in the SAME native read snapshot. The source is rehashed after all checks.
++// Returned reports are partial on error and must never be treated as success.
++// The source parser is shared with Import; the mathematical reference is wholly
++// separate from native vector metrics and uses 768-bit arithmetic. This tests
++// supplied export fidelity, not the accuracy of an exporter's lost decimal bits.
++func VerifyImportDistances(ctx context.Context, input, output string, m ImportManifest, options ImportDistanceOptions) (r ImportDistanceVerification, resultErr error) {
++	r.Distances.Status = "not_run"
++	if ctx == nil {
++		return r, fmt.Errorf("import distances: nil context")
++	}
++	if err := m.Validate(); err != nil {
++		return r, err
++	}
++	o, field, err := options.normalized(m)
++	if err != nil {
++		return r, err
++	}
++	r.Distances = ImportDistanceReport{Version: 1, Status: "not_run", Options: o, SourceField: m.Fields[field].Source, PrimaryKeyField: m.Fields[m.pkField()].Target, Dimensions: m.Fields[field].Dimensions, QueryPKs: []int64{}, Queries: []ImportDistanceQueryReport{}, UnselectedVectorColumns: []string{}, Reference: "source-export binary32 components; independent 768-bit arithmetic", DistanceRelativeTolerance: ImportDistanceTolerance, CosineAbsoluteTolerance: ImportDistanceTolerance, ErrorBounds: "epsilon=2^-52; L1/L2/norm:64*epsilon*abs(reference); cosine:64*epsilon; negative IP:outward-rounded 4*u*abs(reference)+(1+u)*gamma_n^2*S_upper; u=2^-53, gamma_n=n*u/(1-n*u), S_upper=upward-rounded sum(abs(source products))", NormRelativeTolerance: ImportDistanceTolerance, Ordering: "native distance ASC, signed PK ASC; reference interval ordering; top-K boundary overlap explicitly reported", MaxRetainedComponents: MaxImportDistanceRetainedComponents, ANNRecall: "not_run; exact verification does not measure ANN recall"}
++	for i, f := range m.Fields {
++		if f.Type == "vector" && i != field {
++			r.Distances.UnselectedVectorColumns = append(r.Distances.UnselectedVectorColumns, f.Target)
++		}
++	}
++	r.Import, err = verifyImport(ctx, input, output, m, func(src *os.File, db *sqlite.DB, base ImportResult) error {
++		return verifyImportDistanceSnapshot(ctx, src, db, m, field, base, &r.Distances)
++	})
++	if err != nil {
++		r.Distances.Status = "failed"
++		r.Import.ExactDistances = "failed; see distance_verification"
++		return r, err
++	}
++	r.Import.ExactDistances = r.Distances.Status + "; see distance_verification"
++	return r, nil
++}
++
++type importDistanceRow struct {
++	pk     int64
++	values []float32
++	norm   float64
++}
++
++func verifyImportDistanceSnapshot(ctx context.Context, src *os.File, db *sqlite.DB, m ImportManifest, field int, base ImportResult, r *ImportDistanceReport) error {
++	o := r.Options
++	r.AcceptedRows = base.Accepted
++	if base.Accepted > int64(o.MaxRows) {
++		return fmt.Errorf("import distances: accepted-row cap exceeded; no candidate sampling")
++	}
++	if _, err := src.Seek(0, io.SeekStart); err != nil {
++		return err
++	}
++	reader, err := newImportRecordReader(ctx, src, m, MaxImportRecordBytes, 0, nil)
++	if err != nil {
++		return err
++	}
++	rows := make(map[int64]importDistanceRow, int(base.Accepted))
++	for n := int64(1); n <= base.SourceRecords; n++ {
++		rec, parseErr := reader.Next(ctx)
++		if parseErr == io.EOF {
++			return fmt.Errorf("import distances: early source end")
++		}
++		var rejected importRejection
++		skip, e := readImportJSON(ctx, db, importRejections, n, &rejected)
++		if e != nil {
++			return e
++		}
++		if skip {
++			continue
++		}
++		if parseErr != nil {
++			return parseErr
++		}
++		var provenance importAcceptedRow
++		ok, e := readImportJSON(ctx, db, importAccepted, rec.PK, &provenance)
++		if e != nil {
++			return e
++		}
++		if !ok || provenance.Record != n {
++			return fmt.Errorf("import distances: source PK provenance mismatch")
++		}
++		if _, exists := rows[rec.PK]; exists {
++			return fmt.Errorf("import distances: duplicate accepted source PK")
++		}
++		row := importDistanceRow{pk: rec.PK}
++		if rec.Values[field] == nil {
++			r.NullRows++
++		} else {
++			v, ok := rec.Values[field].(vector.Vector)
++			if !ok || v.Dims() != r.Dimensions {
++				return fmt.Errorf("import distances: source dimensions")
++			}
++			r.RetainedComponents += int64(r.Dimensions)
++			if r.RetainedComponents > MaxImportDistanceRetainedComponents {
++				return fmt.Errorf("import distances: retained component cap exceeded")
++			}
++			row.values = v.Values()
++			r.CandidateRows++
++		}
++		rows[rec.PK] = row
++	}
++	if len(rows) != int(base.Accepted) {
++		return fmt.Errorf("import distances: accepted source count mismatch")
++	}
++	// Exhaust the source independently as well as checking the persisted cursor.
++	if _, e := reader.Next(ctx); e != io.EOF {
++		return errors.Join(e, fmt.Errorf("import distances: source end mismatch"))
++	}
++	candidates := make([]importDistanceRow, 0, r.CandidateRows)
++	for _, row := range rows {
++		if row.values != nil {
++			candidates = append(candidates, row)
++		}
++	}
++	sort.Slice(candidates, func(i, j int) bool { return candidates[i].pk < candidates[j].pk })
++	if len(o.QueryPKs) > 0 {
++		r.QuerySelection = "supplied_source_pks"
++		for _, pk := range o.QueryPKs {
++			row, ok := rows[pk]
++			if !ok || row.values == nil {
++				return fmt.Errorf("import distances: query PK must identify an accepted non-NULL source vector")
++			}
++			r.QueryPKs = append(r.QueryPKs, pk)
++		}
++	} else {
++		r.QuerySelection = "evenly_spaced_signed_pk_ranks"
++		count := min(o.QueryCount, len(candidates))
++		for i := 0; i < count; i++ {
++			rank := 0
++			if count > 1 {
++				rank = i * (len(candidates) - 1) / (count - 1)
++			}
++			r.QueryPKs = append(r.QueryPKs, candidates[rank].pk)
++		}
++	}
++	r.QueryCoverage = "sampled_queries_all_candidates"
++	if len(r.QueryPKs) == len(candidates) {
++		r.QueryCoverage = "all_source_vectors_as_queries_all_candidates"
++	}
++	queryMetrics := len(r.QueryPKs) * len(o.Metrics)
++	pairs := queryMetrics * (r.CandidateRows + min(o.TopK, r.CandidateRows))
++	r.PlannedComparisons = pairs
++	// Conservative preflight charges even metrics subsequently skipped, one
++	// reference + scale + two native scoring passes, and source/native norms.
++	r.PlannedComponentWork = int64(r.Dimensions) * (2*int64(r.CandidateRows) + int64(queryMetrics)*(4*int64(r.CandidateRows)+2))
++	if pairs > o.MaxPairs || r.PlannedComponentWork > o.MaxComponentWork {
++		return fmt.Errorf("import distances: comparison or component-work cap exceeded")
++	}
++	for i := range candidates {
++		if err = ctx.Err(); err != nil {
++			return err
++		}
++		candidates[i].norm = importDistanceReferenceNorm(candidates[i].values)
++		rows[candidates[i].pk] = candidates[i]
++		if candidates[i].norm == 0 {
++			r.ZeroNormRows++
++		}
++	}
++	if err = verifyImportNativeNorms(ctx, db, m, field, rows, r); err != nil {
++		return err
++	}
++	if len(candidates) == 0 {
++		r.Status = "skipped_no_nonnull_vectors"
++		r.QueryCoverage = "no_nonnull_vectors"
++		return nil
++	}
++	limits := vector.SearchLimits{MaxCandidates: o.MaxRows, MaxResults: o.MaxRows, MaxComponents: uint64(r.Dimensions) * uint64(r.CandidateRows+1)}
++	skipped := false
++	for _, pk := range r.QueryPKs {
++		query := rows[pk]
++		for _, metric := range o.Metrics {
++			if err = ctx.Err(); err != nil {
++				return err
++			}
++			qr := ImportDistanceQueryReport{QueryPK: pk, Metric: metric, Status: "not_run", All: []ImportDistanceHit{}, TopK: []ImportDistanceHit{}}
++			if metric == vector.Cosine && (r.ZeroNormRows > 0 || query.norm == 0) {
++				qr.Status = "skipped_zero_norm"
++				qr.Reason = "native cosine rejects zero norms; no candidate filtering or invented distance"
++				r.Queries = append(r.Queries, qr)
++				skipped = true
++				continue
++			}
++			refs := make(map[int64]importDistanceReferenceValue, len(candidates))
++			for _, row := range candidates {
++				if err = ctx.Err(); err != nil {
++					return err
++				}
++				ref := importDistanceReference(row.values, query.values, metric)
++				refs[row.pk] = importDistanceReferenceValue{ref, importDistanceErrorBound(row.values, query.values, metric, ref)}
++			}
++			q, e := vector.New(query.values)
++			if e != nil {
++				return e
++			}
++			full, e := db.VectorSearch(ctx, m.Table, o.Column, q, sqlite.VectorSearchOptions{Mode: sqlite.VectorModeExact, Metric: metric, Limit: len(candidates), Limits: limits})
++			if e != nil {
++				return e
++			}
++			if e = checkImportDistancePlan(full, r, metric, len(candidates)); e != nil {
++				return e
++			}
++			qr.All, e = checkImportDistanceHits(full.Hits, refs)
++			if e != nil {
++				return e
++			}
++			r.DistancesChecked += len(qr.All)
++			k := min(o.TopK, len(candidates))
++			top, e := db.VectorSearch(ctx, m.Table, o.Column, q, sqlite.VectorSearchOptions{Mode: sqlite.VectorModeExact, Metric: metric, Limit: k, Limits: limits})
++			if e != nil {
++				return e
++			}
++			if e = checkImportDistancePlan(top, r, metric, k); e != nil {
++				return e
++			}
++			for i, hit := range top.Hits {
++				if hit != full.Hits[i] {
++					return fmt.Errorf("import distances: Top-K differs from complete exact result")
++				}
++				qr.TopK = append(qr.TopK, qr.All[i])
++			}
++			qr.TopKBoundary = importDistanceBoundary(qr.All, k)
++			r.TopKChecked += len(qr.TopK)
++			qr.Exact = true
++			qr.Status = "passed"
++			r.Queries = append(r.Queries, qr)
++		}
++	}
++	r.Status = "passed"
++	if skipped {
++		r.Status = "partial_skipped_metrics"
++		if r.DistancesChecked == 0 {
++			r.Status = "skipped_no_defined_metrics"
++		}
++	}
++	return nil
++}
++
++func verifyImportNativeNorms(ctx context.Context, db *sqlite.DB, m ImportManifest, field int, want map[int64]importDistanceRow, r *ImportDistanceReport) error {
++	col := importQuote(m.Fields[field].Target)
++	result, err := db.Query(ctx, "SELECT "+importQuote(m.Fields[m.pkField()].Target)+", vector_dims("+col+"), vector_norm("+col+") FROM "+importQuote(m.Table))
++	if err != nil {
++		return err
++	}
++	defer result.Close()
++	seen := map[int64]bool{}
++	for result.Next() {
++		v := result.Values()
++		pk, ok := v[0].(int64)
++		row, exists := want[pk]
++		if !ok || !exists || seen[pk] {
++			return fmt.Errorf("import distances: native mapped PK mismatch")
++		}
++		seen[pk] = true
++		r.NativeRowsChecked++
++		if row.values == nil {
++			if v[1] != nil || v[2] != nil {
++				return fmt.Errorf("import distances: native NULL mismatch")
++			}
++			continue
++		}
++		dims, ok := v[1].(int64)
++		norm, normOK := v[2].(float64)
++		if !ok || dims != int64(r.Dimensions) || !normOK || !importDistanceClose(norm, row.norm, ImportDistanceTolerance*math.Abs(row.norm)) {
++			return fmt.Errorf("import distances: native dimension or norm mismatch at PK %d", pk)
++		}
++		r.NormsChecked++
++	}
++	if err = errors.Join(result.Err(), result.Close()); err != nil {
++		return err
++	}
++	if len(seen) != len(want) {
++		return fmt.Errorf("import distances: native norm row count mismatch")
++	}
++	return nil
++}
++func checkImportDistancePlan(got sqlite.VectorResult, r *ImportDistanceReport, metric vector.MetricKind, count int) error {
++	if !got.Plan.Exact || got.Plan.Metric != metric || got.Plan.Field != r.Options.Column || got.Plan.Method != "exact_vector" || got.Plan.Dimensions != r.Dimensions || len(got.Hits) != count || got.Stats.BaseRowFetches != r.AcceptedRows || got.Stats.ScoredRows != int64(r.CandidateRows) || got.Stats.NullRows != int64(r.NullRows) {
++		return fmt.Errorf("import distances: incomplete native exact plan/count coverage")
++	}
++	return nil
++}
++func importDistanceClose(got, want, tolerance float64) bool {
++	return !math.IsNaN(got) && !math.IsInf(got, 0) && !math.IsNaN(want) && !math.IsInf(want, 0) && math.Abs(got-want) <= tolerance
++}
++
++// Bounds follow widened binary32 inputs and native Neumaier accumulation.
++// L1/L2/norm have no cancellation of nonnegative terms; 64 eps covers their
++// input subtraction, accumulation, final rounding and sqrt. Cosine's bound
++// is absolute. For signed IP, let u=2^-53, gamma=n*u/(1-n*u), and S=sum|a*b|.
++// Widened binary32 products and FastTwoSum residuals are exact in binary64.
++// Each partial sum is bounded by S/(1-n*u), so the absolute residual sum is
++// at most gamma*S. Summing these residuals ordinarily costs <=gamma^2*S.
++// Final native and reference rounding cost <=2*u/(1-u)*abs(ref), bounded by
++// 4*u*abs(ref). Thus 4*u*abs(ref)+(1+u)*gamma^2*S is conservative. This retains
++// the dimension-squared term lost by v1. All scale/bound operations round
++// outward; neither cancellation nor downward scale rounding invalidates it.
++// Native metrics are unchanged. See docs/import-distance-verification.md.
++func importDistanceErrorBound(a, b []float32, metric vector.MetricKind, ref float64) float64 {
++	if metric == vector.Cosine {
++		return ImportDistanceTolerance
++	}
++	if metric != vector.NegativeIP {
++		return ImportDistanceTolerance * math.Abs(ref)
++	}
++	const unit = 1.0 / (1 << 53)
++	up := func(v float64) float64 { return math.Nextafter(v, math.Inf(1)) }
++	down := func(v float64) float64 { return math.Nextafter(v, math.Inf(-1)) }
++	scaleUpper := 0.0
++	for i, x := range a {
++		product := math.Abs(float64(x) * float64(b[i]))
++		if product != 0 {
++			scaleUpper = up(scaleUpper + product)
++		}
++	}
++	if scaleUpper == 0 {
++		return 0
++	} // Every product, the sum and reference are exact zero.
++	nu := float64(len(a)) * unit // Exact for the supported integer dimension range.
++	gammaUpper := up(nu / down(1-nu))
++	correctionUpper := up(up(gammaUpper*gammaUpper) * scaleUpper)
++	finalUpper := up((4 * unit) * math.Abs(ref))
++	return up(finalUpper + up(up(1+unit)*correctionUpper))
++}
++
++type importDistanceReferenceValue struct{ distance, tolerance float64 }
++
++func checkImportDistanceHits(hits []vector.Hit, refs map[int64]importDistanceReferenceValue) ([]ImportDistanceHit, error) {
++	if len(hits) != len(refs) {
++		return nil, fmt.Errorf("import distances: incomplete result")
++	}
++	seen := map[int64]bool{}
++	out := make([]ImportDistanceHit, 0, len(hits))
++	priorLower := math.Inf(-1)
++	for i, hit := range hits {
++		ref, exists := refs[hit.RowID]
++		if !exists || seen[hit.RowID] {
++			return nil, fmt.Errorf("import distances: unknown/duplicate result PK")
++		}
++		seen[hit.RowID] = true
++		if !importDistanceClose(hit.Distance, ref.distance, ref.tolerance) {
++			return nil, fmt.Errorf("import distances: distance mismatch at PK %d", hit.RowID)
++		}
++		if i > 0 {
++			prior := hits[i-1]
++			if prior.Distance > hit.Distance || prior.Distance == hit.Distance && prior.RowID >= hit.RowID {
++				return nil, fmt.Errorf("import distances: native distance/signed-PK ordering")
++			}
++		}
++		if priorLower > ref.distance+ref.tolerance {
++			return nil, fmt.Errorf("import distances: independent reference ordering outside error bounds")
++		}
++		priorLower = max(priorLower, ref.distance-ref.tolerance)
++		out = append(out, ImportDistanceHit{PK: hit.RowID, Native: hit.Distance, Reference: ref.distance, Tolerance: ref.tolerance})
++	}
++	return out, nil
++}
++func importDistanceBoundary(hits []ImportDistanceHit, k int) string {
++	if k == len(hits) {
++		return "all_candidates"
++	}
++	highestIncluded := math.Inf(-1)
++	lowestExcluded := math.Inf(1)
++	for i, h := range hits {
++		if i < k {
++			highestIncluded = max(highestIncluded, h.Reference+h.Tolerance)
++		} else {
++			lowestExcluded = min(lowestExcluded, h.Reference-h.Tolerance)
++		}
++	}
++	if highestIncluded >= lowestExcluded {
++		return "ambiguous_within_error_bounds; native distance/signed-PK contract checked"
++	}
++	return "clear_under_reference_error_bounds"
++}
++
++// 768 bits exceed the complete exponent span of products/differences of
++// binary32 values plus 16000-term accumulation. Component products and sums
++// are exact here. Cosine's product of squared norms, sqrt and division may
++// round at this independent high precision before the final float64 rounding.
++// Neither reference helper calls native Norm, Metric.Distance, Scan or SQL.
++func importDistanceReferenceNorm(a []float32) float64 {
++	z := make([]float32, len(a))
++	return importDistanceReference(a, z, vector.L2)
++}
++func importDistanceReference(a, b []float32, metric vector.MetricKind) float64 {
++	fresh := func() *big.Float { return new(big.Float).SetPrec(768) }
++	av, bv, d, tmp := fresh(), fresh(), fresh(), fresh()
++	sum, dot, aa, bb := fresh(), fresh(), fresh(), fresh()
++	for i, x := range a {
++		av.SetFloat64(float64(x))
++		bv.SetFloat64(float64(b[i]))
++		d.Sub(av, bv)
++		switch metric {
++		case vector.L1:
++			sum.Add(sum, tmp.Abs(d))
++		case vector.L2:
++			sum.Add(sum, tmp.Mul(d, d))
++		case vector.NegativeIP:
++			dot.Add(dot, tmp.Mul(av, bv))
++		case vector.Cosine:
++			dot.Add(dot, tmp.Mul(av, bv))
++			aa.Add(aa, tmp.Mul(av, av))
++			bb.Add(bb, tmp.Mul(bv, bv))
++		}
++	}
++	var result *big.Float
++	switch metric {
++	case vector.L1:
++		result = sum
++	case vector.L2:
++		result = fresh().Sqrt(sum)
++	case vector.NegativeIP:
++		result = fresh().Neg(dot)
++	case vector.Cosine:
++		den := fresh().Sqrt(fresh().Mul(aa, bb))
++		result = fresh().Sub(fresh().SetInt64(1), fresh().Quo(dot, den))
++	default:
++		return math.NaN()
++	}
++	value, _ := result.Float64()
++	if metric == vector.Cosine {
++		value = max(0, min(2, value))
++	}
++	return value
++}
+diff --git a/migration/postgres/import_distances_test.go b/migration/postgres/import_distances_test.go
+new file mode 100644
+index 0000000..c18cfa7
+--- /dev/null
++++ b/migration/postgres/import_distances_test.go
+@@ -0,0 +1,287 @@
++package postgres
++
++import (
++	"context"
++	"encoding/csv"
++	"encoding/json"
++	"errors"
++	"fmt"
++	"math"
++	"reflect"
++	"strings"
++	"testing"
++
++	"github.com/ms-xiaosnow/gosqlite/extension/vector"
++)
++
++// All native fixtures use intact freshly imported files and ordinary committed
++// stop/close/resume/read operations. Error controls below are options, source
++// parsing, reference arithmetic or fabricated in-memory results, never native
++// file faults, physical mutation, missing selected paths or recovery probes.
++func TestImportDatasetDistancesMappedFormatsAndResume(t *testing.T) {
++	for _, format := range []string{"csv", "ndjson"} {
++		t.Run(format, func(t *testing.T) {
++			inputs := []struct {
++				pk string
++				v  string
++			}{
++				{"9223372036854775807", "[3.4028234663852886e38,-3.4028234663852886e38]"},
++				{"-7", "[3,4]"}, {"-9223372036854775808", "[-0,1.401298464324817e-45]"},
++				{"9", "[1,1]"}, {"0", "[1.00000011920928955078125,1]"}, {"-2", "[3,4]"}, {"11", "null"},
++				{"-7", "[3,4]"}, {"20", "[1e-100,1]"},
++			}
++			var data strings.Builder
++			if format == "csv" {
++				w := csv.NewWriter(&data)
++				_ = w.Write([]string{"id", "embedding"})
++				for _, row := range inputs {
++					value := strings.NewReplacer("[", "{", "]", "}").Replace(row.v)
++					if row.v == "null" {
++						value = `\N`
++					}
++					_ = w.Write([]string{row.pk, value})
++				}
++				w.Flush()
++				if err := w.Error(); err != nil {
++					t.Fatal(err)
++				}
++			} else {
++				for _, row := range inputs {
++					fmt.Fprintf(&data, "{\"id\":%s,\"embedding\":%s}\n", row.pk, row.v)
++				}
++			}
++			m, in, out := importFixture(t, format, data.String())
++			m.Table = "mapped_vectors"
++			m.Fields[0].Target = "signed_key"
++			m.Fields[1].Target = "dense"
++			ctx := context.Background()
++			paused, err := Import(ctx, in, out, m, ImportOptions{Apply: true, OnError: "quarantine", BatchRows: 3, StopAfterBatches: 1})
++			if err != nil || paused.Status != "paused_committed" {
++				t.Fatal(paused, err)
++			}
++			imported, err := Import(ctx, in, out, m, ImportOptions{Apply: true, Resume: true, OnError: "quarantine", BatchRows: 2})
++			if err != nil {
++				t.Fatal(err)
++			}
++			options := ImportDistanceOptions{Column: "dense", QueryCount: 4, TopK: 2}
++			report, err := VerifyImportDistances(ctx, in, out, m, options)
++			if err != nil {
++				t.Fatal(err)
++			}
++			r := report.Distances
++			if report.Import.Status != "complete_with_rejections" || report.Import.Accepted != 7 || report.Import.Rejected != 2 || !reflect.DeepEqual(report.Import.MissingPKs, []int64{20}) || report.Import.CanonicalSHA256 != imported.CanonicalSHA256 || report.Import.CanonicalSHA256 != report.Import.DatabaseCanonicalSHA256 {
++				t.Fatal(report.Import)
++			}
++			if r.Status != "passed" || r.CandidateRows != 6 || r.NullRows != 1 || r.NativeRowsChecked != 7 || r.NormsChecked != 6 || r.SourceField != "embedding" || r.PrimaryKeyField != "signed_key" || r.Dimensions != 2 || r.DistancesChecked != 96 || r.TopKChecked != 32 || r.ZeroNormRows != 0 || r.QueryCoverage != "sampled_queries_all_candidates" {
++				t.Fatalf("report: %+v", r)
++			}
++			if !reflect.DeepEqual(r.QueryPKs, []int64{math.MinInt64, -7, 0, math.MaxInt64}) {
++				t.Fatal(r.QueryPKs)
++			}
++			for _, q := range r.Queries {
++				if q.Status != "passed" || !q.Exact || len(q.All) != 6 || len(q.TopK) != 2 || q.TopKBoundary == "" {
++					t.Fatal(q)
++				}
++			}
++			if !strings.HasPrefix(report.Import.ANNRecall, "not_run") || !strings.HasPrefix(r.ANNRecall, "not_run") {
++				t.Fatal("exact-only verification claimed recall")
++			}
++			again, err := VerifyImportDistances(ctx, in, out, m, options)
++			if err != nil || !reflect.DeepEqual(report, again) {
++				t.Fatal("not deterministic", err)
++			}
++			legacy, err := VerifyImport(ctx, in, out, m)
++			if err != nil || !strings.HasPrefix(legacy.ExactDistances, "not_run") {
++				t.Fatal("legacy API changed", legacy, err)
++			}
++			options.QueryCount = 0
++			options.QueryPKs = []int64{9, -7}
++			supplied, err := VerifyImportDistances(ctx, in, out, m, options)
++			if err != nil || !reflect.DeepEqual(supplied.Distances.QueryPKs, options.QueryPKs) || supplied.Distances.QuerySelection != "supplied_source_pks" {
++				t.Fatal(supplied, err)
++			}
++		})
++	}
++}
++
++func TestImportDatasetDistancesEmptyNullZeroAndTies(t *testing.T) {
++	for _, tc := range []struct {
++		name, data, status string
++		norms, zeros       int
++	}{
++		{"empty", "", "skipped_no_nonnull_vectors", 0, 0},
++		{"null", "{\"id\":1,\"embedding\":null}\n", "skipped_no_nonnull_vectors", 0, 0},
++		{"zero", "{\"id\":0,\"embedding\":[0,-0]}\n{\"id\":1,\"embedding\":[1,1]}\n{\"id\":2,\"embedding\":[1,-1]}\n", "partial_skipped_metrics", 3, 1},
++	} {
++		t.Run(tc.name, func(t *testing.T) {
++			m, in, out := importFixture(t, "ndjson", tc.data)
++			ctx := context.Background()
++			if _, err := Import(ctx, in, out, m, ImportOptions{Apply: true}); err != nil {
++				t.Fatal(err)
++			}
++			report, err := VerifyImportDistances(ctx, in, out, m, ImportDistanceOptions{Column: "embedding", TopK: 2})
++			if err != nil {
++				t.Fatal(err)
++			}
++			r := report.Distances
++			if r.Status != tc.status || r.NormsChecked != tc.norms || r.ZeroNormRows != tc.zeros {
++				t.Fatal(r)
++			}
++			if tc.name == "zero" {
++				ambiguous := false
++				for _, q := range r.Queries {
++					if q.Metric == vector.Cosine {
++						if q.Status != "skipped_zero_norm" || q.Exact || len(q.All) != 0 {
++							t.Fatal(q)
++						}
++					} else if q.QueryPK == 0 && q.Metric == vector.L2 {
++						ambiguous = strings.HasPrefix(q.TopKBoundary, "ambiguous")
++					}
++				}
++				if !ambiguous {
++					t.Fatal("mathematical top-K tie not disclosed")
++				}
++				skipped, err := VerifyImportDistances(ctx, in, out, m, ImportDistanceOptions{Column: "embedding", Metrics: []vector.MetricKind{vector.Cosine}})
++				if err != nil || skipped.Distances.Status != "skipped_no_defined_metrics" {
++					t.Fatal(skipped, err)
++				}
++			}
++		})
++	}
++}
++
++func TestImportDatasetDistanceOptionsAndBudgets(t *testing.T) {
++	m, in, out := importFixture(t, "ndjson", "{\"id\":1,\"embedding\":[3,4]}\n{\"id\":2,\"embedding\":[1,2]}\n")
++	for _, o := range []ImportDistanceOptions{
++		{}, {Column: "id"}, {Column: "embedding", Metrics: []vector.MetricKind{"unknown"}},
++		{Column: "embedding", Metrics: []vector.MetricKind{vector.L2, vector.L2}},
++		{Column: "embedding", QueryCount: 17}, {Column: "embedding", QueryCount: -1},
++		{Column: "embedding", QueryCount: 1, QueryPKs: []int64{1}}, {Column: "embedding", QueryPKs: []int64{1, 1}},
++		{Column: "embedding", MaxRows: 10001}, {Column: "embedding", TopK: -1},
++		{Column: "embedding", MaxPairs: 100001}, {Column: "embedding", MaxComponentWork: 8000001},
++	} {
++		if _, _, err := o.normalized(m); err == nil {
++			t.Fatal("invalid options accepted", o)
++		}
++	}
++	for _, raw := range []string{`{"column":"embedding","unknown":1}`, `{"column":"embedding","column":"embedding"}`, `{"column":"embedding"} {}`, `null`, strings.Repeat(" ", MaxImportManifestBytes+1)} {
++		if _, err := DecodeImportDistanceOptions(strings.NewReader(raw)); err == nil {
++			t.Fatal("invalid options JSON accepted", raw[:min(100, len(raw))])
++		}
++	}
++	o, err := DecodeImportDistanceOptions(strings.NewReader(`{"column":"embedding","query_pks":[-9223372036854775808,9223372036854775807],"metrics":["l2"]}`))
++	if err != nil || !reflect.DeepEqual(o.QueryPKs, []int64{math.MinInt64, math.MaxInt64}) {
++		t.Fatal(o, err)
++	}
++	ctx := context.Background()
++	if _, err = Import(ctx, in, out, m, ImportOptions{Apply: true}); err != nil {
++		t.Fatal(err)
++	}
++	for _, o := range []ImportDistanceOptions{{Column: "embedding", MaxRows: 1}, {Column: "embedding", MaxPairs: 1}, {Column: "embedding", MaxComponentWork: 1}, {Column: "embedding", QueryPKs: []int64{99}}} {
++		r, e := VerifyImportDistances(ctx, in, out, m, o)
++		if e == nil || r.Distances.Status != "failed" || r.Import.Status != "verification_failed" {
++			t.Fatal("resource/query control", r, e)
++		}
++	}
++	canceled, cancel := context.WithCancel(ctx)
++	cancel()
++	if _, err = VerifyImportDistances(canceled, in, out, m, ImportDistanceOptions{Column: "embedding"}); !errors.Is(err, context.Canceled) {
++		t.Fatal(err)
++	}
++	if _, err = VerifyImportDistances(nil, in, out, m, ImportDistanceOptions{Column: "embedding"}); err == nil {
++		t.Fatal("nil context accepted")
++	}
++}
++
++func TestImportDatasetDistanceReferenceAndComparisonControls(t *testing.T) {
++	a, b := []float32{3, 4}, []float32{0, 0}
++	for _, tc := range []struct {
++		metric vector.MetricKind
++		want   float64
++	}{{vector.L2, 5}, {vector.L1, 7}, {vector.NegativeIP, 0}} {
++		if got := importDistanceReference(a, b, tc.metric); got != tc.want {
++			t.Fatal(tc.metric, got)
++		}
++	}
++	max := float32(math.MaxFloat32)
++	if got := importDistanceReference([]float32{max, 1, max}, []float32{max, 1, -max}, vector.NegativeIP); got != -1 {
++		t.Fatal("high precision cancellation", got)
++	}
++	tiny := float32(math.SmallestNonzeroFloat32)
++	if got := importDistanceReferenceNorm([]float32{tiny, 0}); got != float64(tiny) {
++		t.Fatal("subnormal norm", got)
++	}
++	if tol := importDistanceErrorBound([]float32{tiny, 0}, []float32{0, 0}, vector.L2, float64(tiny)); tol >= float64(tiny) {
++		t.Fatal("bound hides zero/subnormal error")
++	}
++	refs := map[int64]importDistanceReferenceValue{-3: {1, 1e-14}, 7: {1, 1e-14}, 10: {2, 2e-14}}
++	good := []vector.Hit{{RowID: -3, Distance: 1}, {RowID: 7, Distance: 1}, {RowID: 10, Distance: 2}}
++	checked, err := checkImportDistanceHits(good, refs)
++	if err != nil || !strings.HasPrefix(importDistanceBoundary(checked, 1), "ambiguous") || !strings.HasPrefix(importDistanceBoundary(checked, 2), "clear") {
++		t.Fatal(checked, err)
++	}
++	for _, bad := range [][]vector.Hit{good[:2], {{RowID: -3, Distance: 1}, {RowID: -3, Distance: 1}, {RowID: 10, Distance: 2}}, {{RowID: -3, Distance: 1}, {RowID: 8, Distance: 1}, {RowID: 10, Distance: 2}}, {{RowID: 7, Distance: 1}, {RowID: -3, Distance: 1}, {RowID: 10, Distance: 2}}, {{RowID: -3, Distance: 1}, {RowID: 7, Distance: 1}, {RowID: 10, Distance: 2.1}}, {{RowID: -3, Distance: math.NaN()}, {RowID: 7, Distance: 1}, {RowID: 10, Distance: 2}}} {
++		if _, e := checkImportDistanceHits(bad, refs); e == nil {
++			t.Fatal("fabricated wrong result accepted", bad)
++		}
++	}
++	if _, err = json.Marshal(checked); err != nil {
++		t.Fatal(err)
++	}
++}
++
++func TestImportDatasetDistancesNearTieAndMultipleColumns(t *testing.T) {
++	data := "{\"id\":1,\"embedding\":[1,1],\"other\":[3,4]}\n{\"id\":2,\"embedding\":[1.0000001192092896,1],\"other\":[0,0]}\n{\"id\":3,\"embedding\":[1,1.0000001192092896],\"other\":[1,2]}\n"
++	m, in, out := importFixture(t, "ndjson", data)
++	m.Fields = append(m.Fields, ImportField{Source: "other", Target: "other_vector", Type: "vector", Encoding: "json_array", Dimensions: 2})
++	ctx := context.Background()
++	if _, err := Import(ctx, in, out, m, ImportOptions{Apply: true}); err != nil {
++		t.Fatal(err)
++	}
++	r, err := VerifyImportDistances(ctx, in, out, m, ImportDistanceOptions{Column: "embedding", QueryPKs: []int64{1}, Metrics: []vector.MetricKind{vector.Cosine}, TopK: 2})
++	if err != nil || r.Distances.Status != "passed" || !reflect.DeepEqual(r.Distances.UnselectedVectorColumns, []string{"other_vector"}) || !strings.HasPrefix(r.Distances.Queries[0].TopKBoundary, "ambiguous") {
++		t.Fatal(r, err)
++	}
++	// The unselected zero vector must not cause selected-column cosine to skip.
++	if r.Distances.ZeroNormRows != 0 {
++		t.Fatal(r.Distances)
++	}
++	if r.Distances.Queries[0].All[1].Reference <= 0 || r.Distances.Queries[0].All[1].Reference >= r.Distances.Queries[0].All[1].Tolerance {
++		t.Fatal("near-tie reference was not exercised", r.Distances.Queries[0])
++	}
++}
++
++func TestImportDatasetDistancesWideFiniteVectors(t *testing.T) {
++	const dims = 257
++	var data strings.Builder
++	for row := 0; row < 5; row++ {
++		fmt.Fprintf(&data, "{\"id\":%d,\"embedding\":[", row)
++		for i := 0; i < dims; i++ {
++			if i > 0 {
++				data.WriteByte(',')
++			}
++			x := float32((i%17)-8) * float32(row+1) / 8
++			if i == 0 {
++				x = math.MaxFloat32
++			}
++			if i == 1 {
++				x = math.SmallestNonzeroFloat32
++			}
++			if i == 2 && row%2 == 0 {
++				x = -math.MaxFloat32
++			}
++			fmt.Fprintf(&data, "%.9g", x)
++		}
++		data.WriteString("]}\n")
++	}
++	m, in, out := importFixture(t, "ndjson", data.String())
++	m.Fields[1].Dimensions = dims
++	ctx := context.Background()
++	if _, err := Import(ctx, in, out, m, ImportOptions{Apply: true, BatchRows: 2}); err != nil {
++		t.Fatal(err)
++	}
++	r, err := VerifyImportDistances(ctx, in, out, m, ImportDistanceOptions{Column: "embedding", QueryCount: 5, TopK: 3})
++	if err != nil || r.Distances.Status != "passed" || r.Distances.DistancesChecked != 100 || r.Distances.NormsChecked != 5 || r.Distances.Dimensions != dims || r.Distances.QueryCoverage != "all_source_vectors_as_queries_all_candidates" {
++		t.Fatal(r, err)
++	}
++}
+diff --git a/migration/postgres/import_verify.go b/migration/postgres/import_verify.go
+index 809ad77..5a4bf92 100644
+--- a/migration/postgres/import_verify.go
++++ b/migration/postgres/import_verify.go
+@@ -371,7 +371,13 @@ func verifyImportPrefix(ctx context.Context, src *os.File, m ImportManifest, db
+ 
+ // VerifyImport performs an exhaustive source/destination comparison without
+ // changing the database or promoting its persisted completion status.
+-func VerifyImport(ctx context.Context, input, output string, m ImportManifest) (result ImportResult, resultErr error) {
++func VerifyImport(ctx context.Context, input, output string, m ImportManifest) (ImportResult, error) {
++	return verifyImport(ctx, input, output, m, nil)
++}
++
++// additional runs after full fidelity/index checks and before the final source
++// recheck, on the same native read snapshot. It never publishes job status.
++func verifyImport(ctx context.Context, input, output string, m ImportManifest, additional func(*os.File, *sqlite.DB, ImportResult) error) (result ImportResult, resultErr error) {
+ 	defer func() {
+ 		if resultErr != nil && result.Status != "" {
+ 			result.Status = "verification_failed"
+@@ -438,6 +444,14 @@ func VerifyImport(ctx context.Context, input, output string, m ImportManifest) (
+ 			return result, err
+ 		}
+ 	}
++	if additional != nil {
++		if err = additional(source.file, db, result); err != nil {
++			return result, err
++		}
++		if err = source.recheck(ctx, m); err != nil {
++			return result, err
++		}
++	}
+ 	if result.Rejected == 0 {
+ 		result.Status = "complete_verified"
+ 	} else {

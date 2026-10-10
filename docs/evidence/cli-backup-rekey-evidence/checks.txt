@@ -1,0 +1,58 @@
+go version go1.27.2 linux/amd64
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestCLIProviderMemorySourcesAndRelease
+--- PASS: TestCLIProviderMemorySourcesAndRelease (0.00s)
+=== RUN   TestCLIProviderMemoryBoundsAndRedaction
+--- PASS: TestCLIProviderMemoryBoundsAndRedaction (0.00s)
+=== RUN   TestCLIProviderMemoryConcurrencyAndCancellation
+--- PASS: TestCLIProviderMemoryConcurrencyAndCancellation (0.00s)
+=== RUN   TestCLIProviderMemoryInputFailureRedaction
+--- PASS: TestCLIProviderMemoryInputFailureRedaction (0.00s)
+=== RUN   TestVersion
+--- PASS: TestVersion (0.00s)
+=== RUN   TestUnsupported
+--- PASS: TestUnsupported (0.00s)
+=== RUN   TestSQLWriteAndQuery
+--- PASS: TestSQLWriteAndQuery (0.00s)
+=== RUN   TestSQLRejectedBeforeCreation
+--- PASS: TestSQLRejectedBeforeCreation (0.00s)
+=== RUN   TestCLIExclusiveWAL
+--- PASS: TestCLIExclusiveWAL (0.00s)
+=== RUN   TestCLISharedWAL
+--- PASS: TestCLISharedWAL (0.00s)
+=== RUN   TestCLIGramsQueryAndCheck
+--- PASS: TestCLIGramsQueryAndCheck (0.01s)
+=== RUN   TestCLIMaintenanceMemoryArguments
+--- PASS: TestCLIMaintenanceMemoryArguments (0.00s)
+=== RUN   TestCLIMaintenanceMemoryErrorRedaction
+--- PASS: TestCLIMaintenanceMemoryErrorRedaction (0.00s)
+=== RUN   TestCLIMaintenanceCorrectKeyRoundTrips
+=== RUN   TestCLIMaintenanceCorrectKeyRoundTrips/snapshot
+=== RUN   TestCLIMaintenanceCorrectKeyRoundTrips/wal
+=== RUN   TestCLIMaintenanceCorrectKeyRoundTrips/shared
+--- PASS: TestCLIMaintenanceCorrectKeyRoundTrips (0.03s)
+    --- PASS: TestCLIMaintenanceCorrectKeyRoundTrips/snapshot (0.01s)
+    --- PASS: TestCLIMaintenanceCorrectKeyRoundTrips/wal (0.01s)
+    --- PASS: TestCLIMaintenanceCorrectKeyRoundTrips/shared (0.01s)
+=== RUN   TestCLIMaintenancePasswordAndDispatch
+--- PASS: TestCLIMaintenancePasswordAndDispatch (0.35s)
+=== RUN   TestQueryReadonlyFixture
+--- PASS: TestQueryReadonlyFixture (0.00s)
+=== RUN   TestInspectReadonlyFixture
+--- PASS: TestInspectReadonlyFixture (0.00s)
+=== RUN   TestQueryCanceled
+--- PASS: TestQueryCanceled (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.415s
+{"status":"ok","operation":"backup","format":"gosqlite-encrypted-archive","mode":"snapshot","page_size":4096,"page_count":2,"retains_history":false}
+{"status":"ok","operation":"rekey","format":"gosqlite-encrypted-family","mode":"snapshot","page_size":4096,"page_count":2,"retains_history":true}
+Correct-key CLI backup/rekey, native restore, and both data readbacks passed; disposable files will be removed.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	2.508s
+CGO0 cross-build linux/arm64 PASS (compile only)
+CGO0 cross-build darwin/arm64 PASS (compile only)
+CGO0 cross-build darwin/amd64 PASS (compile only)
+CGO0 cross-build windows/amd64 PASS (compile only)
+CGO0 cross-build windows/arm64 PASS (compile only)
+all modules verified
+CLI ENCRYPTED BACKUP/REKEY SELECTED CHECKS PASS

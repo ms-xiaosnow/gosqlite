@@ -1,0 +1,19 @@
+cwd=/workspace/scratch/5e06a74e5f65/durable-restart/rollback-reader-acquisition-candidate-soak-v1
+CGO_ENABLED=1
+command=['go', 'test', '-race', './benchmarks/transactions', '-count=1', '-v']
+=== RUN   TestMomentsAndHistogram
+--- PASS: TestMomentsAndHistogram (0.00s)
+=== RUN   TestAccountingAndClassification
+--- PASS: TestAccountingAndClassification (0.00s)
+=== RUN   TestBoundsAndIdentity
+--- PASS: TestBoundsAndIdentity (0.00s)
+=== RUN   TestOrdinaryHarnessSharedLifecycle
+--- PASS: TestOrdinaryHarnessSharedLifecycle (0.19s)
+=== RUN   TestOrdinaryHarnessCooperativeCancellation
+--- PASS: TestOrdinaryHarnessCooperativeCancellation (0.06s)
+=== RUN   TestRejectedProfileHasNoDatabase
+--- PASS: TestRejectedProfileHasNoDatabase (0.00s)
+=== RUN   TestOutcomeTraceCodes
+--- PASS: TestOutcomeTraceCodes (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/benchmarks/transactions	1.268s

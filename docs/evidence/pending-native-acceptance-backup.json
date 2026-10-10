@@ -1,0 +1,10 @@
+{
+  "library_file_id": "libfile_d54b4f7b05a481918829738e9169a83f",
+  "backing_file_id": "file_00000000f74481f5b9013ebe5153acc9",
+  "library_version": 0,
+  "file": "gosqlite-native-acceptance-pending.tar.gz",
+  "bytes": 25631306,
+  "sha256": "9d3f02be15dc0b9d1765c763656da5d8d321fa38d165427dea3de1a981966235",
+  "verification": "Byte-identical Library materialization, all9644 hashes/9645 regular safe paths, all7 full source bytes/modes and independently rebuilt Git Merkle trees PASS2026-10-10T21:40:24Z. Initial verifier assumed source tree objects existed in lead Git database; corrected to recompute each full tree from exact archive bytes/modes. No runtime restoration test claim.",
+  "status": "Supplemental 21:33UTC snapshot, not a combined accepted source or final delivery. Includes main75 full-history bundle. Later independent native-check/performance findings and transaction/planner revisions are not included; older held failures explicitly retained."
+}

@@ -1,0 +1,11 @@
+Sat Oct 10 21:06:32 UTC 2026
+go version go1.27.2 linux/amd64
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestReaderAcquisitionSourceSnapshotAfterShared
+--- PASS: TestReaderAcquisitionSourceSnapshotAfterShared (0.00s)
+=== RUN   TestReaderAcquisitionOrdinaryCooperatingWriter
+--- PASS: TestReaderAcquisitionOrdinaryCooperatingWriter (0.09s)
+=== RUN   TestReaderAcquisitionMemoryBusyClassification
+--- PASS: TestReaderAcquisitionMemoryBusyClassification (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.099s

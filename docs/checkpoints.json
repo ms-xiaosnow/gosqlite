@@ -450,7 +450,21 @@
     "library_version": 0,
     "verified": "Expected-SHA remote readback/exact local mirror2026-10-10T21:16:29Z. Full-history bundle Library byte-readback/clone/fsck/original goal PASS21:17:44Z. Exact source293a25e4ed905f970b437c28ce6419c1e1b89176 full CGO0 unit/vet/build20:50:06Z, complete pinned ordinary oracle21:02:31Z, full race(SQLite532.059s), five builds/modules/inventory PASS exit0 at21:12:23Z. Published non-document changed bytes equal fixed source. Exact Library-restored bounded memory journal tests, descriptor-free/AST recovery ownership tests normal/race, full vet/build/five targets/modules/clean tree PASS exit0 at21:18:34Z.",
     "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38086983511",
-    "remote_ci_status": "IN_PROGRESS observed2026-10-10T21:17:46Z for exact SHA.",
+    "remote_ci_status": "COMPLETED SUCCESS for exact SHA, updated2026-10-10T21:29:23Z, observed21:30:12Z. Both ordinary and full pinned-oracle jobs verified successful.",
     "open_gates": "RecoverRollback is source-reviewed, never invoked; automatic Open recovery and broader unsupported forms remain code gaps. Native physical recovery/failure/target runtime and independent M10 remain NOT_RUN. Shared-absence and rollback acquisition fixes are separate unpublished sources; supported-SQL remaining parity, CLI/data-verification/native-check/benchmark/CI gaps remain."
+  },
+  {
+    "stage": "Bounded GROUP BY/HAVING, connection SQL counters and ordinary cached preparation",
+    "remote_commit": "75e554754c95c97b1333c3fecd2dc2d01d42a2f0",
+    "local_commit": "75e554754c95c97b1333c3fecd2dc2d01d42a2f0",
+    "tree": "c3bc662b75075a21eaca196a0bb4c945007cca81",
+    "bundle_sha256": "14ffe5ca76358f71706b773b60a1e506d9f55f363c14a8eec26c1f7d6f585739",
+    "bundle_bytes": 3930880,
+    "library_file_id": "libfile_e4803c1bf2f4819193a777f321ef7fd5",
+    "library_version": 0,
+    "verified": "Expected-SHA remote readback/exact local mirror2026-10-10T21:27:57Z. Full-history bundle Library byte-readback/clone/fsck/original goal PASS21:28:24Z. Exact source13f53e4cdadaaca2530e17e5f7a61b9dfe8e5c33 full unit/vet/build20:52:30Z, complete pinned ordinary oracle21:05:18Z, full race(SQLite475.910s), five builds/modules/inventory PASS exit0 at21:14:01Z. All published non-document changed bytes equal fixed source. Independent grouped/counters/cache component findings and original failed controls are preserved; two obsolete assertions strengthened/upgraded before execution with original SQL and typed official counterparts. Exact Library-restored focused group/counter/preparation tests started21:28:24Z, pending. Exact Library-restored group/counter/preparation normal and race, pinned group/counter oracle1.419s, full vet/build/five target builds/modules/clean tree PASS exit0 at2026-10-10T21:30:18Z.",
+    "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38087723483",
+    "remote_ci_status": "COMPLETED SUCCESS for exact SHA, updated2026-10-10T21:43:16Z, observed21:44:56Z. Complete pinned ordinary oracle and ordinary jobs independently checked.",
+    "open_gates": "Wider supported planner error/phase differences remain corrective source; Reader/shared fixes, native full check, CLI/import verification, grams/transaction/performance-CI slices excluded. Transaction harness later v2/v3 failures remain held engineering findings, not clean acceptance. Native failure/recovery/target runtime and independent M10 remain unqualified."
   }
 ]

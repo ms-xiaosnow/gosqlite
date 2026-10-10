@@ -371,7 +371,13 @@ func verifyImportPrefix(ctx context.Context, src *os.File, m ImportManifest, db 
 
 // VerifyImport performs an exhaustive source/destination comparison without
 // changing the database or promoting its persisted completion status.
-func VerifyImport(ctx context.Context, input, output string, m ImportManifest) (result ImportResult, resultErr error) {
+func VerifyImport(ctx context.Context, input, output string, m ImportManifest) (ImportResult, error) {
+	return verifyImport(ctx, input, output, m, nil)
+}
+
+// additional runs after full fidelity/index checks and before the final source
+// recheck, on the same native read snapshot. It never publishes job status.
+func verifyImport(ctx context.Context, input, output string, m ImportManifest, additional func(*os.File, *sqlite.DB, ImportResult) error) (result ImportResult, resultErr error) {
 	defer func() {
 		if resultErr != nil && result.Status != "" {
 			result.Status = "verification_failed"
@@ -435,6 +441,14 @@ func VerifyImport(ctx context.Context, input, output string, m ImportManifest) (
 	}
 	for _, x := range m.Indexes {
 		if err = checkImportIndex(ctx, db, m, x); err != nil {
+			return result, err
+		}
+	}
+	if additional != nil {
+		if err = additional(source.file, db, result); err != nil {
+			return result, err
+		}
+		if err = source.recheck(ctx, m); err != nil {
 			return result, err
 		}
 	}

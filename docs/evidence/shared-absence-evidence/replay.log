@@ -1,0 +1,9 @@
++ go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ go test -p=1 ./internal/pager ./internal/vfs -run '^Test(SharedAbsence|PathAbsenceMemory|CleanupOwnersMemory|Shared(Open|Close)CleanupMemory)' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.016s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.003s
++ go test -p=1 ./internal/pager ./sqlite ./driver -run '^Test(SharedWALSnapshotsPromotionAndCheckpoint|SharedWALSnapshotsAndWriterContention|SharedWALPooledConcurrentWrites|CloseCleanupOrdinarySharedRowsTxAndReopen|SharedCloseCleanupConnectorCancellationAndOrdinaryDisposal)$' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.018s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.040s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.096s

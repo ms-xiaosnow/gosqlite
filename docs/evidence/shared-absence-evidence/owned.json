@@ -1,0 +1,71 @@
+{
+  "docs/progress.md": {
+    "base": {
+      "mode": "100644",
+      "sha256": "6ffe9cd346ba916f7be33cfd075df945a6d97ae2a2d04e3c409f195c94374758",
+      "blob": "74971487fc263fd794a83aa9a6eca0afdeb7c14a",
+      "size": 80112
+    },
+    "final": {
+      "mode": "100644",
+      "sha256": "a58c198fbf5f1ddb0be50a1e3dd8773663be54d784c07dbe0645c623626288c0",
+      "blob": "f2f4689a1bf3134a1d22c42dd8ed456a4d918110",
+      "size": 80796
+    }
+  },
+  "docs/shared-absence-provenance.md": {
+    "base": null,
+    "final": {
+      "mode": "100644",
+      "sha256": "5681222fd73980502e3ca05b19f130c842cd4c71432d0b0f0d16a2b239ffd356",
+      "blob": "895ab6ab635cf3c004f6867e5a94d336b8dab496",
+      "size": 3064
+    }
+  },
+  "internal/pager/plain_session_cleanup.go": {
+    "base": {
+      "mode": "100644",
+      "sha256": "7ccd574b41f9764c42a10af5956d34f69bacfcc740091efa513f5e3c510dd77d",
+      "blob": "547f1a3e1db6bd66ab12bfe7a1f6455b5f102c19",
+      "size": 3370
+    },
+    "final": {
+      "mode": "100644",
+      "sha256": "e5ae328d7b98991171299c19b74a467e51575a4ecba521e9de75e8f601e7f722",
+      "blob": "9cf52db595dac8a1ea2cdde372c16180abaf3e44",
+      "size": 3429
+    }
+  },
+  "internal/pager/shared_absence_test.go": {
+    "base": null,
+    "final": {
+      "mode": "100644",
+      "sha256": "8d4c257d07113287bbe4c15879b8ea22d7425daaf1fb0b92033d0747bb7add82",
+      "blob": "f89e092b15fc7be8048a6d7f986bc37c78e98dc5",
+      "size": 6803
+    }
+  },
+  "internal/pager/shared_session.go": {
+    "base": {
+      "mode": "100644",
+      "sha256": "313135f4d3d43ab8ec55ee4516430c8a207babf81835f1008e98c7540fe1c3e5",
+      "blob": "7f32898cd054a10092f9146b269797c6c4c18564",
+      "size": 16759
+    },
+    "final": {
+      "mode": "100644",
+      "sha256": "b9b3b3820c13a718da6a878102eee27013c29a0d7973b13d281579a57f3293b6",
+      "blob": "f33b175162fe5a36b4a000536396d6bdfba89cf2",
+      "size": 16787
+    }
+  },
+  "internal/vfs/shared_absence_test.go": {
+    "base": null,
+    "final": {
+      "mode": "100644",
+      "sha256": "b2eef2e83a7336bfff47a93aca7c445f2f24a8ea5958d9509f23196d54190877",
+      "blob": "136347e8c408ad02cc9c693435250d575e4ee675",
+      "size": 2292
+    }
+  }
+}

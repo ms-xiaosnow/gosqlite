@@ -1,0 +1,200 @@
++ go version
+go version go1.27.2 linux/amd64
++ go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ go test -p=1 ./internal/pager ./internal/vfs -run '^Test(SharedAbsence|PathAbsenceMemory|CleanupOwnersMemory|PlainCleanupMemory.*Absence|Shared(Open|Close)CleanupMemory)' -count=1 -v
+=== RUN   TestPlainCleanupMemoryInitialAbsence
+--- PASS: TestPlainCleanupMemoryInitialAbsence (0.00s)
+=== RUN   TestPlainCleanupMemoryAmbiguousAbsence
+--- PASS: TestPlainCleanupMemoryAmbiguousAbsence (0.00s)
+=== RUN   TestPlainCleanupMemoryAbsenceBound
+--- PASS: TestPlainCleanupMemoryAbsenceBound (0.00s)
+=== RUN   TestPlainCleanupMemoryPostAcquisitionAbsence
+--- PASS: TestPlainCleanupMemoryPostAcquisitionAbsence (0.00s)
+=== RUN   TestSharedAbsenceSourceInitialProvenance
+--- PASS: TestSharedAbsenceSourceInitialProvenance (0.00s)
+=== RUN   TestSharedAbsenceSourceAdmissionAdoptionAndErrorExit
+--- PASS: TestSharedAbsenceSourceAdmissionAdoptionAndErrorExit (0.00s)
+=== RUN   TestSharedAbsenceMemoryLateDiagnosticSurvivesFailedOpen
+=== RUN   TestSharedAbsenceMemoryLateDiagnosticSurvivesFailedOpen/false
+=== RUN   TestSharedAbsenceMemoryLateDiagnosticSurvivesFailedOpen/true
+--- PASS: TestSharedAbsenceMemoryLateDiagnosticSurvivesFailedOpen (0.00s)
+    --- PASS: TestSharedAbsenceMemoryLateDiagnosticSurvivesFailedOpen/false (0.00s)
+    --- PASS: TestSharedAbsenceMemoryLateDiagnosticSurvivesFailedOpen/true (0.00s)
+=== RUN   TestSharedAbsenceMemoryNestedTerminalProtectsOwners
+--- PASS: TestSharedAbsenceMemoryNestedTerminalProtectsOwners (0.00s)
+=== RUN   TestSharedCloseCleanupMemoryEveryStageBarrier
+=== RUN   TestSharedCloseCleanupMemoryEveryStageBarrier/0
+=== RUN   TestSharedCloseCleanupMemoryEveryStageBarrier/1
+=== RUN   TestSharedCloseCleanupMemoryEveryStageBarrier/2
+=== RUN   TestSharedCloseCleanupMemoryEveryStageBarrier/3
+--- PASS: TestSharedCloseCleanupMemoryEveryStageBarrier (0.00s)
+    --- PASS: TestSharedCloseCleanupMemoryEveryStageBarrier/0 (0.00s)
+    --- PASS: TestSharedCloseCleanupMemoryEveryStageBarrier/1 (0.00s)
+    --- PASS: TestSharedCloseCleanupMemoryEveryStageBarrier/2 (0.00s)
+    --- PASS: TestSharedCloseCleanupMemoryEveryStageBarrier/3 (0.00s)
+=== RUN   TestSharedCloseCleanupMemoryConsumedErrorAndHistoricalPoisonRetire
+--- PASS: TestSharedCloseCleanupMemoryConsumedErrorAndHistoricalPoisonRetire (0.00s)
+=== RUN   TestSharedCloseCleanupMemoryTerminalAndNilAreNotCompletion
+--- PASS: TestSharedCloseCleanupMemoryTerminalAndNilAreNotCompletion (0.00s)
+=== RUN   TestSharedCloseCleanupMemoryAdmission1024NoEviction
+--- PASS: TestSharedCloseCleanupMemoryAdmission1024NoEviction (0.00s)
+=== RUN   TestSharedCloseCleanupMemoryAllTokensDedupAndNoEffectsRefusal
+--- PASS: TestSharedCloseCleanupMemoryAllTokensDedupAndNoEffectsRefusal (0.00s)
+=== RUN   TestSharedCloseCleanupMemoryConcurrencyAndRegistryLock
+--- PASS: TestSharedCloseCleanupMemoryConcurrencyAndRegistryLock (0.00s)
+=== RUN   TestSharedCloseCleanupMemoryBoundedHistoryAndSnapshot
+--- PASS: TestSharedCloseCleanupMemoryBoundedHistoryAndSnapshot (0.01s)
+=== RUN   TestSharedCloseCleanupMemoryDatabaseSQLDiscardsError
+--- PASS: TestSharedCloseCleanupMemoryDatabaseSQLDiscardsError (0.00s)
+=== RUN   TestSharedCloseCleanupMemoryCheckpointOnceAndBusyLease
+--- PASS: TestSharedCloseCleanupMemoryCheckpointOnceAndBusyLease (0.00s)
+=== RUN   TestSharedCloseCleanupMemoryDatabaseSQLResetDiscardsError
+--- PASS: TestSharedCloseCleanupMemoryDatabaseSQLResetDiscardsError (0.00s)
+=== RUN   TestSharedCloseCleanupMemoryAdmissionCancelAndRejectedOpen
+--- PASS: TestSharedCloseCleanupMemoryAdmissionCancelAndRejectedOpen (0.00s)
+=== RUN   TestSharedCloseCleanupMemoryExact4096NodeBoundary
+--- PASS: TestSharedCloseCleanupMemoryExact4096NodeBoundary (0.00s)
+=== RUN   TestSharedCloseCleanupMemoryFailedOpenCapacityRemainsSeparate
+--- PASS: TestSharedCloseCleanupMemoryFailedOpenCapacityRemainsSeparate (0.00s)
+=== RUN   TestSharedOpenCleanupMemoryViewsProtectDMSAndMain
+--- PASS: TestSharedOpenCleanupMemoryViewsProtectDMSAndMain (0.00s)
+=== RUN   TestSharedOpenCleanupMemoryEveryStageRetainsTail
+=== RUN   TestSharedOpenCleanupMemoryEveryStageRetainsTail/0
+=== RUN   TestSharedOpenCleanupMemoryEveryStageRetainsTail/1
+=== RUN   TestSharedOpenCleanupMemoryEveryStageRetainsTail/2
+--- PASS: TestSharedOpenCleanupMemoryEveryStageRetainsTail (0.00s)
+    --- PASS: TestSharedOpenCleanupMemoryEveryStageRetainsTail/0 (0.00s)
+    --- PASS: TestSharedOpenCleanupMemoryEveryStageRetainsTail/1 (0.00s)
+    --- PASS: TestSharedOpenCleanupMemoryEveryStageRetainsTail/2 (0.00s)
+=== RUN   TestSharedOpenCleanupMemoryTerminalOwnerNeverRetriesRawClose
+--- PASS: TestSharedOpenCleanupMemoryTerminalOwnerNeverRetriesRawClose (0.00s)
+=== RUN   TestSharedOpenCleanupMemoryReservationTransferAndEmptyFailure
+--- PASS: TestSharedOpenCleanupMemoryReservationTransferAndEmptyFailure (0.00s)
+=== RUN   TestSharedOpenCleanupMemoryConcurrentRetryExactlyOnce
+--- PASS: TestSharedOpenCleanupMemoryConcurrentRetryExactlyOnce (0.00s)
+=== RUN   TestSharedOpenCleanupMemoryNoGlobalNativeOperationLock
+--- PASS: TestSharedOpenCleanupMemoryNoGlobalNativeOperationLock (0.00s)
+=== RUN   TestSharedOpenCleanupMemoryIndexCausePreservation
+--- PASS: TestSharedOpenCleanupMemoryIndexCausePreservation (0.00s)
+=== RUN   TestSharedOpenCleanupMemoryNestedOwnersRetainMainAndCapacity
+=== RUN   TestSharedOpenCleanupMemoryNestedOwnersRetainMainAndCapacity/false
+=== RUN   TestSharedOpenCleanupMemoryNestedOwnersRetainMainAndCapacity/true
+--- PASS: TestSharedOpenCleanupMemoryNestedOwnersRetainMainAndCapacity (0.00s)
+    --- PASS: TestSharedOpenCleanupMemoryNestedOwnersRetainMainAndCapacity/false (0.00s)
+    --- PASS: TestSharedOpenCleanupMemoryNestedOwnersRetainMainAndCapacity/true (0.00s)
+=== RUN   TestSharedOpenCleanupMemoryJoinedIndependentGroups
+--- PASS: TestSharedOpenCleanupMemoryJoinedIndependentGroups (0.00s)
+=== RUN   TestSharedOpenCleanupMemoryTraversalBoundBeforeAnyCleanup
+--- PASS: TestSharedOpenCleanupMemoryTraversalBoundBeforeAnyCleanup (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.017s
+=== RUN   TestCleanupOwnersMemoryNestedManagedAndTerminal
+--- PASS: TestCleanupOwnersMemoryNestedManagedAndTerminal (0.00s)
+=== RUN   TestCleanupOwnersMemoryRepeatedOwnerDistinctNestedCauses
+--- PASS: TestCleanupOwnersMemoryRepeatedOwnerDistinctNestedCauses (0.00s)
+=== RUN   TestCleanupOwnersMemoryConflictingDependenciesFailClosed
+--- PASS: TestCleanupOwnersMemoryConflictingDependenciesFailClosed (0.00s)
+=== RUN   TestCleanupOwnersMemoryPreFilePoisonIsOpaque
+--- PASS: TestCleanupOwnersMemoryPreFilePoisonIsOpaque (0.00s)
+=== RUN   TestCleanupOwnersMemoryMetadataTerminalComposes
+--- PASS: TestCleanupOwnersMemoryMetadataTerminalComposes (0.00s)
+=== RUN   TestPathAbsenceMemoryInitialOpenOnly
+--- PASS: TestPathAbsenceMemoryInitialOpenOnly (0.00s)
+=== RUN   TestPathAbsenceMemoryInspectionNeverAuthorizes
+--- PASS: TestPathAbsenceMemoryInspectionNeverAuthorizes (0.00s)
+=== RUN   TestPathAbsenceMemoryMixedAndBounded
+--- PASS: TestPathAbsenceMemoryMixedAndBounded (0.00s)
+=== RUN   TestSharedAbsenceMemoryMetadataTerminalProvenance
+--- PASS: TestSharedAbsenceMemoryMetadataTerminalProvenance (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.003s
++ go test -p=1 ./internal/pager -run '^Test(SharedWAL|SharedOpenCleanupSuccessfulSessionsDoNotConsumeCapacity)' -count=1 -v
+=== RUN   TestSharedOpenCleanupSuccessfulSessionsDoNotConsumeCapacity
+--- PASS: TestSharedOpenCleanupSuccessfulSessionsDoNotConsumeCapacity (0.05s)
+=== RUN   TestSharedWALSnapshotsPromotionAndCheckpoint
+=== RUN   TestSharedWALSnapshotsPromotionAndCheckpoint/512
+=== RUN   TestSharedWALSnapshotsPromotionAndCheckpoint/4096
+=== RUN   TestSharedWALSnapshotsPromotionAndCheckpoint/65536
+--- PASS: TestSharedWALSnapshotsPromotionAndCheckpoint (0.01s)
+    --- PASS: TestSharedWALSnapshotsPromotionAndCheckpoint/512 (0.00s)
+    --- PASS: TestSharedWALSnapshotsPromotionAndCheckpoint/4096 (0.00s)
+    --- PASS: TestSharedWALSnapshotsPromotionAndCheckpoint/65536 (0.00s)
+=== RUN   TestSharedWALConcurrentReadersAndWriter
+--- PASS: TestSharedWALConcurrentReadersAndWriter (0.01s)
+=== RUN   TestSharedWALCrossesNativeIndexBlock
+--- PASS: TestSharedWALCrossesNativeIndexBlock (0.06s)
+=== RUN   TestSharedWALImportedSectorBoundary
+=== RUN   TestSharedWALImportedSectorBoundary/false
+=== RUN   TestSharedWALImportedSectorBoundary/true
+--- PASS: TestSharedWALImportedSectorBoundary (0.00s)
+    --- PASS: TestSharedWALImportedSectorBoundary/false (0.00s)
+    --- PASS: TestSharedWALImportedSectorBoundary/true (0.00s)
+=== RUN   TestSharedWALImportedCheckpointSectorBoundary
+--- PASS: TestSharedWALImportedCheckpointSectorBoundary (0.00s)
+=== RUN   TestSharedWALAllReadmarksPinned
+--- PASS: TestSharedWALAllReadmarksPinned (0.01s)
+=== RUN   TestSharedWALCommittedPrefixTailPolicyInMemory
+--- PASS: TestSharedWALCommittedPrefixTailPolicyInMemory (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.143s
++ go test -p=1 ./sqlite ./driver -run '^Test(SharedWAL|CloseCleanupOrdinarySharedRowsTxAndReopen|SharedCloseCleanupConnectorCancellationAndOrdinaryDisposal)' -count=1 -v
+=== RUN   TestCloseCleanupOrdinarySharedRowsTxAndReopen
+=== RUN   TestCloseCleanupOrdinarySharedRowsTxAndReopen/rowscheckpoint
+=== RUN   TestCloseCleanupOrdinarySharedRowsTxAndReopen/txcheckpoint
+=== RUN   TestCloseCleanupOrdinarySharedRowsTxAndReopen/rowskeep
+=== RUN   TestCloseCleanupOrdinarySharedRowsTxAndReopen/txkeep
+--- PASS: TestCloseCleanupOrdinarySharedRowsTxAndReopen (0.01s)
+    --- PASS: TestCloseCleanupOrdinarySharedRowsTxAndReopen/rowscheckpoint (0.00s)
+    --- PASS: TestCloseCleanupOrdinarySharedRowsTxAndReopen/txcheckpoint (0.00s)
+    --- PASS: TestCloseCleanupOrdinarySharedRowsTxAndReopen/rowskeep (0.00s)
+    --- PASS: TestCloseCleanupOrdinarySharedRowsTxAndReopen/txkeep (0.00s)
+=== RUN   TestSharedWALSnapshotsAndWriterContention
+=== RUN   TestSharedWALSnapshotsAndWriterContention/512
+=== RUN   TestSharedWALSnapshotsAndWriterContention/4096
+=== RUN   TestSharedWALSnapshotsAndWriterContention/65536
+--- PASS: TestSharedWALSnapshotsAndWriterContention (0.04s)
+    --- PASS: TestSharedWALSnapshotsAndWriterContention/512 (0.01s)
+    --- PASS: TestSharedWALSnapshotsAndWriterContention/4096 (0.01s)
+    --- PASS: TestSharedWALSnapshotsAndWriterContention/65536 (0.02s)
+=== RUN   TestSharedWALOptionBoundaries
+--- PASS: TestSharedWALOptionBoundaries (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.059s
+=== RUN   TestSharedCloseCleanupConnectorCancellationAndOrdinaryDisposal
+--- PASS: TestSharedCloseCleanupConnectorCancellationAndOrdinaryDisposal (0.00s)
+=== RUN   TestSharedWALPooledConcurrentWrites
+--- PASS: TestSharedWALPooledConcurrentWrites (0.10s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.106s
++ go vet -p=1 ./internal/pager ./internal/vfs ./sqlite ./driver
++ CGO_ENABLED=1
++ go test -race -p=1 ./internal/pager ./internal/vfs ./sqlite ./driver -run '^Test(SharedAbsence|PathAbsenceMemory|CleanupOwnersMemory|PlainCleanupMemory.*Absence|Shared(Open|Close)CleanupMemory|SharedWAL|CloseCleanupOrdinarySharedRowsTxAndReopen|SharedCloseCleanupConnectorCancellationAndOrdinaryDisposal)' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.464s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	1.014s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	1.161s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.603s
++ for target in linux/arm64 darwin/amd64 darwin/arm64 windows/amd64
++ export GOOS=linux GOARCH=arm64
++ GOOS=linux
++ GOARCH=arm64
++ go build -p=1 ./internal/pager ./internal/vfs ./sqlite ./driver
++ go test -p=1 -c -o /workspace/scratch/5e06a74e5f65/durable-restart/shared-absence-evidence/linux-arm64-pager.test ./internal/pager
++ for target in linux/arm64 darwin/amd64 darwin/arm64 windows/amd64
++ export GOOS=darwin GOARCH=amd64
++ GOOS=darwin
++ GOARCH=amd64
++ go build -p=1 ./internal/pager ./internal/vfs ./sqlite ./driver
++ go test -p=1 -c -o /workspace/scratch/5e06a74e5f65/durable-restart/shared-absence-evidence/darwin-amd64-pager.test ./internal/pager
++ for target in linux/arm64 darwin/amd64 darwin/arm64 windows/amd64
++ export GOOS=darwin GOARCH=arm64
++ GOOS=darwin
++ GOARCH=arm64
++ go build -p=1 ./internal/pager ./internal/vfs ./sqlite ./driver
++ go test -p=1 -c -o /workspace/scratch/5e06a74e5f65/durable-restart/shared-absence-evidence/darwin-arm64-pager.test ./internal/pager
++ for target in linux/arm64 darwin/amd64 darwin/arm64 windows/amd64
++ export GOOS=windows GOARCH=amd64
++ GOOS=windows
++ GOARCH=amd64
++ go build -p=1 ./internal/pager ./internal/vfs ./sqlite ./driver
++ go test -p=1 -c -o /workspace/scratch/5e06a74e5f65/durable-restart/shared-absence-evidence/windows-amd64-pager.test ./internal/pager

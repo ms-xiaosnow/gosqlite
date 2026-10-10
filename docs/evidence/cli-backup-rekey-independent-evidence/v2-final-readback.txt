@@ -1,0 +1,1 @@
+PASS: v2 owner freeze, exact independent test copy and reconstructed baseline+patch remain byte/mode/inventory-identical after checks. Reviewer probe copy differs only by the preserved review_boundaries_test.go file. No owner/main source edits.

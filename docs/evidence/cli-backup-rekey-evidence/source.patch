@@ -1,0 +1,1229 @@
+diff --git a/cmd/gosqlite/key_provider.go b/cmd/gosqlite/key_provider.go
+new file mode 100644
+index 0000000..2e1b65a
+--- /dev/null
++++ b/cmd/gosqlite/key_provider.go
+@@ -0,0 +1,183 @@
++package main
++
++import (
++	"context"
++	"encoding/hex"
++	"errors"
++	"fmt"
++	"io"
++	"runtime"
++	"strings"
++	"sync"
++
++	"github.com/ms-xiaosnow/gosqlite/encryption"
++)
++
++type credentialInput struct {
++	lookupEnv func(string) (string, bool)
++	stdin     func() (io.Reader, error)
++}
++
++// Providers are bound to explicit local input descriptors. Unauthenticated
++// KeyRequest IDs/path never select accounts, commands, URLs or credential names.
++// Acquisition stays lazy so the native API can enforce platform/KDF preflight.
++type cliKeyProvider struct {
++	mu        sync.Mutex
++	kind      encryption.CredentialKind
++	name      string
++	fromStdin bool
++	input     credentialInput
++	key       []byte
++	attempted bool
++	closed    bool
++}
++
++func (*cliKeyProvider) Format(s fmt.State, verb rune) {
++	_, _ = io.WriteString(s, "gosqlite.keyProvider{redacted}")
++}
++
++func newCLIKeyProvider(descriptor string, input credentialInput) (*cliKeyProvider, error) {
++	p := &cliKeyProvider{input: input}
++	switch {
++	case strings.HasPrefix(descriptor, "env-hex:"):
++		p.kind, p.name = encryption.RawKey256, strings.TrimPrefix(descriptor, "env-hex:")
++	case strings.HasPrefix(descriptor, "env-password:"):
++		p.kind, p.name = encryption.PasswordArgon2id, strings.TrimPrefix(descriptor, "env-password:")
++	case descriptor == "stdin-hex":
++		p.kind, p.fromStdin = encryption.RawKey256, true
++	case descriptor == "stdin-password":
++		p.kind, p.fromStdin = encryption.PasswordArgon2id, true
++	default:
++		return nil, errors.New(providerHelp)
++	}
++	if !p.fromStdin && !validEnvironmentName(p.name) {
++		return nil, errors.New("provider requires an explicit ASCII environment-variable name; " + providerHelp)
++	}
++	return p, nil
++}
++
++func validEnvironmentName(s string) bool {
++	if len(s) == 0 || len(s) > 128 {
++		return false
++	}
++	for i := range len(s) {
++		b := s[i]
++		if b == '_' || b >= 'A' && b <= 'Z' || b >= 'a' && b <= 'z' || i > 0 && b >= '0' && b <= '9' {
++			continue
++		}
++		return false
++	}
++	return true
++}
++
++func (p *cliKeyProvider) Acquire(ctx context.Context, request encryption.KeyRequest) (encryption.KeyMaterial, error) {
++	if err := ctx.Err(); err != nil {
++		return nil, err
++	}
++	p.mu.Lock()
++	defer p.mu.Unlock()
++	if p.closed || request.Kind != p.kind {
++		return nil, encryption.ErrCredential
++	}
++	if !p.attempted {
++		p.attempted = true
++		key, err := p.readCredential(ctx)
++		if err != nil {
++			return nil, err
++		}
++		p.key = key
++	}
++	if len(p.key) == 0 {
++		return nil, encryption.ErrKeyProvider
++	}
++	if err := ctx.Err(); err != nil {
++		return nil, err
++	}
++	return &cliKeyMaterial{kind: p.kind, key: append([]byte(nil), p.key...)}, nil
++}
++
++func (p *cliKeyProvider) readCredential(ctx context.Context) ([]byte, error) {
++	maxBytes := encryption.MaxPasswordBytes
++	if p.kind == encryption.RawKey256 {
++		maxBytes = encryption.KeySize * 2
++	}
++	var encoded []byte
++	if p.fromStdin {
++		if p.input.stdin == nil {
++			return nil, encryption.ErrKeyProvider
++		}
++		in, err := p.input.stdin()
++		if err != nil || in == nil {
++			return nil, encryption.ErrKeyProvider
++		}
++		// EOF terminates exactly one bounded credential. Raw hex may have one
++		// LF or CRLF. Password bytes, including trailing newlines, are exact.
++		limit := maxBytes
++		if p.kind == encryption.RawKey256 {
++			limit += 2
++		}
++		encoded, err = io.ReadAll(io.LimitReader(in, int64(limit+1)))
++		defer clearCredential(encoded)
++		if err != nil || len(encoded) > limit {
++			return nil, encryption.ErrKeyProvider
++		}
++		if p.kind == encryption.RawKey256 && len(encoded) > 0 && encoded[len(encoded)-1] == '\n' {
++			encoded = encoded[:len(encoded)-1]
++			if len(encoded) > 0 && encoded[len(encoded)-1] == '\r' {
++				encoded = encoded[:len(encoded)-1]
++			}
++		}
++	} else {
++		if p.input.lookupEnv == nil {
++			return nil, encryption.ErrKeyProvider
++		}
++		value, ok := p.input.lookupEnv(p.name)
++		if !ok || len(value) == 0 || len(value) > maxBytes {
++			return nil, encryption.ErrKeyProvider
++		}
++		encoded = []byte(value)
++		defer clearCredential(encoded)
++	}
++	if err := ctx.Err(); err != nil {
++		return nil, err
++	}
++	if p.kind == encryption.PasswordArgon2id {
++		if len(encoded) == 0 || len(encoded) > maxBytes {
++			return nil, encryption.ErrCredential
++		}
++		return append([]byte(nil), encoded...), nil
++	}
++	if len(encoded) != maxBytes {
++		return nil, encryption.ErrCredential
++	}
++	key := make([]byte, encryption.KeySize)
++	if _, err := hex.Decode(key, encoded); err != nil {
++		clearCredential(key)
++		return nil, encryption.ErrCredential
++	}
++	return key, nil
++}
++
++func (p *cliKeyProvider) close() {
++	p.mu.Lock()
++	defer p.mu.Unlock()
++	clearCredential(p.key)
++	p.key = nil
++	p.closed = true
++}
++
++type cliKeyMaterial struct {
++	kind encryption.CredentialKind
++	key  []byte
++}
++
++func (*cliKeyMaterial) Format(s fmt.State, verb rune) {
++	_, _ = io.WriteString(s, "gosqlite.keyMaterial{redacted}")
++}
++func (m *cliKeyMaterial) Kind() encryption.CredentialKind { return m.kind }
++func (m *cliKeyMaterial) Bytes() []byte                   { return m.key }
++func (m *cliKeyMaterial) Release() {
++	clearCredential(m.key)
++	m.key = nil
++}
++func clearCredential(b []byte) { clear(b); runtime.KeepAlive(b) }
+diff --git a/cmd/gosqlite/key_provider_test.go b/cmd/gosqlite/key_provider_test.go
+new file mode 100644
+index 0000000..c81e866
+--- /dev/null
++++ b/cmd/gosqlite/key_provider_test.go
+@@ -0,0 +1,181 @@
++package main
++
++import (
++	"bytes"
++	"context"
++	"crypto/rand"
++	"encoding/hex"
++	"errors"
++	"fmt"
++	"io"
++	"strings"
++	"sync"
++	"testing"
++
++	"github.com/ms-xiaosnow/gosqlite/encryption"
++)
++
++func disposableCLIKey(t *testing.T) []byte {
++	t.Helper()
++	key := make([]byte, encryption.KeySize)
++	if _, err := rand.Read(key); err != nil {
++		t.Fatal(err)
++	}
++	t.Cleanup(func() { clearCredential(key) })
++	return key
++}
++
++func TestCLIProviderMemorySourcesAndRelease(t *testing.T) {
++	ctx := context.Background()
++	key := disposableCLIKey(t)
++	for _, ending := range []string{"", "\n", "\r\n"} {
++		p, err := newCLIKeyProvider("stdin-hex", credentialInput{stdin: func() (io.Reader, error) {
++			return strings.NewReader(hex.EncodeToString(key) + ending), nil
++		}})
++		if err != nil {
++			t.Fatal(err)
++		}
++		for range 2 {
++			m, err := p.Acquire(ctx, encryption.KeyRequest{Kind: encryption.RawKey256})
++			if err != nil || !bytes.Equal(m.Bytes(), key) {
++				t.Fatal("stdin credential mismatch")
++			}
++			borrow := m.Bytes()
++			m.Release()
++			if !bytes.Equal(borrow, make([]byte, len(borrow))) {
++				t.Fatal("borrow was not cleared")
++			}
++		}
++		owned := p.key
++		p.close()
++		if !bytes.Equal(owned, make([]byte, len(owned))) {
++			t.Fatal("owned credential was not cleared")
++		}
++	}
++	for _, descriptor := range []string{"env-password:LOCAL_PASSWORD", "stdin-password"} {
++		password := "exact password\x00 bytes \r\n"
++		p, err := newCLIKeyProvider(descriptor, credentialInput{
++			lookupEnv: func(name string) (string, bool) { return password, true },
++			stdin:     func() (io.Reader, error) { return strings.NewReader(password), nil },
++		})
++		if err != nil {
++			t.Fatal(err)
++		}
++		m, err := p.Acquire(ctx, encryption.KeyRequest{Kind: encryption.PasswordArgon2id})
++		if err != nil || string(m.Bytes()) != password {
++			t.Fatal("password bytes were modified")
++		}
++		m.Release()
++		p.close()
++	}
++}
++
++func TestCLIProviderMemoryBoundsAndRedaction(t *testing.T) {
++	const marker = "private-input-marker-do-not-print"
++	for _, descriptor := range []string{marker, "raw:" + marker, "env-hex:", "env-hex:9BAD", "env-password:BAD-NAME", "env-hex:" + strings.Repeat("A", 129)} {
++		_, err := newCLIKeyProvider(descriptor, credentialInput{})
++		if err == nil || strings.Contains(err.Error(), marker) {
++			t.Fatal("invalid provider descriptor was accepted or disclosed")
++		}
++	}
++	for _, tc := range []struct {
++		descriptor, value string
++	}{
++		{"env-hex:KEY", ""}, {"env-hex:KEY", marker},
++		{"env-hex:KEY", strings.Repeat("z", 64)},
++		{"env-hex:KEY", strings.Repeat("a", 65)},
++		{"stdin-hex", strings.Repeat("a", 64) + "\n\n"},
++		{"stdin-hex", strings.Repeat("a", 67)},
++		{"stdin-password", ""},
++		{"env-password:KEY", strings.Repeat("p", encryption.MaxPasswordBytes+1)},
++		{"stdin-password", strings.Repeat("p", encryption.MaxPasswordBytes+1)},
++	} {
++		p, err := newCLIKeyProvider(tc.descriptor, credentialInput{
++			lookupEnv: func(string) (string, bool) { return tc.value, true },
++			stdin:     func() (io.Reader, error) { return strings.NewReader(tc.value), nil },
++		})
++		if err != nil {
++			t.Fatal(err)
++		}
++		m, err := p.Acquire(context.Background(), encryption.KeyRequest{Kind: p.kind})
++		if err == nil || m != nil || strings.Contains(err.Error(), marker) {
++			t.Fatal("invalid memory credential was accepted or disclosed")
++		}
++		p.close()
++	}
++	p, err := newCLIKeyProvider("env-password:SECRET_NAME", credentialInput{lookupEnv: func(string) (string, bool) { return marker, true }})
++	if err != nil {
++		t.Fatal(err)
++	}
++	defer p.close()
++	m, err := p.Acquire(context.Background(), encryption.KeyRequest{Kind: p.kind})
++	if err != nil {
++		t.Fatal(err)
++	}
++	defer m.Release()
++	for _, value := range []any{p, m} {
++		for _, verb := range []string{"%v", "%+v", "%#v", "%s", "%q"} {
++			if rendered := fmt.Sprintf(verb, value); strings.Contains(rendered, marker) || strings.Contains(rendered, "SECRET_NAME") || !strings.Contains(rendered, "redacted") {
++				t.Fatal("provider/material formatting was not redacted")
++			}
++		}
++	}
++}
++
++func TestCLIProviderMemoryConcurrencyAndCancellation(t *testing.T) {
++	key := disposableCLIKey(t)
++	reads := 0
++	p, err := newCLIKeyProvider("env-hex:KEY", credentialInput{lookupEnv: func(string) (string, bool) {
++		reads++
++		return hex.EncodeToString(key), true
++	}})
++	if err != nil {
++		t.Fatal(err)
++	}
++	ctx, cancel := context.WithCancel(context.Background())
++	cancel()
++	if _, err := p.Acquire(ctx, encryption.KeyRequest{Kind: p.kind}); !errors.Is(err, context.Canceled) || reads != 0 {
++		t.Fatal("canceled acquisition consumed input")
++	}
++	if _, err := p.Acquire(context.Background(), encryption.KeyRequest{Kind: encryption.PasswordArgon2id}); !errors.Is(err, encryption.ErrCredential) || reads != 0 {
++		t.Fatal("mismatched kind consumed input")
++	}
++	var wg sync.WaitGroup
++	for range 8 {
++		wg.Go(func() {
++			m, err := p.Acquire(context.Background(), encryption.KeyRequest{Kind: p.kind})
++			if err != nil {
++				t.Error(err)
++				return
++			}
++			if !bytes.Equal(m.Bytes(), key) {
++				t.Error("concurrent borrow mismatch")
++			}
++			m.Release()
++		})
++	}
++	wg.Wait()
++	if reads != 1 {
++		t.Fatal("provider did not cache a single bounded acquisition")
++	}
++	p.close()
++	if _, err := p.Acquire(context.Background(), encryption.KeyRequest{Kind: p.kind}); !errors.Is(err, encryption.ErrCredential) {
++		t.Fatal("closed provider accepted acquisition")
++	}
++}
++
++func TestCLIProviderMemoryInputFailureRedaction(t *testing.T) {
++	// This is a synthetic input-provider error only, not a filesystem fault.
++	const marker = "input-provider-private-message"
++	p, err := newCLIKeyProvider("stdin-password", credentialInput{stdin: func() (io.Reader, error) {
++		return nil, errors.New(marker)
++	}})
++	if err != nil {
++		t.Fatal(err)
++	}
++	defer p.close()
++	_, err = p.Acquire(context.Background(), encryption.KeyRequest{Kind: p.kind})
++	if !errors.Is(err, encryption.ErrKeyProvider) || strings.Contains(err.Error(), marker) {
++		t.Fatal("input provider error escaped")
++	}
++}
+diff --git a/cmd/gosqlite/main.go b/cmd/gosqlite/main.go
+index ecda73f..1f8b17d 100644
+--- a/cmd/gosqlite/main.go
++++ b/cmd/gosqlite/main.go
+@@ -24,10 +24,12 @@ func runContext(ctx context.Context, args []string, out io.Writer) (resultErr er
+ 		return err
+ 	}
+ 	if len(args) == 0 || (len(args) == 1 && args[0] == "help") {
+-		_, err := fmt.Fprintln(out, "usage: gosqlite version\n       gosqlite query [--wal-exclusive|--wal-shared] <db> '<sql>'\n       gosqlite inspect <db>\n       gosqlite migrate pgembedding inspect --catalog <catalog.json> [--format json|markdown]\n       gosqlite migrate pgembedding --input <export> --manifest <manifest.json> [--output <new.db> --apply [--resume]]\n       gosqlite migrate pgembedding verify --input <export> --manifest <manifest.json> --output <db>\n       gosqlite migrate pgembedding transition --catalog <catalog.json> --options <options.json> [--report <new.json>]\n       gosqlite check [--wal-exclusive|--wal-shared] <db> <index>\nSQLite SQL MVP. One statement per invocation; SELECT emits JSON Lines, writes emit a result.")
++		_, err := fmt.Fprintln(out, "usage: gosqlite version\n       gosqlite query [--wal-exclusive|--wal-shared] <db> '<sql>'\n       gosqlite inspect <db>\n       gosqlite backup <db> --out <new-archive> --key-provider <provider> [--out-key-provider <provider>] [--mode snapshot|wal|shared]\n       gosqlite rekey <db> --key-provider <new-provider> --current-key-provider <provider> [--mode snapshot|wal|shared]\n       gosqlite migrate pgembedding inspect --catalog <catalog.json> [--format json|markdown]\n       gosqlite migrate pgembedding --input <export> --manifest <manifest.json> [--output <new.db> --apply [--resume]]\n       gosqlite migrate pgembedding verify --input <export> --manifest <manifest.json> --output <db>\n       gosqlite migrate pgembedding transition --catalog <catalog.json> --options <options.json> [--report <new.json>]\n       gosqlite check [--wal-exclusive|--wal-shared] <db> <index>\nSQLite SQL MVP. One statement per invocation; SELECT emits JSON Lines, writes emit a result.\nEncrypted maintenance: env-hex:NAME, env-password:NAME, stdin-hex, stdin-password. See docs/cli-encryption.md; plaintext backup is unsupported.")
+ 		return err
+ 	}
+ 	switch args[0] {
++	case "backup", "rekey":
++		return runMaintenance(ctx, args[0], args[1:], out)
+ 	case "migrate":
+ 		return runMigrate(ctx, args[1:], out)
+ 	case "query":
+diff --git a/cmd/gosqlite/maintenance.go b/cmd/gosqlite/maintenance.go
+new file mode 100644
+index 0000000..b242c29
+--- /dev/null
++++ b/cmd/gosqlite/maintenance.go
+@@ -0,0 +1,225 @@
++package main
++
++import (
++	"context"
++	"encoding/json"
++	"errors"
++	"fmt"
++	"io"
++	"os"
++	"strings"
++
++	"github.com/ms-xiaosnow/gosqlite/encryption"
++	"github.com/ms-xiaosnow/gosqlite/sqlite"
++)
++
++const backupUsage = "usage: gosqlite backup <db> --out <new-archive> --key-provider <provider> [--out-key-provider <provider>] [--mode snapshot|wal|shared]"
++const rekeyUsage = "usage: gosqlite rekey <db> --key-provider <new-provider> --current-key-provider <provider> [--mode snapshot|wal|shared]"
++const providerHelp = "providers: env-hex:NAME, env-password:NAME, stdin-hex, stdin-password; credentials must never be arguments"
++
++// The maintenance parser deliberately never formats an argument, including an
++// unknown flag or invalid descriptor. A user may have pasted a secret there.
++// Unlike flag.FlagSet, it also never prints a rejected flag value.
++type maintenanceOptions struct {
++	path, destination string
++	source, target    string
++	mode              sqlite.EncryptionMode
++}
++
++func parseMaintenance(command string, args []string) (maintenanceOptions, error) {
++	var o maintenanceOptions
++	usage := backupUsage
++	if command == "rekey" {
++		usage = rekeyUsage
++	}
++	if len(args) == 0 || args[0] == "" || strings.HasPrefix(args[0], "--") {
++		return o, errors.New(usage)
++	}
++	o.path = args[0]
++	seen := make(map[string]bool)
++	var key string
++	for i := 1; i < len(args); i += 2 {
++		flag := args[i]
++		if i+1 >= len(args) || args[i+1] == "" || seen[flag] {
++			return maintenanceOptions{}, errors.New(usage)
++		}
++		seen[flag] = true
++		value := args[i+1]
++		switch flag {
++		case "--key-provider":
++			key = value
++		case "--out":
++			if command != "backup" {
++				return maintenanceOptions{}, errors.New(usage)
++			}
++			o.destination = value
++		case "--out-key-provider":
++			if command != "backup" {
++				return maintenanceOptions{}, errors.New(usage)
++			}
++			o.target = value
++		case "--current-key-provider":
++			if command != "rekey" {
++				return maintenanceOptions{}, errors.New(usage)
++			}
++			o.source = value
++		case "--mode":
++			switch value {
++			case "snapshot":
++				o.mode = sqlite.EncryptionSnapshot
++			case "wal":
++				o.mode = sqlite.EncryptionWAL
++			case "shared":
++				o.mode = sqlite.EncryptionWALShared
++			default:
++				return maintenanceOptions{}, errors.New("mode must be snapshot, wal or shared")
++			}
++		default:
++			return maintenanceOptions{}, errors.New(usage)
++		}
++	}
++	if command == "backup" {
++		if o.destination == "" {
++			return maintenanceOptions{}, errors.New(usage)
++		}
++		if key == "" {
++			return maintenanceOptions{}, fmt.Errorf("%w: backup currently requires an encrypted source and --key-provider; plaintext backup is not implemented", sqlite.ErrUnsupported)
++		}
++		o.source = key
++		// Omission deliberately reuses the same provider instance. In particular,
++		// a single stdin credential can protect both source and archive.
++	} else {
++		o.target = key
++		if o.source == "" || o.target == "" {
++			return maintenanceOptions{}, errors.New(rekeyUsage)
++		}
++	}
++	return o, nil
++}
++
++func runMaintenance(ctx context.Context, command string, args []string, out io.Writer) error {
++	return runMaintenanceWithInput(ctx, command, args, out, credentialInput{
++		lookupEnv: os.LookupEnv,
++		stdin: func() (io.Reader, error) {
++			info, err := os.Stdin.Stat()
++			if err != nil || (!info.Mode().IsRegular() && info.Mode()&os.ModeNamedPipe == 0) {
++				return nil, errors.New("stdin must be a noninteractive pipe or redirected regular file")
++			}
++			return os.Stdin, nil
++		},
++	})
++}
++
++func runMaintenanceWithInput(ctx context.Context, command string, args []string, out io.Writer, input credentialInput) error {
++	if err := ctx.Err(); err != nil {
++		return err
++	}
++	o, err := parseMaintenance(command, args)
++	if err != nil {
++		return err
++	}
++	source, err := newCLIKeyProvider(o.source, input)
++	if err != nil {
++		return err
++	}
++	defer source.close()
++	target := source
++	if o.target != "" {
++		target, err = newCLIKeyProvider(o.target, input)
++		if err != nil {
++			return err
++		}
++		defer target.close()
++		if source.fromStdin && target.fromStdin {
++			return errors.New("only one explicit stdin provider is allowed per command; use an environment provider for the other credential")
++		}
++	}
++	result, err := executeMaintenance(ctx, command, o, source, target)
++	if err != nil {
++		return maintenanceError(command, err)
++	}
++	// The connection (including its cleanup) has completed before emitting ok.
++	// An output error does not undo a completed backup/rekey.
++	if err := json.NewEncoder(out).Encode(result); err != nil {
++		return errors.New("maintenance completed but the result could not be written; do not repeat the operation automatically")
++	}
++	return nil
++}
++
++type maintenanceResult struct {
++	Status         string `json:"status"`
++	Operation      string `json:"operation"`
++	Format         string `json:"format"`
++	Mode           string `json:"mode"`
++	PageSize       uint32 `json:"page_size"`
++	PageCount      uint32 `json:"page_count"`
++	RetainsHistory bool   `json:"retains_history"`
++}
++
++func executeMaintenance(ctx context.Context, command string, o maintenanceOptions, source, target *cliKeyProvider) (_ maintenanceResult, resultErr error) {
++	sourceOptions := sqlite.EncryptionOptions{KeyProvider: source, CredentialKind: source.kind, Mode: o.mode}
++	db, err := sqlite.OpenContext(ctx, o.path, sqlite.Options{
++		Encryption: &sourceOptions, ReadOnly: command == "backup", NoCreate: true,
++		// Avoid an incidental checkpoint on close in the rekey route. Rekey
++		// itself publishes a full mode-preserving base through the native API.
++		KeepWALOnClose: o.mode != sqlite.EncryptionSnapshot,
++	})
++	if err != nil {
++		return maintenanceResult{}, err
++	}
++	defer func() { resultErr = errors.Join(resultErr, db.Close()) }()
++	targetOptions := sqlite.EncryptionOptions{KeyProvider: target, CredentialKind: target.kind, Mode: o.mode}
++	var info sqlite.EncryptionInfo
++	format := "gosqlite-encrypted-family"
++	if command == "backup" {
++		targetOptions.Mode = sqlite.EncryptionSnapshot
++		info, err = db.BackupEncrypted(ctx, o.destination, targetOptions)
++		format = "gosqlite-encrypted-archive"
++	} else {
++		err = db.Rekey(ctx, targetOptions)
++		if err == nil {
++			info, err = db.VerifyEncrypted(ctx)
++		}
++	}
++	if err != nil {
++		return maintenanceResult{}, err
++	}
++	mode := "snapshot"
++	if info.Mode == sqlite.EncryptionWAL {
++		mode = "wal"
++	} else if info.Mode == sqlite.EncryptionWALShared {
++		mode = "shared"
++	}
++	return maintenanceResult{"ok", command, format, mode, info.PageSize, info.PageCount, info.RetainsHistory}, nil
++}
++
++// Only fixed categories reach stderr. Do not print database paths, catalog SQL,
++// arbitrary native/provider errors or descriptors. Keep cleanup/publication
++// uncertainty ahead of retryable categories. Returned wrapping is also limited
++// to known static sentinels; it does not retain a secret-bearing error chain.
++func maintenanceError(command string, err error) error {
++	for _, candidate := range []struct {
++		cause error
++		text  string
++	}{
++		{sqlite.ErrCommitUncertain, "publication state uncertain; do not retry automatically"},
++		{sqlite.ErrPoisoned, "storage ownership is poisoned; do not retry automatically"},
++		{sqlite.ErrRecoveryRequired, "storage requires recovery; no recovery was attempted"},
++		{sqlite.ErrUnsupported, "unsupported source, mode, platform or operation; see docs/cli-encryption.md"},
++		{encryption.ErrKeyProvider, "credential provider unavailable or invalid"},
++		{encryption.ErrCredential, "credential provider unavailable or invalid"},
++		{sqlite.ErrAuthentication, "authentication failed"},
++		{sqlite.ErrCorrupt, "source validation failed"},
++		{sqlite.ErrBusy, "database is busy; rekey requires all other connections to close"},
++		{sqlite.ErrMemoryLimit, "resource limit exceeded"},
++		{sqlite.ErrFull, "storage limit exceeded"},
++		{context.Canceled, "operation canceled; inspect state before retrying"},
++		{context.DeadlineExceeded, "deadline exceeded; inspect state before retrying"},
++		{os.ErrExist, "destination already exists; choose a new path"},
++	} {
++		if errors.Is(err, candidate.cause) {
++			return fmt.Errorf("%s: %s: %w", command, candidate.text, candidate.cause)
++		}
++	}
++	return fmt.Errorf("%s failed; output may be incomplete or publication state uncertain; do not retry automatically", command)
++}
+diff --git a/cmd/gosqlite/maintenance_test.go b/cmd/gosqlite/maintenance_test.go
+new file mode 100644
+index 0000000..3c99707
+--- /dev/null
++++ b/cmd/gosqlite/maintenance_test.go
+@@ -0,0 +1,244 @@
++package main
++
++import (
++	"bytes"
++	"context"
++	"encoding/hex"
++	"encoding/json"
++	"errors"
++	"io"
++	"path/filepath"
++	"strings"
++	"testing"
++
++	"github.com/ms-xiaosnow/gosqlite/encryption"
++	"github.com/ms-xiaosnow/gosqlite/sqlite"
++)
++
++func TestCLIMaintenanceMemoryArguments(t *testing.T) {
++	const secret = "must-not-print-private-argument"
++	for _, tc := range []struct {
++		command string
++		args    []string
++	}{
++		{"backup", nil}, {"backup", []string{"db", "--out"}},
++		{"backup", []string{"db", "--out", "new", "--out", "other"}},
++		{"backup", []string{"db", "--out", "new", "--key-provider", secret}},
++		{"backup", []string{"db", "--out", "new", "--key-provider=" + secret}},
++		{"backup", []string{"db", "--out", "new", "--key-provider", "env-hex:KEY", "--mode", secret}},
++		{"backup", []string{"db", "--out", "new", "--key-provider", "stdin-hex", "--out-key-provider", "stdin-hex"}},
++		{"rekey", []string{"db", "--key-provider", "env-hex:KEY"}},
++		{"rekey", []string{"db", "--key-provider", "env-hex:NEW", "--current-key-provider", secret}},
++		{"rekey", []string{"db", "--key-provider", "stdin-password", "--current-key-provider", "stdin-password"}},
++	} {
++		var output bytes.Buffer
++		input := credentialInput{
++			lookupEnv: func(string) (string, bool) { t.Fatal("parser touched credential input"); return "", false },
++			stdin:     func() (io.Reader, error) { t.Fatal("parser touched stdin"); return nil, nil },
++		}
++		err := runMaintenanceWithInput(context.Background(), tc.command, tc.args, &output, input)
++		if err == nil || output.Len() != 0 || strings.Contains(err.Error(), secret) {
++			t.Fatal("invalid arguments accepted, disclosed, or emitted success")
++		}
++	}
++	var out bytes.Buffer
++	err := run([]string{"backup", "untouched.db", "--out", "untouched.backup"}, &out)
++	if !errors.Is(err, sqlite.ErrUnsupported) || !strings.Contains(err.Error(), "plaintext backup is not implemented") || out.Len() != 0 {
++		t.Fatal("plaintext boundary is not explicit")
++	}
++	if err := run([]string{"help"}, &out); err != nil || !strings.Contains(out.String(), "gosqlite backup") || !strings.Contains(out.String(), "gosqlite rekey") {
++		t.Fatal("maintenance commands missing from help")
++	}
++}
++
++func TestCLIMaintenanceMemoryErrorRedaction(t *testing.T) {
++	const marker = "secret-from-untrusted-error"
++	for _, cause := range []error{errors.New(marker), errors.Join(sqlite.ErrUnsupported, errors.New(marker)), errors.Join(sqlite.ErrBusy, errors.New(marker)), errors.Join(sqlite.ErrBusy, sqlite.ErrCommitUncertain, errors.New(marker))} {
++		err := maintenanceError("backup", cause)
++		if strings.Contains(err.Error(), marker) {
++			t.Fatal("untrusted error text escaped")
++		}
++		if errors.Is(cause, sqlite.ErrCommitUncertain) && !errors.Is(err, sqlite.ErrCommitUncertain) {
++			t.Fatal("uncertainty lost to BUSY")
++		}
++	}
++}
++
++func cliFixture(t *testing.T, path string, cfg sqlite.EncryptionOptions) sqlite.EncryptionInfo {
++	t.Helper()
++	db, err := sqlite.Open(path, sqlite.Options{Encryption: &cfg, KeepWALOnClose: cfg.Mode != sqlite.EncryptionSnapshot})
++	if err != nil {
++		t.Fatal(err)
++	}
++	t.Cleanup(func() {
++		if err := db.Close(); err != nil {
++			t.Error(err)
++		}
++	})
++	ctx := context.Background()
++	for _, sql := range []string{
++		"CREATE TABLE notes(id INTEGER PRIMARY KEY, body TEXT, payload BLOB)",
++		"CREATE INDEX notes_body ON notes(body)",
++		"INSERT INTO notes VALUES(1,'ordinary 数据库',X'0001ff')",
++	} {
++		if _, err := db.Exec(ctx, sql); err != nil {
++			t.Fatal(err)
++		}
++	}
++	info, err := db.VerifyEncrypted(ctx)
++	if err != nil {
++		t.Fatal(err)
++	}
++	if err := db.Close(); err != nil {
++		t.Fatal(err)
++	}
++	return info
++}
++
++func checkCLIRestoredRows(t *testing.T, path string, cfg sqlite.EncryptionOptions) sqlite.EncryptionInfo {
++	t.Helper()
++	db, err := sqlite.Open(path, sqlite.Options{Encryption: &cfg, ReadOnly: true, NoCreate: true})
++	if err != nil {
++		t.Fatal(err)
++	}
++	t.Cleanup(func() {
++		if err := db.Close(); err != nil {
++			t.Error(err)
++		}
++	})
++	rows, err := db.Query(context.Background(), "SELECT id,body,payload FROM notes WHERE body='ordinary 数据库'")
++	if err != nil {
++		t.Fatal(err)
++	}
++	if !rows.Next() || len(rows.Values()) != 3 || rows.Values()[0] != int64(1) || rows.Values()[1] != "ordinary 数据库" || !bytes.Equal(rows.Values()[2].([]byte), []byte{0, 1, 255}) {
++		t.Fatal("restored row mismatch")
++	}
++	if rows.Next() || rows.Err() != nil {
++		t.Fatal("unexpected extra row or query error")
++	}
++	if err := rows.Close(); err != nil {
++		t.Fatal(err)
++	}
++	info, err := db.VerifyEncrypted(context.Background())
++	if err != nil {
++		t.Fatal(err)
++	}
++	if err := db.Close(); err != nil {
++		t.Fatal(err)
++	}
++	return info
++}
++
++func testCLIProvider(t *testing.T, descriptor string, input credentialInput) *cliKeyProvider {
++	t.Helper()
++	p, err := newCLIKeyProvider(descriptor, input)
++	if err != nil {
++		t.Fatal(err)
++	}
++	t.Cleanup(p.close)
++	return p
++}
++
++func TestCLIMaintenanceCorrectKeyRoundTrips(t *testing.T) {
++	// Intact disposable databases, generated correct keys and normal close only.
++	for _, tc := range []struct {
++		name string
++		mode sqlite.EncryptionMode
++	}{{"snapshot", sqlite.EncryptionSnapshot}, {"wal", sqlite.EncryptionWAL}, {"shared", sqlite.EncryptionWALShared}} {
++		t.Run(tc.name, func(t *testing.T) {
++			oldKey, newKey, archiveKey := disposableCLIKey(t), disposableCLIKey(t), disposableCLIKey(t)
++			values := map[string]string{"OLD": hex.EncodeToString(oldKey), "NEW": hex.EncodeToString(newKey), "ARCHIVE": hex.EncodeToString(archiveKey)}
++			input := credentialInput{lookupEnv: func(name string) (string, bool) { value, ok := values[name]; return value, ok }}
++			oldProvider := testCLIProvider(t, "env-hex:OLD", input)
++			newProvider := testCLIProvider(t, "env-hex:NEW", input)
++			archiveProvider := testCLIProvider(t, "env-hex:ARCHIVE", input)
++			oldCfg := sqlite.EncryptionOptions{KeyProvider: oldProvider, CredentialKind: encryption.RawKey256, Mode: tc.mode}
++			newCfg := sqlite.EncryptionOptions{KeyProvider: newProvider, CredentialKind: encryption.RawKey256, Mode: tc.mode}
++			archiveCfg := sqlite.EncryptionOptions{KeyProvider: archiveProvider, CredentialKind: encryption.RawKey256}
++			dir := t.TempDir()
++			path, archive, restored := filepath.Join(dir, "source.gse"), filepath.Join(dir, "snapshot.backup"), filepath.Join(dir, "restored.gse")
++			before := cliFixture(t, path, oldCfg)
++			if tc.mode != sqlite.EncryptionSnapshot && before.WALSegments == 0 {
++				t.Fatal("test did not select committed WAL segments")
++			}
++			var output bytes.Buffer
++			if err := runMaintenanceWithInput(context.Background(), "backup", []string{path, "--out", archive, "--key-provider", "env-hex:OLD", "--out-key-provider", "env-hex:ARCHIVE", "--mode", tc.name}, &output, input); err != nil {
++				t.Fatal(err)
++			}
++			var result maintenanceResult
++			if err := json.Unmarshal(output.Bytes(), &result); err != nil || result.Status != "ok" || result.Format != "gosqlite-encrypted-archive" || result.RetainsHistory || result.PageCount != before.PageCount {
++				t.Fatal("unexpected backup result")
++			}
++			if _, err := sqlite.RestoreEncrypted(context.Background(), archive, restored, archiveCfg, newCfg); err != nil {
++				t.Fatal(err)
++			}
++			checkCLIRestoredRows(t, restored, newCfg)
++			output.Reset()
++			if err := runMaintenanceWithInput(context.Background(), "rekey", []string{path, "--key-provider", "env-hex:NEW", "--current-key-provider", "env-hex:OLD", "--mode", tc.name}, &output, input); err != nil {
++				t.Fatal(err)
++			}
++			if err := json.Unmarshal(output.Bytes(), &result); err != nil || !result.RetainsHistory || result.Mode != tc.name || result.Operation != "rekey" {
++				t.Fatal("unexpected rekey result")
++			}
++			after := checkCLIRestoredRows(t, path, newCfg)
++			if after.DatabaseID != before.DatabaseID || after.CommitSequence != before.CommitSequence+1 || after.WALSegments != 0 {
++				t.Fatal("rekey changed identity, skipped sequence or retained selected WAL segments")
++			}
++			// A stdin source is reused for the default archive credential, once.
++			stdinCalls := 0
++			input.stdin = func() (io.Reader, error) { stdinCalls++; return strings.NewReader(hex.EncodeToString(newKey)), nil }
++			archive2 := filepath.Join(dir, "same-key.backup")
++			output.Reset()
++			if err := runMaintenanceWithInput(context.Background(), "backup", []string{path, "--out", archive2, "--key-provider", "stdin-hex", "--mode", tc.name}, &output, input); err != nil || stdinCalls != 1 {
++				t.Fatal("single stdin credential backup failed", err)
++			}
++			sourceArchiveCfg := newCfg
++			sourceArchiveCfg.Mode = sqlite.EncryptionSnapshot
++			restored2 := filepath.Join(dir, "restored2.gse")
++			if _, err := sqlite.RestoreEncrypted(context.Background(), archive2, restored2, sourceArchiveCfg, newCfg); err != nil {
++				t.Fatal(err)
++			}
++			checkCLIRestoredRows(t, restored2, newCfg)
++		})
++	}
++}
++
++func TestCLIMaintenancePasswordAndDispatch(t *testing.T) {
++	oldKey := disposableCLIKey(t)
++	// Generated disposable password; it never appears in command arguments.
++	password := hex.EncodeToString(disposableCLIKey(t))
++	t.Setenv("GOSQLITE_CLI_TEST_OLD", hex.EncodeToString(oldKey))
++	t.Setenv("GOSQLITE_CLI_TEST_NEW", password)
++	input := credentialInput{lookupEnv: func(name string) (string, bool) {
++		switch name {
++		case "OLD":
++			return hex.EncodeToString(oldKey), true
++		case "NEW":
++			return password, true
++		}
++		return "", false
++	}}
++	oldProvider := testCLIProvider(t, "env-hex:OLD", input)
++	newProvider := testCLIProvider(t, "env-password:NEW", input)
++	oldCfg := sqlite.EncryptionOptions{KeyProvider: oldProvider, CredentialKind: encryption.RawKey256}
++	newCfg := sqlite.EncryptionOptions{KeyProvider: newProvider, CredentialKind: encryption.PasswordArgon2id}
++	dir := t.TempDir()
++	path, archive := filepath.Join(dir, "source.gse"), filepath.Join(dir, "snapshot.backup")
++	cliFixture(t, path, oldCfg)
++	var output bytes.Buffer
++	if err := run([]string{"rekey", path, "--key-provider", "env-password:GOSQLITE_CLI_TEST_NEW", "--current-key-provider", "env-hex:GOSQLITE_CLI_TEST_OLD"}, &output); err != nil {
++		t.Fatal(err)
++	}
++	checkCLIRestoredRows(t, path, newCfg)
++	if err := run([]string{"backup", path, "--out", archive, "--key-provider", "env-password:GOSQLITE_CLI_TEST_NEW", "--out-key-provider", "env-hex:GOSQLITE_CLI_TEST_OLD"}, &output); err != nil {
++		t.Fatal(err)
++	}
++	restored := filepath.Join(dir, "restored.gse")
++	if _, err := sqlite.RestoreEncrypted(context.Background(), archive, restored, oldCfg, oldCfg); err != nil {
++		t.Fatal(err)
++	}
++	checkCLIRestoredRows(t, restored, oldCfg)
++	if strings.Contains(output.String(), password) || strings.Contains(output.String(), hex.EncodeToString(oldKey)) {
++		t.Fatal("credential appeared in output")
++	}
++}
+diff --git a/docs/cli-encryption.md b/docs/cli-encryption.md
+new file mode 100644
+index 0000000..8535d6b
+--- /dev/null
++++ b/docs/cli-encryption.md
+@@ -0,0 +1,200 @@
++# CLI encrypted backup and rekey
++
++This is a narrow implementation of goal §12.2 using the existing experimental
++native encrypted storage APIs. It does not change the encrypted format, public
++`sqlite.Options`/`sqlite.Result` layouts, KDF policy, platform restrictions or the
++existing query/inspect/check/migrate syntax. Do not use irreplaceable data.
++[Storage and acceptance boundaries](encryption-storage.md) still apply.
++
++## Commands
++
++```text
++gosqlite backup <db> --out <new-archive> --key-provider <provider> [--out-key-provider <provider>] [--mode snapshot|wal|shared]
++gosqlite rekey <db> --key-provider <new-provider> --current-key-provider <provider> [--mode snapshot|wal|shared]
++```
++
++Put the database path first, then separate flag/value pairs. Each flag may appear
++once. `--flag=value`, positional extras and automatic mode detection are not
++supported. With a path beginning `--`, use an unambiguous absolute path. Both
++commands open an existing database with `NoCreate`; they never create a missing
++source. Options and provider descriptors are validated without printing their
++contents. `gosqlite help` lists both commands.
++
++`--mode snapshot` is the default and selects layout 1. `wal` explicitly selects
++layout 2; `shared` selects layout 3. The existing family must match. These are
++independent encrypted modes, not native SQLite WAL flags.
++
++### Backup
++
++`--key-provider` supplies the source credential. `--out-key-provider` supplies an
++independent archive credential; when omitted, the same acquired source credential
++also protects the archive. This is explicit documented credential reuse, not a
++conversion to plaintext. The archive always receives fresh database, epoch and
++file identities and role-separated encryption keys.
++
++The implementation opens the source read-only and calls
++`DB.BackupEncrypted`. It copies one authenticated logical head, including all
++selected committed encrypted WAL segments. The native copy operation validates
++supported catalog grammar and B-tree/overflow/freelist ownership and holds its
++snapshot through validation and output. This does not prove full index-to-table
++content equality, external identity or freshness.
++
++Snapshot/exclusive-WAL sources require writers to close before this read-only
++connection can acquire its lifetime lease. Shared encrypted mode can copy a
++pinned committed head while cooperative readers/writers continue; later commits
++are not added to that archive. No plaintext online-backup capability is implied.
++
++The destination must be absent and its parent must exist. The native archive
++writer exclusively creates its encrypted output and preserves existing outputs;
++it does not replace a prior backup. Partial encrypted output may remain after an
++error and is not a usable successful backup. No raw file-family copying, external
++SQLite process, plaintext spill, fallback or custom publication protocol is used.
++A manifest alone is not a backup. Destination publication, owned descriptors,
++locking, synchronization and error cleanup remain the existing native API's work.
++
++**Plaintext backup is unimplemented in this CLI and its public copy API.**
++`gosqlite backup plain.db --out new.db` returns an explicit unsupported error
++before opening either path. It does not silently copy a main file or a live
++SQLite/WAL family. `DB.BackupEncrypted` requires an encrypted session;
++`DB.ExportPlaintext` explicitly exports an encrypted source; `ImportEncrypted`
++creates an encrypted family from a supported rollback-mode plaintext snapshot.
++None is a generic plaintext-to-plaintext backup API. A future plaintext snapshot
++backup needs a public pinned-page/copy/publication implementation and separate
++scope/evidence. Native plaintext WAL backup remains a phased core item.
++
++The result is a **portable encrypted archive**, not an openable live database.
++Restore it with `sqlite.RestoreEncrypted(ctx, archive, absentDestination,
++archiveOptions, targetOptions)`. That API authenticates the complete archive,
++validates supported logical page ownership and creates a new family with fresh
++identities. It leaves the archive unchanged. This slice does not add a restore
++subcommand. The runnable example below performs a complete native restore and
++checks the rows. Do not pass the archive to `gosqlite query` or `sqlite.Open`.
++
++### Rekey
++
++`--current-key-provider` supplies the current credential; `--key-provider`
++supplies the new credential. A writable existing encrypted session calls
++`DB.Rekey` with the same mode. All other connections must close for rekey,
++including shared-mode idle/read-only connections. The core validates the logical
++copy, rewrites the complete selected head and publishes a fresh epoch/root using
++its existing verified publication protocol. It preserves the logical database
++identity and mode and advances the commit sequence; encrypted WAL modes select a
++full new base and zero segments. A post-operation native verification completes
++before success is emitted. Native WAL close checkpointing is not introduced.
++
++**Rekey retains history.** Old roots/bases/segments remain decryptable with their
++old credentials. It neither revokes old keys' access to history nor erases old
++ciphertext, plaintext copies, backups or snapshots. It does not convert plaintext
++in place, change encrypted mode or recover an interrupted operation. Keep the
++current and replacement credentials available until successful verification.
++
++## Local provider descriptors
++
++| Descriptor | Input |
++| --- | --- |
++| `env-hex:NAME` | Exactly 64 ASCII hexadecimal characters encoding a 32-byte raw key |
++| `env-password:NAME` | Exactly the environment value's 1–4,096 password bytes |
++| `stdin-hex` | 64 hex characters through a pipe or redirected regular file, optionally followed by one LF or CRLF, then EOF |
++| `stdin-password` | Exactly 1–4,096 password bytes through a pipe or redirected regular file, then EOF |
++
++The credential kind is explicit; a 64-character password is still a password.
++Hex is transport encoding, not a password KDF. Password mode uses the existing
++Argon2id production default (64 MiB, three passes, four lanes); opening uses
++bounded stored KDF parameters. This CLI does not expose quota or KDF overrides.
++
++`NAME` must match `[A-Za-z_][A-Za-z0-9_]*`, at most 128 bytes. Only that exact
++variable is read. No database path, unauthenticated ID or SQL selects another
++secret. There is no shell evaluation, provider command execution, URL lookup,
++raw-secret flag or implicit default variable. Two explicit stdin providers in one
++command are rejected before opening a database or reading credentials. Backup
++with only a stdin source provider reuses its single cached input for the target.
++Use an env source with stdin target, or vice versa, when two distinct credentials
++are needed. Empty input and malformed/oversized encodings are rejected.
++
++Password bytes are never trimmed. A trailing newline changes the password.
++Use a trusted noninteractive producer that emits exactly the intended bytes and
++then closes its pipe. Terminals, character devices, directories and other input
++kinds are refused; the CLI never prompts or changes terminal echo. The bounded
++read allocates at most one credential-sized input plus owned copies. Reading a
++pipe can still wait for its producer to close; context is checked before/after
++reading but does not interrupt a blocked OS read. No detached reader or KDF
++worker is launched to evade the native resource budget.
++
++Acquisition is lazy, behind the native API's platform/KDF admission. A provider
++caches one bounded credential per command and returns separately owned borrows.
++Release and command cleanup clear controlled byte buffers best-effort, including
++partially decoded hex. Provider/material formatting is always redacted.
++
++**Do not put secret values in process arguments, shell history, filenames,
++DSNs, SQL or logs.** Pass only descriptors/variable names in arguments. Arrange
++for a trusted launcher to supply the environment or pipe. Avoid shell tracing,
++printing environment dumps, untrusted secret-producing programs and putting
++credential files in source control. Environment transport is not a vault:
++privileged/local process inspection, inherited environments, launcher logs,
++immutable Go strings, runtime/crypto copies and memory dumps can expose secrets.
++Stdin reduces environment exposure but does not protect a compromised host.
++This interface does not claim absolute memory erasure or invent persistent KMS
++access. For application-specific key management use the native `KeyProvider`.
++
++## Success, errors and operational scope
++
++Both commands emit one JSON result only after the operation and connection
++cleanup succeed. It contains fixed status/operation/format/mode fields, page
++geometry and `retains_history`; no keys, descriptors, paths, IDs, SQL or data
++rows are logged. Backup reports `gosqlite-encrypted-archive` with snapshot mode;
++rekey reports `gosqlite-encrypted-family` and the preserved source mode.
++
++Parsing/provider errors never echo submitted arguments. Native errors are mapped
++to fixed categories; arbitrary provider/native error messages and their original
++chains are not retained in the CLI error. Publication uncertainty/poison/recovery
++categories take precedence over BUSY. Unknown failures are conservative. A later
++verification, close, or stdout error can follow a successful publication, so a
++nonzero exit does not prove the database was unchanged. Do not automatically
++retry, replace or remove an output after an error. No failed-operation cleanup,
++recovery, old-root fallback or repair workflow is promised by this CLI.
++
++Linux ordinary-path runtime evidence is limited to the checks recorded for this
++slice. Darwin support is source/compile only and retains ASCII target/inventory
++restrictions; Windows/amd64 is source/compile only, restricted to its supported
++local NTFS/OS profile and has no directory-sync barrier. **Windows shared-mode
++rekey remains unsupported.** Other unsupported targets still fail closed. See
++[native Darwin scope](native-encrypted-darwin.md) and
++[native Windows scope](native-encrypted-windows.md); the later Darwin document
++supersedes the earlier Windows document's historical Darwin-gap statement.
++
++No wrong-key/tampered/corrupt/missing-selected-file disk scenario, native fault,
++namespace mutation/race, crash/process termination/hot recovery or interrupted
++publication/rekey acceptance is part of this work. No such tests were run here
++or moved elsewhere. Cross compilation is not native runtime qualification.
++Independent security/cryptographic/legal review and full release acceptance
++remain outstanding.
++
++## Runnable, disposable end-to-end example
++
++From the repository root on Linux with Go 1.27.2 and existing offline module
++cache:
++
++```sh
++CGO_ENABLED=0 GOTOOLCHAIN=local go build -trimpath -o /tmp/gosqlite-cli ./cmd/gosqlite
++CGO_ENABLED=0 GOTOOLCHAIN=local go run ./examples/encrypted-cli /tmp/gosqlite-cli
++```
++
++The [example source](../examples/encrypted-cli/main.go) creates disposable random
++keys and an encrypted database through the public API. It invokes the actual
++binary for env-source/stdin-target backup and env-source/env-target rekey, then
++reopens with the new key, restores the archive through the native API and checks
++both sets of rows. Child arguments contain only paths and descriptors. It neither
++prints credentials nor writes credential files. Children finish normally; its
++private temporary database directory is removed on normal completion, which is
++not secure erase. The example's keys are intentionally not recoverable later.
++
++For an existing encrypted snapshot whose keys were supplied by your trusted
++launcher, the command shapes are:
++
++```sh
++gosqlite backup /private/source.gse --out /private/new.backup --key-provider env-hex:GOSQLITE_CURRENT --out-key-provider env-hex:GOSQLITE_ARCHIVE
++gosqlite rekey /private/source.gse --key-provider env-hex:GOSQLITE_NEW --current-key-provider env-hex:GOSQLITE_CURRENT
++```
++
++Use `--mode wal` or `--mode shared` only for families created in those modes.
++There is no plaintext success example because that route is unsupported.
+diff --git a/examples/encrypted-cli/main.go b/examples/encrypted-cli/main.go
+new file mode 100644
+index 0000000..b2d993c
+--- /dev/null
++++ b/examples/encrypted-cli/main.go
+@@ -0,0 +1,142 @@
++// Command encrypted-cli exercises real backup/rekey subprocesses with disposable
++// generated credentials supplied only through environment variables or stdin.
++package main
++
++import (
++	"bytes"
++	"context"
++	"crypto/rand"
++	"encoding/hex"
++	"errors"
++	"fmt"
++	"os"
++	"os/exec"
++	"path/filepath"
++
++	"github.com/ms-xiaosnow/gosqlite/encryption"
++	"github.com/ms-xiaosnow/gosqlite/sqlite"
++)
++
++type keyProvider struct{ key []byte }
++type keyMaterial struct{ key []byte }
++
++func (p *keyProvider) Acquire(ctx context.Context, r encryption.KeyRequest) (encryption.KeyMaterial, error) {
++	if err := ctx.Err(); err != nil {
++		return nil, err
++	}
++	if r.Kind != encryption.RawKey256 {
++		return nil, encryption.ErrCredential
++	}
++	return &keyMaterial{append([]byte(nil), p.key...)}, nil
++}
++func (m *keyMaterial) Kind() encryption.CredentialKind { return encryption.RawKey256 }
++func (m *keyMaterial) Bytes() []byte                   { return m.key }
++func (m *keyMaterial) Release()                        { clear(m.key); m.key = nil }
++func (*keyProvider) Format(s fmt.State, _ rune)        { _, _ = s.Write([]byte("demo-provider{redacted}")) }
++func (*keyMaterial) Format(s fmt.State, _ rune)        { _, _ = s.Write([]byte("demo-material{redacted}")) }
++
++func main() {
++	if err := run(); err != nil {
++		fmt.Fprintln(os.Stderr, err)
++		os.Exit(1) // All normal deferred resource cleanup has already completed.
++	}
++}
++
++func run() (resultErr error) {
++	if len(os.Args) != 2 {
++		return errors.New("usage: encrypted-cli <path-to-gosqlite-binary>")
++	}
++	binary, err := filepath.Abs(os.Args[1])
++	if err != nil {
++		return err
++	}
++	dir, err := os.MkdirTemp("", "gosqlite-cli-demo-")
++	if err != nil {
++		return err
++	}
++	defer func() { resultErr = errors.Join(resultErr, os.RemoveAll(dir)) }()
++	// Removal of our disposable directory and clearing owned bytes are not
++	// secure erase. The Go runtime/environment may retain credential copies.
++	var cfg [3]sqlite.EncryptionOptions
++	var providers [3]*keyProvider
++	for i := range cfg {
++		key := make([]byte, encryption.KeySize)
++		if _, err := rand.Read(key); err != nil {
++			return err
++		}
++		defer clear(key)
++		providers[i] = &keyProvider{key}
++		cfg[i] = sqlite.EncryptionOptions{KeyProvider: providers[i], CredentialKind: encryption.RawKey256}
++	}
++	ctx := context.Background()
++	path := filepath.Join(dir, "source.gse")
++	db, err := sqlite.Open(path, sqlite.Options{Encryption: &cfg[0]})
++	if err != nil {
++		return err
++	}
++	defer func() { resultErr = errors.Join(resultErr, db.Close()) }()
++	if _, err := db.Exec(ctx, "CREATE TABLE notes(id INTEGER PRIMARY KEY, body TEXT)"); err != nil {
++		return err
++	}
++	if _, err := db.Exec(ctx, "INSERT INTO notes VALUES(1,'disposable CLI backup')"); err != nil {
++		return err
++	}
++	if err := db.Close(); err != nil {
++		return err
++	}
++
++	// exec.Command never receives credentials as arguments. We use ordinary
++	// synchronous Run, with normal process completion and no signal/kill hooks.
++	archive := filepath.Join(dir, "portable.backup")
++	backup := exec.Command(binary, "backup", path, "--out", archive, "--key-provider", "env-hex:GOSQLITE_DEMO_OLD", "--out-key-provider", "stdin-hex")
++	backup.Env = []string{"GOSQLITE_DEMO_OLD=" + hex.EncodeToString(providers[0].key)}
++	backup.Stdin = bytes.NewBufferString(hex.EncodeToString(providers[2].key))
++	var output bytes.Buffer
++	backup.Stdout, backup.Stderr = &output, &output
++	if err := backup.Run(); err != nil {
++		return errors.New("disposable CLI backup failed")
++	}
++	fmt.Print(output.String())
++
++	rekey := exec.Command(binary, "rekey", path, "--current-key-provider", "env-hex:GOSQLITE_DEMO_OLD", "--key-provider", "env-hex:GOSQLITE_DEMO_NEW")
++	rekey.Env = []string{"GOSQLITE_DEMO_OLD=" + hex.EncodeToString(providers[0].key), "GOSQLITE_DEMO_NEW=" + hex.EncodeToString(providers[1].key)}
++	output.Reset()
++	rekey.Stdout, rekey.Stderr = &output, &output
++	if err := rekey.Run(); err != nil {
++		return errors.New("disposable CLI rekey failed")
++	}
++	fmt.Print(output.String())
++	if err := verify(ctx, path, cfg[1]); err != nil {
++		return err
++	}
++
++	restored := filepath.Join(dir, "restored.gse")
++	if _, err := sqlite.RestoreEncrypted(ctx, archive, restored, cfg[2], cfg[1]); err != nil {
++		return err
++	}
++	if err := verify(ctx, restored, cfg[1]); err != nil {
++		return err
++	}
++	fmt.Println("Correct-key CLI backup/rekey, native restore, and both data readbacks passed; disposable files will be removed.")
++	return nil
++}
++
++func verify(ctx context.Context, path string, cfg sqlite.EncryptionOptions) (resultErr error) {
++	db, err := sqlite.Open(path, sqlite.Options{Encryption: &cfg, ReadOnly: true, NoCreate: true})
++	if err != nil {
++		return err
++	}
++	defer func() { resultErr = errors.Join(resultErr, db.Close()) }()
++	rows, err := db.Query(ctx, "SELECT id,body FROM notes")
++	if err != nil {
++		return err
++	}
++	defer func() { resultErr = errors.Join(resultErr, rows.Close()) }()
++	if !rows.Next() || len(rows.Values()) != 2 || rows.Values()[0] != int64(1) || rows.Values()[1] != "disposable CLI backup" {
++		return errors.New("disposable CLI example row mismatch")
++	}
++	if rows.Next() {
++		return errors.New("unexpected extra row")
++	}
++	return rows.Err()
++}

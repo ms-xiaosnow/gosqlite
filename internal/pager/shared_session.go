@@ -105,10 +105,10 @@ func OpenSharedSessionAdmitted(ctx context.Context, path string, opts Options, a
 	if err != nil {
 		return nil, err
 	}
-	resolved, err := resolveNativePath(path)
+	resolved, initialAbsent, err := resolveNativeReaderPath(path)
 	if err == nil {
 		path = resolved
-	} else if opts.Create && os.IsNotExist(err) {
+	} else if opts.Create && initialAbsent {
 		dir, e := resolveNativePath(filepath.Dir(path))
 		if e != nil {
 			return nil, e
@@ -149,9 +149,9 @@ func OpenSharedSessionAdmitted(ctx context.Context, path string, opts Options, a
 		if err = main.checkJournalLocked(); err != nil {
 			return nil, err
 		}
-		if st, e := nativeLstat(path + "-wal"); e == nil && st.Size() != 0 {
+		if st, absent, e := nativeLstatForCreate(path + "-wal"); e == nil && st.Size() != 0 {
 			return nil, fmt.Errorf("%w: nonempty WAL with rollback database", ErrUnsupported)
-		} else if e != nil && !os.IsNotExist(e) {
+		} else if e != nil && !absent {
 			return nil, e
 		}
 		if err = main.enterWALLocked(ctx); err != nil {
@@ -223,9 +223,9 @@ func (s *SharedSession) checkStableLocked() error {
 	if err := s.checkOpenLocked(); err != nil {
 		return err
 	}
-	if _, err := nativeLstat(s.path + "-journal"); err == nil {
+	if _, absent, err := nativeLstatForCreate(s.path + "-journal"); err == nil {
 		return fmt.Errorf("%w: journal beside shared WAL", ErrRecoveryRequired)
-	} else if !os.IsNotExist(err) {
+	} else if !absent {
 		return err
 	}
 	for _, entry := range []struct {

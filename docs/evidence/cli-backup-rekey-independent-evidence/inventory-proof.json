@@ -1,0 +1,17 @@
+{
+  "baseline_count": 1252,
+  "final_count": 1258,
+  "changed": [
+    "cmd/gosqlite/key_provider.go",
+    "cmd/gosqlite/key_provider_test.go",
+    "cmd/gosqlite/main.go",
+    "cmd/gosqlite/maintenance.go",
+    "cmd/gosqlite/maintenance_test.go",
+    "docs/cli-encryption.md",
+    "examples/encrypted-cli/main.go"
+  ],
+  "patch_sha256": "09d3bd11dc91273e9fa5a166b28f71d32cd246b63426fd971a57f6d2a7ae83bb",
+  "patch_reconstruction": "PASS, all bytes/modes and exact paths equal freeze",
+  "baseline_tree": "7d3184f87165e11e12560884ec6e4f92c9bfd039",
+  "final_tree": "acba5181381f6ee4beb56f1b33ee1a84b6b7d5e1"
+}

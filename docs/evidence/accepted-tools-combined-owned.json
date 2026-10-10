@@ -1,0 +1,62 @@
+{
+  "base": "13f53e4cdadaaca2530e17e5f7a61b9dfe8e5c33",
+  "tree": "ddb957e2a1d804b236a295f7fe6ce383954b852c",
+  "owned": {
+    "benchmarks/grams/README.md": "e706e8c0925247730de4f216e5c1efb060d4dff13998c8e680a2b4e495ccca5b",
+    "benchmarks/grams/main.go": "d745724d10d480df86ce2d2d72c09372e6b5e02e5ba99cc643665530fe756f5c",
+    "benchmarks/grams/main_test.go": "73d37847da37dfaf38e497c0507b08241deb5c792d45f75fcca71e050fda04af",
+    "cmd/gosqlite/key_provider.go": "ff45e87d7e2a21e6af610a8ece9f40c23b52373b0ba465f8bbf93e07a11e08e2",
+    "cmd/gosqlite/key_provider_test.go": "49818b676c3f48bac3edca7ba86ef6eff10df11044a1ab47c73981f4877e32c6",
+    "cmd/gosqlite/main.go": "6206f348723605520908743751dc18aafd23c5eb6488f37e22465aa205741ef6",
+    "cmd/gosqlite/maintenance.go": "4eee009b43edc37c8abf2f11bfd4580e4bf94257076d122aba95e0865177bac2",
+    "cmd/gosqlite/maintenance_test.go": "990cdd75092bfdd1da759ff6e91e9282fb004f6ca4be60bb15d18a8a495e2dc8",
+    "cmd/gosqlite/migrate_import.go": "6cd649fe581620c26f18c820a9315f7c244f22d3d7068edb4dfa0b157ef2ae48",
+    "cmd/gosqlite/migrate_import_distance_independent_review_test.go": "eda51c6d2924c8711d72bee9ddc624721716267496374b0e042b4351d51a9e90",
+    "cmd/gosqlite/migrate_import_distances.go": "4e7bb2f02fea51819d252154655b71a3fee3b769d70bc8bcbe019d087348aeb6",
+    "cmd/gosqlite/migrate_import_distances_test.go": "d12779ff22097ef3142e7069ecc2f662ca312126981ad6e230e3374e522f4ea6",
+    "docs/cli-encryption.md": "b78d760b70a3afb9ce7c937f26eb1415fc2baeae2d2b53475fa17c2333c4fda8",
+    "docs/import-distance-verification.md": "8b0c677006424c854d0512ba3ef23ddf5a721137d892d3b976845c1f5bae3c86",
+    "docs/import-pgembedding.md": "fa8bafe34d23491aeea5da5374647cbe37f7b642c624fdaca2204125b99263a7",
+    "docs/rollback-reader-acquisition.md": "91aac0154c91ea306dba2fc0628d34e2f3b59644a5d74e22b45116423cf256e2",
+    "docs/shared-absence-provenance.md": "5681222fd73980502e3ca05b19f130c842cd4c71432d0b0f0d16a2b239ffd356",
+    "examples/encrypted-cli/main.go": "53245d1748ec4ff5feebfab7db0ee2d8650e5a873ba98a7a40b7907e550b8664",
+    "internal/pager/pager.go": "dde4dd932560ed4e034e92b30f2735cb316bfcc8da6d491ac226f6963dd252c8",
+    "internal/pager/plain_session_cleanup.go": "e5ae328d7b98991171299c19b74a467e51575a4ecba521e9de75e8f601e7f722",
+    "internal/pager/reader_acquisition_test.go": "9ebce76af22236e68574a671de53d7adb0d807097b0988d20e90cc80fdce7339",
+    "internal/pager/shared_absence_test.go": "8d4c257d07113287bbe4c15879b8ea22d7425daaf1fb0b92033d0747bb7add82",
+    "internal/pager/shared_session.go": "b9b3b3820c13a718da6a878102eee27013c29a0d7973b13d281579a57f3293b6",
+    "internal/vfs/shared_absence_test.go": "b2eef2e83a7336bfff47a93aca7c445f2f24a8ea5958d9509f23196d54190877",
+    "migration/postgres/import_distance_bound_independent_v2_test.go": "7ecebbf6712ab3fda8df8cfc71c4300a0b8a2c594c8fad81fe1c2b9c8667af26",
+    "migration/postgres/import_distance_bound_test.go": "3e79c332ef8f4cf89b66df78b1321cbdc07c9d7979d0f304e7970df0f9ea78e4",
+    "migration/postgres/import_distance_cancellation_review_test.go": "6a8d6102fce78e61b611220f1336948604dd64cf3a02f3bba353ecd8ea25a48b",
+    "migration/postgres/import_distance_independent_review_test.go": "7178e53f1e235821974331f4ae0e3c9b2aeae7233a4e34ec8160562bd6504df4",
+    "migration/postgres/import_distances.go": "cab40420462e993e7af92a67a5bd7b6e3c27da352cb729b7f19bc06de6f529db",
+    "migration/postgres/import_distances_test.go": "2851d30c63cba0018a04bfcadf3bf277c0fd3768e6baa89b1ce23fe72e9c24d5",
+    "migration/postgres/import_verify.go": "82aa0fd8f5269a86b802f7a4f5fad9dc025203522fdb67127f5789085ef19b11",
+    "sqlite/plan_grams_normalized_test.go": "9564b8f296d005034f4d3808c98a2fb6f49d297c49f9afdae824bc2b3919525c"
+  },
+  "patches": [
+    [
+      "shared-absence-evidence/source.patch",
+      "a4aa67ed7b2764726b059d0f18a6ce6fe2b8f2ea3d0663968b0137f6310c7770"
+    ],
+    [
+      "grams-acceptance-evidence-v2/changes.patch",
+      "d9feb249e2678f76d58da6d0bd25a56d47c1dc8a9dfd51b8060210fc75d9cbfe"
+    ],
+    [
+      "rollback-reader-acquisition-evidence/source-v1.patch",
+      "ccc9bf728b3df6b0daa65562955ae54cc84fcdf690a9d8985d17888d740c3659"
+    ],
+    [
+      "cli-backup-rekey-evidence/source-v2.patch",
+      "c7893f8a1c6f686cf137cca15dbfa4cdf670e986625f2bf863e01caf80e8c359"
+    ],
+    [
+      "import-distance-v2-source.patch",
+      "64697339b9b7a087a1c0ba813fad87effd9200489c3f5f4b227149933a07e37b"
+    ]
+  ],
+  "independent_distance_regression_sha256": "7ecebbf6712ab3fda8df8cfc71c4300a0b8a2c594c8fad81fe1c2b9c8667af26",
+  "method": "Checked Git hunks over exact integrated base; no stale unowned overwrite"
+}

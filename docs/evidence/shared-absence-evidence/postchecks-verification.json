@@ -1,0 +1,8 @@
+{
+  "checks": 0,
+  "negative": 0,
+  "replay": 0,
+  "grouped-counters-final-verify": "all source bytes/modes unchanged",
+  "shared-absence-freeze-v1": "all source bytes/modes unchanged",
+  "shared-absence-replay-v1": "all source bytes/modes unchanged"
+}

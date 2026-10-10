@@ -1,0 +1,62 @@
+{
+  "cmd/gosqlite/key_provider.go": {
+    "baseline": null,
+    "final": {
+      "sha256": "ff45e87d7e2a21e6af610a8ece9f40c23b52373b0ba465f8bbf93e07a11e08e2",
+      "mode": "0o644",
+      "bytes": 5211
+    }
+  },
+  "cmd/gosqlite/key_provider_test.go": {
+    "baseline": null,
+    "final": {
+      "sha256": "49818b676c3f48bac3edca7ba86ef6eff10df11044a1ab47c73981f4877e32c6",
+      "mode": "0o644",
+      "bytes": 5877
+    }
+  },
+  "cmd/gosqlite/main.go": {
+    "baseline": {
+      "sha256": "d6073bd68f23a0865e50082e292bb73400f265a2ec664a39933185f8c1e15924",
+      "mode": "0o644",
+      "bytes": 5369
+    },
+    "final": {
+      "sha256": "6206f348723605520908743751dc18aafd23c5eb6488f37e22465aa205741ef6",
+      "mode": "0o644",
+      "bytes": 5849
+    }
+  },
+  "cmd/gosqlite/maintenance.go": {
+    "baseline": null,
+    "final": {
+      "sha256": "4eee009b43edc37c8abf2f11bfd4580e4bf94257076d122aba95e0865177bac2",
+      "mode": "0o644",
+      "bytes": 8183
+    }
+  },
+  "cmd/gosqlite/maintenance_test.go": {
+    "baseline": null,
+    "final": {
+      "sha256": "990cdd75092bfdd1da759ff6e91e9282fb004f6ca4be60bb15d18a8a495e2dc8",
+      "mode": "0o644",
+      "bytes": 10603
+    }
+  },
+  "docs/cli-encryption.md": {
+    "baseline": null,
+    "final": {
+      "sha256": "b78d760b70a3afb9ce7c937f26eb1415fc2baeae2d2b53475fa17c2333c4fda8",
+      "mode": "0o644",
+      "bytes": 12146
+    }
+  },
+  "examples/encrypted-cli/main.go": {
+    "baseline": null,
+    "final": {
+      "sha256": "53245d1748ec4ff5feebfab7db0ee2d8650e5a873ba98a7a40b7907e550b8664",
+      "mode": "0o644",
+      "bytes": 5100
+    }
+  }
+}

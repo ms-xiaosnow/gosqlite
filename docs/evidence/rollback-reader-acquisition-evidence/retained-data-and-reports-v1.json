@@ -1,0 +1,113 @@
+{
+  "same_workload_sha256": "bef7e1e07b10787ac0d6880c626dfe49bd779c42f2e3acdac500f44e05156ae4",
+  "runs": [
+    {
+      "report": "soak-v2-baseline-1.json",
+      "report_sha256": "dc8e61e24e676e7e911211962acdaee8f2001b5ea0c8245cde5b92322336723d",
+      "source_tree": "dcd64974d36cb35413f78dd1c006a55a79fe9a5b",
+      "status": "failed",
+      "active_seconds": 19.673626858000002,
+      "commits": 1559,
+      "reads": 8345,
+      "normal_close": "workers_joined_normal_close",
+      "final_model_verified": false,
+      "retained_files": [
+        {
+          "path": "/tmp/gosqlite-ordinary-transactions-959363431/benchmark.db",
+          "bytes": 12288,
+          "sha256": "8169cda8c50e054cb3d3fc00a9b096ff4184eea0f2d30f99c6e85d7dbf21126f"
+        }
+      ]
+    },
+    {
+      "report": "soak-v2-baseline-2.json",
+      "report_sha256": "45d08a15de9989d9fd3a3acf28a79f1913671ded707cdb66f22974d14c1860ae",
+      "source_tree": "dcd64974d36cb35413f78dd1c006a55a79fe9a5b",
+      "status": "failed",
+      "active_seconds": 1.098452608,
+      "commits": 92,
+      "reads": 428,
+      "normal_close": "workers_joined_normal_close",
+      "final_model_verified": false,
+      "retained_files": [
+        {
+          "path": "/tmp/gosqlite-ordinary-transactions-2536277006/benchmark.db",
+          "bytes": 12288,
+          "sha256": "d9b24f3833e9b0d0d8cdf65d14ccc5bb9bf13baea9a977916f98e60cc0a9d3e9"
+        }
+      ]
+    },
+    {
+      "report": "soak-v2-candidate-1.json",
+      "report_sha256": "8ab6a41dad28325cd1a5725a71268c1614277f56f967fcacdb3ca2a6514145e1",
+      "source_tree": "ac7242786b6e7ecffd03f9c45216ee788eaddbba",
+      "status": "passed",
+      "active_seconds": 20.000108642000004,
+      "commits": 1618,
+      "reads": 8592,
+      "normal_close": "workers_joined_normal_close",
+      "final_model_verified": true,
+      "retained_files": [
+        {
+          "path": "/tmp/gosqlite-ordinary-transactions-805134763/benchmark.db",
+          "bytes": 12288,
+          "sha256": "461abaeefe1a3c846ad1bc0325ca9fa6564fe974b41970781742600b81688fba"
+        }
+      ]
+    },
+    {
+      "report": "soak-v2-candidate-2.json",
+      "report_sha256": "f58ff1072296be16c0bc4c4eaaf5ed3475385db7c1d074799277b738b32f2a5a",
+      "source_tree": "ac7242786b6e7ecffd03f9c45216ee788eaddbba",
+      "status": "passed",
+      "active_seconds": 20.002908472,
+      "commits": 1840,
+      "reads": 9153,
+      "normal_close": "workers_joined_normal_close",
+      "final_model_verified": true,
+      "retained_files": [
+        {
+          "path": "/tmp/gosqlite-ordinary-transactions-3800581929/benchmark.db",
+          "bytes": 12288,
+          "sha256": "cc06d21d2effc1d781859a9afe71d593e9fd38a39b935698acba81df9743a8ce"
+        }
+      ]
+    },
+    {
+      "report": "soak-v2-candidate-3.json",
+      "report_sha256": "37644d9f1e221da976505c168b34c3eb58603104f68a2abff8256add6b0d00de",
+      "source_tree": "ac7242786b6e7ecffd03f9c45216ee788eaddbba",
+      "status": "passed",
+      "active_seconds": 20.00085483,
+      "commits": 1513,
+      "reads": 8521,
+      "normal_close": "workers_joined_normal_close",
+      "final_model_verified": true,
+      "retained_files": [
+        {
+          "path": "/tmp/gosqlite-ordinary-transactions-2160010298/benchmark.db",
+          "bytes": 12288,
+          "sha256": "6176d8d00f263c7a42db12fd9138ed6c691c7de13a7c83d18d403bd4e52135c0"
+        }
+      ]
+    },
+    {
+      "report": "soak-v2-candidate-4.json",
+      "report_sha256": "3825b9dbb71b6fc765ada6dc9e3a937f3e4e0e8d5ccdfee4e80d16ba99d7d7bb",
+      "source_tree": "ac7242786b6e7ecffd03f9c45216ee788eaddbba",
+      "status": "passed",
+      "active_seconds": 20.000633911,
+      "commits": 1664,
+      "reads": 9128,
+      "normal_close": "workers_joined_normal_close",
+      "final_model_verified": true,
+      "retained_files": [
+        {
+          "path": "/tmp/gosqlite-ordinary-transactions-1510697860/benchmark.db",
+          "bytes": 12288,
+          "sha256": "6d6ca98d7aa6e4063ec9212f352a22779e212cd26543685f2bd6a14244b3280c"
+        }
+      ]
+    }
+  ]
+}

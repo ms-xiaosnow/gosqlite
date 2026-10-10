@@ -105,11 +105,9 @@ func (s *Session) closeLocked(cause error, checkpoint func() error) error {
 	return s.cleanup.beginClass(cause, nil, !s.cleanup.childClosePending())
 }
 
-// Shared-WAL's private transition Session keeps its existing metadata branch.
+// The private shared-WAL transition needs the same initial no-handle absence
+// provenance as an exclusive session. Later metadata/retirement errors must
+// remain errors, even when they match NotExist and no plaintext scope is used.
 func (s *Session) probePathLocked(path string) (os.FileInfo, bool, error) {
-	if s.cleanup != nil {
-		return nativeLstatForCreate(path)
-	}
-	info, err := nativeLstat(path)
-	return info, os.IsNotExist(err), err
+	return nativeLstatForCreate(path)
 }

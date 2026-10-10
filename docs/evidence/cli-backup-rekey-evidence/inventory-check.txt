@@ -1,0 +1,2 @@
+Baseline 1252 files. Final 1258 files. Exactly 7 owned paths changed. All unowned baseline/final paths and work/freeze contents/modes identical. Baseline tree matches requested 7d3184f87165e11e12560884ec6e4f92c9bfd039.
+Exact patch reconstruction and post-check freeze/work contents/modes also match the full final inventory.

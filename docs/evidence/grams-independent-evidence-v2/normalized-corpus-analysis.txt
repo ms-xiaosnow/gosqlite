@@ -1,0 +1,1 @@
+random texts=128 unique texts=128 patterns=100 unique patterns=97 unique text-pattern pairs=12416 NFC-changed=100 corpus-SHA256=ab4a4a4d2cbb9d85630b88d0d7b1bdeabf7d74820f69702ba4cf5431f3472944

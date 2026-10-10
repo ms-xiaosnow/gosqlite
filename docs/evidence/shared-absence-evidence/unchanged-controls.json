@@ -1,0 +1,68 @@
+{
+  "internal/vfs/path_absence_test.go": {
+    "mode": "100644",
+    "sha256": "08ac05b98d491822986e2c418945652ffd51670a0b02d85fa8482633f398593e",
+    "blob": "921a165deb0d7ddcca55b7a6d23af81ec72c1736",
+    "size": 2550
+  },
+  "internal/vfs/cleanup_test.go": {
+    "mode": "100644",
+    "sha256": "8ab07294d0af090b98441d7ed8d823ef129646331d4242cecdd429990cd9ba6b",
+    "blob": "2dda836b2cc6751f28ae583208ca00c08c048f0d",
+    "size": 4732
+  },
+  "internal/vfs/metadata_owners_test.go": {
+    "mode": "100644",
+    "sha256": "8b6156b6a12aa3735b8339b23e1290b6a546d59e1933bcddba949975b2791fa9",
+    "blob": "52578a23f25b936a2c0a1855c8a4f041989b147e",
+    "size": 7144
+  },
+  "internal/pager/plain_absence_test.go": {
+    "mode": "100644",
+    "sha256": "0d14d853ff138d1f14e61051c7aea64c5ea23c0db45d1628fe4e8eb7a2b31800",
+    "blob": "79d9bdd5aa4ac202f4ba50b475d9bfd007c36ee5",
+    "size": 3528
+  },
+  "internal/pager/shared_open_cleanup_test.go": {
+    "mode": "100644",
+    "sha256": "3517028e9fe6aaaaf57f6c179e007a744cb64a95299b0c7f342103611c7c3ead",
+    "blob": "d1828f87c093ad4ae428ff587808d68b5b5b7074",
+    "size": 14754
+  },
+  "internal/pager/shared_close_cleanup_test.go": {
+    "mode": "100644",
+    "sha256": "ef80f03ac36a810c1b1abcf16c43c9b89d843866bd1212f5898ee7d456013f8e",
+    "blob": "f2caf0ce29307c69a3fe9b57bc493ec76b91865f",
+    "size": 18511
+  },
+  "internal/pager/shared_session_test.go": {
+    "mode": "100644",
+    "sha256": "893201dce17e41d3059d9ad859dd56137b2a7112b0efe2add886f20444a10795",
+    "blob": "9945fdda2493822fe8ccf18a06687eb1d7b890d7",
+    "size": 12600
+  },
+  "sqlite/shared_wal_test.go": {
+    "mode": "100644",
+    "sha256": "4f3b0e0a4af8d2546b916cf9fa87516b63c20ced706addeb940569ca76d3c74d",
+    "blob": "670fa823fed3ce4ff55e39521c5de2ca46a903cf",
+    "size": 3915
+  },
+  "sqlite/close_cleanup_test.go": {
+    "mode": "100644",
+    "sha256": "7f72c4a819bbf72c987ee9b3607865ca41c5e1c573216c3fe7524356ed6388b1",
+    "blob": "b7cd3c5abdf31e35a1ecf8fe814028c05009642e",
+    "size": 2806
+  },
+  "driver/shared_wal_test.go": {
+    "mode": "100644",
+    "sha256": "e6b70730758f1bcf96d670eb0d0e487baf338a8344967d93aaed679b8d017dea",
+    "blob": "fb1c7c3f06aad75090325e16c4a0d2d0435d67a9",
+    "size": 2319
+  },
+  "driver/close_cleanup_test.go": {
+    "mode": "100644",
+    "sha256": "70de3be8904ef3bf01027227c573ac5ee91d412c1e174abecbcece2cf01772b8",
+    "blob": "9477612f69183bfbc65fc502cb256581f08bc229",
+    "size": 2154
+  }
+}

@@ -1,0 +1,6 @@
+docs/progress.md
+docs/shared-absence-provenance.md
+internal/pager/plain_session_cleanup.go
+internal/pager/shared_absence_test.go
+internal/pager/shared_session.go
+internal/vfs/shared_absence_test.go

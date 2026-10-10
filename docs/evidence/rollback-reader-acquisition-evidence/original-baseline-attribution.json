@@ -1,0 +1,19 @@
+{
+  "unfixed_pager_sha256": {
+    "grouped-counters-final-verify/internal/pager/pager.go": "1c08ac6cd21b11ba858b444a00af6cf68d7f28aa93453c1fccdc8fef151cb8bc",
+    "transaction-soak-freeze-v1/internal/pager/pager.go": "1c08ac6cd21b11ba858b444a00af6cf68d7f28aa93453c1fccdc8fef151cb8bc",
+    "transaction-soak-freeze-v2/internal/pager/pager.go": "1c08ac6cd21b11ba858b444a00af6cf68d7f28aa93453c1fccdc8fef151cb8bc"
+  },
+  "original_failed_report_sha256": "a62f4bfed390582d1125d88a6dfbe06f06f3a33500a55fedacea934424a1e101",
+  "original_failed_database_sha256": "b996a714bd220924cd93370ca257c553f17ec775159a33382606b9b29ac773e9",
+  "original_failed_report": {
+    "status": "failed",
+    "errors": [
+      "sqlite query: SQLite database changed during read"
+    ],
+    "active_seconds": 14.015854093,
+    "commits": 723,
+    "reads": 4138,
+    "shutdown": "workers_joined_normal_close"
+  }
+}

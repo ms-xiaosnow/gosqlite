@@ -1,0 +1,9 @@
+cwd=/workspace/scratch/5e06a74e5f65/durable-restart/rollback-reader-acquisition-control-v1
+CGO_ENABLED=0
+command=['go', 'test', './internal/pager', '-run', '^TestReaderAcquisitionSourceSnapshotAfterShared$', '-count=1', '-v']
+=== RUN   TestReaderAcquisitionSourceSnapshotAfterShared
+    reader_acquisition_test.go:68: missing constructor step "info, err = statNativeFile(file)"
+--- FAIL: TestReaderAcquisitionSourceSnapshotAfterShared (0.00s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/pager	0.007s
+FAIL

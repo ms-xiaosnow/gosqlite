@@ -1,0 +1,445 @@
+cwd=/workspace/scratch/5e06a74e5f65/durable-restart/rollback-reader-acquisition-freeze-v1
+CGO_ENABLED=0
+command=['go', 'test', './internal/pager', '-run', '^Test(ReaderAcquisition|ReadOnlyPageAccess$|TxCreatePageSizesAndReadSnapshot$)', '-count=20', '-v']
+=== RUN   TestReadOnlyPageAccess
+=== RUN   TestReadOnlyPageAccess/512
+=== RUN   TestReadOnlyPageAccess/4096
+=== RUN   TestReadOnlyPageAccess/65536
+--- PASS: TestReadOnlyPageAccess (0.01s)
+    --- PASS: TestReadOnlyPageAccess/512 (0.00s)
+    --- PASS: TestReadOnlyPageAccess/4096 (0.00s)
+    --- PASS: TestReadOnlyPageAccess/65536 (0.00s)
+=== RUN   TestReaderAcquisitionSourceSnapshotAfterShared
+--- PASS: TestReaderAcquisitionSourceSnapshotAfterShared (0.00s)
+=== RUN   TestReaderAcquisitionOrdinaryCooperatingWriter
+--- PASS: TestReaderAcquisitionOrdinaryCooperatingWriter (0.04s)
+=== RUN   TestReaderAcquisitionMemoryBusyClassification
+--- PASS: TestReaderAcquisitionMemoryBusyClassification (0.00s)
+=== RUN   TestTxCreatePageSizesAndReadSnapshot
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/512
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/4096
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/65536
+--- PASS: TestTxCreatePageSizesAndReadSnapshot (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/512 (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/4096 (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/65536 (0.00s)
+=== RUN   TestReadOnlyPageAccess
+=== RUN   TestReadOnlyPageAccess/512
+=== RUN   TestReadOnlyPageAccess/4096
+=== RUN   TestReadOnlyPageAccess/65536
+--- PASS: TestReadOnlyPageAccess (0.01s)
+    --- PASS: TestReadOnlyPageAccess/512 (0.00s)
+    --- PASS: TestReadOnlyPageAccess/4096 (0.00s)
+    --- PASS: TestReadOnlyPageAccess/65536 (0.00s)
+=== RUN   TestReaderAcquisitionSourceSnapshotAfterShared
+--- PASS: TestReaderAcquisitionSourceSnapshotAfterShared (0.00s)
+=== RUN   TestReaderAcquisitionOrdinaryCooperatingWriter
+--- PASS: TestReaderAcquisitionOrdinaryCooperatingWriter (0.04s)
+=== RUN   TestReaderAcquisitionMemoryBusyClassification
+--- PASS: TestReaderAcquisitionMemoryBusyClassification (0.00s)
+=== RUN   TestTxCreatePageSizesAndReadSnapshot
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/512
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/4096
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/65536
+--- PASS: TestTxCreatePageSizesAndReadSnapshot (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/512 (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/4096 (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/65536 (0.00s)
+=== RUN   TestReadOnlyPageAccess
+=== RUN   TestReadOnlyPageAccess/512
+=== RUN   TestReadOnlyPageAccess/4096
+=== RUN   TestReadOnlyPageAccess/65536
+--- PASS: TestReadOnlyPageAccess (0.01s)
+    --- PASS: TestReadOnlyPageAccess/512 (0.00s)
+    --- PASS: TestReadOnlyPageAccess/4096 (0.00s)
+    --- PASS: TestReadOnlyPageAccess/65536 (0.00s)
+=== RUN   TestReaderAcquisitionSourceSnapshotAfterShared
+--- PASS: TestReaderAcquisitionSourceSnapshotAfterShared (0.00s)
+=== RUN   TestReaderAcquisitionOrdinaryCooperatingWriter
+--- PASS: TestReaderAcquisitionOrdinaryCooperatingWriter (0.04s)
+=== RUN   TestReaderAcquisitionMemoryBusyClassification
+--- PASS: TestReaderAcquisitionMemoryBusyClassification (0.00s)
+=== RUN   TestTxCreatePageSizesAndReadSnapshot
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/512
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/4096
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/65536
+--- PASS: TestTxCreatePageSizesAndReadSnapshot (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/512 (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/4096 (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/65536 (0.00s)
+=== RUN   TestReadOnlyPageAccess
+=== RUN   TestReadOnlyPageAccess/512
+=== RUN   TestReadOnlyPageAccess/4096
+=== RUN   TestReadOnlyPageAccess/65536
+--- PASS: TestReadOnlyPageAccess (0.01s)
+    --- PASS: TestReadOnlyPageAccess/512 (0.00s)
+    --- PASS: TestReadOnlyPageAccess/4096 (0.00s)
+    --- PASS: TestReadOnlyPageAccess/65536 (0.00s)
+=== RUN   TestReaderAcquisitionSourceSnapshotAfterShared
+--- PASS: TestReaderAcquisitionSourceSnapshotAfterShared (0.00s)
+=== RUN   TestReaderAcquisitionOrdinaryCooperatingWriter
+--- PASS: TestReaderAcquisitionOrdinaryCooperatingWriter (0.04s)
+=== RUN   TestReaderAcquisitionMemoryBusyClassification
+--- PASS: TestReaderAcquisitionMemoryBusyClassification (0.00s)
+=== RUN   TestTxCreatePageSizesAndReadSnapshot
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/512
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/4096
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/65536
+--- PASS: TestTxCreatePageSizesAndReadSnapshot (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/512 (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/4096 (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/65536 (0.00s)
+=== RUN   TestReadOnlyPageAccess
+=== RUN   TestReadOnlyPageAccess/512
+=== RUN   TestReadOnlyPageAccess/4096
+=== RUN   TestReadOnlyPageAccess/65536
+--- PASS: TestReadOnlyPageAccess (0.01s)
+    --- PASS: TestReadOnlyPageAccess/512 (0.00s)
+    --- PASS: TestReadOnlyPageAccess/4096 (0.00s)
+    --- PASS: TestReadOnlyPageAccess/65536 (0.01s)
+=== RUN   TestReaderAcquisitionSourceSnapshotAfterShared
+--- PASS: TestReaderAcquisitionSourceSnapshotAfterShared (0.00s)
+=== RUN   TestReaderAcquisitionOrdinaryCooperatingWriter
+--- PASS: TestReaderAcquisitionOrdinaryCooperatingWriter (0.03s)
+=== RUN   TestReaderAcquisitionMemoryBusyClassification
+--- PASS: TestReaderAcquisitionMemoryBusyClassification (0.00s)
+=== RUN   TestTxCreatePageSizesAndReadSnapshot
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/512
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/4096
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/65536
+--- PASS: TestTxCreatePageSizesAndReadSnapshot (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/512 (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/4096 (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/65536 (0.00s)
+=== RUN   TestReadOnlyPageAccess
+=== RUN   TestReadOnlyPageAccess/512
+=== RUN   TestReadOnlyPageAccess/4096
+=== RUN   TestReadOnlyPageAccess/65536
+--- PASS: TestReadOnlyPageAccess (0.01s)
+    --- PASS: TestReadOnlyPageAccess/512 (0.00s)
+    --- PASS: TestReadOnlyPageAccess/4096 (0.00s)
+    --- PASS: TestReadOnlyPageAccess/65536 (0.00s)
+=== RUN   TestReaderAcquisitionSourceSnapshotAfterShared
+--- PASS: TestReaderAcquisitionSourceSnapshotAfterShared (0.00s)
+=== RUN   TestReaderAcquisitionOrdinaryCooperatingWriter
+--- PASS: TestReaderAcquisitionOrdinaryCooperatingWriter (0.04s)
+=== RUN   TestReaderAcquisitionMemoryBusyClassification
+--- PASS: TestReaderAcquisitionMemoryBusyClassification (0.00s)
+=== RUN   TestTxCreatePageSizesAndReadSnapshot
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/512
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/4096
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/65536
+--- PASS: TestTxCreatePageSizesAndReadSnapshot (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/512 (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/4096 (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/65536 (0.00s)
+=== RUN   TestReadOnlyPageAccess
+=== RUN   TestReadOnlyPageAccess/512
+=== RUN   TestReadOnlyPageAccess/4096
+=== RUN   TestReadOnlyPageAccess/65536
+--- PASS: TestReadOnlyPageAccess (0.01s)
+    --- PASS: TestReadOnlyPageAccess/512 (0.00s)
+    --- PASS: TestReadOnlyPageAccess/4096 (0.00s)
+    --- PASS: TestReadOnlyPageAccess/65536 (0.00s)
+=== RUN   TestReaderAcquisitionSourceSnapshotAfterShared
+--- PASS: TestReaderAcquisitionSourceSnapshotAfterShared (0.00s)
+=== RUN   TestReaderAcquisitionOrdinaryCooperatingWriter
+--- PASS: TestReaderAcquisitionOrdinaryCooperatingWriter (0.05s)
+=== RUN   TestReaderAcquisitionMemoryBusyClassification
+--- PASS: TestReaderAcquisitionMemoryBusyClassification (0.00s)
+=== RUN   TestTxCreatePageSizesAndReadSnapshot
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/512
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/4096
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/65536
+--- PASS: TestTxCreatePageSizesAndReadSnapshot (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/512 (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/4096 (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/65536 (0.00s)
+=== RUN   TestReadOnlyPageAccess
+=== RUN   TestReadOnlyPageAccess/512
+=== RUN   TestReadOnlyPageAccess/4096
+=== RUN   TestReadOnlyPageAccess/65536
+--- PASS: TestReadOnlyPageAccess (0.01s)
+    --- PASS: TestReadOnlyPageAccess/512 (0.00s)
+    --- PASS: TestReadOnlyPageAccess/4096 (0.00s)
+    --- PASS: TestReadOnlyPageAccess/65536 (0.00s)
+=== RUN   TestReaderAcquisitionSourceSnapshotAfterShared
+--- PASS: TestReaderAcquisitionSourceSnapshotAfterShared (0.00s)
+=== RUN   TestReaderAcquisitionOrdinaryCooperatingWriter
+--- PASS: TestReaderAcquisitionOrdinaryCooperatingWriter (0.04s)
+=== RUN   TestReaderAcquisitionMemoryBusyClassification
+--- PASS: TestReaderAcquisitionMemoryBusyClassification (0.00s)
+=== RUN   TestTxCreatePageSizesAndReadSnapshot
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/512
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/4096
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/65536
+--- PASS: TestTxCreatePageSizesAndReadSnapshot (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/512 (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/4096 (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/65536 (0.00s)
+=== RUN   TestReadOnlyPageAccess
+=== RUN   TestReadOnlyPageAccess/512
+=== RUN   TestReadOnlyPageAccess/4096
+=== RUN   TestReadOnlyPageAccess/65536
+--- PASS: TestReadOnlyPageAccess (0.01s)
+    --- PASS: TestReadOnlyPageAccess/512 (0.00s)
+    --- PASS: TestReadOnlyPageAccess/4096 (0.00s)
+    --- PASS: TestReadOnlyPageAccess/65536 (0.00s)
+=== RUN   TestReaderAcquisitionSourceSnapshotAfterShared
+--- PASS: TestReaderAcquisitionSourceSnapshotAfterShared (0.00s)
+=== RUN   TestReaderAcquisitionOrdinaryCooperatingWriter
+--- PASS: TestReaderAcquisitionOrdinaryCooperatingWriter (0.04s)
+=== RUN   TestReaderAcquisitionMemoryBusyClassification
+--- PASS: TestReaderAcquisitionMemoryBusyClassification (0.00s)
+=== RUN   TestTxCreatePageSizesAndReadSnapshot
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/512
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/4096
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/65536
+--- PASS: TestTxCreatePageSizesAndReadSnapshot (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/512 (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/4096 (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/65536 (0.00s)
+=== RUN   TestReadOnlyPageAccess
+=== RUN   TestReadOnlyPageAccess/512
+=== RUN   TestReadOnlyPageAccess/4096
+=== RUN   TestReadOnlyPageAccess/65536
+--- PASS: TestReadOnlyPageAccess (0.01s)
+    --- PASS: TestReadOnlyPageAccess/512 (0.00s)
+    --- PASS: TestReadOnlyPageAccess/4096 (0.00s)
+    --- PASS: TestReadOnlyPageAccess/65536 (0.00s)
+=== RUN   TestReaderAcquisitionSourceSnapshotAfterShared
+--- PASS: TestReaderAcquisitionSourceSnapshotAfterShared (0.00s)
+=== RUN   TestReaderAcquisitionOrdinaryCooperatingWriter
+--- PASS: TestReaderAcquisitionOrdinaryCooperatingWriter (0.07s)
+=== RUN   TestReaderAcquisitionMemoryBusyClassification
+--- PASS: TestReaderAcquisitionMemoryBusyClassification (0.00s)
+=== RUN   TestTxCreatePageSizesAndReadSnapshot
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/512
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/4096
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/65536
+--- PASS: TestTxCreatePageSizesAndReadSnapshot (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/512 (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/4096 (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/65536 (0.00s)
+=== RUN   TestReadOnlyPageAccess
+=== RUN   TestReadOnlyPageAccess/512
+=== RUN   TestReadOnlyPageAccess/4096
+=== RUN   TestReadOnlyPageAccess/65536
+--- PASS: TestReadOnlyPageAccess (0.01s)
+    --- PASS: TestReadOnlyPageAccess/512 (0.01s)
+    --- PASS: TestReadOnlyPageAccess/4096 (0.00s)
+    --- PASS: TestReadOnlyPageAccess/65536 (0.00s)
+=== RUN   TestReaderAcquisitionSourceSnapshotAfterShared
+--- PASS: TestReaderAcquisitionSourceSnapshotAfterShared (0.00s)
+=== RUN   TestReaderAcquisitionOrdinaryCooperatingWriter
+--- PASS: TestReaderAcquisitionOrdinaryCooperatingWriter (0.04s)
+=== RUN   TestReaderAcquisitionMemoryBusyClassification
+--- PASS: TestReaderAcquisitionMemoryBusyClassification (0.00s)
+=== RUN   TestTxCreatePageSizesAndReadSnapshot
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/512
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/4096
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/65536
+--- PASS: TestTxCreatePageSizesAndReadSnapshot (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/512 (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/4096 (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/65536 (0.00s)
+=== RUN   TestReadOnlyPageAccess
+=== RUN   TestReadOnlyPageAccess/512
+=== RUN   TestReadOnlyPageAccess/4096
+=== RUN   TestReadOnlyPageAccess/65536
+--- PASS: TestReadOnlyPageAccess (0.01s)
+    --- PASS: TestReadOnlyPageAccess/512 (0.00s)
+    --- PASS: TestReadOnlyPageAccess/4096 (0.00s)
+    --- PASS: TestReadOnlyPageAccess/65536 (0.00s)
+=== RUN   TestReaderAcquisitionSourceSnapshotAfterShared
+--- PASS: TestReaderAcquisitionSourceSnapshotAfterShared (0.00s)
+=== RUN   TestReaderAcquisitionOrdinaryCooperatingWriter
+--- PASS: TestReaderAcquisitionOrdinaryCooperatingWriter (0.05s)
+=== RUN   TestReaderAcquisitionMemoryBusyClassification
+--- PASS: TestReaderAcquisitionMemoryBusyClassification (0.00s)
+=== RUN   TestTxCreatePageSizesAndReadSnapshot
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/512
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/4096
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/65536
+--- PASS: TestTxCreatePageSizesAndReadSnapshot (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/512 (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/4096 (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/65536 (0.00s)
+=== RUN   TestReadOnlyPageAccess
+=== RUN   TestReadOnlyPageAccess/512
+=== RUN   TestReadOnlyPageAccess/4096
+=== RUN   TestReadOnlyPageAccess/65536
+--- PASS: TestReadOnlyPageAccess (0.01s)
+    --- PASS: TestReadOnlyPageAccess/512 (0.00s)
+    --- PASS: TestReadOnlyPageAccess/4096 (0.00s)
+    --- PASS: TestReadOnlyPageAccess/65536 (0.00s)
+=== RUN   TestReaderAcquisitionSourceSnapshotAfterShared
+--- PASS: TestReaderAcquisitionSourceSnapshotAfterShared (0.00s)
+=== RUN   TestReaderAcquisitionOrdinaryCooperatingWriter
+--- PASS: TestReaderAcquisitionOrdinaryCooperatingWriter (0.04s)
+=== RUN   TestReaderAcquisitionMemoryBusyClassification
+--- PASS: TestReaderAcquisitionMemoryBusyClassification (0.00s)
+=== RUN   TestTxCreatePageSizesAndReadSnapshot
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/512
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/4096
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/65536
+--- PASS: TestTxCreatePageSizesAndReadSnapshot (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/512 (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/4096 (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/65536 (0.00s)
+=== RUN   TestReadOnlyPageAccess
+=== RUN   TestReadOnlyPageAccess/512
+=== RUN   TestReadOnlyPageAccess/4096
+=== RUN   TestReadOnlyPageAccess/65536
+--- PASS: TestReadOnlyPageAccess (0.01s)
+    --- PASS: TestReadOnlyPageAccess/512 (0.00s)
+    --- PASS: TestReadOnlyPageAccess/4096 (0.00s)
+    --- PASS: TestReadOnlyPageAccess/65536 (0.00s)
+=== RUN   TestReaderAcquisitionSourceSnapshotAfterShared
+--- PASS: TestReaderAcquisitionSourceSnapshotAfterShared (0.01s)
+=== RUN   TestReaderAcquisitionOrdinaryCooperatingWriter
+--- PASS: TestReaderAcquisitionOrdinaryCooperatingWriter (0.03s)
+=== RUN   TestReaderAcquisitionMemoryBusyClassification
+--- PASS: TestReaderAcquisitionMemoryBusyClassification (0.00s)
+=== RUN   TestTxCreatePageSizesAndReadSnapshot
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/512
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/4096
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/65536
+--- PASS: TestTxCreatePageSizesAndReadSnapshot (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/512 (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/4096 (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/65536 (0.00s)
+=== RUN   TestReadOnlyPageAccess
+=== RUN   TestReadOnlyPageAccess/512
+=== RUN   TestReadOnlyPageAccess/4096
+=== RUN   TestReadOnlyPageAccess/65536
+--- PASS: TestReadOnlyPageAccess (0.01s)
+    --- PASS: TestReadOnlyPageAccess/512 (0.00s)
+    --- PASS: TestReadOnlyPageAccess/4096 (0.00s)
+    --- PASS: TestReadOnlyPageAccess/65536 (0.00s)
+=== RUN   TestReaderAcquisitionSourceSnapshotAfterShared
+--- PASS: TestReaderAcquisitionSourceSnapshotAfterShared (0.00s)
+=== RUN   TestReaderAcquisitionOrdinaryCooperatingWriter
+--- PASS: TestReaderAcquisitionOrdinaryCooperatingWriter (0.07s)
+=== RUN   TestReaderAcquisitionMemoryBusyClassification
+--- PASS: TestReaderAcquisitionMemoryBusyClassification (0.00s)
+=== RUN   TestTxCreatePageSizesAndReadSnapshot
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/512
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/4096
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/65536
+--- PASS: TestTxCreatePageSizesAndReadSnapshot (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/512 (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/4096 (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/65536 (0.00s)
+=== RUN   TestReadOnlyPageAccess
+=== RUN   TestReadOnlyPageAccess/512
+=== RUN   TestReadOnlyPageAccess/4096
+=== RUN   TestReadOnlyPageAccess/65536
+--- PASS: TestReadOnlyPageAccess (0.01s)
+    --- PASS: TestReadOnlyPageAccess/512 (0.00s)
+    --- PASS: TestReadOnlyPageAccess/4096 (0.00s)
+    --- PASS: TestReadOnlyPageAccess/65536 (0.00s)
+=== RUN   TestReaderAcquisitionSourceSnapshotAfterShared
+--- PASS: TestReaderAcquisitionSourceSnapshotAfterShared (0.00s)
+=== RUN   TestReaderAcquisitionOrdinaryCooperatingWriter
+--- PASS: TestReaderAcquisitionOrdinaryCooperatingWriter (0.05s)
+=== RUN   TestReaderAcquisitionMemoryBusyClassification
+--- PASS: TestReaderAcquisitionMemoryBusyClassification (0.00s)
+=== RUN   TestTxCreatePageSizesAndReadSnapshot
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/512
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/4096
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/65536
+--- PASS: TestTxCreatePageSizesAndReadSnapshot (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/512 (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/4096 (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/65536 (0.00s)
+=== RUN   TestReadOnlyPageAccess
+=== RUN   TestReadOnlyPageAccess/512
+=== RUN   TestReadOnlyPageAccess/4096
+=== RUN   TestReadOnlyPageAccess/65536
+--- PASS: TestReadOnlyPageAccess (0.01s)
+    --- PASS: TestReadOnlyPageAccess/512 (0.00s)
+    --- PASS: TestReadOnlyPageAccess/4096 (0.00s)
+    --- PASS: TestReadOnlyPageAccess/65536 (0.00s)
+=== RUN   TestReaderAcquisitionSourceSnapshotAfterShared
+--- PASS: TestReaderAcquisitionSourceSnapshotAfterShared (0.00s)
+=== RUN   TestReaderAcquisitionOrdinaryCooperatingWriter
+--- PASS: TestReaderAcquisitionOrdinaryCooperatingWriter (0.03s)
+=== RUN   TestReaderAcquisitionMemoryBusyClassification
+--- PASS: TestReaderAcquisitionMemoryBusyClassification (0.00s)
+=== RUN   TestTxCreatePageSizesAndReadSnapshot
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/512
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/4096
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/65536
+--- PASS: TestTxCreatePageSizesAndReadSnapshot (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/512 (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/4096 (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/65536 (0.00s)
+=== RUN   TestReadOnlyPageAccess
+=== RUN   TestReadOnlyPageAccess/512
+=== RUN   TestReadOnlyPageAccess/4096
+=== RUN   TestReadOnlyPageAccess/65536
+--- PASS: TestReadOnlyPageAccess (0.01s)
+    --- PASS: TestReadOnlyPageAccess/512 (0.00s)
+    --- PASS: TestReadOnlyPageAccess/4096 (0.00s)
+    --- PASS: TestReadOnlyPageAccess/65536 (0.01s)
+=== RUN   TestReaderAcquisitionSourceSnapshotAfterShared
+--- PASS: TestReaderAcquisitionSourceSnapshotAfterShared (0.00s)
+=== RUN   TestReaderAcquisitionOrdinaryCooperatingWriter
+--- PASS: TestReaderAcquisitionOrdinaryCooperatingWriter (0.07s)
+=== RUN   TestReaderAcquisitionMemoryBusyClassification
+--- PASS: TestReaderAcquisitionMemoryBusyClassification (0.00s)
+=== RUN   TestTxCreatePageSizesAndReadSnapshot
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/512
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/4096
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/65536
+--- PASS: TestTxCreatePageSizesAndReadSnapshot (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/512 (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/4096 (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/65536 (0.00s)
+=== RUN   TestReadOnlyPageAccess
+=== RUN   TestReadOnlyPageAccess/512
+=== RUN   TestReadOnlyPageAccess/4096
+=== RUN   TestReadOnlyPageAccess/65536
+--- PASS: TestReadOnlyPageAccess (0.01s)
+    --- PASS: TestReadOnlyPageAccess/512 (0.00s)
+    --- PASS: TestReadOnlyPageAccess/4096 (0.00s)
+    --- PASS: TestReadOnlyPageAccess/65536 (0.01s)
+=== RUN   TestReaderAcquisitionSourceSnapshotAfterShared
+--- PASS: TestReaderAcquisitionSourceSnapshotAfterShared (0.00s)
+=== RUN   TestReaderAcquisitionOrdinaryCooperatingWriter
+--- PASS: TestReaderAcquisitionOrdinaryCooperatingWriter (0.04s)
+=== RUN   TestReaderAcquisitionMemoryBusyClassification
+--- PASS: TestReaderAcquisitionMemoryBusyClassification (0.00s)
+=== RUN   TestTxCreatePageSizesAndReadSnapshot
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/512
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/4096
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/65536
+--- PASS: TestTxCreatePageSizesAndReadSnapshot (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/512 (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/4096 (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/65536 (0.00s)
+=== RUN   TestReadOnlyPageAccess
+=== RUN   TestReadOnlyPageAccess/512
+=== RUN   TestReadOnlyPageAccess/4096
+=== RUN   TestReadOnlyPageAccess/65536
+--- PASS: TestReadOnlyPageAccess (0.01s)
+    --- PASS: TestReadOnlyPageAccess/512 (0.00s)
+    --- PASS: TestReadOnlyPageAccess/4096 (0.00s)
+    --- PASS: TestReadOnlyPageAccess/65536 (0.00s)
+=== RUN   TestReaderAcquisitionSourceSnapshotAfterShared
+--- PASS: TestReaderAcquisitionSourceSnapshotAfterShared (0.00s)
+=== RUN   TestReaderAcquisitionOrdinaryCooperatingWriter
+--- PASS: TestReaderAcquisitionOrdinaryCooperatingWriter (0.05s)
+=== RUN   TestReaderAcquisitionMemoryBusyClassification
+--- PASS: TestReaderAcquisitionMemoryBusyClassification (0.00s)
+=== RUN   TestTxCreatePageSizesAndReadSnapshot
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/512
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/4096
+=== RUN   TestTxCreatePageSizesAndReadSnapshot/65536
+--- PASS: TestTxCreatePageSizesAndReadSnapshot (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/512 (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/4096 (0.00s)
+    --- PASS: TestTxCreatePageSizesAndReadSnapshot/65536 (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.157s

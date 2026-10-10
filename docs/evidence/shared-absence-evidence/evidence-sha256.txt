@@ -1,0 +1,10 @@
+af5523ceb547371caf4f0e41259f95cdeb991e74dcda380dd78272fcdfe94a31  ../shared-absence-evidence/report.md
+a4aa67ed7b2764726b059d0f18a6ce6fe2b8f2ea3d0663968b0137f6310c7770  ../shared-absence-evidence/source.patch
+636bf50d8223b93dc3a1f1bfa4b9f8dc3d574f9b74aff2444520cafd831bc3ae  ../shared-absence-evidence/checks.log
+211d3a2e26a9bb15523f78d2c64fafc50ca31559e271609cf0a0d7644d6fa627  ../shared-absence-evidence/negative.log
+5a37e2a0d2b18c4f36e65529df0c5ee1440cee580b56ea9bd3d34095fa100a3d  ../shared-absence-evidence/replay.log
+db5c10673c944043654c2ed07e8dbb0173c77eb4c45bf11c6db7bd82faa425aa  ../shared-absence-evidence/full-manifest.json
+13c7187db67f66c3550f711e219450661f1b15c8d7cf629636d10b44e8c3fed5  ../shared-absence-evidence/owned.json
+6bb831c58fe377993f0682e85cbafe3266e7fefdcc8eec7de6c0c9025f0375ec  ../shared-absence-evidence/verification.json
+ef3be5ce908157e068c43feea5c9a993239084bb9c445bff9007506f894c73b0  ../shared-absence-evidence/postchecks-verification.json
+455f5c7dffc876639cabf1f197a1bb759c5c77675cce6c7f84614049a28f5f16  ../shared-absence-evidence/unchanged-controls.json

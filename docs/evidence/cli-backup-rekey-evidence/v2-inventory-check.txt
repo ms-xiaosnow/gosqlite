@@ -1,0 +1,2 @@
+Baseline 1252 files; final 1258. Exactly seven owned paths changed. All unowned baseline/final files and work/freeze content/modes identical.
+Exact patch reconstruction and current work/freeze content/modes matched full final inventory after native example.

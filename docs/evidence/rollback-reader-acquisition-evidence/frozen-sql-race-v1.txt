@@ -1,0 +1,35 @@
+cwd=/workspace/scratch/5e06a74e5f65/durable-restart/rollback-reader-acquisition-freeze-v1
+CGO_ENABLED=1
+command=['go', 'test', '-race', './sqlite', '-run', '^TestTransactionDeferredSnapshotTiming$', '-count=5', '-v']
+=== RUN   TestTransactionDeferredSnapshotTiming
+=== RUN   TestTransactionDeferredSnapshotTiming/false
+=== RUN   TestTransactionDeferredSnapshotTiming/true
+--- PASS: TestTransactionDeferredSnapshotTiming (0.03s)
+    --- PASS: TestTransactionDeferredSnapshotTiming/false (0.01s)
+    --- PASS: TestTransactionDeferredSnapshotTiming/true (0.02s)
+=== RUN   TestTransactionDeferredSnapshotTiming
+=== RUN   TestTransactionDeferredSnapshotTiming/false
+=== RUN   TestTransactionDeferredSnapshotTiming/true
+--- PASS: TestTransactionDeferredSnapshotTiming (0.03s)
+    --- PASS: TestTransactionDeferredSnapshotTiming/false (0.01s)
+    --- PASS: TestTransactionDeferredSnapshotTiming/true (0.02s)
+=== RUN   TestTransactionDeferredSnapshotTiming
+=== RUN   TestTransactionDeferredSnapshotTiming/false
+=== RUN   TestTransactionDeferredSnapshotTiming/true
+--- PASS: TestTransactionDeferredSnapshotTiming (0.03s)
+    --- PASS: TestTransactionDeferredSnapshotTiming/false (0.01s)
+    --- PASS: TestTransactionDeferredSnapshotTiming/true (0.03s)
+=== RUN   TestTransactionDeferredSnapshotTiming
+=== RUN   TestTransactionDeferredSnapshotTiming/false
+=== RUN   TestTransactionDeferredSnapshotTiming/true
+--- PASS: TestTransactionDeferredSnapshotTiming (0.03s)
+    --- PASS: TestTransactionDeferredSnapshotTiming/false (0.01s)
+    --- PASS: TestTransactionDeferredSnapshotTiming/true (0.02s)
+=== RUN   TestTransactionDeferredSnapshotTiming
+=== RUN   TestTransactionDeferredSnapshotTiming/false
+=== RUN   TestTransactionDeferredSnapshotTiming/true
+--- PASS: TestTransactionDeferredSnapshotTiming (0.03s)
+    --- PASS: TestTransactionDeferredSnapshotTiming/false (0.01s)
+    --- PASS: TestTransactionDeferredSnapshotTiming/true (0.02s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	1.174s

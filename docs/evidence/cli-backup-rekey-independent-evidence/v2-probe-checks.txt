@@ -1,0 +1,39 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestReviewMemoryEnvironmentAlphabet
+--- PASS: TestReviewMemoryEnvironmentAlphabet (0.00s)
+=== RUN   TestReviewMemoryInputBoundaries
+--- PASS: TestReviewMemoryInputBoundaries (0.00s)
+=== RUN   TestReviewMemoryErrorsHaveNoPrivateChain
+--- PASS: TestReviewMemoryErrorsHaveNoPrivateChain (0.00s)
+=== RUN   TestReviewActualCLICorrectKeyModes
+=== RUN   TestReviewActualCLICorrectKeyModes/snapshot
+=== RUN   TestReviewActualCLICorrectKeyModes/wal
+=== RUN   TestReviewActualCLICorrectKeyModes/shared
+--- PASS: TestReviewActualCLICorrectKeyModes (0.07s)
+    --- PASS: TestReviewActualCLICorrectKeyModes/snapshot (0.02s)
+    --- PASS: TestReviewActualCLICorrectKeyModes/wal (0.02s)
+    --- PASS: TestReviewActualCLICorrectKeyModes/shared (0.03s)
+=== RUN   TestReviewMemoryStdinBackingCleared
+--- PASS: TestReviewMemoryStdinBackingCleared (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.075s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestReviewMemoryEnvironmentAlphabet
+--- PASS: TestReviewMemoryEnvironmentAlphabet (0.00s)
+=== RUN   TestReviewMemoryInputBoundaries
+--- PASS: TestReviewMemoryInputBoundaries (0.00s)
+=== RUN   TestReviewMemoryErrorsHaveNoPrivateChain
+--- PASS: TestReviewMemoryErrorsHaveNoPrivateChain (0.00s)
+=== RUN   TestReviewActualCLICorrectKeyModes
+=== RUN   TestReviewActualCLICorrectKeyModes/snapshot
+=== RUN   TestReviewActualCLICorrectKeyModes/wal
+=== RUN   TestReviewActualCLICorrectKeyModes/shared
+--- PASS: TestReviewActualCLICorrectKeyModes (0.18s)
+    --- PASS: TestReviewActualCLICorrectKeyModes/snapshot (0.03s)
+    --- PASS: TestReviewActualCLICorrectKeyModes/wal (0.08s)
+    --- PASS: TestReviewActualCLICorrectKeyModes/shared (0.05s)
+=== RUN   TestReviewMemoryStdinBackingCleared
+--- PASS: TestReviewMemoryStdinBackingCleared (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	1.201s
+REVIEWER V2 MEMORY AND ACTUAL CLI PROBES PASS

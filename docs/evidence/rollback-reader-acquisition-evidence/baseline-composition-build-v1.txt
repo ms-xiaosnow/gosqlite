@@ -1,0 +1,3 @@
+cwd=/workspace/scratch/5e06a74e5f65/durable-restart/rollback-reader-acquisition-baseline-soak-v1
+CGO_ENABLED=0
+command=['go', 'build', '-trimpath', '-o', '/workspace/scratch/5e06a74e5f65/durable-restart/rollback-reader-acquisition-evidence/transactions-baseline-v1', './benchmarks/transactions']

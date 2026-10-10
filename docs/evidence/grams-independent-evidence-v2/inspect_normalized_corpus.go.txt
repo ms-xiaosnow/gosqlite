@@ -1,0 +1,61 @@
+package main
+import("fmt"; "crypto/sha256"; "encoding/binary"; "strings"; "math/rand"; "golang.org/x/text/unicode/norm")
+type check struct{}
+func(check) Fatal(args ...any){panic(fmt.Sprint(args...))}
+func(check) Fatalf(f string,args ...any){panic(fmt.Sprintf(f,args...))}
+func escapeGramLiteral(s string, e rune) string {var b strings.Builder; for _,r:=range s {if r==e||r=='%'||r=='_' {b.WriteRune(e)};b.WriteRune(r)};return b.String()}
+func main(){t:=check{}
+	const rows, queries = 128, 100
+	const seed int64 = 2026101052
+	rng := rand.New(rand.NewSource(seed))
+	tokens := []string{"a", "B", "z", "数据库", "日本語", "かな", "한글", "🙂", "👩‍💻", "e\u0301", "A\u030a", "か\u3099", "한", "%", "_", "\\", " ", "\t", "é", "ß", "Σ"}
+	texts := make([]string, rows)
+	changed := 0
+	hash := sha256.New()
+	hashString := func(s string) {
+		var size [8]byte
+		binary.LittleEndian.PutUint64(size[:], uint64(len(s)))
+		hash.Write(size[:])
+		hash.Write([]byte(s))
+	}
+	for i := range texts {
+		var raw strings.Builder
+		for n := 4 + rng.Intn(12); n > 0; n-- {
+			raw.WriteString(tokens[rng.Intn(len(tokens))])
+		}
+		texts[i] = norm.NFC.String(raw.String())
+		if texts[i] != raw.String() {
+			changed++
+		}
+		if !norm.NFC.IsNormalString(texts[i]) {
+			t.Fatal("non-NFC input")
+		}
+		hashString(texts[i])
+	}
+	if changed < 32 {
+		t.Fatalf("only %d randomized inputs changed under NFC", changed)
+	}
+	patterns := make([]string, queries)
+	for i := range patterns {
+		rr := []rune(texts[rng.Intn(rows)])
+		start := rng.Intn(len(rr))
+		n := min(1+rng.Intn(5), len(rr)-start)
+		literal := norm.NFC.String(string(rr[start : start+n]))
+		pattern := escapeGramLiteral(literal, '\\')
+		switch i % 4 {
+		case 0:
+			pattern = "%" + pattern + "%"
+		case 1:
+			pattern = "_" + pattern + "%"
+		case 2:
+			pattern = "%" + pattern + "_"
+		}
+		if !norm.NFC.IsNormalString(pattern) {
+			t.Fatalf("pattern not NFC: %q", pattern)
+		}
+		patterns[i] = pattern
+		hashString(pattern)
+	}
+
+ ts,ps:=map[string]bool{},map[string]bool{};for _,s:=range texts{ts[s]=true};for _,p:=range patterns{ps[p]=true};fmt.Printf("random texts=%d unique texts=%d patterns=%d unique patterns=%d unique text-pattern pairs=%d NFC-changed=%d corpus-SHA256=%x\n", len(texts),len(ts),len(patterns),len(ps),len(ts)*len(ps),changed,hash.Sum(nil))
+}

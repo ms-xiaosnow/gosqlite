@@ -1,0 +1,54 @@
+[
+  {
+    "report": "soak-v2-baseline-1.json",
+    "status": "failed",
+    "reconstructed_attempts": 2297,
+    "reconstructed_commits": 1559,
+    "final_model_sha256": "049a7bf2fcfb61cbd66fbab14a3f324247c28344a43738f6d828dc099d1f0a6a",
+    "retained_failure": [
+      "reader generation: sqlite query: SQLite database changed during read"
+    ]
+  },
+  {
+    "report": "soak-v2-baseline-2.json",
+    "status": "failed",
+    "reconstructed_attempts": 133,
+    "reconstructed_commits": 92,
+    "final_model_sha256": "879763be0d7fdd8574240bd13eb51d64654a31d4386aa72c5fbca94768b5b85c",
+    "retained_failure": [
+      "reader generation: sqlite query: SQLite database changed during read"
+    ]
+  },
+  {
+    "report": "soak-v2-candidate-1.json",
+    "status": "passed",
+    "reconstructed_attempts": 2371,
+    "reconstructed_commits": 1618,
+    "final_model_sha256": "9ee7739279596c2c717330427a08f5d96d1648f741837fafb981258df8adf1bd",
+    "retained_failure": []
+  },
+  {
+    "report": "soak-v2-candidate-2.json",
+    "status": "passed",
+    "reconstructed_attempts": 2697,
+    "reconstructed_commits": 1840,
+    "final_model_sha256": "d321a4a9db82b4fd1652eab00d927cc693ad4f9701f30d6d4488b28b11e1869e",
+    "retained_failure": []
+  },
+  {
+    "report": "soak-v2-candidate-3.json",
+    "status": "passed",
+    "reconstructed_attempts": 2222,
+    "reconstructed_commits": 1513,
+    "final_model_sha256": "646cd94a9ef63401a5f7ad91408f2b55417acdcb19f54d004f729f240265cb64",
+    "retained_failure": []
+  },
+  {
+    "report": "soak-v2-candidate-4.json",
+    "status": "passed",
+    "reconstructed_attempts": 2480,
+    "reconstructed_commits": 1664,
+    "final_model_sha256": "c975030a41d7e68dc8566c917b2ebbe84432393ffb8ae2602e8264b1c2bb3eac",
+    "retained_failure": []
+  }
+]

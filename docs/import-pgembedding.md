@@ -249,3 +249,11 @@ Component evidence is in `docs/evidence/m9-import-components.txt`; independent
 review evidence is owned separately by the reviewer. These focused checks do
 not replace the lead's whole-repository aggregate, cross-platform release gates,
 or official SQLite interoperability checks.
+
+## Opt-in caller-dataset mathematical verification
+
+Use `VerifyImportDistances` or add `--distances distances.json` to `verify` for
+bounded caller-dataset norms, complete exact distances and native Top-K checks
+against source-export high-precision references. See
+[the options, caps, sampling, uncertainty and skipped-status contract](import-distance-verification.md).
+This is separate from unchanged ordinary-import reports and ANN recall.

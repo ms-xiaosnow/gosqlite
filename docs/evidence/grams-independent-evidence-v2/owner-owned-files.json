@@ -1,0 +1,42 @@
+[
+  {
+    "path": "benchmarks/grams/README.md",
+    "before": null,
+    "after": {
+      "path": "benchmarks/grams/README.md",
+      "mode": "0o644",
+      "size": 8867,
+      "sha256": "e706e8c0925247730de4f216e5c1efb060d4dff13998c8e680a2b4e495ccca5b"
+    }
+  },
+  {
+    "path": "benchmarks/grams/main.go",
+    "before": null,
+    "after": {
+      "path": "benchmarks/grams/main.go",
+      "mode": "0o644",
+      "size": 21781,
+      "sha256": "d745724d10d480df86ce2d2d72c09372e6b5e02e5ba99cc643665530fe756f5c"
+    }
+  },
+  {
+    "path": "benchmarks/grams/main_test.go",
+    "before": null,
+    "after": {
+      "path": "benchmarks/grams/main_test.go",
+      "mode": "0o644",
+      "size": 4060,
+      "sha256": "73d37847da37dfaf38e497c0507b08241deb5c792d45f75fcca71e050fda04af"
+    }
+  },
+  {
+    "path": "sqlite/plan_grams_normalized_test.go",
+    "before": null,
+    "after": {
+      "path": "sqlite/plan_grams_normalized_test.go",
+      "mode": "0o644",
+      "size": 7968,
+      "sha256": "9564b8f296d005034f4d3808c98a2fb6f49d297c49f9afdae824bc2b3919525c"
+    }
+  }
+]

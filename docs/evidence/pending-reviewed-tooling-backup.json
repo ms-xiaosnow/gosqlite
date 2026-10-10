@@ -1,0 +1,10 @@
+{
+  "library_file_id": "libfile_67087c948d988191ae14e8c37e074065",
+  "backing_file_id": "file_0000000069e481f5b2abe77030b048f7",
+  "library_version": 0,
+  "file": "gosqlite-reviewed-tooling-pending.tar.gz",
+  "bytes": 22665516,
+  "sha256": "3f86c7a8dc4a3ed6147040088dc9762253be3a756abb06d00fd2ac0dd69d1879",
+  "verification": "Byte-identical Library materialization, all8398 hashes/8399 regular safe paths, all6 full source bytes/modes and independently rebuilt Git Merkle trees PASS2026-10-10T21:48:18Z. Runtime restoration checks are separate.",
+  "status": "Supplemental21:47UTC snapshot, not final delivery. Main75 bundle closed with restored/CI PASS. Accepted-tools ddb and runtime-tools8b full gates are running. TransactionV4 and nativeCheckV2 have independent scoped PASS; plannerV3 is held for34 inherited ORDER failures; WindowsV1 independent review pending; mutable performanceV2/recovery/Darwin excluded."
+}

@@ -1,0 +1,36 @@
+diff --git a/cmd/gosqlite/key_provider.go b/cmd/gosqlite/key_provider.go
+index 2e1b65a..3d33323 100644
+--- a/cmd/gosqlite/key_provider.go
++++ b/cmd/gosqlite/key_provider.go
+@@ -116,11 +116,15 @@ func (p *cliKeyProvider) readCredential(ctx context.Context) ([]byte, error) {
+ 		if p.kind == encryption.RawKey256 {
+ 			limit += 2
+ 		}
+-		encoded, err = io.ReadAll(io.LimitReader(in, int64(limit+1)))
++		// Allocate once: growing io.ReadAll buffers can leave earlier copies
++		// of credential bytes in allocations we can no longer clear.
++		encoded = make([]byte, limit+1)
+ 		defer clearCredential(encoded)
+-		if err != nil || len(encoded) > limit {
++		n, err := io.ReadFull(in, encoded)
++		if (err != io.EOF && err != io.ErrUnexpectedEOF) || n > limit {
+ 			return nil, encryption.ErrKeyProvider
+ 		}
++		encoded = encoded[:n]
+ 		if p.kind == encryption.RawKey256 && len(encoded) > 0 && encoded[len(encoded)-1] == '\n' {
+ 			encoded = encoded[:len(encoded)-1]
+ 			if len(encoded) > 0 && encoded[len(encoded)-1] == '\r' {
+diff --git a/docs/cli-encryption.md b/docs/cli-encryption.md
+index 8535d6b..ddd55df 100644
+--- a/docs/cli-encryption.md
++++ b/docs/cli-encryption.md
+@@ -115,7 +115,8 @@ Password bytes are never trimmed. A trailing newline changes the password.
+ Use a trusted noninteractive producer that emits exactly the intended bytes and
+ then closes its pipe. Terminals, character devices, directories and other input
+ kinds are refused; the CLI never prompts or changes terminal echo. The bounded
+-read allocates at most one credential-sized input plus owned copies. Reading a
++read uses one fixed input buffer (the accepted byte limit plus one sentinel
++byte), without growing/reallocating credential-bearing input buffers. Reading a
+ pipe can still wait for its producer to close; context is checked before/after
+ reading but does not interrupt a blocked OS read. No detached reader or KDF
+ worker is launched to evade the native resource budget.

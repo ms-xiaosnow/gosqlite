@@ -1,0 +1,8 @@
+{
+  "base": "13f53e4cdadaaca2530e17e5f7a61b9dfe8e5c33",
+  "frozen": "ad066d04d676b8368ca7d02d83664e50dfa47216",
+  "independent_patch_replay": "ad066d04d676b8368ca7d02d83664e50dfa47216",
+  "files": 1324,
+  "mode_and_bytes": "PASS",
+  "scope": "Six-line production post-SHARED descriptor-stat capture; source/memory laws plus ordinary cooperating readers/writer. No failure injection or namespace mutation."
+}

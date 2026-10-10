@@ -897,3 +897,45 @@ Known wider planner error/phase differences remain held and corrective. Reader/
 shared acquisition fixes, CLI/import verification, grams/transaction harnesses and
 native integrity/performance-CI additions are excluded from this checkpoint.
 M10 remains unfinished; no complete-goal delivery claim follows.
+
+
+### Native acquisition fixes, maintenance CLI and dataset/grams tooling
+
+Exact source ddb957e2a1d804b236a295f7fe6ce383954b852c adds32 checked paths to
+13f53e4cdadaaca2530e17e5f7a61b9dfe8e5c33. It composes independently reviewed
+Reader post-SHARED stat, shared initial-absence provenance, encrypted backup/rekey
+CLI, importer-distance v2 and NFC grams measurement/correctness sources. Central
+documents are reconciled separately; every changed production/test byte equals
+the fixed checked composition. Complete ordinary unit/vet/build, pinned complete
+oracle, full race, five target builds, modules and full source hashes passed;
+exact clocks and all commands remain in accepted-tools-combined-checks.txt.
+
+The Reader fix closes the stat-before-SHARED race observed in the original failed
+20-second rollback sample. Two retained baseline controls fail; four corrected
+20-second samples pass. These observations do not constitute long-soak acceptance.
+Shared absence handling accepts only initial no-handle absence and retains later
+lookup/retirement diagnostics. Exceptional native paths were checked only with
+inert ownership/source laws, never injected into disk-backed operations.
+
+CLI backup/rekey has independently verified correct-key snapshot/WAL/shared
+archive/native restore and explicit provider boundaries. Plaintext backup remains
+unsupported. Existing history remains decryptable with prior credentials; no
+secure-erasure or native-failure/rekey durability claim is made. Dataset verifier
+uses source norms, full exact distances and separate Top-K checks; ANN is not_run.
+Its original16000-dimensional cancellation bound failed by14.0724x and remains
+failed history. V2 derives outward arithmetic bounds challenged with rational
+references, rather than widening an arbitrary tolerance or changing kernels.
+
+NFC corpus covers12800 memberships/12416 distinct pairs, including100 inputs
+changed by normalization, without changing LIKE_RAW_V1. Grams smoke and medium
+measure real SEARCH/fallback paths and preserve slowdowns: medium512rows reports
+147x DB size and4/18 selective medians slower than scan; smoke all12 are slower.
+No universal speedup, large benchmark or confidence-qualified result is claimed.
+
+TransactionV4 and nativeCheckV2 have separate independent scoped PASS, but are
+excluded from this checkpoint pending their own full-source gate. Wider planner
+V3 remains held history for34 newly exposed inherited multi-key/partial-sort
+failures; V4b is awaiting independent review after6 V4 bound-LIMIT regressions. Windows
+shared-rekey source has independent model/compile review, not native runtime.
+Public recovery/Darwin/performance tooling remain separate corrective slices.
+Restricted recovery/fault, target runtime and independent M10 gates remain open.

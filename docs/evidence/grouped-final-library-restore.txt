@@ -1,0 +1,21 @@
+Exact Library-restored grouped/counters/cached-preparation checkpoint. Pure-memory/parser/quota laws and audited intact SQL/BUSY/cancel/normal lifecycle plus cooperating official oracle only. New wider planner and Reader fixes are excluded; no restricted physical/native-fault/namespace/crash/hot-recovery test.
+75e554754c95c97b1333c3fecd2dc2d01d42a2f0
+2026-10-10T21:28:25Z
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.009s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.311s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.029s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	1.034s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	2.002s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.092s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	1.419s
+restored cross-build linux/arm64 PASS
+restored cross-build darwin/arm64 PASS
+restored cross-build darwin/amd64 PASS
+restored cross-build windows/amd64 PASS
+restored cross-build windows/arm64 PASS
+all modules verified
+2026-10-10T21:30:18Z
+EXACT RESTORED GROUPED COUNTERS PREPARATION CHECKPOINT PASS

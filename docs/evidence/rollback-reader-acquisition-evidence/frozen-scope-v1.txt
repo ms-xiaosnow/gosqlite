@@ -1,0 +1,4 @@
+cwd=/workspace/scratch/5e06a74e5f65/durable-restart/rollback-reader-acquisition-freeze-v1
+CGO_ENABLED=0
+command=['go', 'run', './internal/testscope']
+Ordinary test source-reference guard PASS; behavioral review is still required.

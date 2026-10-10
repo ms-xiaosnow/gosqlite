@@ -1,0 +1,19 @@
+{
+  "base_tree": "13f53e4cdadaaca2530e17e5f7a61b9dfe8e5c33",
+  "candidate_tree": "ad066d04d676b8368ca7d02d83664e50dfa47216",
+  "control_tree": "5d42d326ac9dcb58981e0b64376342cc4e0ce7c9",
+  "patch_sha256": "ccc9bf728b3df6b0daa65562955ae54cc84fcdf690a9d8985d17888d740c3659",
+  "base_file_count": 1322,
+  "candidate_file_count": 1324,
+  "changed_files": [
+    "docs/rollback-reader-acquisition.md",
+    "internal/pager/pager.go",
+    "internal/pager/reader_acquisition_test.go"
+  ],
+  "patch_roundtrip_verified": true,
+  "harness_patch_sha256": "71b64b771631b39978f635aadb3348c0e42d6f7c652f25e7f21b719f1d973606",
+  "compositions": {
+    "candidate": "ac7242786b6e7ecffd03f9c45216ee788eaddbba",
+    "baseline": "dcd64974d36cb35413f78dd1c006a55a79fe9a5b"
+  }
+}

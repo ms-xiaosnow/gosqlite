@@ -1,0 +1,367 @@
+diff --git a/docs/progress.md b/docs/progress.md
+index 7497148..f2f4689 100644
+--- a/docs/progress.md
++++ b/docs/progress.md
+@@ -688,3 +688,14 @@ unpublished encrypted patch while that gate runs; it is not a remote milestone
+ or final delivery. Plain rollback Reader/Tx/import-source and exclusive-WAL
+ ownership remain required code. Native failure/runtime and M3/M8/M10 acceptance
+ remain NOT_RUN. See encrypted-cleanup.md and its independent review.
++
++## 2026-10-10: shared-WAL initial-absence provenance
++
++The remaining native shared-WAL creation and sidecar absence branches now consume
++explicit initial no-handle provenance, including the private nil-scope transition
++Session probe. Error-carried ownership, admission/adoption order, formats, public
++layouts, and normal shared lifecycle remain unchanged. See
++[shared-absence-provenance.md](shared-absence-provenance.md) for the correction,
++source/memory regression scope, and qualification limits. The isolated handoff
++records focused unit/race/vet/crossbuild results, exact source hashes, and replay;
++no native failures, physical missing files, or recovery workflows are qualified.
+diff --git a/docs/shared-absence-provenance.md b/docs/shared-absence-provenance.md
+new file mode 100644
+index 0000000..895ab6a
+--- /dev/null
++++ b/docs/shared-absence-provenance.md
+@@ -0,0 +1,50 @@
++# Shared-WAL initial-absence provenance
++
++Date: 2026-10-10. This narrow source correction removes the remaining generic
++`os.IsNotExist` decisions from native shared-WAL database creation, rollback-mode
++WAL-sidecar preflight, and the live journal check. The private rollback-transition
++Session probe now forwards the same explicit provenance regardless of whether
++it has an exclusive plaintext cleanup scope.
++
++Only the existing VFS initial, no-handle absence result permits creation or
++ignoring an absent sidecar. Later inspection, retirement, or acquisition errors
++remain diagnostics even if they contain ENOENT. On Windows the existing managed
++metadata probe provides this distinction; Linux/Darwin retain the existing
++no-handle path behavior. No raw descriptor, OS backend contract, public layout,
++SQL behavior, or persistent format is changed.
++
++Both shared retirement schemes remain intact. Failed-open admission precedes
++metadata; successful main/WAL/index acquisitions are adopted before later work;
++failed-open deferral collects error-carried children before index, WAL, and main
++retirement. Successful open transfers to its separately bounded live/close
++reservation. The transition continues borrowing its main descriptor and never
++runs exclusive-WAL scanner, replacement, or SHM-removal paths.
++
++The transitive review covered Session.checkJournalLocked, enterWALLocked,
++Tx.checkStable/checkSidecars and Commit, native metadata wrappers, the platform
++provenance implementations, and failed-open/successful-close ownership. Existing
++checkSidecars already uses explicit provenance. Only shared_session.go and
++plain_session_cleanup.go change production behavior.
++
++## Verification scope
++
++New AST laws pin the four decisions and admission/adoption/error-exit boundaries.
++Descriptor-free pager laws preserve late ENOENT diagnostics and nested-owner
++barriers. VFS memory callbacks verify inspection/retirement ENOENT cannot become
++absence, error-carried terminal discovery remains available, and a later poisoned
++acquisition neither opens a handle nor authorizes absence. Existing memory
++absence/cleanup controls are unchanged. New source laws are expected to fail on
++the immutable baseline, while memory controls pass there.
++
++The frozen handoff records focused CGO-disabled memory and normal Linux shared
++lifecycle tests, a separate CGO-enabled race-tooling run, vet, and compile-only
++Linux arm64, Darwin amd64/arm64, and Windows amd64 checks. Base-plus-patch replay,
++whole-source hashes/modes, owned changes, and exact commands are recorded outside
++this source snapshot by the verification handoff. These focused checks are not a
++new full aggregate or hosted CI result.
++
++No physical missing-selected-file, corruption/tamper/wrong-key, namespace
++mutation/replacement, crash/kill/abrupt exit/hot recovery, native I/O/lock/unmap/
++close/Sync/short-write/disk-full/permission failure, interrupted publication/rekey,
++or manual-tag workflow is executed. Native failure and non-Linux runtime
++qualification remain NOT_RUN; full durability/security/release gates stay open.
+diff --git a/internal/pager/plain_session_cleanup.go b/internal/pager/plain_session_cleanup.go
+index 547f1a3..9cf52db 100644
+--- a/internal/pager/plain_session_cleanup.go
++++ b/internal/pager/plain_session_cleanup.go
+@@ -105,11 +105,9 @@ func (s *Session) closeLocked(cause error, checkpoint func() error) error {
+ 	return s.cleanup.beginClass(cause, nil, !s.cleanup.childClosePending())
+ }
+ 
+-// Shared-WAL's private transition Session keeps its existing metadata branch.
++// The private shared-WAL transition needs the same initial no-handle absence
++// provenance as an exclusive session. Later metadata/retirement errors must
++// remain errors, even when they match NotExist and no plaintext scope is used.
+ func (s *Session) probePathLocked(path string) (os.FileInfo, bool, error) {
+-	if s.cleanup != nil {
+-		return nativeLstatForCreate(path)
+-	}
+-	info, err := nativeLstat(path)
+-	return info, os.IsNotExist(err), err
++	return nativeLstatForCreate(path)
+ }
+diff --git a/internal/pager/shared_absence_test.go b/internal/pager/shared_absence_test.go
+new file mode 100644
+index 0000000..f89e092
+--- /dev/null
++++ b/internal/pager/shared_absence_test.go
+@@ -0,0 +1,170 @@
++package pager
++
++import (
++	"bytes"
++	"errors"
++	"fmt"
++	"go/ast"
++	"go/format"
++	"go/parser"
++	"go/token"
++	"os"
++	"reflect"
++	"strings"
++	"testing"
++
++	"github.com/ms-xiaosnow/gosqlite/internal/vfs"
++)
++
++// Absence regressions use source ASTs and descriptor-free owner/error laws.
++// They never create a missing selected file or inject a native operation error.
++func sharedAbsenceSource(t *testing.T, path, name string) (*token.FileSet, *ast.FuncDecl) {
++	t.Helper()
++	set := token.NewFileSet()
++	file, err := parser.ParseFile(set, path, nil, 0)
++	if err != nil {
++		t.Fatal(err)
++	}
++	for _, decl := range file.Decls {
++		if fn, ok := decl.(*ast.FuncDecl); ok && fn.Name.Name == name {
++			return set, fn
++		}
++	}
++	t.Fatalf("missing source function %s", name)
++	return nil, nil
++}
++
++func sharedAbsenceText(t *testing.T, set *token.FileSet, node ast.Node) string {
++	t.Helper()
++	var out bytes.Buffer
++	if err := format.Node(&out, set, node); err != nil {
++		t.Fatal(err)
++	}
++	return out.String()
++}
++
++func TestSharedAbsenceSourceInitialProvenance(t *testing.T) {
++	set, open := sharedAbsenceSource(t, "shared_session.go", "OpenSharedSessionAdmitted")
++	body := sharedAbsenceText(t, set, open.Body)
++	for _, required := range []string{
++		"resolved, initialAbsent, err := resolveNativeReaderPath(path)",
++		"else if opts.Create && initialAbsent {",
++		"dir, e := resolveNativePath(filepath.Dir(path))",
++		"if st, absent, e := nativeLstatForCreate(path + \"-wal\"); e == nil && st.Size() != 0 {",
++		"else if e != nil && !absent {\n\t\t\treturn nil, e",
++	} {
++		if !strings.Contains(body, required) {
++			t.Errorf("shared open must preserve initial absence provenance: missing %q", required)
++		}
++	}
++	set, stable := sharedAbsenceSource(t, "shared_session.go", "checkStableLocked")
++	body = sharedAbsenceText(t, set, stable.Body)
++	for _, required := range []string{
++		"if _, absent, err := nativeLstatForCreate(s.path + \"-journal\"); err == nil {",
++		"else if !absent {\n\t\treturn err",
++	} {
++		if !strings.Contains(body, required) {
++			t.Errorf("shared stable journal must preserve initial absence provenance: missing %q", required)
++		}
++	}
++	// The shared opener calls checkJournalLocked on a private Session without
++	// a plaintext cleanup scope. Its probe must not revert to error matching.
++	set, probe := sharedAbsenceSource(t, "plain_session_cleanup.go", "probePathLocked")
++	if got := sharedAbsenceText(t, set, probe.Body); got != "{\n\treturn nativeLstatForCreate(path)\n}" {
++		t.Errorf("transition probe must forward explicit provenance in every scope: %s", got)
++	}
++	for _, fn := range []*ast.FuncDecl{open, stable, probe} {
++		ast.Inspect(fn.Body, func(node ast.Node) bool {
++			if selector, ok := node.(*ast.SelectorExpr); ok && selector.Sel.Name == "IsNotExist" {
++				t.Errorf("%s regressed to generic NotExist classification", fn.Name.Name)
++			}
++			return true
++		})
++	}
++}
++
++func TestSharedAbsenceSourceAdmissionAdoptionAndErrorExit(t *testing.T) {
++	set, open := sharedAbsenceSource(t, "shared_session.go", "OpenSharedSessionAdmitted")
++	body := sharedAbsenceText(t, set, open.Body)
++	before := func(first, second string) {
++		t.Helper()
++		a, b := strings.Index(body, first), strings.Index(body, second)
++		if a < 0 || b < 0 || a >= b {
++			t.Errorf("expected %q before %q", first, second)
++		}
++	}
++	before("admission.take()", "resolveNativeReaderPath(path)")
++	before("sharedOpenRetirements.reserve()", "resolveNativeReaderPath(path)")
++	before("cleanup.failedOpen(retErr)", "resolveNativeReaderPath(path)") // installed defer
++	before("cleanup.main = sharedOpenFileOwner{file: f}", "lockShared(f)")
++	before("cleanup.wal = sharedOpenFileOwner{file: s.walFile}", "walindex.Open(path + \"-shm\")")
++	before("cleanup.index = sharedOpenIndexOwner{index: s.index}", "s.checkStableLocked()")
++	for _, required := range []string{
++		"} else {\n\t\treturn nil, err\n\t}",
++		"closeGroup.index = sharedCloseIndex{s.index}",
++		"closeGroup.wal = sharedCloseFile{s.walFile}",
++		"closeGroup.main = sharedCloseFile{s.file}",
++	} {
++		if !strings.Contains(body, required) {
++			t.Errorf("shared admission/transfer/error exit lost %q", required)
++		}
++	}
++	set, failed := sharedAbsenceSource(t, "shared_open_cleanup.go", "failedOpen")
++	body = sharedAbsenceText(t, set, failed.Body)
++	before("g.nested = vfs.CleanupOwners(openErr)", "g.retireLocked()")
++}
++
++func TestSharedAbsenceMemoryLateDiagnosticSurvivesFailedOpen(t *testing.T) {
++	for _, wrapped := range []bool{false, true} {
++		t.Run(fmt.Sprint(wrapped), func(t *testing.T) {
++			r, g := memoryOpenGroup(t, 1)
++			var events []string
++			main := &memoryOpenOwner{name: "main", events: &events}
++			g.main = main
++			late := &os.PathError{Op: "memory inspection", Path: "memory", Err: os.ErrNotExist}
++			var cause error = late
++			if wrapped {
++				cause = fmt.Errorf("memory resolver: %w", cause)
++			}
++			got := g.failedOpen(cause)
++			var detail *os.PathError
++			if got != cause || !errors.Is(got, os.ErrNotExist) || !errors.As(got, &detail) || detail != late || !g.done || len(r.groups) != 0 || !reflect.DeepEqual(events, []string{"main"}) {
++				t.Fatal("completed cleanup erased or changed late absence diagnostic", got, events)
++			}
++		})
++	}
++}
++
++func TestSharedAbsenceMemoryNestedTerminalProtectsOwners(t *testing.T) {
++	r, g := memoryOpenGroup(t, 1)
++	var events []string
++	g.index = &memoryOpenOwner{name: "index", events: &events}
++	g.wal = &memoryOpenOwner{name: "wal", events: &events}
++	g.main = &memoryOpenOwner{name: "main", events: &events}
++	late := &os.PathError{Op: "memory metadata", Path: "memory", Err: os.ErrNotExist}
++	// Compose the VFS collection result with the actual pager retirement state
++	// machine using a fake nested owner. The separate VFS absence law verifies
++	// real error-carried terminal discovery without acquiring a descriptor.
++	cause := nativeFileError(errors.Join(late, vfs.ErrPoisoned))
++	childEvents := []string{}
++	child := &memoryOpenOwner{name: "metadata", remaining: 1, terminal: true, failure: cause, events: &childEvents}
++	g.nested = []vfs.CleanupOwner{child}
++	g.cause = errors.Join(cause, g.retireLocked())
++	var pending error = &sharedOpenCleanupError{group: g, cause: g.cause}
++	for i := 0; i < 3; i++ {
++		var detail *os.PathError
++		if !errors.Is(pending, os.ErrNotExist) || !errors.Is(pending, vfs.ErrPoisoned) || !errors.Is(pending, ErrOpenCleanupPending) || !errors.As(pending, &detail) || detail != late {
++			t.Fatal("metadata ownership or cause dropped", pending)
++		}
++		if g.done || len(r.groups) != 1 || len(g.nested) == 0 || len(events) != 0 {
++			t.Fatal("error-carried metadata retired its protecting owners", events)
++		}
++		if _, err := r.reserve(); !errors.Is(err, ErrLimit) {
++			t.Fatal("terminal obligation stopped counting toward admission", err)
++		}
++		pending = RetryOpenCleanup(pending)
++	}
++	if child.rawCalls != 1 {
++		t.Fatal("terminal metadata invented another raw retirement")
++	}
++}
+diff --git a/internal/pager/shared_session.go b/internal/pager/shared_session.go
+index 7f32898..f33b175 100644
+--- a/internal/pager/shared_session.go
++++ b/internal/pager/shared_session.go
+@@ -105,10 +105,10 @@ func OpenSharedSessionAdmitted(ctx context.Context, path string, opts Options, a
+ 	if err != nil {
+ 		return nil, err
+ 	}
+-	resolved, err := resolveNativePath(path)
++	resolved, initialAbsent, err := resolveNativeReaderPath(path)
+ 	if err == nil {
+ 		path = resolved
+-	} else if opts.Create && os.IsNotExist(err) {
++	} else if opts.Create && initialAbsent {
+ 		dir, e := resolveNativePath(filepath.Dir(path))
+ 		if e != nil {
+ 			return nil, e
+@@ -149,9 +149,9 @@ func OpenSharedSessionAdmitted(ctx context.Context, path string, opts Options, a
+ 		if err = main.checkJournalLocked(); err != nil {
+ 			return nil, err
+ 		}
+-		if st, e := nativeLstat(path + "-wal"); e == nil && st.Size() != 0 {
++		if st, absent, e := nativeLstatForCreate(path + "-wal"); e == nil && st.Size() != 0 {
+ 			return nil, fmt.Errorf("%w: nonempty WAL with rollback database", ErrUnsupported)
+-		} else if e != nil && !os.IsNotExist(e) {
++		} else if e != nil && !absent {
+ 			return nil, e
+ 		}
+ 		if err = main.enterWALLocked(ctx); err != nil {
+@@ -223,9 +223,9 @@ func (s *SharedSession) checkStableLocked() error {
+ 	if err := s.checkOpenLocked(); err != nil {
+ 		return err
+ 	}
+-	if _, err := nativeLstat(s.path + "-journal"); err == nil {
++	if _, absent, err := nativeLstatForCreate(s.path + "-journal"); err == nil {
+ 		return fmt.Errorf("%w: journal beside shared WAL", ErrRecoveryRequired)
+-	} else if !os.IsNotExist(err) {
++	} else if !absent {
+ 		return err
+ 	}
+ 	for _, entry := range []struct {
+diff --git a/internal/vfs/shared_absence_test.go b/internal/vfs/shared_absence_test.go
+new file mode 100644
+index 0000000..136347e
+--- /dev/null
++++ b/internal/vfs/shared_absence_test.go
+@@ -0,0 +1,49 @@
++package vfs
++
++import (
++	"errors"
++	"os"
++	"testing"
++)
++
++// This complements pager's shared-session source laws at the actual metadata
++// decision boundary. Callbacks manipulate only inert integers and error values.
++func TestSharedAbsenceMemoryMetadataTerminalProvenance(t *testing.T) {
++	for _, inspectionAbsent := range []bool{false, true} {
++		for _, retirementAbsent := range []bool{false, true} {
++			r := metadataOwners{limit: 1}
++			o, err := r.open(func() (uintptr, error) { return 37, nil })
++			if err != nil {
++				t.Fatal(err)
++			}
++			inspection := errors.New("memory inspection diagnostic")
++			retirement := errors.New("memory retirement diagnostic")
++			if inspectionAbsent {
++				inspection = &os.PathError{Op: "memory inspection", Path: "memory", Err: os.ErrNotExist}
++			}
++			if retirementAbsent {
++				retirement = &os.PathError{Op: "memory retirement", Path: "memory", Err: os.ErrNotExist}
++			}
++			calls := 0
++			value, absent, cause := observeMetadataForCreate(&r, o, nil,
++				func(uintptr) (string, error) { return "unpublished", inspection },
++				func(uintptr) error { calls++; return retirement })
++			if absent || value != "" || calls != 1 || !errors.Is(cause, inspection) || !errors.Is(cause, retirement) || !errors.Is(cause, ErrPoisoned) {
++				t.Fatal("post-acquisition error became absence or lost cause", absent, cause)
++			}
++			owners := CleanupOwners(cause)
++			if len(owners) != 1 || CleanupComplete(owners[0]) || !errors.Is(owners[0].Close(), retirement) || calls != 1 || len(r.live) != 1 {
++				t.Fatal("metadata terminal discovery lost ownership or repeated raw close")
++			}
++			// Later acquisition is refused by the same tombstone. Even an
++			// ENOENT inside it must never become initial absence authority.
++			later, laterErr := r.open(func() (uintptr, error) { t.Fatal("poisoned metadata gate acquired"); return 0, nil })
++			_, absent, laterErr = observeMetadataForCreate(&r, later, laterErr,
++				func(uintptr) (string, error) { t.Fatal("poisoned metadata gate inspected"); return "", nil },
++				func(uintptr) error { t.Fatal("poisoned metadata gate retired"); return nil })
++			if absent || !errors.Is(laterErr, retirement) || len(CleanupOwners(laterErr)) != 1 || calls != 1 {
++				t.Fatal("retained acquisition diagnostic authorized absence", absent, laterErr)
++			}
++		}
++	}
++}

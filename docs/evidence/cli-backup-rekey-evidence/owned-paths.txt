@@ -1,0 +1,7 @@
+cmd/gosqlite/key_provider.go
+cmd/gosqlite/key_provider_test.go
+cmd/gosqlite/main.go
+cmd/gosqlite/maintenance.go
+cmd/gosqlite/maintenance_test.go
+docs/cli-encryption.md
+examples/encrypted-cli/main.go

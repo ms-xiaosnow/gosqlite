@@ -1,0 +1,196 @@
+{
+  "status": "PASS for bounded ordinary slice; not full goal acceptance",
+  "source_root": "/workspace/scratch/5e06a74e5f65/durable-restart/grams-acceptance-freeze-v2",
+  "baseline_tree": "7d3184f87165e11e12560884ec6e4f92c9bfd039",
+  "final_tree": "762a9e9dd8105cf620c68a8398922ddf254a9d5f",
+  "owned_files": [
+    {
+      "path": "benchmarks/grams/README.md",
+      "before": null,
+      "after": {
+        "path": "benchmarks/grams/README.md",
+        "mode": "0o644",
+        "size": 8867,
+        "sha256": "e706e8c0925247730de4f216e5c1efb060d4dff13998c8e680a2b4e495ccca5b"
+      }
+    },
+    {
+      "path": "benchmarks/grams/main.go",
+      "before": null,
+      "after": {
+        "path": "benchmarks/grams/main.go",
+        "mode": "0o644",
+        "size": 21781,
+        "sha256": "d745724d10d480df86ce2d2d72c09372e6b5e02e5ba99cc643665530fe756f5c"
+      }
+    },
+    {
+      "path": "benchmarks/grams/main_test.go",
+      "before": null,
+      "after": {
+        "path": "benchmarks/grams/main_test.go",
+        "mode": "0o644",
+        "size": 4060,
+        "sha256": "73d37847da37dfaf38e497c0507b08241deb5c792d45f75fcca71e050fda04af"
+      }
+    },
+    {
+      "path": "sqlite/plan_grams_normalized_test.go",
+      "before": null,
+      "after": {
+        "path": "sqlite/plan_grams_normalized_test.go",
+        "mode": "0o644",
+        "size": 7968,
+        "sha256": "9564b8f296d005034f4d3808c98a2fb6f49d297c49f9afdae824bc2b3919525c"
+      }
+    }
+  ],
+  "evidence_files": [
+    {
+      "path": "/workspace/scratch/5e06a74e5f65/durable-restart/grams-acceptance-evidence-v2/report.md",
+      "sha256": "fcdd390e4dc8b0df8100a5744a634c9fcdfbbcf4956c3eae8290150dda066976",
+      "bytes": 10736
+    },
+    {
+      "path": "/workspace/scratch/5e06a74e5f65/durable-restart/grams-acceptance-evidence-v2/scope.md",
+      "sha256": "3794a3c5e57638e7d1b8ab7c828028479bf9c42f3377d6ba3d8f697076ed8421",
+      "bytes": 5217
+    },
+    {
+      "path": "/workspace/scratch/5e06a74e5f65/durable-restart/grams-acceptance-evidence-v2/changes.patch",
+      "sha256": "d9feb249e2678f76d58da6d0bd25a56d47c1dc8a9dfd51b8060210fc75d9cbfe",
+      "bytes": 44753
+    },
+    {
+      "path": "/workspace/scratch/5e06a74e5f65/durable-restart/grams-acceptance-evidence-v2/owned-files.json",
+      "sha256": "6a02f1610370617b1caca4866dd531476e3554d78d318bd609aa203f0fc8534d",
+      "bytes": 1074
+    },
+    {
+      "path": "/workspace/scratch/5e06a74e5f65/durable-restart/grams-acceptance-evidence-v2/baseline-inventory.json",
+      "sha256": "54e73a824baf208687fddbace5754737447dde7b660262fd3c07abd901b2ff96",
+      "bytes": 248428
+    },
+    {
+      "path": "/workspace/scratch/5e06a74e5f65/durable-restart/grams-acceptance-evidence-v2/final-inventory.json",
+      "sha256": "50bc2590a3cde425801bb162dfabbe9bec7ae2c8fbbbcb79cd1054580757e2c1",
+      "bytes": 249180
+    },
+    {
+      "path": "/workspace/scratch/5e06a74e5f65/durable-restart/grams-acceptance-evidence-v2/baseline-sha256.txt",
+      "sha256": "378b993f2b1dc8e4dfd1d3bc12928a110ccf3fe8a4c245dc0407238ee811383a",
+      "bytes": 135688
+    },
+    {
+      "path": "/workspace/scratch/5e06a74e5f65/durable-restart/grams-acceptance-evidence-v2/final-sha256.txt",
+      "sha256": "69a805420669455e247d2a626a09aec3794dbca2026749bb19f59369920e4405",
+      "bytes": 136071
+    },
+    {
+      "path": "/workspace/scratch/5e06a74e5f65/durable-restart/grams-acceptance-evidence-v2/patch-check-result.txt",
+      "sha256": "d48bd02e81a526e828d22a08fbdfeca3649d317b8029bc3c2dd3d37d1cc596fd",
+      "bytes": 146
+    },
+    {
+      "path": "/workspace/scratch/5e06a74e5f65/durable-restart/grams-acceptance-evidence-v2/v1-v2-delta.json",
+      "sha256": "f8557aac74cab1a944158cb9a58801c7a7bc4b451e2a9e140153db1fb1d25b95",
+      "bytes": 65
+    },
+    {
+      "path": "/workspace/scratch/5e06a74e5f65/durable-restart/grams-acceptance-evidence-v2/checks-and-measurements.sh",
+      "sha256": "fa9bcba7970c176b040cc1ab573f1f697d71cc1c0df7737bb702569d1bcbed4f",
+      "bytes": 3378
+    },
+    {
+      "path": "/workspace/scratch/5e06a74e5f65/durable-restart/grams-acceptance-evidence-v2/checks-and-measurements.log",
+      "sha256": "54b8b2d7593c27282dbc5cd4369d8f52c95d0e328bc3e37f360974d9a79b775c",
+      "bytes": 2550
+    },
+    {
+      "path": "/workspace/scratch/5e06a74e5f65/durable-restart/grams-acceptance-evidence-v2/checks-and-measurements.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    {
+      "path": "/workspace/scratch/5e06a74e5f65/durable-restart/grams-acceptance-evidence-v2/harness-checks.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    {
+      "path": "/workspace/scratch/5e06a74e5f65/durable-restart/grams-acceptance-evidence-v2/smoke.json",
+      "sha256": "ba4b8ff37827db9b28f57c6b5a8b64c3c6798b087b113d7bdaa4b7153dd87ccd",
+      "bytes": 293661
+    },
+    {
+      "path": "/workspace/scratch/5e06a74e5f65/durable-restart/grams-acceptance-evidence-v2/smoke.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    {
+      "path": "/workspace/scratch/5e06a74e5f65/durable-restart/grams-acceptance-evidence-v2/smoke.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/workspace/scratch/5e06a74e5f65/durable-restart/grams-acceptance-evidence-v2/medium.json",
+      "sha256": "a0f61e1da2b14989bc772c8fcc887b37d5d9b657d55f6155b1e94b63c9715603",
+      "bytes": 801878
+    },
+    {
+      "path": "/workspace/scratch/5e06a74e5f65/durable-restart/grams-acceptance-evidence-v2/medium.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    {
+      "path": "/workspace/scratch/5e06a74e5f65/durable-restart/grams-acceptance-evidence-v2/medium.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/workspace/scratch/5e06a74e5f65/durable-restart/grams-acceptance-evidence-v2/measurements-summary.json",
+      "sha256": "8af2c270ed9fd46986f4850a2f54ece1de8f55f0047843181131d7fa1d3d84f0",
+      "bytes": 12266
+    },
+    {
+      "path": "/workspace/scratch/5e06a74e5f65/durable-restart/grams-acceptance-evidence-v2/environment.txt",
+      "sha256": "e8947b80892c92c6e7e15de2c1a5ab41852d5c5cdbf40937503611eb6c28568e",
+      "bytes": 735
+    },
+    {
+      "path": "/workspace/scratch/5e06a74e5f65/durable-restart/grams-acceptance-evidence-v2/executable-build-info.txt",
+      "sha256": "5d2199290af0d44eec1a11ad38949abc322d435d4c687139f7b927f4c5bb5b69",
+      "bytes": 579
+    },
+    {
+      "path": "/workspace/scratch/5e06a74e5f65/durable-restart/grams-acceptance-evidence-v2/cgo-dependencies.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/workspace/scratch/5e06a74e5f65/durable-restart/grams-acceptance-evidence-v2/final-handoff-source-check.log",
+      "sha256": "d474313e5103eae1f76e4adc653a4e438e0cad4ee1bfe05a0a9a61f17aa5db21",
+      "bytes": 58199
+    },
+    {
+      "path": "/workspace/scratch/5e06a74e5f65/durable-restart/grams-acceptance-evidence-v2/corpus-a.json",
+      "sha256": "e3ed9f485418869a1af81d930bb2822148eaae72570d5025fd356422a368e3e9",
+      "bytes": 11640
+    },
+    {
+      "path": "/workspace/scratch/5e06a74e5f65/durable-restart/grams-acceptance-evidence-v2/corpus-b.json",
+      "sha256": "e3ed9f485418869a1af81d930bb2822148eaae72570d5025fd356422a368e3e9",
+      "bytes": 11640
+    }
+  ],
+  "independent_review": {
+    "path": "/workspace/scratch/5e06a74e5f65/durable-restart/grams-independent-evidence-v2/FINAL.md",
+    "sha256": "63739e9dd93cfe3952441d4f9e3f8a667a9ac346fb05ba2cedde104293d90d40"
+  },
+  "v1_exact_sqlite_source_closure_log": {
+    "path": "/workspace/scratch/5e06a74e5f65/durable-restart/grams-acceptance-evidence/checks.log",
+    "sha256": "0b5a62f2319b8e04ff9963c3d498098af22f7cf4352c41b57f320ec9dd05ef91"
+  },
+  "larger_profile_executed": false,
+  "restricted_workflows_executed": false,
+  "commits_uploads_remote_writes": false
+}

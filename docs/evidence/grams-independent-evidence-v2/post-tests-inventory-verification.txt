@@ -1,0 +1,1 @@
+PASS: complete post-test path/mode/size/SHA256 inventory unchanged; 1256 files; tree 762a9e9dd8105cf620c68a8398922ddf254a9d5f

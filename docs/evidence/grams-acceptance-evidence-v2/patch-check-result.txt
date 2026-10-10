@@ -1,0 +1,1 @@
+PASS: git apply --check; applied to independent plain-final-verify copy; exact full path set, modes, lengths and SHA256 match final v2 inventory.

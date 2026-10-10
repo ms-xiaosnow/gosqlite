@@ -1,0 +1,72 @@
+Independent exact b983d28 shared-absence source/descriptor-free memory laws and ordinary pinned shared snapshots/commit/rollback/checkpoint/normal reopen at three page sizes. Test bodies and helper paths audited. No physical missing-file/namespace/native-fault/crash/recovery workflow.
+2026-10-10T21:21:02Z
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestSharedAbsenceSourceInitialProvenance
+--- PASS: TestSharedAbsenceSourceInitialProvenance (0.00s)
+=== RUN   TestSharedAbsenceSourceAdmissionAdoptionAndErrorExit
+--- PASS: TestSharedAbsenceSourceAdmissionAdoptionAndErrorExit (0.00s)
+=== RUN   TestSharedAbsenceMemoryLateDiagnosticSurvivesFailedOpen
+=== RUN   TestSharedAbsenceMemoryLateDiagnosticSurvivesFailedOpen/false
+=== RUN   TestSharedAbsenceMemoryLateDiagnosticSurvivesFailedOpen/true
+--- PASS: TestSharedAbsenceMemoryLateDiagnosticSurvivesFailedOpen (0.00s)
+    --- PASS: TestSharedAbsenceMemoryLateDiagnosticSurvivesFailedOpen/false (0.00s)
+    --- PASS: TestSharedAbsenceMemoryLateDiagnosticSurvivesFailedOpen/true (0.00s)
+=== RUN   TestSharedAbsenceMemoryNestedTerminalProtectsOwners
+--- PASS: TestSharedAbsenceMemoryNestedTerminalProtectsOwners (0.00s)
+=== RUN   TestSharedAbsenceSourceInitialProvenance
+--- PASS: TestSharedAbsenceSourceInitialProvenance (0.00s)
+=== RUN   TestSharedAbsenceSourceAdmissionAdoptionAndErrorExit
+--- PASS: TestSharedAbsenceSourceAdmissionAdoptionAndErrorExit (0.00s)
+=== RUN   TestSharedAbsenceMemoryLateDiagnosticSurvivesFailedOpen
+=== RUN   TestSharedAbsenceMemoryLateDiagnosticSurvivesFailedOpen/false
+=== RUN   TestSharedAbsenceMemoryLateDiagnosticSurvivesFailedOpen/true
+--- PASS: TestSharedAbsenceMemoryLateDiagnosticSurvivesFailedOpen (0.00s)
+    --- PASS: TestSharedAbsenceMemoryLateDiagnosticSurvivesFailedOpen/false (0.00s)
+    --- PASS: TestSharedAbsenceMemoryLateDiagnosticSurvivesFailedOpen/true (0.00s)
+=== RUN   TestSharedAbsenceMemoryNestedTerminalProtectsOwners
+--- PASS: TestSharedAbsenceMemoryNestedTerminalProtectsOwners (0.00s)
+=== RUN   TestSharedAbsenceSourceInitialProvenance
+--- PASS: TestSharedAbsenceSourceInitialProvenance (0.00s)
+=== RUN   TestSharedAbsenceSourceAdmissionAdoptionAndErrorExit
+--- PASS: TestSharedAbsenceSourceAdmissionAdoptionAndErrorExit (0.00s)
+=== RUN   TestSharedAbsenceMemoryLateDiagnosticSurvivesFailedOpen
+=== RUN   TestSharedAbsenceMemoryLateDiagnosticSurvivesFailedOpen/false
+=== RUN   TestSharedAbsenceMemoryLateDiagnosticSurvivesFailedOpen/true
+--- PASS: TestSharedAbsenceMemoryLateDiagnosticSurvivesFailedOpen (0.00s)
+    --- PASS: TestSharedAbsenceMemoryLateDiagnosticSurvivesFailedOpen/false (0.00s)
+    --- PASS: TestSharedAbsenceMemoryLateDiagnosticSurvivesFailedOpen/true (0.00s)
+=== RUN   TestSharedAbsenceMemoryNestedTerminalProtectsOwners
+--- PASS: TestSharedAbsenceMemoryNestedTerminalProtectsOwners (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.015s
+=== RUN   TestSharedAbsenceMemoryMetadataTerminalProvenance
+--- PASS: TestSharedAbsenceMemoryMetadataTerminalProvenance (0.00s)
+=== RUN   TestSharedAbsenceMemoryMetadataTerminalProvenance
+--- PASS: TestSharedAbsenceMemoryMetadataTerminalProvenance (0.00s)
+=== RUN   TestSharedAbsenceMemoryMetadataTerminalProvenance
+--- PASS: TestSharedAbsenceMemoryMetadataTerminalProvenance (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.007s
+=== RUN   TestSharedWALSnapshotsPromotionAndCheckpoint
+=== RUN   TestSharedWALSnapshotsPromotionAndCheckpoint/512
+=== RUN   TestSharedWALSnapshotsPromotionAndCheckpoint/4096
+=== RUN   TestSharedWALSnapshotsPromotionAndCheckpoint/65536
+--- PASS: TestSharedWALSnapshotsPromotionAndCheckpoint (0.01s)
+    --- PASS: TestSharedWALSnapshotsPromotionAndCheckpoint/512 (0.00s)
+    --- PASS: TestSharedWALSnapshotsPromotionAndCheckpoint/4096 (0.00s)
+    --- PASS: TestSharedWALSnapshotsPromotionAndCheckpoint/65536 (0.01s)
+=== RUN   TestSharedWALSnapshotsPromotionAndCheckpoint
+=== RUN   TestSharedWALSnapshotsPromotionAndCheckpoint/512
+=== RUN   TestSharedWALSnapshotsPromotionAndCheckpoint/4096
+=== RUN   TestSharedWALSnapshotsPromotionAndCheckpoint/65536
+--- PASS: TestSharedWALSnapshotsPromotionAndCheckpoint (0.01s)
+    --- PASS: TestSharedWALSnapshotsPromotionAndCheckpoint/512 (0.00s)
+    --- PASS: TestSharedWALSnapshotsPromotionAndCheckpoint/4096 (0.00s)
+    --- PASS: TestSharedWALSnapshotsPromotionAndCheckpoint/65536 (0.01s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.031s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.149s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	1.012s
+2026-10-10T21:21:32Z
+INDEPENDENT SHARED ABSENCE FOCUSED PASS

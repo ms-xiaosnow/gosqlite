@@ -1,0 +1,17 @@
+{
+  "report": "/workspace/scratch/5e06a74e5f65/durable-restart/grams-independent-evidence-v2/owner-medium.json",
+  "corpus": "/workspace/scratch/5e06a74e5f65/durable-restart/grams-independent-evidence-v2/medium-corpus.json",
+  "status": "PASS",
+  "independent_substring_result_hash_checks": 228,
+  "memberships": 116736,
+  "actual_searches": 216,
+  "actual_fallbacks": 12,
+  "quantiles_space_and_exact_logical_counters": "recomputed independently",
+  "workload_sha256": "4075cb1cba12aec7e0bc69ed5949f388e3887ab7b3cddf2dad0757df04b1bed5",
+  "elapsed_seconds": 290.019114205,
+  "builds_ms": [
+    65291.547495,
+    37267.472208,
+    41224.17365
+  ]
+}

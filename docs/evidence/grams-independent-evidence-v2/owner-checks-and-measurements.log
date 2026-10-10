@@ -1,0 +1,42 @@
+Final source 762a9e9dd8105cf620c68a8398922ddf254a9d5f
+v1/v2 exact inventory delta only benchmarks/grams/main.go and README.md; sqlite package and entire imported source closure are byte-identical. Selected sqlite CGO0/race evidence therefore retains exact executable source identity. Final changed harness rechecked below.
+0
+2026-10-10T21:02:07Z
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestCorpusDeterministicNFCAndMarkers
+--- PASS: TestCorpusDeterministicNFCAndMarkers (0.00s)
+=== RUN   TestEmpiricalDistributionAndUncertainty
+--- PASS: TestEmpiricalDistributionAndUncertainty (0.00s)
+=== RUN   TestBoundedConfiguration
+--- PASS: TestBoundedConfiguration (0.00s)
+=== RUN   TestNativePersistedGramsBenchmarkSmoke
+--- PASS: TestNativePersistedGramsBenchmarkSmoke (24.41s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/benchmarks/grams	24.420s
+7c80d5a732adc95b534a8b04b128c51bdfc5f0ff6a64160b9e5f356f170ef40f  /workspace/scratch/5e06a74e5f65/durable-restart/grams-acceptance-evidence-v2/grams-cli-a
+7c80d5a732adc95b534a8b04b128c51bdfc5f0ff6a64160b9e5f356f170ef40f  /workspace/scratch/5e06a74e5f65/durable-restart/grams-acceptance-evidence-v2/grams-cli-b
+e3ed9f485418869a1af81d930bb2822148eaae72570d5025fd356422a368e3e9  /workspace/scratch/5e06a74e5f65/durable-restart/grams-acceptance-evidence-v2/corpus-a.json
+e3ed9f485418869a1af81d930bb2822148eaae72570d5025fd356422a368e3e9  /workspace/scratch/5e06a74e5f65/durable-restart/grams-acceptance-evidence-v2/corpus-b.json
+invalid flags rejected before opening DB
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestCorpusDeterministicNFCAndMarkers
+--- PASS: TestCorpusDeterministicNFCAndMarkers (0.01s)
+=== RUN   TestEmpiricalDistributionAndUncertainty
+--- PASS: TestEmpiricalDistributionAndUncertainty (0.00s)
+=== RUN   TestBoundedConfiguration
+--- PASS: TestBoundedConfiguration (0.00s)
+=== RUN   TestNativePersistedGramsBenchmarkSmoke
+--- PASS: TestNativePersistedGramsBenchmarkSmoke (113.77s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/benchmarks/grams	114.818s
+FINAL HARNESS CGO0 NORMAL/VET/BUILD/DETERMINISM AND CGO1 RACE PASS
+2026-10-10T21:04:45Z
+2026-10-10T21:04:45Z
+Starting smoke: rows=128 queries-per-length=6 independent-builds=2
+smoke native standalone benchmark PASS
+2026-10-10T21:05:37Z
+2026-10-10T21:05:37Z
+Starting medium: rows=512 queries-per-length=12 independent-builds=3
+medium native standalone benchmark PASS
+2026-10-10T21:10:27Z
+FINAL SOURCE AND BOTH DECLARED ORDINARY MEASUREMENT PROFILES PASS

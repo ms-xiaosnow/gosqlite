@@ -1,0 +1,236 @@
+{
+  "version": "grams-nfc-selectivity-v1",
+  "dataset_seed": 2026101052,
+  "texts": [
+    "common 한%据한한🙂な🙂が\\库据한BB_ 稀 簀粀 縀纀缀",
+    "common _한库%한a据한a据がか%_库%zが据 稁 簁粁 縁纁缁",
+    "common BÅ_% zか\\🙂%か%库か🙂数\\ 稂 簂粂 縂纂缂",
+    "common  _éかBaa한🙂글\\ÅÅ글_글かか한Å数 稃 簃粃 縃纃缃",
+    "common な%な🙂한글B글é한글a한Å 稄 簄粄 縄纄缄",
+    "common \\글_ががé\\🙂글 % 库 稅 簅粅 縅纅缅",
+    "common 库é글🙂🙂Å_한数한数Åなz 稆 簆粆 縆纆缆",
+    "common 🙂z%据z글_한据なa한なza글한%zがzな 稇 簇粇 縇纇缇",
+    "common __aなか글据한글글かz한한库 稈 簈粈 縈纈缈",
+    "common \\据库Å글한  %한数が한ÅBa🙂\\ 稉 簉粉 縉纉缉",
+    "common なzÅ한か\\éÅ据B글é数é%な 稊 簊粊 縊纊缊",
+    "common Åかa据é글据据한🙂글  な글z글 程 簋粋 縋纋缋",
+    "common _zBな🙂%%한据か🙂_한한한か 稌 簌粌 縌續缌",
+    "common なz한なÅ据az库 稍 簍粍 縍纍缍",
+    "common _z \\%库Åa%か 税 簎粎 縎纎缎",
+    "common 한a数한_é_ _🙂な库Å 库za한 稏 簏粏 縏纏缏",
+    "common 库%据한据한Ba数か%한a 稐 簐粐 縐纐缐",
+    "common 글据_かが据据é%库한数がÅ数数한Å 稑 簑粑 縑纑缑",
+    "common 한_🙂ながa\\据_éÅ数数é_\\ aが zな  稒 簒粒 縒纒缒",
+    "common ééa\\なB据글B な한한zB  稓 簓粓 縓纓缓",
+    "common ÅBか库한 Bé한z 稔 簔粔 縔纔缔",
+    "common 한%ÅÅか🙂库%な が_é_%かéa 据한  稕 簕粕 縕纕缕",
+    "common  \\Baz数z\\がz한がかな B%かかzB 稖 簖粖 縖纖编",
+    "common 库ézかBな %库 稗 簗粗 縗纗缗",
+    "common z数글库é数éz\\🙂库Å글%🙂_🙂 稘 簘粘 縘纘缘",
+    "common 据据z🙂库Åが库_が   库한库\\글数库数글 稙 簙粙 縙纙缙",
+    "common がかÅ库a\\据库한한%éz글🙂글글据z한 なÅ 稚 簚粚 縚纚缚",
+    "common B\\库한な库%🙂 한aな  zé🙂한한か글zが글 稛 簛粛 縛纛缛",
+    "common 한a\\z な글%が _な한 稜 簜粜 縜纜缜",
+    "common zÅ数な\\\\한库%zé据Å库___한aé%한 稝 簝粝 縝纝缝",
+    "common z库z数é据库な%Å🙂azzé库据\\库_한Åが글 稞 簞粞 縞纞缞",
+    "common な한が한が🙂B库한 な\\Å かa\\_据🙂🙂か据B 稟 簟粟 縟纟缟",
+    "common 🙂aかa库BéBaé が한zBな据한한a数 稀 簀粀 縀纀缀",
+    "common 据数かがが한\\库\\か한か🙂é\\%éa한 稁 簁粁 縁纁缁",
+    "common \\なÅな据é🙂Bz한\\库% な库_Åa 稂 簂粂 縂纂缂",
+    "common かÅ글_库が库🙂글 Å글な🙂_がB\\\\zがé%が 稃 簃粃 縃纃缃",
+    "common \\\\Åな한한글库éかaが%かが🙂글かかÅÅz 稄 簄粄 縄纄缄",
+    "common %が%B_ が库_ 🙂z한a库B한Å Åéか글글 稅 簅粅 縅纅缅",
+    "common が%\\글글Å数Å한한zなÅ%かかか%한zéa_글 稆 簆粆 縆纆缆",
+    "common %한éBz据글据aB글글\\か  稇 簇粇 縇纇缇",
+    "common %_库がé_한据\\a한%がz🙂a数_🙂글がが_z 稈 簈粈 縈纈缈",
+    "common \\🙂数🙂🙂Å据数🙂Åが🙂 稉 簉粉 縉纉缉",
+    "common 数库 ÅzBか%한なÅé数한Å_ 稊 簊粊 縊纊缊",
+    "common か한な数据かaa 글な数数か글库_éな 程 簋粋 縋纋缋",
+    "common 한 _éな글z글B库\\数한éB한한な🙂\\か\\ 稌 簌粌 縌續缌",
+    "common 库 글Ba库Å库한éがé据 数か한é 稍 簍粍 縍纍缍",
+    "common ÅなÅBか한%한数かÅ%글数\\库 z据한B数z 税 簎粎 縎纎缎",
+    "common かé库かBéé据库🙂한%か🙂 稏 簏粏 縏纏缏",
+    "common 库Å\\글据库한据한_かÅ数한数% _ 稐 簐粐 縐纐缐",
+    "common 글az한Å한据글库B_ 稑 簑粑 縑纑缑",
+    "common 한据글%éかか 库z글_库かa  B 稒 簒粒 縒纒缒",
+    "common 据库글한%なééÅ한 か数な_z% 稓 簓粓 縓纓缓",
+    "common が%ÅÅ库なaÅzなzが글한% Åな数한 한글 稔 簔粔 縔纔缔",
+    "common なB한 が库 🙂Å 稕 簕粕 縕纕缕",
+    "common B_🙂库 a글글한据\\がが据 z % 据かaa글 稖 簖粖 縖纖编",
+    "common 据が%🙂Å\\글a_🙂aがなか库据한Bé%库  稗 簗粗 縗纗缗",
+    "common 数_aBa글なz 稘 簘粘 縘纘缘",
+    "common B库 é🙂か\\%な 稙 簙粙 縙纙缙",
+    "common 글数か 한_数a库é🙂据库한글 稚 簚粚 縚纚缚",
+    "common %azzéかa库据か한\\ 稛 簛粛 縛纛缛",
+    "common \\がか库BÅ %aがががな\\_ 库 稜 簜粜 縜纜缜",
+    "common é数\\Å库zzな Å%か数ééB%\\数 稝 簝粝 縝纝缝",
+    "common が据库な数글B글か한a한한Å据한한Bé 稞 簞粞 縞纞缞",
+    "common B据Åな🙂z🙂한한z据か 稟 簟粟 縟纟缟",
+    "common 据%한が数🙂글な한数a库据\\据库数数é \\据한_ 稀 簀粀 縀纀缀",
+    "common  Å한が据Å éなな한zがz_\\\\한a 稁 簁粁 縁纁缁",
+    "common なéがB据한据za_ 稂 簂粂 縂纂缂",
+    "common é%_🙂か한aが한a据zzÅ据 aな한据_数🙂 稃 簃粃 縃纃缃",
+    "common か\\\\库ながéBかa\\a한据据なÅ%\\库a한z한 稄 簄粄 縄纄缄",
+    "common %据か\\한かかza🙂が_据🙂かÅB글aÅ 稅 簅粅 縅纅缅",
+    "common \\aÅかzかz글なかな%글z\\がな数ÅÅ%é 稆 簆粆 縆纆缆",
+    "common %zなな🙂Baなな%  稇 簇粇 縇纇缇",
+    "common 한zが_数库%_%a글据🙂数库글B 稈 簈粈 縈纈缈",
+    "common か_ 库数🙂%か库한B_aな库 稉 簉粉 縉纉缉",
+    "common a_据か据库Å한库数 稊 簊粊 縊纊缊",
+    "common 🙂éなaなz据한é글한がÅBÅ 程 簋粋 縋纋缋",
+    "common %库据数か据库B🙂_数 稌 簌粌 縌續缌",
+    "common 据が据z\\z한库한据aか한한글글 稍 簍粍 縍纍缍",
+    "common 库が库_a_글ééÅ글 税 簎粎 縎纎缎",
+    "common 글%B%据\\\\%据z🙂z库é🙂글 Åなが 数 稏 簏粏 縏纏缏",
+    "common 한글a_が据据%据 なBa 稐 簐粐 縐纐缐",
+    "common 数数数_한글_🙂 Åなéa 稑 簑粑 縑纑缑",
+    "common Bが数 z글\\B数ÅÅ한据が%a \\B한库数z 稒 簒粒 縒纒缒",
+    "common z\\a글\\な🙂B éなか据 a据한한한한 稓 簓粓 縓纓缓",
+    "common 🙂なa한zかBかa%z 稔 簔粔 縔纔缔",
+    "common 库数글z글な🙂a한数B\\数数 B 稕 簕粕 縕纕缕",
+    "common \\ 한a据aが Å 稖 簖粖 縖纖编",
+    "common aB据%zB数か数B_a が 稗 簗粗 縗纗缗",
+    "common 한が_库な 한库글글🙂한がなか글BÅ_한z 稘 簘粘 縘纘缘",
+    "common 据🙂数%か\\글据z글据\\ががが%库\\B_なa 稙 簙粙 縙纙缙",
+    "common %な글_ 库_é 🙂🙂글 %zza글aな🙂% 稚 簚粚 縚纚缚",
+    "common %\\ _🙂한Å🙂B한 稛 簛粛 縛纛缛",
+    "common z数がaな数글数 稜 簜粜 縜纜缜",
+    "common _库글🙂한한é\\é 稝 簝粝 縝纝缝",
+    "common 글_한か한Åな🙂한글%Åazが据据据が_Å\\\\な 稞 簞粞 縞纞缞",
+    "common 据éなz库é\\🙂据Å据がÅ🙂な库据Ba%%_Å 稟 簟粟 縟纟缟",
+    "common 글한éなB한\\%🙂 稀 簀粀 縀纀缀",
+    "common \\한か\\한な\\ 🙂数글 稁 簁粁 縁纁缁",
+    "common aが글한z🙂\\\\がaB🙂 库 稂 簂粂 縂纂缂",
+    "common B 据据库_B なzなB% か글かがかé 稃 簃粃 縃纃缃",
+    "common な据かÅ한な数éBÅ_な🙂 稄 簄粄 縄纄缄",
+    "common 글a_ 据_%한库库がBaz 稅 簅粅 縅纅缅",
+    "common B据z🙂é Å한 稆 簆粆 縆纆缆",
+    "common 한글数B%🙂な据が%é%な🙂Åéz한 z 稇 簇粇 縇纇缇",
+    "common 한za글éBÅ\\が据\\é据Åな \\한がなか 稈 簈粈 縈纈缈",
+    "common zé🙂库库Å据한数aが 稉 簉粉 縉纉缉",
+    "common BBzÅz%が한 稊 簊粊 縊纊缊",
+    "common 🙂库库がな글한한글글 程 簋粋 縋纋缋",
+    "common 글ななが한é한_ B_Åか🙂éz a 稌 簌粌 縌續缌",
+    "common é据🙂글库글が 한a据éB  _  稍 簍粍 縍纍缍",
+    "common é글\\zな Å\\数な _a\\がな한🙂z数🙂 é 税 簎粎 縎纎缎",
+    "common éÅz한z\\がÅ글Bが한%zaが_🙂%한かが数z 稏 簏粏 縏纏缏",
+    "common 글한글글库%Å_%数Å数é\\한é%글\\か글z 稐 簐粐 縐纐缐",
+    "common \\ÅB数%B\\글🙂据数な글 a 稑 簑粑 縑纑缑",
+    "common 数Å\\が%が한な🙂글数글한か한が库B글🙂a 稒 簒粒 縒纒缒",
+    "common 한据\\Bz🙂한_库据한zな한🙂_a글a한がz 稓 簓粓 縓纓缓",
+    "common aか_z글据_数なÅ한zBが글 稔 簔粔 縔纔缔",
+    "common な한数한库がé🙂 z🙂 글z%か BB据Å_ÅÅ 稕 簕粕 縕纕缕",
+    "common がé%B数aÅ글%がz글数글_z🙂据 か_ 稖 簖粖 縖纖编",
+    "common  な한%한%か\\a한é数据éか한が 稗 簗粗 縗纗缗",
+    "common 数%한\\한が数Åが한ÅÅBaÅzか 稘 簘粘 縘纘缘",
+    "common 한Bかが한库글한 稙 簙粙 縙纙缙",
+    "common 한が%zzが글な글库数据é据%한글_éa据か 稚 簚粚 縚纚缚",
+    "common 🙂Å한한\\한Å库数\\한한数Bzな한な글 稛 簛粛 縛纛缛",
+    "common \\한글한 库ÅaBな 稜 簜粜 縜纜缜",
+    "common 한数库aéz\\Bなzか글z % zÅ%%\\ 稝 簝粝 縝纝缝",
+    "common \\é_ 글库한%库_な한한 稞 簞粞 縞纞缞",
+    "common z%が한か\\\\Ba🙂é Åな🙂B_ 稟 簟粟 縟纟缟"
+  ],
+  "queries": [
+    {
+      "gram_length": 1,
+      "pattern": "%稂%",
+      "require_real_search": true
+    },
+    {
+      "gram_length": 1,
+      "pattern": "%稊%",
+      "require_real_search": true
+    },
+    {
+      "gram_length": 1,
+      "pattern": "%稆%",
+      "require_real_search": true
+    },
+    {
+      "gram_length": 1,
+      "pattern": "%稑%",
+      "require_real_search": true
+    },
+    {
+      "gram_length": 1,
+      "pattern": "%稙%",
+      "require_real_search": true
+    },
+    {
+      "gram_length": 1,
+      "pattern": "%稁%",
+      "require_real_search": true
+    },
+    {
+      "gram_length": 2,
+      "pattern": "%簟粟%",
+      "require_real_search": true
+    },
+    {
+      "gram_length": 2,
+      "pattern": "%簓粓%",
+      "require_real_search": true
+    },
+    {
+      "gram_length": 2,
+      "pattern": "%簒粒%",
+      "require_real_search": true
+    },
+    {
+      "gram_length": 2,
+      "pattern": "%簓粓%",
+      "require_real_search": true
+    },
+    {
+      "gram_length": 2,
+      "pattern": "%簖粖%",
+      "require_real_search": true
+    },
+    {
+      "gram_length": 2,
+      "pattern": "%簊粊%",
+      "require_real_search": true
+    },
+    {
+      "gram_length": 3,
+      "pattern": "%縄纄缄%",
+      "require_real_search": true
+    },
+    {
+      "gram_length": 3,
+      "pattern": "%縙纙缙%",
+      "require_real_search": true
+    },
+    {
+      "gram_length": 3,
+      "pattern": "%縕纕缕%",
+      "require_real_search": true
+    },
+    {
+      "gram_length": 3,
+      "pattern": "%縅纅缅%",
+      "require_real_search": true
+    },
+    {
+      "gram_length": 3,
+      "pattern": "%縉纉缉%",
+      "require_real_search": true
+    },
+    {
+      "gram_length": 3,
+      "pattern": "%縝纝缝%",
+      "require_real_search": true
+    },
+    {
+      "gram_length": 0,
+      "pattern": "%",
+      "require_real_search": false
+    },
+    {
+      "gram_length": 0,
+      "pattern": "%common%",
+      "require_real_search": false
+    }
+  ]
+}

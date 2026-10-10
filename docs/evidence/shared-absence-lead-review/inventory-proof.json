@@ -1,0 +1,8 @@
+{
+  "base": "13f53e4cdadaaca2530e17e5f7a61b9dfe8e5c33",
+  "frozen": "b983d28c1e217d121bf5cda0ff92c6e85accef41",
+  "files": 1325,
+  "independent_patch_replay": "b983d28c1e217d121bf5cda0ff92c6e85accef41",
+  "bytes_modes": "PASS",
+  "production_scope": "Three shared session classification sites and nil-cleanup Session probe; no native resource acquisition/retirement mechanism is replaced."
+}

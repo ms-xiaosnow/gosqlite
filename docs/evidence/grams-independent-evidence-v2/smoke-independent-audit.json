@@ -1,0 +1,16 @@
+{
+  "report": "/workspace/scratch/5e06a74e5f65/durable-restart/grams-independent-evidence-v2/smoke.json",
+  "corpus": "/workspace/scratch/5e06a74e5f65/durable-restart/grams-independent-evidence-v2/smoke-corpus-a.json",
+  "status": "PASS",
+  "independent_substring_result_hash_checks": 80,
+  "memberships": 10240,
+  "actual_searches": 72,
+  "actual_fallbacks": 8,
+  "quantiles_space_and_exact_logical_counters": "recomputed independently",
+  "workload_sha256": "a36ee786cd4c307b79d0c8a4abf35cb685bb9a336252010aa25cac015280be33",
+  "elapsed_seconds": 56.740249523,
+  "builds_ms": [
+    15589.029349,
+    12297.030789
+  ]
+}

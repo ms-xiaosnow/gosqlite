@@ -1,0 +1,58 @@
+Independent lead review of exact ad066d04: source/AST and memory classifiers plus ordinary cooperating reader/writer. Constructor and createEmpty helper audited. No injected native errors, physical mutation, hot recovery, abrupt process exit or manual tags.
+2026-10-10T21:08:54Z
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestReaderAcquisitionSourceSnapshotAfterShared
+--- PASS: TestReaderAcquisitionSourceSnapshotAfterShared (0.00s)
+=== RUN   TestReaderAcquisitionOrdinaryCooperatingWriter
+--- PASS: TestReaderAcquisitionOrdinaryCooperatingWriter (0.04s)
+=== RUN   TestReaderAcquisitionMemoryBusyClassification
+--- PASS: TestReaderAcquisitionMemoryBusyClassification (0.00s)
+=== RUN   TestReaderAcquisitionSourceSnapshotAfterShared
+--- PASS: TestReaderAcquisitionSourceSnapshotAfterShared (0.00s)
+=== RUN   TestReaderAcquisitionOrdinaryCooperatingWriter
+--- PASS: TestReaderAcquisitionOrdinaryCooperatingWriter (0.04s)
+=== RUN   TestReaderAcquisitionMemoryBusyClassification
+--- PASS: TestReaderAcquisitionMemoryBusyClassification (0.00s)
+=== RUN   TestReaderAcquisitionSourceSnapshotAfterShared
+--- PASS: TestReaderAcquisitionSourceSnapshotAfterShared (0.00s)
+=== RUN   TestReaderAcquisitionOrdinaryCooperatingWriter
+--- PASS: TestReaderAcquisitionOrdinaryCooperatingWriter (0.05s)
+=== RUN   TestReaderAcquisitionMemoryBusyClassification
+--- PASS: TestReaderAcquisitionMemoryBusyClassification (0.00s)
+=== RUN   TestReaderAcquisitionSourceSnapshotAfterShared
+--- PASS: TestReaderAcquisitionSourceSnapshotAfterShared (0.00s)
+=== RUN   TestReaderAcquisitionOrdinaryCooperatingWriter
+--- PASS: TestReaderAcquisitionOrdinaryCooperatingWriter (0.03s)
+=== RUN   TestReaderAcquisitionMemoryBusyClassification
+--- PASS: TestReaderAcquisitionMemoryBusyClassification (0.00s)
+=== RUN   TestReaderAcquisitionSourceSnapshotAfterShared
+--- PASS: TestReaderAcquisitionSourceSnapshotAfterShared (0.00s)
+=== RUN   TestReaderAcquisitionOrdinaryCooperatingWriter
+--- PASS: TestReaderAcquisitionOrdinaryCooperatingWriter (0.05s)
+=== RUN   TestReaderAcquisitionMemoryBusyClassification
+--- PASS: TestReaderAcquisitionMemoryBusyClassification (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.224s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestReaderAcquisitionSourceSnapshotAfterShared
+--- PASS: TestReaderAcquisitionSourceSnapshotAfterShared (0.03s)
+=== RUN   TestReaderAcquisitionOrdinaryCooperatingWriter
+--- PASS: TestReaderAcquisitionOrdinaryCooperatingWriter (0.13s)
+=== RUN   TestReaderAcquisitionMemoryBusyClassification
+--- PASS: TestReaderAcquisitionMemoryBusyClassification (0.00s)
+=== RUN   TestReaderAcquisitionSourceSnapshotAfterShared
+--- PASS: TestReaderAcquisitionSourceSnapshotAfterShared (0.03s)
+=== RUN   TestReaderAcquisitionOrdinaryCooperatingWriter
+--- PASS: TestReaderAcquisitionOrdinaryCooperatingWriter (0.10s)
+=== RUN   TestReaderAcquisitionMemoryBusyClassification
+--- PASS: TestReaderAcquisitionMemoryBusyClassification (0.00s)
+=== RUN   TestReaderAcquisitionSourceSnapshotAfterShared
+--- PASS: TestReaderAcquisitionSourceSnapshotAfterShared (0.04s)
+=== RUN   TestReaderAcquisitionOrdinaryCooperatingWriter
+--- PASS: TestReaderAcquisitionOrdinaryCooperatingWriter (0.13s)
+=== RUN   TestReaderAcquisitionMemoryBusyClassification
+--- PASS: TestReaderAcquisitionMemoryBusyClassification (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.481s
+2026-10-10T21:09:11Z
+INDEPENDENT READER ACQUISITION FOCUSED PASS

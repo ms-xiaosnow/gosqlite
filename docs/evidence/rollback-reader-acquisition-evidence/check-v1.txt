@@ -1,0 +1,43 @@
+2026-10-10T21:08:26.282873+00:00 frozen-scope-v1
+frozen-scope-v1 exit 0
+2026-10-10T21:08:26.704530+00:00 frozen-normal-v1
+frozen-normal-v1 exit 0
+2026-10-10T21:08:29.834059+00:00 frozen-sql-normal-v1
+frozen-sql-normal-v1 exit 0
+2026-10-10T21:08:34.257244+00:00 frozen-vet-v1
+frozen-vet-v1 exit 0
+2026-10-10T21:08:35.767332+00:00 frozen-build-v1
+frozen-build-v1 exit 0
+2026-10-10T21:08:36.895408+00:00 frozen-race-v1
+frozen-race-v1 exit 0
+2026-10-10T21:08:43.181688+00:00 frozen-sql-race-v1
+frozen-sql-race-v1 exit 0
+2026-10-10T21:08:53.362174+00:00 control-scope-v1
+control-scope-v1 exit 0
+2026-10-10T21:08:53.750675+00:00 control-source-regression-v1
+control-source-regression-v1 exit 1
+2026-10-10T21:08:56.085232+00:00 baseline-composition-scope-v1
+baseline-composition-scope-v1 exit 0
+2026-10-10T21:08:56.550620+00:00 baseline-composition-build-v1
+baseline-composition-build-v1 exit 0
+2026-10-10T21:08:57.483245+00:00 candidate-composition-scope-v1
+candidate-composition-scope-v1 exit 0
+2026-10-10T21:08:57.901326+00:00 candidate-composition-build-v1
+candidate-composition-build-v1 exit 0
+2026-10-10T21:09:00.413078+00:00 candidate-harness-normal-v1
+candidate-harness-normal-v1 exit 0
+2026-10-10T21:09:04.726469+00:00 candidate-harness-race-v1
+candidate-harness-race-v1 exit 0
+2026-10-10T21:09:15.822813+00:00 soak-v2-baseline-1
+{"name": "soak-v2-baseline-1", "status": "failed", "exit": 1, "active_seconds": 19.673626858000002, "commits": 1559, "reads": 8345, "errors": ["reader generation: sqlite query: SQLite database changed during read"], "final_model_verified": false, "shutdown": "workers_joined_normal_close"}
+2026-10-10T21:09:35.557776+00:00 soak-v2-candidate-1
+{"name": "soak-v2-candidate-1", "status": "passed", "exit": 0, "active_seconds": 20.000108642000004, "commits": 1618, "reads": 8592, "errors": [], "final_model_verified": true, "shutdown": "workers_joined_normal_close"}
+2026-10-10T21:09:55.642182+00:00 soak-v2-baseline-2
+{"name": "soak-v2-baseline-2", "status": "failed", "exit": 1, "active_seconds": 1.098452608, "commits": 92, "reads": 428, "errors": ["reader generation: sqlite query: SQLite database changed during read"], "final_model_verified": false, "shutdown": "workers_joined_normal_close"}
+2026-10-10T21:09:56.760941+00:00 soak-v2-candidate-2
+{"name": "soak-v2-candidate-2", "status": "passed", "exit": 0, "active_seconds": 20.002908472, "commits": 1840, "reads": 9153, "errors": [], "final_model_verified": true, "shutdown": "workers_joined_normal_close"}
+2026-10-10T21:10:16.824826+00:00 soak-v2-candidate-3
+{"name": "soak-v2-candidate-3", "status": "passed", "exit": 0, "active_seconds": 20.00085483, "commits": 1513, "reads": 8521, "errors": [], "final_model_verified": true, "shutdown": "workers_joined_normal_close"}
+2026-10-10T21:10:36.893773+00:00 soak-v2-candidate-4
+{"name": "soak-v2-candidate-4", "status": "passed", "exit": 0, "active_seconds": 20.000633911, "commits": 1664, "reads": 9128, "errors": [], "final_model_verified": true, "shutdown": "workers_joined_normal_close"}
+all bounded checks finished; source inventories and original failure unchanged

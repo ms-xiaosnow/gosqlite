@@ -1,0 +1,1 @@
+bounded options: rows 64..20000, queries 1..128 per length, repeats 2..10, max-pages 4096..65536

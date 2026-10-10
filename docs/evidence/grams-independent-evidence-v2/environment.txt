@@ -1,0 +1,11 @@
+2026-10-10T20:56:16Z
+model name	: AMD EPYC 9V74 80-Core Processor
+Cpus_allowed_list:	0-8
+Mems_allowed_list:	0
+Filesystem     Type    1K-blocks     Used Available Use% Mounted on
+overlay        overlay  32978704 22758120   8526480  73% /workspace/scratch/5e06a74e5f65
+               total        used        free      shared  buff/cache   available
+Mem:           9.8Gi       6.4Gi       1.5Gi       3.7Gi       6.1Gi       3.4Gi
+Swap:             0B          0B          0B
+18.21 18.04 14.96 19/921 13
+Shared container; uncontrolled concurrent workload including independent correctness/race checks; storage physical medium unknown; no OS cache eviction; not fixed-hardware release qualification.

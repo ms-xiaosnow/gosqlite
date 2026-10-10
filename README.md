@@ -130,7 +130,7 @@ CGO_ENABLED=0 go run ./examples/encrypted
 
 Native exact retrieval remains the default. IVFFlat supports L2, negative inner product and cosine, immutable trained centroids between explicit rebuilds, and actual list probes with exact rescoring. Probing every list chooses exact scan. [ANN documentation](docs/ann.md) records boundaries and measured recall.
 
-Encryption is selected only through code-configured KeyProvider and sqlite.Options.Encryption (also available through driver.NewConnector). Linux supports explicit full-snapshot mode or immutable final-dirty-page WAL segments with complete-head verification, checkpoint, correct-key rekey/backup/restore and plaintext import/export. Legacy modes use lifetime writable-exclusive/read-only-shared leases. Explicit EncryptionWALShared adds immutable reader selections and a nonblocking single writer, stale-snapshot detection, checkpoint/copy and globally quiescent rekey. Old ciphertext is retained and remains decryptable with old credentials after rekey. Whole-history replay/substitution lacks external freshness/identity protection. Live family operations use a pinned Linux parent directory, but initial resolution and hostile-filesystem protection remain limited. Do not use it for irreplaceable or security-sensitive data; see [encrypted storage](docs/encryption-storage.md).
+Library encryption uses code-configured KeyProvider and sqlite.Options.Encryption (also available through driver.NewConnector). The encrypted backup/rekey CLI additionally accepts explicit environment-variable names or bounded stdin providers; credentials are never argument values. Linux supports explicit full-snapshot mode or immutable final-dirty-page WAL segments with complete-head verification, checkpoint, correct-key rekey/backup/restore and plaintext import/export. Legacy modes use lifetime writable-exclusive/read-only-shared leases. Explicit EncryptionWALShared adds immutable reader selections and a nonblocking single writer, stale-snapshot detection, checkpoint/copy and globally quiescent rekey. Old ciphertext is retained and remains decryptable with old credentials after rekey. Whole-history replay/substitution lacks external freshness/identity protection. Live family operations use a pinned Linux parent directory, but initial resolution and hostile-filesystem protection remain limited. Do not use it for irreplaceable or security-sensitive data; see [encrypted storage](docs/encryption-storage.md).
 
 ## Encrypted WAL and migration prerequisites (experimental)
 
@@ -333,3 +333,8 @@ ordinary preparation are described in [grouped aggregates](docs/grouped-aggregat
 [connection state](docs/sql-connection-counters.md) and
 [preparation boundaries](docs/sql-cached-preparation.md). The profile remains
 explicitly partial; final M10 qualification is outstanding.
+
+Required tooling now includes [encrypted CLI backup/rekey](docs/cli-encryption.md),
+[caller-dataset numerical verification](docs/import-distance-verification.md) and
+[grams measurements](benchmarks/grams/README.md). Generic plaintext backup,
+full plaintext-WAL read-only CLI and final release qualification remain open.

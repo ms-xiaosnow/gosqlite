@@ -27,7 +27,7 @@ Exact source, command, CI and restored-commit evidence remains in
 | Shared WAL | partial | Actual dual-header/hash/readmark SHM protocol, single writer/multiple independent snapshots, ordinary live official-reader/writer interoperability and reader-safe checkpoint/reset; one active lease per connection |
 | Ambiguous WAL tails | partial | Accepted ordinary committed/discarded/reset cases are bounded; incomplete/current-generation ambiguous tails fail closed; broader recovery handling remains code work |
 | Locking/native platforms | partial | Linux managed OFD locks; Darwin process-fcntl/deferred-close registry; Windows/amd64 LockFileEx, full file identity and managed mapping/metadata handles. Linux/amd64 ordinary runtime only; other target builds are not runtime evidence |
-| Managed cleanup ownership | partial | Bounded shared failed-open/successful-close, encrypted and plaintext Reader/Tx/exclusive minimal-owner registries/retry APIs are implemented, including pre-acquisition public metadata adoption. Native recovery now shares bounded ownership and explicit initial-absence provenance; shared-session legacy absence handling and rollback reader-open timing remain code gaps. Native failure execution remains unqualified |
+| Managed cleanup ownership | partial | Bounded shared failed-open/successful-close, encrypted and plaintext Reader/Tx/exclusive minimal-owner registries/retry APIs are implemented, including pre-acquisition public metadata adoption. Native recovery now shares bounded ownership and explicit initial-absence provenance; shared-session initial-absence provenance and rollback Reader post-SHARED metadata timing are corrected with independent source/ordinary/race evidence. Native failure execution remains unqualified |
 | Busy/cancel/uncertain results | partial | Normal BUSY, stale shared promotion, cancellation and snapshot lifetime are exercised. Once physical publication begins it is not interrupted; ErrPoisoned/ErrCommitUncertain requires stopping use and preserving evidence |
 | General backup/integrity/VACUUM | unsupported | No general native integrity_check, plaintext online backup API or native VACUUM; metadata inspect and extension-index consistency checks have narrower meanings |
 
@@ -115,3 +115,10 @@ this is not reusable compiled-AST or complete SQLite prepare parity. See
 [connection counters](sql-connection-counters.md),
 [cached preparation](sql-cached-preparation.md) and
 [grouped aggregates](grouped-aggregates.md).
+
+Encrypted backup/rekey CLI uses explicit redacting env-name or bounded stdin
+providers. Caller-dataset distance verification reports derived outward numerical
+bounds and exact-search/Top-K coverage, while ANN remains separately not_run.
+NFC grams membership and build/space/latency tools are implemented; measured
+space amplification and selective slowdowns are preserved. These additions do
+not qualify native failure recovery, long soak or statistical performance.

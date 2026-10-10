@@ -23,6 +23,10 @@ func runMigrateImport(ctx context.Context, args []string, out io.Writer, verify 
 	var onError string
 	var batchRows int
 	var batchBytes, stopAfter int64
+	var distanceOptions string
+	if verify {
+		flags.StringVar(&distanceOptions, "distances", "", "strict bounded exact-distance options JSON; read-only")
+	}
 	if !verify {
 		flags.BoolVar(&apply, "apply", false, "explicitly write local SQLite destination")
 		flags.BoolVar(&resume, "resume", false, "resume matching committed job")
@@ -59,6 +63,9 @@ func runMigrateImport(ctx context.Context, args []string, out io.Writer, verify 
 	m, decodeErr := postgres.DecodeImportManifest(file)
 	if err = errors.Join(decodeErr, file.Close()); err != nil {
 		return err
+	}
+	if verify && distanceOptions != "" {
+		return runMigrateImportDistances(ctx, *input, *output, distanceOptions, m, out)
 	}
 	var result postgres.ImportResult
 	if verify {

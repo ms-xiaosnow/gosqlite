@@ -1,0 +1,18 @@
+{
+  "base_tree": "13f53e4cdadaaca2530e17e5f7a61b9dfe8e5c33",
+  "final_tree": "b983d28c1e217d121bf5cda0ff92c6e85accef41",
+  "base_files": 1322,
+  "final_files": 1325,
+  "owned": [
+    "docs/progress.md",
+    "docs/shared-absence-provenance.md",
+    "internal/pager/plain_session_cleanup.go",
+    "internal/pager/shared_absence_test.go",
+    "internal/pager/shared_session.go",
+    "internal/vfs/shared_absence_test.go"
+  ],
+  "unchanged_files": 1319,
+  "base_git_objects_exact": true,
+  "base_patch_replay_exact_bytes_modes": true,
+  "patch_sha256": "a4aa67ed7b2764726b059d0f18a6ce6fe2b8f2ea3d0663968b0137f6310c7770"
+}

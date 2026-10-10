@@ -1,0 +1,65 @@
+cwd=/workspace/scratch/5e06a74e5f65/durable-restart/rollback-reader-acquisition-freeze-v1
+CGO_ENABLED=0
+command=['go', 'test', './sqlite', '-run', '^TestTransactionDeferredSnapshotTiming$', '-count=10', '-v']
+=== RUN   TestTransactionDeferredSnapshotTiming
+=== RUN   TestTransactionDeferredSnapshotTiming/false
+=== RUN   TestTransactionDeferredSnapshotTiming/true
+--- PASS: TestTransactionDeferredSnapshotTiming (0.01s)
+    --- PASS: TestTransactionDeferredSnapshotTiming/false (0.00s)
+    --- PASS: TestTransactionDeferredSnapshotTiming/true (0.01s)
+=== RUN   TestTransactionDeferredSnapshotTiming
+=== RUN   TestTransactionDeferredSnapshotTiming/false
+=== RUN   TestTransactionDeferredSnapshotTiming/true
+--- PASS: TestTransactionDeferredSnapshotTiming (0.01s)
+    --- PASS: TestTransactionDeferredSnapshotTiming/false (0.00s)
+    --- PASS: TestTransactionDeferredSnapshotTiming/true (0.01s)
+=== RUN   TestTransactionDeferredSnapshotTiming
+=== RUN   TestTransactionDeferredSnapshotTiming/false
+=== RUN   TestTransactionDeferredSnapshotTiming/true
+--- PASS: TestTransactionDeferredSnapshotTiming (0.01s)
+    --- PASS: TestTransactionDeferredSnapshotTiming/false (0.00s)
+    --- PASS: TestTransactionDeferredSnapshotTiming/true (0.01s)
+=== RUN   TestTransactionDeferredSnapshotTiming
+=== RUN   TestTransactionDeferredSnapshotTiming/false
+=== RUN   TestTransactionDeferredSnapshotTiming/true
+--- PASS: TestTransactionDeferredSnapshotTiming (0.01s)
+    --- PASS: TestTransactionDeferredSnapshotTiming/false (0.00s)
+    --- PASS: TestTransactionDeferredSnapshotTiming/true (0.00s)
+=== RUN   TestTransactionDeferredSnapshotTiming
+=== RUN   TestTransactionDeferredSnapshotTiming/false
+=== RUN   TestTransactionDeferredSnapshotTiming/true
+--- PASS: TestTransactionDeferredSnapshotTiming (0.01s)
+    --- PASS: TestTransactionDeferredSnapshotTiming/false (0.00s)
+    --- PASS: TestTransactionDeferredSnapshotTiming/true (0.01s)
+=== RUN   TestTransactionDeferredSnapshotTiming
+=== RUN   TestTransactionDeferredSnapshotTiming/false
+=== RUN   TestTransactionDeferredSnapshotTiming/true
+--- PASS: TestTransactionDeferredSnapshotTiming (0.01s)
+    --- PASS: TestTransactionDeferredSnapshotTiming/false (0.00s)
+    --- PASS: TestTransactionDeferredSnapshotTiming/true (0.00s)
+=== RUN   TestTransactionDeferredSnapshotTiming
+=== RUN   TestTransactionDeferredSnapshotTiming/false
+=== RUN   TestTransactionDeferredSnapshotTiming/true
+--- PASS: TestTransactionDeferredSnapshotTiming (0.01s)
+    --- PASS: TestTransactionDeferredSnapshotTiming/false (0.00s)
+    --- PASS: TestTransactionDeferredSnapshotTiming/true (0.00s)
+=== RUN   TestTransactionDeferredSnapshotTiming
+=== RUN   TestTransactionDeferredSnapshotTiming/false
+=== RUN   TestTransactionDeferredSnapshotTiming/true
+--- PASS: TestTransactionDeferredSnapshotTiming (0.01s)
+    --- PASS: TestTransactionDeferredSnapshotTiming/false (0.00s)
+    --- PASS: TestTransactionDeferredSnapshotTiming/true (0.00s)
+=== RUN   TestTransactionDeferredSnapshotTiming
+=== RUN   TestTransactionDeferredSnapshotTiming/false
+=== RUN   TestTransactionDeferredSnapshotTiming/true
+--- PASS: TestTransactionDeferredSnapshotTiming (0.01s)
+    --- PASS: TestTransactionDeferredSnapshotTiming/false (0.00s)
+    --- PASS: TestTransactionDeferredSnapshotTiming/true (0.00s)
+=== RUN   TestTransactionDeferredSnapshotTiming
+=== RUN   TestTransactionDeferredSnapshotTiming/false
+=== RUN   TestTransactionDeferredSnapshotTiming/true
+--- PASS: TestTransactionDeferredSnapshotTiming (0.01s)
+    --- PASS: TestTransactionDeferredSnapshotTiming/false (0.00s)
+    --- PASS: TestTransactionDeferredSnapshotTiming/true (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.087s
