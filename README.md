@@ -1,8 +1,8 @@
 # gosqlite
 
-A native Go database kernel targeting tested subsets of SQLite 3.54.0 files and SQL. Current development milestone: M1 read-only SQLite. It is not production-ready. No CGO, SQLite subprocess, C ABI, or remote SQL engine is used in production.
+A native Go database kernel targeting tested subsets of SQLite 3.54.0 files and SQL. Current development milestone: M2 SQL/write MVP. It is not production-ready. No CGO, SQLite subprocess, C ABI, or remote SQL engine is used in production.
 
-## Try the implemented read-only path
+## Try the implemented SQL path
 
 Use Go 1.27.2. Runtime database opening currently requires Linux; other targets compile and fail closed until native locks are supported.
 
@@ -14,7 +14,14 @@ CGO_ENABLED=0 go run ./cmd/gosqlite inspect testdata/readonly/page512.db
 ./scripts/check.sh
 ```
 
-The query command writes JSON Lines: a columns object followed by row objects. BLOB values are base64. Inspect is metadata inspection, not a full integrity check. Unsupported commands return errors.
+```sh
+CGO_ENABLED=0 go run ./cmd/gosqlite query example.db 'CREATE TABLE docs(id INTEGER PRIMARY KEY, title TEXT NOT NULL)'
+CGO_ENABLED=0 go run ./cmd/gosqlite query example.db 'CREATE INDEX docs_title ON docs(title)'
+CGO_ENABLED=0 go run ./cmd/gosqlite query example.db "INSERT INTO docs VALUES(1,'数据库')"
+CGO_ENABLED=0 go run ./cmd/gosqlite query example.db 'SELECT id,title FROM docs'
+```
+
+Each CLI invocation executes one statement. Writes autocommit and return JSON with rows_affected and last_insert_id. Explicit transactions use the Go API; BEGIN/COMMIT in separate CLI invocations are rejected. SELECT opens read-only and writes JSON Lines: a columns object followed by row objects. BLOB values are base64. Inspect is metadata inspection, not a full integrity check. Unsupported commands return errors.
 
 ```go
 import (
@@ -39,7 +46,9 @@ func read(ctx context.Context) error {
 }
 ```
 
-The database and docs table must already exist. Writes and transactions fail explicitly. Use sqlite.Open plus sqlite.Options for the native API, or driver.NewConnector with sql.OpenDB for configured connections. Close handles promptly: M1 keeps a shared lock for their lifetime.
+The read-only example requires an existing database and docs table. For writes, use a normal path or mode=rwc DSN, or mode=rw to require an existing file. Native sqlite.Options{} is writable/create; ReadOnly and NoCreate are explicit alternatives. See examples/write for prepared inserts and transactions. Native transactions can retry BUSY Commit after readers close; database/sql transactions cannot be reused after Commit, so the adapter rolls back on an error. Close Rows promptly to release their snapshot locks.
+
+CREATE TABLE, nonunique BINARY ASC CREATE INDEX, INSERT, UPDATE, DELETE and explicit Go/driver transactions are implemented for the documented subset. Secondary indices are maintained on disk, but SELECT currently scans. Unsupported schema objects/constraints reject writes to the database rather than being ignored. Existing journals require recovery and are refused. Existing zero-byte files are conservatively rejected. Normal successful commit tests do not qualify crash durability; use only disposable data.
 
 If home is read-only, set GOCACHE and GOPATH to writable directories. There are no external Go module dependencies, so no go.sum is needed. Official SQLite is a separately built test oracle only:
 
@@ -49,4 +58,4 @@ SQLITE_ORACLE=/absolute/path/to/verified/sqlite3 ./scripts/test-oracle.sh
 
 See [progress](docs/progress.md), [compatibility](docs/compatibility.md), [architecture](docs/architecture.md), [sources](docs/upstream.md), and [manual verification](docs/manual-verification.md). The unchanged [original goal](goal.md) remains the contract. [Restart protocol](docs/restart.md) and checkpoint records preserve durable development history.
 
-Transactional writes, grams13 indices, similarity, vectors, independent authenticated encryption and pg_embedding migration are still future milestones. Full SQLite/PostgreSQL semantics, SEE file compatibility and production security are not claimed.
+Native recovery/WAL, grams13 indices, similarity, vectors, independent authenticated encryption and pg_embedding migration are still future milestones. Full SQLite/PostgreSQL semantics, SEE file compatibility and production security are not claimed.

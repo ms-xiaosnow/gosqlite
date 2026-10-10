@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/ms-xiaosnow/gosqlite/internal/buildinfo"
+	sqlast "github.com/ms-xiaosnow/gosqlite/internal/sql"
 	"github.com/ms-xiaosnow/gosqlite/sqlite"
 	"io"
 	"os"
@@ -14,24 +15,47 @@ import (
 
 func run(args []string, out io.Writer) error { return runContext(context.Background(), args, out) }
 func runContext(ctx context.Context, args []string, out io.Writer) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 	if len(args) == 1 && (args[0] == "version" || args[0] == "--version") {
 		_, err := fmt.Fprintf(out, "gosqlite %s; Go %s; SQLite behavior baseline %s\n", buildinfo.Version, buildinfo.GoBaseline, buildinfo.SQLiteBaseline)
 		return err
 	}
 	if len(args) == 0 || (len(args) == 1 && args[0] == "help") {
-		_, err := fmt.Fprintln(out, "usage: gosqlite version\n       gosqlite query <db> '<select>'\n       gosqlite inspect <db>\nM1 read-only SQLite subset. Query emits JSON Lines: columns, then rows.")
+		_, err := fmt.Fprintln(out, "usage: gosqlite version\n       gosqlite query <db> '<sql>'\n       gosqlite inspect <db>\nSQLite SQL MVP. One statement per invocation; SELECT emits JSON Lines, writes emit a result.")
 		return err
 	}
 	switch args[0] {
 	case "query":
 		if len(args) != 3 {
-			return fmt.Errorf("usage: gosqlite query <db> '<select>'")
+			return fmt.Errorf("usage: gosqlite query <db> '<sql>'")
 		}
-		db, err := sqlite.Open(args[1], sqlite.Options{ReadOnly: true})
+		stmt, err := sqlast.Parse(args[2])
+		if err != nil {
+			return err
+		}
+		if _, ok := stmt.(*sqlast.Transaction); ok {
+			return fmt.Errorf("CLI executes one statement per connection; use the Go API for explicit transactions")
+		}
+		_, selectOnly := stmt.(*sqlast.Select)
+		db, err := sqlite.Open(args[1], sqlite.Options{ReadOnly: selectOnly})
 		if err != nil {
 			return err
 		}
 		defer db.Close()
+		if !selectOnly {
+			result, err := db.Exec(ctx, args[2])
+			if err != nil {
+				return err
+			}
+			affected, _ := result.RowsAffected()
+			id, _ := result.LastInsertId()
+			return json.NewEncoder(out).Encode(struct {
+				RowsAffected int64 `json:"rows_affected"`
+				LastInsertID int64 `json:"last_insert_id"`
+			}{affected, id})
+		}
 		rows, err := db.Query(ctx, args[2])
 		if err != nil {
 			return err
@@ -73,7 +97,7 @@ func runContext(ctx context.Context, args []string, out io.Writer) error {
 			Format string               `json:"format"`
 			Header sqlite.FileInfo      `json:"header"`
 			Schema []sqlite.SchemaEntry `json:"schema"`
-		}{"SQLite format 3 (supported read-only subset)", db.Info(), schema})
+		}{"SQLite format 3 (metadata inspection only)", db.Info(), schema})
 	default:
 		return fmt.Errorf("unsupported command %q", args[0])
 	}

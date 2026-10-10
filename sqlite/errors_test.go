@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/ms-xiaosnow/gosqlite/internal/btree"
 	"github.com/ms-xiaosnow/gosqlite/internal/pager"
 	"github.com/ms-xiaosnow/gosqlite/internal/record"
 	sqlast "github.com/ms-xiaosnow/gosqlite/internal/sql"
@@ -17,6 +18,14 @@ func TestErrorClassification(t *testing.T) {
 		code              Code
 	}{
 		{record.ErrCorrupt, ErrCorrupt, CodeCorrupt},
+		{pager.ErrLimit, ErrMemoryLimit, CodeNoMem},
+		{btree.ErrDuplicate, ErrConstraint, CodeConstraint},
+		{ErrFull, ErrFull, CodeFull},
+		{ErrMismatch, ErrMismatch, CodeMismatch},
+		{ErrTxDone, ErrTxDone, CodeMisuse},
+		{ErrCommitUncertain, ErrCommitUncertain, CodeIOErr},
+		{ErrRecoveryRequired, ErrRecoveryRequired, CodeIOErr},
+		{ErrPoisoned, ErrPoisoned, CodeIOErr},
 		{record.ErrLimit, ErrMemoryLimit, CodeNoMem},
 		{record.ErrUnsupported, ErrUnsupported, CodeError},
 		{pager.ErrCorrupt, ErrCorrupt, CodeCorrupt},

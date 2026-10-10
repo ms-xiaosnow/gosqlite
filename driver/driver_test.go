@@ -15,7 +15,7 @@ import (
 
 func database(t *testing.T) *sql.DB {
 	t.Helper()
-	db, err := sql.Open("gosqlite", filepath.Join("..", "testdata", "readonly", "page4096.db"))
+	db, err := sql.Open("gosqlite", "file:"+filepath.Join("..", "testdata", "readonly", "page4096.db")+"?mode=ro")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -77,10 +77,22 @@ func TestDatabaseSQLRowsAndPrepared(t *testing.T) {
 	if _, err := db.ExecContext(ctx, "DELETE FROM samples"); !errors.Is(err, sqlite.ErrReadOnly) {
 		t.Fatal(err)
 	}
-	if _, err := db.BeginTx(ctx, &sql.TxOptions{ReadOnly: true}); !errors.Is(err, sqlite.ErrUnsupported) {
+	tx, err := db.BeginTx(ctx, &sql.TxOptions{ReadOnly: true})
+	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := db.PrepareContext(ctx, "INSERT INTO samples(id) VALUES(?)"); !errors.Is(err, sqlite.ErrReadOnly) {
+	if err := tx.QueryRowContext(ctx, "SELECT id FROM samples WHERE id=1").Scan(&answer); err != nil || answer != 1 {
+		t.Fatalf("read-only transaction: answer=%d err=%v", answer, err)
+	}
+	if err := tx.Rollback(); err != nil {
+		t.Fatal(err)
+	}
+	write, err := db.PrepareContext(ctx, "INSERT INTO samples(id) VALUES(?)")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer write.Close()
+	if _, err := write.ExecContext(ctx, 10000); !errors.Is(err, sqlite.ErrReadOnly) {
 		t.Fatal(err)
 	}
 }
@@ -114,14 +126,14 @@ func TestConnectorAndContext(t *testing.T) {
 	}
 }
 func TestDSNValidationNoCredentialDisclosure(t *testing.T) {
-	accepted := map[string]string{"plain.db": "plain.db", "file:relative.db?mode=ro": "relative.db", "file:/tmp/a%20b.db": "/tmp/a b.db", "file:///tmp/a.db?mode=ro": "/tmp/a.db", "file:a%3Fb.db": "a?b.db"}
+	accepted := map[string]string{"plain.db": "plain.db", "file:relative.db?mode=ro": "relative.db", "file:relative.db?mode=rw": "relative.db", "file:relative.db?mode=rwc": "relative.db", "file:/tmp/a%20b.db": "/tmp/a b.db", "file:///tmp/a.db?mode=ro": "/tmp/a.db", "file:a%3Fb.db": "a?b.db"}
 	for dsn, want := range accepted {
 		got, err := parseDSN(dsn)
 		if err != nil || got != want {
 			t.Fatalf("%q => %q, %v", dsn, got, err)
 		}
 	}
-	for _, dsn := range []string{"", ":memory:", "file::memory:", "file:db?mode=rw", "file:db?mode=ro&mode=ro", "file:db?key=SECRET", "file://user:SECRET@host/db", "file://localhost/db", "postgres://user:SECRET@host/db", "file:db#SECRET", "file:db?unknown=SECRET", "file:db?mode=ro;key=SECRET", "file:bad%zz", "file:"} {
+	for _, dsn := range []string{"", ":memory:", "file::memory:", "file:db?mode=memory", "file:db?mode=", "file:db?mode=ro&mode=ro", "file:db?mode=rw&mode=rwc", "file:db?key=SECRET", "file://user:SECRET@host/db", "file://localhost/db", "postgres://user:SECRET@host/db", "file:db#SECRET", "file:db?unknown=SECRET", "file:db?mode=ro;key=SECRET", "file:bad%zz", "file:"} {
 		_, err := parseDSN(dsn)
 		if err == nil {
 			t.Fatalf("accepted %q", dsn)

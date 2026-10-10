@@ -2,6 +2,7 @@ package sqlite
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"sort"
@@ -39,6 +40,8 @@ type Rows struct {
 	current                         []any
 	err                             error
 	closed                          bool
+	release                         func() error
+	tx                              *Tx
 }
 
 func (r *Rows) Columns() []string { return append([]string(nil), r.columns...) }
@@ -60,8 +63,14 @@ func cloneValue(v any) any {
 	}
 	return v
 }
-func (r *Rows) Err() error   { r.mu.Lock(); defer r.mu.Unlock(); return r.err }
-func (r *Rows) Close() error { r.mu.Lock(); defer r.mu.Unlock(); return r.close() }
+func (r *Rows) Err() error { r.mu.Lock(); defer r.mu.Unlock(); return r.err }
+func (r *Rows) Close() error {
+	r.db.mu.Lock()
+	defer r.db.mu.Unlock()
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return r.close()
+}
 func (r *Rows) close() error {
 	if r.closed {
 		return nil
@@ -70,12 +79,20 @@ func (r *Rows) close() error {
 	r.current = nil
 	r.sorted = nil
 	r.params = nil
+	var err error
 	if r.source != nil {
-		err := r.source.Close()
+		err = r.source.Close()
 		r.source = nil
-		return wrap("rows close", err)
 	}
-	return nil
+	if r.release != nil {
+		err = errors.Join(err, r.release())
+		r.release = nil
+	}
+	delete(r.db.rows, r)
+	if r.tx != nil {
+		r.tx.activeRows--
+	}
+	return wrap("rows close", err)
 }
 func (r *Rows) fail(err error) bool {
 	if err != io.EOF {
@@ -86,8 +103,8 @@ func (r *Rows) fail(err error) bool {
 }
 
 func (r *Rows) Next() bool {
-	r.db.mu.RLock()
-	defer r.db.mu.RUnlock()
+	r.db.mu.Lock()
+	defer r.db.mu.Unlock()
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	if r.closed {
@@ -98,6 +115,11 @@ func (r *Rows) Next() bool {
 	}
 	if err := r.ctx.Err(); err != nil {
 		return r.fail(err)
+	}
+	if r.tx != nil {
+		if err := r.tx.check(); err != nil {
+			return r.fail(err)
+		}
 	}
 	if r.limit >= 0 && r.emitted >= r.limit {
 		return r.fail(io.EOF)

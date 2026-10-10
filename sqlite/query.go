@@ -35,7 +35,7 @@ type table struct {
 	ipk         int
 }
 
-func (d *DB) table(ctx context.Context, sel *sqlast.Select) (*table, error) {
+func (d *DB) table(ctx context.Context, reader btree.PageReader, sel *sqlast.Select) (*table, error) {
 	if sel.From == "" {
 		return nil, nil
 	}
@@ -46,7 +46,7 @@ func (d *DB) table(ctx context.Context, sel *sqlast.Select) (*table, error) {
 			t.columns = append(t.columns, sqlast.ColumnDef{Name: c.name, Type: c.typ})
 		}
 	} else {
-		entries, err := btree.ReadSchema(ctx, d.reader)
+		entries, err := btree.ReadSchema(ctx, reader)
 		if err != nil {
 			return nil, err
 		}
@@ -145,8 +145,8 @@ func affinity(typ string) string {
 	}
 }
 
-func (d *DB) plan(ctx context.Context, sel *sqlast.Select, params []any) (*Rows, error) {
-	t, err := d.table(ctx, sel)
+func (d *DB) plan(ctx context.Context, reader btree.PageReader, sel *sqlast.Select, params []any) (*Rows, error) {
+	t, err := d.table(ctx, reader, sel)
 	if err != nil {
 		return nil, err
 	}
@@ -240,7 +240,7 @@ func (d *DB) plan(ctx context.Context, sel *sqlast.Select, params []any) (*Rows,
 	if t == nil {
 		r.source = &constantSource{}
 	} else {
-		r.source, err = btree.NewCursor(ctx, d.reader, t.root)
+		r.source, err = btree.NewCursor(ctx, reader, t.root)
 		if err != nil {
 			return nil, err
 		}

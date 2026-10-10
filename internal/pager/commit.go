@@ -1,0 +1,256 @@
+package pager
+
+import (
+	"context"
+	"crypto/rand"
+	"encoding/binary"
+	"errors"
+	"fmt"
+	"io"
+	"os"
+	"path/filepath"
+	"sort"
+
+	"github.com/ms-xiaosnow/gosqlite/internal/journal"
+)
+
+// writeFullAt treats short writes as errors, even if the OS reports no error.
+func writeFullAt(f *os.File, b []byte, off int64) error {
+	n, err := f.WriteAt(b, off)
+	if err != nil {
+		return err
+	}
+	if n != len(b) {
+		return io.ErrShortWrite
+	}
+	return nil
+}
+func syncDirectory(path string) error {
+	d, err := os.Open(filepath.Dir(path))
+	if err != nil {
+		return err
+	}
+	err = d.Sync()
+	return errors.Join(err, d.Close())
+}
+func sortedPages(m map[uint32][]byte) []uint32 {
+	out := make([]uint32, 0, len(m))
+	for n := range m {
+		out = append(out, n)
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i] < out[j] })
+	return out
+}
+
+// journalPages includes original images of complete storage sectors touched
+// by the write, including old neighbors of newly appended pages. No original
+// image is required for pages beyond the pre-transaction database extent.
+func (t *Tx) journalPages(dirty []uint32) []uint32 {
+	set := make(map[uint32]struct{})
+	for _, n := range dirty {
+		first, last := uint64(n), uint64(n)
+		if t.opts.SectorSize > t.header.PageSize {
+			per := uint64(t.opts.SectorSize / t.header.PageSize)
+			first = (uint64(n)-1)/per*per + 1
+			last = first + per - 1
+		}
+		if last > uint64(t.originalPages) {
+			last = uint64(t.originalPages)
+		}
+		for p := first; p <= last && p != 0; p++ {
+			if p != uint64(lockPage(t.header.PageSize)) {
+				set[uint32(p)] = struct{}{}
+			}
+		}
+	}
+	pages := make([]uint32, 0, len(set))
+	for n := range set {
+		pages = append(pages, n)
+	}
+	sort.Slice(pages, func(i, j int) bool { return pages[i] < pages[j] })
+	return pages
+}
+
+// Commit writes a standard SQLite DELETE-mode rollback journal, then the
+// database. Order: EXCLUSIVE; invalid header + body; journal Sync; valid header
+// + Sync; directory Sync; database writes + Sync; journal unlink; directory
+// Sync; release locks. Atomicity after interruption is NOT acceptance-verified.
+//
+// Cancellation is checked until the journal is created. Once physical I/O
+// starts, the entire commit or error cleanup completes without cancellation.
+// A BUSY lock is returned before creating any sidecar or writing database data.
+func (t *Tx) Commit(ctx context.Context) error {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if err := t.checkOpen(); err != nil {
+		return err
+	}
+	if t.statement {
+		return fmt.Errorf("%w: commit inside statement", ErrMisuse)
+	}
+	if err := t.checkStable(); err != nil {
+		return err
+	}
+	if len(t.dirty) == 0 {
+		err := t.file.Close()
+		t.file = nil
+		t.free = nil
+		return err
+	}
+	if err := t.promoteLocked(ctx); err != nil {
+		return err
+	}
+	p1, err := t.readLocked(ctx, 1)
+	if err != nil {
+		return err
+	}
+	finalHeader := t.header
+	finalHeader.ChangeCounter++
+	finalHeader.VersionValidFor = finalHeader.ChangeCounter
+	binary.BigEndian.PutUint32(p1[24:], finalHeader.ChangeCounter)
+	binary.BigEndian.PutUint32(p1[28:], finalHeader.PageCount)
+	binary.BigEndian.PutUint32(p1[92:], finalHeader.VersionValidFor)
+	dirty := sortedPages(t.dirty)
+	if len(dirty) == 0 || dirty[0] != 1 {
+		return fmt.Errorf("%w: dirty transaction lacks page one", ErrMisuse)
+	}
+	originals := t.journalPages(dirty)
+	var random [4]byte
+	if _, err = rand.Read(random[:]); err != nil {
+		return err
+	}
+	h := journal.Header{Records: uint32(len(originals)), Nonce: binary.BigEndian.Uint32(random[:]), OriginalPages: t.originalPages, SectorSize: t.opts.SectorSize, PageSize: t.header.PageSize}
+	invalid, err := journal.EncodeHeader(h, false)
+	if err != nil {
+		return err
+	}
+	valid, err := journal.EncodeHeader(h, true)
+	if err != nil {
+		return err
+	}
+	if err = ctx.Err(); err != nil {
+		return err
+	}
+	if err = lockExclusive(t.file); err != nil {
+		if errors.Is(err, ErrPoisoned) {
+			return t.poison(err, false)
+		}
+		return err
+	}
+	// Pre-I/O failures remain retryable and release PENDING/EXCLUSIVE while
+	// retaining this transaction's SHARED+RESERVED locks.
+	preflight := func(e error) error {
+		if unlock := unlockExclusive(t.file); unlock != nil {
+			return t.poison(errors.Join(e, unlock), false)
+		}
+		return e
+	}
+	if err = t.checkStable(); err != nil {
+		return preflight(err)
+	}
+	if err = ctx.Err(); err != nil {
+		return preflight(err)
+	}
+	jpath := t.path + "-journal"
+	jf, err := os.OpenFile(jpath, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0600)
+	if err != nil {
+		return preflight(err)
+	}
+	databaseTouched := false
+	// After a database write is attempted, even an error may have changed
+	// bytes. Preserve the fully synced journal for explicit recovery.
+	fail := func(cause error) error {
+		cause = errors.Join(cause, jf.Close())
+		if !databaseTouched {
+			if e := os.Remove(jpath); e != nil {
+				return t.poison(errors.Join(cause, e), true)
+			}
+			if e := syncDirectory(t.path); e != nil {
+				return t.poison(errors.Join(cause, e), true)
+			}
+		}
+		return t.poison(cause, databaseTouched)
+	}
+	if err = writeFullAt(jf, invalid, 0); err != nil {
+		return fail(err)
+	}
+	offset := int64(h.SectorSize)
+	page := make([]byte, h.PageSize)
+	for _, n := range originals {
+		if _, err = t.file.ReadAt(page, int64(n-1)*int64(h.PageSize)); err != nil {
+			return fail(err)
+		}
+		record, e := journal.EncodeRecord(h, n, page)
+		if e != nil {
+			return fail(e)
+		}
+		if err = writeFullAt(jf, record, offset); err != nil {
+			return fail(err)
+		}
+		offset += int64(len(record))
+	}
+	if err = jf.Sync(); err != nil {
+		return fail(err)
+	}
+	// Publish only the first 12 bytes after the body is durable. All remaining
+	// header fields were included in the first journal Sync.
+	if err = writeFullAt(jf, valid[:12], 0); err != nil {
+		return fail(err)
+	}
+	if err = jf.Sync(); err != nil {
+		return fail(err)
+	}
+	if err = syncDirectory(t.path); err != nil {
+		return fail(err)
+	}
+	for _, n := range dirty {
+		data := t.dirty[n]
+		if n == 1 {
+			data = p1
+		}
+		databaseTouched = true
+		if err = writeFullAt(t.file, data, int64(n-1)*int64(t.header.PageSize)); err != nil {
+			return fail(err)
+		}
+	}
+	// Extent only grows here. Freelist pages are retained; no unrelated physical
+	// trailing pages are ever truncated.
+	if err = t.file.Sync(); err != nil {
+		return fail(err)
+	}
+	if err = jf.Close(); err != nil {
+		return t.poison(err, true)
+	}
+	if err = os.Remove(jpath); err != nil {
+		return t.poison(err, true)
+	}
+	if err = syncDirectory(t.path); err != nil {
+		return t.poison(errors.Join(ErrCommitUncertain, err), false)
+	}
+	t.header = finalHeader
+	err = t.file.Close()
+	t.file = nil
+	t.dirty = nil
+	t.free = nil
+	if err != nil {
+		t.poisoned = errors.Join(ErrPoisoned, ErrCommitUncertain, err)
+		return t.poisoned
+	}
+	return nil
+}
+func (t *Tx) poison(cause error, recovery bool) error {
+	if t.file != nil {
+		cause = errors.Join(cause, t.file.Close())
+		t.file = nil
+	}
+	if recovery {
+		cause = errors.Join(ErrRecoveryRequired, cause)
+	}
+	t.poisoned = errors.Join(ErrPoisoned, cause)
+	t.dirty = nil
+	t.free = nil
+	return t.poisoned
+}

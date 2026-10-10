@@ -278,7 +278,7 @@ func confUnchanged(t *testing.T, path string) func() {
 }
 func confRun(t *testing.T, path string, cases []confCase) {
 	t.Helper()
-	db, err := sqlite.Open(path, sqlite.Options{})
+	db, err := sqlite.Open(path, sqlite.Options{ReadOnly: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -432,7 +432,7 @@ func TestOracleOrdinaryFreshFixtures(t *testing.T) {
 func TestOracleErrorsAndResources(t *testing.T) {
 	path := confFresh(t)
 	defer confUnchanged(t, path)()
-	db, err := sqlite.Open(path, sqlite.Options{})
+	db, err := sqlite.Open(path, sqlite.Options{ReadOnly: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -514,7 +514,7 @@ func TestOracleErrorsAndResources(t *testing.T) {
 		t.Error("Columns aliases mutable internal data")
 	}
 	rows.Close()
-	limited, err := sqlite.Open(path, sqlite.Options{MaxSortBytes: 1})
+	limited, err := sqlite.Open(path, sqlite.Options{ReadOnly: true, MaxSortBytes: 1})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -545,7 +545,7 @@ func TestOracleDatabaseSQLAndConcurrency(t *testing.T) {
 	confOracle(t)
 	path := filepath.Join("..", "..", "testdata", "readonly", "page512.db")
 	defer confUnchanged(t, path)()
-	db, err := sql.Open("gosqlite", path)
+	db, err := sql.Open("gosqlite", "file:"+path+"?mode=ro")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -610,8 +610,15 @@ func TestOracleDatabaseSQLAndConcurrency(t *testing.T) {
 	if _, err = db.ExecContext(context.Background(), "DELETE FROM samples"); !errors.Is(err, sqlite.ErrReadOnly) {
 		t.Errorf("driver Exec: %v", err)
 	}
-	if _, err = db.BeginTx(context.Background(), nil); !errors.Is(err, sqlite.ErrUnsupported) {
-		t.Errorf("driver transaction: %v", err)
+	readTx, err := db.BeginTx(context.Background(), &sql.TxOptions{ReadOnly: true})
+	if err != nil {
+		t.Fatalf("read-only transaction: %v", err)
+	}
+	if _, err = readTx.ExecContext(context.Background(), "DELETE FROM samples"); !errors.Is(err, sqlite.ErrReadOnly) {
+		t.Errorf("read-only transaction accepted write: %v", err)
+	}
+	if err = readTx.Rollback(); err != nil {
+		t.Errorf("read-only rollback: %v", err)
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
@@ -690,7 +697,7 @@ func TestOracleResourceCloseCycles(t *testing.T) {
 	}
 	before := countTarget()
 	for i := 0; i < 100; i++ {
-		db, err := sqlite.Open(path, sqlite.Options{})
+		db, err := sqlite.Open(path, sqlite.Options{ReadOnly: true})
 		if err != nil {
 			t.Fatal(err)
 		}

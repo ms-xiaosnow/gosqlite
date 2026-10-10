@@ -408,6 +408,15 @@ func (p *parser) createIndex() (*CreateIndex, error) {
 			return nil, p.unsupported("column list exceeds 2000")
 		}
 		s.Columns = append(s.Columns, n)
+		if p.take("COLLATE") {
+			name, err := p.name()
+			if err != nil {
+				return nil, err
+			}
+			if FoldName(name) != "binary" {
+				return nil, p.unsupported("index collation " + name)
+			}
+		}
 		desc := p.take("DESC")
 		if !desc {
 			p.take("ASC")

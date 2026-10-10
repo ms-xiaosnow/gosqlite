@@ -69,19 +69,23 @@ func Open(path string) (*Reader, error) {
 	return r, nil
 }
 
+// checkSidecars is shared by read-only probes and writable snapshots. Until
+// recovery has an acceptance-verified implementation, every existing rollback
+// journal (including a cold or empty one) fails closed with a distinct error.
 func checkSidecars(path string) error {
 	for _, suffix := range []string{"-wal", "-journal"} {
-		st, err := os.Stat(path + suffix)
+		st, err := os.Lstat(path + suffix)
 		if os.IsNotExist(err) {
 			continue
 		}
 		if err != nil {
 			return fmt.Errorf("inspect SQLite sidecar: %w", err)
 		}
-		// Conservative: even an inactive nonempty persistent journal is refused.
-		// Proving it is cold belongs to the later recovery implementation.
+		if suffix == "-journal" {
+			return fmt.Errorf("%w: existing journal; recovery is not yet acceptance-verified", ErrRecoveryRequired)
+		}
 		if !st.Mode().IsRegular() || st.Size() != 0 {
-			return fmt.Errorf("%w: nonempty %s sidecar (recovery unsupported)", ErrUnsupported, suffix)
+			return fmt.Errorf("%w: nonempty WAL sidecar", ErrUnsupported)
 		}
 	}
 	return nil

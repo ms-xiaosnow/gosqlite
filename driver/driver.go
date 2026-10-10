@@ -1,5 +1,7 @@
-// Package driver registers the "gosqlite" database/sql driver. Connections are
-// strictly read-only; transaction and Exec APIs return explicit errors.
+// Package driver registers the "gosqlite" database/sql driver. Plain paths and
+// file: URIs open writable databases, creating them when needed. Use mode=ro for
+// read-only access or mode=rw to require an existing database. SQL transactions
+// must use a pinned sql.Conn or sql.Tx; pooled connections are reset before reuse.
 package driver
 
 import (
@@ -12,6 +14,7 @@ import (
 	"net/url"
 	"strings"
 	"sync"
+	"sync/atomic"
 
 	sqlast "github.com/ms-xiaosnow/gosqlite/internal/sql"
 	"github.com/ms-xiaosnow/gosqlite/sqlite"
@@ -34,22 +37,30 @@ func (*Driver) OpenConnector(dsn string) (sqldriver.Connector, error) {
 	return NewConnector(dsn, sqlite.Options{})
 }
 
-// Connector creates independently owned read-only connections.
+// Connector creates independently owned connections.
 type Connector struct {
 	path string
 	opts sqlite.Options
 }
 
-// NewConnector accepts plain filesystem paths or file:path?mode=ro. URI
-// authorities, fragments, credentials, other modes and unknown options fail
-// closed; DSN values are never echoed in validation errors.
+// NewConnector accepts plain filesystem paths or file:path?mode=ro|rw|rwc.
+// The default mode is rwc. URI modes only restrict supplied options: mode=ro
+// forces ReadOnly, mode=rw forces NoCreate, and neither rw nor rwc overrides a
+// ReadOnly or NoCreate option. Authorities, fragments, credentials and unknown
+// options fail closed; DSN values are never echoed in validation errors.
 func NewConnector(dsn string, opts sqlite.Options) (*Connector, error) {
-	path, err := parseDSN(dsn)
+	path, mode, err := parseDSNMode(dsn)
 	if err != nil {
 		return nil, err
 	}
 	if opts.MaxSortBytes < 0 {
 		return nil, fmt.Errorf("gosqlite: MaxSortBytes must not be negative")
+	}
+	if mode == "ro" {
+		opts.ReadOnly = true
+	}
+	if mode == "rw" {
+		opts.NoCreate = true
 	}
 	return &Connector{path: path, opts: opts}, nil
 }
@@ -69,8 +80,12 @@ func (c *Connector) Connect(ctx context.Context) (sqldriver.Conn, error) {
 	return &conn{db: db}, nil
 }
 func parseDSN(dsn string) (string, error) {
-	fail := func() (string, error) {
-		return "", fmt.Errorf("gosqlite: unsupported DSN; use a path or file:path?mode=ro")
+	path, _, err := parseDSNMode(dsn)
+	return path, err
+}
+func parseDSNMode(dsn string) (string, string, error) {
+	fail := func() (string, string, error) {
+		return "", "", fmt.Errorf("gosqlite: unsupported DSN; use a path or file:path?mode=ro, rw, or rwc")
 	}
 	if dsn == "" || strings.ContainsRune(dsn, 0) || dsn == ":memory:" {
 		return fail()
@@ -79,7 +94,7 @@ func parseDSN(dsn string) (string, error) {
 		if strings.Contains(dsn, "://") || strings.ContainsAny(dsn, "?#") {
 			return fail()
 		}
-		return dsn, nil
+		return dsn, "rwc", nil
 	}
 	u, err := url.Parse(dsn)
 	if err != nil || u.Scheme != "file" || u.User != nil || u.Host != "" || u.Fragment != "" {
@@ -89,8 +104,15 @@ func parseDSN(dsn string) (string, error) {
 	if err != nil {
 		return fail()
 	}
+	mode := "rwc"
 	for key, values := range options {
-		if key != "mode" || len(values) != 1 || values[0] != "ro" {
+		if key != "mode" || len(values) != 1 {
+			return fail()
+		}
+		switch values[0] {
+		case "ro", "rw", "rwc":
+			mode = values[0]
+		default:
 			return fail()
 		}
 	}
@@ -104,12 +126,38 @@ func parseDSN(dsn string) (string, error) {
 	if path == "" || path == ":memory:" || strings.ContainsRune(path, 0) {
 		return fail()
 	}
-	return path, nil
+	return path, mode, nil
 }
 
-type conn struct{ db *sqlite.DB }
+type conn struct {
+	db            *sqlite.DB
+	closed        atomic.Bool
+	inTransaction bool // database/sql serializes connection methods.
+}
 
-func (c *conn) Close() error { return c.db.Close() }
+func (c *conn) Close() error {
+	c.closed.Store(true)
+	return c.db.Close()
+}
+func (c *conn) IsValid() bool { return !c.closed.Load() }
+func (c *conn) ResetSession(ctx context.Context) error {
+	if c.closed.Load() {
+		return sqldriver.ErrBadConn
+	}
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if c.inTransaction {
+		// SQL BEGIN on a pinned sql.Conn may be abandoned when it is returned
+		// to the pool. Never expose that transaction to the next borrower.
+		if _, err := c.db.Exec(ctx, "ROLLBACK"); err != nil {
+			c.Close()
+			return sqldriver.ErrBadConn
+		}
+		c.inTransaction = false
+	}
+	return nil
+}
 func (c *conn) Prepare(query string) (sqldriver.Stmt, error) {
 	return c.PrepareContext(context.Background(), query)
 }
@@ -117,23 +165,32 @@ func (c *conn) PrepareContext(ctx context.Context, query string) (sqldriver.Stmt
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
-	ast, err := sqlast.Parse(query)
+	if c.closed.Load() {
+		return nil, apiError("prepare", sqlite.ErrClosed)
+	}
+	_, err := sqlast.Parse(query)
 	if err != nil {
 		return nil, apiError("prepare", err)
 	}
-	if _, ok := ast.(*sqlast.Select); !ok {
-		return nil, apiError("prepare", sqlite.ErrReadOnly)
-	}
 	return &stmt{conn: c, query: query}, nil
 }
-func (*conn) Begin() (sqldriver.Tx, error) {
-	return nil, apiError("begin", fmt.Errorf("%w: transactions", sqlite.ErrUnsupported))
+func (c *conn) Begin() (sqldriver.Tx, error) {
+	return c.BeginTx(context.Background(), sqldriver.TxOptions{})
 }
-func (*conn) BeginTx(ctx context.Context, _ sqldriver.TxOptions) (sqldriver.Tx, error) {
+func (c *conn) BeginTx(ctx context.Context, opts sqldriver.TxOptions) (sqldriver.Tx, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
-	return nil, apiError("begin", fmt.Errorf("%w: transactions", sqlite.ErrUnsupported))
+	// Other isolation levels must not silently receive different semantics.
+	if opts.Isolation != sqldriver.IsolationLevel(sql.LevelDefault) && opts.Isolation != sqldriver.IsolationLevel(sql.LevelSerializable) {
+		return nil, apiError("begin", fmt.Errorf("%w: transaction isolation level %d", sqlite.ErrUnsupported, opts.Isolation))
+	}
+	t, err := c.db.Begin(ctx, sqlite.TxOptions{ReadOnly: opts.ReadOnly})
+	if err != nil {
+		return nil, err
+	}
+	c.inTransaction = true
+	return &transaction{conn: c, inner: t, ctx: ctx}, nil
 }
 func (c *conn) Ping(ctx context.Context) error { _, err := c.db.Schema(ctx); return err }
 func (c *conn) QueryContext(ctx context.Context, query string, args []sqldriver.NamedValue) (sqldriver.Rows, error) {
@@ -144,11 +201,49 @@ func (c *conn) QueryContext(ctx context.Context, query string, args []sqldriver.
 	}
 	return &rows{inner: r}, nil
 }
-func (*conn) ExecContext(ctx context.Context, _ string, _ []sqldriver.NamedValue) (sqldriver.Result, error) {
+func (c *conn) ExecContext(ctx context.Context, query string, args []sqldriver.NamedValue) (sqldriver.Result, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
-	return nil, apiError("exec", sqlite.ErrReadOnly)
+	result, err := c.db.Exec(ctx, query, namedArguments(args)...)
+	if err != nil {
+		return nil, err
+	}
+	// Track only successfully executed controls. DB owns the actual native
+	// transaction and dispatches all Query/Exec calls to it while active.
+	ast, _ := sqlast.Parse(query)
+	if control, ok := ast.(*sqlast.Transaction); ok {
+		c.inTransaction = control.Action == "BEGIN"
+	}
+	return result, nil
+}
+
+type transaction struct {
+	conn  *conn
+	inner *sqlite.Tx
+	ctx   context.Context
+}
+
+func (t *transaction) Commit() error {
+	err := t.inner.Commit(t.ctx)
+	if err != nil {
+		// database/sql cannot retry Commit: it considers this Tx finished even
+		// on an error. Release its uncommitted native transaction before reuse.
+		if rollbackErr := t.inner.Rollback(); rollbackErr != nil && !errors.Is(rollbackErr, sqlite.ErrClosed) {
+			t.conn.Close()
+			err = errors.Join(err, rollbackErr)
+		}
+	}
+	t.conn.inTransaction = false
+	return err
+}
+func (t *transaction) Rollback() error {
+	err := t.inner.Rollback()
+	t.conn.inTransaction = false
+	if err != nil {
+		t.conn.Close()
+	}
+	return err
 }
 func namedArguments(args []sqldriver.NamedValue) []any {
 	values := make([]any, len(args))
@@ -189,13 +284,19 @@ func (s *stmt) QueryContext(ctx context.Context, args []sqldriver.NamedValue) (s
 	return s.conn.QueryContext(ctx, s.query, args)
 }
 func (s *stmt) Exec(args []sqldriver.Value) (sqldriver.Result, error) {
-	return nil, apiError("exec", sqlite.ErrReadOnly)
-}
-func (s *stmt) ExecContext(ctx context.Context, _ []sqldriver.NamedValue) (sqldriver.Result, error) {
-	if err := ctx.Err(); err != nil {
-		return nil, err
+	named := make([]sqldriver.NamedValue, len(args))
+	for i, v := range args {
+		named[i] = sqldriver.NamedValue{Ordinal: i + 1, Value: v}
 	}
-	return nil, apiError("exec", sqlite.ErrReadOnly)
+	return s.ExecContext(context.Background(), named)
+}
+func (s *stmt) ExecContext(ctx context.Context, args []sqldriver.NamedValue) (sqldriver.Result, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	if s.closed {
+		return nil, apiError("statement", sqlite.ErrClosed)
+	}
+	return s.conn.ExecContext(ctx, s.query, args)
 }
 
 type rows struct{ inner *sqlite.Rows }
@@ -228,6 +329,9 @@ var (
 	_ sqldriver.ConnPrepareContext = (*conn)(nil)
 	_ sqldriver.ConnBeginTx        = (*conn)(nil)
 	_ sqldriver.Pinger             = (*conn)(nil)
+	_ sqldriver.SessionResetter    = (*conn)(nil)
+	_ sqldriver.Validator          = (*conn)(nil)
+	_ sqldriver.Tx                 = (*transaction)(nil)
 	_ sqldriver.StmtQueryContext   = (*stmt)(nil)
 	_ sqldriver.StmtExecContext    = (*stmt)(nil)
 	_ sqldriver.Rows               = (*rows)(nil)

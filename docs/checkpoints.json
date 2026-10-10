@@ -20,5 +20,17 @@
     "verified": "Guarded remote ref update and readback; exact local commit mirror; complete-history bundle verify; clean clone/fsck and scripts/check.sh; persisted Library bytes read back identical",
     "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38040601986",
     "remote_ci_status": "PASSED for exact checkpoint SHA; observed 2026-10-10T09:14:25Z"
+  },
+  {
+    "stage": "M1 verified read-only SQLite",
+    "remote_commit": "7cb9f4e34c219b0062cf19f8be3d8186a6a5d287",
+    "local_commit": "7cb9f4e34c219b0062cf19f8be3d8186a6a5d287",
+    "tree": "396a64dbc58dd0ab78027e55895202a468e2faff",
+    "bundle_sha256": "d983f2c5337e64602cdfb75f724f2bd0a18e4dee2b710ac73fadfc9038de8d4e",
+    "library_file_id": "libfile_7fe62b9473448191b7ec9d8a1d9302b4",
+    "library_version": 0,
+    "verified": "Guarded remote commit; ref and branch readback confirmed after one initial mismatched observation; no mutation retried; exact local commit mirror; complete-history bundle verify; clean clone/fsck and ordinary/race/oracle checks; persisted Library readback bytes identical",
+    "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38041930194",
+    "remote_ci_status": "PASSED for exact checkpoint SHA; observed 2026-10-10T09:38:33Z"
   }
 ]

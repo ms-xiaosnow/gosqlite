@@ -1,5 +1,5 @@
-// Package btree streams ordinary rowid-table SQLite B-trees. Index and
-// WITHOUT ROWID B-trees are deliberately unsupported in the read-only phase.
+// Package btree reads and mutates ordinary SQLite rowid-table B-trees and
+// BINARY ascending indexes. WITHOUT ROWID B-trees remain unsupported.
 package btree
 
 import (
@@ -52,15 +52,17 @@ type PageReader interface {
 // the whole table. Visited-page bookkeeping is capped to prevent cycles and
 // malicious inputs exhausting memory. Cursor methods must not run concurrently.
 type Cursor struct {
-	ctx      context.Context
-	reader   PageReader
-	header   pager.Header
-	stack    []frame
-	visited  map[uint32]struct{}
-	last     int64
-	hasLast  bool
-	done     bool
-	terminal error
+	ctx       context.Context
+	reader    PageReader
+	header    pager.Header
+	root      uint32
+	leafDepth int
+	stack     []frame
+	visited   map[uint32]struct{}
+	last      int64
+	hasLast   bool
+	done      bool
+	terminal  error
 }
 
 func NewCursor(ctx context.Context, r PageReader, root uint32) (*Cursor, error) {
@@ -71,7 +73,7 @@ func NewCursor(ctx context.Context, r PageReader, root uint32) (*Cursor, error) 
 	if h.PageSize < 512 || h.PageSize > 65536 || h.PageSize&(h.PageSize-1) != 0 || h.UsableSize < 480 || h.UsableSize > h.PageSize || h.PageCount == 0 {
 		return nil, corrupt("invalid PageReader header")
 	}
-	c := &Cursor{ctx: ctx, reader: r, header: h, visited: make(map[uint32]struct{})}
+	c := &Cursor{ctx: ctx, reader: r, header: h, root: root, visited: make(map[uint32]struct{})}
 	if err := c.push(root, bounds{}); err != nil {
 		return nil, err
 	}
@@ -114,6 +116,16 @@ func (c *Cursor) push(n uint32, b bounds) error {
 	f, err := parsePage(p, n, int(c.header.UsableSize), b)
 	if err != nil {
 		return err
+	}
+	if len(f.cells) == 0 && (n != c.root || !f.leaf && n != 1) {
+		return corrupt("invalid empty B-tree page %d", n)
+	}
+	if f.leaf {
+		depth := len(c.stack) + 1
+		if c.leafDepth != 0 && c.leafDepth != depth {
+			return corrupt("B-tree leaves have unequal depths")
+		}
+		c.leafDepth = depth
 	}
 	c.stack = append(c.stack, f)
 	return nil

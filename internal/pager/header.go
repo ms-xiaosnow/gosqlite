@@ -1,4 +1,5 @@
-// Package pager provides bounded, read-only access to SQLite database pages.
+// Package pager provides bounded SQLite page reads and native rollback-mode
+// write transactions. Interrupted-commit recovery remains unverified.
 package pager
 
 import (
