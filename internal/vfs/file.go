@@ -231,6 +231,16 @@ func (f *File) Close() error {
 	return err
 }
 
+// RetirementComplete reports whether this managed lease relinquished ownership.
+// It is independent of Close's diagnostic error: Linux may consume a descriptor
+// while reporting a close error. Darwin may transfer an idle descriptor to its
+// process-inode owner. Terminal native uncertainty is not completion.
+func (f *File) RetirementComplete() bool {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	return f.raw == nil
+}
+
 // closeResourcesLocked keeps native retirement and descriptor release in one
 // ordered operation. Tests exercise it with memory-only backend callbacks.
 func (f *File) closeResourcesLocked(unmap func(*nativeMapping) error, closeFile func() error) error {

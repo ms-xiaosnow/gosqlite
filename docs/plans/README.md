@@ -90,9 +90,10 @@ source plan, cross-build, ordinary rollback or benchmark closes those gates.
 
 Shared-session failed-open cleanup now uses 64 bounded strongly retained groups
 and a deliberate RetryOpenCleanup route. Nested owners retire before index/DMS,
-WAL and main protection. Successful-session retirement, public DB.Close retry and
-driver disposal still need their own bounded ownership correction; this slice
-does not cover them. Terminal retention may last for process lifetime. Ordinary
+WAL and main protection. A separate native WALShared successful-close increment
+now covers public DB.Close retry and driver disposal with1024 live+pending
+reservations and explicit discovery/retry. Other storage modes and constructors
+still need their own bounded ownership corrections; neither slice covers them. Terminal retention may last for process lifetime. Ordinary
 and memory checks do not qualify real unmap/close failures.
 
 A later source review found plain Windows metadata probes outside this ownership

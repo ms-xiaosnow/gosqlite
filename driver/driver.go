@@ -78,10 +78,9 @@ func (c *Connector) Connect(ctx context.Context) (sqldriver.Conn, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err := ctx.Err(); err != nil {
-		db.Close()
-		return nil, err
-	}
+	// The Connector context governs dialing. Once OpenContext succeeds, return
+	// its owned connection even if cancellation races with this return. A late
+	// check used to discard both the connection and its Close error.
 	return &conn{db: db}, nil
 }
 func parseDSN(dsn string) (string, error) {

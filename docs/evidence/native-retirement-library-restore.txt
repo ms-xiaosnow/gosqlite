@@ -1,0 +1,29 @@
+Exact Library restored commit b8c5ffa44809f9058eb7b13654e9edf9e54a91ad; Darwin/Windows native runtime NOT_RUN
+2026-10-10T17:58:59Z
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/darwinfile	0.065s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.069s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	0.201s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	0.073s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.161s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	2.235s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.312s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-shared	0.013s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/darwinfile	1.105s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	1.357s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	2.521s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	1.496s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.665s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	10.926s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.952s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-shared	1.060s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	0.005s [no tests to run]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.127s
+cross-build darwin/amd64 PASS
+cross-build darwin/arm64 PASS
+cross-build windows/amd64 PASS
+all modules verified
+2026-10-10T17:59:52Z
+NATIVE RETIREMENT EXACT RESTORED SCOPED CHECKS PASS

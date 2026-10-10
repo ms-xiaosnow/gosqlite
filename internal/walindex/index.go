@@ -132,12 +132,20 @@ func (x *Index) Close() error {
 	x.closed = true
 	// The owner retains all failed native mappings and DMS on an unmap error.
 	// Retrying Close is permitted; reads and further lock acquisitions are not.
-	if err := x.file.Close(); err != nil {
-		return nativeError(err)
+	err := x.file.Close()
+	if x.file.RetirementComplete() {
+		x.maps = nil
+		x.file = nil
 	}
-	x.maps = nil
-	x.file = nil
-	return nil
+	return nativeError(err)
+}
+
+// RetirementComplete distinguishes a retired owner with a diagnostic error
+// from retained views, DMS, or terminal file ownership.
+func (x *Index) RetirementComplete() bool {
+	x.mu.Lock()
+	defer x.mu.Unlock()
+	return x.file == nil
 }
 
 func validRange(slot, n int) bool { return slot >= 0 && n > 0 && slot < 8 && n <= 8-slot }

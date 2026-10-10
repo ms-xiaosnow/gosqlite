@@ -414,3 +414,14 @@ evidence. Dense v1 cross-version fixtures retain original byte/config/layout
 contracts. Approximate recall uses actual graph/list work and fixture-specific
 measurements. No physical tamper/crash workflow or native Darwin/Windows runtime
 was executed. All earlier manual prohibitions and independent M10 gates remain.
+
+## Native shared successful-close source qualification
+
+The successful native WALShared close delta is separate from the64 failed-open
+groups. Its focused isolated source/memory/ordinary/race/vet/build and native
+compile-only commands are preserved in shared-close-cleanup-isolated.txt and
+shared-close-cleanup-independent-review.txt. New negative laws use descriptor-
+free managed owners/fake sessions; real database/sql disposal models use memory-
+only connections. Ordinary native tests use intact databases and normal locks.
+No injected native close/unmap/lock/Sync failure or physical recovery ran. See
+shared-close-cleanup.md for the1024 lifetime bound and exact remaining code gaps.

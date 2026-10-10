@@ -296,7 +296,7 @@
     "library_version": 0,
     "verified": "Expected-SHA main readback and exact mirror; full-history bundle byte-identical Library readback, clean clone/fsck/goal verified2026-10-10T17:54:35Z. Initial local xattr call used relative path and failed; corrected absolute path succeeded. prepare_materialize had already copied the file; an unnecessary signed-transfer invocation failed without download_url, then direct-path readback/xattrs and all integrity checks passed. Exact restored scoped native/encrypted/shared unit/race, full vet/build, pinned transaction oracle, modules and clean tree passed17:55:19Z. Withdrawn75552c9 never published.",
     "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38073597982",
-    "remote_ci_status": "IN_PROGRESS observed2026-10-10T17:55:34Z; no terminal pass inferred.",
+    "remote_ci_status": "COMPLETED SUCCESS for exact SHA, updated2026-10-10T18:04:41Z, observed18:06:05Z.",
     "open_gates": "Windows native execution and physical failure acceptance NOT_RUN; Windows shared rekey, successful-session/public/driver close ownership, broad SQL and remaining migration/platform code are open. Default Windows VFS vet mapping diagnostic remains disclosed."
   },
   {
@@ -308,9 +308,23 @@
     "bundle_bytes": 1788563,
     "library_file_id": "libfile_11c0e5e2a10c8191b8a6096dae773bdb",
     "library_version": 0,
-    "verified": "Expected-SHA remote main readback and exact local mirror; full-history bundle byte-identical Library readback, clean clone/fsck and original goal hash verified2026-10-10T17:58:45Z. Scoped independent source/memory/ordinary/race/crosscompile evidence and combined source49f2749ffb838f936cc6066fb3496a4914cb1626 checks passed; exact restored scoped suite started17:58:59Z and remains pending at this record. Historical22-path Darwin manifest is explicitly superseded only for bounded first-poison retention delta.",
+    "verified": "Expected-SHA remote main readback and exact local mirror; full-history bundle byte-identical Library readback, clean clone/fsck and original goal hash verified2026-10-10T17:58:45Z. Scoped independent source/memory/ordinary/race/crosscompile evidence and combined source49f2749ffb838f936cc6066fb3496a4914cb1626 checks passed; exact restored scoped suite started17:58:59Z and remains pending at this record. Historical22-path Darwin manifest is explicitly superseded only for bounded first-poison retention delta. Exact restored scoped native/encrypted/shared CGO0 unit, separate CGO1 race, full vet/build, transaction oracle, three target cross-builds, modules and clean tree passed17:59:52Z. That first oracle regex selected no encryption tests (reported explicitly); corrected TestOracleEncryptedSnapshotExportImport selection passed85.268s at18:03:38Z without source edits. No testless encryption pass is inferred.",
     "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38073896992",
-    "remote_ci_status": "IN_PROGRESS observed2026-10-10T17:58:45Z; no terminal pass inferred.",
+    "remote_ci_status": "COMPLETED SUCCESS for exact SHA, updated2026-10-10T18:09:13Z, observed18:09:31Z.",
     "open_gates": "Native Darwin/Windows runtime and physical cleanup failures NOT_RUN; Darwin Unicode inventory, Windows shared rekey, successful-session/public/driver close ownership and broader SQL/migration/recovery code remain. Failed-open API is scoped, not whole-lifecycle acceptance."
+  },
+  {
+    "stage": "M9 typed persistent HNSW and supported IVFFlat",
+    "remote_commit": "efe40d70b190eaa8a8138b49ebd295279c9a0813",
+    "local_commit": "efe40d70b190eaa8a8138b49ebd295279c9a0813",
+    "tree": "1174b4a1ddc6bee57df58b71aa4e6fb8d507d650",
+    "bundle_sha256": "d52e8722dee70a031f3f6b6fc6b70195a7d01d9525fab5ff1e8ed2d5006fd652",
+    "bundle_bytes": 1869239,
+    "library_file_id": "libfile_517e226685bc81918f21566a6e06cb9b",
+    "library_version": 0,
+    "verified": "Expected-SHA remote main readback and exact local mirror; full-history bundle byte-identical Library readback, clean clone/fsck and original goal hash verified2026-10-10T18:02:10Z. Exact restored scoped ANN/example unit and race, typed native/driver/dense API checks, full vet/build, typed ordinary oracle, modules and clean tree passed18:04:40Z. Initial no-argument example printed usage only; corrected new disposable-path invocation generated valid JSON18:05:40Z, byte-identical to the frozen example. Full aggregate27de and combined focused49f2749 source-tree evidence remains separate from this exact restored focused suite.",
+    "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38074127283",
+    "remote_ci_status": "COMPLETED SUCCESS for exact SHA, updated2026-10-10T18:14:13Z, observed18:14:41Z.",
+    "open_gates": "Broad SQL/planner/recovery/native lifetime and migration code remain open. Sparse IVF/IVF L1/Jaccard unsupported; nativeOS, physical recovery and independent M10 qualification remain unavailable. Exact dense v1 fixtures are retained; approximation is not exact recall."
   }
 ]

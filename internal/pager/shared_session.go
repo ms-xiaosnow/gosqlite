@@ -23,15 +23,17 @@ import (
 // A connection permits one local lease. Use independent connections for
 // concurrent transactions. Shared WAL currently requires writable sidecars.
 type SharedSession struct {
-	mu       sync.Mutex
-	file     *vfs.File
-	walFile  *vfs.File
-	index    *walindex.Index
-	path     string
-	opts     Options
-	header   Header
-	active   *Tx
-	poisoned error
+	mu         sync.Mutex
+	file       *vfs.File
+	walFile    *vfs.File
+	index      *walindex.Index
+	path       string
+	opts       Options
+	header     Header
+	active     *Tx
+	poisoned   error
+	closed     bool
+	closeGroup *sharedCloseRetirement
 }
 
 type sharedRead struct {
@@ -66,14 +68,23 @@ func sharedIndexError(err error) error {
 	}
 }
 
-// OpenSharedSession enters or opens standard shared WAL. Mode changes require
+// OpenSharedSessionAdmitted consumes a close admission and enters standard shared WAL. Mode changes require
 // the database EXCLUSIVE lock, but an already-WAL database does not. The WAL
 // and SHM inodes are never replaced or unlinked by a SharedSession.
-func OpenSharedSession(ctx context.Context, path string, opts Options) (result *SharedSession, retErr error) {
+func OpenSharedSessionAdmitted(ctx context.Context, path string, opts Options, admission *SharedCloseAdmission) (result *SharedSession, retErr error) {
+	closeGroup, err := admission.take()
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if result == nil {
+			closeGroup.abandon()
+		}
+	}()
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
-	opts, err := normalizedOptions(opts)
+	opts, err = normalizedOptions(opts)
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +125,7 @@ func OpenSharedSession(ctx context.Context, path string, opts Options) (result *
 	if err != nil {
 		return nil, err
 	}
-	s := &SharedSession{file: f, path: path, opts: opts}
+	s := &SharedSession{file: f, path: path, opts: opts, closeGroup: closeGroup}
 	cleanup.main = sharedOpenFileOwner{file: f}
 	if err = lockShared(f); err != nil {
 		return nil, err
@@ -185,10 +196,16 @@ func OpenSharedSession(ctx context.Context, path string, opts Options) (result *
 		return nil, errors.Join(err, releaseErr)
 	}
 	s.header = h
+	closeGroup.index = sharedCloseIndex{s.index}
+	closeGroup.wal = sharedCloseFile{s.walFile}
+	closeGroup.main = sharedCloseFile{s.file}
 	return s, nil
 }
 
 func (s *SharedSession) checkOpenLocked() error {
+	if s.closed {
+		return ErrClosed
+	}
 	if s.poisoned != nil {
 		return s.poisoned
 	}
@@ -405,32 +422,40 @@ func (s *SharedSession) releaseLocked(t *Tx) error {
 // Close preserves WAL/SHM names. Other connections may be using either inode.
 // A reader-limited checkpoint is harmless: the synced WAL is retained and the
 // connection still closes normally. No last-connection deletion is attempted.
-func (s *SharedSession) Close() error {
+func (s *SharedSession) Close() error { return s.CloseWithError(nil) }
+
+// CloseWithError adopts first-close lease errors before retiring their protecting
+// index, WAL and main owners. It is called by sqlite.DB after invalidating its
+// Rows and transaction once. Retries never checkpoint or re-invalidate leases.
+func (s *SharedSession) CloseWithError(cause error) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if s.file == nil {
-		return s.poisoned
+	return s.closeLocked(cause, func() error { return s.checkpointLocked(context.Background()) })
+}
+
+// The callback isolates the one-shot checkpoint decision for descriptor-free
+// policy laws. Production always passes its real checkpoint above; it is not a
+// replaceable native-I/O or fault-injection hook.
+func (s *SharedSession) closeLocked(cause error, checkpoint func() error) error {
+	if s.closed {
+		return s.closeGroup.retry()
 	}
 	if s.active != nil {
 		return ErrBusy
 	}
-	err := s.poisoned
+	err := errors.Join(cause, s.poisoned)
 	if err == nil && !s.opts.KeepWALOnClose {
-		err = s.checkpointLocked(context.Background())
+		err = checkpoint()
 		if errors.Is(err, ErrBusy) && s.poisoned == nil {
 			err = nil
 		}
 	}
-	if closeErr := s.index.Close(); closeErr != nil {
-		// Retain main SHARED and WAL while the index still owns native views.
-		// A later Close can retry cleanup; no transaction may continue.
-		return s.poisonLocked(errors.Join(err, sharedIndexError(closeErr)))
-	}
-	err = errors.Join(err, closeNativeFile(s.walFile), closeNativeFile(s.file))
-	s.file = nil
-	s.walFile = nil
-	s.index = nil
-	return err
+	s.closed = true
+	// Only managed owners and native causes remain rooted in the group, not the
+	// session or any SQL objects. All subsequent operations fail logically closed.
+	s.file, s.walFile, s.index = nil, nil, nil
+	s.poisoned = nil
+	return s.closeGroup.begin(err)
 }
 
 // beginReadLocked follows walTryBeginRead: header, slot, then header/mark

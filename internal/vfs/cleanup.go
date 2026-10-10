@@ -22,6 +22,18 @@ func (e *cleanupError) Close() error {
 	return e.file.Close()
 }
 
+// CleanupComplete reports explicit retirement for error-carried owners. Unknown
+// implementations fail closed; a diagnostic error is never ownership evidence.
+func CleanupComplete(owner CleanupOwner) bool {
+	if o, ok := owner.(interface{ RetirementComplete() bool }); ok {
+		return o.RetirementComplete()
+	}
+	return false
+}
+func (e *cleanupError) RetirementComplete() bool {
+	return e.file != nil && e.file.RetirementComplete()
+}
+
 func retainedFileCleanup(f *File, cause error) error {
 	return &cleanupError{file: f, cause: cause}
 }

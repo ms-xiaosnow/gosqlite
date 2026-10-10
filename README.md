@@ -268,8 +268,9 @@ with deferred close, native relative namespace operations and direct bounded
 directory enumeration. Native execution is still NOT_RUN. See
 [Darwin scope](docs/native-encrypted-darwin.md). Shared-WAL unsuccessful opening
 now retains nested owners and protection in bounded groups, with explicit
-[retry API](docs/shared-open-cleanup.md). Successful-session Close and driver
-disposal ownership remain separate required code corrections.
+[retry API](docs/shared-open-cleanup.md). Native WALShared successful Close now
+uses separately bounded retained ownership and explicit discover/retry APIs.
+Rollback/WALExclusive and encrypted lifecycle cleanup still require code fixes.
 
 ## Persistent typed ANN
 
@@ -279,3 +280,13 @@ L1 and IVF Jaccard remain unsupported. Dense v1 bytes and existing public struct
 layouts remain unchanged, with bidirectional old/new fixture checks. See
 [typed ANN limits and evidence](docs/typed-ann.md) and examples/typed-ann-rerank.
 Ordinary measured recall depends on workload/probes and is not an exact guarantee.
+
+## Native shared-WAL close ownership
+
+`DB.Close` logically closes native WALShared once, but retries unresolved managed
+retirement. `ErrCloseCleanupPending`, `RetryCloseCleanup` and
+`PendingCloseCleanups` expose deliberate retry even when database/sql discarded
+a Close error. At most1024 native shared sessions/in-flight opens/pending closes
+share the new lifetime admission bound; the64 failed-open groups are separate.
+See [scope and lifecycle limits](docs/shared-close-cleanup.md). Terminal ownership
+can remain retained for process lifetime; native failure behavior is NOT_RUN.

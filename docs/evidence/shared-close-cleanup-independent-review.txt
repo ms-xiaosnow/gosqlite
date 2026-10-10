@@ -1,0 +1,230 @@
+Native shared-WAL successful-close retirement: independent review
+Date: 2026-10-10 UTC
+Outcome: no remaining blocker found in the exact frozen scoped implementation.
+This is source review, descriptor-free ownership-law execution, ordinary Linux
+lifecycle verification, race tooling, and target compilation. It is not native
+teardown-failure qualification, full M3 acceptance, or release approval.
+
+Independent basis and source freeze
+The reviewer independently created /tmp/shared-close-independent.uCJCe2 using
+git archive efe40d70b190eaa8a8138b49ebd295279c9a0813 plus only the sixteen files
+in shared-close-cleanup-source-sha256.txt. This includes thirteen production/test
+files, two explanatory documents, and the owned-path manifest. No concurrent SQL
+JOIN/parser/cursor/Rows or migration working changes were imported. The reviewed
+Rows/transaction dependencies in the executed snapshot are the immutable base.
+
+Source manifest SHA-256:
+f28256beab7bd4fbf96ebe5654138d6b543423e26e2d357c03533e4f85d6c505
+  docs/evidence/shared-close-cleanup-source-sha256.txt
+
+All sixteen hashes were checked when constructing the independent snapshot,
+after independent execution, and against the working source afterward. The
+complete frozen list is reproduced below. Existing Windows mapping-retirement
+and Darwin first-poison corrections are dependencies already in the base;
+their prior independent reviews remain separate historical evidence.
+
+Source findings
+1. Admission and ownership transfer
+   The public sqlite.OpenContext reserves a successful-close slot before
+   canonicalOpenPath. Direct pager.OpenSharedSession also reserves before path
+   resolution/acquisition. Exactly 1024 in-flight/live/pending-close reservations
+   are allowed, with ErrLimit mapped to public ErrMemoryLimit/CodeNoMem on
+   exhaustion. SharedCloseAdmission.take/Cancel serialize consumption; early
+   validation/cancellation and unsuccessful opens abandon the unused close slot.
+   The distinct 64 failed-open reservation remains before pager acquisition;
+   successful opening transfers its owners and frees only that failed-open slot.
+   Unsuccessful opening retains pending ownership in the existing failed-open
+   registry while abandoning the unused successful-close slot. Public Windows
+   canonicalization metadata remains under its separate bounded managed owner;
+   the new reservation does not claim a new pre-pager metadata retry route.
+
+2. Logical Close versus physical/managed retirement
+   DB.Close marks SQL closure, invalidates Rows, joins their release diagnostics,
+   and rolls back the transaction once. Subsequent shared-WAL Close calls reach
+   session retirement without repeating those operations. SharedSession closes
+   logically before group retirement, detaches its primary resource fields, and
+   routes retries straight to the group. Direct pager Close with an active lease
+   remains BUSY and leaves the session usable. The first lease-free Close makes
+   at most one checkpoint attempt; KeepWALOnClose and existing causes/poison skip
+   it. An unpoisoned reader-limited BUSY keeps the existing benign-close policy.
+   The small private callback only factors this policy for memory laws; the
+   production caller always supplies the real checkpoint and introduces no
+   replaceable native-I/O hook.
+
+3. Child-before-protector retirement and explicit completion
+   First-close causes are passed through VFS CleanupOwners and adopted before
+   retiring primary resources. Existing dependency collection merges all child
+   edges for repeated File identities and fails closed on inconsistent cycles.
+   Retirement proceeds nested obligations, index/views/mapping objects/DMS,
+   WAL, then main. A retained child stops retirement before its protectors. Both
+   pre-call and post-call status use explicit RetirementComplete, independently
+   of the diagnostic error. A nil error with retained state is pending/poisoned;
+   a completed owner with an error permits later stages and frees its slot when
+   all owners are done. The index now clears its maps/File when the managed File
+   has conclusively relinquished ownership even if its close returned a diagnostic.
+
+4. Exact managed retries and platform boundaries
+   The group stores only the three managed adapters and dependency owners. It
+   neither extracts raw numbers nor calls an OS close directly. Common File.Close
+   still retains mappings before descriptor/DMS release. Linux's consumed
+   os.File.Close clears managed ownership and is never called again by this
+   group. Pinned Go internal/poll FD.destroy sets Sysfd=-1 after the close result;
+   no inference about a safe second native close is introduced.
+   Windows file closeUnknown, mappingRetirement.closeUnknown, and metadata
+   tombstones remain terminal. Represented view-only retirement can retry its
+   actual managed view; uncertain raw-handle close cannot. Darwin retains its
+   process-inode coordination: File retirement may transfer an idle descriptor
+   to that existing owner, while uncertain close records stay attempted and are
+   never physically closed again. The new successful-close registry does not
+   claim that all process-wide deferred Darwin physical closes have happened.
+
+5. Dropped errors, lock independence, and finite retained history
+   Admission roots the group before successful opening returns, so discarding
+   a database/sql connection or its Close error cannot lose ownership. Pending
+   tokens are published atomically; snapshots hold the registry mutex only for
+   enumeration and never take a group/native lock. Group operations occur after
+   releasing the registry mutex. No registry-to-group lock inversion was found.
+   Retained fields have no DB/session/Options/Rows/Tx/cache reference or callback
+   to such objects. Managed native objects retain only their existing ownership
+   bookkeeping. No finalizer, background retry, eviction, pathname lookup, or
+   cleanup of unrelated groups was added.
+   The group retains its first cause plus one replaceable current immutable
+   pending token, not an accumulating chain of retry results. First-error VFS
+   wrappers may still name already-retired Go File bookkeeping; explicit status
+   skips it, and release clears the group's cause and owner fields. Caller-held
+   historical error values can retain their own fixed graphs. Existing Darwin
+   first-poison storage and Windows terminal mappings likewise do not accumulate
+   retry histories. This is a structural bound, not a universal byte limit.
+
+6. Public retry/discovery contract
+   Wrapped/joined errors are completely discovered before any cleanup. Each
+   distinct group is attempted once per call; completed groups cannot hide
+   later pending groups. Tokens are immutable discovery leaves. Deep and wide
+   exact 4096-node inputs are accepted; excessive/cyclic inputs return the
+   explicit limit without resource effects or wrapping unsafe input. Snapshot
+   slices are separate allocations; stale tokens remain harmless after cleanup.
+   Pending errors preserve original causes and ErrPoisoned/CodeIOErr. Completed
+   retries can still return diagnostics without ErrCloseCleanupPending; error
+   presence alone is not ownership status. Nil/no-token input is only a no-op.
+   Documentation accurately notes that additional public/application wrappers
+   can push a full joined snapshot beyond the discovery limit, requiring batches.
+
+7. Connector context decision
+   Pinned Go 1.27.2 src/database/sql/driver/driver.go describes Connector context
+   as dialing-only. Its synchronous DB.conn path accepts successful Connect
+   without a second context check. The old post-success context branch dropped
+   both db.Close's error and the connection. Removing it returns the successfully
+   acquired connection while retaining pre-open and OpenContext cancellation
+   checks. It does not authorize executing canceled queries. The standard
+   library's finalClose/putConn paths can discard Close results and nil ci;
+   the independent strong group plus snapshot supplies the missing retry route.
+
+8. Scope and documentation
+   New guarantees are limited to successful native plaintext WALShared sessions.
+   The docs accurately distinguish actual remaining rollback Reader/Tx,
+   WALExclusive, encrypted Store/session, other constructor/lease, and pre-pager
+   metadata cleanup gaps from unexecuted qualification. The failed-open document
+   has a dated superseding link while preserving historical evidence. Two
+   documentation precision suggestions were incorporated before this freeze:
+   full snapshot batching and limiting the no-raw-handle statement to the new
+   group rather than all native backends. No production correction was requested.
+
+Behavioral audit and execution boundary
+Before execution, selected test source and its helper paths were read. New
+negative cases use descriptor-free state, synthetic counters, ordinary Go errors,
+fake page sessions, or real database/sql pooling over memory-only connections.
+Public capacity tests fill only memory reservations and return before path access;
+canceled/invalid/reused admissions return before native acquisition. The existing
+65-session regression and other physical selections use intact ordinary files,
+normal commits/rollback/reopen, cooperating snapshots/contention, and normal
+mapping/DMS lifetime. A mandatory testscope guard ran immediately before each
+test suite, independently of this behavioral review. The guard is not a full
+behavioral audit or proof that arbitrary tests would be safe to execute.
+
+The reviewer used the worker's focused selection plus already source-audited
+Windows mapping-terminal memory laws and the Darwin bounded-first-poison memory
+law. Every scoped CGO0 test, separately instrumented CGO1 race test, vet, native
+Linux build, and linux/arm64, darwin/arm64, windows/amd64 build exited zero.
+The cross-built targets were not executed. No full aggregate suite was run.
+
+Environment:
+  Go /workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go
+  GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off
+  GOCACHE=/workspace/scratch/5e06a74e5f65/durable-restart/go-cache
+  GOPATH=/workspace/scratch/5e06a74e5f65/durable-restart/go-path
+  SQLITE_ORACLE=/workspace/scratch/5e06a74e5f65/durable-restart/toolchains/sqlite-build-3540000/sqlite3
+  Oracle remains test-only; no selected test required a production oracle path.
+
+Not executed or qualified
+Physical native failed I/O/close/unmap/lock/Sync, short write, disk-full,
+permissions, tamper/corruption/wrong key, missing selected files, namespace
+substitution/retargeting, process exit/kill/crash/hot recovery, interrupted
+publication/rekey: NOT_RUN. None was moved to CI or another environment.
+Native Darwin/Windows/Linux-arm64 runtime: NOT_RUN. Full M3, encryption safety,
+soak, independent release review, and unrelated SQL-worker integration remain
+outside this review. The reviewer changed only this evidence file, staged
+nothing, and performed no commit, upload, or publication.
+
+Frozen source hashes and exact captured independent command output follow.
+
+6227fddfc2da9cf9c6da1b9019142b5df5eaacaecc9cdbc5825fbb634368af93  internal/pager/shared_close_cleanup.go
+ef80f03ac36a810c1b1abcf16c43c9b89d843866bd1212f5898ee7d456013f8e  internal/pager/shared_close_cleanup_test.go
+313135f4d3d43ab8ec55ee4516430c8a207babf81835f1008e98c7540fe1c3e5  internal/pager/shared_session.go
+e7ccb94d055bfece01e2f7736d2122d2aa5ceec3b60db0ae1fc2495e4fe1bda6  internal/vfs/cleanup.go
+c839f6a6132a49e2cc96278b7903fbfcd1121238dd4f59a68302e3a0d0c5e822  internal/vfs/close_status_test.go
+5ae510838d69e48ae5b417143987e1c50bb7f413f237d8a92f06660c71e87aae  internal/vfs/file.go
+43c4ce96d9605e46a0fa2e261c22b01fd6a2cad3bf9b6e8c8d610ad96c93be69  internal/walindex/index.go
+18332ccdffcd012ddecf3981f4dd6e121958dd14c674f58a7a6efd413fe29c87  sqlite/close_cleanup.go
+1110dcee87f1d0c635bd3da82d497339dc59d72aaf35cfa97ab9c1dce985019d  sqlite/close_cleanup_internal_test.go
+7f72c4a819bbf72c987ee9b3607865ca41c5e1c573216c3fe7524356ed6388b1  sqlite/close_cleanup_test.go
+d5753419e614d98de4e2861a53998f4ea1d89d8446c4403b02f585c9ab34ef05  sqlite/sqlite.go
+70de3be8904ef3bf01027227c573ac5ee91d412c1e174abecbcece2cf01772b8  driver/close_cleanup_test.go
+9b88a16152782f6251bdfdda24d7fb0f810dfe5ad776e29c3cf2ec5a53c87b4a  driver/driver.go
+89a6866f9a57e84f862f5d49778b3e28092b64562f78b0137cbb4dc43b61edeb  docs/shared-close-cleanup.md
+53d24ff3baf5b4ba2ab4a3e8f252b9f0ff5e3edcb145d050aa15bfd5410b4098  docs/shared-open-cleanup.md
+6c9645634532008468dc65eb89c4b9adde403ae60c7abcf5d83966e6b76ba947  docs/evidence/shared-close-cleanup-owned-paths.txt
+
+Independent command output
+Sat Oct 10 18:11:23 UTC 2026
+go version go1.27.2 linux/amd64
+CGO_ENABLED=0 go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
+CGO_ENABLED=0 go test ./internal/vfs ./internal/walindex ./internal/darwinfile ./internal/pager ./sqlite ./driver -run \^\(TestCloseStatusMemory.\*\|TestSharedCloseCleanupMemory.\*\|TestCloseCleanup.\*\|TestSharedCloseCleanupConnectorCancellationAndOrdinaryDisposal\|TestSharedOpenCleanup.\*\|TestOpenCleanup.\*\|TestCleanupOwnersMemory.\*\|TestOwnershipReviewPartialRetirementRetainsAllLocks\|TestManagedMappingLogicalSpanAndClose\|TestDMSNormalLifecycleAndHeaderPublication\|TestRealHashBlocksSnapshotAndCleanup\|TestSharedWALSnapshotsPromotionAndCheckpoint\|TestSharedWALConcurrentReadersAndWriter\|TestSharedWALSnapshotsAndWriterContention\|TestSharedWALPooledConcurrentWrites\|TestWindowsMappingRetirementMemory.\*\|TestRegistryMemoryRepeatedPoisonRetainsBoundedFirstCause\)\$ -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.004s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	0.138s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/darwinfile	0.007s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.129s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.045s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.125s
+CGO_ENABLED=0 go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
+CGO_ENABLED=1 go test -race ./internal/vfs ./internal/walindex ./internal/darwinfile ./internal/pager ./sqlite ./driver -run \^\(TestCloseStatusMemory.\*\|TestSharedCloseCleanupMemory.\*\|TestCloseCleanup.\*\|TestSharedCloseCleanupConnectorCancellationAndOrdinaryDisposal\|TestSharedOpenCleanup.\*\|TestOpenCleanup.\*\|TestCleanupOwnersMemory.\*\|TestOwnershipReviewPartialRetirementRetainsAllLocks\|TestManagedMappingLogicalSpanAndClose\|TestDMSNormalLifecycleAndHeaderPublication\|TestRealHashBlocksSnapshotAndCleanup\|TestSharedWALSnapshotsPromotionAndCheckpoint\|TestSharedWALConcurrentReadersAndWriter\|TestSharedWALSnapshotsAndWriterContention\|TestSharedWALPooledConcurrentWrites\|TestWindowsMappingRetirementMemory.\*\|TestRegistryMemoryRepeatedPoisonRetainsBoundedFirstCause\)\$ -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	1.042s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	2.284s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/darwinfile	1.053s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.249s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	1.242s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.697s
+CGO_ENABLED=0 go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
+CGO_ENABLED=0 go vet ./internal/vfs ./internal/walindex ./internal/darwinfile ./internal/pager ./sqlite ./driver
+CGO_ENABLED=0 go build ./internal/vfs ./internal/walindex ./internal/darwinfile ./internal/pager ./sqlite ./driver
+CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build ./internal/vfs ./internal/walindex ./internal/darwinfile ./internal/pager ./sqlite ./driver (compile-only; native execution NOT_RUN)
+CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build ./internal/vfs ./internal/walindex ./internal/darwinfile ./internal/pager ./sqlite ./driver (compile-only; native execution NOT_RUN)
+CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build ./internal/vfs ./internal/walindex ./internal/darwinfile ./internal/pager ./sqlite ./driver (compile-only; native execution NOT_RUN)
+internal/pager/shared_close_cleanup.go: OK
+internal/pager/shared_close_cleanup_test.go: OK
+internal/pager/shared_session.go: OK
+internal/vfs/cleanup.go: OK
+internal/vfs/close_status_test.go: OK
+internal/vfs/file.go: OK
+internal/walindex/index.go: OK
+sqlite/close_cleanup.go: OK
+sqlite/close_cleanup_internal_test.go: OK
+sqlite/close_cleanup_test.go: OK
+sqlite/sqlite.go: OK
+driver/close_cleanup_test.go: OK
+driver/driver.go: OK
+docs/shared-close-cleanup.md: OK
+docs/shared-open-cleanup.md: OK
+docs/evidence/shared-close-cleanup-owned-paths.txt: OK

@@ -1,0 +1,18 @@
+Exact Library restored commit efe40d70b190eaa8a8138b49ebd295279c9a0813; focused typed ANN and dense compatibility
+2026-10-10T18:02:31Z
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector/ann	7.247s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/typed-ann-rerank	0.346s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	8.045s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.284s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector/ann	53.268s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/typed-ann-rerank	2.389s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	32.752s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	6.901s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	6.553s
+usage: typed-ann-rerank <new-disposable-db>
+all modules verified
+2026-10-10T18:04:40Z
+TYPED ANN EXACT RESTORED SCOPED CHECKS PASS

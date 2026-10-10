@@ -77,5 +77,6 @@ Darwin now shares descriptor retirement across plain and encrypted native paths;
 unmanaged same-inode closes remain outside that protection. Shared-WAL failed
 Open ownership has bounded retention and explicit retry; terminal uncertainty
 can exhaust admission until process exit. No cleanup error authorizes repeated
-raw OS close. Successful-session Close and driver disposal gaps remain separately
-tracked, so this increment does not establish whole-public-lifecycle safety.
+raw OS close. Native WALShared successful Close and driver disposal now have a
+separate bounded ownership correction. Rollback, exclusive WAL and encrypted
+lifecycle gaps remain, so whole-public-lifecycle safety is not established.

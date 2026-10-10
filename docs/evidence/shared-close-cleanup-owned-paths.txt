@@ -1,0 +1,30 @@
+Native shared-WAL successful-session close retirement delta, 2026-10-10.
+Started from b8c5ffa44809f9058eb7b13654e9edf9e54a91ad (prior native failed-open + Darwin/Windows ownership increments).
+Final isolated review base: efe40d70b190eaa8a8138b49ebd295279c9a0813 (adds independently landed typed ANN).
+Direct implementation/test/doc ownership (no central matrix ownership):
+internal/pager/shared_close_cleanup.go
+internal/pager/shared_close_cleanup_test.go
+internal/pager/shared_session.go
+internal/vfs/cleanup.go
+internal/vfs/close_status_test.go
+internal/vfs/file.go
+internal/walindex/index.go
+sqlite/close_cleanup.go
+sqlite/close_cleanup_internal_test.go
+sqlite/close_cleanup_test.go
+sqlite/sqlite.go
+driver/close_cleanup_test.go
+driver/driver.go
+docs/shared-close-cleanup.md
+docs/shared-open-cleanup.md (dated superseding link only; historical evidence is unchanged)
+
+Reviewed unchanged dependencies:
+internal/pager/shared_open_cleanup.go and shared_open_cleanup_test.go
+internal/pager/native_file.go, shared_checkpoint.go, pager.go, tx.go, session.go, encrypted_session.go
+internal/vfs/native_linux.go, native_darwin.go, native_windows.go, mapping_retirement.go, metadata_owners.go
+internal/darwinfile/registry.go (prior first-poison retention delta)
+sqlite/path_default.go, path_windows.go, transaction.go, rows.go (Rows may contain unrelated SQL worker changes)
+internal/encstore/store.go and its existing managed owner helpers
+Pinned Go 1.27.2 src/database/sql/driver/driver.go Connector contract and src/database/sql/sql.go conn/disposal implementation
+
+This manifest does not incorporate concurrent unrelated SQL/ANN worktree changes into the close-retirement claim.

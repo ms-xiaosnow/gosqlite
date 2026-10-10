@@ -1,0 +1,5 @@
+Prior oracle regex selected no encryption test; explicit corrected selection follows.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	85.268s
+2026-10-10T18:03:38Z
+NATIVE RETIREMENT EXACT RESTORED ENCRYPTED ORACLE PASS

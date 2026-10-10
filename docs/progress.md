@@ -502,3 +502,42 @@ Source49f2749ffb838f936cc6066fb3496a4914cb1626 separately passed focused combine
 native/Darwin/failed-open/typed integration at15:49:53Z. Neither replaces exact
 commit CI/Library restore, native-OS or restricted/independent acceptance. Fixture
 HNSW recall@10=1 is dataset-specific; IVF one-probe recall spans0.30–0.90.
+
+### Resumed durable phase saves and exact restore checks
+
+On2026-10-10, explicit approval allowed conditional development checkpoints to
+continue. Corrected Windows ea6591b, Darwin/failed-open b8c5ffa and typed ANN
+efe40d7 were read back from main and exactly mirrored locally. Each full-history
+bundle was persisted to Library and byte-compared, clean-cloned/fsck checked
+with unchanged goal hash. Exact restored focused unit/race/vet/build and scoped
+oracles passed; see checkpoints.json for scope, IDs and timestamps. The initial
+Darwin encryption regex selected zero tests; a corrected explicit oracle ran and
+passed. The initial no-argument typed example printed usage only; a corrected
+disposable-path run passed and matched frozen output bytes. No missing execution
+is represented as evidence. Windows exact-SHA CI38073597982 completed SUCCESS
+18:04:41Z; the other two runs are separately monitored.
+
+Actual further code work is in progress: native shared successful-session close
+retirement, scoped relational JOIN execution and full-table migration plans.
+Those unpublished changes are excluded from the preceding restored commits.
+
+### Native shared-WAL successful-close retirement
+
+Implemented separate1024 live/in-flight/pending admission before public native
+metadata/acquisition;64 failed-open admission remains independent. Groups retain
+minimal managed owners even if database/sql ignores Close errors. New explicit
+completion adapters distinguish retired diagnostics from unresolved ownership.
+Nested owners retire before index/DMS, WAL and main; no protecting parent is
+released below a pending child. Logical DB.Close invalidation and checkpoint run
+once, while repeated Close/RetryCloseCleanup can continue represented cleanup.
+PendingCloseCleanups returns immutable bounded tokens without cleanup/sweeps.
+Connector no longer manufactures a late-context cancellation disposal path.
+
+Independent16-path review and isolated focused CGO0 unit, separate CGO1 race,
+scoped vet/build and Linux-arm64/Darwin-arm64/Windows-amd64 compilation passed.
+Lead close-only sourcebc3ddb29edab8a1d8e9ab599600dac8e6d114121 (efe40d7 plus
+those16 paths, excluding future relational/migration work) completed full CGO0
+unit/vet/build18:13:25Z. Full race/oracle is still running at this record, not
+inferred complete. Runtime outside Linux and all restricted native failures stay
+NOT_RUN. Rollback/exclusive-WAL/encrypted constructors and lifecycle loss remain
+actual required code work; no full M3 or release acceptance follows.

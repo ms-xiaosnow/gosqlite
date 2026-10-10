@@ -1,0 +1,30 @@
+Shared-WAL successful-close focused evidence, final source candidate
+Sat Oct 10 18:07:26 UTC 2026
+go version go1.27.2 linux/amd64
+Production environment: GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off CGO_ENABLED=0; shared ../go-cache and ../go-path.
+Behavioral audit: new negative laws are descriptor-free managed-owner callbacks, fake sessions and real database/sql pooling over memory-only connections. Existing failed-open/VFS negative laws are memory-only. Native selected tests create intact ordinary files, acquire/release normal locks and mappings, commit/rollback, read snapshots, encounter ordinary BUSY, cancel before work, close/reopen. No injected native I/O/close/unmap/lock/Sync failure, corruption/tamper/wrong key, missing selected files, namespace substitution, kill/exit/crash or hot-recovery execution.
+go run ./internal/testscope && go test ./internal/vfs ./internal/walindex ./internal/pager ./sqlite ./driver -run \^\(TestCloseStatusMemory.\*\|TestSharedCloseCleanupMemory.\*\|TestCloseCleanup.\*\|TestSharedCloseCleanupConnectorCancellationAndOrdinaryDisposal\|TestSharedOpenCleanup.\*\|TestOpenCleanup.\*\|TestCleanupOwnersMemory.\*\|TestOwnershipReviewPartialRetirementRetainsAllLocks\|TestManagedMappingLogicalSpanAndClose\|TestDMSNormalLifecycleAndHeaderPublication\|TestRealHashBlocksSnapshotAndCleanup\|TestSharedWALSnapshotsPromotionAndCheckpoint\|TestSharedWALConcurrentReadersAndWriter\|TestSharedWALSnapshotsAndWriterContention\|TestSharedWALPooledConcurrentWrites\)\$ -count=1
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.007s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	0.124s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.103s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.074s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.168s
+Race tooling only: CGO_ENABLED=1; production dependency remains pure Go.
+Same behavioral audit repeated against the same unchanged scoped source, only race instrumentation differs.
+CGO_ENABLED=0 go run ./internal/testscope && CGO_ENABLED=1 go test -race ./internal/vfs ./internal/walindex ./internal/pager ./sqlite ./driver -run \^\(TestCloseStatusMemory.\*\|TestSharedCloseCleanupMemory.\*\|TestCloseCleanup.\*\|TestSharedCloseCleanupConnectorCancellationAndOrdinaryDisposal\|TestSharedOpenCleanup.\*\|TestOpenCleanup.\*\|TestCleanupOwnersMemory.\*\|TestOwnershipReviewPartialRetirementRetainsAllLocks\|TestManagedMappingLogicalSpanAndClose\|TestDMSNormalLifecycleAndHeaderPublication\|TestRealHashBlocksSnapshotAndCleanup\|TestSharedWALSnapshotsPromotionAndCheckpoint\|TestSharedWALConcurrentReadersAndWriter\|TestSharedWALSnapshotsAndWriterContention\|TestSharedWALPooledConcurrentWrites\)\$ -count=1
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	1.030s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	2.492s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.256s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	1.280s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.940s
+CGO_ENABLED=0 go vet ./internal/vfs ./internal/walindex ./internal/pager ./sqlite ./driver
+CGO_ENABLED=0 go build ./internal/vfs ./internal/walindex ./internal/pager ./sqlite ./driver
+CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build ./internal/vfs ./internal/walindex ./internal/pager ./sqlite ./driver (compile only; native runtime NOT_RUN)
+CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build ./internal/vfs ./internal/walindex ./internal/pager ./sqlite ./driver (compile only; native runtime NOT_RUN)
+CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build ./internal/vfs ./internal/walindex ./internal/pager ./sqlite ./driver (compile only; native runtime NOT_RUN)
+
+Preliminary new-test correction, before the passing candidate run above:
+The first driver disposal test attempted SELECT count(*), which this engine explicitly rejects as unsupported aggregate SQL. That test failed with the correct unsupported classification. Replaced the test query with SELECT id ORDER BY id, asserting exactly one committed id=7 and no second row. No engine SQL behavior or unsupported-feature assertion was changed. The corrected candidate passed the suite above.
+SQLITE_ORACLE in the candidate shell pointed to an unused nonexistent shorthand; no selected test invoked an oracle. The final isolated shell uses the verified ../toolchains/sqlite-build-3540000/sqlite3 path.

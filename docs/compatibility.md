@@ -203,7 +203,9 @@ Shared-WAL OpenSharedSession reserves one of64 groups before native acquisitions
 all represented nested owners retire before index/DMS, WAL and main. The public
 RetryOpenCleanup handles wrapped/joined groups with bounded discovery. Successful
 sessions release this admission slot. It therefore does not cover successful
-session Close, public DB.Close retry or driver disposal. Those remain code gaps.
+session Close, public DB.Close retry or driver disposal. A separate native
+WALShared successful-close increment now covers those paths; rollback, exclusive
+WAL and encrypted ownership remain code gaps.
 Native cleanup-error behavior is not qualified by memory-only laws.
 
 ## Typed ANN checkpoint
@@ -216,3 +218,14 @@ semantics are preserved. Dense old-to-new-to-old and new-to-old-to-new ordinary
 fixtures verify v1 bytes/configuration and existing public structs. The supported
 opclass matrix, budget accounting and explicit unsupported combinations are in
 typed-ann.md; neither full PostgreSQL compatibility nor exact ANN recall follows.
+
+## Native shared successful-close retirement
+
+Native WALShared reserves one of1024 lifetime groups before public canonical
+metadata/acquisition, strongly retaining only minimal managed cleanup owners.
+Logical Close invalidates Rows/Tx and considers checkpoint once. Explicit owner
+completion retires nested obligations, index/DMS, WAL and main in order; a
+consumed-error diagnostic is distinguished from unresolved native ownership.
+The public pending snapshot/retry API survives database/sql ignoring Close errors.
+This scope does not fix rollback Reader/Tx, exclusive WAL, encrypted Store or
+copy-helper owner loss. Real close/unmap/lock failures remain NOT_RUN.

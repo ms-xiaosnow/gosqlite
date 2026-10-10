@@ -112,6 +112,12 @@ locking or mapping algorithm was changed by this worker.
 
 ## Driver propagation and separate gap
 
+2026-10-10 later increment: the successful native shared-WAL close/disposal gaps
+below are superseded by [successful-session close retirement](shared-close-cleanup.md).
+Its separate source/evidence snapshot adds bounded live-or-pending ownership and
+explicit retry discovery; the historical failed-open evidence here is unchanged.
+Other storage-mode close gaps remain outside that newer scope.
+
 `sqlite.OpenContext` wraps the pager opening error without losing its cause;
 `driver.Connector.Connect` returns a failed `sqlite.OpenContext` error unchanged.
 Thus errors surfaced by a `database/sql` connection attempt retain this retry

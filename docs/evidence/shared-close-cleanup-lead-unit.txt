@@ -1,0 +1,49 @@
+Frozen shared successful-close only on durable efe40d7, no in-flight relational/migration; source tests, not commit restoration.
+bc3ddb29edab8a1d8e9ab599600dac8e6d114121
+2026-10-10T18:11:51Z
+Ordinary test source-reference guard PASS; behavioral review is still required.
+?   	github.com/ms-xiaosnow/gosqlite/benchmarks/ann	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.135s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	8.963s
+ok  	github.com/ms-xiaosnow/gosqlite/encryption	1.482s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ann	1.818s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/bit-rerank	0.015s
+?   	github.com/ms-xiaosnow/gosqlite/examples/encrypted	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-shared	0.010s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-wal	0.024s
+?   	github.com/ms-xiaosnow/gosqlite/examples/grams	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/half-rerank	0.010s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ivfflat	0.978s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/migrate-pgembedding	0.021s
+?   	github.com/ms-xiaosnow/gosqlite/examples/migration-transition	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/pgembedding-import	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/readonly	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/similarity	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/sparse-exact	0.006s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/typed-ann-rerank	1.324s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/vector	0.112s
+?   	github.com/ms-xiaosnow/gosqlite/examples/wal	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/write	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/extension/grams13	1.844s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/registry	0.107s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/similarity	5.927s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	1.229s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector/ann	12.658s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	17.118s
+?   	github.com/ms-xiaosnow/gosqlite/internal/buildinfo	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/darwinfile	0.063s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	0.227s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/journal	0.017s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.508s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/record	0.012s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.313s
+?   	github.com/ms-xiaosnow/gosqlite/internal/testkit/fileview	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testscope	0.003s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.124s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/wal	1.435s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	0.252s
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	6.191s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	75.624s
+SHARED CLOSE FULL CGO0 UNIT/VET/BUILD PASS
+2026-10-10T18:13:25Z
+Full race and full oracle remain running separately.

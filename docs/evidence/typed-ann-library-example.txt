@@ -1,0 +1,4 @@
+Prior no-argument example printed usage only; corrected ordinary disposable-path invocation follows.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+2026-10-10T18:05:40Z
+TYPED ANN EXACT RESTORED EXAMPLE PASS

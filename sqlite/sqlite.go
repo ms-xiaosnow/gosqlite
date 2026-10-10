@@ -232,6 +232,14 @@ func OpenContext(ctx context.Context, path string, opts Options) (*DB, error) {
 	if err != nil {
 		return nil, wrap("open", err)
 	}
+	var closeAdmission *pager.SharedCloseAdmission
+	if opts.WALShared {
+		closeAdmission, err = pager.ReserveSharedClose()
+		if err != nil {
+			return nil, wrap("open", err)
+		}
+		defer closeAdmission.Cancel()
+	}
 	// A connection must keep naming the same path across working-directory
 	// changes and symlink retargeting while idle between snapshots.
 	path, err = canonicalOpenPath(path, opts.Encryption != nil)
@@ -267,7 +275,7 @@ func OpenContext(ctx context.Context, path string, opts Options) (*DB, error) {
 		var session pageSession
 		var err error
 		if opts.WALShared {
-			session, err = pager.OpenSharedSession(ctx, path, d.pagerOptions())
+			session, err = pager.OpenSharedSessionAdmitted(ctx, path, d.pagerOptions(), closeAdmission)
 		} else {
 			session, err = pager.OpenSession(ctx, path, d.pagerOptions())
 		}
@@ -354,23 +362,34 @@ func (d *DB) Schema(ctx context.Context) ([]SchemaEntry, error) {
 }
 
 // Close rolls back an open transaction and releases every owned snapshot.
-// Open iterators subsequently report ErrClosed. Close is idempotent.
+// Open iterators subsequently report ErrClosed. Repeated calls are idempotent
+// after retirement. Native WALShared Close may return ErrCloseCleanupPending;
+// call Close again or RetryCloseCleanup to retry its retained managed owners.
+// Rows/transaction invalidation occurs only on the first call.
 func (d *DB) Close() error {
 	d.mu.Lock()
 	defer d.mu.Unlock()
-	if d.closed {
-		return nil
-	}
-	d.closed = true
 	var err error
-	for r := range d.rows {
-		r.mu.Lock()
-		r.err = wrap("next", ErrClosed)
-		err = errors.Join(err, r.close())
-		r.mu.Unlock()
+	if !d.closed {
+		d.closed = true
+		for r := range d.rows {
+			r.mu.Lock()
+			r.err = wrap("next", ErrClosed)
+			err = errors.Join(err, r.close())
+			r.mu.Unlock()
+		}
+		if d.tx != nil {
+			err = errors.Join(err, d.tx.rollbackLocked())
+		}
+	} else {
+		// Native shared-WAL logical closure does not imply owner retirement.
+		// Other modes retain their pre-existing one-shot Close contract.
+		if _, ok := d.session.(interface{ CloseWithError(error) error }); !ok {
+			return nil
+		}
 	}
-	if d.tx != nil {
-		err = errors.Join(err, d.tx.rollbackLocked())
+	if s, ok := d.session.(interface{ CloseWithError(error) error }); ok {
+		return wrap("close", s.CloseWithError(err))
 	}
 	if d.session != nil {
 		err = errors.Join(err, d.session.Close())
