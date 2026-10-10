@@ -1,0 +1,29 @@
+Sat Oct 10 11:10:37 UTC 2026
+87b8eea67c38f8dd9d84e4346e5b92b1f1325cc07f81cdc83f31a5abebb6fd69  ../m5-build-verification/gosqlite-a
+87b8eea67c38f8dd9d84e4346e5b92b1f1325cc07f81cdc83f31a5abebb6fd69  ../m5-build-verification/gosqlite-b
+../m5-build-verification/gosqlite-a: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), statically linked, Go BuildID=S7FTWbJwltdn_PG4U9TN/DboBcMDS3a9deSk-tTM3/ZkrBvI_RUOHZEQcFWNHJ/bcSQQRSZCTpx8M5WXwTv, BuildID[sha1]=7e3992928e5ea7c2da8fca4e63c512101b2f1873, with debug_info, not stripped
+../m5-build-verification/gosqlite-a: go1.27.2
+	path	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite
+	mod	github.com/ms-xiaosnow/gosqlite	v0.0.0-20261010105454-ad7d1c9082d7+dirty
+	dep	golang.org/x/text	v0.43.0	h1:1QivrlhwAsnMOcqgOdl9my7s9OyZl8O5/UGUTJVXoWc=
+	build	-buildmode=exe
+	build	-compiler=gc
+	build	-trimpath=true
+	build	CGO_ENABLED=0
+	build	GOARCH=amd64
+	build	GOOS=linux
+	build	GOAMD64=v1
+	build	vcs=git
+	build	vcs.revision=ad7d1c9082d715e91a7ef728e441737e72340408
+	build	vcs.time=2026-10-10T10:54:54Z
+	build	vcs.modified=true
+gosqlite 0.0.0-dev; Go 1.27.2; SQLite behavior baseline 3.54.0
+BUILD_REPEATABILITY_PASSED within same source state
+Final all-six readonly manifest comparison:
+verified testdata/readonly/page512.db 737fb6403a1ccba56404ba55f2531510881b3207a6f8c4062783850ffc23d571
+verified testdata/readonly/page4096.db 6b822f68ed1fa2d7c7a9d9211a89a1c0fb08e70de1eb2fe50c44ae164dd258e9
+verified testdata/readonly/page65536.db e0aa2d57493afbed7a57a1da805919f65846ebcdc896423f97ed336532052c77
+verified testdata/readonly/schema512.db d42c2118b49f99452515298fed09b439017e1fe3923214033b481f30f9bd36c5
+verified testdata/readonly/schema.json 40f7061aa8cfede8f6cb170241643e1be4b89b045cf75dbce7ccf92b7ff10ffe
+verified testdata/readonly/samples.json ce22e9bb3db7c2cc19cbc0f400bd6fd929d66c22fd2977b83b3b942c756c6189
+Capture formatting: trailing horizontal whitespace from go version output trimmed; values unchanged.

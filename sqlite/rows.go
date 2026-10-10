@@ -189,7 +189,7 @@ func (r *Rows) fetch() (resultRow, int64, error) {
 					if !isConstantDefault(c.Default) {
 						return resultRow{}, 0, fmt.Errorf("%w: missing column has a non-literal default", ErrUnsupported)
 					}
-					v, err = sqlast.Eval(c.Default, &sqlast.EvalContext{})
+					v, err = sqlast.Eval(c.Default, &sqlast.EvalContext{Context: r.ctx})
 					if err != nil {
 						return resultRow{}, 0, err
 					}
@@ -211,7 +211,7 @@ func (r *Rows) fetch() (resultRow, int64, error) {
 				}
 			}
 		}
-		ec := &sqlast.EvalContext{Params: r.params, Functions: r.functions}
+		ec := &sqlast.EvalContext{Context: r.ctx, Params: r.params, Functions: r.functions}
 		ec.Resolver = func(q, name string) (any, error) {
 			i, err := r.table.column(q, name)
 			if err != nil {
@@ -241,7 +241,7 @@ func (r *Rows) fetch() (resultRow, int64, error) {
 				return value, err
 			}
 			if i, ok := r.aliases[fold(name)]; ok {
-				return sqlast.Eval(r.exprs[i], &sqlast.EvalContext{Params: r.params, Resolver: physicalResolver, Affinity: physicalAffinity, Functions: r.functions})
+				return sqlast.Eval(r.exprs[i], &sqlast.EvalContext{Context: r.ctx, Params: r.params, Resolver: physicalResolver, Affinity: physicalAffinity, Functions: r.functions})
 			}
 			return nil, err
 		}

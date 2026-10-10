@@ -1,6 +1,7 @@
 package sql
 
 import (
+	"context"
 	"encoding/hex"
 	"fmt"
 	"math"
@@ -11,6 +12,15 @@ import (
 // BuiltinFunctions is read-only after initialization. Per-connection overrides
 // and extension functions belong in EvalContext.Functions, avoiding global races.
 var BuiltinFunctions = map[string]Function{
+	"ngram_similarity": func(a []any) (any, error) {
+		return similarityFunction(context.Background(), "ngram_similarity", a)
+	},
+	"bigram_similarity": func(a []any) (any, error) {
+		return similarityFunction(context.Background(), "bigram_similarity", a)
+	},
+	"levenshtein": func(a []any) (any, error) {
+		return similarityFunction(context.Background(), "levenshtein", a)
+	},
 	"abs": func(a []any) (any, error) {
 		if err := ValidateFunction("abs", len(a)); err != nil {
 			return nil, err
@@ -122,7 +132,14 @@ func ValidateFunction(name string, argc int) error {
 	want := 1
 	switch name {
 	case "abs", "length", "lower", "upper", "typeof", "hex":
-	case "nullif", "ifnull":
+	case "nullif", "ifnull", "bigram_similarity":
+		want = 2
+	case "ngram_similarity":
+		want = 4
+	case "levenshtein":
+		if argc == 2 || argc == 3 {
+			return nil
+		}
 		want = 2
 	case "coalesce":
 		if argc >= 2 {

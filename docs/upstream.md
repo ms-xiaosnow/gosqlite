@@ -112,3 +112,18 @@ Downloaded and verified 2026-10-10 using Go1.27.2 with GOPROXY=https://proxy.gol
 Primary metadata: [official proxy version](https://proxy.golang.org/golang.org/x/text/@v/v0.43.0.info), [Go checksum database](https://sum.golang.org/lookup/golang.org/x/text@v0.43.0), [tagged go.mod](https://raw.githubusercontent.com/golang/text/v0.43.0/go.mod), [tagged license](https://raw.githubusercontent.com/golang/text/v0.43.0/LICENSE), [normalization package](https://pkg.go.dev/golang.org/x/text/unicode/norm), [casefold package](https://pkg.go.dev/golang.org/x/text/cases).
 
 The normalization implementation is stream-safe and may insert U+034F after long nonstarter runs; grams13 must explicitly reject such insertions or persist that policy rather than mislabeling unrestricted canonical equivalence. Casefold can change normalization form, so normalize again afterward. Actual versioned behavior belongs to tokenizer tests and config metadata.
+
+## M6 public pgvector semantic reference
+
+Retrieved2026-10-10 from the official pgvector GitHub repository, tag v0.8.7, verified commit f37c13f68b57d2c3472b2214fbcff699d6d34876. Public source and published expected outputs were read only; PostgreSQL/pgvector was not built or executed. Independently calculated SHA256 values (not upstream-published checksum claims):
+
+- README.md:19cebadeeb8d3181d01ef00399674ec41bd2f0363850cdccc7685d4260c5a1c6
+- src/vector.c:d97ce73c3e3977be2b086e01d39352376f3b064f3eef30efe12b28042c7fd1f1
+- src/vector.h:a67272ea44553d174968f575a91da71dfe82b8278ec2c70d51e37c154e2f0049
+- LICENSE:6bba9ebeb73e27477463b05e5ef1bf303bccbddb3db9bbc95905d351604d6a87
+- test/sql/vector_type.sql:592f055f8d1940c0ac603883ad2f65700ef5629909af049d6a02bca041927f45
+- test/expected/vector_type.out:0434592d5d32797d42ff6cfcfdf9e27353ae7f651d9ec2078fcc44c490ba51d6
+
+Source: https://github.com/pgvector/pgvector/tree/f37c13f68b57d2c3472b2214fbcff699d6d34876. Retained fixture metadata and deliberate differences are in testdata/pgvector-v0.8.7/manifest.json and README.md. Exact upstream license is retained, including its copyright year range. The first guessed fixture path test/sql/vector.sql returned404; official directory listing located vector_type.sql. No older version was silently substituted. No private SEE source is accessed.
+
+The specified Neon migration page and its .md variant returned fetch errors during prerequisite research. The official sunset announcement and old pg_embedding repository were readable. M9 must reverify the requested current migration chapter and snapshot date; these partial references do not establish full guide conformance.

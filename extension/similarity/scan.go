@@ -52,13 +52,19 @@ func betterHit(a, b Hit) bool {
 	return a.Score.Value > b.Score.Value || a.Score.Value == b.Score.Value && a.RowID < b.RowID
 }
 
-// Scan performs a declared FULL SCAN, retaining at most Limit hits. Next must
-// yield every visible row at most once; ok=false ends input. Duplicate rowids
-// are errors, including duplicates involving NULLs. The caller owns snapshot
-// consistency, source closure, and cancellation inside Next. This helper does
-// not advertise an index or truncate candidate recall. Filter business predicates
-// in the source before ranking. Input order does not affect output: score DESC,
-// signed rowid ASC. Only score metadata is retained, not document text.
+// Scan exhausts the supplied source, retaining at most Limit hits. Next must
+// yield every source row at most once; ok=false ends input. The source may be
+// every visible row, or independently proven complete candidates (for example
+// PlanCandidates' complete union). The caller owns that proof, transaction
+// snapshot, source closure, and cancellation inside Next. Stats.Mode=FullScan
+// describes this helper's exhaustive traversal of its supplied source; it is
+// not the database access plan and does not advertise an index.
+//
+// Duplicate rowids are errors, including duplicates involving NULLs. This
+// helper never truncates candidate recall. Filter business predicates before
+// ranking; adapters may yield filtered rows as Null to keep charging the
+// candidate budget. Input order does not affect output: score DESC, signed
+// rowid ASC. Only score metadata is retained, not document text.
 //
 // A zero limit still validates/normalizes the query but does not call Next.
 // A nil Next is invalid, even at limit zero. Query NULL must be handled in SQL.

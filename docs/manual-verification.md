@@ -74,3 +74,15 @@ CGO_ENABLED=1 SQLITE_ORACLE=/absolute/path/to/verified/sqlite3 go test -race -ta
 ```
 
 Actual commands/results belong in evidence/m4-aggregate.txt and m4-review.md. No checkpoint or ordinary rollback result qualifies interrupted index publication/recovery. Those gates remain BLOCKED/NOT_RUN, and full M4 acceptance is conditional on them.
+
+## M5 ordinary similarity verification
+
+```sh
+./scripts/check.sh
+SQLITE_ORACLE=/absolute/path/to/verified/sqlite3 ./scripts/test-oracle.sh
+CGO_ENABLED=1 SQLITE_ORACLE=/absolute/path/to/verified/sqlite3 go test -race -tags oracle ./internal/testkit -run TestOracleSimilarityDirtyIndexFallback -count=1
+CGO_ENABLED=0 go test ./sqlite ./driver ./internal/sql ./extension/similarity -run Similarity -count=1
+CGO_ENABLED=0 go run ./examples/similarity /new/disposable/path.db
+```
+
+Component native indexed-versus-forced-scan, independent reference, SQL/driver, rollback/reopen/config rebuild and ordinary external SQLite invalidation/checkpoint tests pass. The final live-oracle race regression passed15.417s on2026-10-10. Exact commands/output for the final aggregate and scoped review are in evidence/m5-aggregate.txt and m5-review.md. PostgreSQL/pgvector is not executed: vector prerequisite tests use retained public expected outputs and independent math only. M5 vector-hybrid code and M6 database integration are still separate required implementation gaps. Restricted crash/fault/recovery, native-OS, independent security/legal and soak evidence remains BLOCKED/NOT_RUN and is not implied by these commands.

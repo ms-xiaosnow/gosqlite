@@ -20,8 +20,8 @@ Behavior baseline: official SQLite 3.54.0. M2 implements a deliberately bounded 
 | Shared concurrent WAL | partial | actual Linux mmap dual-header/hash/readmark protocol; single writer/multiple readers, live SQLite interop, reader-safe checkpoint/reset; conservative imported-sector gates |
 | Hot-journal recovery | partial source only | explicit internal RecoverRollback, single finite-count segment; memory parser tests and static review; physical replay NOT_RUN, no automatic Open integration |
 | grams13 / indexed LIKE | conditional ordinary implementation | legal persistent posting/frequency trees, registry, transactional deltas/reindex, actual LIKE/MATCH candidate plans, diagnostics, external-write invalidation; restricted recovery unverified |
-| similarity / threshold / top-K | mathematical prerequisite only | bounded Go set/edit-distance/exact-scan/RRF package; SQL and persistent query integration pending |
-| dense vectors / exact KNN | unsupported | M6 not started |
+| similarity / threshold / top-K | conditional ordinary implementation | SQL Dice/Jaccard/Levenshtein, native exact posting-union or scan search, business WHERE, diagnostics and Go RRF; database vector fusion pending |
+| dense vectors / exact KNN | mathematical prerequisite only | immutable finite float32 vectors, versioned BLOB, four metrics and bounded in-memory exact KNN; SQL/persistence integration pending |
 | HNSW / IVFFlat | unsupported | M7 not started |
 | encryption / rekey | unsupported | M8 not started; no SEE file compatibility |
 | Neon migration / extended vectors | unsupported | M9 not started |
@@ -55,3 +55,7 @@ Shared cold index reconstruction accepts fully validated committed data, checksu
 
 
 M4 project extension SQL is CREATE INDEX name ON table(columns) USING grams13 WITH(...), REINDEX name, EXPLAIN QUERY PLAN SELECT, FROM table [alias] NOT INDEXED and SELECT grams13_match(index_name,value,needle). Only legal ordinary schema objects are persisted. The registry supports immutable configured inverted-key handlers, not dynamic code loading or general ANN planner hooks. Exact native DML maintenance, official writer dirty guards and schema-cookie checks protect cooperative lifecycle operations, including VACUUM. Dirty intact metadata yields explained scans; unknown versions/configuration/ownership refuse. Full details and limits: grams13.md. General source schema changes require reindex or fail explicitly; no automatic arbitrary migration is claimed.
+
+M5 SQL ngram_similarity(a,b,n,metric), bigram_similarity(a,b), and levenshtein(a,b[,maximum]) use case-sensitive NFC, distinct unpadded rune grams, preserved NUL and strict budgets. Any NULL argument yields NULL. SQL score expressions do not receive an implicit indexed rewrite. Native SimilaritySearch explicitly names a grams13 index/field and uses that snapshot's persisted MATCH normalization. Threshold is inclusive; ties sort signed rowid ascending; zero limit returns no hits. Limits/error/cancellation discard the entire result. A maximum edit distance yields maximum+1 when exceeded, not the exact larger distance. No pg_bigm binary/operator/score compatibility is claimed. See similarity.md.
+
+M6 prerequisite vector arithmetic deliberately uses float64 compensated accumulation over finite float32 inputs instead of pgvector's float32/FMA-dependent accumulation. Cosine with zero norm errors, rather than returning NaN or silently skipping rows. Published pgvector v0.8.7 fixtures and independent exact mathematics are references; PostgreSQL/pgvector has not been executed. The independent GSV BLOB is not PostgreSQL binary COPY/wire format. See vector-primitives.md and the fixture manifest.

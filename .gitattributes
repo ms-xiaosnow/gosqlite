@@ -1,0 +1,2 @@
+# Preserve the exact upstream expected-output fixture, including aligned spaces.
+testdata/pgvector-v0.8.7/vector_type.out -whitespace

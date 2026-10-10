@@ -1,0 +1,440 @@
+{
+  "source": "Published pgvector v0.8.7 expected output; not locally executed",
+  "parse": [
+    {
+      "statement": "SELECT '[1,2,3]'::vector;",
+      "input": "[1,2,3]",
+      "upstream": "[1,2,3]",
+      "error": null
+    },
+    {
+      "statement": "SELECT '[-1,-2,-3]'::vector;",
+      "input": "[-1,-2,-3]",
+      "upstream": "[-1,-2,-3]",
+      "error": null
+    },
+    {
+      "statement": "SELECT '[1.,2.,3.]'::vector;",
+      "input": "[1.,2.,3.]",
+      "upstream": "[1,2,3]",
+      "error": null
+    },
+    {
+      "statement": "SELECT ' [ 1,  2 ,    3  ] '::vector;",
+      "input": " [ 1,  2 ,    3  ] ",
+      "upstream": "[1,2,3]",
+      "error": null
+    },
+    {
+      "statement": "SELECT '[1.23456]'::vector;",
+      "input": "[1.23456]",
+      "upstream": "[1.23456]",
+      "error": null
+    },
+    {
+      "statement": "SELECT '[hello,1]'::vector;",
+      "input": "[hello,1]",
+      "upstream": null,
+      "error": "invalid input syntax for type vector: \"[hello,1]\""
+    },
+    {
+      "statement": "SELECT '[NaN,1]'::vector;",
+      "input": "[NaN,1]",
+      "upstream": null,
+      "error": "NaN not allowed in vector"
+    },
+    {
+      "statement": "SELECT '[Infinity,1]'::vector;",
+      "input": "[Infinity,1]",
+      "upstream": null,
+      "error": "infinite value not allowed in vector"
+    },
+    {
+      "statement": "SELECT '[-Infinity,1]'::vector;",
+      "input": "[-Infinity,1]",
+      "upstream": null,
+      "error": "infinite value not allowed in vector"
+    },
+    {
+      "statement": "SELECT '[1.5e38,-1.5e38]'::vector;",
+      "input": "[1.5e38,-1.5e38]",
+      "upstream": "[1.5e+38,-1.5e+38]",
+      "error": null
+    },
+    {
+      "statement": "SELECT '[1.5e+38,-1.5e+38]'::vector;",
+      "input": "[1.5e+38,-1.5e+38]",
+      "upstream": "[1.5e+38,-1.5e+38]",
+      "error": null
+    },
+    {
+      "statement": "SELECT '[1.5e-38,-1.5e-38]'::vector;",
+      "input": "[1.5e-38,-1.5e-38]",
+      "upstream": "[1.5e-38,-1.5e-38]",
+      "error": null
+    },
+    {
+      "statement": "SELECT '[4e38,1]'::vector;",
+      "input": "[4e38,1]",
+      "upstream": null,
+      "error": "\"4e38\" is out of range for type vector"
+    },
+    {
+      "statement": "SELECT '[-4e38,1]'::vector;",
+      "input": "[-4e38,1]",
+      "upstream": null,
+      "error": "\"-4e38\" is out of range for type vector"
+    },
+    {
+      "statement": "SELECT '[1e-46,1]'::vector;",
+      "input": "[1e-46,1]",
+      "upstream": "[0,1]",
+      "error": null
+    },
+    {
+      "statement": "SELECT '[-1e-46,1]'::vector;",
+      "input": "[-1e-46,1]",
+      "upstream": "[-0,1]",
+      "error": null
+    },
+    {
+      "statement": "SELECT '[1,2,3'::vector;",
+      "input": "[1,2,3",
+      "upstream": null,
+      "error": "invalid input syntax for type vector: \"[1,2,3\""
+    },
+    {
+      "statement": "SELECT '[1,2,3]9'::vector;",
+      "input": "[1,2,3]9",
+      "upstream": null,
+      "error": "invalid input syntax for type vector: \"[1,2,3]9\""
+    },
+    {
+      "statement": "SELECT '1,2,3'::vector;",
+      "input": "1,2,3",
+      "upstream": null,
+      "error": "invalid input syntax for type vector: \"1,2,3\""
+    },
+    {
+      "statement": "SELECT ''::vector;",
+      "input": "",
+      "upstream": null,
+      "error": "invalid input syntax for type vector: \"\""
+    },
+    {
+      "statement": "SELECT '['::vector;",
+      "input": "[",
+      "upstream": null,
+      "error": "invalid input syntax for type vector: \"[\""
+    },
+    {
+      "statement": "SELECT '[ '::vector;",
+      "input": "[ ",
+      "upstream": null,
+      "error": "invalid input syntax for type vector: \"[ \""
+    },
+    {
+      "statement": "SELECT '[,'::vector;",
+      "input": "[,",
+      "upstream": null,
+      "error": "invalid input syntax for type vector: \"[,\""
+    },
+    {
+      "statement": "SELECT '[]'::vector;",
+      "input": "[]",
+      "upstream": null,
+      "error": "vector must have at least 1 dimension"
+    },
+    {
+      "statement": "SELECT '[ ]'::vector;",
+      "input": "[ ]",
+      "upstream": null,
+      "error": "vector must have at least 1 dimension"
+    },
+    {
+      "statement": "SELECT '[,]'::vector;",
+      "input": "[,]",
+      "upstream": null,
+      "error": "invalid input syntax for type vector: \"[,]\""
+    },
+    {
+      "statement": "SELECT '[1,]'::vector;",
+      "input": "[1,]",
+      "upstream": null,
+      "error": "invalid input syntax for type vector: \"[1,]\""
+    },
+    {
+      "statement": "SELECT '[1a]'::vector;",
+      "input": "[1a]",
+      "upstream": null,
+      "error": "invalid input syntax for type vector: \"[1a]\""
+    },
+    {
+      "statement": "SELECT '[1,,3]'::vector;",
+      "input": "[1,,3]",
+      "upstream": null,
+      "error": "invalid input syntax for type vector: \"[1,,3]\""
+    },
+    {
+      "statement": "SELECT '[1, ,3]'::vector;",
+      "input": "[1, ,3]",
+      "upstream": null,
+      "error": "invalid input syntax for type vector: \"[1, ,3]\""
+    }
+  ],
+  "metrics": [
+    {
+      "statement": "SELECT vector_norm('[3,4]');",
+      "operation": "vector_norm",
+      "a": "[3,4]",
+      "b": null,
+      "upstream": "5",
+      "error": null
+    },
+    {
+      "statement": "SELECT vector_norm('[0,1]');",
+      "operation": "vector_norm",
+      "a": "[0,1]",
+      "b": null,
+      "upstream": "1",
+      "error": null
+    },
+    {
+      "statement": "SELECT vector_norm('[0,0]');",
+      "operation": "vector_norm",
+      "a": "[0,0]",
+      "b": null,
+      "upstream": "0",
+      "error": null
+    },
+    {
+      "statement": "SELECT vector_norm('[2]');",
+      "operation": "vector_norm",
+      "a": "[2]",
+      "b": null,
+      "upstream": "2",
+      "error": null
+    },
+    {
+      "statement": "SELECT l2_distance('[0,0]'::vector, '[3,4]');",
+      "operation": "l2_distance",
+      "a": "[0,0]",
+      "b": "[3,4]",
+      "upstream": "5",
+      "error": null
+    },
+    {
+      "statement": "SELECT l2_distance('[0,0]'::vector, '[0,1]');",
+      "operation": "l2_distance",
+      "a": "[0,0]",
+      "b": "[0,1]",
+      "upstream": "1",
+      "error": null
+    },
+    {
+      "statement": "SELECT l2_distance('[1,2]'::vector, '[3]');",
+      "operation": "l2_distance",
+      "a": "[1,2]",
+      "b": "[3]",
+      "upstream": null,
+      "error": "different vector dimensions 2 and 1"
+    },
+    {
+      "statement": "SELECT l2_distance('[3e38]'::vector, '[-3e38]');",
+      "operation": "l2_distance",
+      "a": "[3e38]",
+      "b": "[-3e38]",
+      "upstream": "Infinity",
+      "error": null,
+      "local_policy": "finite_float64"
+    },
+    {
+      "statement": "SELECT l2_distance('[1,1,1,1,1,1,1,1,1]'::vector, '[1,1,1,1,1,1,1,4,5]');",
+      "operation": "l2_distance",
+      "a": "[1,1,1,1,1,1,1,1,1]",
+      "b": "[1,1,1,1,1,1,1,4,5]",
+      "upstream": "5",
+      "error": null
+    },
+    {
+      "statement": "SELECT inner_product('[1,2]'::vector, '[3,4]');",
+      "operation": "inner_product",
+      "a": "[1,2]",
+      "b": "[3,4]",
+      "upstream": "11",
+      "error": null
+    },
+    {
+      "statement": "SELECT inner_product('[1,2]'::vector, '[3]');",
+      "operation": "inner_product",
+      "a": "[1,2]",
+      "b": "[3]",
+      "upstream": null,
+      "error": "different vector dimensions 2 and 1"
+    },
+    {
+      "statement": "SELECT inner_product('[3e38]'::vector, '[3e38]');",
+      "operation": "inner_product",
+      "a": "[3e38]",
+      "b": "[3e38]",
+      "upstream": "Infinity",
+      "error": null,
+      "local_policy": "finite_float64"
+    },
+    {
+      "statement": "SELECT inner_product('[1,1,1,1,1,1,1,1,1]'::vector, '[1,2,3,4,5,6,7,8,9]');",
+      "operation": "inner_product",
+      "a": "[1,1,1,1,1,1,1,1,1]",
+      "b": "[1,2,3,4,5,6,7,8,9]",
+      "upstream": "45",
+      "error": null
+    },
+    {
+      "statement": "SELECT '[1,2]'::vector <#> '[3,4]';",
+      "operation": "negative_inner_product",
+      "a": "[1,2]",
+      "b": "[3,4]",
+      "upstream": "-11",
+      "error": null
+    },
+    {
+      "statement": "SELECT cosine_distance('[1,2]'::vector, '[2,4]');",
+      "operation": "cosine_distance",
+      "a": "[1,2]",
+      "b": "[2,4]",
+      "upstream": "0",
+      "error": null
+    },
+    {
+      "statement": "SELECT cosine_distance('[1,2]'::vector, '[0,0]');",
+      "operation": "cosine_distance",
+      "a": "[1,2]",
+      "b": "[0,0]",
+      "upstream": "NaN",
+      "error": null,
+      "local_policy": "ErrZeroNorm"
+    },
+    {
+      "statement": "SELECT cosine_distance('[1,1]'::vector, '[1,1]');",
+      "operation": "cosine_distance",
+      "a": "[1,1]",
+      "b": "[1,1]",
+      "upstream": "0",
+      "error": null
+    },
+    {
+      "statement": "SELECT cosine_distance('[1,0]'::vector, '[0,2]');",
+      "operation": "cosine_distance",
+      "a": "[1,0]",
+      "b": "[0,2]",
+      "upstream": "1",
+      "error": null
+    },
+    {
+      "statement": "SELECT cosine_distance('[1,1]'::vector, '[-1,-1]');",
+      "operation": "cosine_distance",
+      "a": "[1,1]",
+      "b": "[-1,-1]",
+      "upstream": "2",
+      "error": null
+    },
+    {
+      "statement": "SELECT cosine_distance('[1,2]'::vector, '[3]');",
+      "operation": "cosine_distance",
+      "a": "[1,2]",
+      "b": "[3]",
+      "upstream": null,
+      "error": "different vector dimensions 2 and 1"
+    },
+    {
+      "statement": "SELECT cosine_distance('[1,1]'::vector, '[1.1,1.1]');",
+      "operation": "cosine_distance",
+      "a": "[1,1]",
+      "b": "[1.1,1.1]",
+      "upstream": "0",
+      "error": null
+    },
+    {
+      "statement": "SELECT cosine_distance('[1,1]'::vector, '[-1.1,-1.1]');",
+      "operation": "cosine_distance",
+      "a": "[1,1]",
+      "b": "[-1.1,-1.1]",
+      "upstream": "2",
+      "error": null
+    },
+    {
+      "statement": "SELECT cosine_distance('[3e38]'::vector, '[3e38]');",
+      "operation": "cosine_distance",
+      "a": "[3e38]",
+      "b": "[3e38]",
+      "upstream": "NaN",
+      "error": null,
+      "local_policy": "finite_float64"
+    },
+    {
+      "statement": "SELECT cosine_distance('[1,2,3,4,5,6,7,8,9]'::vector, '[1,2,3,4,5,6,7,8,9]');",
+      "operation": "cosine_distance",
+      "a": "[1,2,3,4,5,6,7,8,9]",
+      "b": "[1,2,3,4,5,6,7,8,9]",
+      "upstream": "0",
+      "error": null
+    },
+    {
+      "statement": "SELECT cosine_distance('[1,2,3,4,5,6,7,8,9]'::vector, '[-1,-2,-3,-4,-5,-6,-7,-8,-9]');",
+      "operation": "cosine_distance",
+      "a": "[1,2,3,4,5,6,7,8,9]",
+      "b": "[-1,-2,-3,-4,-5,-6,-7,-8,-9]",
+      "upstream": "2",
+      "error": null
+    },
+    {
+      "statement": "SELECT l1_distance('[0,0]'::vector, '[3,4]');",
+      "operation": "l1_distance",
+      "a": "[0,0]",
+      "b": "[3,4]",
+      "upstream": "7",
+      "error": null
+    },
+    {
+      "statement": "SELECT l1_distance('[0,0]'::vector, '[0,1]');",
+      "operation": "l1_distance",
+      "a": "[0,0]",
+      "b": "[0,1]",
+      "upstream": "1",
+      "error": null
+    },
+    {
+      "statement": "SELECT l1_distance('[1,2]'::vector, '[3]');",
+      "operation": "l1_distance",
+      "a": "[1,2]",
+      "b": "[3]",
+      "upstream": null,
+      "error": "different vector dimensions 2 and 1"
+    },
+    {
+      "statement": "SELECT l1_distance('[3e38]'::vector, '[-3e38]');",
+      "operation": "l1_distance",
+      "a": "[3e38]",
+      "b": "[-3e38]",
+      "upstream": "Infinity",
+      "error": null,
+      "local_policy": "finite_float64"
+    },
+    {
+      "statement": "SELECT l1_distance('[1,2,3,4,5,6,7,8,9]'::vector, '[1,2,3,4,5,6,7,8,9]');",
+      "operation": "l1_distance",
+      "a": "[1,2,3,4,5,6,7,8,9]",
+      "b": "[1,2,3,4,5,6,7,8,9]",
+      "upstream": "0",
+      "error": null
+    },
+    {
+      "statement": "SELECT l1_distance('[1,2,3,4,5,6,7,8,9]'::vector, '[0,3,2,5,4,7,6,9,8]');",
+      "operation": "l1_distance",
+      "a": "[1,2,3,4,5,6,7,8,9]",
+      "b": "[0,3,2,5,4,7,6,9,8]",
+      "upstream": "9",
+      "error": null
+    }
+  ]
+}

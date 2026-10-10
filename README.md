@@ -1,6 +1,6 @@
 # gosqlite
 
-A native Go database kernel targeting tested subsets of SQLite 3.54.0 files and SQL. Current development milestone: M4 persistent grams13 and indexed LIKE (ordinary M2 SQL/write MVP verified). It is not production-ready. No CGO, SQLite subprocess, C ABI, or remote SQL engine is used in production.
+A native Go database kernel targeting tested subsets of SQLite 3.54.0 files and SQL. Current development milestone: M5 exact text similarity over persistent grams13, with M6 dense-vector mathematical prerequisites. It is not production-ready. No CGO, SQLite subprocess, C ABI, or remote SQL engine is used in production.
 
 ## Try the implemented SQL path
 
@@ -58,7 +58,7 @@ SQLITE_ORACLE=/absolute/path/to/verified/sqlite3 ./scripts/test-oracle.sh
 
 See [progress](docs/progress.md), [compatibility](docs/compatibility.md), [architecture](docs/architecture.md), [sources](docs/upstream.md), and [manual verification](docs/manual-verification.md). The unchanged [original goal](goal.md) remains the contract. [Restart protocol](docs/restart.md) and checkpoint records preserve durable development history.
 
-Qualified crash recovery, integrated similarity ranking, vectors, independent authenticated encryption and pg_embedding migration remain unfinished milestones. Full SQLite/PostgreSQL semantics, SEE file compatibility and production security are not claimed.
+Qualified crash recovery, integrated vector/hybrid retrieval, independent authenticated encryption and pg_embedding migration remain unfinished milestones. Full SQLite/PostgreSQL semantics, SEE file compatibility and production security are not claimed.
 
 
 ## Explicit exclusive WAL
@@ -91,3 +91,12 @@ CGO_ENABLED=0 go run ./cmd/gosqlite check disposable-grams.db docs_grams
 ```
 
 CREATE INDEX docs_grams ON docs(title) USING grams13 builds legal transactional SQLite posting structures. One/two/three-rune LIKE literals can use actual posting ranges and source-row seeks, followed by original predicate rechecking. EXPLAIN QUERY PLAN and native Rows.Plan/Stats show the access path and work. Configured normalized containment uses grams13_match('docs_grams',title,needle). REINDEX rebuilds safely; ordinary external SQLite writes or schema changes invalidate the index and force explained scans. See [grams13 APIs, semantics and limits](docs/grams13.md). The check command verifies one extension index's source/posting/frequency consistency, not general SQLite integrity.
+
+## Exact text similarity
+
+```sh
+CGO_ENABLED=0 go run ./examples/similarity disposable-similarity.db
+CGO_ENABLED=0 go run ./cmd/gosqlite query disposable-similarity.db "SELECT id,ngram_similarity(title,'数据库',2,'dice') AS score FROM docs WHERE score>=0.1 ORDER BY score DESC,id LIMIT 3"
+```
+
+SQL exposes ngram_similarity, bigram_similarity and rune-based levenshtein. SQL score expressions currently scan; native DB/Tx.SimilaritySearch uses complete persistent posting unions when sound, then exact scoring and business filtering. Its plan and counters report the actual path. Zero threshold, empty query-token sets, dirty indices or insufficient posting budget use exact scans. Bounded operations return no partial result on error. See [similarity semantics and APIs](docs/similarity.md). The example also demonstrates weighted RRF of two text rankings, preserving contribution details; database vector fusion is a later integration.

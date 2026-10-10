@@ -2,6 +2,7 @@ package sql
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"math"
 	"math/big"
@@ -13,6 +14,9 @@ import (
 
 type Function func([]any) (any, error)
 type EvalContext struct {
+	// Context is the actual operation context for bounded extension functions.
+	// A nil value retains Background semantics for pure internal evaluation.
+	Context   context.Context
 	Row       map[string]any
 	Params    []any
 	Resolver  func(table, name string) (any, error)
@@ -251,6 +255,9 @@ func Eval(e Expr, ctx *EvalContext) (any, error) {
 			args[i] = v
 		}
 		fn := ctx.Functions[name]
+		if fn == nil && isSimilarityFunction(name) {
+			return similarityFunction(ctx.Context, name, args)
+		}
 		if fn == nil {
 			fn = BuiltinFunctions[name]
 		}

@@ -176,7 +176,7 @@ func (t *Tx) insert(ctx context.Context, c *writeCatalog, stmt *sqlast.Insert, p
 		values := make([]any, len(tab.columns))
 		for i, col := range tab.columns {
 			if col.Default != nil {
-				values[i], err = sqlast.Eval(col.Default, &sqlast.EvalContext{})
+				values[i], err = sqlast.Eval(col.Default, &sqlast.EvalContext{Context: ctx})
 				if err != nil {
 					return result, err
 				}
@@ -187,7 +187,7 @@ func (t *Tx) insert(ctx context.Context, c *writeCatalog, stmt *sqlast.Insert, p
 			rowValue = values[tab.ipk]
 		}
 		for i, expr := range exprs {
-			v, err := sqlast.Eval(expr, &sqlast.EvalContext{Params: params})
+			v, err := sqlast.Eval(expr, &sqlast.EvalContext{Context: ctx, Params: params})
 			if err != nil {
 				return result, err
 			}
@@ -224,8 +224,8 @@ func (t *Tx) insert(ctx context.Context, c *writeCatalog, stmt *sqlast.Insert, p
 	}
 	return result, nil
 }
-func (tab *writeTable) evalContext(params []any, rowid int64, values []any) *sqlast.EvalContext {
-	return &sqlast.EvalContext{Params: params, Resolver: func(q, name string) (any, error) {
+func (tab *writeTable) evalContext(ctx context.Context, params []any, rowid int64, values []any) *sqlast.EvalContext {
+	return &sqlast.EvalContext{Context: ctx, Params: params, Resolver: func(q, name string) (any, error) {
 		i, err := tab.column(q, name)
 		if err != nil {
 			return nil, err
@@ -271,7 +271,7 @@ func (t *Tx) matchRows(ctx context.Context, tab *writeTable, where sqlast.Expr, 
 			return nil, err
 		}
 		if where != nil {
-			v, err := sqlast.Eval(where, tab.evalContext(params, id, values))
+			v, err := sqlast.Eval(where, tab.evalContext(ctx, params, id, values))
 			if err != nil {
 				return nil, err
 			}
@@ -328,7 +328,7 @@ func (t *Tx) update(ctx context.Context, c *writeCatalog, stmt *sqlast.Update, p
 		}
 		values := append([]any(nil), oldValues...)
 		newID := oldID
-		ec := tab.evalContext(params, oldID, oldValues)
+		ec := tab.evalContext(ctx, params, oldID, oldValues)
 		for i, assignment := range stmt.Assignments {
 			v, err := sqlast.Eval(assignment.Expr, ec)
 			if err != nil {

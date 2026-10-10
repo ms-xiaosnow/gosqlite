@@ -249,7 +249,10 @@ func (p *gramPlanner) like(x *sqlast.Like) (*gramCandidatePlan, string, error) {
 	if ordinal < 0 {
 		ordinal = p.rows.table.ipk
 	}
-	pattern, why, ok := constantLikePattern(x, p.rows.params)
+	pattern, why, ok := constantLikePatternContext(p.ctx, x, p.rows.params)
+	if p.ctx.Err() != nil {
+		return nil, "", p.ctx.Err()
+	}
 	if !ok {
 		return nil, why, nil
 	}
@@ -340,12 +343,25 @@ type likeLiterals struct{ runs []string }
 // Only row-independent builtin expressions are evaluated during planning.
 // Errors merely disable filtering, leaving original evaluator/error semantics.
 func constantLikePattern(x *sqlast.Like, params []any) (likeLiterals, string, bool) {
+	return constantLikePatternContext(nil, x, params)
+}
+
+// Context-free proof callers can fold ordinary builtins, but bounded extension
+// work must never run during planning without the real operation context.
+func constantLikePatternContext(ctx context.Context, x *sqlast.Like, params []any) (likeLiterals, string, bool) {
 	constant := func(e sqlast.Expr) bool {
 		if e == nil {
 			return true
 		}
 		return sqlast.Walk(e, func(v sqlast.Expr) error {
-			switch v.(type) {
+			switch call := v.(type) {
+			case *sqlast.Call:
+				if ctx == nil {
+					switch fold(call.Name) {
+					case "ngram_similarity", "bigram_similarity", "levenshtein":
+						return fmt.Errorf("similarity requires planning context")
+					}
+				}
 			case *sqlast.Column, *sqlast.Star:
 				return fmt.Errorf("dynamic")
 			}
@@ -355,7 +371,7 @@ func constantLikePattern(x *sqlast.Like, params []any) (likeLiterals, string, bo
 	if !constant(x.Pattern) || !constant(x.Escape) {
 		return likeLiterals{}, "dynamic LIKE pattern/ESCAPE", false
 	}
-	ec := &sqlast.EvalContext{Params: params}
+	ec := &sqlast.EvalContext{Context: ctx, Params: params}
 	v, err := sqlast.Eval(x.Pattern, ec)
 	if err != nil || v == nil {
 		return likeLiterals{}, "NULL or unevaluable LIKE pattern", false

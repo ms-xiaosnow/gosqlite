@@ -70,5 +70,18 @@
     "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38045438964",
     "remote_ci_status": "PASSED for exact SHA, observed 2026-10-10T10:37:24Z; ordinary-only",
     "open_gates": "Broader recovery/platform implementation, restricted physical recovery/crash/fault acceptance; M4 persistent index/planner and all later milestones; independent native-OS/security/legal/soak acceptance"
+  },
+  {
+    "stage": "M4 ordinary persistent grams13/indexed LIKE/MATCH; M5 math prerequisite",
+    "remote_commit": "ad7d1c9082d715e91a7ef728e441737e72340408",
+    "local_commit": "ad7d1c9082d715e91a7ef728e441737e72340408",
+    "tree": "1bf3b320d7c816d5c29671fc8639b4529066fd99",
+    "bundle_sha256": "31e1387e478ac39dc7a33fcce1caa3c9698a6e927e2512829f901d3ea7539881",
+    "library_file_id": "libfile_5849fa1d054481918c22f0994f770633",
+    "library_version": 0,
+    "verified": "Guarded remote ref and commit readback; exact local mirror; full-history bundle verify; Library byte-identical readback; clean restore/fsck; restored scripts/check.sh and complete pinned-oracle suite passed",
+    "remote_ci_status": "PASSED for exact SHA, observed 2026-10-10T11:05:16Z; ordinary-only",
+    "open_gates": "Full M4 crash/recovery acceptance remains conditional; later integrated similarity/vector/encryption/migration features and independent OS/security/legal/soak gates remain open",
+    "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38046568934"
   }
 ]

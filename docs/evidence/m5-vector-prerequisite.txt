@@ -1,0 +1,39 @@
+Sat Oct 10 11:08:47 UTC 2026
+CGO0 go test ./extension/vector -count=1 -cover
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	0.490s	coverage: 98.8% of statements
+CGO1 go test -race ./extension/vector -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	1.817s
+CGO0 go vet ./extension/vector
+memory-only fuzz FuzzVectorText 3s
+fuzz: elapsed: 0s, gathering baseline coverage: 0/86 completed
+fuzz: elapsed: 0s, gathering baseline coverage: 86/86 completed, now fuzzing with 2 workers
+fuzz: elapsed: 3s, execs: 74754 (24745/sec), new interesting: 14 (total: 100)
+fuzz: elapsed: 3s, execs: 74754 (0/sec), new interesting: 14 (total: 100)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	3.071s
+memory-only fuzz FuzzVectorCodec 3s
+fuzz: elapsed: 0s, gathering baseline coverage: 0/9 completed
+fuzz: elapsed: 0s, gathering baseline coverage: 9/9 completed, now fuzzing with 2 workers
+fuzz: elapsed: 3s, execs: 91798 (30590/sec), new interesting: 0 (total: 9)
+fuzz: elapsed: 3s, execs: 93320 (107553/sec), new interesting: 0 (total: 9)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	3.021s
+memory-only fuzz FuzzVectorFloatBits 3s
+fuzz: elapsed: 0s, gathering baseline coverage: 0/24 completed
+fuzz: elapsed: 0s, gathering baseline coverage: 24/24 completed, now fuzzing with 2 workers
+fuzz: elapsed: 3s, execs: 10479 (3493/sec), new interesting: 3 (total: 27)
+fuzz: elapsed: 4s, execs: 10479 (0/sec), new interesting: 3 (total: 27)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	4.021s
+memory-only fuzz FuzzVectorTopK 3s
+fuzz: elapsed: 0s, gathering baseline coverage: 0/49 completed
+fuzz: elapsed: 0s, gathering baseline coverage: 49/49 completed, now fuzzing with 2 workers
+fuzz: elapsed: 3s, execs: 9534 (3178/sec), new interesting: 30 (total: 79)
+fuzz: elapsed: 3s, execs: 9534 (0/sec), new interesting: 30 (total: 79)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	3.040s
+Pinned public fixture/license hashes
+592f055f8d1940c0ac603883ad2f65700ef5629909af049d6a02bca041927f45  testdata/pgvector-v0.8.7/vector_type.sql
+0434592d5d32797d42ff6cfcfdf9e27353ae7f651d9ec2078fcc44c490ba51d6  testdata/pgvector-v0.8.7/vector_type.out
+6bba9ebeb73e27477463b05e5ef1bf303bccbddb3db9bbc95905d351604d6a87  third_party/pgvector-LICENSE
+Sat Oct 10 11:09:06 UTC 2026

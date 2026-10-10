@@ -220,7 +220,7 @@ func (d *DB) plan(ctx context.Context, reader btree.PageReader, sel *sqlast.Sele
 		if err := validate(sel.Limit, nil, nil); err != nil {
 			return nil, err
 		}
-		r.limit, err = limitValue(sel.Limit, params)
+		r.limit, err = limitValue(ctx, sel.Limit, params)
 		if err != nil {
 			return nil, err
 		}
@@ -229,7 +229,7 @@ func (d *DB) plan(ctx context.Context, reader btree.PageReader, sel *sqlast.Sele
 		if err := validate(sel.Offset, nil, nil); err != nil {
 			return nil, err
 		}
-		r.offset, err = limitValue(sel.Offset, params)
+		r.offset, err = limitValue(ctx, sel.Offset, params)
 		if err != nil {
 			return nil, err
 		}
@@ -279,8 +279,8 @@ func integerConstant(e sqlast.Expr) (int64, bool) {
 	}
 	return 0, false
 }
-func limitValue(expr sqlast.Expr, params []any) (int64, error) {
-	value, err := sqlast.Eval(expr, &sqlast.EvalContext{Params: params})
+func limitValue(ctx context.Context, expr sqlast.Expr, params []any) (int64, error) {
+	value, err := sqlast.Eval(expr, &sqlast.EvalContext{Context: ctx, Params: params})
 	if err != nil {
 		return 0, err
 	}

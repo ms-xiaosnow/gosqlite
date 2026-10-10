@@ -1,0 +1,31 @@
+Sat Oct 10 11:09:41 UTC 2026
+CGO1 pinned-oracle similarity lifecycle race
+=== RUN   TestOracleSimilarityDirtyIndexFallback
+=== RUN   TestOracleSimilarityDirtyIndexFallback/false
+=== RUN   TestOracleSimilarityDirtyIndexFallback/true
+--- PASS: TestOracleSimilarityDirtyIndexFallback (14.39s)
+    --- PASS: TestOracleSimilarityDirtyIndexFallback/false (7.35s)
+    --- PASS: TestOracleSimilarityDirtyIndexFallback/true (7.04s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	15.417s
+CGO1 driver similarity race count3
+=== RUN   TestDriverSimilarityScalarsAndRanking
+--- PASS: TestDriverSimilarityScalarsAndRanking (0.07s)
+=== RUN   TestDriverSimilarityScalarsAndRanking
+--- PASS: TestDriverSimilarityScalarsAndRanking (0.11s)
+=== RUN   TestDriverSimilarityScalarsAndRanking
+--- PASS: TestDriverSimilarityScalarsAndRanking (0.08s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.276s
+CGO0 go run ./examples/similarity /workspace/scratch/5e06a74e5f65/durable-restart/m5-example-MqAV3X/example.db
+SEARCH docs; similarity=dice; grams=2..2; threshold=0.1; limit=3; exact=true; candidates=union-all-query-gram-postings; query_tokens=2; score_order=DESC,rowid_ASC; reason=positive score implies a shared query gram; exact recheck required
+{"Hits":[{"RowID":1,"Score":{"Value":0.6666666666666666,"LeftTokens":2,"RightTokens":4,"Intersection":2}},{"RowID":2,"Score":{"Value":0.4,"LeftTokens":2,"RightTokens":3,"Intersection":1}}],"Plan":{"Access":"SEARCH","Table":"docs","Indexes":["docs_grams"],"Method":"grams13","MethodVersion":1,"Fields":["title"],"Namespace":"MATCH_CONFIG_V1","GramLengths":[2],"EstimatedCandidates":2,"Recheck":true,"Reason":"positive score implies a shared query gram; exact recheck required","CandidateMode":"union-all-query-gram-postings","QueryTokens":2,"ConfigHash":"db62347b090e7a5fb1a21c1dbd4f9af6484b6dd7a62a3ae30e573ee41ffba449","TokenizerHash":"d2ec70f2122ab4cd8ef6843523dfb60979fc91bcc302ae15d66f791c85332762","Generation":1,"MinGram":2,"MaxGram":2,"Metric":"dice","Threshold":0.1,"Limit":3,"Exact":true},"Stats":{"FrequencyLookups":0,"PostingKeysRead":3,"Candidates":2,"BaseRowFetches":2,"ReturnedRows":2,"PostingRangesRead":2,"FilteredRows":0,"ScoredRows":2,"MatchedRows":2}}
+SEARCH docs; similarity=dice; grams=2..2; threshold=0.1; limit=3; exact=true; candidates=union-all-query-gram-postings; query_tokens=2; score_order=DESC,rowid_ASC; reason=positive score implies a shared query gram; exact recheck required
+{"Hits":[{"RowID":2,"Score":{"Value":0.6666666666666666,"LeftTokens":2,"RightTokens":4,"Intersection":2}},{"RowID":1,"Score":{"Value":0.4,"LeftTokens":2,"RightTokens":3,"Intersection":1}}],"Plan":{"Access":"SEARCH","Table":"docs","Indexes":["docs_grams"],"Method":"grams13","MethodVersion":1,"Fields":["body"],"Namespace":"MATCH_CONFIG_V1","GramLengths":[2],"EstimatedCandidates":2,"Recheck":true,"Reason":"positive score implies a shared query gram; exact recheck required","CandidateMode":"union-all-query-gram-postings","QueryTokens":2,"ConfigHash":"db62347b090e7a5fb1a21c1dbd4f9af6484b6dd7a62a3ae30e573ee41ffba449","TokenizerHash":"d2ec70f2122ab4cd8ef6843523dfb60979fc91bcc302ae15d66f791c85332762","Generation":1,"MinGram":2,"MaxGram":2,"Metric":"dice","Threshold":0.1,"Limit":3,"Exact":true},"Stats":{"FrequencyLookups":0,"PostingKeysRead":3,"Candidates":2,"BaseRowFetches":2,"ReturnedRows":2,"PostingRangesRead":2,"FilteredRows":0,"ScoredRows":2,"MatchedRows":2}}
+Weighted reciprocal-rank fusion of the two supplied text rankings:
+[{"RowID":1,"Score":0.03252247488101534,"Contributions":[{"List":0,"Name":"title","Rank":1,"Weight":1,"Value":0.01639344262295082},{"List":1,"Name":"body","Rank":2,"Weight":1,"Value":0.016129032258064516}]},{"RowID":2,"Score":0.03252247488101534,"Contributions":[{"List":0,"Name":"title","Rank":2,"Weight":1,"Value":0.016129032258064516},{"List":1,"Name":"body","Rank":1,"Weight":1,"Value":0.01639344262295082}]}]
+CGO0 CLI scalar-ranking query
+{"columns":["id","score"]}
+{"row":[1,0.6666666666666666]}
+{"row":[2,0.4]}
+Sat Oct 10 11:10:00 UTC 2026

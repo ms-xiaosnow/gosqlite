@@ -1,0 +1,30 @@
+{
+  "tag": "v0.8.7",
+  "commit": "f37c13f68b57d2c3472b2214fbcff699d6d34876",
+  "retrieved_utc": "2026-10-10",
+  "source_url": "https://github.com/pgvector/pgvector/tree/f37c13f68b57d2c3472b2214fbcff699d6d34876",
+  "execution": "Public source and published expected-output fixture only. No PostgreSQL or pgvector execution.",
+  "license": "../../third_party/pgvector-LICENSE",
+  "files": [
+    {
+      "file": "vector_type.sql",
+      "upstream": "test/sql/vector_type.sql",
+      "bytes": 6793,
+      "sha256": "592f055f8d1940c0ac603883ad2f65700ef5629909af049d6a02bca041927f45"
+    },
+    {
+      "file": "vector_type.out",
+      "upstream": "test/expected/vector_type.out",
+      "bytes": 15526,
+      "sha256": "0434592d5d32797d42ff6cfcfdf9e27353ae7f651d9ec2078fcc44c490ba51d6"
+    }
+  ],
+  "intentional_differences": [
+    "Float64 Neumaier-compensated metric accumulations replace upstream float32 accumulations and architecture-dependent FMA. No bit-exact arithmetic compatibility is claimed; finite float32 inputs do not produce overflow or underflow in float64 metrics.",
+    "Cosine involving a zero norm returns ErrZeroNorm instead of upstream NaN; exact search aborts for an eligible zero-norm candidate.",
+    "Text parser accepts bounded ASCII decimal syntax only, rejecting hexadecimal, digit separators, quoted numbers, text over 1 MiB and a number over 128 bytes. Decimal underflow to signed float32 zero is accepted; rounding is direct with strconv.ParseFloat(token,32).",
+    "String formatting follows Go shortest float32 round trip, which may use different fixed/exponent thresholds from PostgreSQL.",
+    "BLOB format is project-specific versioned IEEE-754 float32 big-endian GSV format, not PostgreSQL wire/internal representation; float32 bits including signed zero are preserved.",
+    "Go zero Vector is invalid, not NULL. NullVector and Row.Null model NULL explicitly. New nil/empty slices are invalid."
+  ]
+}

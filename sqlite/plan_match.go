@@ -90,12 +90,18 @@ func (p *gramPlanner) match(call *sqlast.Call) (*gramCandidatePlan, string, erro
 	}
 	// No column resolver is installed, so row-dependent arguments are rejected
 	// without evaluating them against a fabricated row.
-	nameValue, err := sqlast.Eval(call.Args[0], &sqlast.EvalContext{Params: p.rows.params})
+	nameValue, err := sqlast.Eval(call.Args[0], &sqlast.EvalContext{Context: p.ctx, Params: p.rows.params})
+	if p.ctx.Err() != nil {
+		return nil, "", p.ctx.Err()
+	}
 	name, ok := nameValue.(string)
 	if err != nil || !ok {
 		return nil, "dynamic or NULL grams13_match index", nil
 	}
-	needleValue, err := sqlast.Eval(call.Args[2], &sqlast.EvalContext{Params: p.rows.params})
+	needleValue, err := sqlast.Eval(call.Args[2], &sqlast.EvalContext{Context: p.ctx, Params: p.rows.params})
+	if p.ctx.Err() != nil {
+		return nil, "", p.ctx.Err()
+	}
 	if err != nil || needleValue == nil {
 		return nil, "dynamic or NULL grams13_match needle", nil
 	}
