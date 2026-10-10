@@ -39,7 +39,7 @@ type Session struct {
 // even if its subsequent transactions are read-only. Entering WAL mode is a
 // standard rollback-journal transaction using the same continuously locked
 // database descriptor. A mode-2 database without a WAL is valid.
-func OpenSession(ctx context.Context, path string, opts Options) (*Session, error) {
+func OpenSession(ctx context.Context, path string, opts Options) (result *Session, retErr error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
@@ -51,11 +51,11 @@ func OpenSession(ctx context.Context, path string, opts Options) (*Session, erro
 	if err != nil {
 		return nil, err
 	}
-	resolved, err := filepath.EvalSymlinks(path)
+	resolved, err := resolveNativePath(path)
 	if err == nil {
 		path = resolved
 	} else if opts.Create && os.IsNotExist(err) {
-		dir, e := filepath.EvalSymlinks(filepath.Dir(path))
+		dir, e := resolveNativePath(filepath.Dir(path))
 		if e != nil {
 			return nil, e
 		}
@@ -76,9 +76,9 @@ func OpenSession(ctx context.Context, path string, opts Options) (*Session, erro
 	defer func() {
 		if !success {
 			if s.walFile != nil {
-				_ = s.walFile.Close()
+				retErr = errors.Join(retErr, closeNativeFile(s.walFile))
 			}
-			_ = f.Close()
+			retErr = errors.Join(retErr, closeNativeFile(f))
 		}
 	}()
 	if err = lockShared(f); err != nil {
@@ -113,7 +113,7 @@ func OpenSession(ctx context.Context, path string, opts Options) (*Session, erro
 	pageOne := make([]byte, 100)
 	copy(pageOne, s.rawHeader[:])
 	if ref, ok := s.snapshot.Pages[1]; ok {
-		if _, err = s.walFile.ReadAt(pageOne, ref.Offset); err != nil {
+		if _, err = readNativeAt(s.walFile, pageOne, ref.Offset); err != nil {
 			return nil, err
 		}
 	}
@@ -210,7 +210,7 @@ func (s *Session) enterWALLocked(ctx context.Context) error {
 }
 
 func (s *Session) refreshMainLocked() error {
-	info, err := s.file.Stat()
+	info, err := statNativeFile(s.file)
 	if err != nil {
 		return err
 	}
@@ -223,15 +223,15 @@ func (s *Session) refreshMainLocked() error {
 	s.info = info
 	s.rawHeader = [100]byte{}
 	if info.Size() != 0 {
-		if _, err = s.file.ReadAt(s.rawHeader[:], 0); err != nil {
-			return fmt.Errorf("%w: header: %v", ErrCorrupt, err)
+		if _, err = readNativeAt(s.file, s.rawHeader[:], 0); err != nil {
+			return fmt.Errorf("%w: header: %w", ErrCorrupt, err)
 		}
 	}
 	return nil
 }
 
 func (s *Session) checkJournalLocked() error {
-	_, err := os.Lstat(s.path + "-journal")
+	_, err := nativeLstat(s.path + "-journal")
 	if os.IsNotExist(err) {
 		return nil
 	}
@@ -267,29 +267,32 @@ func (s *Session) checkStableLocked() error {
 	if err := validateNativePath(s.file); err != nil {
 		return err
 	}
-	st, err := s.file.Stat()
+	st, err := statNativeFile(s.file)
 	if err != nil {
 		return err
 	}
-	pathInfo, err := os.Lstat(s.path)
+	pathInfo, err := nativeLstat(s.path)
 	if err != nil {
-		return fmt.Errorf("%w: database pathname: %v", ErrChanged, err)
+		return fmt.Errorf("%w: database pathname: %w", ErrChanged, err)
 	}
-	if !pathInfo.Mode().IsRegular() || !os.SameFile(st, pathInfo) || st.Size() != s.info.Size() || !st.ModTime().Equal(s.info.ModTime()) {
+	if !pathInfo.Mode().IsRegular() || !vfs.SameFile(st, pathInfo) || st.Size() != s.info.Size() || !st.ModTime().Equal(s.info.ModTime()) {
 		return ErrChanged
 	}
 	if err = validateWritableFile(s.file); err != nil {
 		return err
 	}
 	var header [100]byte
-	if _, err = s.file.ReadAt(header[:], 0); err != nil || header != s.rawHeader {
+	if _, err = readNativeAt(s.file, header[:], 0); err != nil {
+		return errors.Join(ErrChanged, err)
+	}
+	if header != s.rawHeader {
 		return fmt.Errorf("%w: physical database header", ErrChanged)
 	}
 	return s.checkWALStableLocked()
 }
 
 func (s *Session) removeStaleSHMLocked() error {
-	st, err := os.Lstat(s.path + "-shm")
+	st, err := nativeLstat(s.path + "-shm")
 	if os.IsNotExist(err) {
 		return nil
 	}
@@ -387,8 +390,8 @@ func (s *Session) readPageLocked(ctx context.Context, n uint32) ([]byte, error) 
 	if ref, ok := s.snapshot.Pages[n]; ok {
 		f, off = s.walFile, ref.Offset
 	}
-	if _, err := f.ReadAt(p, off); err != nil {
-		return nil, fmt.Errorf("%w: read page %d: %v", ErrCorrupt, n, err)
+	if _, err := readNativeAt(f, p, off); err != nil {
+		return nil, fmt.Errorf("%w: read page %d: %w", ErrCorrupt, n, err)
 	}
 	return p, ctx.Err()
 }
@@ -415,10 +418,10 @@ func (s *Session) Close() error {
 		err = s.checkpointLocked(context.Background())
 	}
 	if s.walFile != nil {
-		err = errors.Join(err, s.walFile.Close())
+		err = errors.Join(err, closeNativeFile(s.walFile))
 		s.walFile = nil
 	}
-	err = errors.Join(err, s.file.Close())
+	err = errors.Join(err, closeNativeFile(s.file))
 	s.file = nil
 	return err
 }

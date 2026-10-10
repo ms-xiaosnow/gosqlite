@@ -14,7 +14,7 @@ import (
 )
 
 func (s *Session) openWALLocked(ctx context.Context) error {
-	st, err := os.Lstat(s.path + "-wal")
+	st, err := nativeLstat(s.path + "-wal")
 	if os.IsNotExist(err) {
 		return nil
 	}
@@ -29,11 +29,11 @@ func (s *Session) openWALLocked(ctx context.Context) error {
 		return err
 	}
 	s.walFile = f
-	s.walInfo, err = f.Stat()
+	s.walInfo, err = statNativeFile(f)
 	if err != nil {
 		return err
 	}
-	if !os.SameFile(st, s.walInfo) {
+	if !vfs.SameFile(st, s.walInfo) {
 		return ErrChanged
 	}
 	if err = validateWritableFile(s.walFile); err != nil {
@@ -42,7 +42,7 @@ func (s *Session) openWALLocked(ctx context.Context) error {
 	if s.walInfo.Size() == 0 {
 		return nil
 	}
-	s.snapshot, err = wal.Scan(ctx, f, s.walInfo.Size(), wal.Limits{})
+	s.snapshot, err = wal.Scan(ctx, nativeReaderAt{f}, s.walInfo.Size(), wal.Limits{})
 	if err != nil {
 		// Incomplete, uncommitted, and invalid tails are deliberately left
 		// untouched. Supporting their recovery requires separate acceptance.
@@ -55,7 +55,7 @@ func (s *Session) openWALLocked(ctx context.Context) error {
 }
 
 func (s *Session) checkWALStableLocked() error {
-	pathInfo, err := os.Lstat(s.path + "-wal")
+	pathInfo, err := nativeLstat(s.path + "-wal")
 	if s.walFile == nil {
 		if os.IsNotExist(err) {
 			return nil
@@ -65,17 +65,20 @@ func (s *Session) checkWALStableLocked() error {
 		}
 		return fmt.Errorf("%w: unexpected WAL", ErrChanged)
 	}
-	if err != nil || !pathInfo.Mode().IsRegular() {
+	if err != nil {
+		return errors.Join(ErrChanged, err)
+	}
+	if !pathInfo.Mode().IsRegular() {
 		return fmt.Errorf("%w: WAL pathname", ErrChanged)
 	}
 	if err := validateNativePath(s.walFile); err != nil {
 		return err
 	}
-	st, err := s.walFile.Stat()
+	st, err := statNativeFile(s.walFile)
 	if err != nil {
 		return err
 	}
-	if !os.SameFile(st, pathInfo) || st.Size() != s.walInfo.Size() || !st.ModTime().Equal(s.walInfo.ModTime()) {
+	if !vfs.SameFile(st, pathInfo) || st.Size() != s.walInfo.Size() || !st.ModTime().Equal(s.walInfo.ModTime()) {
 		return fmt.Errorf("%w: WAL file", ErrChanged)
 	}
 	return validateWritableFile(s.walFile)
@@ -118,7 +121,7 @@ func (s *Session) ensureWALLocked() error {
 	if err = syncDirectory(s.path); err != nil {
 		return s.poisonLocked(err)
 	}
-	s.walInfo, err = s.walFile.Stat()
+	s.walInfo, err = statNativeFile(s.walFile)
 	if err != nil {
 		return s.poisonLocked(err)
 	}
@@ -162,7 +165,7 @@ func (s *Session) normalizeAppendWALLocked() error {
 		return fmt.Errorf("%w: imported WAL sector normalization", ErrLimit)
 	}
 	last := make([]byte, frameSize)
-	if _, err := s.walFile.ReadAt(last, offset-frameSize); err != nil {
+	if _, err := readNativeAt(s.walFile, last, offset-frameSize); err != nil {
 		return err
 	}
 	pageNo, dbSize := binary.BigEndian.Uint32(last), binary.BigEndian.Uint32(last[4:])
@@ -171,13 +174,13 @@ func (s *Session) normalizeAppendWALLocked() error {
 	}
 	candidate, err := vfs.CreateWALCandidate(s.path)
 	if err != nil {
-		return err
+		return nativeFileError(err)
 	}
 	tempPath := candidate.Name()
 	renamed := false
 	fail := func(cause error) error {
 		if !renamed {
-			cause = errors.Join(cause, candidate.Close())
+			cause = errors.Join(cause, closeNativeFile(candidate))
 			if e := os.Remove(tempPath); e != nil {
 				cause = errors.Join(cause, e)
 			} else {
@@ -194,7 +197,7 @@ func (s *Session) normalizeAppendWALLocked() error {
 		if n > offset-copied {
 			n = offset - copied
 		}
-		if _, err = s.walFile.ReadAt(buf[:n], copied); err != nil {
+		if _, err = readNativeAt(s.walFile, buf[:n], copied); err != nil {
 			return fail(err)
 		}
 		if err = writeFullAt(candidate, buf[:n], copied); err != nil {
@@ -220,7 +223,7 @@ func (s *Session) normalizeAppendWALLocked() error {
 	if err = candidate.Sync(); err != nil {
 		return fail(err)
 	}
-	info, err := candidate.Stat()
+	info, err := statNativeFile(candidate)
 	if err != nil {
 		return fail(err)
 	}
@@ -234,7 +237,7 @@ func (s *Session) normalizeAppendWALLocked() error {
 	old := s.walFile
 	s.walFile, s.walInfo = candidate, info
 	if err = syncDirectory(s.path); err != nil {
-		return fail(errors.Join(ErrCommitUncertain, err, old.Close()))
+		return fail(errors.Join(ErrCommitUncertain, err, closeNativeFile(old)))
 	}
 	s.snapshot.IndexWork += 2 * uint64(frames-s.snapshot.FrameCount)
 	s.snapshot.FrameCount, s.snapshot.ValidFrameCount = frames, frames
@@ -244,7 +247,7 @@ func (s *Session) normalizeAppendWALLocked() error {
 		s.snapshot.Pages[pageNo] = ref
 	}
 	s.appendSafe = true
-	if err = old.Close(); err != nil {
+	if err = closeNativeFile(old); err != nil {
 		return s.poisonLocked(err)
 	}
 	return nil
@@ -468,7 +471,7 @@ func (s *Session) appendWALPagesLocked(ctx context.Context, commitPages map[uint
 	if err = s.walFile.Sync(); err != nil {
 		return fail(err)
 	}
-	info, err := s.walFile.Stat()
+	info, err := statNativeFile(s.walFile)
 	if err != nil {
 		return fail(err)
 	}

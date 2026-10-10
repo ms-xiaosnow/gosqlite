@@ -1,0 +1,307 @@
+Encrypted Windows independent scoped engineering review
+Date: 2026-10-10 UTC
+Status: COMPLETE for the bounded source/memory/compile review on frozen22.
+No remaining concrete blocker identified in the reviewed encrypted source slice.
+Native Windows runtime, physical durability and full security acceptance remain open.
+Reviewer-owned file: internal/encstore/windows_review_test.go
+This is independent source/test review within the engineering task, not an
+independent cryptographic/security certification or an M3/M8 acceptance claim.
+
+Scope and permitted evidence
+----------------------------
+Read goal.md M3/M8 gates, ADR 0016, encryption-storage.md,
+native-encrypted-windows.md, common encrypted publication/namespace paths,
+Windows managed owner, exact lock ledger, lifetime model, pinned Go 1.27.2,
+pinned golang.org/x/sys v0.49.0, and existing plain Windows VFS ownership.
+Windows/amd64 runtime remains NOT_RUN. Darwin encrypted storage is a missing
+implementation. Windows shared-mode rekey is a missing implementation, rejected
+early. Directory Sync provides no Windows namespace persistence barrier.
+
+Only source audit, pure-memory callback laws, correct-key intact Linux regressions,
+and Windows compile-only checks are authorized for this review. No native failed
+close/unmap/lock/I/O/Sync, disk corruption/tamper/wrong-key/missing-selected-file,
+namespace mutation-race, crash/process exit, hot recovery, or interrupted
+publication/rekey is executed or relocated to CI/another executor.
+
+Findings supplied to the source owner
+------------------------------------
+W1. Frozen18 live os.Lstat + os.SameFile probes bypassed managed ownership.
+    namespace.check, inventory, checkedFile and stableFile could enter pinned
+    Go os/types_windows.go loadFileId: raw CreateFile followed by deferred
+    CloseHandle with its result discarded. os/stat_windows.go has additional
+    raw metadata fallbacks. Those resources did not reserve encryptedWinOwners
+    capacity or retain unknown-close state. This contradicted all-handle bounded
+    lifetime claims. Source-only finding; no failure was executed.
+    Owner fix inspected: Windows canonicalPath uses a managed directory and
+    GetFinalPathNameByHandle; platformPathInfo uses managed relative metadata
+    handles; platformDirectoryCheck compares managed full native IDs; common
+    encstore no longer calls path-based os.Lstat/Stat/EvalSymlinks on Windows.
+    Remaining os.SameFile inputs are handle-derived FileInfo, whose Go fileStat
+    already has identity and does not lazily open another handle.
+
+W2. Main basenames admitted up to 255 UTF-16 units could fail after lock creation
+    when the first generated candidate exceeded the NTFS component limit.
+    The longest suffix is '.gse-' + 64 hexadecimal units + '.retained' = 78 units.
+    A 200-unit main name fit the initial lock name but not generated members.
+    Owner fix inspected: windowsFamilyNameBound rejects more than 177 units
+    before any native open, provider acquisition or stable-lock creation.
+    Supplementary characters count as two UTF-16 units. This conservative bound
+    also applies to archive/plain-output targets routed through canonicalPath.
+
+W3. Source owner independently found case-sensitive family classification could
+    omit existing history after case-alias reopen. Reviewed the owner's fix:
+    native CompareStringOrdinal(ignoreCase=1) normalizes only root/family prefix;
+    exact canonical lowercase hexadecimal ID and suffix grammar remains enforced.
+    Native Unicode comparison is compile/source evidence, not executed here.
+
+W4. inventory redundantly opened a named directory before its relative open,
+    discarding the first Close result. Owner removed that unnecessary open.
+    Final fix inspected: inventory joins its deferred enumeration Close result
+    into the returned error and resets its byte total to zero on cleanup failure.
+    Windows directory public validation also checks closed/poisoned state before
+    and after opening its managed named probe; private retained probes remain
+    allowed while existing children protect the physically live parent.
+
+Adjacent plain-Windows observation, separately reported to parent
+----------------------------------------------------------------
+This encrypted review does not repair or certify plain Windows storage.
+Source inspected at 2026-10-10 14:49 UTC also showed hidden path-identity opens
+at pager/shared_session.go checkStableLocked, walindex/index.go statLocked, and
+vfs/file.go validatePathLocked. The latter ran generic named/parent Stat/Lstat
+and SameFile after nativeValidatePath. native_windows.go nativeValidatePath also
+opened raw metadata handles, reported CloseHandle errors but retained no record
+of unresolved probes. Therefore the plain VFS all-probes-use-managed-owner
+comment was too broad. Windows locks are per handle; closing a metadata alias
+does not itself release another handle's locks. This is an exceptional-resource
+representation/failure-reporting gap, not observed data loss or native runtime
+failure. Parent owns any separate correction/fix and release evidence.
+
+API/source checks
+-----------------
+Official Microsoft sources accessed 2026-10-10:
+https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-lockfileex
+  Shared-over-exclusive on the same handle is permitted; first unlock removes
+  exclusive, second shared. Exact ledger reflects both successful holds.
+https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-unlockfileex
+  Release interval must match the originally acquired region, not a union.
+https://learn.microsoft.com/en-us/windows/win32/api/winternl/nf-winternl-ntcreatefile
+  RootDirectory/ObjectName relative opens, synchronous mode with SYNCHRONIZE,
+  open/create dispositions, and final reparse-open policy checked.
+https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ntifs/ns-ntifs-_file_rename_information
+  DELETE source access, root-relative target name, replacement flag and POSIX
+  semantics preserving older handles checked against the production rename.
+https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/ne-wdm-_file_information_class
+  FileRenameInformationEx is class 65.
+https://learn.microsoft.com/en-us/windows/win32/api/winbase/ns-winbase-file_id_info
+  Full volume identity plus 128-bit FileId is the comparison contract.
+https://learn.microsoft.com/en-us/windows/win32/api/winbase/ns-winbase-file_standard_info
+  Link count, directory and delete-pending field sizes/meaning checked.
+https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew
+  Share/access policy, noninheritable attributes and OPEN_EXISTING checked.
+https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-flushfilebuffers
+  File flushing is not evidence of a directory namespace/power-loss barrier.
+https://learn.microsoft.com/en-us/windows/win32/api/stringapiset/nf-stringapiset-comparestringordinal
+  Ignore-case comparison uses the OS uppercase table, with success equality 2;
+  it is not Go linguistic folding or an inode identity comparison.
+
+Pinned local primary implementation sources inspected:
+../toolchains/go1.27.2/src/internal/syscall/windows/at_windows.go
+../toolchains/go1.27.2/src/internal/syscall/windows/types_windows.go
+../toolchains/go1.27.2/src/os/{file_windows,stat_windows,types_windows,dir_windows}.go
+../toolchains/go1.27.2/src/os/file_posix.go
+../toolchains/go1.27.2/src/internal/poll/fd_fsync_windows.go
+../toolchains/go1.27.2/src/syscall/syscall_windows.go
+../toolchains/cache/pkg/mod/golang.org/x/sys@v0.49.0/windows/{syscall_windows,zsyscall_windows}.go
+Go maps '.' to an empty NT relative name, uses native rename class 65, and
+its os.File.Close disables later finalization after a close attempt. Encrypted
+code deliberately does not adopt Go's legacy-rename fallback. Directory ReadDir
+uses the already owned handle, not a hidden enumeration open. Go Sync reaches
+FlushFileBuffers. x/sys wrappers and signatures match the calls and ABI checks.
+
+Independent memory composition tests
+------------------------------------
+TestWindowsReviewMemoryLockLifetimeComposition
+  All 64 exact-lock held states compose with child then parent physical retirement.
+TestWindowsReviewMemoryUnresolvedChildPreservesParent
+  Each of six release positions across three stacked intervals retains child
+  and parent until represented cleanup succeeds; ordinary lock reuse is poisoned.
+TestWindowsReviewMemoryUnknownChildCloseNeverReleasesPin
+  A synthetic callback result records terminal unknown close once, preserves
+  the parent pin, and forbids retry/admission. No OS handle exists in the test.
+TestWindowsReviewMemoryRetainedProbeClosePermutations
+  All six orders for two children and one retained relative-probe model preserve
+  closed public ownership and retire the parent only after the last child.
+
+Initial checks at 2026-10-10 14:46 UTC
+------------------------------------
+Behavioral source audit completed first: four tests import errors/fmt/testing and
+use only Go memory plus encstore/encryption error sentinels. No filesystem,
+process, native syscall, TestMain, or execution helper is reached by these laws.
+Toolchain: go version go1.27.2 linux/amd64.
+Working directory: /workspace/scratch/5e06a74e5f65/durable-restart/gosqlite
+Environment:
+  GOPATH=$PWD/../toolchains/cache
+  GOMODCACHE=$PWD/../toolchains/cache/pkg/mod
+  GOCACHE=$PWD/../toolchains/go-cache
+  GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off GOFLAGS='' CGO_ENABLED=0
+Commands/results:
+  ../toolchains/go1.27.2/bin/go run ./internal/testscope
+    PASS ordinary source-reference guard (not a behavioral proof).
+  ../toolchains/go1.27.2/bin/go test -count=1 ./internal/encstore -run '^TestWindowsReviewMemory' -v
+    PASS, package 0.006s, all four functions and 77 leaf cases.
+  ../toolchains/go1.27.2/bin/go run ./internal/testscope
+    PASS before separate race execution.
+  CGO_ENABLED=1 ../toolchains/go1.27.2/bin/go test -race -count=1 ./internal/encstore -run '^TestWindowsReviewMemory' -v
+    PASS, package 1.023s. This is Linux memory-law race tooling, not Windows
+    native race/locking acceptance and not a CGO production dependency.
+Raw logs: ../encrypted-platform-evidence/independent-review-memory-cgo0.log
+          ../encrypted-platform-evidence/independent-review-memory-race.log
+Test source SHA-256:
+ac278a6158366118aed62200a9136c00202c170e78ea3be848234294af9cd7ce  internal/encstore/windows_review_test.go
+Linux backend before/current SHA-256:
+56cdfaa91f7a77fb4e9e1674b39b0e2dcf23eb93fdf5a219dd5f95de2ad27112  internal/encstore/platform_linux.go
+Initial reviewed frozen18 Windows SHA-256 (superseded by fixes above):
+dda86780ccc703f4d48401a62c77c3b9e053a7bf26d87ff54796fb465f68bfc3  internal/encstore/platform_windows.go
+
+No aggregate test, commit, stage, push, native target launch or prohibited
+workflow was performed by this reviewer.
+
+
+Final frozen22 verification at 2026-10-10 14:52-14:53 UTC
+-------------------------------------------------------
+Same offline pinned-toolchain environment as above; source audited before runs.
+Behavioral audit additionally covered exact_locks_test.go, handle_lifetime_test.go,
+family_names_test.go, TestReviewSharedIntactPinnedSelectionAndLedger with its
+reviewMemoryProvider, and the five listed SQLite tests with encryptionOptions,
+encryptedExec and query helpers. The selected physical fixtures are disposable,
+correct-key and intact; they use normal cooperating transactions, ordinary
+contention, checkpoint, close/reopen, completed rekey, archive/restore and explicit
+plaintext copy. No test package TestMain or init hook was present. Unselected
+native target tests were only compiled. There was no compile interference from
+other workers' SQL/migration files; those unrelated edits are not certified here.
+
+Commands (G = ../toolchains/go1.27.2/bin/go for the listing below):
+  sha256sum -c ../encrypted-platform-evidence/owned-source.sha256
+    PASS all 22 paths before execution.
+  $G run ./internal/testscope
+    PASS.
+  $G test -count=1 ./internal/encstore -run '^Test(ExactByteLocksMemory|EncryptedHandleLifetimeMemory|EncryptedFamily.*Memory|WindowsReviewMemory|ReviewSharedIntactPinnedSelectionAndLedger$)' -v
+    PASS, 0.021s. Twenty portable memory-law functions and one intact-file test.
+  $G test -count=1 ./sqlite -run '^TestEncryption(OrdinaryLifecycleAndCopies|SharedReadersWriterAndStalePromotion|SharedLazySavepointsAndNoopRelease|SharedQuiescentRekeyAndLeaseRetention|SharedExplicitUpgradeCopiesAndRestore)$' -v
+    PASS, 0.231s. Five top-level tests; explicit upgrade covers modes 0 and 1.
+  $G run ./internal/testscope
+    PASS before separate CGO1 race executions.
+  CGO_ENABLED=1 $G test -race -count=1 ./internal/encstore -run '^Test(ExactByteLocksMemory|EncryptedHandleLifetimeMemory|EncryptedFamily.*Memory|WindowsReviewMemory|ReviewSharedIntactPinnedSelectionAndLedger$)'
+    PASS, 1.165s.
+  CGO_ENABLED=1 $G test -race -count=1 ./sqlite -run '^TestEncryption(OrdinaryLifecycleAndCopies|SharedReadersWriterAndStalePromotion|SharedLazySavepointsAndNoopRelease|SharedQuiescentRekeyAndLeaseRetention|SharedExplicitUpgradeCopiesAndRestore)$'
+    PASS, 1.286s.
+  $G run ./internal/testscope
+    PASS before target compilation.
+  GOOS=windows GOARCH=amd64 $G test -c -o ../encrypted-platform-evidence/independent-encstore-windows-amd64.test.exe ./internal/encstore
+    PASS compile-only. Executable NOT_RUN.
+  GOOS=windows GOARCH=amd64 $G test -c -o ../encrypted-platform-evidence/independent-sqlite-windows-amd64.test.exe ./sqlite
+    PASS compile-only. Executable NOT_RUN.
+  GOOS=windows GOARCH=amd64 $G vet ./internal/encstore
+    PASS cross-vet. No native test execution.
+  sha256sum -c ../encrypted-platform-evidence/owned-source.sha256
+    PASS all 22 paths after checks.
+Raw final log: ../encrypted-platform-evidence/independent-review-final.log
+
+Exact final executed top-level test names (encstore then SQLite):
+  TestExactByteLocksMemoryAcquireAndIdempotency
+  TestExactByteLocksMemorySharedUpgradeRefused
+  TestExactByteLocksMemoryDowngradeStacksBeforeRelease
+  TestExactByteLocksMemoryEveryHeldRecordRelease
+  TestExactByteLocksMemoryAllHeldCombinationsCloseOrder
+  TestExactByteLocksMemoryAcquisitionErrorOwnership
+  TestExactByteLocksMemoryDowngradeReleaseErrorRetainsBoth
+  TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder
+  TestExactByteLocksMemoryDirectReleaseErrorRetry
+  TestExactByteLocksMemoryCleanupAccumulatesPoison
+  TestExactByteLocksMemoryInvalidOffsetAndStackedAcquisition
+  TestEncryptedFamilyPrefixMemoryCanonicalTail
+  TestEncryptedFamilyNameMemoryUTF16Envelope
+  TestEncryptedHandleLifetimeMemoryParentPins
+  TestEncryptedHandleLifetimeMemoryUnresolvedLocks
+  TestEncryptedHandleLifetimeMemoryUnknownCloseIsTerminal
+  TestReviewSharedIntactPinnedSelectionAndLedger
+  TestWindowsReviewMemoryLockLifetimeComposition
+  TestWindowsReviewMemoryUnresolvedChildPreservesParent
+  TestWindowsReviewMemoryUnknownChildCloseNeverReleasesPin
+  TestWindowsReviewMemoryRetainedProbeClosePermutations
+  TestEncryptionSharedReadersWriterAndStalePromotion
+  TestEncryptionSharedLazySavepointsAndNoopRelease
+  TestEncryptionSharedQuiescentRekeyAndLeaseRetention
+  TestEncryptionSharedExplicitUpgradeCopiesAndRestore
+  TestEncryptionOrdinaryLifecycleAndCopies
+
+Final source-review conclusions
+------------------------------
+- Private Windows managedFile never exports its raw handle. Each native open
+  reserves capacity before opening and adopts before validation. Every live
+  explicit encrypted file/directory/probe follows that path. Directory lifetime
+  is pinned by physically live children; the public closed bit is never cleared.
+- Unknown os.File.Close is terminal and retained. Native unlock cleanup remains
+  retryable only through the represented exact records. Registry capacity keeps
+  unresolved ownership bounded; it does not supply eventual retirement or make
+  a dropped caller retry route recoverable. Generic failed-open cleanup can still
+  return the original error while an exceptional resource is privately retained.
+- Byte 0/1/2 ledger and exact unlock calls preserve successful acquisitions.
+  Same-mode repeats are idempotent; downgrade adds shared before releasing
+  exclusive; no unprotected shared-to-exclusive unlock/relock emulation exists.
+- Live opens/rename use retained directory authority and one validated basename.
+  Empty relative ObjectName represents inventory's directory self-open. Native
+  full IDs and reparse/link/type/deletion checks are distinct from name matching.
+  The publication root alone uses normal delete sharing; immutable members and
+  stable lock do not. Metadata/rename probes share delete access. No path-based
+  rename/copy/delete fallback appears in the native publication path.
+- Early unsupported shared rekey is before Prepare's canonicalization/provider
+  call and before BeginMaintenance writer reservation. Legacy-to-shared upgrade
+  retains exclusive lifecycle until successful publication then downgrades.
+- platform_linux.go remains byte-identical to the saved baseline. Common helper
+  refactoring keeps Linux path/identity operations and passed the selected
+  correct-key regressions. Inventory now propagates enumeration cleanup errors;
+  this source-level error-reporting improvement is not an executed fault test.
+- File Sync follows FlushFileBuffers. Directory Sync intentionally performs no
+  flush and supplies no namespace persistence guarantee. M3/M8/M10 gates remain
+  unsatisfied by this bounded compile/source/memory checkpoint.
+
+Frozen22 source hashes (owner manifest verified before and after):
+00317f6d7caee50955892da2d6169a44b7d055b7ad2a5c5ed7330e59b2e433a4  docs/decisions/0016-shared-encrypted-coordination.md
+feb1abe8ffeb60297fbf4222574443d7a806e42bbaac44c351f3a606f0d3e6e2  docs/encryption-storage.md
+43ad1c4358d3cb9d2e2a850725495a5ae7c82fb402e5ee5af0c89b67927c4cfc  docs/native-encrypted-windows.md
+f19b4cd5e8672edb7058b70e96c1cfe323708f37b0ee935c5ca8323d5de5da90  internal/encstore/exact_locks.go
+d6fc0a5a85d2daa827f35ff6387b74c710e6a678d7c74bd79fa86533c99a6d21  internal/encstore/exact_locks_test.go
+35f6e419b61df6ac856e3b63b574b0057ab7e280523535ec3f775412e962f657  internal/encstore/family_names.go
+c5f2a2f6fbf3a6807ae2d94c64256f1a4048f2d449cc6d2952e6fb3209b4aea9  internal/encstore/family_names_test.go
+564a2768d1f5e7cbc1e926d3ca83dee99526b61ee0fd9b8268e938091c7b5a0b  internal/encstore/file_default.go
+4663edc067e7aaa69406963b4839929e2dc8fb3746b07327cf75d6f681244b44  internal/encstore/file_windows.go
+62b882b4b81ee6583d99dee711fa5eb55faf63100373a425bf29d92175544796  internal/encstore/format.go
+891e12172956f50d9219ab619936ffc70b6d16edb59844693e62c149d83c0e62  internal/encstore/handle_lifetime.go
+e75c0f2f05257d56c3ad1939d924d0ad43fe1f4f91b866b98813986d417bbf62  internal/encstore/handle_lifetime_test.go
+a00e56f3bbc8c5d447cc818598445fbe94b2250844418fe61a235eb00ee9662d  internal/encstore/inventory.go
+ed391c317720d194c5b3f40d59e6ff83e2cec4707dea0a42b37e89d0fcf5fbc0  internal/encstore/namespace.go
+ff33977be2e4f33732bf436dddf77a77b7ae7412df845a7d63e94e70c44dd880  internal/encstore/native_windows_test.go
+015947e82b5ebf3fb172bf6f3a72f304c07029cec84cfc6bc17fdef2d77375c1  internal/encstore/object.go
+210e57581e01d3324ce47f02a29f0aa0de1eb4d699bf6c11949588ec39b42ccf  internal/encstore/platform_other.go
+eef5e711510b3e8b560f01185422f4131915bc1b6180187354df3d459b04f7b3  internal/encstore/platform_windows.go
+748d081b4a3a45b15337175ea47c1b123f788e7eaa8f7d0923dd891c58760c3e  internal/encstore/shared.go
+b103d32fb8a12eafdf288d442a28dd2edfb804c4c98e308693df5229167ad611  internal/encstore/store.go
+0d96e6a541fd55858c29547f4a18cb015792d263868bf2257cea590ffa50ad57  internal/encstore/wal_object.go
+ac278a6158366118aed62200a9136c00202c170e78ea3be848234294af9cd7ce  internal/encstore/windows_review_test.go
+
+Independent compile artifact SHA-256 (not runtime evidence):
+f5b4edeb18ce1ed363f67c72edb0d2b9143cbca6cbfcf0076f1e515bcefcf3ed  independent-encstore-windows-amd64.test.exe
+106589e953cfd17ef85e036044eda593122a9744b920072c70b37708912b2385  independent-sqlite-windows-amd64.test.exe
+Pinned primary-source hashes used for key cross-checks:
+32bdbb028336c434525559642424295c71c0dd6e4fef7cec1fd0739ec80feffb  Go1.27.2/src/os/types_windows.go
+90f01ab7b8a973df1c4588c3b40fae737c6d23d6548a1805e5f213e38def6df4  Go1.27.2/src/os/stat_windows.go
+8e91b547504c80ea026bc96cd6bba3ab0b38f9218b3c0399eb49045641628e45  Go1.27.2/src/internal/syscall/windows/at_windows.go
+c40bdeba110bf46782feb55976a00c88c2ae51d8c812de5ae023326eeb083c92  x/sys@v0.49.0/windows/zsyscall_windows.go
+
+Native Windows runtime and cross-process behavior: NOT_RUN.
+Darwin encrypted storage and Windows shared rekey: missing implementations.
+Windows directory namespace persistence barrier: not supplied.
+Still unaccepted: hostile namespace/storage guarantees, independent security/legal
+review, wrong-key/tampered/missing-object disk workflows, native fault paths,
+interrupted publication/rekey, crash/recovery and release acceptance.

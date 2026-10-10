@@ -368,3 +368,27 @@ Use the pinned toolchain/environment documented above. Source-faithful actual
 PostgreSQL version/extension/dependency/privilege validation and user-reviewed
 cutover/rollback remain pending. Fault/interrupted-publication testing remains
 manual pending and is not moved to another environment or CI.
+
+## Windows encrypted/public metadata source qualification
+
+Component and independent-review logs distinguish pure-memory lock/lifetime/
+metadata/error laws, Linux intact correct-key operations, and target-only
+Windows compile checks. The combined isolated-source suite runs VFS/WAL-index/
+encstore/pager unit/race, ordinary public canonical paths/encrypted/shared DB
+operations, full vet/build, pinned transaction oracle and cross-builds. Native
+Windows binary tests are not executed. The Windows encstore vet pass is scoped;
+the plain VFS default vet warning remains disclosed, never suppressed as clean.
+
+No native failed lock/unmap/close/Sync, wrong key, physical tamper, namespace
+race/retarget, crash/exit/recovery or interrupted publication/rekey is executed.
+Those commands remain manual pending in their existing sections. Public code
+coverage, source review and cross-compilation do not replace platform runtime
+and independent security/legal verification.
+
+Windows mapping correction uses genuine production state-machine code with
+synthetic uintptr identities and memory callbacks only. Repeated handle-close
+uncertainty, successful object-close followed by represented view-unmap retry,
+failed view-creation cleanup and idempotence are memory laws; no Windows
+CloseHandle/UnmapViewOfFile failure is induced. Both corrected native callsites
+are compiled and source-reviewed, with unchanged lock/identity/granularity
+contracts. A new native runtime or physical gate is not inferred from these laws.

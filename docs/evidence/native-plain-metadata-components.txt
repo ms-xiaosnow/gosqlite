@@ -1,0 +1,112 @@
+Sat Oct 10 15:04:25 UTC 2026
+Corrective plain Windows metadata: scoped verification; no aggregate or native runtime claim.
+Pinned offline toolchain; GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off GOPATH=$PWD/../go-path GOCACHE=$PWD/../go-cache; production CGO_ENABLED=0.
+go version go1.27.2 linux/amd64
+Behavioral source audit: memory owner callbacks, ordinary VFS read/write/close and BUSY/lock/mapping tests; selected pager snapshots/rollback/shared WAL/checkpoint tests; selected WAL-index ordinary tests; official oracle normal transaction/read/lock tests. No physical errors, fault injection, corruption/tamper/missing selected files, namespace races, crash/forced exit, hot recovery, or interrupted publication are invoked.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+CGO0: VFS metadata source guard, ordinary snapshots, abstract owner laws and existing reviewed lock/mapping laws
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.049s
+CGO0: selected ordinary pager snapshots, rollback, BUSY and shared WAL
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.060s
+CGO0: selected ordinary WAL-index native bytes, mapping, DMS and publication
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	0.174s
+Separate CGO1 race tooling, production remains CGO0
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	1.218s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.218s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	3.079s
+Pinned official SQLite 3.54.0 test-only ordinary transaction/read/lock oracle
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.118s
+Scoped Linux vet
+linux/amd64 scoped production build PASS; cross-target builds are compile-only
+linux/arm64 scoped production build PASS; cross-target builds are compile-only
+windows/amd64 scoped production build PASS; cross-target builds are compile-only
+darwin/arm64 scoped production build PASS; cross-target builds are compile-only
+windows/amd64 scoped test binaries compile PASS; NOT EXECUTED
+darwin/arm64 scoped test binaries compile PASS; NOT EXECUTED
+Manual recovery source compile-only; binary never executed
+Sat Oct 10 15:04:52 UTC 2026
+Default Windows cross-vet qualification; prior unsafe mapped-address warning remains disclosed.
+internal/vfs/native_windows.go:690:33: possible misuse of unsafe.Pointer
+Default Windows cross-vet exit status: 1 (not a clean-vet claim)
+
+Reproduction of reviewed selections (each preceded by go run ./internal/testscope):
+CGO_ENABLED=0 go test -count=1 ./internal/vfs -run '^(TestMetadata.*|TestIndependentOFDLocksAndPOSIXInterop|TestOFDSubrangeAndUnionUnlock|TestManagedDBProbeRetainsReservedAndSnapshot|TestManagedMappingLogicalSpanAndClose|TestSlotLedgerStrictOwnership|TestMappingSpanGranularity|TestMappingRetirementMemoryModel|TestCloseOrderingMemoryModel|TestOwnershipReview.*|TestPlatformReview.*)$'
+CGO_ENABLED=0 go test -count=1 ./internal/pager -run '^(TestMetadataPoisonClassificationPreservesCause|TestTxCreatePageSizesAndReadSnapshot|TestTxRollbackAndStatementUndo|TestTxBusyCommitIsRetryableWithoutSideEffects|TestSessionDescriptorLeaseAndOrdinaryRetainedClose|TestSharedWALSnapshotsPromotionAndCheckpoint|TestSharedWALConcurrentReadersAndWriter)$'
+CGO_ENABLED=0 go test -count=1 ./internal/walindex -run '^(TestMetadataPoisonClassificationPreservesCause|TestDMSNormalLifecycleAndHeaderPublication|TestDMSEarlierExclusiveOpenerReturnsBusy|TestRealHashBlocksSnapshotAndCleanup|TestCheckpointMetadataAndLimits|TestConcurrentHeaderPublication|TestNativeHashAndPageMappingBytes|TestPortableSHMLockRequiresExplicitRelease)$'
+Same selections rerun with CGO_ENABLED=1 go test -race -count=1.
+SQLITE_ORACLE=$PWD/../toolchains/sqlite-build-3540000/sqlite3 CGO_ENABLED=0 go test -tags=oracle -count=1 ./internal/pager -run '^TestTxOracle'
+CGO_ENABLED=0 go vet ./internal/vfs ./internal/pager ./internal/walindex
+CGO_ENABLED=0 GOOS=<linux|windows|darwin> GOARCH=<amd64|arm64> go build ./internal/vfs ./internal/pager ./internal/walindex (only exact listed target pairs above)
+CGO_ENABLED=0 GOOS=<windows|darwin> GOARCH=<amd64|arm64> go test -c -o /tmp/plain-metadata-<os>-<package>.test ./internal/<vfs|pager|walindex> (windows/amd64 and darwin/arm64 only; binaries NOT EXECUTED)
+CGO_ENABLED=0 go test -tags=manual_recovery -c -o /tmp/plain-metadata-manual-recovery.test ./internal/pager (NOT EXECUTED)
+All go commands use ../toolchains/go1.27.2/bin/go and the pinned offline environment at the top of this file.
+Final supplemental checks: source guard build-tag assertion and shared-open cleanup error classification.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.035s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.029s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	0.011s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	1.117s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.118s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	1.017s
+Supplemental Windows build/test compile-only PASS; binary never executed.
+Sat Oct 10 15:07:17 UTC 2026
+
+FINAL CORRECTIVE SCOPE: public SQLite plain/encrypted canonical dispatch; probe composition; read/scan/close poison propagation.
+Sat Oct 10 15:14:31 UTC 2026
+Encrypted public-path integration dependency: frozen Git tree d52c82cfa393f220bfcd2a6c54fe4f6c9b47b3d3 (not a commit ID).
+Additional behavioral source review: sqlite/path_test.go uses successful plain/exclusive/shared/encrypted creation, committed data, normal close/reopen and provider-path agreement; driver database/sql checks read unchanged ordinary fixtures. Metadata observation/failed-open composition and generic ReaderAt/Close models use only fake integers/interfaces, never native error injection.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+cgo0 final scoped checks
+go test  -count=1 ./internal/vfs -run ^(TestMetadata.*|TestIndependentOFDLocksAndPOSIXInterop|TestOFDSubrangeAndUnionUnlock|TestManagedDBProbeRetainsReservedAndSnapshot|TestManagedMappingLogicalSpanAndClose|TestSlotLedgerStrictOwnership|TestMappingSpanGranularity|TestMappingRetirementMemoryModel|TestCloseOrderingMemoryModel|TestOwnershipReview.*|TestPlatformReview.*)$
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.098s
+go test  -count=1 ./internal/pager -run ^(TestMetadata.*|TestTxCreatePageSizesAndReadSnapshot|TestTxRollbackAndStatementUndo|TestTxBusyCommitIsRetryableWithoutSideEffects|TestSessionDescriptorLeaseAndOrdinaryRetainedClose|TestSharedWALSnapshotsPromotionAndCheckpoint|TestSharedWALConcurrentReadersAndWriter)$
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.094s
+go test  -count=1 ./internal/walindex -run ^(TestMetadata.*|TestDMSNormalLifecycleAndHeaderPublication|TestDMSEarlierExclusiveOpenerReturnsBusy|TestRealHashBlocksSnapshotAndCleanup|TestCheckpointMetadataAndLimits|TestConcurrentHeaderPublication|TestNativeHashAndPageMappingBytes|TestPortableSHMLockRequiresExplicitRelease)$
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	0.206s
+go test  -count=1 ./sqlite -run ^TestCanonicalOpenPathOrdinaryConnectionsAndProvider$
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.018s
+go test  -count=1 ./driver -run ^(TestDatabaseSQLRowsAndPrepared|TestPooledConcurrentQueries)$
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.023s
+race final scoped checks
+go test -race -count=1 ./internal/vfs -run ^(TestMetadata.*|TestIndependentOFDLocksAndPOSIXInterop|TestOFDSubrangeAndUnionUnlock|TestManagedDBProbeRetainsReservedAndSnapshot|TestManagedMappingLogicalSpanAndClose|TestSlotLedgerStrictOwnership|TestMappingSpanGranularity|TestMappingRetirementMemoryModel|TestCloseOrderingMemoryModel|TestOwnershipReview.*|TestPlatformReview.*)$
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	1.697s
+go test -race -count=1 ./internal/pager -run ^(TestMetadata.*|TestTxCreatePageSizesAndReadSnapshot|TestTxRollbackAndStatementUndo|TestTxBusyCommitIsRetryableWithoutSideEffects|TestSessionDescriptorLeaseAndOrdinaryRetainedClose|TestSharedWALSnapshotsPromotionAndCheckpoint|TestSharedWALConcurrentReadersAndWriter)$
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.323s
+go test -race -count=1 ./internal/walindex -run ^(TestMetadata.*|TestDMSNormalLifecycleAndHeaderPublication|TestDMSEarlierExclusiveOpenerReturnsBusy|TestRealHashBlocksSnapshotAndCleanup|TestCheckpointMetadataAndLimits|TestConcurrentHeaderPublication|TestNativeHashAndPageMappingBytes|TestPortableSHMLockRequiresExplicitRelease)$
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	3.996s
+go test -race -count=1 ./sqlite -run ^TestCanonicalOpenPathOrdinaryConnectionsAndProvider$
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	1.042s
+go test -race -count=1 ./driver -run ^(TestDatabaseSQLRowsAndPrepared|TestPooledConcurrentQueries)$
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.051s
+Final test-only pinned SQLite ordinary oracle: go test -tags=oracle -count=1 ./internal/pager -run ^TestTxOracle
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.146s
+Final scoped Linux default vet: ./internal/vfs ./internal/pager ./internal/walindex ./sqlite ./driver
+linux/amd64 final public/internal production build PASS (cross-targets compile only)
+linux/arm64 final public/internal production build PASS (cross-targets compile only)
+windows/amd64 final public/internal production build PASS (cross-targets compile only)
+darwin/arm64 final public/internal production build PASS (cross-targets compile only)
+windows/amd64 final scoped test compilation PASS; no binary executed
+darwin/arm64 final scoped test compilation PASS; no binary executed
+Final manual recovery compiled only, never executed.
+Sat Oct 10 15:15:13 UTC 2026
+
+Final default Windows cross-vet, including public SQLite/driver; known mapped-address warning is still explicitly disclosed.
+internal/vfs/native_windows.go:692:33: possible misuse of unsafe.Pointer
+Final default Windows cross-vet exit status: 1. This is not clean vet.
+
+Final scope qualification:
+All selected ordinary/model checks above passed. No aggregate ./... run or native
+Windows/Darwin execution is claimed. Default Windows cross-vet still exits 1 for
+its pre-existing OS-mapped-address unsafe.Pointer diagnostic. Native failure,
+physical durability, hostile namespace, interrupted publication/recovery, security
+and release acceptance remain NOT_RUN/unqualified.
+The independent reviewer examined final source and fixed propagation sites but
+ran no tests. Encstore public-path dependency remains frozen Git tree
+ d52c82cfa393f220bfcd2a6c54fe4f6c9b47b3d3.
+
+Pinned Go source provenance, read-only audit inputs (not owned modifications):
+32bdbb028336c434525559642424295c71c0dd6e4fef7cec1fd0739ec80feffb  ../toolchains/go1.27.2/src/os/types_windows.go
+90f01ab7b8a973df1c4588c3b40fae737c6d23d6548a1805e5f213e38def6df4  ../toolchains/go1.27.2/src/os/stat_windows.go
+c22ecd7dd18b10a3091f7c1d7deae868a64e7adcf046c8ca62d3666e73edfcc7  ../toolchains/go1.27.2/src/os/file_windows.go
+801a4135e7dbc63dbf392fb1b4dcfcd0c8b5d81c66dfaa8aff7ea98a8f708ccf  ../toolchains/go1.27.2/src/path/filepath/symlink_windows.go
+d4e5ae166c208c8d0fbbed9aa907208f7cc541100b8e04029a38f16f1b5da1b5  ../toolchains/go1.27.2/src/path/filepath/symlink.go

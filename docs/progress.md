@@ -105,7 +105,7 @@ Fresh restart, 2026-10-10 UTC. Historical work and test results are not acceptan
 - Limits: dense only, bounded training/query memory and work; no L1 IVF, no silent retraining, no automatic dynamic tuning or general SQL ANN hint. ANN approximation remains explicit in diagnostics. Restricted recovery and broader remaining code are not qualified by these ordinary results.
 
 ### M8: Authenticated encryption
-- Status: experimental snapshot, dirty-page WAL and Linux shared encrypted sessions implemented; non-Linux encrypted coordination remains required code. Physical tamper/recovery and independent security acceptance remain open.
+- Status: experimental snapshot, dirty-page WAL and Linux shared encrypted sessions implemented; Windows/amd64 coordination is implemented but native runtime unverified; Darwin encrypted coordination and Windows shared rekey remain required code. Physical tamper/recovery and independent security acceptance remain open.
 - Delivered: write-once AES256GCM records, domain-separated HKDFSHA256, bounded Argon2id, code KeyProvider lifecycle, strict bootstrap/record codecs and expected-location authentication. Final component unit0.921s/race4.113s/purego0.958s/vet passed; upstream RFC Argon2 test0.005s passed. AES/HKDF known answers, memory-only substitutions/truncation/nonce/provider/cancel/race tests pass; three10second actual fuzz campaigns total1400866 executions pass. Evidence m8-primitives.txt, ADR0010. At that primitive-only checkpoint no database encryption was integrated. The following increment supplies an explicit encrypted session; plaintext options still remain plaintext. No SEE compatibility or independent cryptographic audit is claimed.
 
 - Snapshot increment: native SQL/database/sql correct-key encrypted create/read/write/rollback/normal reopen; raw/password provider, full-page root/base authentication, stable Linux lifetime leases, rekey, portable encrypted backup/restore and explicit plaintext export/import. Changed commits copy full logical snapshot with fresh identities; no plaintext journal/WAL/staging path. Mode rejects native WAL options. ADR0011 and encryption-storage.md give the exact format/API/quotas.
@@ -398,3 +398,66 @@ or restored/remote result is inferred before observation.
   focused migration/CLI/example unit/race, full vet/build, four cross-builds,
   synthetic CLI output, modules and unchanged source inventory passed exit0 at
   2026-10-10T15:10:56Z. No live SQL execution occurred.
+
+S2 final immutable tree db470d2ec208a690202253db840620b219a6abdc completed full
+guarded CGO0 unit/vet/build, separate CGO1 race, pinned SQLite ordinary oracle,
+four cross-builds, module/no-CGO and unchanged source/fixture inventories at
+2026-10-10T15:15:24Z, exit0. See s2-expressions-aggregate.txt. Its exact Library
+restore focused checks are separate; one incorrect oracle environment variable
+failed before queries, then the corrected invocation passed without source edits.
+D exact Library restore focused unit/race/vet/build and identical synthetic text
+generation passed15:14:56Z. Remote CI terminal states are recorded separately.
+
+### Native Windows encrypted backend and public metadata correction
+- Delivered: managed retained-parent/child handles, native one-component relative
+  open/publication, full identity checks, exact lifecycle/writer/capture lock
+  ledger and strict case-family/name accounting. Shared mode2 supports readers,
+  writer, refresh/checkpoint and legacy upgrade. Protocol/storage bytes unchanged.
+- Windows shared rekey remains unsupported before provider acquisition; no
+  unlock/relock weakening. Native Windows/Darwin execution NOT_RUN. Directory
+  Sync supplies no namespace barrier; restricted physical gates remain open.
+- Corrected public plain VFS/pager/WAL-index metadata and Windows Open prelude:
+  bounded owner reservations, immutable complete IDs, terminal uncertain-close
+  tombstones, retained parents, preserved read/scan/map/close error causes.
+  Encrypted public paths forward to the same managed canonical backend.
+- Independent reviews repaired backend path/lifetime/accounting defects and
+  metadata poison erasure. Source/model/ordinary Linux checks and cross-builds
+  are scoped evidence; default Windows VFS cross-vet remains non-clean with its
+  disclosed native mapped-address warning. Earlier logs are not retroactively
+  promoted to cover the missing public metadata chain.
+- Evidence: native-encrypted-windows-*, encrypted-windows-independent-review,
+  native-plain-metadata-*, native-windows-metadata.md. Combined isolated source
+  927ebc2a40d1ff4926914aca6777b7a236fc8992 excludes future Darwin/ANN changes; lead
+  focused VFS/WAL-index/encstore/pager unit/race, public/encrypted/shared
+  lifecycle unit/race, full Linux vet/build, transaction oracle, five cross-builds,
+  six Windows package test-binary compilations, Windows encstore vet and unchanged
+  source inventory passed exit0 at2026-10-10T15:19:47Z. Failed-open shared-session retirement
+  retry remains a separate code gap. No full M3/M8/M10 acceptance follows.
+
+### Windows mapping-retirement source correction
+
+The unpublished candidate75552c9ecbf7788b581f154e2aaa4b134c37d771 was withdrawn
+before any branch update. A subsequent source review found the historical plain
+Windows mapping-object HANDLE could be passed to CloseHandle again after a prior
+close error; the failed MapView acquisition-cleanup path had the same issue.
+A close error does not prove the numeric handle is safely retryable. No native
+fault test was executed, and no data-loss incident is asserted.
+
+A portable private retirement state machine now backs both Windows paths. Its
+first uncertain close becomes a terminal retained tombstone; repeated cleanup
+returns the bounded retained cause without closing that handle or the exposed
+view again. Successful object close followed by failed view unmap remains a
+represented view retry. DMS/file protection and live Bytes are preserved while
+ownership is unresolved. Exact locks, identity and mapping granularity do not
+change. Independent three-path source review, memory/race and Windows compile
+checks are recorded separately. Earlier metadata/native review evidence did not
+prove this mapping path safe and is retained as historical scoped evidence.
+
+Replacement Windows source tree8f9025bccbfcdc65458c276d683a1485b5a9290e completed
+focused VFS/WAL-index/encstore/pager CGO0 unit and separate CGO1 race, ordinary
+public/encrypted/shared lifecycle checks, full Linux vet/build, pinned transaction
+oracle, five cross-builds, six Windows package test-binary compilations, scoped
+Windows encstore vet and unchanged source inventory at2026-10-10T15:40:52Z, exit0.
+See native-windows-corrected-lead-checks.txt. Default Windows VFS vet remains
+non-clean with its mapped-address diagnostic. Remote publication, exact Library
+restore and exact-SHA CI are separate pending steps, not inferred passes.

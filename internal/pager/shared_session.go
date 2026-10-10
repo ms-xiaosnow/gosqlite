@@ -81,11 +81,11 @@ func OpenSharedSession(ctx context.Context, path string, opts Options) (result *
 	if err != nil {
 		return nil, err
 	}
-	resolved, err := filepath.EvalSymlinks(path)
+	resolved, err := resolveNativePath(path)
 	if err == nil {
 		path = resolved
 	} else if opts.Create && os.IsNotExist(err) {
-		dir, e := filepath.EvalSymlinks(filepath.Dir(path))
+		dir, e := resolveNativePath(filepath.Dir(path))
 		if e != nil {
 			return nil, e
 		}
@@ -114,9 +114,9 @@ func OpenSharedSession(ctx context.Context, path string, opts Options) (result *
 				}
 			}
 			if s.walFile != nil {
-				retErr = errors.Join(retErr, s.walFile.Close())
+				retErr = errors.Join(retErr, closeNativeFile(s.walFile))
 			}
-			retErr = errors.Join(retErr, f.Close())
+			retErr = errors.Join(retErr, closeNativeFile(f))
 		}
 	}()
 	if err = lockShared(f); err != nil {
@@ -141,7 +141,7 @@ func OpenSharedSession(ctx context.Context, path string, opts Options) (result *
 		if err = main.checkJournalLocked(); err != nil {
 			return nil, err
 		}
-		if st, e := os.Lstat(path + "-wal"); e == nil && st.Size() != 0 {
+		if st, e := nativeLstat(path + "-wal"); e == nil && st.Size() != 0 {
 			return nil, fmt.Errorf("%w: nonempty WAL with rollback database", ErrUnsupported)
 		} else if e != nil && !os.IsNotExist(e) {
 			return nil, e
@@ -208,7 +208,7 @@ func (s *SharedSession) checkStableLocked() error {
 	if err := s.checkOpenLocked(); err != nil {
 		return err
 	}
-	if _, err := os.Lstat(s.path + "-journal"); err == nil {
+	if _, err := nativeLstat(s.path + "-journal"); err == nil {
 		return fmt.Errorf("%w: journal beside shared WAL", ErrRecoveryRequired)
 	} else if !os.IsNotExist(err) {
 		return err
@@ -220,12 +220,15 @@ func (s *SharedSession) checkStableLocked() error {
 		if err := validateNativePath(entry.f); err != nil {
 			return err
 		}
-		st, err := entry.f.Stat()
+		st, err := statNativeFile(entry.f)
 		if err != nil {
 			return err
 		}
-		other, err := os.Lstat(entry.path)
-		if err != nil || !st.Mode().IsRegular() || !other.Mode().IsRegular() || !os.SameFile(st, other) {
+		other, err := nativeLstat(entry.path)
+		if err != nil {
+			return errors.Join(ErrChanged, err)
+		}
+		if !st.Mode().IsRegular() || !other.Mode().IsRegular() || !vfs.SameFile(st, other) {
 			return fmt.Errorf("%w: shared WAL pathname %s", ErrChanged, entry.path)
 		}
 		if err = validateWritableFile(entry.f); err != nil {
@@ -290,7 +293,7 @@ func (s *SharedSession) readLogicalHeaderLocked(ctx context.Context, r sharedRea
 	if err != nil {
 		return Header{}, nil, err
 	}
-	st, err := s.file.Stat()
+	st, err := statNativeFile(s.file)
 	if err != nil {
 		return Header{}, nil, err
 	}
@@ -333,19 +336,19 @@ func (s *SharedSession) readPageLocked(ctx context.Context, r sharedRead, pageSi
 	}
 	page := make([]byte, pageSize)
 	if frame == 0 {
-		if _, err := s.file.ReadAt(page, int64(n-1)*int64(pageSize)); err != nil {
+		if _, err := readNativeAt(s.file, page, int64(n-1)*int64(pageSize)); err != nil {
 			return nil, err
 		}
 	} else {
 		off := int64(wal.HeaderSize) + int64(frame-1)*(int64(wal.FrameHeaderSize)+int64(pageSize))
 		var fh [wal.FrameHeaderSize]byte
-		if _, err := s.walFile.ReadAt(fh[:], off); err != nil {
+		if _, err := readNativeAt(s.walFile, fh[:], off); err != nil {
 			return nil, err
 		}
 		if binary.BigEndian.Uint32(fh[:4]) != n || !bytes.Equal(fh[8:16], r.hdr.Salt[:]) {
 			return nil, fmt.Errorf("%w: indexed WAL frame identity", ErrCorrupt)
 		}
-		if _, err := s.walFile.ReadAt(page, off+wal.FrameHeaderSize); err != nil {
+		if _, err := readNativeAt(s.walFile, page, off+wal.FrameHeaderSize); err != nil {
 			return nil, err
 		}
 	}
@@ -425,7 +428,7 @@ func (s *SharedSession) Close() error {
 		// A later Close can retry cleanup; no transaction may continue.
 		return s.poisonLocked(errors.Join(err, sharedIndexError(closeErr)))
 	}
-	err = errors.Join(err, s.walFile.Close(), s.file.Close())
+	err = errors.Join(err, closeNativeFile(s.walFile), closeNativeFile(s.file))
 	s.file = nil
 	s.walFile = nil
 	s.index = nil

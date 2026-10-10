@@ -3,6 +3,7 @@ package pager
 import (
 	"errors"
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/ms-xiaosnow/gosqlite/internal/vfs"
@@ -57,4 +58,34 @@ func openJournal(path string, flags int) (*vfs.File, error) {
 }
 func openReadOnlyDatabase(path string) (*vfs.File, error) {
 	return openNativeFile(path, vfs.OpenOptions{Role: vfs.Database, Flags: os.O_RDONLY})
+}
+
+// Metadata helpers preserve native ownership errors while retaining ordinary
+// os.IsNotExist behavior for absent sidecars and the authorized create path.
+func nativeLstat(path string) (os.FileInfo, error) {
+	info, err := vfs.Lstat(path)
+	return info, nativeFileError(err)
+}
+func resolveNativePath(path string) (string, error) {
+	resolved, err := vfs.ResolvePath(path)
+	return resolved, nativeFileError(err)
+}
+
+func statNativeFile(f *vfs.File) (os.FileInfo, error) {
+	info, err := f.Stat()
+	return info, nativeFileError(err)
+}
+
+func readNativeAt(f io.ReaderAt, b []byte, off int64) (int, error) {
+	n, err := f.ReadAt(b, off)
+	return n, nativeFileError(err)
+}
+func closeNativeFile(f interface{ Close() error }) error { return nativeFileError(f.Close()) }
+
+// Preserve ownership classification through generic ReaderAt consumers such
+// as the WAL scanner and io.SectionReader without exposing a raw descriptor.
+type nativeReaderAt struct{ file io.ReaderAt }
+
+func (r nativeReaderAt) ReadAt(b []byte, off int64) (int, error) {
+	return readNativeAt(r.file, b, off)
 }

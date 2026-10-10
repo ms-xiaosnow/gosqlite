@@ -1,0 +1,33 @@
+Combined Windows backend/public metadata source audit and ordinary/compile checks.
+No native Windows runtime or physical failure qualification.
+
+Combined reviewed Windows encrypted backend and public/plain metadata correction; Windows native NOT_RUN. Darwin/typed ANN excluded.
+927ebc2a40d1ff4926914aca6777b7a236fc8992
+2026-10-10T15:18:20Z
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.136s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	0.148s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	0.176s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.210s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	2.495s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.184s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-shared	0.011s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	1.465s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	3.035s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	1.608s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.783s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	14.741s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.849s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-shared	1.052s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.270s
+cross-build linux/amd64 PASS
+cross-build linux/arm64 PASS
+cross-build darwin/arm64 PASS
+cross-build windows/amd64 PASS
+cross-build windows/arm64 PASS
+Windows encstore vet PASS; plain VFS has separately disclosed mapping diagnostic.
+all modules verified
+2026-10-10T15:19:47Z
+WINDOWS INTEGRATED SOURCE CHECKS PASS

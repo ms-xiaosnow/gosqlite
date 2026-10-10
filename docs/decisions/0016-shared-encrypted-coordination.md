@@ -127,8 +127,11 @@ checks. The disposable `examples/encrypted-shared` exercises the ordinary path.
 
 No disk tamper, wrong-key disk open, missing selected object, hostile namespace
 race, failed native I/O, short write, disk-full/permission fault, forced process
-exit, crash/hot recovery or interrupted publication/rekey was executed. Native
-Darwin/Windows encrypted coordination remains unsupported. Cryptographic/legal
+exit, crash/hot recovery or interrupted publication/rekey was executed. Darwin encrypted coordination remains unsupported. Windows/amd64 now has a
+[bounded native implementation](../native-encrypted-windows.md), verified only
+by compilation and portable memory laws. Windows shared-mode rekey remains an
+explicit implementation gap; no directory namespace persistence barrier is
+provided. Native Windows runtime acceptance is NOT_RUN. Cryptographic/legal
 review, hostile-namespace security, externally protected freshness, secure erase
 and physical durability remain separate gates. Full M8 and production readiness
 are not claimed.

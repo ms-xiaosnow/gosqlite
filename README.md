@@ -60,7 +60,7 @@ SQLITE_ORACLE=/absolute/path/to/verified/sqlite3 ./scripts/test-oracle.sh
 
 See [progress](docs/progress.md), [compatibility](docs/compatibility.md), [architecture](docs/architecture.md), [sources](docs/upstream.md), and [manual verification](docs/manual-verification.md). The unchanged [original goal](goal.md) remains the contract. [Restart protocol](docs/restart.md) and checkpoint records preserve durable development history.
 
-Qualified crash recovery, non-Linux encrypted coordination, broader SQL and all extended-vector ANN integration, and full-table/online pg_embedding transition work remain unfinished implementation work. Full SQLite/PostgreSQL semantics, SEE file compatibility and production security are not claimed.
+Qualified crash recovery, Darwin encrypted coordination and Windows shared rekey, broader SQL and all extended-vector ANN integration, and full-table/online pg_embedding transition work remain unfinished implementation work. Full SQLite/PostgreSQL semantics, SEE file compatibility and production security are not claimed.
 
 
 ## Explicit exclusive WAL
@@ -200,7 +200,10 @@ See [native policy](docs/decisions/0015-native-darwin-windows-backends.md).
 On Linux, EncryptionWALShared explicitly selects authenticated layout3. Readers
 retain an immutable authenticated head while a writer commits or checkpoints;
 legacy layouts are never silently upgraded. Run examples/encrypted-shared only
-with disposable data. Non-Linux encrypted backends, retained-history collection,
+with disposable data. A Windows/amd64 encrypted backend now implements legacy
+and shared-session paths under its strict local-NTFS policy, with native runtime
+unverified; Windows shared rekey and Darwin encrypted storage remain unsupported
+code in this checkpoint. Retained-history collection,
 external freshness guarantees and independent security acceptance remain open.
 
 ## Sparse exact vectors
@@ -242,3 +245,14 @@ SQL is executed. Explicit target index retuning, global hnsw access-method colli
 PK cursor state, exhaustive binary32 verification and rollback limits are included.
 See [transition contracts](docs/migration-transition.md). Full-table/dependency
 recreation, online operation and actual PostgreSQL validation remain required work.
+
+## Windows managed metadata and encrypted storage
+
+Windows/amd64 now has handle-relative encrypted publication and exact lifecycle/
+writer/capture locks. Public plain and encrypted Open paths use managed bounded
+metadata observations; full native IDs and uncertain-close tombstones are retained.
+These are source/model and cross-build results, not Windows runtime acceptance.
+Shared encrypted rekey remains unsupported, directory namespace barriers are not
+supplied, and default Windows VFS vet retains a disclosed mapping diagnostic. See
+[encrypted policy](docs/native-encrypted-windows.md) and
+[metadata correction](docs/native-windows-metadata.md).

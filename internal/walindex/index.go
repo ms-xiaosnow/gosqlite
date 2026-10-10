@@ -2,6 +2,7 @@ package walindex
 
 import (
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -38,7 +39,7 @@ func Open(path string) (*Index, error) { return OpenWithLimit(path, DefaultMaxFr
 // OpenWithLimit takes a SHM pathname (normally databasePath+"-shm"), not a
 // database pathname. Zero selects DefaultMaxFrames. It acquires the DMS lock
 // using SQLite's first-opener protocol without extending or mapping the file.
-func OpenWithLimit(path string, maxFrames uint32) (*Index, error) {
+func OpenWithLimit(path string, maxFrames uint32) (result *Index, retErr error) {
 	if maxFrames == 0 {
 		maxFrames = DefaultMaxFrames
 	}
@@ -47,9 +48,9 @@ func OpenWithLimit(path string, maxFrames uint32) (*Index, error) {
 		return nil, err
 	}
 	// Resolve directory aliases only. A final-component symlink is forbidden.
-	dir, err := filepath.EvalSymlinks(filepath.Dir(p))
+	dir, err := vfs.ResolvePath(filepath.Dir(p))
 	if err != nil {
-		return nil, err
+		return nil, nativeError(err)
 	}
 	p = filepath.Join(dir, filepath.Base(p))
 	f, err := openFile(p)
@@ -59,7 +60,7 @@ func OpenWithLimit(path string, maxFrames uint32) (*Index, error) {
 	ok := false
 	defer func() {
 		if !ok {
-			_ = f.Close()
+			retErr = errors.Join(retErr, nativeError(f.Close()))
 		}
 	}()
 	unit := BlockSize
@@ -94,7 +95,7 @@ func (x *Index) statLocked() (os.FileInfo, error) {
 	}
 	info, err := x.file.Stat()
 	if err != nil {
-		return nil, err
+		return nil, nativeError(err)
 	}
 	if !info.Mode().IsRegular() {
 		return nil, fmt.Errorf("%w: sidecar is not a regular file", ErrIdentity)
@@ -102,11 +103,11 @@ func (x *Index) statLocked() (os.FileInfo, error) {
 	if err = nativeError(x.file.ValidateSingleLink()); err != nil {
 		return nil, err
 	}
-	named, err := os.Lstat(x.path)
+	named, err := vfs.Lstat(x.path)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %v", ErrIdentity, err)
+		return nil, fmt.Errorf("%w: %w", ErrIdentity, nativeError(err))
 	}
-	if named.Mode()&os.ModeSymlink != 0 || !os.SameFile(info, named) || (x.identity != nil && !os.SameFile(info, x.identity)) {
+	if named.Mode()&os.ModeSymlink != 0 || !vfs.SameFile(info, named) || (x.identity != nil && !vfs.SameFile(info, x.identity)) {
 		return nil, fmt.Errorf("%w: sidecar pathname no longer names the opened file", ErrIdentity)
 	}
 	if info.Size() < x.mappedEnd {
@@ -225,7 +226,7 @@ func (x *Index) blockLocked(block uint32, extend bool) ([]byte, error) {
 		for tail := (info.Size()/page+1)*page - 1; tail < end; tail += page {
 			n, e := x.file.WriteAt(zero[:], tail)
 			if e != nil {
-				return nil, fmt.Errorf("extend WAL-index: %w", e)
+				return nil, fmt.Errorf("extend WAL-index: %w", nativeError(e))
 			}
 			if n != 1 {
 				return nil, fmt.Errorf("extend WAL-index: %w", io.ErrShortWrite)
@@ -240,7 +241,7 @@ func (x *Index) blockLocked(block uint32, extend bool) ([]byte, error) {
 	}
 	b, err := x.file.MapShared(base, x.mapSize)
 	if err != nil {
-		return nil, fmt.Errorf("map WAL-index: %w", err)
+		return nil, fmt.Errorf("map WAL-index: %w", nativeError(err))
 	}
 	x.maps[base] = b
 	if end > x.mappedEnd {

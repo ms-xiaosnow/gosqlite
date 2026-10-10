@@ -102,7 +102,7 @@ func (t *Tx) Commit(ctx context.Context) error {
 	if len(t.dirty) == 0 {
 		var err error
 		if !t.keepFile {
-			err = t.file.Close()
+			err = closeNativeFile(t.file)
 		}
 		t.file = nil
 		t.free = nil
@@ -243,7 +243,7 @@ func (t *Tx) Commit(ctx context.Context) error {
 	}
 	t.header = finalHeader
 	if !t.keepFile {
-		err = t.file.Close()
+		err = closeNativeFile(t.file)
 	}
 	t.file = nil
 	t.dirty = nil
@@ -274,7 +274,7 @@ func (t *Tx) poison(cause error, recovery bool) error {
 		return t.poisoned
 	}
 	if t.file != nil {
-		cause = errors.Join(cause, t.file.Close())
+		cause = errors.Join(cause, closeNativeFile(t.file))
 		t.file = nil
 	}
 	if recovery {

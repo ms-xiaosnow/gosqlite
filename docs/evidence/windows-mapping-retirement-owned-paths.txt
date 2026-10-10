@@ -1,0 +1,10 @@
+internal/vfs/native_windows.go
+internal/vfs/mapping_retirement.go
+internal/vfs/mapping_retirement_test.go
+docs/native-windows.md
+docs/windows-mapping-retirement.md
+docs/evidence/windows-mapping-retirement-components.txt
+docs/evidence/windows-mapping-retirement-checks.txt
+docs/evidence/windows-mapping-retirement-independent-review.txt
+docs/evidence/windows-mapping-retirement-owned-paths.txt
+docs/evidence/windows-mapping-retirement-source-sha256.txt

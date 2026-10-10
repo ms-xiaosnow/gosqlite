@@ -1,0 +1,163 @@
+2026-10-10. Native encrypted Windows bounded implementation evidence.
+Host: Linux amd64. Native Windows/Darwin execution: NOT_RUN.
+Working directory: durable-restart/gosqlite.
+No staging, commit, branch/ref publication, dependency install or download by
+this worker. Plain VFS sources were not edited. This is a scoped component
+checkpoint, not an aggregate M3/M8/M10/security/durability acceptance pass.
+
+Final source freeze
+-------------------
+The 22 reviewed source/doc paths and SHA-256 hashes are recorded in
+  docs/evidence/native-encrypted-windows-source-sha256.txt
+The manifest includes the independent reviewer's windows_review_test.go.
+All 22 hashes were checked before and after final tests/builds and remained
+unchanged. Linux's syscall backend is byte-identical to the frozen baseline:
+  56cdfaa91f7a77fb4e9e1674b39b0e2dcf23eb93fdf5a219dd5f95de2ad27112  internal/encstore/platform_linux.go
+A direct cmp against the pre-edit copy also passed. Formats, authenticated
+protocol values, legacy modes/layouts, shared layout 3 and content commitments
+were not changed. Frozen layout vectors remain passing.
+
+Toolchain and environment for every owner-run Go check
+-----------------------------------------------------
+  ../toolchains/go1.27.2/bin/go
+  GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off
+  GOPATH="$PWD/../go-path" GOCACHE="$PWD/../go-cache" CGO_ENABLED=0
+  go version -> go version go1.27.2 linux/amd64
+Production build/test checks used CGO=0. Separate Linux race runs explicitly
+used CGO_ENABLED=1, without adding CGO to production dependencies.
+
+Behavioral scope audit and guard
+-------------------------------
+Before execution, inspected the exact selected tests and their helpers.
+New exact-lock, handle-lifetime, filename and independent composition tests
+operate only on Go values and synthetic callbacks; no OS handle exists in those
+failure models. Existing selected disk histories use correct credentials,
+intact files, ordinary publication/checkpoint/rollback/rekey and clean close.
+The filename tests cover classification and UTF-16 lengths entirely in memory.
+No prohibited workflow is hidden in the selected helpers.
+  go run ./internal/testscope
+  PASS: Ordinary test source-reference guard PASS; behavioral review is still required.
+The final guard ran before any final selected test. Earlier focused new-law
+runs likewise followed an audited source guard.
+
+Final Linux ordinary and portable memory execution
+-------------------------------------------------
+Exact selected encrypted-store pattern (26 test functions, plus subcases):
+  ENC='^(TestExactByteLocksMemory.*|TestEncryptedHandleLifetimeMemory.*|TestEncryptedFamily(PrefixMemoryCanonicalTail|NameMemoryUTF16Envelope)|TestWindowsReviewMemory.*|TestSnapshotManifestCanonicalMemory|TestInventoryAccountingMemory|TestWALFormatFrozenMemoryVectors|TestSharedLayoutFrozenMemoryModeAndProtocol|TestReviewSharedIntactPinnedSelectionAndLedger|TestReviewSharedIntactConcurrentReaderAndPublisher)$'
+  go test ./internal/encstore -run "$ENC" -count=1
+  PASS, package 0.025s.
+
+This includes 11 exact-lock laws, 3 resource-lifetime laws, 2 family-name laws,
+4 independent lock/lifetime composition laws, 4 preserved format/accounting
+vectors and 2 intact shared-reader/publisher histories. Exact-lock tests include
+all 64 held-state arrays and 192 partial-close positions. Every failure result
+in these laws is produced only by a memory callback, never an OS syscall.
+
+Exact selected public API pattern (4 test functions):
+  SQL='^(TestEncryptionOrdinaryLifecycleAndCopies|TestEncryptionSharedReadersWriterAndStalePromotion|TestEncryptionSharedLazySavepointsAndNoopRelease|TestEncryptionSharedQuiescentRekeyAndLeaseRetention)$'
+  go test ./sqlite -run "$SQL" -count=1
+  PASS, package 0.034s.
+These cover ordinary correct-key create/read/write, rekey then correct-key
+reopen, archive/restore/explicit copy, pinned readers, writer BUSY, stale
+promotion, checkpoint and savepoints on Linux. They do not prove Windows
+runtime or Windows shared-mode rekey support.
+
+Separate race execution on Linux:
+  CGO_ENABLED=1 go test -race ./internal/encstore -run "$ENC" -count=1
+  PASS, package 1.209s.
+  CGO_ENABLED=1 go test -race ./sqlite -run "$SQL" -count=1
+  PASS, package 1.233s.
+
+Final target source/build/compile checks
+---------------------------------------
+For each target below:
+  GOOS=<os> GOARCH=<arch> go build ./internal/encstore ./internal/pager ./sqlite ./driver
+  GOOS=<os> GOARCH=<arch> go test -c -o ../encrypted-platform-evidence/encstore-<os>-<arch>.test ./internal/encstore
+  linux/amd64   PASS
+  linux/arm64   PASS (compile only; no arm64 runtime in this work)
+  darwin/arm64  PASS (encrypted backend remains explicitly unsupported)
+  windows/amd64 PASS (real encrypted native implementation; runtime NOT_RUN)
+  windows/arm64 PASS (encrypted and plain native backends remain unsupported)
+
+  GOOS=windows GOARCH=amd64 go test -c -o ../encrypted-platform-evidence/sqlite-windows-amd64.test.exe ./sqlite
+  PASS. This compiles target integration tests, not an execution pass.
+  GOOS=windows GOARCH=amd64 go vet ./internal/encstore
+  PASS, default analyzer set, no suppression.
+  go vet ./internal/encstore
+  PASS on Linux.
+  git diff --check -- internal/encstore docs/native-encrypted-windows.md docs/encryption-storage.md docs/decisions/0016-shared-encrypted-coordination.md
+  PASS.
+The final shell used set -euo pipefail and exited 0. No cross-target executable
+was launched. The final raw command/results log is
+  ../encrypted-platform-evidence/final-reviewed-components.log
+
+Five new Windows-only tests compiled, never executed:
+  TestWindowsEncryptedExactLocksAndProbeLifetime
+  TestWindowsEncryptedRelativePublicationAndRetainedRoot
+  TestWindowsEncryptedStandaloneParentRetention
+  TestWindowsEncryptedPathPolicyMemory
+  TestWindowsEncryptedSharedRekeyPreflightMemory
+These include relative inventory, ordinary initial/replacement publication,
+retained legacy root bytes, exact native lock contention/downgrade, parent
+pins, closed public-directory refusal, native ordinal family classification,
+and unsupported shared rekey preflight. All are compile evidence only.
+
+Review corrections
+------------------
+Source owner found and corrected NT '.' self-directory normalization against
+pinned Go's empty-relative-name convention. Direct single-component opens use
+FILE_OPEN_REPARSE_POINT plus native handle inspection without depending on
+version-variable OBJ_DONT_REPARSE or weakening flags in a fallback.
+
+Independent review exposed generic os.Lstat/os.SameFile and EvalSymlinks paths
+that could create hidden metadata handles. All Windows canonical/path probes
+now go through the managed owner layer. Linux keeps its existing named-probe
+behavior in a build-excluded default helper. Windows ordinal family-prefix
+classification avoids case-alias history undercount while retaining strict tail
+grammar. A 177-UTF16-unit target bound reserves the longest generated .retained
+name before native opens, key-provider acquisition or lock creation. Inventory
+now opens only the chosen directory and reports final enumeration Close errors.
+Review details and independent evidence:
+  docs/evidence/encrypted-windows-independent-review.txt
+Independent source review is separate from independent cryptographic/security
+review and cannot qualify an unexecuted native runtime.
+
+Unsupported implementation / acceptance matrix
+---------------------------------------------
+Windows/amd64: native handles, relative namespace, exact locks, legacy modes,
+shared readers/writer/refresh/checkpoint and legacy-to-shared downgrade present.
+Windows shared-mode rekey: REQUIRED IMPLEMENTATION GAP. Existing protocol's
+shared-to-exclusive lifecycle conversion cannot be emulated atomically by
+LockFileEx. Prepare rejects it before provider/filesystem work; maintenance
+rejects it before writer reservation. No lock-drop/reacquire workaround.
+Darwin encrypted storage: REQUIRED IMPLEMENTATION GAP. Its entire encrypted
+managed-descriptor/lock inode set still needs coordinated POSIX inode ownership,
+deferred close and safe publication; platform_other remains explicit.
+Other OSes and Windows architectures: unsupported.
+Windows storage: local fixed NTFS and Windows 10 1709+, checked native identity;
+UNC/device/ADS, reparse/cloud/offline, unsupported filesystems and ambiguous names
+refused. User target basenames >177 UTF-16 units are refused conservatively.
+Windows directory Sync: no native namespace persistence barrier. Ordinary file
+FlushFileBuffers and native handle-relative rename do not qualify power loss.
+Windows/Darwin native runtime and cross-process encrypted acceptance: NOT_RUN.
+Independent security/legal release gates, M3 interrupted durability/recovery,
+and M10 long soak/release review remain separate open work.
+
+No disk tamper, wrong-key-on-disk, missing selected files, mutation-race,
+injected native I/O/lock/close/Sync failure, crash/process-exit, hot recovery,
+interrupted publication/rekey, or fault workflow was run here or elsewhere.
+No restricted work was moved to CI or another executor. No universal eventual
+cleanup is claimed: uncertain native close retains bounded handles/pins and
+can lose its public retry route while remaining privately represented.
+
+Final independent review completion
+-----------------------------------
+Frozen22 scoped engineering source review: PASS, no remaining concrete blocker
+identified within the encrypted backend's declared scope.
+The independent reviewer reran scoped CGO0 encstore/SQLite checks (0.021s/0.231s),
+separate CGO1 race checks (1.165s/1.286s), Windows encstore and SQLite test
+compilation, and default Windows encstore vet. All 22 source hashes remained
+stable before/after. Native Windows execution remains NOT_RUN.
+  19d284ae6ae55d4c51fab4975a534f538a2351fba89409ab6476b68d0b85a958  docs/evidence/encrypted-windows-independent-review.txt
+This does not resolve the separate plain-Windows metadata-resource observation,
+Darwin encrypted code gap, Windows shared-rekey gap, or broader release gates.

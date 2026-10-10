@@ -13,7 +13,7 @@ import (
 
 type object struct {
 	ns          *namespace
-	file        *os.File
+	file        *managedFile
 	info        os.FileInfo
 	path        string
 	header      encryption.Header
@@ -22,7 +22,7 @@ type object struct {
 	hash        [32]byte
 }
 
-func checkedFile(path string, flags int) (*os.File, os.FileInfo, error) {
+func checkedFile(path string, flags int) (*managedFile, os.FileInfo, error) {
 	f, err := openFile(path, flags)
 	if err != nil {
 		return nil, nil, err
@@ -35,11 +35,7 @@ func checkedFile(path string, flags int) (*os.File, os.FileInfo, error) {
 		err = validateLinks(f)
 	}
 	if err == nil {
-		var named os.FileInfo
-		named, err = os.Lstat(path)
-		if err == nil && (!named.Mode().IsRegular() || !os.SameFile(st, named)) {
-			err = ErrChanged
-		}
+		err = platformFileCheck(f, path, st)
 	}
 	if err != nil {
 		_ = f.Close()
@@ -47,19 +43,18 @@ func checkedFile(path string, flags int) (*os.File, os.FileInfo, error) {
 	}
 	return f, st, nil
 }
-func stableFile(f *os.File, path string, info os.FileInfo) error {
+func stableFile(f *managedFile, path string, info os.FileInfo) error {
 	now, err := f.Stat()
 	if err != nil {
 		return err
 	}
-	named, err := os.Lstat(path)
-	if err != nil {
-		return err
-	}
-	if !named.Mode().IsRegular() || !os.SameFile(now, named) || !os.SameFile(info, now) || now.Size() != info.Size() || !now.ModTime().Equal(info.ModTime()) {
+	if !os.SameFile(info, now) || now.Size() != info.Size() || !now.ModTime().Equal(info.ModTime()) {
 		return ErrChanged
 	}
-	return validateLinks(f)
+	if err = validateLinks(f); err != nil {
+		return err
+	}
+	return platformFileCheck(f, path, info)
 }
 func readExact(f io.ReaderAt, size int, off int64) ([]byte, error) {
 	b := make([]byte, size)

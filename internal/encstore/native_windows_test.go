@@ -1,0 +1,240 @@
+//go:build windows && amd64
+
+package encstore
+
+import (
+	"bytes"
+	"context"
+	"errors"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+
+	"github.com/ms-xiaosnow/gosqlite/encryption"
+)
+
+// These tests are compile-only on non-Windows hosts. They exercise ordinary
+// cooperating ownership and successful publication, never injected native
+// errors, hostile namespace mutation, disk tamper, or interrupted operations.
+func TestWindowsEncryptedExactLocksAndProbeLifetime(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "locks.gse")
+	ns, err := newNamespace(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ns.dir.Close()
+	a, _, err := ns.checked(path+".gse-lock", os.O_RDWR|os.O_CREATE|os.O_EXCL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer a.Close()
+	b, _, err := ns.checked(path+".gse-lock", os.O_RDWR)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer b.Close()
+	if err = lockFile(a, true); err != nil {
+		t.Fatal(err)
+	}
+	if err = lockFile(b, true); err != nil {
+		t.Fatal(err)
+	}
+	if err = rangeLock(a, writerByte, false, false); err != nil {
+		t.Fatal(err)
+	}
+	for i := 0; i < 4; i++ {
+		probe, _, err := ns.checked(path+".gse-lock", os.O_RDONLY)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err = probe.Close(); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err = rangeLock(b, writerByte, false, false); !errors.Is(err, ErrBusy) {
+		t.Fatal("sibling close lost writer", err)
+	}
+	if err = rangeLock(a, captureByte, true, false); err != nil {
+		t.Fatal(err)
+	}
+	if err = rangeLock(b, captureByte, true, false); err != nil {
+		t.Fatal(err)
+	}
+	if err = rangeLock(a, captureByte, false, true); err != nil {
+		t.Fatal(err)
+	}
+	if err = rangeLock(b, captureByte, false, true); err != nil {
+		t.Fatal(err)
+	}
+	if err = rangeLock(a, captureByte, false, false); err != nil {
+		t.Fatal(err)
+	}
+	if err = rangeLock(b, captureByte, true, false); !errors.Is(err, ErrBusy) {
+		t.Fatal("capture gate", err)
+	}
+	if err = a.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if err = rangeLock(b, writerByte, false, false); err != nil {
+		t.Fatal("writer not released", err)
+	}
+	if err = b.Close(); err != nil {
+		t.Fatal(err)
+	}
+	c, _, err := ns.checked(path+".gse-lock", os.O_RDWR)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer c.Close()
+	if err = lockFile(c, false); err != nil {
+		t.Fatal(err)
+	}
+	if err = rangeLock(c, lifecycleByte, true, false); err != nil {
+		t.Fatal("stacked downgrade", err)
+	}
+	d, _, err := ns.checked(path+".gse-lock", os.O_RDONLY)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer d.Close()
+	if err = lockFile(d, true); err != nil {
+		t.Fatal("downgraded shared lease", err)
+	}
+}
+func TestWindowsEncryptedRelativePublicationAndRetainedRoot(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "ordinary Ω family.gse")
+	ns, err := newNamespace(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ns.dir.Close()
+	lock, _, err := ns.checked(path+".gse-lock", os.O_RDWR|os.O_CREATE|os.O_EXCL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer lock.Close()
+	if err = lockFile(lock, false); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = inventory(context.Background(), path, 1<<20, 64, ns); err != nil {
+		t.Fatal("relative directory inventory", err)
+	}
+	pending := path + ".gse-" + strings.Repeat("a", 64) + ".pending"
+	if err = ns.write(pending, []byte("first")); err != nil {
+		t.Fatal(err)
+	}
+	if err = ns.rename(pending, path, true); err != nil {
+		t.Fatal(err)
+	}
+	root, info, err := ns.checked(path, os.O_RDONLY)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer root.Close()
+	if err = ns.stable(root, path, info); err != nil {
+		t.Fatal(err)
+	}
+	next := path + ".gse-" + strings.Repeat("b", 64) + ".pending"
+	if err = ns.write(next, []byte("after")); err != nil {
+		t.Fatal(err)
+	}
+	if err = ns.rename(next, path, false); err != nil {
+		t.Fatal(err)
+	}
+	// Replacement is an ordinary authorized cutover. The older open handle
+	// retains its original bytes until explicit close, without a copy fallback.
+	old, err := readExact(root, 5, 0)
+	if err != nil || !bytes.Equal(old, []byte("first")) {
+		t.Fatal("old root handle", err)
+	}
+	current, ci, err := ns.checked(path, os.O_RDONLY)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer current.Close()
+	raw, err := readExact(current, 5, 0)
+	if err != nil || !bytes.Equal(raw, []byte("after")) {
+		t.Fatal("new root handle", err)
+	}
+	if err = ns.stable(current, path, ci); err != nil {
+		t.Fatal(err)
+	}
+	if err = ns.check(); err != nil {
+		t.Fatal(err)
+	}
+}
+func TestWindowsEncryptedStandaloneParentRetention(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "archive.gse")
+	file, info, err := checkedFile(path, os.O_RDWR|os.O_CREATE|os.O_EXCL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// openFile has released its public directory lease; this child still owns
+	// the actual pin and supports relative identity probes until physical close.
+	parent := file.parent
+	if parent == nil || !parent.closed || parent.raw == nil || parent.children != 1 {
+		t.Fatal("directory pin not retained")
+	}
+	if err = platformDirectoryCheck(parent, parent.path, nil); !errors.Is(err, encryption.ErrClosed) {
+		t.Fatal("closed public directory reuse", err)
+	}
+	if err = stableFile(file, path, info); err != nil {
+		t.Fatal(err)
+	}
+	if err = file.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if parent.raw != nil || parent.children != 0 {
+		t.Fatal("last child did not retire directory")
+	}
+	if err = file.Close(); err != nil {
+		t.Fatal(err)
+	}
+}
+func TestWindowsEncryptedPathPolicyMemory(t *testing.T) {
+	for _, path := range []string{`C:\data\valid.gse`, `\\?\C:\data\valid.gse`, `ordinary Ω.gse`} {
+		if err := platformInputPath(path); err != nil {
+			t.Fatal(path, err)
+		}
+	}
+	for _, path := range []string{`\\server\share\db`, `\\.\C:\db`, `C:db`, `C:\db:stream`, `C:\AUX.gse`, `C:\db.`, `C:\db `, `C:\..\db`, string([]byte{0xff})} {
+		if err := platformInputPath(path); !errors.Is(err, ErrUnsupported) {
+			t.Fatal("ambiguous path accepted", path, err)
+		}
+	}
+	id := strings.Repeat("a", 64)
+	for _, name := range []string{"ORDINARY Ω.GSE", "ORDINARY Ω.GSE.GSE-LOCK", "ORDINARY Ω.GSE.GSE-" + id + ".base"} {
+		member, err := platformFamilyEntry(name, "ordinary ω.gse")
+		if err != nil || !member {
+			t.Fatal("native ordinal family prefix", name, err)
+		}
+	}
+	if _, err := platformFamilyEntry("ORDINARY Ω.GSE.GSE-"+id+".BASE", "ordinary ω.gse"); !errors.Is(err, ErrUnsupported) {
+		t.Fatal("noncanonical family suffix", err)
+	}
+
+	if _, err := canonicalPath(`C:\path-never-opened\` + strings.Repeat("a", 178)); !errors.Is(err, ErrUnsupported) {
+		t.Fatal("family envelope preflight", err)
+	}
+
+}
+
+type windowsForbiddenProvider struct{ calls int }
+
+func (p *windowsForbiddenProvider) Acquire(context.Context, encryption.KeyRequest) (encryption.KeyMaterial, error) {
+	p.calls++
+	return nil, errors.New("provider must not be called")
+}
+func TestWindowsEncryptedSharedRekeyPreflightMemory(t *testing.T) {
+	p := &windowsForbiddenProvider{}
+	cfg := Options{Mode: WALShared, CredentialKind: encryption.RawKey256, KeyProvider: p}
+	prepared, err := Prepare(context.Background(), `C:\path-never-opened\db.gse`, cfg, encryption.OperationRekeyTarget, [16]byte{1})
+	if prepared != nil || !errors.Is(err, ErrUnsupported) || p.calls != 0 {
+		t.Fatal("unsupported operation touched provider", err, p.calls)
+	}
+	s := Store{opts: cfg}
+	if err = s.BeginMaintenance(context.Background(), true); !errors.Is(err, ErrUnsupported) || s.writerOwned {
+		t.Fatal("unsupported operation reserved writer", err)
+	}
+}

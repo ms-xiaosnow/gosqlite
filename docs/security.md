@@ -4,7 +4,7 @@ Test-scope correction: historical full suites from M2 through 7addc493 included 
 
 This is a development project, not production-ready. M2 can modify a supported SQLite subset. It validates supported catalog grammar and whole-file page ownership, holds native Linux locks, bounds dirty pages and refuses layouts it cannot preserve. No crash/recovery durability qualification exists. Never use irreplaceable data with this development build. No security or legal review has been completed.
 
-The encryption package implements experimental memory-only AES-256-GCM authenticated-record primitives with unique writer nonces, bound file/page/frame identity, explicit raw-key versus passphrase modes and bounded Argon2id parameters. The M8 snapshot and dirty-page WAL storage slices connect these primitives to SQL and code-configured driver connections, immutable authenticated roots/bases, rekey, encrypted backup/restore, and explicit plaintext export/import. Set `sqlite.Options.Encryption` to select it; nil keeps the ordinary plaintext engine. Immutable authenticated WAL segments, bounded overlay replay and checkpoint are implemented; Linux EncryptionWALShared implements concurrent readers and one writer; non-Linux encrypted coordination and full M8 acceptance remain open. The independent container is not SQLite/SEE ciphertext compatibility; no SEE private source is accessed. Keys must enter only through code-configured providers, never argv, DSNs, SQL, logs, repository files, or examples with usable static secrets.
+The encryption package implements experimental memory-only AES-256-GCM authenticated-record primitives with unique writer nonces, bound file/page/frame identity, explicit raw-key versus passphrase modes and bounded Argon2id parameters. The M8 snapshot and dirty-page WAL storage slices connect these primitives to SQL and code-configured driver connections, immutable authenticated roots/bases, rekey, encrypted backup/restore, and explicit plaintext export/import. Set `sqlite.Options.Encryption` to select it; nil keeps the ordinary plaintext engine. Immutable authenticated WAL segments, bounded overlay replay and checkpoint are implemented; Linux EncryptionWALShared implements concurrent readers and one writer; Windows/amd64 native coordination is implemented but unexecuted; Darwin encrypted coordination, Windows shared rekey and full M8 acceptance remain open. The independent container is not SQLite/SEE ciphertext compatibility; no SEE private source is accessed. Keys must enter only through code-configured providers, never argv, DSNs, SQL, logs, repository files, or examples with usable static secrets.
 
 AEAD cannot prevent whole-family historical rollback without externally protected freshness state. Under a reused credential, an unrelated complete valid encrypted family can be substituted unless the application also checks an externally protected expected identity. Internal parent hashes, commit sequences and authenticated roots are not that external expectation; the public storage APIs do not accept an expected-root identity/freshness token. Metadata sizes/IDs/KDF costs, access patterns, process memory and Go GC copies remain risks. The library's best-effort clearing does not erase all copies or expanded keys. Publishing a production-security claim requires independent review and the full negative/recovery gate.
 
@@ -49,7 +49,26 @@ No migration report authorizes destructive remote changes or automatic retuning.
 
 Later Windows source review found metadata handles outside the plain managed
 retirement model, including stdlib identity probes with discarded close outcomes.
-This remains corrective code work; see native-windows.md. Prior cross-builds and
+The subsequent bounded metadata/public-path correction is implemented and source-
+reviewed; see native-windows-metadata.md. Its native execution is still NOT_RUN.
+Prior cross-builds and
 portable ownership tests are retained as scoped evidence, not all-handle proof.
 No physical fault was run and no data-loss result is asserted. Linux managed OFD
 behavior is unchanged by this source finding.
+
+Windows encrypted namespace operations use managed native relative handles and
+strict local fixed-NTFS/filename policy. No Windows runtime, directory persistence
+barrier, shared-rekey support or physical failure qualification is implied. The
+public Open prelude was included in the metadata audit rather than assuming the
+internal backend alone covered every handle. Source/model reviews are not an
+independent security/cryptographic/legal review. Uncertain-close tombstones may
+retain capacity and poison availability permanently; there is no safe numeric
+handle retry or automatic reclamation promise.
+
+Later source review additionally found the plain Windows mapping-object close
+path could retry a numeric HANDLE after an uncertain close. The replacement
+state machine now retains a terminal unknown-close record and first cause,
+including failed MapView setup cleanup, while preserving the still-live view
+and DMS/main protections. Native Windows failure/runtime testing remains
+NOT_RUN; source and memory proof is not OS qualification. The withdrawn
+unpublished candidate containing the earlier mapping path was never main.

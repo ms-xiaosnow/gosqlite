@@ -89,7 +89,7 @@ func Open(path string, opts OpenOptions) (*File, error) {
 	// register the physical descriptor under its inode lifecycle gate.
 	err = nativeOpened(f)
 	if err == nil {
-		f.identity, err = raw.Stat()
+		f.identity, err = nativeStat(f)
 	}
 	if err == nil {
 		if opts.Role == Directory {
@@ -101,7 +101,7 @@ func Open(path string, opts OpenOptions) (*File, error) {
 		}
 	}
 	if err == nil {
-		f.parent, err = os.Stat(filepath.Dir(path))
+		f.parent, err = nativeParentInfo(f)
 	}
 	if err == nil && f.writable {
 		err = nativeValidateLinks(f)
@@ -154,7 +154,7 @@ func (f *File) Stat() (os.FileInfo, error) {
 	if err := f.checkLocked(); err != nil {
 		return nil, err
 	}
-	return f.raw.Stat()
+	return nativeStat(f)
 }
 func (f *File) Truncate(size int64) error {
 	f.mu.Lock()
@@ -187,19 +187,19 @@ func (f *File) validatePathLocked() error {
 	if err := nativeValidatePath(f); err != nil {
 		return err
 	}
-	info, err := f.raw.Stat()
+	info, err := nativeStat(f)
 	if err != nil {
 		return err
 	}
-	named, err := os.Lstat(f.path)
+	named, err := Lstat(f.path)
 	if err != nil {
 		return errors.Join(ErrIdentity, err)
 	}
-	parent, err := os.Stat(filepath.Dir(f.path))
+	parent, err := statParentPath(filepath.Dir(f.path))
 	if err != nil {
 		return errors.Join(ErrIdentity, err)
 	}
-	if named.Mode()&os.ModeSymlink != 0 || !os.SameFile(info, f.identity) || !os.SameFile(info, named) || !os.SameFile(parent, f.parent) {
+	if named.Mode()&os.ModeSymlink != 0 || !SameFile(info, f.identity) || !SameFile(info, named) || !SameFile(parent, f.parent) {
 		return ErrIdentity
 	}
 	return nil

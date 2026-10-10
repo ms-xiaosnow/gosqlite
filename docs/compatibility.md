@@ -8,7 +8,7 @@ Behavior baseline: official SQLite 3.54.0. M2 implements a deliberately bounded 
 | SQLite header/records | partial | format3, UTF-8, rollback-mode header; page sizes 512/4096/65536 exercised; integer widths/REAL/NULL/TEXT/BLOB |
 | Rowid B-trees | partial | leaf/interior, signed rowids, overflow, streaming, schema root1 including schema overflow |
 | Ordinary secondary indices | partial | create/maintain nonunique BINARY ASC keys; actual rowid/IPK equality and leading-prefix equality SELECT seeks with residual recheck; unsupported shapes scan; no general range/covering/order optimization |
-| Native file locking | partial | managed role-specific file/mapping ownership, Linux OFD shared/reserved/pending/exclusive byte-range locks; Darwin managed process-fcntl and Windows/amd64 checked LockFileEx/mapping backends implemented; only Linux ordinary runtime verified |
+| Native file locking | partial | managed role-specific file/mapping ownership, Linux OFD shared/reserved/pending/exclusive byte-range locks; Darwin managed process-fcntl and Windows/amd64 checked LockFileEx/mapping and bounded public metadata ownership implemented; only Linux ordinary runtime verified |
 | SELECT | partial | one rowid table or no FROM; projection, *, WHERE, parameters, SELECT ALL, ORDER BY with NULLS FIRST/LAST, LIMIT/OFFSET; aliases and rowid/IPK semantics |
 | Expressions | partial | NULL3VL, comparisons/affinity, arithmetic/bitwise/concat, ASCII-insensitive rune LIKE with ESCAPE, tested scalar builtins |
 | Schema interpretation | partial | declared types INTEGER/INT/REAL/TEXT/BLOB/NUMERIC, strict VECTOR(n)/BIT(n)/HALFVEC(n)/SPARSEVEC(n), or typeless; supported INTEGER PRIMARY KEY, NOT NULL and literal DEFAULT enforced on writes; non-INTEGER PK metadata read-only |
@@ -176,3 +176,20 @@ not become supported by parsing these nodes. Typeless physical columns retain
 name-resolution precedence over colliding typed result aliases. Explicit NULL
 ordering conservatively disables specialized rank access when needed for correct
 order. Full query-wide nested budgets and relational binding remain code gaps.
+
+## Windows encrypted and metadata checkpoint
+
+Windows/amd64 local fixed NTFS implements encrypted legacy modes0/1 and shared
+mode2 read/write/refresh/checkpoint plus explicit legacy-to-shared upgrade. The
+format bytes and Linux backend remain unchanged. Native Windows execution is
+NOT_RUN; target tests compile only. Shared-mode rekey remains unsupported code
+because the current lifecycle protocol requires atomic shared-to-exclusive
+conversion. Darwin encrypted storage remains a separate code increment.
+
+Public plain paths now use managed metadata snapshots with complete volume and
+128-bit IDs, bounded reservations and terminal uncertain-close tombstones.
+Encrypted public canonicalization delegates to the reviewed managed backend.
+Source review repaired poison/cause propagation through pager reads, scans and
+close paths. Earlier ownership results remain historical scoped evidence. The
+separate failed-OpenSharedSession retry group is still missing in this checkpoint.
+See native-windows-metadata.md and native-encrypted-windows.md for exact limits.

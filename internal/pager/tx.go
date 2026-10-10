@@ -108,7 +108,7 @@ func normalizedOptions(o Options) (Options, error) {
 // OpenTx starts a shared read snapshot. Create permits an absent or empty file.
 // Existing rollback journals are deliberately refused: hot-journal recovery
 // has not passed the separately authorized durability acceptance gate.
-func OpenTx(ctx context.Context, path string, opts Options) (*Tx, error) {
+func OpenTx(ctx context.Context, path string, opts Options) (result *Tx, retErr error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
@@ -120,11 +120,11 @@ func OpenTx(ctx context.Context, path string, opts Options) (*Tx, error) {
 	if err != nil {
 		return nil, err
 	}
-	resolved, err := filepath.EvalSymlinks(path)
+	resolved, err := resolveNativePath(path)
 	if err == nil {
 		path = resolved
 	} else if opts.Create && os.IsNotExist(err) {
-		dir, e := filepath.EvalSymlinks(filepath.Dir(path))
+		dir, e := resolveNativePath(filepath.Dir(path))
 		if e != nil {
 			return nil, e
 		}
@@ -143,10 +143,10 @@ func OpenTx(ctx context.Context, path string, opts Options) (*Tx, error) {
 	success := false
 	defer func() {
 		if !success {
-			_ = f.Close()
+			retErr = errors.Join(retErr, closeNativeFile(f))
 		}
 	}()
-	info, err := f.Stat()
+	info, err := statNativeFile(f)
 	if err != nil {
 		return nil, err
 	}
@@ -161,7 +161,7 @@ func OpenTx(ctx context.Context, path string, opts Options) (*Tx, error) {
 	}
 	// Stat after acquiring SHARED: another connection may have committed while
 	// this descriptor was being opened.
-	info, err = f.Stat()
+	info, err = statNativeFile(f)
 	if err != nil {
 		return nil, err
 	}
@@ -183,8 +183,8 @@ func OpenTx(ctx context.Context, path string, opts Options) (*Tx, error) {
 		}
 		t.dirty[1] = p
 	} else {
-		if _, err = f.ReadAt(t.originalHeader[:], 0); err != nil {
-			return nil, fmt.Errorf("%w: header: %v", ErrCorrupt, err)
+		if _, err = readNativeAt(f, t.originalHeader[:], 0); err != nil {
+			return nil, fmt.Errorf("%w: header: %w", ErrCorrupt, err)
 		}
 		t.header, err = ParseHeader(t.originalHeader[:], info.Size())
 		if err != nil {
@@ -259,15 +259,15 @@ func (t *Tx) checkStable() error {
 	if err := validateNativePath(t.file); err != nil {
 		return err
 	}
-	st, err := t.file.Stat()
+	st, err := statNativeFile(t.file)
 	if err != nil {
 		return err
 	}
-	other, err := os.Lstat(t.path)
+	other, err := nativeLstat(t.path)
 	if err != nil {
-		return fmt.Errorf("%w: database pathname: %v", ErrChanged, err)
+		return fmt.Errorf("%w: database pathname: %w", ErrChanged, err)
 	}
-	if !other.Mode().IsRegular() || !os.SameFile(st, other) || st.Size() != t.info.Size() || !st.ModTime().Equal(t.info.ModTime()) {
+	if !other.Mode().IsRegular() || !vfs.SameFile(st, other) || st.Size() != t.info.Size() || !st.ModTime().Equal(t.info.ModTime()) {
 		return ErrChanged
 	}
 	if err = validateWritableFile(t.file); err != nil {
@@ -275,7 +275,7 @@ func (t *Tx) checkStable() error {
 	}
 	if t.originalPages > 0 {
 		var b [100]byte
-		if _, err = t.file.ReadAt(b[:], 0); err != nil {
+		if _, err = readNativeAt(t.file, b[:], 0); err != nil {
 			return err
 		}
 		if b != t.originalHeader {
@@ -310,7 +310,7 @@ func (t *Tx) readLocked(ctx context.Context, n uint32) ([]byte, error) {
 		return t.session.readPage(ctx, n)
 	}
 	p := make([]byte, t.header.PageSize)
-	if _, err := t.file.ReadAt(p, int64(n-1)*int64(t.header.PageSize)); err != nil {
+	if _, err := readNativeAt(t.file, p, int64(n-1)*int64(t.header.PageSize)); err != nil {
 		return nil, err
 	}
 	if err := ctx.Err(); err != nil {
@@ -466,7 +466,7 @@ func (t *Tx) Rollback() error {
 		t.free = nil
 		return t.poisoned
 	}
-	err := t.file.Close()
+	err := closeNativeFile(t.file)
 	t.file = nil
 	t.dirty = nil
 	t.free = nil

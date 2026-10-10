@@ -71,7 +71,7 @@ type winNode struct {
 type nativeFile struct {
 	id, parentID winIdentity
 	canonical    string
-	parentHandle windows.Handle
+	parent       *metadataOwner
 	node         *winNode
 	// Each entry is one exact successful LockFileEx interval: 0 absent,
 	// 1 shared, 2 exclusive. The probe entry is only transient.
@@ -80,8 +80,8 @@ type nativeFile struct {
 	poisoned     bool
 	rawClosed    bool
 	closeUnknown bool
-	// A failed view creation can still own its mapping object if closing that
-	// object failed. Such resources retire before DMS/descriptor release.
+	// A failed view creation retains a terminal mapping-object tombstone if
+	// its close was uncertain. It permanently protects DMS/descriptor lifetime.
 	retained []nativeMapping
 }
 
@@ -232,20 +232,22 @@ func nativeOpen(path string, opts OpenOptions) (*os.File, error) {
 	// Resolve only the directory alias, through a handle. Retaining this parent
 	// without delete sharing stabilizes its namespace while the lease is live.
 	parentPath := filepath.Dir(path)
-	parent, err := winCreate(parentPath, windows.FILE_READ_ATTRIBUTES, windows.OPEN_EXISTING, true, true, false)
+	parent, err := winOpenMetadata(parentPath, true, false)
 	if err != nil {
 		return nil, err
 	}
-	fail := func(err error) (*os.File, error) { return nil, errors.Join(err, windows.CloseHandle(parent)) }
-	parentID, err := winInspect(parent, true)
+	fail := func(err error) (*os.File, error) {
+		return nil, rejectMetadata(&winMetadataOwners, parent, err, winCloseMetadataHandle)
+	}
+	parentID, err := winInspect(windows.Handle(parent.handle), true)
 	if err != nil {
 		return fail(err)
 	}
-	canonicalParent, err := winFinalPath(parent)
+	canonicalParent, err := winFinalPath(windows.Handle(parent.handle))
 	if err != nil {
 		return fail(err)
 	}
-	if err = winLocalNTFS(parent, canonicalParent); err != nil {
+	if err = winLocalNTFS(windows.Handle(parent.handle), canonicalParent); err != nil {
 		return fail(err)
 	}
 	canonical := filepath.Join(canonicalParent, filepath.Base(path))
@@ -269,13 +271,16 @@ func nativeOpen(path string, opts OpenOptions) (*os.File, error) {
 		}
 		access = windows.FILE_READ_ATTRIBUTES
 	}
+	if err := winMetadataOwners.check(); err != nil {
+		return fail(err)
+	}
 	h, err := winCreate(canonical, access, disposition, opts.Role == Directory, false, opts.Replaceable)
 	if err != nil {
 		return fail(err)
 	}
 	raw := os.NewFile(uintptr(h), canonical)
 	winRegistry.Lock()
-	winRegistry.pending[raw] = nativeFile{canonical: canonical, parentHandle: parent, parentID: parentID}
+	winRegistry.pending[raw] = nativeFile{canonical: canonical, parent: parent, parentID: parentID}
 	winRegistry.Unlock()
 	return raw, nil
 }
@@ -317,6 +322,9 @@ func nativeOpened(f *File) error {
 	return nil
 }
 func nativeCheck(f *File) error {
+	if err := winMetadataOwners.check(); err != nil {
+		return winPoison(f, err)
+	}
 	if f.native.poisoned || f.native.closeUnknown || f.native.rawClosed {
 		return ErrPoisoned
 	}
@@ -344,30 +352,16 @@ func nativeValidatePath(f *File) error {
 	if id != f.native.id {
 		return ErrIdentity
 	}
-	parentID, err := winInspect(f.native.parentHandle, true)
+	if f.native.parent == nil {
+		return winPoison(f, ErrIdentity)
+	}
+	parentID, err := winInspect(windows.Handle(f.native.parent.handle), true)
 	if err != nil || parentID != f.native.parentID {
 		return errors.Join(ErrIdentity, err)
 	}
-	// Metadata-only probes use compatible sharing and reject final reparse
-	// points. Parent aliases are allowed only if their resolved identity agrees.
-	for _, target := range []struct {
-		path              string
-		directory, follow bool
-		want              winIdentity
-	}{
-		{f.path, f.role == Directory, false, f.native.id},
-		{filepath.Dir(f.path), true, true, f.native.parentID},
-	} {
-		h, e := winCreate(target.path, windows.FILE_READ_ATTRIBUTES, windows.OPEN_EXISTING, target.directory, target.follow, f.replaceable && !target.directory)
-		if e != nil {
-			return errors.Join(ErrIdentity, e)
-		}
-		actual, inspectErr := winInspect(h, target.directory)
-		closeErr := windows.CloseHandle(h)
-		if inspectErr != nil || closeErr != nil || actual != target.want {
-			return errors.Join(ErrIdentity, inspectErr, closeErr)
-		}
-	}
+	// The common validatePathLocked continuation uses managed snapshots for
+	// original-name and parent-alias checks. Never introduce raw probe closes
+	// or os.SameFile's lazy metadata opens here.
 	return nil
 }
 
@@ -604,11 +598,11 @@ func nativeClose(f *File) error {
 		}
 		f.native.rawClosed = true
 	}
-	if f.native.parentHandle != 0 {
-		if err := windows.CloseHandle(f.native.parentHandle); err != nil {
+	if f.native.parent != nil {
+		if err := winCloseMetadata(f.native.parent); err != nil {
 			return winPoison(f, err)
 		}
-		f.native.parentHandle = 0
+		f.native.parent = nil
 	}
 	if node := f.native.node; node != nil {
 		node.leases--
@@ -646,10 +640,8 @@ func nativeReplace(old, new string) error {
 }
 
 type nativeMapping struct {
-	base   uintptr
-	length int
-	handle windows.Handle
-	owner  *File
+	mappingRetirement
+	owner *File
 }
 
 var winMappingSystem = struct {
@@ -685,12 +677,12 @@ func nativeMap(f *File, off int64, n int) (nativeMapping, []byte, error) {
 	if err != nil {
 		return empty, nil, err
 	}
-	m := nativeMapping{handle: h, length: n, owner: f}
+	m := nativeMapping{mappingRetirement: mappingRetirement{handle: uintptr(h), length: n}, owner: f}
 	base, err := windows.MapViewOfFile(h, windows.FILE_MAP_READ|windows.FILE_MAP_WRITE, uint32(uint64(off)>>32), uint32(off), uintptr(n))
 	if err != nil {
-		if closeErr := windows.CloseHandle(h); closeErr != nil {
+		if closeErr := nativeUnmap(&m); closeErr != nil {
 			f.native.retained = append(f.native.retained, m)
-			return empty, nil, winPoison(f, errors.Join(err, closeErr))
+			return empty, nil, errors.Join(err, closeErr)
 		}
 		return empty, nil, err
 	}
@@ -701,18 +693,15 @@ func nativeUnmap(m *nativeMapping) error {
 	// Views retain a mapping object reference independently of its HANDLE.
 	// Closing the object handle first keeps Bytes live if either stage fails;
 	// DMS and the file handle remain held until the view is actually unmapped.
-	if m.handle != 0 {
-		if err := windows.CloseHandle(m.handle); err != nil {
-			return winPoison(m.owner, err)
-		}
-		m.handle = 0
+	// Both published views and rejected MapViewOfFile acquisition use this
+	// gate. An indeterminate object close is never retried with a numeric
+	// HANDLE that may now designate some unrelated object.
+	if err := m.mappingRetirement.retire(winCloseMappingHandle, windows.UnmapViewOfFile); err != nil {
+		return winPoison(m.owner, err)
 	}
-	if m.base != 0 {
-		if err := windows.UnmapViewOfFile(m.base); err != nil {
-			return winPoison(m.owner, err)
-		}
-		m.base = 0
-	}
-	m.length = 0
 	return nil
+}
+
+func winCloseMappingHandle(handle uintptr) error {
+	return windows.CloseHandle(windows.Handle(handle))
 }

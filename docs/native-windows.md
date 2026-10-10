@@ -84,11 +84,12 @@ algorithm.
 
 Native close explicitly releases recorded locks, then closes the file and
 retained parent. Successful partial cleanup updates only those native records.
-An unresolved lock, view, or mapping-object close retains its protecting lease
-for retry and rejects ordinary I/O. An `os.File.Close` error is conservatively
-recorded as an uncertain terminal close; the backend does not repeat a close on
-an OS handle whose state is unknown. Exceptional resources can therefore remain
-retained. In addition, the existing failed-OpenSharedSession resource-retention
+An unresolved lock or represented view retains its protecting lease for retry
+and rejects ordinary I/O. A mapping-object `CloseHandle` error or `os.File.Close`
+error is conservatively recorded as an uncertain terminal close; the backend
+does not repeat a close on an OS handle whose state is unknown. The mapping
+record, still-live view and protecting lease remain strongly retained, with no
+reset or reclamation promise. In addition, the existing failed-OpenSharedSession resource-retention
 gap can return no reachable session through which to retry cleanup. This work
 does not claim a bounded recovery queue or universal retryable cleanup.
 
@@ -109,8 +110,14 @@ base. Microsoft documents that the HANDLE can be closed while views remain
 mapped. That order keeps the exposed slice live if either operation fails;
 successful stages clear only their own record. DMS and the ordinary file handle
 remain retained until actual view retirement. A mapping-object cleanup failure
-after unsuccessful view creation is likewise retained by the file. No durable
-SHM flush substitutes for database/WAL synchronization.
+after unsuccessful view creation is likewise retained by the file. Both routes
+use one retirement state machine: the first uncertain object close stores a
+terminal cause, and later cleanup attempts never call CloseHandle again on its
+numeric value or proceed to unmap its still-live view. A successful object close
+clears only the handle; an unsuccessful, represented view unmap can still be
+retried using its original base. No durable SHM flush substitutes for
+database/WAL synchronization. See [the mapping-retirement correction](windows-mapping-retirement.md)
+for the previously uncovered flaw and exact source/model verification scope.
 
 ## Source provenance
 
@@ -182,3 +189,44 @@ proven, and no native close/fault experiment was executed. Required corrective
 code is managed/bounded metadata probes across the plain VFS/pager/WAL-index
 call chain, followed by portable laws and separately unrun native qualification.
 The encrypted Windows backend is receiving its own equivalent fix before release.
+
+
+## Corrective implementation follow-up: owned metadata
+
+The historical source-review gap above is addressed for the plain
+VFS/pager/WAL-index chain and its public SQLite open prelude by [the metadata ownership correction](native-windows-metadata.md).
+Windows metadata now uses full-ID snapshots and a bounded reserved-before-open
+owner gate, including path resolution and retained-parent failed-open cleanup.
+Uncertain metadata close is a retained terminal tombstone, never a blind retry
+of a numeric handle; the plain Windows backend fails closed on subsequent work.
+Linux/Darwin metadata semantics and exact Windows lock/mapping records are
+unchanged by this correction. The old ordinary/cross-build evidence is preserved
+and does not retrospectively establish exceptional metadata ownership. Target
+runtime, physical failure/durability and the separate failed-shared-open view
+retirement group remain unqualified. See the correction's exact-path evidence.
+
+The public encrypted Windows prelude likewise now delegates canonicalization to
+the encrypted backend's existing managed path helper. That narrow integration
+depends on the encrypted Windows frozen source tree
+`d52c82cfa393f220bfcd2a6c54fe4f6c9b47b3d3`; it does not change or independently
+qualify the encrypted backend. Ordinary Linux public path/provider checks and
+Windows compile-only checks are recorded separately in the corrective evidence.
+
+## Corrective implementation follow-up: mapping-object retirement
+
+A subsequent source review found that earlier ordinary/cross-build evidence and
+the metadata correction did not cover either repeated mapping-object close
+after a published view's close error, or repeated cleanup after failed
+MapViewOfFile acquisition followed by a close error. The old implementation
+retained each numeric HANDLE without recording terminal uncertainty. Retention
+alone did not justify another CloseHandle call. This flaw was also present in
+the historical plain Windows backend; it was not introduced by the metadata or
+encrypted Windows changes.
+
+The [mapping-retirement correction](windows-mapping-retirement.md) adds a shared
+private state gate for both paths and pure-memory tests of repeated terminal
+cleanup, retained Bytes/protectors, and successful partial retirement. Prior
+evidence remains unchanged and must not be read as coverage of these cases.
+Native Windows execution and all physical failure/durability gates remain
+NOT_RUN. This narrow correction does not resolve the separate failed-shared-open
+parent-retirement group or establish a universal cleanup/recovery mechanism.

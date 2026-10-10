@@ -11,9 +11,10 @@ import (
 // identity/freshness oracle; initial path selection and hostile OS actors remain
 // outside the cooperative lease and descriptor checks.
 type namespace struct {
-	dir  *os.File
+	dir  *managedFile
 	info os.FileInfo
 	path string
+	root string
 }
 
 func newNamespace(path string) (*namespace, error) {
@@ -27,20 +28,13 @@ func newNamespace(path string) (*namespace, error) {
 		f.Close()
 		return nil, e
 	}
-	return &namespace{f, i, d}, nil
+	return &namespace{dir: f, info: i, path: d, root: filepath.Base(path)}, nil
 }
 func (n *namespace) check() error {
 	if n == nil {
 		return nil
 	}
-	i, e := os.Lstat(n.path)
-	if e != nil {
-		return e
-	}
-	if !i.IsDir() || !os.SameFile(n.info, i) {
-		return ErrChanged
-	}
-	return nil
+	return platformDirectoryCheck(n.dir, n.path, n.info)
 }
 func (n *namespace) name(path string) (string, error) {
 	if filepath.Dir(path) != n.path {
@@ -48,7 +42,7 @@ func (n *namespace) name(path string) (string, error) {
 	}
 	return filepath.Base(path), nil
 }
-func (n *namespace) checked(path string, flags int) (*os.File, os.FileInfo, error) {
+func (n *namespace) checked(path string, flags int) (*managedFile, os.FileInfo, error) {
 	if n == nil {
 		return checkedFile(path, flags)
 	}
@@ -56,7 +50,12 @@ func (n *namespace) checked(path string, flags int) (*os.File, os.FileInfo, erro
 	if e != nil {
 		return nil, nil, e
 	}
-	f, e := openFileAt(n.dir, name, flags)
+	var f *managedFile
+	if name == n.root {
+		f, e = openRootFileAt(n.dir, name, flags)
+	} else {
+		f, e = openFileAt(n.dir, name, flags)
+	}
 	if e != nil {
 		return nil, nil, e
 	}
@@ -76,7 +75,7 @@ func (n *namespace) checked(path string, flags int) (*os.File, os.FileInfo, erro
 	}
 	return f, i, nil
 }
-func (n *namespace) stable(f *os.File, path string, i os.FileInfo) error {
+func (n *namespace) stable(f *managedFile, path string, i os.FileInfo) error {
 	if n == nil {
 		return stableFile(f, path, i)
 	}
@@ -133,7 +132,7 @@ func (n *namespace) rename(old, new string, absent bool) error {
 		if absent {
 			return renameAbsent(old, new)
 		}
-		return os.Rename(old, new)
+		return replaceFile(old, new)
 	}
 	a, e := n.name(old)
 	if e != nil {

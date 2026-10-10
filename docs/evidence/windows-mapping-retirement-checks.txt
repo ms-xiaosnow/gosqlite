@@ -1,0 +1,147 @@
+Isolated base tree: 5207d59b667614c40c184ec277fdc1fc1ca80fae plus three mapping source overlays.
+Native Windows runtime: NOT_RUN. No restricted physical failure, recovery or namespace test execution.
+go version go1.27.2 linux/amd64
+
+CGO_ENABLED=0 go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
+
+CGO_ENABLED=0 go build ./...
+error obtaining VCS status: exit status 128
+	Use -buildvcs=false to disable VCS stamping.
+error obtaining VCS status: exit status 128
+	Use -buildvcs=false to disable VCS stamping.
+error obtaining VCS status: exit status 128
+	Use -buildvcs=false to disable VCS stamping.
+error obtaining VCS status: exit status 128
+	Use -buildvcs=false to disable VCS stamping.
+error obtaining VCS status: exit status 128
+	Use -buildvcs=false to disable VCS stamping.
+error obtaining VCS status: exit status 128
+	Use -buildvcs=false to disable VCS stamping.
+error obtaining VCS status: exit status 128
+	Use -buildvcs=false to disable VCS stamping.
+error obtaining VCS status: exit status 128
+	Use -buildvcs=false to disable VCS stamping.
+error obtaining VCS status: exit status 128
+	Use -buildvcs=false to disable VCS stamping.
+error obtaining VCS status: exit status 128
+	Use -buildvcs=false to disable VCS stamping.
+error obtaining VCS status: exit status 128
+	Use -buildvcs=false to disable VCS stamping.
+error obtaining VCS status: exit status 128
+	Use -buildvcs=false to disable VCS stamping.
+error obtaining VCS status: exit status 128
+	Use -buildvcs=false to disable VCS stamping.
+error obtaining VCS status: exit status 128
+	Use -buildvcs=false to disable VCS stamping.
+error obtaining VCS status: exit status 128
+	Use -buildvcs=false to disable VCS stamping.
+error obtaining VCS status: exit status 128
+	Use -buildvcs=false to disable VCS stamping.
+error obtaining VCS status: exit status 128
+	Use -buildvcs=false to disable VCS stamping.
+error obtaining VCS status: exit status 128
+	Use -buildvcs=false to disable VCS stamping.
+error obtaining VCS status: exit status 128
+	Use -buildvcs=false to disable VCS stamping.
+error obtaining VCS status: exit status 128
+	Use -buildvcs=false to disable VCS stamping.
+
+Archive-only correction: GOFLAGS=-buildvcs=false disables VCS stamping, not a check or analyzer. No Git repository is created or modified.
+
+CGO_ENABLED=0 go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
+
+CGO_ENABLED=0 go build ./...
+
+CGO_ENABLED=0 go test -count=1 ./internal/vfs -run '^(TestWindowsMappingRetirementMemory.*|TestMappingSpanGranularity|TestMappingRetirementMemoryModel|TestCloseOrderingMemoryModel|TestOwnershipReviewPartialRetirementRetainsAllLocks|TestPlatformReviewMappingSpanConservation|TestPlatformReviewRetirementPermutationsMemoryModel|TestManagedMappingLogicalSpanAndClose|TestMetadataSnapshotsAndResolvedPath|TestMetadataOwnershipCallChainSource)$' -v
+=== RUN   TestWindowsMappingRetirementMemoryUnknownCloseIsTerminal
+--- PASS: TestWindowsMappingRetirementMemoryUnknownCloseIsTerminal (0.00s)
+=== RUN   TestWindowsMappingRetirementMemoryViewRetryAfterKnownClose
+--- PASS: TestWindowsMappingRetirementMemoryViewRetryAfterKnownClose (0.00s)
+=== RUN   TestWindowsMappingRetirementMemoryFailedViewAcquisition
+=== RUN   TestWindowsMappingRetirementMemoryFailedViewAcquisition/known_object_retirement
+=== RUN   TestWindowsMappingRetirementMemoryFailedViewAcquisition/terminal_object_close
+--- PASS: TestWindowsMappingRetirementMemoryFailedViewAcquisition (0.00s)
+    --- PASS: TestWindowsMappingRetirementMemoryFailedViewAcquisition/known_object_retirement (0.00s)
+    --- PASS: TestWindowsMappingRetirementMemoryFailedViewAcquisition/terminal_object_close (0.00s)
+=== RUN   TestWindowsMappingRetirementMemoryPublishedViewKeepsProtectors
+--- PASS: TestWindowsMappingRetirementMemoryPublishedViewKeepsProtectors (0.00s)
+=== RUN   TestWindowsMappingRetirementMemorySuccessAndEmptyAreIdempotent
+--- PASS: TestWindowsMappingRetirementMemorySuccessAndEmptyAreIdempotent (0.00s)
+=== RUN   TestMetadataOwnershipCallChainSource
+--- PASS: TestMetadataOwnershipCallChainSource (0.04s)
+=== RUN   TestMetadataSnapshotsAndResolvedPath
+--- PASS: TestMetadataSnapshotsAndResolvedPath (0.00s)
+=== RUN   TestManagedMappingLogicalSpanAndClose
+--- PASS: TestManagedMappingLogicalSpanAndClose (0.00s)
+=== RUN   TestOwnershipReviewPartialRetirementRetainsAllLocks
+--- PASS: TestOwnershipReviewPartialRetirementRetainsAllLocks (0.00s)
+=== RUN   TestMappingSpanGranularity
+--- PASS: TestMappingSpanGranularity (0.00s)
+=== RUN   TestMappingRetirementMemoryModel
+--- PASS: TestMappingRetirementMemoryModel (0.00s)
+=== RUN   TestCloseOrderingMemoryModel
+--- PASS: TestCloseOrderingMemoryModel (0.00s)
+=== RUN   TestPlatformReviewMappingSpanConservation
+--- PASS: TestPlatformReviewMappingSpanConservation (0.00s)
+=== RUN   TestPlatformReviewRetirementPermutationsMemoryModel
+--- PASS: TestPlatformReviewRetirementPermutationsMemoryModel (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.044s
+
+CGO_ENABLED=1 go test -race -count=1 ./internal/vfs -run '^(TestWindowsMappingRetirementMemory.*|TestMappingSpanGranularity|TestMappingRetirementMemoryModel|TestCloseOrderingMemoryModel|TestOwnershipReviewPartialRetirementRetainsAllLocks|TestPlatformReviewMappingSpanConservation|TestPlatformReviewRetirementPermutationsMemoryModel|TestManagedMappingLogicalSpanAndClose|TestMetadataSnapshotsAndResolvedPath|TestMetadataOwnershipCallChainSource)$' -v
+=== RUN   TestWindowsMappingRetirementMemoryUnknownCloseIsTerminal
+--- PASS: TestWindowsMappingRetirementMemoryUnknownCloseIsTerminal (0.00s)
+=== RUN   TestWindowsMappingRetirementMemoryViewRetryAfterKnownClose
+--- PASS: TestWindowsMappingRetirementMemoryViewRetryAfterKnownClose (0.00s)
+=== RUN   TestWindowsMappingRetirementMemoryFailedViewAcquisition
+=== RUN   TestWindowsMappingRetirementMemoryFailedViewAcquisition/known_object_retirement
+=== RUN   TestWindowsMappingRetirementMemoryFailedViewAcquisition/terminal_object_close
+--- PASS: TestWindowsMappingRetirementMemoryFailedViewAcquisition (0.00s)
+    --- PASS: TestWindowsMappingRetirementMemoryFailedViewAcquisition/known_object_retirement (0.00s)
+    --- PASS: TestWindowsMappingRetirementMemoryFailedViewAcquisition/terminal_object_close (0.00s)
+=== RUN   TestWindowsMappingRetirementMemoryPublishedViewKeepsProtectors
+--- PASS: TestWindowsMappingRetirementMemoryPublishedViewKeepsProtectors (0.01s)
+=== RUN   TestWindowsMappingRetirementMemorySuccessAndEmptyAreIdempotent
+--- PASS: TestWindowsMappingRetirementMemorySuccessAndEmptyAreIdempotent (0.00s)
+=== RUN   TestMetadataOwnershipCallChainSource
+--- PASS: TestMetadataOwnershipCallChainSource (0.29s)
+=== RUN   TestMetadataSnapshotsAndResolvedPath
+--- PASS: TestMetadataSnapshotsAndResolvedPath (0.00s)
+=== RUN   TestManagedMappingLogicalSpanAndClose
+--- PASS: TestManagedMappingLogicalSpanAndClose (0.00s)
+=== RUN   TestOwnershipReviewPartialRetirementRetainsAllLocks
+--- PASS: TestOwnershipReviewPartialRetirementRetainsAllLocks (0.00s)
+=== RUN   TestMappingSpanGranularity
+--- PASS: TestMappingSpanGranularity (0.00s)
+=== RUN   TestMappingRetirementMemoryModel
+--- PASS: TestMappingRetirementMemoryModel (0.00s)
+=== RUN   TestCloseOrderingMemoryModel
+--- PASS: TestCloseOrderingMemoryModel (0.00s)
+=== RUN   TestPlatformReviewMappingSpanConservation
+--- PASS: TestPlatformReviewMappingSpanConservation (0.00s)
+=== RUN   TestPlatformReviewRetirementPermutationsMemoryModel
+--- PASS: TestPlatformReviewRetirementPermutationsMemoryModel (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	1.342s
+
+CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build ./...
+
+CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go test -c -o ../native-build/windows-mapping-retirement-worker/vfs.test.exe ./internal/vfs
+
+CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go test -c -o ../native-build/windows-mapping-retirement-worker/pager.test.exe ./internal/pager
+
+CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go test -c -o ../native-build/windows-mapping-retirement-worker/walindex.test.exe ./internal/walindex
+
+ALL REQUESTED SCOPED CHECKS PASS. Windows executables were not launched.
+28bb464bd46d63c537b48ef52af5b29392696d1db6bbe9fc54282ef5548d76b7  internal/vfs/native_windows.go
+9791a8be8ceb3c2c7fff85aba80b31c9f1334b96ea4070dda45b5c44765d464d  internal/vfs/mapping_retirement.go
+cf811fd89e49d65ca8a664058bb14043334b96a3512e94a01b64e81584b8e7ce  internal/vfs/mapping_retirement_test.go
+
+Linux CGO_ENABLED=0 go vet ./internal/vfs ./internal/pager ./internal/walindex
+Linux vet exit: 0
+
+Windows CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go vet ./internal/vfs ./internal/pager ./internal/walindex
+internal/vfs/native_windows.go:690:33: possible misuse of unsafe.Pointer
+Windows default vet exit: 1 (known mapped-address unsafe.Pointer diagnostic remains disclosed)

@@ -12,7 +12,7 @@ import (
 )
 
 type segment struct {
-	file   *os.File
+	file   *managedFile
 	info   os.FileInfo
 	path   string
 	ns     *namespace

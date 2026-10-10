@@ -3,6 +3,7 @@ package pager
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -26,14 +27,14 @@ type Reader struct {
 	lease     *Tx
 }
 
-func Open(path string) (*Reader, error) {
+func Open(path string) (result *Reader, retErr error) {
 	// Resolve symlinks so sidecar checks apply to the actual database pathname.
 	// Multiple hard-linked names remain unsupported by SQLite itself.
 	path, err := filepath.Abs(path)
 	if err != nil {
 		return nil, err
 	}
-	path, err = filepath.EvalSymlinks(path)
+	path, err = resolveNativePath(path)
 	if err != nil {
 		return nil, err
 	}
@@ -44,10 +45,10 @@ func Open(path string) (*Reader, error) {
 	success := false
 	defer func() {
 		if !success {
-			file.Close()
+			retErr = errors.Join(retErr, closeNativeFile(file))
 		}
 	}()
-	info, err := file.Stat()
+	info, err := statNativeFile(file)
 	if err != nil {
 		return nil, err
 	}
@@ -61,8 +62,8 @@ func Open(path string) (*Reader, error) {
 	if err = checkSidecars(path); err != nil {
 		return nil, err
 	}
-	if _, err = io.ReadFull(io.NewSectionReader(file, 0, 100), r.rawHeader[:]); err != nil {
-		return nil, fmt.Errorf("%w: header: %v", ErrCorrupt, err)
+	if _, err = io.ReadFull(io.NewSectionReader(nativeReaderAt{file}, 0, 100), r.rawHeader[:]); err != nil {
+		return nil, fmt.Errorf("%w: header: %w", ErrCorrupt, err)
 	}
 	r.header, err = ParseHeader(r.rawHeader[:], info.Size())
 	if err != nil {
@@ -82,7 +83,7 @@ func Open(path string) (*Reader, error) {
 // journal (including a cold or empty one) fails closed with a distinct error.
 func checkSidecars(path string) error {
 	for _, suffix := range []string{"-wal", "-journal"} {
-		st, err := os.Lstat(path + suffix)
+		st, err := nativeLstat(path + suffix)
 		if os.IsNotExist(err) {
 			continue
 		}
@@ -113,23 +114,23 @@ func (r *Reader) checkStable() error {
 	if err := checkSidecars(r.path); err != nil {
 		return err
 	}
-	st, err := r.file.Stat()
+	st, err := statNativeFile(r.file)
 	if err != nil {
 		return err
 	}
 	if st.Size() != r.info.Size() || !st.ModTime().Equal(r.info.ModTime()) {
 		return ErrChanged
 	}
-	pathInfo, err := os.Lstat(r.path)
+	pathInfo, err := nativeLstat(r.path)
 	if err != nil {
-		return fmt.Errorf("%w: database path: %v", ErrChanged, err)
+		return fmt.Errorf("%w: database path: %w", ErrChanged, err)
 	}
-	if !pathInfo.Mode().IsRegular() || !os.SameFile(st, pathInfo) {
+	if !pathInfo.Mode().IsRegular() || !vfs.SameFile(st, pathInfo) {
 		return ErrChanged
 	}
 	var raw [100]byte
-	if _, err = r.file.ReadAt(raw[:], 0); err != nil {
-		return fmt.Errorf("%w: header: %v", ErrChanged, err)
+	if _, err = readNativeAt(r.file, raw[:], 0); err != nil {
+		return fmt.Errorf("%w: header: %w", ErrChanged, err)
 	}
 	if !bytes.Equal(raw[:], r.rawHeader[:]) {
 		return ErrChanged
@@ -156,8 +157,8 @@ func (r *Reader) ReadPage(ctx context.Context, pageNo uint32) ([]byte, error) {
 		return nil, err
 	}
 	data := make([]byte, int(r.header.PageSize))
-	if _, err := r.file.ReadAt(data, int64(pageNo-1)*int64(r.header.PageSize)); err != nil {
-		return nil, fmt.Errorf("%w: page %d: %v", ErrCorrupt, pageNo, err)
+	if _, err := readNativeAt(r.file, data, int64(pageNo-1)*int64(r.header.PageSize)); err != nil {
+		return nil, fmt.Errorf("%w: page %d: %w", ErrCorrupt, pageNo, err)
 	}
 	if err := ctx.Err(); err != nil {
 		return nil, err
@@ -177,7 +178,7 @@ func (r *Reader) Close() error {
 	if r.file == nil {
 		return nil
 	}
-	err := r.file.Close()
+	err := closeNativeFile(r.file)
 	r.file = nil
 	return err
 }

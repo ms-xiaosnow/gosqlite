@@ -96,10 +96,16 @@ func Prepare(ctx context.Context, path string, o Options, op encryption.Operatio
 	if err := o.Validate(); err != nil {
 		return nil, err
 	}
+	if err := platformOperation(op, o.Mode); err != nil {
+		return nil, err
+	}
 	var pathErr error
 	path, pathErr = canonical(path)
 	if pathErr != nil {
 		return nil, pathErr
+	}
+	if err := platformPreflight(path); err != nil {
+		return nil, err
 	}
 	var epoch encryption.Epoch
 	var err error

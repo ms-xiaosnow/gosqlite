@@ -82,7 +82,7 @@ func (s *SharedSession) appendProtectedLocked(h walindex.Header) (bool, error) {
 	for n := h.MaxFrame; n > 0; n-- {
 		b := make([]byte, frameSize)
 		off := int64(wal.HeaderSize) + int64(n-1)*frameSize
-		if _, err := s.walFile.ReadAt(b, off); err != nil {
+		if _, err := readNativeAt(s.walFile, b, off); err != nil {
 			return false, err
 		}
 		if binary.BigEndian.Uint32(b[4:8]) != h.DBSize || !bytes.Equal(b[8:16], h.Salt[:]) {
@@ -218,7 +218,11 @@ func (s *SharedSession) appendSharedLocked(ctx context.Context, t *Tx, images ma
 	checksum := h.FrameChecksum
 	if h.MaxFrame == 0 {
 		var old [wal.HeaderSize]byte
-		if n, _ := s.walFile.ReadAt(old[:], 0); n == len(old) {
+		n, readErr := readNativeAt(s.walFile, old[:], 0)
+		if errors.Is(readErr, ErrPoisoned) {
+			return s.poisonLocked(readErr)
+		}
+		if n == len(old) {
 			if prev, e := wal.ParseHeader(old[:]); e == nil {
 				wh.CheckpointSequence = prev.CheckpointSequence
 				if !bytes.Equal(old[16:24], h.Salt[:]) {
@@ -291,7 +295,7 @@ func (s *SharedSession) appendSharedLocked(ctx context.Context, t *Tx, images ma
 	// after a reset), so none can reference the discarded extent. Trimming
 	// prevents the overwritten suffix from looking checksum-invalid on cold
 	// reopen. The authoritative WAL inode is never replaced.
-	if st, e := s.walFile.Stat(); e != nil {
+	if st, e := statNativeFile(s.walFile); e != nil {
 		return fail(e)
 	} else if st.Size() > offset {
 		if err = s.walFile.Truncate(offset); err != nil {

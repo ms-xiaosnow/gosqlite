@@ -2,6 +2,7 @@ package encstore
 
 import (
 	"context"
+	"errors"
 	"io"
 	"os"
 	"path/filepath"
@@ -70,20 +71,25 @@ func charge(total, amount, maximum uint64) (uint64, error) {
 // family object, including unreferenced candidates from previous attempts.
 // Unknown family names, links, symlinks and nonregular entries fail closed.
 // A dedicated directory avoids quota refusal caused by unrelated entry counts.
-func inventory(ctx context.Context, path string, maxBytes uint64, maxEntries uint32, spaces ...*namespace) (uint64, error) {
+func inventory(ctx context.Context, path string, maxBytes uint64, maxEntries uint32, spaces ...*namespace) (total uint64, resultErr error) {
 	ns := chooseNamespace(spaces)
 	dir := filepath.Dir(path)
-	f, err := openDirectory(dir)
+	var f *managedFile
+	var err error
 	if ns != nil {
-		if f != nil {
-			_ = f.Close()
-		}
 		f, err = openFileAt(ns.dir, ".", os.O_RDONLY)
+	} else {
+		f, err = openDirectory(dir)
 	}
 	if err != nil {
 		return 0, err
 	}
-	defer f.Close()
+	defer func() {
+		if closeErr := f.Close(); closeErr != nil {
+			total = 0
+			resultErr = errors.Join(resultErr, closeErr)
+		}
+	}()
 	di, err := f.Stat()
 	if err != nil || !di.IsDir() {
 		if err != nil {
@@ -92,7 +98,6 @@ func inventory(ctx context.Context, path string, maxBytes uint64, maxEntries uin
 		return 0, ErrUnsupported
 	}
 	base := filepath.Base(path)
-	var total uint64
 	var scanned uint32
 	for {
 		if err = ctx.Err(); err != nil {
@@ -108,7 +113,7 @@ func inventory(ctx context.Context, path string, maxBytes uint64, maxEntries uin
 			if scanned > maxEntries {
 				return 0, encryption.ErrLimit
 			}
-			member, e := familyEntry(entry.Name(), base)
+			member, e := platformFamilyEntry(entry.Name(), base)
 			if e != nil {
 				return 0, e
 			}
@@ -138,15 +143,12 @@ func inventory(ctx context.Context, path string, maxBytes uint64, maxEntries uin
 			return 0, e
 		}
 	}
-	// Detect a changed parent entry before returning. Filesystem adversaries can
-	// still race path-based operations; this is not a pinned-dirfd namespace API.
-	named, err := os.Lstat(dir)
-	if err != nil {
+	// Revalidate the scanned directory with the platform's managed identity
+	// check. Windows must not let os.SameFile lazily reopen an os.Lstat result.
+	if err = platformDirectoryCheck(f, dir, di); err != nil {
 		return 0, err
 	}
-	if !named.IsDir() || !os.SameFile(di, named) {
-		return 0, ErrChanged
-	}
+
 	return total, nil
 }
 func publicationBudget(ctx context.Context, path string, o Options, g Geometry, next uint64, hasRoot bool) error {
@@ -178,7 +180,7 @@ func plannedBudget(ctx context.Context, path string, ns *namespace, o Options, n
 	if hasRoot {
 		additions++
 	} else {
-		if _, e := os.Lstat(path + ".gse-lock"); os.IsNotExist(e) {
+		if _, e := platformPathInfo(path + ".gse-lock"); os.IsNotExist(e) {
 			additions++
 		} else if e != nil {
 			return e

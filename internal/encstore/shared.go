@@ -257,7 +257,7 @@ func (s *Store) checkAuthority() (err error) {
 		return err
 	}
 	if len(s.rootBytes) == 0 {
-		if _, e := os.Lstat(s.path); !os.IsNotExist(e) {
+		if _, e := platformPathInfo(s.path); !os.IsNotExist(e) {
 			return ErrChanged
 		}
 		return nil
@@ -289,6 +289,11 @@ func (s *Store) checkAuthority() (err error) {
 func (s *Store) BeginMaintenance(ctx context.Context, rekey bool) (err error) {
 	if s.opts.Mode != WALShared {
 		return s.Check()
+	}
+	if rekey {
+		if err = platformOperation(encryption.OperationRekeyTarget, s.opts.Mode); err != nil {
+			return err
+		}
 	}
 	if err = s.AcquireWriter(ctx, nil); err != nil {
 		return err

@@ -95,7 +95,13 @@ and memory state models do not qualify real unmap/close failures.
 
 A later source review found plain Windows metadata probes outside this ownership
 model: generic os.Stat/Lstat/SameFile can internally create handles with discarded
-close outcomes, and native VFS probes do not retain unresolved closes. Fix the
-whole live metadata path with managed/bounded probes; standard cross-build and
-memory-ledger tests did not cover it. This is a code gap, not only a native-test
-availability gap. No data-loss or ordinary-lock-failure claim has been established.
+close outcomes, and native VFS probes did not retain unresolved closes. The
+whole live metadata path was subsequently corrected with managed/bounded probes,
+including public Open and poison propagation. Native runtime remains unverified;
+standard earlier cross-build/memory-ledger tests did not cover this correction.
+No data-loss or ordinary-lock-failure claim has been established.
+
+Windows encrypted modes0/1/shared2 now have native managed coordination code.
+Keep Windows shared rekey, Darwin encrypted coordination and platform runtime/
+durability acceptance as separate open requirements. A cross-build does not
+close those gates. Preserve current encrypted bytes and exact lifecycle rules.

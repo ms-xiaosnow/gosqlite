@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path/filepath"
 	"sync"
 
 	"github.com/ms-xiaosnow/gosqlite/encryption"
@@ -235,34 +234,10 @@ func OpenContext(ctx context.Context, path string, opts Options) (*DB, error) {
 	}
 	// A connection must keep naming the same path across working-directory
 	// changes and symlink retargeting while idle between snapshots.
-	absolute, err := filepath.Abs(path)
+	path, err = canonicalOpenPath(path, opts.Encryption != nil)
 	if err != nil {
 		return nil, wrap("open", err)
 	}
-	if opts.Encryption != nil {
-		if info, e := os.Lstat(absolute); e == nil && !info.Mode().IsRegular() {
-			return nil, wrap("open", ErrUnsupported)
-		} else if e != nil && !os.IsNotExist(e) {
-			return nil, wrap("open", e)
-		}
-	}
-	canonical, err := filepath.EvalSymlinks(absolute)
-	if err != nil {
-		if !errors.Is(err, os.ErrNotExist) {
-			return nil, wrap("open", err)
-		}
-		parent, parentErr := filepath.EvalSymlinks(filepath.Dir(absolute))
-		if parentErr != nil {
-			return nil, wrap("open", parentErr)
-		}
-		canonical = filepath.Join(parent, filepath.Base(absolute))
-		// An absent final component may be created; a dangling final symlink
-		// is refused rather than treating it as an authorized new database.
-		if info, statErr := os.Lstat(canonical); statErr == nil && info.Mode()&os.ModeSymlink != 0 {
-			return nil, wrap("open", fmt.Errorf("%w: dangling database symlink", ErrUnsupported))
-		}
-	}
-	path = canonical
 	methods := opts.IndexMethods
 	if methods == nil {
 		methods, err = registry.New(grams13.Method())

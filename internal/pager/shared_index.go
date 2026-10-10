@@ -38,13 +38,13 @@ func (s *SharedSession) readIndexHeaderLocked(ctx context.Context) (h walindex.H
 		return h, sharedIndexError(err)
 	}
 	defer s.unlockDeferred(walindex.CheckpointLock, 7, &err)
-	st, err := s.walFile.Stat()
+	st, err := statNativeFile(s.walFile)
 	if err != nil {
 		return h, err
 	}
 	h = walindex.Header{Version: wal.Version}
 	if st.Size() != 0 {
-		snap, e := wal.Scan(ctx, s.walFile, st.Size(), wal.Limits{})
+		snap, e := wal.Scan(ctx, nativeReaderAt{s.walFile}, st.Size(), wal.Limits{})
 		// Stale-generation bytes after an exact committed prefix are the normal
 		// consequence of SQLite WAL reuse. Fully checksum-valid uncommitted
 		// frames can likewise follow an ordinary cache-spill then ROLLBACK.
@@ -68,7 +68,7 @@ func (s *SharedSession) readIndexHeaderLocked(ctx context.Context) (h walindex.H
 				return h, err
 			}
 			off := int64(wal.HeaderSize) + int64(n-1)*(int64(wal.FrameHeaderSize)+int64(h.PageSize))
-			if _, err = s.walFile.ReadAt(raw[:], off); err != nil {
+			if _, err = readNativeAt(s.walFile, raw[:], off); err != nil {
 				return h, err
 			}
 			if err = s.index.Append(n, binary.BigEndian.Uint32(raw[:4])); err != nil {

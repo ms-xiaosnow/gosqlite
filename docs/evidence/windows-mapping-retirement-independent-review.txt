@@ -1,0 +1,97 @@
+Windows mapping-object retirement: independent review
+Date: 2026-10-10 UTC
+Outcome: no remaining blocker found in the exact three-path correction below.
+This is source review, portable ownership-law execution, and target compilation;
+it is not native Windows runtime, native-failure, M3, or release acceptance.
+
+Isolated basis and exact scope
+The review snapshot was the owner-created windows-mapping-retirement-freeze
+archive of immutable Git tree 5207d59b667614c40c184ec277fdc1fc1ca80fae,
+with only these three source overlays. No pending shared-open-cleanup, Darwin,
+or typed-ANN working code was imported into this standalone verification.
+
+SHA256 (verified before execution and against the working source afterward):
+28bb464bd46d63c537b48ef52af5b29392696d1db6bbe9fc54282ef5548d76b7  internal/vfs/native_windows.go
+9791a8be8ceb3c2c7fff85aba80b31c9f1334b96ea4070dda45b5c44765d464d  internal/vfs/mapping_retirement.go
+cf811fd89e49d65ca8a664058bb14043334b96a3512e94a01b64e81584b8e7ce  internal/vfs/mapping_retirement_test.go
+
+Finding and correction
+The previous native_windows.go nativeUnmap kept m.handle nonzero after a
+CloseHandle error, then retried that numeric handle on another managed Close.
+The MapViewOfFile rejection branch also called CloseHandle directly and placed
+the unchanged mapping record into native.retained on error. Both paths could
+therefore repeat an uncertain mapping-object close through nativeClose, although
+main-file and metadata handles already used terminal-uncertainty state.
+This flaw was present in the immutable basis; the old basis alone does not meet
+the no-raw-retry claim. No native error was induced to find or qualify it.
+
+The correction routes both paths through mappingRetirement.retire:
+- nativeMap lines 680-685 uses nativeUnmap for failed-view cleanup and retains the
+  complete nativeMapping record if cleanup is unresolved.
+- nativeUnmap lines 692-706 uses the same portable transition for published
+  mappings, failed-acquisition retained records, and subsequent explicit closes.
+- mapping_retirement.go lines 19-30 latches the first poisoned close error once.
+  Every later attempt returns that stored error before any raw close or unmap.
+  The uncertain handle, view base, length, and owning File remain represented.
+- Object-handle close precedes view unmap. Its known success clears only the
+  handle. If view retirement then fails, base/length and exposed Bytes remain
+  available to the owner, and only the represented view is retried.
+- Full retirement clears base/length and is idempotent. No raw handle is exposed
+  through a new API, no finalizer or background sweep is introduced, and existing
+  File.mu continues to serialize the state.
+
+Retained-view/protector contract
+Mapping.retireLocked clears Bytes and removes its owner-map entry only after
+nativeUnmap succeeds. File.closeResourcesLocked never closes its descriptor/DMS
+while a mapping remains unresolved. nativeClose similarly stops at a retained
+failed-acquisition record before descriptor/lock release. The new terminal
+state deliberately may retain the view, object tombstone, and protecting file
+locks for process lifetime. This is fail-closed availability loss, not a promise
+that an uncertain native close can be repaired.
+
+Behavioral review and exact checks
+All five new TestWindowsMappingRetirementMemory* laws use synthetic integers,
+ordinary Go byte slices, and memory callbacks only. They cover terminal close
+repetition 1,000 times; no view unmap after uncertain object close; retryable view-only
+retirement after successful object close; failed view acquisition with known or
+terminal object retirement; published Bytes plus DMS/main/slot preservation;
+independent sibling retirement; and empty/success idempotence. No real native
+mapping, raw descriptor, forced error, or filesystem mutation is involved.
+
+Working directory: windows-mapping-retirement-freeze
+Tool: ../toolchains/go1.27.2/bin/go (go1.27.2 linux/amd64)
+Environment: GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off
+GOCACHE=/workspace/scratch/5e06a74e5f65/durable-restart/go-cache
+GOPATH=/workspace/scratch/5e06a74e5f65/durable-restart/go-path
+Commands, all exit 0:
+CGO_ENABLED=0 go run ./internal/testscope
+CGO_ENABLED=0 go test ./internal/vfs -run '^TestWindowsMappingRetirementMemory' -count=1
+CGO_ENABLED=1 go test -race ./internal/vfs -run '^TestWindowsMappingRetirementMemory' -count=1
+CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go test -c ./internal/vfs -o ../windows-mapping-independent.test.exe
+Race instrumentation is a separate tooling check; production remains CGO0.
+The compiled Windows test executable was not run.
+
+Captured output (2026-10-10 15:35:13 UTC):
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok github.com/ms-xiaosnow/gosqlite/internal/vfs 0.004s
+ok github.com/ms-xiaosnow/gosqlite/internal/vfs 1.022s
+Windows/amd64 test compilation completed with exit 0 and no further output.
+
+Limits and independence
+Native Windows and Darwin runtime: NOT_RUN. Physical failed close/unmap/lock/IO/
+Sync, short write, permissions/disk-full, corrupt or tampered/wrong-key storage,
+missing selected files, namespace replacement/retarget/race, forced exit/crash/
+hot recovery, and interrupted publication/rekey: NOT_RUN. None was relocated.
+This report does not qualify those paths, full durability, or production release.
+The reviewer changed no production/test source, staged nothing, and performed
+no commit or publication. This review is independently usable for the Windows
+three-path correction; broader failed-open and Darwin checks are separate.
+
+Documentation-only follow-through reviewed at the same source freeze:
+f4daad090f1bef30675833e83032c40560d05c291b206054e839a093dba27f31  docs/native-windows.md
+d277cfb5cc8e5f3acf2fc5504c6d35e3c96a2bde47d2c9e1f45d072ff69efb49  docs/windows-mapping-retirement.md
+The revised wording accurately distinguishes represented view retry from terminal
+mapping-object close uncertainty, states both previously uncovered close routes,
+preserves the historical evidence boundary, and does not claim failed-shared-open
+retirement-group or native-runtime acceptance. No scope/contract overclaim found
+in this narrow documentation delta. The three production/test hashes are unchanged.

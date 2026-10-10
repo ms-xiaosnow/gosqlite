@@ -10,8 +10,12 @@ engine. The zero-valued `EncryptionSnapshot` mode and its layout-1 bytes remain
 supported; `EncryptionWAL` explicitly selects lifetime-exclusive layout 2.
 `EncryptionWALShared` explicitly selects shared coordination with layout 3.
 
-The implementation is experimental and currently supported only on Linux. It is
-an independent container, not a SQLite/SEE ciphertext format. Full M8 remains
+The implementation is experimental. Linux has ordinary-path runtime evidence;
+Windows/amd64 now has a bounded native implementation with compile-only evidence,
+and Darwin remains unsupported. Windows shared-mode rekey is a separate missing
+implementation. See [native encrypted Windows support](native-encrypted-windows.md)
+for the precise matrix and no-directory-barrier policy. It is an independent
+container, not a SQLite/SEE ciphertext format. Full M8 remains
 partial: simultaneous encrypted writer/readers now have an ordinary-path Linux
 implementation, while fault/security/durability acceptance remains pending.
 There is no stable encrypted-format promise,
@@ -513,9 +517,9 @@ publication/rekey workflows have **not** been executed or accepted for this
 checkpoint. They must not be run here or relocated to CI/another executor.
 Memory-only malformed-input tests do not qualify these disk/recovery behaviors.
 The shared slice adds simultaneous intact-file readers/writer, operation-pinned
-copies, stale promotion, quiescent rekey and combined-resource tests. Encrypted
-non-Linux coordination, independent security review and full release
-qualification remain outstanding.
+copies, stale promotion, quiescent rekey and combined-resource tests. Windows encrypted coordination is compile-only; Darwin encrypted storage and
+Windows shared-mode rekey remain explicit implementation gaps. Independent
+security review and full release qualification remain outstanding.
 
 ## Layout-3 coordination and combined admission
 

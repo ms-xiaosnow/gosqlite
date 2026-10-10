@@ -1,0 +1,35 @@
+Replacement Windows source candidate after mapping-retirement correction.
+Old75552c9 candidate withdrawn; no branch pointed to it.
+Source archive8f9025bccbfcdc65458c276d683a1485b5a9290e includes only Windows/public metadata/mapping changes plus existing durable D/S2. Later cleanup/Darwin/typedANN excluded. NativeWindowsNOT_RUN.
+Independent review report later added documentation hashes only; production sources unchanged.
+
+Corrected Windows candidate: encrypted/public metadata plus terminal mapping retirement fix; Windows native NOT_RUN. Darwin/typed ANN/failed-open code excluded.
+8f9025bccbfcdc65458c276d683a1485b5a9290e
+2026-10-10T15:39:26Z
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.089s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	0.213s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	0.098s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.200s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	2.585s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.197s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-shared	0.013s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	1.698s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	3.793s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	1.840s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.987s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	13.751s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	2.651s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-shared	1.064s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.194s
+cross-build linux/amd64 PASS
+cross-build linux/arm64 PASS
+cross-build darwin/arm64 PASS
+cross-build windows/amd64 PASS
+cross-build windows/arm64 PASS
+Windows encstore vet PASS; plain VFS has separately disclosed mapping diagnostic.
+all modules verified
+2026-10-10T15:40:52Z
+CORRECTED WINDOWS SOURCE CHECKS PASS

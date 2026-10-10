@@ -1,0 +1,73 @@
+Corrective plain Windows metadata ownership: independent source-only review
+Date: 2026-10-10
+Scope: owned plain VFS/pager/WAL-index metadata chain, public SQLite path
+selection, and the narrow encrypted Windows public canonicalization forwarding
+helper. This is not an independent security/cryptographic or release acceptance.
+
+Outcome: no remaining blocking correctness issue found in this scoped source
+review. The reviewer made no edits and ran no tests, builds, fault scenarios or
+acceptance checks. Execution evidence is separate in the components record.
+
+Findings repaired and rechecked during review:
+- Pager reads previously erased metadata poison and its cause through %v
+  formatting or discarded errors. readNativeAt/nativeReaderAt preserve package
+  classification and original causes, including SectionReader and WAL scanning.
+- Normal Close, zero-dirty commit Close, WAL-candidate creation, recovery journal
+  Sync, and WAL-index write/map returns now preserve native poison classification.
+- Public OpenContext no longer enters generic Windows metadata normalization
+  before the managed layer. Non-Windows behavior was faithfully extracted into
+  sqlite/path_default.go rather than changed.
+
+Ownership laws inspected in final source:
+- metadataOwners reserves capacity before native creation and retains every
+  successfully acquired metadata handle under a distinct owner. Failed creation
+  releases only the reservation; no live owner is evicted at the configured bound.
+- Indeterminate close is retained permanently with its cause, never retried using
+  the same numeric HANDLE. Known sibling resources can still retire explicitly.
+- observeMetadata withholds results unless inspection, retirement and the registry
+  usability check succeed. rejectMetadata preserves failed-open parent ownership
+  while leaving a primary error unwrapped after successful cleanup.
+- Failed-open and normal parent cleanup use the same owner. Windows snapshots
+  compare the complete 64-bit volume/128-bit file identity from an already-owned
+  handle and do not create lazy os.SameFile metadata handles.
+- Linux/Darwin metadata delegation keeps existing os/filepath operations.
+- Exact Windows byte-lock intervals, acquisition records, mapping records and
+  retirement ordering are unchanged by this correction.
+
+Encrypted public-path integration:
+internal/encstore/public_path_windows.go only delegates to the already-managed
+canonicalPath. The reviewer compared source hashes for platform_windows.go,
+file_windows.go, handle_lifetime.go and exact_locks.go to frozen Git tree
+d52c82cfa393f220bfcd2a6c54fe4f6c9b47b3d3; all match. That identifier is a tree,
+not a commit. The new helper does not independently qualify the entire encrypted
+backend. DB.path and key-provider paths use the same backend canonical family.
+
+Model and regression boundary:
+- Reservation/capacity/retirement, inspect/close outcome combinations and
+  failed-open parent retention use synthetic integers and memory callbacks.
+- Generic ReaderAt/SectionReader/WAL-scan/Close error laws use memory-only
+  interfaces. They do not execute real filesystem failure paths.
+- Public ordinary create/reopen tests cover plain, exclusive/shared WAL, encrypted
+  path/provider agreement and normal close. Windows versions are compiled only.
+- Source guard covers VFS/pager/WAL-index/sqlite/driver metadata selectors and the
+  two non-Windows build exclusions. This is a regression guard, not a complete
+  transitive ownership proof.
+- Native Windows API behavior, cross-owner poison interleavings during native
+  observation and full native failed-open/Close composition remain unexecuted.
+  The Windows full-ID value test and public error-class test are native NOT_RUN.
+
+Primary references checked:
+Pinned Go 1.27.2 os/types_windows.go, os/stat_windows.go and filepath Windows
+normalization sources. Microsoft documents combined volume/file identity and
+CloseHandle success/failure plus one close per acquired handle; the terminal
+uncertainty policy is the implementation's conservative choice, not a guarantee
+that every failure leaves a safely retryable numeric handle.
+https://learn.microsoft.com/en-us/windows/win32/api/winbase/ns-winbase-file_id_info
+https://learn.microsoft.com/en-us/windows/win32/api/handleapi/nf-handleapi-closehandle
+
+No physical I/O/lock/close/unmap/Sync failure, disk corruption/tamper/wrong-key or
+missing selected-file scenario, namespace mutation race/retarget, crash/forced
+exit, hot recovery, or interrupted publication was executed. Native Windows and
+Darwin runtime, physical durability, full security/release review and aggregate
+acceptance remain separate gates. Failed-OpenSharedSession mapping-retirement
+retry remains a distinct pending design, not closed by metadata tombstones.

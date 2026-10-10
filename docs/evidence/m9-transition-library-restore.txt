@@ -1,0 +1,11 @@
+Exact Library restore f5663cc47f7e3f30f7b239cab674c47b6ad54b34; focused offline transition/CLI unit/race, full vet/build, synthetic text generation.
+2026-10-10T15:14:26Z
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	0.216s
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.014s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	2.092s
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	1.110s
+all modules verified
+2026-10-10T15:14:56Z
+RESTORED M9 D FOCUSED TRANSITION PASS

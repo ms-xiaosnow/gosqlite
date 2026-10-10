@@ -54,7 +54,7 @@ func RecoverRollback(ctx context.Context, path string, opts RecoveryOptions) (re
 	if err != nil {
 		return result, err
 	}
-	path, err = filepath.EvalSymlinks(path)
+	path, err = resolveNativePath(path)
 	if err != nil {
 		return result, err
 	}
@@ -64,7 +64,7 @@ func RecoverRollback(ctx context.Context, path string, opts RecoveryOptions) (re
 	}
 	touched, removed := false, false
 	defer func() {
-		if closeErr := db.Close(); closeErr != nil {
+		if closeErr := closeNativeFile(db); closeErr != nil {
 			retErr = errors.Join(retErr, closeErr)
 		}
 		if retErr != nil && touched {
@@ -79,7 +79,7 @@ func RecoverRollback(ctx context.Context, path string, opts RecoveryOptions) (re
 			result = RecoveryResult{}
 		}
 	}()
-	info, err := db.Stat()
+	info, err := statNativeFile(db)
 	if err != nil {
 		return result, err
 	}
@@ -99,7 +99,7 @@ func RecoverRollback(ctx context.Context, path string, opts RecoveryOptions) (re
 		return result, err
 	}
 	jpath := path + "-journal"
-	if _, err = os.Lstat(jpath); os.IsNotExist(err) {
+	if _, err = nativeLstat(jpath); os.IsNotExist(err) {
 		return result, nil
 	} else if err != nil {
 		return result, err
@@ -114,8 +114,8 @@ func RecoverRollback(ctx context.Context, path string, opts RecoveryOptions) (re
 		return result, err
 	}
 	var first [1]byte
-	_, readErr := candidate.ReadAt(first[:], 0)
-	closeErr := candidate.Close()
+	_, readErr := readNativeAt(candidate, first[:], 0)
+	closeErr := closeNativeFile(candidate)
 	if readErr != nil && !errors.Is(readErr, io.EOF) {
 		return result, errors.Join(readErr, closeErr)
 	}
@@ -142,7 +142,7 @@ func RecoverRollback(ctx context.Context, path string, opts RecoveryOptions) (re
 	if err = recoveryCheckWAL(path); err != nil {
 		return result, err
 	}
-	info, err = db.Stat()
+	info, err = statNativeFile(db)
 	if err != nil {
 		return result, err
 	}
@@ -160,10 +160,10 @@ func RecoverRollback(ctx context.Context, path string, opts RecoveryOptions) (re
 	}
 	defer func() {
 		if jf != nil {
-			retErr = errors.Join(retErr, jf.Close())
+			retErr = errors.Join(retErr, closeNativeFile(jf))
 		}
 	}()
-	ji, err := jf.Stat()
+	ji, err := statNativeFile(jf)
 	if err != nil {
 		return result, err
 	}
@@ -173,7 +173,7 @@ func RecoverRollback(ctx context.Context, path string, opts RecoveryOptions) (re
 	}
 	data := make([]byte, int(ji.Size()))
 	if _, err = io.ReadFull(jf, data); err != nil {
-		return result, err
+		return result, nativeFileError(err)
 	}
 	plan, err := journal.ParseReplay(data, limits)
 	if err != nil {
@@ -193,7 +193,7 @@ func RecoverRollback(ctx context.Context, path string, opts RecoveryOptions) (re
 	}
 	// The journal must be durable before replay itself could be interrupted.
 	if err = jf.Sync(); err != nil {
-		return result, err
+		return result, nativeFileError(err)
 	}
 	if err = syncDirectory(path); err != nil {
 		return result, err
@@ -225,7 +225,7 @@ func RecoverRollback(ctx context.Context, path string, opts RecoveryOptions) (re
 	if err = recoveryCheckPath(path, db, info); err != nil {
 		return result, err
 	}
-	err = jf.Close()
+	err = closeNativeFile(jf)
 	jf = nil
 	if err != nil {
 		return result, err
@@ -253,7 +253,7 @@ func recoveryCheckReserved(db *vfs.File) error {
 
 func recoveryCheckWAL(path string) error {
 	for _, suffix := range []string{"-wal", "-shm"} {
-		if _, err := os.Lstat(path + suffix); err == nil {
+		if _, err := nativeLstat(path + suffix); err == nil {
 			return fmt.Errorf("%w: rollback recovery with WAL sidecar %s", ErrUnsupported, suffix)
 		} else if !os.IsNotExist(err) {
 			return err
@@ -263,7 +263,7 @@ func recoveryCheckWAL(path string) error {
 }
 
 func recoveryOpenJournal(path string) (*vfs.File, error) {
-	info, err := os.Lstat(path)
+	info, err := nativeLstat(path)
 	if err != nil {
 		return nil, err
 	}
@@ -274,15 +274,15 @@ func recoveryOpenJournal(path string) (*vfs.File, error) {
 	if err != nil {
 		return nil, err
 	}
-	opened, err := file.Stat()
+	opened, err := statNativeFile(file)
 	if err == nil {
 		err = validateWritableFile(file)
 	}
-	if err == nil && (!opened.Mode().IsRegular() || !os.SameFile(info, opened)) {
+	if err == nil && (!opened.Mode().IsRegular() || !vfs.SameFile(info, opened)) {
 		err = ErrChanged
 	}
 	if err != nil {
-		return nil, errors.Join(err, file.Close())
+		return nil, errors.Join(err, closeNativeFile(file))
 	}
 	return file, nil
 }
@@ -291,11 +291,11 @@ func recoveryCheckPath(path string, file *vfs.File, original os.FileInfo) error 
 	if err := validateNativePath(file); err != nil {
 		return err
 	}
-	current, err := os.Lstat(path)
+	current, err := nativeLstat(path)
 	if err != nil {
 		return errors.Join(ErrChanged, err)
 	}
-	if !current.Mode().IsRegular() || !os.SameFile(current, original) {
+	if !current.Mode().IsRegular() || !vfs.SameFile(current, original) {
 		return fmt.Errorf("%w: recovery pathname identity", ErrChanged)
 	}
 	return validateWritableFile(file)
@@ -305,7 +305,7 @@ func recoveryCheckUnchanged(path string, file *vfs.File, original os.FileInfo) e
 	if err := recoveryCheckPath(path, file, original); err != nil {
 		return err
 	}
-	current, err := file.Stat()
+	current, err := statNativeFile(file)
 	if err != nil {
 		return err
 	}
@@ -328,8 +328,8 @@ func recoveryValidateHeader(db *vfs.File, plan *journal.ReplayPlan) error {
 	}
 	if headerBytes == nil {
 		headerBytes = make([]byte, 100)
-		if _, err := db.ReadAt(headerBytes, 0); err != nil {
-			return fmt.Errorf("%w: original header unavailable: %v", ErrCorrupt, err)
+		if _, err := readNativeAt(db, headerBytes, 0); err != nil {
+			return fmt.Errorf("%w: original header unavailable: %w", ErrCorrupt, err)
 		}
 	}
 	header, err := ParseHeader(headerBytes, plan.DatabaseBytes)

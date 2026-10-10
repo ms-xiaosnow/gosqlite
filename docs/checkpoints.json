@@ -266,9 +266,23 @@
     "bundle_bytes": 1560682,
     "library_file_id": "libfile_6b4a9e8063288191926006a86bf8478f",
     "library_version": 0,
-    "verified": "Expected-SHA remote ref readback and exact local mirror verified2026-10-10T15:08:13Z; full-history bundle byte-identical Library readback, clean clone/fsck and unchanged goal hash verified15:08:48Z. Exact restored focused expression CGO0 unit/full vet/build and separate CGO1 race passed. Initial oracle invocation used incorrect SQLITE3_ORACLE env and failed before queries; preserved output. Corrected SQLITE_ORACLE focused scalar/ordinary database oracle, module and clean-tree checks passed exit0 at15:10:02Z with no source changes. Frozen full aggregate db470d2ec208a690202253db840620b219a6abdc is tracked separately.",
+    "verified": "Expected-SHA remote ref readback and exact local mirror verified2026-10-10T15:08:13Z; full-history bundle byte-identical Library readback, clean clone/fsck and unchanged goal hash verified15:08:48Z. Exact restored focused expression CGO0 unit/full vet/build and separate CGO1 race passed. Initial oracle invocation used incorrect SQLITE3_ORACLE env and failed before queries; preserved output. Corrected SQLITE_ORACLE focused scalar/ordinary database oracle, module and clean-tree checks passed exit0 at15:10:02Z with no source changes. Frozen full aggregate db470d2ec208a690202253db840620b219a6abdc is tracked separately. Full frozen-source CGO0 unit/vet/build, separate CGO1 race, full pinned SQLite ordinary oracle, four cross-builds, module/no-CGO and unchanged source/fixture checks passed exit0 at2026-10-10T15:15:24Z; this is separate source-tree evidence, not a second full exact-restored suite.",
     "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38062386078",
-    "remote_ci_status": "IN_PROGRESS observed2026-10-10T15:08:57Z; not yet a terminal pass.",
+    "remote_ci_status": "COMPLETED SUCCESS for exact SHA, updated2026-10-10T15:17:19Z, observed15:17:26Z.",
     "open_gates": "Full relational S2/scoped binder/pull operators, broad SQL/planner/recovery/native-platform and extended ANN code remain open. This checkpoint also documents the plain-Windows metadata ownership correction; no native platform, restricted physical or independent release acceptance is claimed."
+  },
+  {
+    "stage": "M9 D review-only transition bundles and bounded CLI",
+    "remote_commit": "f5663cc47f7e3f30f7b239cab674c47b6ad54b34",
+    "local_commit": "f5663cc47f7e3f30f7b239cab674c47b6ad54b34",
+    "tree": "d1e1fc6f77ab9d720dc65ed75bcd1523afc28086",
+    "bundle_sha256": "48b25ae38ad98595dec5f2e92bb27a652c800a34b962a826251657261ee6bf16",
+    "bundle_bytes": 1623112,
+    "library_file_id": "libfile_ddef927b9518819199aca67ced0cb5b4",
+    "library_version": 0,
+    "verified": "Expected-SHA remote ref readback and exact local mirror verified2026-10-10T15:13:43Z; full-history bundle byte-identical Library readback, clean clone/fsck and unchanged goal hash verified15:14:25Z. Four initial blob errors lost exception detail in caller handler; exact blob reads returned404, one identical retry each succeeded, main had remained at its expected parent. Final isolated source415de5f50dbb6060befb52955208cbf5aeec7588 focused unit/race, full vet/build, four cross-builds, synthetic CLI output, modules and unchanged inventory passed15:10:56Z. Exact restored focused generator/CLI unit/race, full vet/build, identical synthetic JSON output, modules and clean tree passed exit0 at15:14:56Z. No external SQL executed.",
+    "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38062750892",
+    "remote_ci_status": "COMPLETED SUCCESS for exact SHA, updated2026-10-10T15:24:30Z, observed15:25:59Z.",
+    "open_gates": "Full-table/dependency recreation, online transition, live PostgreSQL/Neon validation and interrupted migration remain open. Extended ANN, broad SQL/recovery/native-platform code and restricted/independent release acceptance remain open."
   }
 ]

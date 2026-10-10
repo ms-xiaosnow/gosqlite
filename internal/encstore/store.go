@@ -19,7 +19,7 @@ type selection struct {
 	segments    []*segment
 	overlay     []location
 	baseCeiling uint32
-	root        *os.File // legacy modes only; shared roots own authenticated bytes
+	root        *managedFile // legacy modes only; shared roots own authenticated bytes
 	rootInfo    os.FileInfo
 	rootBytes   []byte
 	header      encryption.Header
@@ -33,7 +33,7 @@ type Store struct {
 	path               string
 	opts               Options
 	readOnly           bool
-	lock               *os.File
+	lock               *managedFile
 	lockInfo           os.FileInfo
 	master             *encryption.MasterKey
 	poisoned           error
@@ -43,21 +43,7 @@ type Store struct {
 }
 
 func canonical(path string) (string, error) {
-	p, err := filepath.Abs(path)
-	if err != nil {
-		return "", err
-	}
-	dir, err := filepath.EvalSymlinks(filepath.Dir(p))
-	if err != nil {
-		return "", err
-	}
-	p = filepath.Join(dir, filepath.Base(p))
-	if info, e := os.Lstat(p); e == nil && !info.Mode().IsRegular() {
-		return "", ErrUnsupported
-	} else if e != nil && !os.IsNotExist(e) {
-		return "", e
-	}
-	return p, nil
+	return canonicalPath(path)
 }
 
 // rejectPlainSidecars is a read-only preflight, repeated under the stable
@@ -65,7 +51,7 @@ func canonical(path string) (string, error) {
 // merely because its lock inode was created before detecting the conflict.
 func rejectPlainSidecars(path string) error {
 	for _, suffix := range []string{"-journal", "-wal", "-shm"} {
-		if _, err := os.Lstat(path + suffix); err == nil {
+		if _, err := platformPathInfo(path + suffix); err == nil {
 			return ErrUnsupported
 		} else if !os.IsNotExist(err) {
 			return err
@@ -82,7 +68,7 @@ func acquire(path string, readOnly, create bool, mode Mode) (*Store, bool, error
 	if err != nil {
 		return nil, false, err
 	}
-	_, err = os.Lstat(path)
+	_, err = platformPathInfo(path)
 	absent := os.IsNotExist(err)
 	if err != nil && !absent {
 		return nil, false, err
@@ -130,7 +116,7 @@ func acquire(path string, readOnly, create bool, mode Mode) (*Store, bool, error
 		return nil, false, err
 	}
 	// Recheck the root only after acquiring the stable lease.
-	_, err = os.Lstat(path)
+	_, err = platformPathInfo(path)
 	absent = os.IsNotExist(err)
 	if err != nil && !absent {
 		return nil, false, err
@@ -156,6 +142,9 @@ func Open(ctx context.Context, path string, o Options, readOnly, create bool, in
 	if err := o.Validate(); err != nil {
 		return nil, err
 	}
+	if err := supported(); err != nil {
+		return nil, err
+	}
 	// Preflight brand-new geometry and obtain credentials before creating even
 	// the stable lock inode. A failed provider must not strand a new family.
 	path, err := canonical(path)
@@ -163,7 +152,7 @@ func Open(ctx context.Context, path string, o Options, readOnly, create bool, in
 		return nil, err
 	}
 	var initialTarget *Prepared
-	_, probeErr := os.Lstat(path)
+	_, probeErr := platformPathInfo(path)
 	if os.IsNotExist(probeErr) && create && !readOnly {
 		desc := encryption.FileDescriptor{Role: encryption.FileBase, PageSize: uint32(len(initial)), PageCount: 1, RecordCount: 3}
 		if err = desc.Validate(o.Limits); err != nil {
@@ -280,7 +269,7 @@ func (s *Store) Check() error {
 		return s.checkSelected()
 	}
 	if s.root == nil {
-		if _, err := os.Lstat(s.path); !os.IsNotExist(err) {
+		if _, err := platformPathInfo(s.path); !os.IsNotExist(err) {
 			return ErrChanged
 		}
 		return nil

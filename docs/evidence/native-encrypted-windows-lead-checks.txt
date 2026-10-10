@@ -1,0 +1,24 @@
+Earlier frozen backend d52c82cfa393f220bfcd2a6c54fe4f6c9b47b3d3 checks.
+These predate discovery/correction of the public Open raw metadata prelude.
+They are backend-scoped evidence only; combined public-chain results are in native-windows-integrated-lead-checks.txt.
+
+Frozen Windows encrypted integration d52c82cfa393f220bfcd2a6c54fe4f6c9b47b3d3; target code never executed, later Darwin/plain-probe/typed-ANN edits excluded.
+2026-10-10T14:59:15Z
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	0.427s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.446s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	3.584s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.026s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	1.684s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.736s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	12.324s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.078s
+cross-build linux/amd64 PASS
+cross-build linux/arm64 PASS
+cross-build darwin/arm64 PASS
+cross-build windows/amd64 PASS
+cross-build windows/arm64 PASS
+all modules verified
+2026-10-10T15:00:31Z
+WINDOWS ENCRYPTED FROZEN FOCUSED CHECKS PASS; target runtime NOT_RUN

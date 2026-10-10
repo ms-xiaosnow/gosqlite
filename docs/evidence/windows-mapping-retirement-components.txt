@@ -1,0 +1,119 @@
+Windows mapping-object terminal-retirement correction
+Date: 2026-10-10. Host Linux/amd64, pinned Go 1.27.2.
+Native Windows execution: NOT_RUN. This is not physical failure, durability,
+security, cross-process interoperability or release acceptance.
+
+Isolation and ownership
+-----------------------
+Base source archive: git archive 5207d59b667614c40c184ec277fdc1fc1ca80fae
+Extracted at ../windows-mapping-retirement-freeze relative to gosqlite.
+Only three source/test files were overlaid for verification:
+  internal/vfs/native_windows.go
+  internal/vfs/mapping_retirement.go
+  internal/vfs/mapping_retirement_test.go
+Correction documentation was copied afterward and does not change compilation.
+Live failed-open-retirement, Darwin and typed-ANN changes were not included.
+No staging, commit, upload, push or ref mutation was performed by this worker.
+
+The frozen base and historical plain backend retained a numeric mapping HANDLE
+after an uncertain CloseHandle result without a terminal latch. Both published
+view retirement and failed MapViewOfFile acquisition cleanup could retry that
+numeric value. Prior native-ownership/native-windows/plain-metadata evidence
+did not test or establish safety of these two paths. It has not been rewritten.
+
+Correction
+----------
+The private mappingRetirement state machine is used by nativeUnmap and by
+nativeMap's rejected-view cleanup through nativeUnmap. It records the first
+unknown-close cause once, retaining handle/base/length, and returns that cause
+on every later attempt without invoking either native operation. The native
+adapter poisons its File. Strong File/maps/native.retained ownership keeps the
+record and protecting resources reachable; it offers no reset or reclamation.
+Object-close-before-view-unmap ordering remains unchanged, preserving live Bytes
+after failed close. A known successful object close is never repeated when only
+the represented view remains to retire. No lock interval, granularity, identity,
+namespace or sharing algorithm was changed. This does not implement the separate
+failed-OpenSharedSession pending-retirement group.
+
+Pre-execution behavioral review
+-------------------------------
+Read goal.md, Windows native/metadata ownership docs, generic Mapping/File close
+paths, and each selected test and helper before execution. Relevant local AGENTS
+search found no repository instruction file; no unrelated SQLite upstream file
+was edited. Read the software-engineering skill for existing assigned tasks.
+
+New tests use only synthetic integer handles/addresses, errors and in-memory
+callback/state transitions. No descriptor is opened or native API called in
+the five new cases. Failed-view cleanup composes the same state with the generic
+File close-ordering helper. Published-view cleanup composes Mapping.retireLocked
+and File.closeResourcesLocked and checks Bytes, mapped ownership and protectors.
+Repeated terminal cases perform 1,000 in-memory attempts, verifying one close
+callback, no unmap/descriptor close, and an identical stored cause.
+
+Existing selected arithmetic/ownership cases also use memory callbacks only.
+TestMetadataOwnershipCallChainSource only parses source. The two selected Linux
+ordinary cases create fresh temporary files, inspect metadata, acquire ordinary
+cooperating SHM ownership, write/grow normal backing storage, map logical views,
+check shared bytes, and close normally. They do not inject errors, delete or
+replace selected storage, execute hot recovery, launch processes or tamper with
+physical storage. No unreviewed test-name pattern was used.
+
+Toolchain and exact commands
+---------------------------
+All final commands ran from the isolated source archive with:
+  GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off
+  GOPATH="$PWD/../go-path" GOCACHE="$PWD/../go-cache"
+  GOFLAGS=-buildvcs=false
+  G=../toolchains/go1.27.2/bin/go
+  CGO_ENABLED=0, except the explicitly separate CGO_ENABLED=1 race run.
+No dependency download, production CGO path or native fault hook was added.
+
+An initial archive go build ./... stopped at automatic VCS stamping with
+"error obtaining VCS status: exit status 128". The exported archive has no Git
+repository. It was rerun with -buildvcs=false, disabling only source-archive VCS
+stamping, not an analyzer or test. The initial output is preserved in the check
+log. No test or source failure was hidden by this tooling correction.
+
+SCOPE='^(TestWindowsMappingRetirementMemory.*|TestMappingSpanGranularity|TestMappingRetirementMemoryModel|TestCloseOrderingMemoryModel|TestOwnershipReviewPartialRetirementRetainsAllLocks|TestPlatformReviewMappingSpanConservation|TestPlatformReviewRetirementPermutationsMemoryModel|TestManagedMappingLogicalSpanAndClose|TestMetadataSnapshotsAndResolvedPath|TestMetadataOwnershipCallChainSource)$'
+
+PASS: $G run ./internal/testscope
+  Source-reference guard is prevention aid only; behavior was separately read.
+PASS: CGO_ENABLED=0 $G build ./...
+PASS: CGO_ENABLED=0 $G test -count=1 ./internal/vfs -run "$SCOPE" -v
+  14 named tests plus acquisition subcases; package 0.044s.
+PASS: CGO_ENABLED=1 $G test -race -count=1 ./internal/vfs -run "$SCOPE" -v
+  Same scope; package 1.342s. Linux race tooling, not Windows native acceptance.
+PASS: CGO_ENABLED=0 $G vet ./internal/vfs ./internal/pager ./internal/walindex
+PASS: CGO_ENABLED=0 GOOS=windows GOARCH=amd64 $G build ./...
+PASS: CGO_ENABLED=0 GOOS=windows GOARCH=amd64 $G test -c -o ../native-build/windows-mapping-retirement-worker/vfs.test.exe ./internal/vfs
+PASS: CGO_ENABLED=0 GOOS=windows GOARCH=amd64 $G test -c -o ../native-build/windows-mapping-retirement-worker/pager.test.exe ./internal/pager
+PASS: CGO_ENABLED=0 GOOS=windows GOARCH=amd64 $G test -c -o ../native-build/windows-mapping-retirement-worker/walindex.test.exe ./internal/walindex
+  Compiled Windows executables were never launched.
+
+NOT CLEAN (known, disclosed):
+  CGO_ENABLED=0 GOOS=windows GOARCH=amd64 $G vet ./internal/vfs ./internal/pager ./internal/walindex
+  Exit 1: internal/vfs/native_windows.go:690:33: possible misuse of unsafe.Pointer
+  The successful MapViewOfFile uintptr-to-unsafe.Slice conversion is unchanged.
+  No vet checker was disabled or native-boundary acceptance inferred.
+
+Files and independent review
+----------------------------
+docs/evidence/windows-mapping-retirement-checks.txt preserves exact final raw
+check output, including the initial archive-only VCS-stamping problem.
+docs/evidence/windows-mapping-retirement-owned-paths.txt lists the deliverable.
+docs/evidence/windows-mapping-retirement-source-sha256.txt freezes the three
+source/test paths and two explanatory documentation paths. Final source hashes
+matched before and after unit/race/build/compile checks.
+docs/evidence/windows-mapping-retirement-independent-review.txt records a
+separate source audit, source-reference guard, memory laws, race tooling and
+Windows VFS compile-only run against the exact three source hashes.
+
+Explicit non-execution
+----------------------
+No failed native I/O, lock, unmap, close or Sync experiment; no physical
+corruption/tamper/wrong-key/missing-selected-file test; no namespace mutation,
+retarget or race; no crash/kill/process-exit/recovery; no interrupted publication
+or rekey; no manual harness; no Windows native runtime was executed. The aggregate
+go test ./... suite was not run for this narrow assignment. The exact scoped
+ordinary/unit/race and compile results above do not substitute for missing
+platform, durability, security, interoperability or release qualification.
