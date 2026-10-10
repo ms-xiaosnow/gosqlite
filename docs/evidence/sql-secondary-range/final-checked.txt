@@ -1,0 +1,157 @@
+2026-10-10T19:49:48Z
+go version go1.27.2 linux/amd64
+3.54.0|2026-10-09 15:46:58 be8d059e9a49089ab2dce5ed26dd87aaf598fdc5fbe0b107c0dd758464bcd5e3
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestBooleanAliasOnNativeProvenance
+--- PASS: TestBooleanAliasOnNativeProvenance (0.00s)
+=== RUN   TestBooleanIdentifierNativeLifecycle
+--- PASS: TestBooleanIdentifierNativeLifecycle (0.00s)
+=== RUN   TestBooleanRankMemoryEntrypoints
+--- PASS: TestBooleanRankMemoryEntrypoints (0.00s)
+=== RUN   TestBooleanRankSQLStartupAcrossRepresentations
+=== RUN   TestBooleanRankSQLStartupAcrossRepresentations/dense
+=== RUN   TestBooleanRankSQLStartupAcrossRepresentations/half
+=== RUN   TestBooleanRankSQLStartupAcrossRepresentations/sparse
+=== RUN   TestBooleanRankSQLStartupAcrossRepresentations/bit
+--- PASS: TestBooleanRankSQLStartupAcrossRepresentations (0.08s)
+    --- PASS: TestBooleanRankSQLStartupAcrossRepresentations/dense (0.04s)
+    --- PASS: TestBooleanRankSQLStartupAcrossRepresentations/half (0.02s)
+    --- PASS: TestBooleanRankSQLStartupAcrossRepresentations/sparse (0.01s)
+    --- PASS: TestBooleanRankSQLStartupAcrossRepresentations/bit (0.01s)
+=== RUN   TestBooleanPublicFilterTypedLazinessAndTerminalStartup
+--- PASS: TestBooleanPublicFilterTypedLazinessAndTerminalStartup (0.00s)
+=== RUN   TestBooleanPublicVectorFiltersAndBudgets
+--- PASS: TestBooleanPublicVectorFiltersAndBudgets (0.02s)
+=== RUN   TestBooleanPublicSimilarityFilter
+--- PASS: TestBooleanPublicSimilarityFilter (0.01s)
+=== RUN   TestBooleanRankIVFStartupAndFallback
+=== RUN   TestBooleanRankIVFStartupAndFallback/1
+=== RUN   TestBooleanRankIVFStartupAndFallback/2
+=== RUN   TestBooleanRankIVFStartupAndFallback/4
+--- PASS: TestBooleanRankIVFStartupAndFallback (0.01s)
+    --- PASS: TestBooleanRankIVFStartupAndFallback/1 (0.00s)
+    --- PASS: TestBooleanRankIVFStartupAndFallback/2 (0.01s)
+    --- PASS: TestBooleanRankIVFStartupAndFallback/4 (0.00s)
+=== RUN   TestBooleanQueryContextsAndPreflight
+--- PASS: TestBooleanQueryContextsAndPreflight (0.00s)
+=== RUN   TestBooleanLazyTypedCellsAndProjection
+--- PASS: TestBooleanLazyTypedCellsAndProjection (0.00s)
+=== RUN   TestBooleanConservativeIndexErrorBoundary
+--- PASS: TestBooleanConservativeIndexErrorBoundary (0.00s)
+=== RUN   TestBooleanDMLPredicatesAndRollback
+--- PASS: TestBooleanDMLPredicatesAndRollback (0.00s)
+=== RUN   TestBooleanTransitiveConstantExpansionIsBounded
+--- PASS: TestBooleanTransitiveConstantExpansionIsBounded (0.00s)
+=== RUN   TestOrdinaryIndexIndependentRangePageEvidence
+    plan_index_internal_test.go:88: independent PageReader: prefix=3 reads/2 keys vs full index=84 reads/1600 keys
+--- PASS: TestOrdinaryIndexIndependentRangePageEvidence (0.07s)
+=== RUN   TestOrdinaryIndexTotalPredicateProof
+--- PASS: TestOrdinaryIndexTotalPredicateProof (0.00s)
+=== RUN   TestRowIDRangeRationalBoundaryLaw
+--- PASS: TestRowIDRangeRationalBoundaryLaw (0.00s)
+=== RUN   TestRowIDRangeSourceMemoryQuotasWorkAndOwnership
+    plan_rowid_range_internal_test.go:127: reverse=false: 3 native range page calls/3 rows vs 828 full scan page calls/1028 rows
+    plan_rowid_range_internal_test.go:127: reverse=true: 3 native range page calls/3 rows vs 828 full scan page calls/1028 rows
+--- PASS: TestRowIDRangeSourceMemoryQuotasWorkAndOwnership (0.00s)
+=== RUN   TestSecondaryRangeIndependentPagesAndAdmissions
+    plan_secondary_range_internal_test.go:79: independent PageReader: inequality=3 calls/4 keys versus full index=82 calls/1600 keys
+--- PASS: TestSecondaryRangeIndependentPagesAndAdmissions (0.08s)
+=== RUN   TestOrdinaryIndexStorageClassesAndAffinities
+    plan_index_test.go:69: 240 storage-class/affinity equality and IS probes matched independently forced scans
+--- PASS: TestOrdinaryIndexStorageClassesAndAffinities (0.64s)
+=== RUN   TestOrdinaryIndexRowIDAndShadowedNames
+--- PASS: TestOrdinaryIndexRowIDAndShadowedNames (0.04s)
+=== RUN   TestOrdinaryIndexPrefixWorkAndDeterministicLimit
+    plan_index_test.go:137: tail="" matching keys=20 range page reads=3 source fetches=20 forced-scan fetches=1800
+    plan_index_test.go:137: tail=" LIMIT 7 OFFSET 3" matching keys=20 range page reads=3 source fetches=10 forced-scan fetches=900
+    plan_index_test.go:137: tail=" ORDER BY tie LIMIT 7 OFFSET 3" matching keys=20 range page reads=3 source fetches=20 forced-scan fetches=1800
+    plan_index_test.go:137: tail=" ORDER BY tie DESC LIMIT 7 OFFSET 3" matching keys=20 range page reads=3 source fetches=20 forced-scan fetches=1800
+    plan_index_test.go:137: tail=" ORDER BY suffix,id LIMIT 7 OFFSET 3" matching keys=20 range page reads=3 source fetches=20 forced-scan fetches=1800
+    plan_index_test.go:137: tail=" ORDER BY id DESC LIMIT 7 OFFSET 3" matching keys=20 range page reads=3 source fetches=20 forced-scan fetches=1800
+--- PASS: TestOrdinaryIndexPrefixWorkAndDeterministicLimit (0.11s)
+=== RUN   TestOrdinaryIndexBudgetsCancellationAndResidualErrors
+--- PASS: TestOrdinaryIndexBudgetsCancellationAndResidualErrors (0.02s)
+=== RUN   TestOrdinaryIndexTransactionsRollbackReopenAndSnapshot
+=== RUN   TestOrdinaryIndexTransactionsRollbackReopenAndSnapshot/sharedfalse
+=== RUN   TestOrdinaryIndexTransactionsRollbackReopenAndSnapshot/sharedtrue
+--- PASS: TestOrdinaryIndexTransactionsRollbackReopenAndSnapshot (0.01s)
+    --- PASS: TestOrdinaryIndexTransactionsRollbackReopenAndSnapshot/sharedfalse (0.00s)
+    --- PASS: TestOrdinaryIndexTransactionsRollbackReopenAndSnapshot/sharedtrue (0.01s)
+=== RUN   TestOrdinaryIndexGramsANNPrecedenceAndExactVector
+--- PASS: TestOrdinaryIndexGramsANNPrecedenceAndExactVector (1.09s)
+=== RUN   TestOrdinaryIndexConcurrentQueries
+--- PASS: TestOrdinaryIndexConcurrentQueries (0.02s)
+=== RUN   TestOrdinaryIndexSlotBindingAndUnsupportedShapes
+    plan_index_test.go:392: unsupported extraction must keep a genuine scan SELECT id FROM t WHERE k>10 { 0 0  0 0 0 0 0 0       0 0 false  SEARCH t [by_prefix] btree_range 1 [k]  [] -1 true native BINARY ASC leading-key interval; direction=forward; rowid-ordered candidates; order_satisfied=false; sort=false; covering=false}
+--- FAIL: TestOrdinaryIndexSlotBindingAndUnsupportedShapes (0.00s)
+=== RUN   TestRowIDRangeStorageClassesDirectionsAndCuts
+    plan_rowid_range_test.go:64: 1104 native/forced-scan storage-class, side, direction cases
+--- PASS: TestRowIDRangeStorageClassesDirectionsAndCuts (0.21s)
+=== RUN   TestRowIDRangeOrderProofLazyWorkAndBinding
+    plan_rowid_range_test.go:104: SELECT id,v FROM t WHERE id>=850 AND id<860 ORDER BY id DESC LIMIT 3 OFFSET 2: range=5 source rows; scan=1800 source rows
+    plan_rowid_range_test.go:104: SELECT id,v FROM t WHERE id>=850 AND id<860 ORDER BY 1 DESC NULLS FIRST LIMIT 3 OFFSET 2: range=5 source rows; scan=1800 source rows
+    plan_rowid_range_test.go:104: SELECT id AS rid,v FROM t WHERE id>=850 AND id<860 ORDER BY rid DESC LIMIT 3 OFFSET 2: range=5 source rows; scan=1800 source rows
+    plan_rowid_range_test.go:104: SELECT id AS rid,v FROM t WHERE rid>=850 AND rid<860 ORDER BY rid DESC LIMIT 3 OFFSET 2: range=5 source rows; scan=1800 source rows
+--- PASS: TestRowIDRangeOrderProofLazyWorkAndBinding (0.13s)
+=== RUN   TestRowIDRangeErrorOrderAndConservativeJoin
+--- PASS: TestRowIDRangeErrorOrderAndConservativeJoin (0.01s)
+=== RUN   TestRowIDRangeTransactionsSnapshotsCancelAndReopen
+=== RUN   TestRowIDRangeTransactionsSnapshotsCancelAndReopen/false
+=== RUN   TestRowIDRangeTransactionsSnapshotsCancelAndReopen/true
+--- PASS: TestRowIDRangeTransactionsSnapshotsCancelAndReopen (0.05s)
+    --- PASS: TestRowIDRangeTransactionsSnapshotsCancelAndReopen/false (0.00s)
+    --- PASS: TestRowIDRangeTransactionsSnapshotsCancelAndReopen/true (0.04s)
+=== RUN   TestSecondaryRangeStorageClassesAndAffinities
+    plan_secondary_range_test.go:66: 1120 leading inequality affinity/storage-class/operand-side comparisons matched genuine scans
+--- PASS: TestSecondaryRangeStorageClassesAndAffinities (4.14s)
+=== RUN   TestSecondaryRangeWorkOrderingPrecedenceAndBinding
+    plan_secondary_range_test.go:89: "": 40 index keys/4 pages/40 source rows versus 1800 forced-scan rows
+    plan_secondary_range_test.go:89: " LIMIT 7 OFFSET 3": 40 index keys/4 pages/10 source rows versus 450 forced-scan rows
+    plan_secondary_range_test.go:89: " ORDER BY tie LIMIT 7 OFFSET 3": 40 index keys/4 pages/40 source rows versus 1800 forced-scan rows
+    plan_secondary_range_test.go:89: " ORDER BY tie DESC LIMIT 7 OFFSET 3": 40 index keys/4 pages/40 source rows versus 1800 forced-scan rows
+    plan_secondary_range_test.go:89: " ORDER BY k DESC NULLS FIRST,suffix ASC,id DESC LIMIT 7 OFFSET 3": 40 index keys/4 pages/40 source rows versus 1800 forced-scan rows
+    plan_secondary_range_test.go:89: " ORDER BY k NULLS LAST,id": 40 index keys/4 pages/40 source rows versus 1800 forced-scan rows
+--- PASS: TestSecondaryRangeWorkOrderingPrecedenceAndBinding (0.58s)
+=== RUN   TestSecondaryRangeBudgetsAndErrorOrder
+--- PASS: TestSecondaryRangeBudgetsAndErrorOrder (0.03s)
+=== RUN   TestSecondaryRangeTransactionsSnapshotsCancelAndReopen
+=== RUN   TestSecondaryRangeTransactionsSnapshotsCancelAndReopen/false
+=== RUN   TestSecondaryRangeTransactionsSnapshotsCancelAndReopen/true
+--- PASS: TestSecondaryRangeTransactionsSnapshotsCancelAndReopen (0.02s)
+    --- PASS: TestSecondaryRangeTransactionsSnapshotsCancelAndReopen/false (0.00s)
+    --- PASS: TestSecondaryRangeTransactionsSnapshotsCancelAndReopen/true (0.01s)
+=== RUN   TestSecondaryRangeExtensionAndJoinPrecedence
+--- PASS: TestSecondaryRangeExtensionAndJoinPrecedence (0.71s)
+=== RUN   TestSecondaryRangeConcurrentQueries
+--- PASS: TestSecondaryRangeConcurrentQueries (0.04s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/sqlite	8.144s
+=== RUN   TestDriverRowIDRangePreparedStreamingAndRollback
+--- PASS: TestDriverRowIDRangePreparedStreamingAndRollback (0.00s)
+=== RUN   TestDriverRowIDRangeAvoidsOnlyProvenSort
+--- PASS: TestDriverRowIDRangeAvoidsOnlyProvenSort (0.00s)
+=== RUN   TestDriverSecondaryRangePreparedAndRollback
+--- PASS: TestDriverSecondaryRangePreparedAndRollback (0.03s)
+=== RUN   TestDriverBooleanAliasOnPreparedReuse
+--- PASS: TestDriverBooleanAliasOnPreparedReuse (0.00s)
+=== RUN   TestDriverBooleanIdentifierPrepared
+--- PASS: TestDriverBooleanIdentifierPrepared (0.00s)
+=== RUN   TestDriverBooleanPreparedAndTransactions
+--- PASS: TestDriverBooleanPreparedAndTransactions (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.046s
+=== RUN   TestBooleanIdentifierASTPrecedence
+--- PASS: TestBooleanIdentifierASTPrecedence (0.00s)
+=== RUN   TestBooleanIdentifierGrammar
+--- PASS: TestBooleanIdentifierGrammar (0.00s)
+=== RUN   TestBooleanIdentifierRetainedRejections
+--- PASS: TestBooleanIdentifierRetainedRejections (0.00s)
+=== RUN   TestBooleanScalarVersusPredicate
+--- PASS: TestBooleanScalarVersusPredicate (0.00s)
+=== RUN   TestBooleanThreeValuedTruthTables
+--- PASS: TestBooleanThreeValuedTruthTables (0.00s)
+=== RUN   TestBooleanCustomFunctionsCancellationAndQuotas
+--- PASS: TestBooleanCustomFunctionsCancellationAndQuotas (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.004s
+FAIL

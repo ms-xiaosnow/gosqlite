@@ -1,0 +1,52 @@
+{
+  "commands": [
+    {
+      "command": [
+        "git",
+        "apply",
+        "--check",
+        "/workspace/scratch/5e06a74e5f65/durable-restart/sql-secondary-range-v1-source.patch"
+      ],
+      "status": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "apply",
+        "/workspace/scratch/5e06a74e5f65/durable-restart/sql-secondary-range-v1-source.patch"
+      ],
+      "status": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "owned_paths_equal": [
+    "docs/progress.md",
+    "docs/sql-secondary-ranges.md",
+    "driver/secondary_range_test.go",
+    "internal/testkit/secondary_range_conformance_test.go",
+    "sqlite/plan_index_test.go",
+    "sqlite/plan_secondary_range.go",
+    "sqlite/plan_secondary_range_internal_test.go",
+    "sqlite/plan_secondary_range_test.go",
+    "sqlite/query.go"
+  ],
+  "candidate_only_evidence": [
+    "docs/evidence/sql-secondary-range/baseline.txt",
+    "docs/evidence/sql-secondary-range/behavioral-audit.md",
+    "docs/evidence/sql-secondary-range/checked-v2.exit",
+    "docs/evidence/sql-secondary-range/checked-v2.txt",
+    "docs/evidence/sql-secondary-range/final-checked.exit",
+    "docs/evidence/sql-secondary-range/final-checked.txt",
+    "docs/evidence/sql-secondary-range/oracle-initial.txt",
+    "docs/evidence/sql-secondary-range/owned-base-final.tsv",
+    "docs/evidence/sql-secondary-range/owned-paths.txt",
+    "docs/evidence/sql-secondary-range/regression-initial.exit",
+    "docs/evidence/sql-secondary-range/regression-initial.txt",
+    "docs/evidence/sql-secondary-range/run-checked.sh",
+    "docs/evidence/sql-secondary-range/unit-expanded.txt",
+    "docs/evidence/sql-secondary-range/unit-initial.txt"
+  ]
+}

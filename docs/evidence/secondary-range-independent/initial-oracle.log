@@ -1,0 +1,14 @@
+=== RUN   TestReviewSecondaryOfficialFixtures
+=== RUN   TestReviewSecondaryOfficialFixtures/512
+    review_secondary_range_oracle_independent_test.go:70: native query "SELECT id,typeof(k),hex(k) FROM t WHERE -9007199254740993<k AND NULL<k AND (s=0 OR s=2) ORDER BY k DESC,s ASC,id DESC LIMIT 9 OFFSET 1": sqlite query: unsupported SQLite feature: unsupported SQLite feature: table "t" definition: unsupported SQL: column type or constraint STRING at byte 47
+=== RUN   TestReviewSecondaryOfficialFixtures/4096
+    review_secondary_range_oracle_independent_test.go:70: native query "SELECT id,typeof(k),hex(k) FROM t WHERE -9007199254740993<k AND NULL<k AND (s=0 OR s=2) ORDER BY k DESC,s ASC,id DESC LIMIT 9 OFFSET 1": sqlite query: unsupported SQLite feature: unsupported SQLite feature: table "t" definition: unsupported SQL: column type or constraint STRING at byte 47
+=== RUN   TestReviewSecondaryOfficialFixtures/65536
+    review_secondary_range_oracle_independent_test.go:70: native query "SELECT id,typeof(k),hex(k) FROM t WHERE -9007199254740993<k AND NULL<k AND (s=0 OR s=2) ORDER BY k DESC,s ASC,id DESC LIMIT 9 OFFSET 1": sqlite query: unsupported SQLite feature: unsupported SQLite feature: table "t" definition: unsupported SQL: column type or constraint STRING at byte 47
+--- FAIL: TestReviewSecondaryOfficialFixtures (0.04s)
+    --- FAIL: TestReviewSecondaryOfficialFixtures/512 (0.01s)
+    --- FAIL: TestReviewSecondaryOfficialFixtures/4096 (0.02s)
+    --- FAIL: TestReviewSecondaryOfficialFixtures/65536 (0.01s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/testkit	0.048s
+FAIL

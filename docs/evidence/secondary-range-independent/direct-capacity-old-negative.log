@@ -1,0 +1,10 @@
+=== RUN   TestReviewSecondaryAdmissionsCopyAndCancellation
+    review_secondary_range_internal_independent_test.go:201: upstream page admission rejects with 1 page calls before returning no partial IDs
+    review_secondary_range_internal_independent_test.go:201: upstream record admission rejects with 1 page calls before returning no partial IDs
+    review_secondary_range_internal_independent_test.go:226: quota={budget:0 memory:1048576 zero:true} calls=0 stats={IndexKeysRead:0 IndexPageReads:0 RowIDSeeks:0 ANNStateReads:0 ANNNodeReads:0 ANNEdgeReads:0 ANNVisited:0 ANNDistanceEvaluations:0 ANNIdentityLookups:0 ANNCentroidScores:0 ANNCentroidReads:0 ANNListsOpened:0 ANNMemberKeysRead:0 ANNIterations:0 ANNExactRescores:0 ANNPeakBytes:0 VectorRankedRows:0 VectorFilteredRows:0 VectorNullRows:0 VectorRankComponents:0 VectorRankNonzeros:0 VectorRankPackedBytes:0 FrequencyLookups:0 PostingKeysRead:0 Candidates:0 BaseRowFetches:0 ReturnedRows:0}
+    review_secondary_range_internal_independent_test.go:226: quota={budget:20 memory:1 zero:true} calls=0 stats={IndexKeysRead:0 IndexPageReads:0 RowIDSeeks:0 ANNStateReads:0 ANNNodeReads:0 ANNEdgeReads:0 ANNVisited:0 ANNDistanceEvaluations:0 ANNIdentityLookups:0 ANNCentroidScores:0 ANNCentroidReads:0 ANNListsOpened:0 ANNMemberKeysRead:0 ANNIterations:0 ANNExactRescores:0 ANNPeakBytes:0 VectorRankedRows:0 VectorFilteredRows:0 VectorNullRows:0 VectorRankComponents:0 VectorRankNonzeros:0 VectorRankPackedBytes:0 FrequencyLookups:0 PostingKeysRead:0 Candidates:0 BaseRowFetches:0 ReturnedRows:0}
+    review_secondary_range_internal_independent_test.go:224: {100001 67108864 true} [2 3 4] <nil> 1 {3 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0}
+--- FAIL: TestReviewSecondaryAdmissionsCopyAndCancellation (0.00s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/sqlite	0.006s
+FAIL

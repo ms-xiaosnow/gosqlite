@@ -1,0 +1,6 @@
+=== RUN   TestReviewSecondaryIndependentIntersections
+    review_secondary_range_independent_test.go:186: n=0 q=SELECT id FROM t WHERE ?1<k AND ?2<k AND (s=1 OR s=3) ORDER BY k DESC,s ASC LIMIT 3 OFFSET 1 a=<nil> b=-9007199254740993 got=[] want=[] plan={ANNOpclass: ANNGeneration:0 ANNLists:0 ANNTrainingState: ANNEFSearch:0 ANNMaxEFSearch:0 ANNEffectiveEF:0 ANNProbes:0 ANNMaxProbes:0 ANNEffectiveProbes:0 ANNStopReason: ANNFallback: VectorMetric: VectorBitMetric: VectorRepresentation: VectorColumn: VectorDimensions:0 VectorTopK:0 VectorExact:false VectorRanking: Access:SCAN Table:t Indexes:[] Method: MethodVersion:0 Fields:[] Namespace: GramLengths:[] EstimatedCandidates:0 Recheck:false Reason:predicate has no safe gram filter} stats={IndexKeysRead:0 IndexPageReads:0 RowIDSeeks:0 ANNStateReads:0 ANNNodeReads:0 ANNEdgeReads:0 ANNVisited:0 ANNDistanceEvaluations:0 ANNIdentityLookups:0 ANNCentroidScores:0 ANNCentroidReads:0 ANNListsOpened:0 ANNMemberKeysRead:0 ANNIterations:0 ANNExactRescores:0 ANNPeakBytes:0 VectorRankedRows:0 VectorFilteredRows:0 VectorNullRows:0 VectorRankComponents:0 VectorRankNonzeros:0 VectorRankPackedBytes:0 FrequencyLookups:0 PostingKeysRead:0 Candidates:0 BaseRowFetches:123 ReturnedRows:0}
+--- FAIL: TestReviewSecondaryIndependentIntersections (0.01s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/sqlite	0.029s
+FAIL

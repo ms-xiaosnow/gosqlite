@@ -502,3 +502,13 @@ checkpoint fixtures. None executed failed native I/O/lock/unmap/close/Sync,
 physical corruption/tamper/wrong-key/missing-file, namespace mutation, crash,
 hot recovery or interrupted publication/rekey. Those gates remain NOT_RUN with
 the previously recorded manual commands. Cross-builds are compile evidence only.
+
+
+## Leading secondary inequalities ordinary gate
+
+Exact source60d8a2d68c36c1a48333baf9af2c22eb5fb83188 passed full guarded ordinary
+unit/vet/build/oracle/race, five target builds/modules/inventory at 2026-10-10T20:58:20Z.
+New runtime fixtures are intact SQL/index/BUSY/cancel/lifecycle or byte-only
+range/quota laws. No physical/native-fault/namespace/crash/hot-recovery or
+interrupted-publication/rekey workflow ran. Existing concrete manual commands
+remain user-requested documentation; these results do not qualify those gates.

@@ -30,7 +30,7 @@ The source-only rollback recovery operation is not automatically reachable throu
 
 M5 similarity operations enforce per-text tokenizer limits plus cumulative candidate/input-byte/set-comparison/DP/result limits, propagate live contexts and return no partial successful result on errors. Exact plans never use lossy candidate cutoffs. User-supplied registry handlers, driver.Valuer implementations and custom mathematical callbacks remain trusted application code; their own allocation, blocking or side effects cannot be bounded by the engine. Native SQL filter parsing accepts only one expression and binds parameters through the normal parser. Vector primitives reject nonfinite values and malformed/unknown encodings before unbounded allocation; their BLOB checksum/authentication is intentionally absent and is not an encryption format. These source reviews are not independent release security certification.
 
-See [encryption-primitives.md](encryption-primitives.md) for primitive-specific credential/nonce lifecycle and memory-only evidence, and [encryption-storage.md](encryption-storage.md) for the implemented root/footer/storage semantics, complete API/options/limits, retention policy and remaining gates. Component negative tests change only in-memory byte slices and do not qualify disk tamper/recovery handling. The encrypted runtime is Linux-only; native non-Linux encrypted implementation/qualification, independent security review and production acceptance remain outstanding. No ciphertext format is stable or production accepted.
+See [encryption-primitives.md](encryption-primitives.md) for primitive-specific credential/nonce lifecycle and memory-only evidence, and [encryption-storage.md](encryption-storage.md) for the implemented root/footer/storage semantics, complete API/options/limits, retention policy and remaining gates. Component negative tests change only in-memory byte slices and do not qualify disk tamper/recovery handling. Verified ordinary encrypted runtime is Linux/amd64 only. Native Darwin and Windows backends are implemented but their runtime qualification, independent security review and production acceptance remain outstanding. No ciphertext format is stable or production accepted.
 
 Encrypted WAL bounds active segment/frame/root bytes, overlay entries, open files,
 scan/operation I/O, replay work and aggregate adapter memory separately from dirty
@@ -80,5 +80,7 @@ can exhaust admission until process exit. No cleanup error authorizes repeated
 raw OS close. Native WALShared successful Close and driver disposal now have a
 separate bounded ownership correction. Encrypted acquisition/selection/copy/session retirement now has bounded scope
 ownership and explicit discovery/retry, with native exceptional branches still
-unexecuted. Rollback Reader/Tx and exclusive-WAL lifecycle gaps remain, so
-whole-public-lifecycle safety is not established.
+unexecuted. Rollback Reader/Tx, exclusive WAL and public metadata adoption now
+have bounded ownership corrections. Recovery ownership/integration, remaining
+shared absence provenance and physical native failures are still open; complete
+public-lifecycle safety is not established.

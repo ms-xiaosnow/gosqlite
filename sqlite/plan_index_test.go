@@ -387,8 +387,14 @@ func TestOrdinaryIndexSlotBindingAndUnsupportedShapes(t *testing.T) {
 		}
 	}
 	for _, sql := range []string{"SELECT id FROM t WHERE +k=10", "SELECT id FROM t WHERE k+0=10", "SELECT id FROM t WHERE k=n", "SELECT id FROM t WHERE k>10", "SELECT id FROM t WHERE k=10 OR k=20", "SELECT id FROM t WHERE k=abs(10)", "SELECT id+0 AS renamed FROM t WHERE renamed=1"} {
-		p, _, _ := ordinaryCompare(t, db, sql)
-		if p.Access != "SCAN" {
+		p, stats, _ := ordinaryCompare(t, db, sql)
+		if sql == "SELECT id FROM t WHERE k>10" {
+			// This formerly unsupported shape now has genuine leading-range
+			// access. Keep the forced-scan equality and require actual work.
+			if p.Access != "SEARCH" || p.Method != "btree_range" || !reflect.DeepEqual(p.Indexes, []string{"by_prefix"}) || stats.IndexKeysRead != 1 || stats.IndexPageReads == 0 || stats.RowIDSeeks != 1 || stats.BaseRowFetches != 1 {
+				t.Fatal("leading inequality must use a real bounded index interval", p, stats)
+			}
+		} else if p.Access != "SCAN" {
 			t.Fatal("unsupported extraction must keep a genuine scan", sql, p)
 		}
 	}

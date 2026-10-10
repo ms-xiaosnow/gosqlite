@@ -805,3 +805,31 @@ All published non-document changed bytes equal that tested source. Remote CI
 and Library-restored exact commit checks are recorded separately. This checkpoint
 does not qualify native failure paths, physical recovery, Windows/Darwin runtime,
 independent security/legal review or M10 release acceptance.
+
+
+### Leading secondary-index inequalities and acceptance traceability
+
+Source 60d8a2d68c36c1a48333baf9af2c22eb5fb83188 adds eight checked paths onto
+fully verified plaintext/SQL source7d3184. It uses real leading BINARY ASC index
+bounds, bounded candidate rowids and source seeks; complete WHERE rechecks and
+existing sorting remain. Composite equality-plus-range, covering/reverse/order,
+JOIN probes and statistics remain code work. Independent exact rational, forced-
+scan and official matrices passed; measured whole-query page calls are16/19
+versus277, not only the3 index-page calls. LIMIT0/EXPLAIN retain planning reads.
+Initial stale k>10 SCAN negative was upgraded with the exact original typed
+query, actual SEARCH counters and forced-scan comparison; earlier failed fixture
+logs remain in the owner evidence. Nothing pretends a table scan is an index hit.
+
+Exact combined full ordinary unit/vet/build, complete pinned ordinary oracle,
+full race, five builds, modules and complete inventory passed exit0 at 2026-10-10T20:58:20Z.
+All published non-document changed bytes equal this source. Remote and restored
+commit gates remain separately recorded. New journal/recovery/group/counter,
+CLI/import verification and benchmark sources are excluded from this checkpoint.
+
+The full original goal audit is preserved under evidence with exact source/time
+identities. acceptance-status.md separates required code, runnable ordinary
+verification, restricted manual gates and real external environments. Required
+CLI backup/rekey, caller-dataset distance checks, normalized corpus and benchmark/
+soak/performance-CI work take priority over optional SQL breadth. Current-tense
+architecture/security contradictions are corrected; original documents remain in
+history. The user's manual verification commands remain intact. M10 is not complete.

@@ -1,0 +1,15 @@
+set -euo pipefail
+cd /workspace/scratch/5e06a74e5f65/durable-restart/restore-library-sql-ranges-aggregates
+export PATH="$PWD/../toolchains/go1.27.2/bin:$PATH" GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off GOCACHE="$PWD/../go-cache" GOPATH="$PWD/../go-path" CGO_ENABLED=0 SQLITE_ORACLE="$PWD/../toolchains/sqlite-build-3540000/sqlite3"
+echo 'Exact Library-restored 13a2146. Audited intact SQL/range/aggregate/identifier fixtures, byte-only cursor/math/parser laws and normal resource/quota checks. Full source48370 gate is separate evidence. No restricted physical/namespace/native-fault/recovery workflow.'
+git rev-parse HEAD; date -u +%FT%TZ
+go run ./internal/testscope
+go test ./internal/btree ./internal/sql ./sqlite ./driver -run 'Range|Bound|GlobalAggregate|IndependentAggregate|Identifier|LeftON|LeftOn|RowID|GramsHighFrequency|GramsConfigured' -count=1 -timeout=20m
+go run ./internal/testscope
+CGO_ENABLED=1 go test -race ./internal/btree ./internal/sql ./sqlite ./driver -run 'Range|Bound|GlobalAggregate|IndependentAggregate|Identifier|LeftON|LeftOn|RowID|GramsHighFrequency|GramsConfigured' -count=1 -timeout=20m
+go run ./internal/testscope
+go test -tags oracle ./internal/testkit -run 'GlobalAggregate|IndependentAggregate|BooleanIdentifier|OracleRowIDRangeSQL|OracleErrorsAndResources' -count=1 -timeout=20m
+go vet ./...; go build -trimpath ./...
+for target in linux/arm64 darwin/arm64 darwin/amd64 windows/amd64 windows/arm64; do GOOS=${target%/*} GOARCH=${target#*/} go build ./...; echo "restored cross-build $target PASS"; done
+go mod verify; test -z "$(git status --porcelain)"; date -u +%FT%TZ
+echo 'EXACT RESTORED SQL RANGES/AGGREGATES FOCUSED CHECKPOINT PASS'

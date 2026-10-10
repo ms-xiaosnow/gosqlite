@@ -1,0 +1,6 @@
+Base: rowid-identifier-lead-verify
+Lead Git tree: 284402d1d8acba2252c85cc3d52c353cc4ed920b
+Base full SHA256 inventory: ../rowid-identifier-lead-all-sha256.txt
+Full base inventory verified unchanged before freeze.
+Only nine non-evidence source/test/doc paths are owned. No B-tree, rowid planner, public layout, storage or main-tree edits.
+The lead-owned rowid-reason-repair.patch is intentionally not included.

@@ -1,0 +1,15 @@
+{
+  "files": 1225,
+  "mismatches": {
+    "docs/evidence/sql-secondary-range/checked-v2.txt": {
+      "recorded_source_after_copy": "52ea23b33d380552de8914014e9970ebcef4af7f39b92637339dd75734df87f7",
+      "copied_bytes": "f912973d8dbf02c5574d2aaa78c1a870ded722c5b287211fd0a01146b4b29fa4"
+    }
+  },
+  "extras": [
+    "internal/testkit/review_secondary_range_oracle_independent_test.go",
+    "sqlite/review_secondary_range_independent_test.go",
+    "sqlite/review_secondary_range_internal_independent_test.go"
+  ],
+  "note": "Provisional source copy was taken while owner checked-v2.txt was growing. Its captured evidence bytes differ from source manifest generated after copying. All source/test/doc bytes match. Final qualification uses exact immutable freeze."
+}

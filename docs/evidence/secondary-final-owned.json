@@ -1,0 +1,21 @@
+{
+  "base": "7d3184f87165e11e12560884ec6e4f92c9bfd039",
+  "tree": "60d8a2d68c36c1a48333baf9af2c22eb5fb83188",
+  "owned": {
+    "docs/sql-secondary-ranges.md": "cc460e7c0be8bfc772ad5a4a608b9002cc00fc1dd3d8646ed11dd6e6df6efd92",
+    "driver/secondary_range_test.go": "1644e0ff0e2806b54e0a856c7b29883f1cbe3841156eb543548a8c7ac0d4b1aa",
+    "internal/testkit/secondary_range_conformance_test.go": "266e01474e9c4578242a9bab07a8685b9c4018143d63c39ef3c0a86f934a7575",
+    "sqlite/plan_index_test.go": "0655f9d06d73e75ff4ba82fcf2332284df8914b1ab12ada75318ceb08b2eb64f",
+    "sqlite/plan_secondary_range.go": "798ecff28bd2b34704aab3df3059a16324471f00ff6b2c0bf08bbfa925f7543f",
+    "sqlite/plan_secondary_range_internal_test.go": "80ec91e0da52d523a0ebb8bf210637bdddc0959bad3709d3f741f717cdc82aff",
+    "sqlite/plan_secondary_range_test.go": "fb15a534e15dc7a211efd84df69c4ff18c1eee2a2ead9ca42fcd41f04e91a53c",
+    "sqlite/query.go": "6b765cf8ed97f8c8b0d53923f1900db77a3e6582ee361dd86327defec052a9f8"
+  },
+  "patches": [
+    [
+      "sql-secondary-range-v1-source.patch",
+      "180e9226e6839c8498f0b1ab1405c1cffe6e743bf8fffadf00ae30c175e04752"
+    ]
+  ],
+  "merged": "query.go preserves previously integrated global aggregate dispatch; only secondary hook added"
+}

@@ -1,0 +1,268 @@
+package sqlite
+
+import (
+	"bytes"
+	"context"
+	"errors"
+	"io"
+	"reflect"
+	"strings"
+	"testing"
+
+	"github.com/ms-xiaosnow/gosqlite/internal/btree"
+	"github.com/ms-xiaosnow/gosqlite/internal/record"
+	sqlast "github.com/ms-xiaosnow/gosqlite/internal/sql"
+)
+
+type reviewSecondaryReader struct {
+	btree.PageReader
+	reads          int
+	pages, records []int64
+	pageHook       func()
+	recordHook     func()
+	denied         string
+}
+
+func (r *reviewSecondaryReader) ReadPage(ctx context.Context, n uint32) ([]byte, error) {
+	r.reads++
+	return r.PageReader.ReadPage(ctx, n)
+}
+func (r *reviewSecondaryReader) BeforePage(n int64) error {
+	r.pages = append(r.pages, n)
+	if r.pageHook != nil {
+		r.pageHook()
+	}
+	if r.denied == "page" {
+		return errOrdinaryIndexBudget
+	}
+	return nil
+}
+func (r *reviewSecondaryReader) BeforeRecord(n int) error {
+	r.records = append(r.records, int64(n))
+	if r.recordHook != nil {
+		r.recordHook()
+	}
+	if r.denied == "record" {
+		return errOrdinaryIndexBudget
+	}
+	return nil
+}
+func TestReviewSecondaryWholePlannerAccounting(t *testing.T) {
+	db, _ := reviewVectorDB(t, Options{PageSize: 512})
+	ctx := context.Background()
+	reviewVectorExec(t, db, "CREATE TABLE t(id INTEGER PRIMARY KEY,k INTEGER,s INTEGER)")
+	reviewVectorExec(t, db, "CREATE INDEX by_k ON t(k,s)")
+	tx, err := db.Begin(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i := 0; i < 4096; i++ {
+		if _, err = tx.Exec(ctx, "INSERT INTO t VALUES(?,?,?)", i-2048, i/2, 4096-i); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err = tx.Commit(ctx); err != nil {
+		t.Fatal(err)
+	}
+	rd, err := db.openReader(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer rd.Close()
+	for _, tail := range []string{" LIMIT 2 OFFSET 1", " ORDER BY k DESC,s ASC LIMIT 2 OFFSET 1"} {
+		var totals []int
+		for _, mod := range []string{"", " NOT INDEXED"} {
+			counted := &reviewSecondaryReader{PageReader: rd}
+			q := "SELECT id FROM t" + mod + " WHERE k>=2044 AND k<2046" + tail
+			stmt, err := sqlast.Parse(q)
+			if err != nil {
+				t.Fatal(err)
+			}
+			r, err := db.plan(ctx, counted, stmt.(*sqlast.Select), nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			initial := counted.reads
+			plan := r.Plan()
+			var got [][]any
+			for r.Next() {
+				got = append(got, r.Values())
+				if !reflect.DeepEqual(plan, r.Plan()) {
+					t.Fatal("mutable plan")
+				}
+			}
+			if r.Err() != nil {
+				t.Fatal(r.Err())
+			}
+			if len(got) != 2 {
+				t.Fatal(got)
+			}
+			s := r.Stats()
+			r.Close()
+			totals = append(totals, counted.reads)
+			if mod == "" {
+				if plan.Method != "btree_range" || s.Candidates != 4 || s.IndexKeysRead != 4 || s.BaseRowFetches > 4 || s.RowIDSeeks != s.BaseRowFetches || !strings.Contains(plan.Reason, "order_satisfied=false") {
+					t.Fatal(plan, s)
+				}
+				if counted.reads <= int(s.IndexPageReads) {
+					t.Fatal("planning/table overhead absent", counted.reads, s)
+				}
+			} else if plan.Access != "SCAN" {
+				t.Fatal(plan)
+			}
+			t.Logf("tail=%q modifier=%q planning page calls=%d total=%d stats=%+v plan=%s values=%v", tail, mod, initial, counted.reads, s, plan.Detail(), got)
+		}
+		if totals[0] >= totals[1]/4 {
+			t.Fatal("no bounded whole-query reduction", tail, totals)
+		}
+	}
+	for _, q := range []string{"SELECT id FROM t WHERE k>=2044 LIMIT 0", "EXPLAIN QUERY PLAN SELECT id FROM t WHERE k>=2044", "SELECT id FROM t WHERE k>NULL", "SELECT id FROM t WHERE k>5 AND k<4"} {
+		c := &reviewSecondaryReader{PageReader: rd}
+		stmt, err := sqlast.Parse(q)
+		if err != nil {
+			t.Fatal(err)
+		}
+		r, err := db.plan(ctx, c, stmt.(*sqlast.Select), nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		before := c.reads
+		for r.Next() {
+		}
+		s := r.Stats()
+		if r.Err() != nil || c.reads != before || s.IndexKeysRead != 0 || s.IndexPageReads != 0 || s.RowIDSeeks != 0 {
+			t.Fatal(q, c.reads, before, s, r.Err())
+		}
+		r.Close()
+		t.Logf("%s: %d planning calls, zero range/iteration calls", q, c.reads)
+	}
+	// Candidate fallback must retain discarded-attempt stats and then do a full scan.
+	small := &DB{opts: db.opts}
+	small.opts.MaxSortBytes = 16 << 10
+	c := &reviewSecondaryReader{PageReader: rd}
+	stmt, _ := sqlast.Parse("SELECT id FROM t WHERE k>=0")
+	r, err := small.plan(ctx, c, stmt.(*sqlast.Select), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for r.Next() {
+	}
+	s := r.Stats()
+	if r.Err() != nil || r.Plan().Access != "SCAN" || s.BaseRowFetches != 4096 || s.IndexPageReads == 0 || s.Candidates != 0 || s.RowIDSeeks != 0 {
+		t.Fatal(r.Err(), r.Plan(), s)
+	}
+	r.Close()
+	t.Logf("fallback total page calls=%d stats=%+v", c.reads, s)
+}
+
+func TestReviewSecondaryAdmissionsCopyAndCancellation(t *testing.T) {
+	db, _ := reviewVectorDB(t, Options{PageSize: 512})
+	ctx := context.Background()
+	reviewVectorExec(t, db, "CREATE TABLE t(id INTEGER PRIMARY KEY,k BLOB)")
+	reviewVectorExec(t, db, "CREATE INDEX by_k ON t(k)")
+	for i := 1; i <= 8; i++ {
+		reviewVectorExec(t, db, "INSERT INTO t VALUES(?,?)", i, []byte{byte(i)})
+	}
+	rd, err := db.openReader(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer rd.Close()
+	tab, err := db.table(ctx, rd, &sqlast.Select{From: "t"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	low := []byte{2}
+	high := []byte{5}
+	bound := &secondaryInterval{}
+	bound.add(">=", low)
+	bound.add("<", high)
+	idx, _, err := secondaryReadIndex(ctx, rd, tab, map[int]*secondaryInterval{1: bound})
+	if err != nil || idx == nil {
+		t.Fatal(idx, err)
+	}
+	// Mutate the caller-owned endpoint only after the cursor has admitted/copied it.
+	counted := &reviewSecondaryReader{PageReader: rd}
+	counted.pageHook = func() { low[0] = 7; high[0] = 8 }
+	var stats QueryStats
+	got, err := secondaryIndexRowIDs(ctx, counted, idx, bound, 20, 1<<20, &stats)
+	if err != nil || !reflect.DeepEqual(got, []int64{2, 3, 4}) {
+		t.Fatal("endpoint alias", got, err)
+	}
+	low[0] = 2
+	high[0] = 5
+	for _, kind := range []string{"page", "record"} {
+		c := &reviewSecondaryReader{PageReader: rd, denied: kind}
+		var s QueryStats
+		got, err := secondaryIndexRowIDs(ctx, c, idx, bound, 20, 1<<20, &s)
+		if got != nil || !errors.Is(err, errOrdinaryIndexBudget) || len(c.pages) == 0 || kind == "record" && len(c.records) == 0 {
+			t.Fatal(kind, got, err, c, s)
+		}
+		t.Logf("upstream %s admission rejects with %d page calls before returning no partial IDs", kind, c.reads)
+		hctx, cancel := context.WithCancel(ctx)
+		c = &reviewSecondaryReader{PageReader: rd}
+		if kind == "page" {
+			c.pageHook = cancel
+		} else {
+			c.recordHook = cancel
+		}
+		got, err = secondaryIndexRowIDs(hctx, c, idx, bound, 20, 1<<20, &s)
+		cancel()
+		if got != nil || !errors.Is(err, context.Canceled) {
+			t.Fatal(kind, got, err)
+		}
+	}
+	for _, tc := range []struct {
+		budget int
+		memory int64
+		zero   bool
+	}{{0, 1 << 20, true}, {20, 1, true}, {100001, 64 << 20, true}, {1024, 1 << 10, true}, {20, 3000, false}, {1, 1 << 20, false}} {
+		c := &reviewSecondaryReader{PageReader: rd}
+		var s QueryStats
+		got, err := secondaryIndexRowIDs(ctx, c, idx, bound, tc.budget, tc.memory, &s)
+		if got != nil || (!errors.Is(err, errOrdinaryIndexBudget) && !errors.Is(err, record.ErrLimit)) || tc.zero && c.reads != 0 {
+			t.Fatal(tc, got, err, c.reads, s)
+		}
+		t.Logf("quota=%+v calls=%d stats=%+v", tc, c.reads, s)
+	}
+	canceled, cancel := context.WithCancel(ctx)
+	cancel()
+	c := &reviewSecondaryReader{PageReader: rd}
+	var s QueryStats
+	if got, err := secondaryIndexRowIDs(canceled, c, idx, bound, 20, 1<<20, &s); got != nil || !errors.Is(err, context.Canceled) || c.reads != 0 {
+		t.Fatal(got, err, c.reads)
+	}
+	// Logical endpoint-copy Work admission rejects both allocations before page I/O.
+	c = &reviewSecondaryReader{PageReader: rd}
+	lo := &btree.IndexBound{Key: []any{bytes.Repeat([]byte{1}, 5000)}, Inclusive: true}
+	hi := &btree.IndexBound{Key: []any{bytes.Repeat([]byte{2}, 5000)}, Inclusive: true}
+	cursor, err := btree.NewBoundedIndexCursor(ctx, c, idx.root, btree.KeyInfo{Columns: 1}, lo, hi, false, btree.RangeLimits{Work: 6000})
+	if cursor != nil || !errors.Is(err, record.ErrLimit) || c.reads != 0 {
+		t.Fatal(cursor, err, c.reads)
+	}
+	// A successful cursor remains EOF-sticky after exhaustion and Close.
+	c = &reviewSecondaryReader{PageReader: rd}
+	cursor, err = btree.NewBoundedIndexCursor(ctx, c, idx.root, btree.KeyInfo{Columns: 1}, bound.lower, bound.upper, false, btree.RangeLimits{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for {
+		_, err = cursor.Next()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	before := c.reads
+	for i := 0; i < 3; i++ {
+		if _, err = cursor.Next(); err != io.EOF || c.reads != before {
+			t.Fatal(err, c.reads, before)
+		}
+	}
+	cursor.Close()
+	if _, err = cursor.Next(); err != io.EOF || c.reads != before {
+		t.Fatal(err, c.reads, before)
+	}
+}

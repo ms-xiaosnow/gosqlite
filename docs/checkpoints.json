@@ -406,9 +406,23 @@
     "bundle_bytes": 2880042,
     "library_file_id": "libfile_fa0ebcd1db288191b82cfc01ec0b9d77",
     "library_version": 0,
-    "verified": "Expected-SHA remote readback and exact local mirror2026-10-10T20:29:47Z; full-history bundle byte-identical Library readback, clone/fsck and original goal20:30:13Z. All non-document changed bytes match source48370bbe2dc585c1b45821fbc360c525d156a9f5: full CGO0 unit/vet/build20:08:43Z, complete pinned ordinary oracle20:15:22Z, full race (SQLite418.468s), five builds/modules/full inventory PASS exit0 at20:23:10Z. Original two combined failures retained with repaired diagnostic code and independently reviewed original-query oracle positive plus genuine sort-quota negative. Exact restored focused unit/race/oracle and full vet/build started20:30Z, pending.",
+    "verified": "Expected-SHA remote readback and exact local mirror2026-10-10T20:29:47Z; full-history bundle byte-identical Library readback, clone/fsck and original goal20:30:13Z. All non-document changed bytes match source48370bbe2dc585c1b45821fbc360c525d156a9f5: full CGO0 unit/vet/build20:08:43Z, complete pinned ordinary oracle20:15:22Z, full race (SQLite418.468s), five builds/modules/full inventory PASS exit0 at20:23:10Z. Original two combined failures retained with repaired diagnostic code and independently reviewed original-query oracle positive plus genuine sort-quota negative. Exact restored focused unit/race/oracle and full vet/build started20:30Z, pending. Exact Library-restored focused range/aggregate/identifier unit and race, pinned oracle12.292s, full vet/build/five cross-builds/modules and clean tree PASS exit0 at2026-10-10T20:34:49Z.",
     "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38083962328",
-    "remote_ci_status": "IN_PROGRESS for exact SHA, observed2026-10-10T20:30:07Z. Full ordinary plus complete pinned-oracle workflow.",
+    "remote_ci_status": "COMPLETED SUCCESS for exact SHA, updated2026-10-10T20:38:52Z, observed20:39:24Z. Ordinary job114306451557 and complete pinned-oracle job114306451406 both SUCCESS.",
     "open_gates": "Plaintext ownership, secondary ranges, GROUP BY/HAVING, SQL connection counters, memory journal segments and broader SQL/native/migration code are separate increments. Native target runtime, physical failure/recovery and independent M10 acceptance NOT_RUN."
+  },
+  {
+    "stage": "Bounded plaintext Reader/Tx/exclusive WAL and public metadata cleanup ownership",
+    "remote_commit": "f2bc1b0fdf39890aa8e4cd51ab6b35925010f3e4",
+    "local_commit": "f2bc1b0fdf39890aa8e4cd51ab6b35925010f3e4",
+    "tree": "edb1e2f148dc86b610feccfd48683ce066a3b529",
+    "bundle_sha256": "f296041e9a063a70d59fb657797e9823dee3e6738374ef9c6afd652b6e01c01e",
+    "bundle_bytes": 3075580,
+    "library_file_id": "libfile_e01f01f75a288191bef41e0c7616857c",
+    "library_version": 0,
+    "verified": "Expected-SHA remote main readback and exact mirror2026-10-10T20:36:39Z; full-history bundle byte-identical Library readback/clone/fsck/original goal20:37:56Z. Exact source7d3184f87165e11e12560884ec6e4f92c9bfd039 full CGO0 unit/vet/build20:10:04Z, complete pinned oracle20:16:24Z, full race (SQLite409.205s), five builds/modules/inventory PASS exit0 at20:24:10Z. Four checked layers and independent reports retain original findings and fixes. All published non-document changed bytes equal the frozen source. Exact Library-restored focused memory/ordinary lifecycle/Tx/WAL unit/race/oracle and full build checks started20:38Z, pending. Exact restored focused plaintext memory/ordinary lifecycle unit/race, pinned transaction/live shared/exclusive WAL oracle0.516s, all-tree vet/build, five target builds, modules and clean tree PASS exit0 at2026-10-10T20:39:50Z.",
+    "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38084417388",
+    "remote_ci_status": "COMPLETED SUCCESS for exact SHA, updated2026-10-10T20:50:02Z, observed20:52:43Z. Ordinary job114307787868 and complete pinned-oracle job114307788002 both SUCCESS.",
+    "open_gates": "Native recovery cleanup remains a separate source-only correction; shared/recovery legacy absence coupling, remaining SQL/migration/mandatory CLI and benchmark code are open. Native failure/recovery, non-Linux runtime and independent M10 qualification NOT_RUN."
   }
 ]

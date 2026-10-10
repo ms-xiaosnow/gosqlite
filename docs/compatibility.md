@@ -55,7 +55,8 @@ ADR0015](decisions/0015-native-darwin-windows-backends.md) and
 | Global aggregates | partial | Bounded native COUNT(*)/COUNT(expr)/SUM/TOTAL/AVG/MIN/MAX, supported scalar result wrappers and existing joins; exact storage-class/NULL/arithmetic/error comparisons against pinned SQLite. GROUP BY/HAVING, DISTINCT/FILTER/windows, ambiguous bare-column projections and general aggregate ordering remain required code |
 | Rowid equality/ranges/order | partial | Genuine equality seeks and signed bounded forward/reverse inequality cursors, conservative residual recheck and proven rowid ORDER BY elimination. Error-capable projections/residuals retain the original path; NOT INDEXED forces scan/sort |
 | Secondary equality | partial | Genuine leading equality-prefix B-tree cursor, bounded rowid candidates and source seeks with residual recheck; ANN/grams precedence preserved |
-| Secondary ranges/covering/join plans/statistics | unsupported | Leading-index range implementation is a separate pending slice; composite equality-plus-range, general reverse/covering/order plans, join index pushdown and ANALYZE statistics are still code work |
+| Secondary leading inequalities | partial | Genuine leading BINARY ASC index bounds, bounded signed-rowid candidates and base seeks with complete residual recheck; existing ordering remains materialized and diagnostics count actual attempted work |
+| Composite ranges/covering/join plans/statistics | unsupported | Composite equality-plus-range, general secondary reverse/covering/order plans, join index pushdown and ANALYZE statistics remain code work |
 | Diagnostics | partial | EXPLAIN QUERY PLAN and immutable Plan/Stats report actual supported access. Global aggregate plans say AGGREGATE/global; JOIN plans say nested_loop. Range counters do not invent work or include unmeasured speedups |
 | Remaining SQL | unsupported | Subqueries, CTEs, DISTINCT/compound UNION, windows, JSON, ON CONFLICT/UPSERT, general ALTER/view/trigger, FTS5, ATTACH/DETACH and unlisted PRAGMAs remain required implementation work |
 | database/sql | partial | Connector, prepared SQL/binds, normal transactions, streaming rows, cancellation and connection disposal; statement preparation is not a claim of reusable compiled AST execution |
@@ -101,3 +102,7 @@ The unchanged [goal](../goal.md) remains the contract. The user permitted
 independent later development while restricted tests remain documented for
 manual verification; that sequencing change does not waive required code or
 acceptance gates. No restricted test is relocated to CI or another environment.
+
+Required code, automatically runnable evidence, restricted manual gates and real
+external environments are separated in [acceptance status](acceptance-status.md).
+The dated clause-by-clause source audit remains a historical evidence snapshot.

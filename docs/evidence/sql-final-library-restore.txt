@@ -1,0 +1,23 @@
+Exact Library-restored 13a2146. Audited intact SQL/range/aggregate/identifier fixtures, byte-only cursor/math/parser laws and normal resource/quota checks. Full source48370 gate is separate evidence. No restricted physical/namespace/native-fault/recovery workflow.
+13a214607c01c2b663dfc9d7e680050aff1bbaba
+2026-10-10T20:30:37Z
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	17.180s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.215s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	40.886s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.094s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	39.748s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	1.212s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	133.631s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.252s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	12.292s
+restored cross-build linux/arm64 PASS
+restored cross-build darwin/arm64 PASS
+restored cross-build darwin/amd64 PASS
+restored cross-build windows/amd64 PASS
+restored cross-build windows/arm64 PASS
+all modules verified
+2026-10-10T20:34:49Z
+EXACT RESTORED SQL RANGES/AGGREGATES FOCUSED CHECKPOINT PASS

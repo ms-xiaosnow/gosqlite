@@ -1,0 +1,10 @@
+{
+  "files": 1229,
+  "candidate_manifest_sha256": "a151a5c69a5e0bd102ba156a474991470bffffc1a1d008f898fa8d26d5f0df9e",
+  "all_match": true,
+  "reviewer_additions": [
+    "sqlite/review_secondary_range_internal_independent_test.go",
+    "sqlite/review_secondary_range_independent_test.go",
+    "internal/testkit/review_secondary_range_oracle_independent_test.go"
+  ]
+}

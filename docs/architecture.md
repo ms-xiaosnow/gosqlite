@@ -1,6 +1,6 @@
 # Architecture
 
-The goal is a native Go engine, with SQLite 3 pages as its plaintext compatibility boundary. M2 adds native transaction overlays, local B-tree mutation, rollback-journal publication and SQL writes. M3 adds explicit exclusive/shared WAL paths and isolated recovery source. M4 adds transactional persistent inverted indices and a real candidate planner. M5 adds snapshot-bound exact text similarity and SQL scalars. Qualified recovery and later security/vector stages remain unfinished.
+The goal is a native Go engine, with SQLite 3 pages as its plaintext compatibility boundary. M2 adds native transaction overlays, local B-tree mutation, rollback-journal publication and SQL writes. M3 adds explicit exclusive/shared WAL paths and isolated recovery source. M4 adds transactional persistent inverted indices and a real candidate planner. M5 adds snapshot-bound exact text similarity and SQL scalars. Native vector, typed ANN, encrypted storage and offline migration layers are now implemented within the current compatibility matrix. Qualified recovery, security and mandatory release evidence remain unfinished.
 
 Target data path:
 
@@ -10,13 +10,13 @@ Target data path:
                                                                          ↓
                                                              journal / codec / VFS
 
-The engine will use bounded page access and query context cancellation. Connections and transaction snapshots, not a process-wide interpreter mutex, own execution. Writers must use native file locks before publishing SQLite pages; readers must never ignore hot journals or WAL.
+The engine uses bounded page access and query context cancellation. Connections and transaction snapshots, not a process-wide interpreter mutex, own execution. Writers must use native file locks before publishing SQLite pages; readers must never ignore hot journals or WAL.
 
 Persisted extension indices share the table transaction. Encryption sits below logical pages, with an independent authenticated physical container. Unsupported formats and semantics fail closed. Go structs are not disk formats.
 
-Implemented M1 path: cmd/gosqlite query/inspect or database/sql driver → sqlite pull executor → internal/sql expressions/parser + schema interpretation → streaming internal/btree cursor + internal/record decoder → read-only internal/pager and native Linux shared locks. The public sqlite package currently owns the small pull executor rather than creating a placeholder VM package. ORDER BY is separately bounded; ordinary scans stream. The PageReader abstraction decouples traversal from the physical reader for future transaction overlays. See ADR0002 for lock lifetimes, quotas and rejected modes.
+Initial M1 path (retained architectural history): cmd/gosqlite query/inspect or database/sql driver → sqlite pull executor → internal/sql expressions/parser + schema interpretation → streaming internal/btree cursor + internal/record decoder → read-only internal/pager and native Linux shared locks. The public sqlite package currently owns the small pull executor rather than creating a placeholder VM package. ORDER BY is separately bounded; ordinary scans stream. The PageReader abstraction decouples traversal from the physical reader for future transaction overlays. See ADR0002 for lock lifetimes, quotas and rejected modes.
 
-Implemented M2 write path: parsed CREATE/INSERT/UPDATE/DELETE → full supported-catalog and page-ownership validation → statement undo snapshot → local table/index B-tree operations → bounded pager dirty overlay and SQLite freelist → native RESERVED/PENDING/EXCLUSIVE locks → standard DELETE rollback journal and database publication. Successful statements remain in an explicit transaction; a rejected statement restores its own overlay without erasing earlier statements. No page spill is used. Ordinary index pages are maintained; M4 uses covering extension posting indices for its supported predicates. Eligible rowid and leading BINARY ASC equality SELECT paths now use bounded range/seek planning; general inequalities/covering/order optimization remains open.
+Implemented M2 write path: parsed CREATE/INSERT/UPDATE/DELETE → full supported-catalog and page-ownership validation → statement undo snapshot → local table/index B-tree operations → bounded pager dirty overlay and SQLite freelist → native RESERVED/PENDING/EXCLUSIVE locks → standard DELETE rollback journal and database publication. Successful statements remain in an explicit transaction; a rejected statement restores its own overlay without erasing earlier statements. No page spill is used. Ordinary index pages are maintained; M4 uses covering extension posting indices for its supported predicates. Eligible rowid equality/inequality and leading BINARY ASC equality/inequality SELECT paths now use genuine bounded range/seek planning. Proved rowid ordering can stream; composite equality-plus-range, secondary covering/order and statistics remain open.
 
 Idle connections release snapshots; each query or transaction owns its file handle and locks. Native Commit returning BUSY before physical I/O can be retried after readers close. database/sql invalidates a Tx after any Commit result, so its adapter rolls back after a failed commit. Once commit physical I/O begins, cancellation is deferred until the operation resolves. Any ambiguous physical-I/O result poisons the handle; it cannot be used as a successful commit.
 
@@ -34,7 +34,7 @@ M4 read route: parser/binder → snapshot-bound extension catalog + immutable pe
 
 M4 write route: source mutation + registered key derivation → old/new posting delta + frequency metadata in the same statement/transaction overlay. Legal SQLite shadow schemas and exact invalidation guards permit cooperative official writers to mark indices dirty; source schema-cookie tracking covers VACUUM rowid changes. REINDEX is a bounded atomic statement and never blesses unrelated dirty indices. Registry handlers are trusted immutable application code; disk metadata never downloads or instantiates unknown code. See grams13.md for real APIs and limits.
 
-M5 native route: named grams13 index plus physical field → snapshot-bound canonical MATCH config/generation → selected distinct query grams → complete union of every gram's covering posting range → source seeks → business WHERE → exact score → bounded Top-K. A positive score for a nonempty query set implies at least one common gram; zero threshold or empty sets require a full scan. Posting-budget exhaustion discards the complete attempted union and scans; it never truncates recall. Default SQL scalars use the same mathematical package with default normalization, and actual query/DML operation contexts reach bounded DP/set work. SQL expressions are not silently rewritten to native indexed search. RRF operates on explicitly supplied ranked lists and preserves one-based ranks/weights; vector-database fusion remains open.
+M5 native route: named grams13 index plus physical field → snapshot-bound canonical MATCH config/generation → selected distinct query grams → complete union of every gram's covering posting range → source seeks → business WHERE → exact score → bounded Top-K. A positive score for a nonempty query set implies at least one common gram; zero threshold or empty sets require a full scan. Posting-budget exhaustion discards the complete attempted union and scans; it never truncates recall. Default SQL scalars use the same mathematical package with default normalization, and actual query/DML operation contexts reach bounded DP/set work. SQL expressions are not silently rewritten to native indexed search. RRF operates on explicitly supplied ranked lists and preserves one-based ranks/weights; same-snapshot native text/vector fusion is implemented by the M6 route below.
 
 The independently written extension/vector package remains a pure mathematical/codec layer: immutable float32 values, strict text/binary validation, float64-compensated distances and bounded exact candidate scanning. It owns no database or ANN index. The sqlite layer now adds VECTOR(n) enforcement, canonical BLOB mutation and actual SQL/API plans; no ANN is implied.
 
@@ -55,7 +55,7 @@ querying. See ADR0009 and ann.md. IVFFlat now shares the optional ANN family wit
 
 ## Experimental encrypted snapshot storage
 
-internal/encstore supplies independent authenticated root/base objects below the logical SQLite pager. internal/pager.EncryptedSession reuses transactional page overlays and statement undo while bypassing plaintext journal/WAL publication. Fresh file identities and fully authenticated object completeness precede page parsing. sqlite owns code KeyProvider configuration and rekey/backup/restore/import/export, and driver.NewConnector snapshots options. This first mode publishes a whole immutable base per changed transaction and retains history. The separate dirty-page WAL route follows below; simultaneous encrypted writer/readers remain required code. See encryption-storage.md for exact authority/locking, quotas and namespace/security limitations.
+internal/encstore supplies independent authenticated root/base objects below the logical SQLite pager. internal/pager.EncryptedSession reuses transactional page overlays and statement undo while bypassing plaintext journal/WAL publication. Fresh file identities and fully authenticated object completeness precede page parsing. sqlite owns code KeyProvider configuration and rekey/backup/restore/import/export, and driver.NewConnector snapshots options. This first mode publishes a whole immutable base per changed transaction and retains history. The separate dirty-page WAL route follows below; the separate authenticated shared-session route implements simultaneous pinned readers and one writer within its documented platform profile. See encryption-storage.md for exact authority/locking, quotas and namespace/security limitations.
 
 Encrypted WAL route: code-only provider -> authenticated current root -> immutable
 base plus complete ordered dirty-page segment selection -> bounded logical page
@@ -72,13 +72,31 @@ index page-reader calls, matching keys and base-row seeks.
 
 Migration inspection is a standalone bounded local parser/identity checker, not
 a remote database client or a production SQL delegation path. Extended vector
-primitives are immutable values beneath future typed SQL integration; they do
-not silently alter existing dense storage or planner identity.
+primitives are immutable values beneath implemented HALF/BIT/SPARSE typed SQL
+and supported typed ANN. They do not silently alter dense bytes or index identity.
 
 Plain native file ownership now passes through `internal/vfs`: private managed
 leases own OFD locks, stable identity checks, WAL-index mapping resources, and
 close ordering. The pager still owns transaction/publication sequencing. SHM
 slot mode changes require explicit release; Linux-native OFD conversion remains
 separately tested. An unresolved view retains DMS and the shared connection's
-main SHARED lease. Darwin/Windows backends remain missing implementation, not
-merely missing runtime tests. See ADR0014 and its component evidence.
+main SHARED lease. Darwin process-fcntl/deferred-close and Windows managed
+LockFileEx/identity/mapping backends are implemented and cross-built; only Linux
+amd64 ordinary runtime is verified here. Target runtime and native failures are
+separate qualification gates. See ADR0014 and its component evidence.
+
+## Current bounded ownership and execution
+
+Plain Reader/Tx/exclusive sessions, shared failed-open/successful-close paths
+and encrypted constructors/copies retain bounded minimal managed obligations
+with explicit pending/retry APIs. Public metadata admission precedes native
+acquisition. Children retire before the protecting database owner; retries
+retire obligations rather than repeating logical publication or checkpoint.
+Recovery ownership and Open integration remain distinct pending corrections.
+
+The SQL executor remains in sqlite with scoped pull operators, bound expression
+metadata and conservative shared budgets. Global aggregates are implemented;
+reviewed GROUP BY and connection-counter/cache additions await their separate
+combined checkpoint. The current [compatibility matrix](compatibility.md) and
+[acceptance work](acceptance-status.md) are authoritative; earlier architecture
+text is preserved in history/before-acceptance-audit-architecture.md.

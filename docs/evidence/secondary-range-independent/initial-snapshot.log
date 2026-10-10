@@ -1,0 +1,4 @@
+=== RUN   TestReviewSecondarySnapshotBeforeFirstNext
+--- PASS: TestReviewSecondarySnapshotBeforeFirstNext (0.01s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.018s

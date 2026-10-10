@@ -1,0 +1,119 @@
+=== RUN   TestOrdinaryIndexIndependentRangePageEvidence
+    plan_index_internal_test.go:88: independent PageReader: prefix=3 reads/2 keys vs full index=84 reads/1600 keys
+--- PASS: TestOrdinaryIndexIndependentRangePageEvidence (0.12s)
+=== RUN   TestOrdinaryIndexTotalPredicateProof
+--- PASS: TestOrdinaryIndexTotalPredicateProof (0.00s)
+=== RUN   TestRowIDRangeRationalBoundaryLaw
+--- PASS: TestRowIDRangeRationalBoundaryLaw (0.00s)
+=== RUN   TestRowIDRangeSourceMemoryQuotasWorkAndOwnership
+    plan_rowid_range_internal_test.go:127: reverse=false: 3 native range page calls/3 rows vs 828 full scan page calls/1028 rows
+    plan_rowid_range_internal_test.go:127: reverse=true: 3 native range page calls/3 rows vs 828 full scan page calls/1028 rows
+--- PASS: TestRowIDRangeSourceMemoryQuotasWorkAndOwnership (0.00s)
+=== RUN   TestSecondaryRangeIndependentPagesAndAdmissions
+    plan_secondary_range_internal_test.go:79: independent PageReader: inequality=3 calls/4 keys versus full index=82 calls/1600 keys
+--- PASS: TestSecondaryRangeIndependentPagesAndAdmissions (0.14s)
+=== RUN   TestSecondaryRangePreservesPriorRejectionReason
+--- PASS: TestSecondaryRangePreservesPriorRejectionReason (0.00s)
+=== RUN   TestReviewSecondaryWholePlannerAccounting
+    review_secondary_range_internal_independent_test.go:113: tail=" LIMIT 2 OFFSET 1" modifier="" planning page calls=7 total=16 stats={IndexKeysRead:4 IndexPageReads:3 RowIDSeeks:3 ANNStateReads:0 ANNNodeReads:0 ANNEdgeReads:0 ANNVisited:0 ANNDistanceEvaluations:0 ANNIdentityLookups:0 ANNCentroidScores:0 ANNCentroidReads:0 ANNListsOpened:0 ANNMemberKeysRead:0 ANNIterations:0 ANNExactRescores:0 ANNPeakBytes:0 VectorRankedRows:0 VectorFilteredRows:0 VectorNullRows:0 VectorRankComponents:0 VectorRankNonzeros:0 VectorRankPackedBytes:0 FrequencyLookups:0 PostingKeysRead:0 Candidates:4 BaseRowFetches:3 ReturnedRows:2} plan=SEARCH t USING by_k btree_range v1; fields=k; original_where_recheck=true; reason=native BINARY ASC leading-key interval; direction=forward; rowid-ordered candidates; order_satisfied=false; sort=false; covering=false values=[[2041] [2042]]
+    review_secondary_range_internal_independent_test.go:113: tail=" LIMIT 2 OFFSET 1" modifier=" NOT INDEXED" planning page calls=2 total=277 stats={IndexKeysRead:0 IndexPageReads:0 RowIDSeeks:0 ANNStateReads:0 ANNNodeReads:0 ANNEdgeReads:0 ANNVisited:0 ANNDistanceEvaluations:0 ANNIdentityLookups:0 ANNCentroidScores:0 ANNCentroidReads:0 ANNListsOpened:0 ANNMemberKeysRead:0 ANNIterations:0 ANNExactRescores:0 ANNPeakBytes:0 VectorRankedRows:0 VectorFilteredRows:0 VectorNullRows:0 VectorRankComponents:0 VectorRankNonzeros:0 VectorRankPackedBytes:0 FrequencyLookups:0 PostingKeysRead:0 Candidates:0 BaseRowFetches:4091 ReturnedRows:2} plan=SCAN t; reason=NOT INDEXED requested values=[[2041] [2042]]
+    review_secondary_range_internal_independent_test.go:113: tail=" ORDER BY k DESC,s ASC LIMIT 2 OFFSET 1" modifier="" planning page calls=19 total=19 stats={IndexKeysRead:4 IndexPageReads:3 RowIDSeeks:4 ANNStateReads:0 ANNNodeReads:0 ANNEdgeReads:0 ANNVisited:0 ANNDistanceEvaluations:0 ANNIdentityLookups:0 ANNCentroidScores:0 ANNCentroidReads:0 ANNListsOpened:0 ANNMemberKeysRead:0 ANNIterations:0 ANNExactRescores:0 ANNPeakBytes:0 VectorRankedRows:0 VectorFilteredRows:0 VectorNullRows:0 VectorRankComponents:0 VectorRankNonzeros:0 VectorRankPackedBytes:0 FrequencyLookups:0 PostingKeysRead:0 Candidates:4 BaseRowFetches:4 ReturnedRows:2} plan=SEARCH t USING by_k btree_range v1; fields=k; original_where_recheck=true; reason=native BINARY ASC leading-key interval; direction=forward; rowid-ordered candidates; order_satisfied=false; sort=true; covering=false values=[[2042] [2041]]
+    review_secondary_range_internal_independent_test.go:113: tail=" ORDER BY k DESC,s ASC LIMIT 2 OFFSET 1" modifier=" NOT INDEXED" planning page calls=277 total=277 stats={IndexKeysRead:0 IndexPageReads:0 RowIDSeeks:0 ANNStateReads:0 ANNNodeReads:0 ANNEdgeReads:0 ANNVisited:0 ANNDistanceEvaluations:0 ANNIdentityLookups:0 ANNCentroidScores:0 ANNCentroidReads:0 ANNListsOpened:0 ANNMemberKeysRead:0 ANNIterations:0 ANNExactRescores:0 ANNPeakBytes:0 VectorRankedRows:0 VectorFilteredRows:0 VectorNullRows:0 VectorRankComponents:0 VectorRankNonzeros:0 VectorRankPackedBytes:0 FrequencyLookups:0 PostingKeysRead:0 Candidates:0 BaseRowFetches:4096 ReturnedRows:2} plan=SCAN t; reason=NOT INDEXED requested values=[[2042] [2041]]
+    review_secondary_range_internal_independent_test.go:137: SELECT id FROM t WHERE k>=2044 LIMIT 0: 4 planning calls, zero range/iteration calls
+    review_secondary_range_internal_independent_test.go:137: EXPLAIN QUERY PLAN SELECT id FROM t WHERE k>=2044: 3 planning calls, zero range/iteration calls
+    review_secondary_range_internal_independent_test.go:137: SELECT id FROM t WHERE k>NULL: 4 planning calls, zero range/iteration calls
+    review_secondary_range_internal_independent_test.go:137: SELECT id FROM t WHERE k>5 AND k<4: 4 planning calls, zero range/iteration calls
+    review_secondary_range_internal_independent_test.go:155: fallback total page calls=282 stats={IndexKeysRead:22 IndexPageReads:3 RowIDSeeks:0 ANNStateReads:0 ANNNodeReads:0 ANNEdgeReads:0 ANNVisited:0 ANNDistanceEvaluations:0 ANNIdentityLookups:0 ANNCentroidScores:0 ANNCentroidReads:0 ANNListsOpened:0 ANNMemberKeysRead:0 ANNIterations:0 ANNExactRescores:0 ANNPeakBytes:0 VectorRankedRows:0 VectorFilteredRows:0 VectorNullRows:0 VectorRankComponents:0 VectorRankNonzeros:0 VectorRankPackedBytes:0 FrequencyLookups:0 PostingKeysRead:0 Candidates:0 BaseRowFetches:4096 ReturnedRows:4096}
+--- PASS: TestReviewSecondaryWholePlannerAccounting (0.46s)
+=== RUN   TestReviewSecondaryAdmissionsCopyAndCancellation
+    review_secondary_range_internal_independent_test.go:201: upstream page admission rejects with 1 page calls before returning no partial IDs
+    review_secondary_range_internal_independent_test.go:201: upstream record admission rejects with 1 page calls before returning no partial IDs
+    review_secondary_range_internal_independent_test.go:226: quota={budget:0 memory:1048576 zero:true} calls=0 stats={IndexKeysRead:0 IndexPageReads:0 RowIDSeeks:0 ANNStateReads:0 ANNNodeReads:0 ANNEdgeReads:0 ANNVisited:0 ANNDistanceEvaluations:0 ANNIdentityLookups:0 ANNCentroidScores:0 ANNCentroidReads:0 ANNListsOpened:0 ANNMemberKeysRead:0 ANNIterations:0 ANNExactRescores:0 ANNPeakBytes:0 VectorRankedRows:0 VectorFilteredRows:0 VectorNullRows:0 VectorRankComponents:0 VectorRankNonzeros:0 VectorRankPackedBytes:0 FrequencyLookups:0 PostingKeysRead:0 Candidates:0 BaseRowFetches:0 ReturnedRows:0}
+    review_secondary_range_internal_independent_test.go:226: quota={budget:20 memory:1 zero:true} calls=0 stats={IndexKeysRead:0 IndexPageReads:0 RowIDSeeks:0 ANNStateReads:0 ANNNodeReads:0 ANNEdgeReads:0 ANNVisited:0 ANNDistanceEvaluations:0 ANNIdentityLookups:0 ANNCentroidScores:0 ANNCentroidReads:0 ANNListsOpened:0 ANNMemberKeysRead:0 ANNIterations:0 ANNExactRescores:0 ANNPeakBytes:0 VectorRankedRows:0 VectorFilteredRows:0 VectorNullRows:0 VectorRankComponents:0 VectorRankNonzeros:0 VectorRankPackedBytes:0 FrequencyLookups:0 PostingKeysRead:0 Candidates:0 BaseRowFetches:0 ReturnedRows:0}
+    review_secondary_range_internal_independent_test.go:226: quota={budget:100001 memory:67108864 zero:true} calls=0 stats={IndexKeysRead:0 IndexPageReads:0 RowIDSeeks:0 ANNStateReads:0 ANNNodeReads:0 ANNEdgeReads:0 ANNVisited:0 ANNDistanceEvaluations:0 ANNIdentityLookups:0 ANNCentroidScores:0 ANNCentroidReads:0 ANNListsOpened:0 ANNMemberKeysRead:0 ANNIterations:0 ANNExactRescores:0 ANNPeakBytes:0 VectorRankedRows:0 VectorFilteredRows:0 VectorNullRows:0 VectorRankComponents:0 VectorRankNonzeros:0 VectorRankPackedBytes:0 FrequencyLookups:0 PostingKeysRead:0 Candidates:0 BaseRowFetches:0 ReturnedRows:0}
+    review_secondary_range_internal_independent_test.go:226: quota={budget:1024 memory:1024 zero:true} calls=0 stats={IndexKeysRead:0 IndexPageReads:0 RowIDSeeks:0 ANNStateReads:0 ANNNodeReads:0 ANNEdgeReads:0 ANNVisited:0 ANNDistanceEvaluations:0 ANNIdentityLookups:0 ANNCentroidScores:0 ANNCentroidReads:0 ANNListsOpened:0 ANNMemberKeysRead:0 ANNIterations:0 ANNExactRescores:0 ANNPeakBytes:0 VectorRankedRows:0 VectorFilteredRows:0 VectorNullRows:0 VectorRankComponents:0 VectorRankNonzeros:0 VectorRankPackedBytes:0 FrequencyLookups:0 PostingKeysRead:0 Candidates:0 BaseRowFetches:0 ReturnedRows:0}
+    review_secondary_range_internal_independent_test.go:226: quota={budget:20 memory:3000 zero:false} calls=1 stats={IndexKeysRead:0 IndexPageReads:1 RowIDSeeks:0 ANNStateReads:0 ANNNodeReads:0 ANNEdgeReads:0 ANNVisited:0 ANNDistanceEvaluations:0 ANNIdentityLookups:0 ANNCentroidScores:0 ANNCentroidReads:0 ANNListsOpened:0 ANNMemberKeysRead:0 ANNIterations:0 ANNExactRescores:0 ANNPeakBytes:0 VectorRankedRows:0 VectorFilteredRows:0 VectorNullRows:0 VectorRankComponents:0 VectorRankNonzeros:0 VectorRankPackedBytes:0 FrequencyLookups:0 PostingKeysRead:0 Candidates:0 BaseRowFetches:0 ReturnedRows:0}
+    review_secondary_range_internal_independent_test.go:226: quota={budget:1 memory:1048576 zero:false} calls=1 stats={IndexKeysRead:2 IndexPageReads:1 RowIDSeeks:0 ANNStateReads:0 ANNNodeReads:0 ANNEdgeReads:0 ANNVisited:0 ANNDistanceEvaluations:0 ANNIdentityLookups:0 ANNCentroidScores:0 ANNCentroidReads:0 ANNListsOpened:0 ANNMemberKeysRead:0 ANNIterations:0 ANNExactRescores:0 ANNPeakBytes:0 VectorRankedRows:0 VectorFilteredRows:0 VectorNullRows:0 VectorRankComponents:0 VectorRankNonzeros:0 VectorRankPackedBytes:0 FrequencyLookups:0 PostingKeysRead:0 Candidates:0 BaseRowFetches:0 ReturnedRows:0}
+--- PASS: TestReviewSecondaryAdmissionsCopyAndCancellation (0.00s)
+=== RUN   TestOrdinaryIndexStorageClassesAndAffinities
+    plan_index_test.go:69: 240 storage-class/affinity equality and IS probes matched independently forced scans
+--- PASS: TestOrdinaryIndexStorageClassesAndAffinities (0.76s)
+=== RUN   TestOrdinaryIndexRowIDAndShadowedNames
+--- PASS: TestOrdinaryIndexRowIDAndShadowedNames (0.04s)
+=== RUN   TestOrdinaryIndexPrefixWorkAndDeterministicLimit
+    plan_index_test.go:137: tail="" matching keys=20 range page reads=3 source fetches=20 forced-scan fetches=1800
+    plan_index_test.go:137: tail=" LIMIT 7 OFFSET 3" matching keys=20 range page reads=3 source fetches=10 forced-scan fetches=900
+    plan_index_test.go:137: tail=" ORDER BY tie LIMIT 7 OFFSET 3" matching keys=20 range page reads=3 source fetches=20 forced-scan fetches=1800
+    plan_index_test.go:137: tail=" ORDER BY tie DESC LIMIT 7 OFFSET 3" matching keys=20 range page reads=3 source fetches=20 forced-scan fetches=1800
+    plan_index_test.go:137: tail=" ORDER BY suffix,id LIMIT 7 OFFSET 3" matching keys=20 range page reads=3 source fetches=20 forced-scan fetches=1800
+    plan_index_test.go:137: tail=" ORDER BY id DESC LIMIT 7 OFFSET 3" matching keys=20 range page reads=3 source fetches=20 forced-scan fetches=1800
+--- PASS: TestOrdinaryIndexPrefixWorkAndDeterministicLimit (0.19s)
+=== RUN   TestOrdinaryIndexBudgetsCancellationAndResidualErrors
+--- PASS: TestOrdinaryIndexBudgetsCancellationAndResidualErrors (0.05s)
+=== RUN   TestOrdinaryIndexTransactionsRollbackReopenAndSnapshot
+=== RUN   TestOrdinaryIndexTransactionsRollbackReopenAndSnapshot/sharedfalse
+=== RUN   TestOrdinaryIndexTransactionsRollbackReopenAndSnapshot/sharedtrue
+--- PASS: TestOrdinaryIndexTransactionsRollbackReopenAndSnapshot (0.01s)
+    --- PASS: TestOrdinaryIndexTransactionsRollbackReopenAndSnapshot/sharedfalse (0.00s)
+    --- PASS: TestOrdinaryIndexTransactionsRollbackReopenAndSnapshot/sharedtrue (0.01s)
+=== RUN   TestOrdinaryIndexGramsANNPrecedenceAndExactVector
+--- PASS: TestOrdinaryIndexGramsANNPrecedenceAndExactVector (3.27s)
+=== RUN   TestOrdinaryIndexConcurrentQueries
+--- PASS: TestOrdinaryIndexConcurrentQueries (0.04s)
+=== RUN   TestOrdinaryIndexSlotBindingAndUnsupportedShapes
+--- PASS: TestOrdinaryIndexSlotBindingAndUnsupportedShapes (0.01s)
+=== RUN   TestRowIDRangeStorageClassesDirectionsAndCuts
+    plan_rowid_range_test.go:64: 1104 native/forced-scan storage-class, side, direction cases
+--- PASS: TestRowIDRangeStorageClassesDirectionsAndCuts (0.88s)
+=== RUN   TestRowIDRangeOrderProofLazyWorkAndBinding
+    plan_rowid_range_test.go:104: SELECT id,v FROM t WHERE id>=850 AND id<860 ORDER BY id DESC LIMIT 3 OFFSET 2: range=5 source rows; scan=1800 source rows
+    plan_rowid_range_test.go:104: SELECT id,v FROM t WHERE id>=850 AND id<860 ORDER BY 1 DESC NULLS FIRST LIMIT 3 OFFSET 2: range=5 source rows; scan=1800 source rows
+    plan_rowid_range_test.go:104: SELECT id AS rid,v FROM t WHERE id>=850 AND id<860 ORDER BY rid DESC LIMIT 3 OFFSET 2: range=5 source rows; scan=1800 source rows
+    plan_rowid_range_test.go:104: SELECT id AS rid,v FROM t WHERE rid>=850 AND rid<860 ORDER BY rid DESC LIMIT 3 OFFSET 2: range=5 source rows; scan=1800 source rows
+--- PASS: TestRowIDRangeOrderProofLazyWorkAndBinding (0.34s)
+=== RUN   TestRowIDRangeErrorOrderAndConservativeJoin
+--- PASS: TestRowIDRangeErrorOrderAndConservativeJoin (0.00s)
+=== RUN   TestRowIDRangeTransactionsSnapshotsCancelAndReopen
+=== RUN   TestRowIDRangeTransactionsSnapshotsCancelAndReopen/false
+=== RUN   TestRowIDRangeTransactionsSnapshotsCancelAndReopen/true
+--- PASS: TestRowIDRangeTransactionsSnapshotsCancelAndReopen (0.01s)
+    --- PASS: TestRowIDRangeTransactionsSnapshotsCancelAndReopen/false (0.00s)
+    --- PASS: TestRowIDRangeTransactionsSnapshotsCancelAndReopen/true (0.00s)
+=== RUN   TestSecondaryRangeStorageClassesAndAffinities
+    plan_secondary_range_test.go:66: 1120 leading inequality affinity/storage-class/operand-side comparisons matched genuine scans
+--- PASS: TestSecondaryRangeStorageClassesAndAffinities (12.39s)
+=== RUN   TestSecondaryRangeWorkOrderingPrecedenceAndBinding
+    plan_secondary_range_test.go:89: "": 40 index keys/4 pages/40 source rows versus 1800 forced-scan rows
+    plan_secondary_range_test.go:89: " LIMIT 7 OFFSET 3": 40 index keys/4 pages/10 source rows versus 450 forced-scan rows
+    plan_secondary_range_test.go:89: " ORDER BY tie LIMIT 7 OFFSET 3": 40 index keys/4 pages/40 source rows versus 1800 forced-scan rows
+    plan_secondary_range_test.go:89: " ORDER BY tie DESC LIMIT 7 OFFSET 3": 40 index keys/4 pages/40 source rows versus 1800 forced-scan rows
+    plan_secondary_range_test.go:89: " ORDER BY k DESC NULLS FIRST,suffix ASC,id DESC LIMIT 7 OFFSET 3": 40 index keys/4 pages/40 source rows versus 1800 forced-scan rows
+    plan_secondary_range_test.go:89: " ORDER BY k NULLS LAST,id": 40 index keys/4 pages/40 source rows versus 1800 forced-scan rows
+--- PASS: TestSecondaryRangeWorkOrderingPrecedenceAndBinding (0.76s)
+=== RUN   TestSecondaryRangeBudgetsAndErrorOrder
+--- PASS: TestSecondaryRangeBudgetsAndErrorOrder (0.07s)
+=== RUN   TestSecondaryRangeTransactionsSnapshotsCancelAndReopen
+=== RUN   TestSecondaryRangeTransactionsSnapshotsCancelAndReopen/false
+=== RUN   TestSecondaryRangeTransactionsSnapshotsCancelAndReopen/true
+--- PASS: TestSecondaryRangeTransactionsSnapshotsCancelAndReopen (0.02s)
+    --- PASS: TestSecondaryRangeTransactionsSnapshotsCancelAndReopen/false (0.01s)
+    --- PASS: TestSecondaryRangeTransactionsSnapshotsCancelAndReopen/true (0.01s)
+=== RUN   TestSecondaryRangeExtensionAndJoinPrecedence
+--- PASS: TestSecondaryRangeExtensionAndJoinPrecedence (2.52s)
+=== RUN   TestSecondaryRangeConcurrentQueries
+--- PASS: TestSecondaryRangeConcurrentQueries (0.19s)
+=== RUN   TestReviewSecondaryIndependentIntersections
+    review_secondary_range_independent_test.go:199: 4096 exact-rational mixed-storage-class two-bound cases; 512 genuine scan comparisons; 123 rows including duplicate suffix groups and overflow keys
+--- PASS: TestReviewSecondaryIndependentIntersections (23.18s)
+=== RUN   TestReviewSecondarySnapshotBeforeFirstNext
+--- PASS: TestReviewSecondarySnapshotBeforeFirstNext (0.19s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	45.656s
+=== RUN   TestDriverRowIDRangePreparedStreamingAndRollback
+--- PASS: TestDriverRowIDRangePreparedStreamingAndRollback (0.00s)
+=== RUN   TestDriverRowIDRangeAvoidsOnlyProvenSort
+--- PASS: TestDriverRowIDRangeAvoidsOnlyProvenSort (0.00s)
+=== RUN   TestDriverSecondaryRangePreparedAndRollback
+--- PASS: TestDriverSecondaryRangePreparedAndRollback (0.01s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.021s

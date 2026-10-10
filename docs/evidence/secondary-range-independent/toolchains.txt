@@ -1,0 +1,3 @@
+Go: go version go1.27.2 linux/amd64
+470775f6ada29ccfb2d3046ac2b4c975df95a9c20b782332d4e8ba6b6233e6c6  ../toolchains/sqlite-build-3540000/sqlite3
+3.54.0|2026-10-09 15:46:58 be8d059e9a49089ab2dce5ed26dd87aaf598fdc5fbe0b107c0dd758464bcd5e3

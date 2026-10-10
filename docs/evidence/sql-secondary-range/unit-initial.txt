@@ -1,0 +1,22 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestSecondaryRangeStorageClassesAndAffinities
+    plan_secondary_range_test.go:65: 1120 leading inequality affinity/storage-class/operand-side comparisons matched genuine scans
+--- PASS: TestSecondaryRangeStorageClassesAndAffinities (4.95s)
+=== RUN   TestSecondaryRangeWorkOrderingPrecedenceAndBinding
+    plan_secondary_range_test.go:88: "": 40 index keys/4 pages/40 source rows versus 1800 forced-scan rows
+    plan_secondary_range_test.go:88: " LIMIT 7 OFFSET 3": 40 index keys/4 pages/10 source rows versus 450 forced-scan rows
+    plan_secondary_range_test.go:88: " ORDER BY tie LIMIT 7 OFFSET 3": 40 index keys/4 pages/40 source rows versus 1800 forced-scan rows
+    plan_secondary_range_test.go:88: " ORDER BY tie DESC LIMIT 7 OFFSET 3": 40 index keys/4 pages/40 source rows versus 1800 forced-scan rows
+    plan_secondary_range_test.go:88: " ORDER BY k DESC NULLS FIRST,suffix ASC,id DESC LIMIT 7 OFFSET 3": 40 index keys/4 pages/40 source rows versus 1800 forced-scan rows
+    plan_secondary_range_test.go:88: " ORDER BY k NULLS LAST,id": 40 index keys/4 pages/40 source rows versus 1800 forced-scan rows
+--- PASS: TestSecondaryRangeWorkOrderingPrecedenceAndBinding (0.69s)
+=== RUN   TestSecondaryRangeBudgetsAndErrorOrder
+--- PASS: TestSecondaryRangeBudgetsAndErrorOrder (0.04s)
+=== RUN   TestSecondaryRangeTransactionsSnapshotsCancelAndReopen
+=== RUN   TestSecondaryRangeTransactionsSnapshotsCancelAndReopen/false
+=== RUN   TestSecondaryRangeTransactionsSnapshotsCancelAndReopen/true
+--- PASS: TestSecondaryRangeTransactionsSnapshotsCancelAndReopen (0.01s)
+    --- PASS: TestSecondaryRangeTransactionsSnapshotsCancelAndReopen/false (0.00s)
+    --- PASS: TestSecondaryRangeTransactionsSnapshotsCancelAndReopen/true (0.01s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	5.697s

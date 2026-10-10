@@ -1,0 +1,13 @@
+=== RUN   TestReviewSecondaryOfficialFixtures
+=== RUN   TestReviewSecondaryOfficialFixtures/512
+    review_secondary_range_oracle_independent_test.go:97: 484 independent official-created two-bound/affinity/alias comparisons at page size 512; file hash unchanged
+=== RUN   TestReviewSecondaryOfficialFixtures/4096
+    review_secondary_range_oracle_independent_test.go:97: 484 independent official-created two-bound/affinity/alias comparisons at page size 4096; file hash unchanged
+=== RUN   TestReviewSecondaryOfficialFixtures/65536
+    review_secondary_range_oracle_independent_test.go:97: 484 independent official-created two-bound/affinity/alias comparisons at page size 65536; file hash unchanged
+--- PASS: TestReviewSecondaryOfficialFixtures (22.84s)
+    --- PASS: TestReviewSecondaryOfficialFixtures/512 (9.17s)
+    --- PASS: TestReviewSecondaryOfficialFixtures/4096 (7.18s)
+    --- PASS: TestReviewSecondaryOfficialFixtures/65536 (6.49s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	22.854s

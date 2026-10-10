@@ -1,0 +1,9 @@
+docs/progress.md
+docs/sql-secondary-ranges.md
+driver/secondary_range_test.go
+internal/testkit/secondary_range_conformance_test.go
+sqlite/plan_index_test.go
+sqlite/plan_secondary_range.go
+sqlite/plan_secondary_range_internal_test.go
+sqlite/plan_secondary_range_test.go
+sqlite/query.go

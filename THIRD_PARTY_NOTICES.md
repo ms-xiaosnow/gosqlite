@@ -37,3 +37,13 @@ See [SQLite's public-domain dedication](https://www.sqlite.org/copyright.html).
 No SQLite C source is compiled, linked or executed in production; the official
 CLI remains a tagged test oracle only. This is source/license provenance, not
 independent release legal review.
+
+## pg_embedding 0.3.6 retained migration references
+
+The pinned public extension metadata and SQL reference fixtures under
+[testdata/pgembedding-0.3.6](testdata/pgembedding-0.3.6/README.md) retain their
+exact [LICENSE](testdata/pgembedding-0.3.6/LICENSE) and
+[NOTICE](testdata/pgembedding-0.3.6/NOTICE). The SQL/control files are migration
+inspection and provenance inputs, not a production PostgreSQL extension or
+external SQL engine dependency. This index of retained notices is not the
+independent M10 legal/license acceptance.

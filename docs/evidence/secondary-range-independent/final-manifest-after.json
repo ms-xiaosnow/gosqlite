@@ -1,0 +1,17 @@
+{
+  "freeze": {
+    "original_files_checked": 1229,
+    "mismatches": {},
+    "extra": {}
+  },
+  "tested_copy": {
+    "original_files_checked": 1229,
+    "mismatches": {},
+    "extra": {
+      "sqlite/review_secondary_range_internal_independent_test.go": "3eb600d2098c9c3c798d1ee6017f091b1901bff6cc371f508f01f7456ca916cf",
+      "sqlite/review_secondary_range_independent_test.go": "b481d08c3ff589d24f0eff6133583ce0f0d00e24d19280fbeebeaeb6ef2268a7",
+      "internal/testkit/review_secondary_range_oracle_independent_test.go": "dbc0dec28aff1b193fa471f18b8f2014d772ccf33d85e5abb83334ca6bd5b43e"
+    }
+  },
+  "all_final_selected_commands_passed": true
+}

@@ -1,0 +1,196 @@
+    20	type secondaryInterval struct {
+    21		lower, upper *btree.IndexBound
+    22		empty        bool
+    23	}
+    24	
+    25	func (b *secondaryInterval) add(op string, value any) error {
+    26		if value == nil {
+    27			b.empty = true
+    28			return nil
+    29		}
+    30		cut := &btree.IndexBound{Key: []any{value}, Inclusive: op == ">=" || op == "<="}
+    31		if op == ">" || op == ">=" {
+    32			cmp := 1
+    33			var err error
+    34			if b.lower != nil {
+    35				cmp, err = sqlast.Compare(value, b.lower.Key[0])
+    36			}
+    37			if err != nil {
+    38				return err
+    39			}
+    40			if cmp > 0 || cmp == 0 && !cut.Inclusive {
+    41				b.lower = cut
+    42			}
+    43		} else {
+    44			cmp := -1
+    45			var err error
+    46			if b.upper != nil {
+    47				cmp, err = sqlast.Compare(value, b.upper.Key[0])
+    48			}
+    49			if err != nil {
+    50				return err
+    51			}
+    52			if cmp < 0 || cmp == 0 && !cut.Inclusive {
+    53				b.upper = cut
+    54			}
+    55		}
+    56		if b.lower == nil {
+    57			b.lower = &btree.IndexBound{Key: []any{nil}}
+    58		}
+    59		if b.upper != nil {
+    60			cmp, err := sqlast.Compare(b.lower.Key[0], b.upper.Key[0])
+    61			if err != nil {
+    62				return err
+    63			}
+    64			b.empty = b.empty || cmp > 0 || cmp == 0 && (!b.lower.Inclusive || !b.upper.Inclusive)
+    65		}
+    66		return nil
+    67	}
+    68	
+    69	func secondaryBounds(ctx context.Context, r *Rows, e sqlast.Expr, out map[int]*secondaryInterval) {
+    70		x, ok := e.(*sqlast.Binary)
+    71		if !ok {
+    72			return
+    73		}
+    74		if x.Op == "AND" {
+    75			secondaryBounds(ctx, r, x.Left, out)
+    76			secondaryBounds(ctx, r, x.Right, out)
+    77			return
+    78		}
+    79		op := x.Op
+    80		if op != "<" && op != "<=" && op != ">" && op != ">=" {
+    81			return
+    82		}
+    83		col, ok := x.Left.(*sqlast.Column)
+    84		constant := x.Right
+    85		if !ok {
+    86			col, ok = x.Right.(*sqlast.Column)
+    87			constant = x.Left
+    88			switch op {
+    89			case "<":
+    90				op = ">"
+    91			case "<=":
+    92				op = ">="
+    93			case ">":
+    94				op = "<"
+    95			case ">=":
+    96				op = "<="
+    97			}
+    98		}
+    99		if !ok || !ordinaryConstant(constant) {
+   100			return
+   101		}
+   102		ordinal, ok := ordinaryColumn(r, col)
+   103		if !ok || ordinal < 0 || sqlast.IsVectorDeclaration(r.table.columns[ordinal].Type) {
+   104			return
+   105		}
+   106		v, err := sqlast.Eval(constant, &sqlast.EvalContext{Context: ctx, Params: r.params})
+   107		if err != nil {
+   108			return // Binding and the existing evaluator retain error precedence.
+   109		}
+   110		aff := affinity(r.table.columns[ordinal].Type)
+   111		if aff == "INTEGER" || aff == "REAL" {
+   112			aff = "NUMERIC"
+   113		}
+   114		v, err = sqlast.ApplyAffinity(v, aff)
+   115		if err != nil {
+   116			return
+   117		}
+   118		b := out[ordinal]
+   119		if b == nil {
+   120			b = &secondaryInterval{}
+   121		}
+   122		if b.add(op, v) == nil {
+   123			out[ordinal] = b
+   124		}
+   125	}
+   126	
+   127	// Equality, rowid (including proven rowid ordering), grams and ANN planners
+   128	// have already run. Do not replace any of those selected sources. This narrow
+   129	// increment only admits a leading inequality, never an equality-prefix suffix,
+   130	// expression key, DESC index, vector rank, JOIN probe or ordering claim.
+   131	func (d *DB) planSecondaryRange(ctx context.Context, reader btree.PageReader, r *Rows) error {
+   132		if r.table == nil || r.relational != nil || r.sel.NotIndexed || r.sel.Where == nil || r.queryPlan.Access != "SCAN" || r.queryPlan.Method == "rowid_range" || r.vectorRank != nil {
+   133			return nil
+   134		}
+   135		bounds := make(map[int]*secondaryInterval)
+   136		secondaryBounds(ctx, r, r.sel.Where, bounds)
+   137		if err := ctx.Err(); err != nil {
+   138			return err
+   139		}
+   140		if len(bounds) == 0 {
+   141			return nil
+   142		}
+   143		if !ordinarySafeWhere(r, r.sel.Where) || !ordinarySafeDefaults(ctx, r.table) {
+   144			// No candidate was attempted. Preserve the earlier planner's specific
+   145			// fallback reason (for example a grams high-frequency rejection).
+   146			return ctx.Err()
+   147		}
+   148		idx, bound, err := secondaryReadIndex(ctx, reader, r.table, bounds)
+   149		if err != nil || idx == nil {
+   150			return err
+   151		}
+   152		// Admit endpoint copies and candidate capacity before opening a cursor.
+   153		// Keep half the configured workspace for cursor records/parser admissions;
+   154		// this is conservative workspace accounting, not a connection-wide heap cap.
+   155		boundBytes := int64(256)
+   156		for _, edge := range []*btree.IndexBound{bound.lower, bound.upper} {
+   157			if edge != nil {
+   158				boundBytes += 2 * valuesSize(edge.Key)
+   159			}
+   160		}
+   161		memory := d.opts.MaxSortBytes / 2
+   162		budget := int(min(int64(maxOrdinaryIndexCandidates), (memory-boundBytes)/64))
+   163		if budget < 1 {
+   164			secondaryRangeRejection(r, "secondary range endpoint/candidate memory budget; complete scan retained")
+   165			return nil
+   166		}
+   167		p := r.queryPlan
+   168		p.Access, p.Method, p.MethodVersion = "SEARCH", "btree_range", 1
+   169		p.Indexes, p.Fields = []string{idx.name}, []string{r.table.columns[idx.columns[0]].Name}
+   170		p.EstimatedCandidates, p.Recheck = -1, true
+   171		if bound.empty {
+   172			p.EstimatedCandidates = 0
+   173		}
+   174		p.Reason = fmt.Sprintf("native BINARY ASC leading-key interval; direction=forward; rowid-ordered candidates; order_satisfied=false; sort=%t; covering=false", len(r.order) > 0)
+   175		if r.sel.Explain || r.limit == 0 {
+   176			r.queryPlan = p // Prebinding is complete; these paths never open the range.
+   177			return nil
+   178		}
+   179		ids, err := secondaryIndexRowIDs(ctx, reader, idx, bound, budget, memory, &r.queryStats)
+   180		if errors.Is(err, errOrdinaryIndexBudget) || errors.Is(err, record.ErrLimit) || errors.Is(err, record.ErrUnsupported) {
+   181			secondaryRangeRejection(r, "secondary range candidate/work/storage budget exceeded; complete scan retained")
+   182			return nil
+   183		}
+   184		if err != nil {
+   185			return err
+   186		}
+   187		if err = r.source.Close(); err != nil {
+   188			return err
+   189		}
+   190		r.source = &ordinaryRowSource{ctx: ctx, reader: reader, root: r.table.root, rowids: ids, stats: &r.queryStats}
+   191		r.queryStats.Candidates = int64(len(ids))
+   192		r.queryPlan = p
+   193		return nil
+   194	}
+   195	
+   196	func secondaryRangeRejection(r *Rows, why string) {
+   197		if r.queryPlan.Reason != "" {
+   198			r.queryPlan.Reason += "; "
+   199		}
+   200		r.queryPlan.Reason += why
+   201	}
+   202	
+   203	// Keep the reviewed equality catalog admission untouched. The same limited
+   204	// physical descriptor grammar proves every indexed field BINARY ASC, including
+   205	// suffix fields even though only the first field supplies the interval.
+   206	func secondaryReadIndex(ctx context.Context, reader btree.PageReader, t *table, bounds map[int]*secondaryInterval) (*ordinaryIndex, *secondaryInterval, error) {
+   207		entries, err := btree.ReadSchema(ctx, reader)
+   208		if err != nil {
+   209			return nil, nil, err
+   210		}
+   211		var best *ordinaryIndex
+   212		var bound *secondaryInterval
+   213		examined := 0
+   214		for _, entry := range entries {
+   215			if entry.Type != "index" || fold(entry.TableName) != fold(t.name) {

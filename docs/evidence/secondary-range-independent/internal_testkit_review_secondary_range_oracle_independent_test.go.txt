@@ -1,0 +1,100 @@
+//go:build oracle
+
+package testkit_test
+
+import (
+	"context"
+	"crypto/sha256"
+	"fmt"
+	"path/filepath"
+	"reflect"
+	"strings"
+	"testing"
+
+	"github.com/ms-xiaosnow/gosqlite/internal/testkit/fileview"
+	"github.com/ms-xiaosnow/gosqlite/sqlite"
+)
+
+// Official-created intact rollback fixtures exercise all supported affinity
+// families and physical index records. CLI processes exit normally at EOF.
+func TestReviewSecondaryOfficialFixtures(t *testing.T) {
+	confOracle(t)
+	literals := []string{"NULL", "-9223372036854775808", "-9223372036854775807", "-9007199254740993", "-2", "-1", "0", "1", "2", "9007199254740993", "9223372036854775807", "-9.223372036854778e18", "-0.5", "4.9406564584124654e-324", "1.5", "9.223372036854776e18", "1e999", "-1e999", "''", "'01'", "'1.0'", "'1e0'", "' 2 '", "'0x10'", "'2x'", "'x'", "CAST(X'780078' AS TEXT)", "X''", "X'00'", "X'00FF'", "X'FF'", "'" + strings.Repeat("overflow界", 250) + "'"}
+	columns := []string{"k", "n", "txt", "r", "weird"}
+	for _, size := range []int{512, 4096, 65536} {
+		t.Run(fmt.Sprint(size), func(t *testing.T) {
+			path := filepath.Join(t.TempDir(), "oracle-range.db")
+			setup := fmt.Sprintf("PRAGMA page_size=%d;CREATE TABLE t(id INTEGER PRIMARY KEY,k BLOB,n NUMERIC,txt TEXT,r REAL,weird INTEGER,s INTEGER);", size)
+			for _, col := range columns {
+				setup += "CREATE INDEX by_" + col + " ON t(" + col + ",s);"
+			}
+			setup += "BEGIN;"
+			for i, lit := range literals {
+				for j := 0; j < 2; j++ {
+					setup += fmt.Sprintf("INSERT INTO t VALUES(%d,%s,%s,%s,%s,%s,%d);", 100-i*2-j, lit, lit, lit, lit, lit, (i+j)%3)
+				}
+			}
+			setup += "COMMIT;"
+			confCLI(t, path, setup, false)
+			before, err := fileview.ReadFile(path)
+			if err != nil {
+				t.Fatal(err)
+			}
+			hash := sha256.Sum256(before)
+			db, err := sqlite.Open(path, sqlite.Options{ReadOnly: true})
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer db.Close()
+			checks := 0
+			ops := []string{">", ">=", "<", "<="}
+			for _, col := range columns {
+				for n := 0; n < 96; n++ {
+					a, b := literals[(n*7+3)%len(literals)], literals[(n*11+n/5)%len(literals)]
+					oa, ob := ops[n%4], ops[(n/4)%4]
+					// Literals requiring CAST stay on the residual scan by admission contract.
+					if strings.HasPrefix(a, "CAST") || strings.HasPrefix(b, "CAST") {
+						a = "'x'"
+						b = "X'FF'"
+					}
+					where := fmt.Sprintf("%s%s%s AND %s%s%s", col, oa, a, col, ob, b)
+					if n%2 == 0 {
+						inv := map[string]string{">": "<", ">=": "<=", "<": ">", "<=": ">="}
+						where = fmt.Sprintf("%s%s%s AND %s%s%s", a, inv[oa], col, b, inv[ob], col)
+					}
+					if n%3 == 0 {
+						where += " AND (s=0 OR s=2)"
+					}
+					q := "SELECT id,typeof(" + col + "),hex(" + col + ") FROM t WHERE " + where + " ORDER BY " + col + " DESC,s ASC,id DESC LIMIT 9 OFFSET 1"
+					want := confExpected(t, path, q)
+					confCompare(t, want, confNative(t, db, q))
+					confCompare(t, want, confNative(t, db, strings.Replace(q, "FROM t ", "FROM t NOT INDEXED ", 1)))
+					r, err := db.Query(context.Background(), q)
+					if err != nil {
+						t.Fatal(err)
+					}
+					p := r.Plan()
+					r.Close()
+					if p.Method != "btree_range" || !reflect.DeepEqual(p.Indexes, []string{"by_" + col}) {
+						t.Fatal(q, p)
+					}
+					checks++
+				}
+			}
+			for _, q := range []string{"SELECT k AS true,id FROM t WHERE true>1 AND true<'x' ORDER BY k,id DESC", "SELECT k AS false,id FROM t WHERE false<='x' ORDER BY k,id DESC", "SELECT n AS renamed,id FROM t WHERE renamed>'01' AND renamed<'x' ORDER BY n,id DESC", "SELECT k AS txt,id FROM t WHERE txt>'2' AND txt<'x' ORDER BY k,id DESC"} {
+				want := confExpected(t, path, q)
+				confCompare(t, want, confNative(t, db, q))
+				checks++
+			}
+			if err = db.Close(); err != nil {
+				t.Fatal(err)
+			}
+			after, err := fileview.ReadFile(path)
+			if err != nil || sha256.Sum256(after) != hash {
+				t.Fatal("readonly fixture changed", err)
+			}
+			writeIntegrity(t, path)
+			t.Logf("%d independent official-created two-bound/affinity/alias comparisons at page size %d; file hash unchanged", checks, size)
+		})
+	}
+}

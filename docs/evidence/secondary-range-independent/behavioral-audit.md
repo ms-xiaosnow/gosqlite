@@ -1,0 +1,15 @@
+# Independent secondary interval audit
+
+The reviewer read goal.md, the bounded-range and SQL-rowid independent reports, and the current owner additions and their helper call paths. Each command below requires this behavioral review and an immediately preceding internal/testscope guard.
+
+Reviewer native tests create intact ordinary SQL tables/indexes using approved create/insert/commit paths; they compare 4,096 exact-rational and storage-class interval expectations, without production comparison helpers. Overflow TEXT/BLOB values are normal supported SQL values. Logical PageReader wrappers count calls and exercise quota admission and context cancellation only. Endpoint mutation affects caller-owned bound byte slices, never a database page or file. BeforePage/BeforeRecord quotas decline descriptor-free parser work; no native I/O failure is introduced.
+
+Reviewer oracle tests use pinned official SQLite only in oracle-tagged test code, create intact rollback fixtures with ordinary SQL, close normally, and open those fixtures read-only in native Go. Hash checks ensure fixture bytes stay unchanged. Normal EOF ends all CLI processes; no CommandContext, forced exit, recovery or fault operation is used.
+
+Owner selected SecondaryRange, OrdinaryIndex, RowIDRange, driver secondary/rowid tests use normal SQL, rollback/BUSY, own writes, cancellation, shared snapshot, checkpoint and close/reopen paths. Tests for unsupported peer index definitions use official CREATE INDEX after normal journal mode transition. The initial unsupported read-only WAL fixture failure remains owner evidence. Build and vet compile/check sources, not repository broad gate scripts.
+
+No physical corruption/tamper/wrong key/missing selected file; namespace replace/retarget/race; process crash/kill/forced exit/hot recovery; native I/O/lock/close/unmap/Sync/shortwrite/diskfull/permissions/interrupted publication/rekey is executed. Native fault branches are source-only. No manual tags, cache removal, production source edit, staging, commit, push or upload. Main-tree writes are this evidence directory only.
+
+Final native/race additions also verify an ordinary shared snapshot retained before the first Next while another owner commits; early Rows.Close and cancellation before first base seek; normal cooperative close/checkpoint. Both signed rowid extrema now belong to non-NULL indexed keys in the independent matrix, so they participate in candidate ordering. The direct-capacity old-source negative uses only 100,001 int64 capacity (approximately 0.8 MiB), never unbounded allocation; its failure is a private precondition-hardening observation because the high-level planner already caps the value. The exact final source now rejects that request and over-workspace capacities before page reads.
+
+The rowid diagnostic repair review is separately scoped to eight descriptor-free AST/default/cancellation cases and the unchanged owner law. It creates no DB, PageReader, native handle, or fault. The original lead negative was read and preserved, without rerunning any prohibited behavior.

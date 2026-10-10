@@ -1,0 +1,23 @@
+Exact Library-restored f2bc1b0. Descriptor-free plaintext acquisition/retirement/absence/admission laws and intact ordinary lifecycle/Tx/WAL interoperability only; native failures and physical recovery NOT_RUN. Full source7d3184 gates are separate.
+f2bc1b0fdf39890aa8e4cd51ab6b35925010f3e4
+2026-10-10T20:38:52Z
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.005s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.120s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.013s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.004s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	1.026s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.289s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	1.080s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.026s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	0.516s
+restored cross-build linux/arm64 PASS
+restored cross-build darwin/arm64 PASS
+restored cross-build darwin/amd64 PASS
+restored cross-build windows/amd64 PASS
+restored cross-build windows/arm64 PASS
+all modules verified
+2026-10-10T20:39:50Z
+EXACT RESTORED PLAINTEXT OWNERSHIP FOCUSED CHECKPOINT PASS

@@ -1,0 +1,271 @@
+package sqlite_test
+
+import (
+	"bytes"
+	"context"
+	"errors"
+	"fmt"
+	"github.com/ms-xiaosnow/gosqlite/sqlite"
+	"math"
+	"math/big"
+	"path/filepath"
+	"reflect"
+	"sort"
+	"strings"
+	"testing"
+)
+
+// Independent reference uses only exact rationals, storage-class ranks, and byte
+// comparison. It never calls the production comparator or interval constructor.
+func reviewSecondaryRank(v any) int {
+	switch v.(type) {
+	case nil:
+		return 0
+	case int64, float64:
+		return 1
+	case string:
+		return 2
+	case []byte:
+		return 3
+	}
+	panic(fmt.Sprintf("bad reference value %T", v))
+}
+func reviewSecondaryCmp(a, b any) int {
+	ra, rb := reviewSecondaryRank(a), reviewSecondaryRank(b)
+	if ra < rb {
+		return -1
+	}
+	if ra > rb {
+		return 1
+	}
+	if ra == 0 {
+		return 0
+	}
+	if ra == 2 {
+		return strings.Compare(a.(string), b.(string))
+	}
+	if ra == 3 {
+		return bytes.Compare(a.([]byte), b.([]byte))
+	}
+	inf := func(v any) int {
+		if f, ok := v.(float64); ok {
+			if math.IsInf(f, -1) {
+				return -1
+			}
+			if math.IsInf(f, 1) {
+				return 1
+			}
+		}
+		return 0
+	}
+	ia, ib := inf(a), inf(b)
+	if ia != 0 || ib != 0 {
+		if ia < ib {
+			return -1
+		}
+		if ia > ib {
+			return 1
+		}
+		return 0
+	}
+	rat := func(v any) *big.Rat {
+		if i, ok := v.(int64); ok {
+			return new(big.Rat).SetInt64(i)
+		}
+		return new(big.Rat).SetFloat64(v.(float64))
+	}
+	return rat(a).Cmp(rat(b))
+}
+func reviewSecondaryMatch(v, b any, op string) bool {
+	if v == nil || b == nil {
+		return false
+	}
+	if f, ok := b.(float64); ok && math.IsNaN(f) {
+		return false
+	}
+	c := reviewSecondaryCmp(v, b)
+	switch op {
+	case ">":
+		return c > 0
+	case ">=":
+		return c >= 0
+	case "<":
+		return c < 0
+	case "<=":
+		return c <= 0
+	}
+	panic(op)
+}
+func TestReviewSecondaryIndependentIntersections(t *testing.T) {
+	db, _ := writable(t, sqlite.Options{PageSize: 512})
+	execute(t, db, "CREATE TABLE t(id INTEGER PRIMARY KEY,k BLOB,s INTEGER,tie INTEGER)")
+	execute(t, db, "CREATE INDEX by_k ON t(k,s)")
+	vals := []any{nil, int64(math.MinInt64), int64(math.MinInt64 + 1), int64(-9007199254740993), int64(-9007199254740992), int64(-2), int64(-1), int64(0), int64(1), int64(2), int64(9007199254740992), int64(9007199254740993), int64(math.MaxInt64 - 1), int64(math.MaxInt64), math.Inf(-1), math.Nextafter(-9223372036854775808.0, math.Inf(-1)), -9223372036854775808.0, -1.5, -math.SmallestNonzeroFloat64, math.Copysign(0, -1), math.SmallestNonzeroFloat64, 1.5, math.Nextafter(9223372036854775808.0, 0), 9223372036854775808.0, math.Inf(1), "", "0", "01", "1e0", "a", "a\x00", "a\x00b", "a\x00c", "a界", strings.Repeat("q", 1500), []byte{}, []byte{0}, []byte{0, 0}, []byte{0, 255}, []byte{255}, bytes.Repeat([]byte{1}, 1800)}
+	type item struct {
+		id int64
+		k  any
+		s  int64
+	}
+	var rows []item
+	tx, err := db.Begin(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i, v := range vals {
+		for j := 0; j < 3; j++ {
+			id := int64(200 - 3*i - j)
+			if i == 6 && j == 0 {
+				id = math.MinInt64
+			}
+			if i == 6 && j == 1 {
+				id = math.MaxInt64
+			}
+			s := int64((i + j) % 5)
+			txExecute(t, tx, "INSERT INTO t VALUES(?,?,?,0)", id, v, s)
+			rows = append(rows, item{id, v, s})
+		}
+	}
+	if err = tx.Commit(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	bounds := append(append([]any{}, vals...), math.NaN(), "absent", []byte{0, 128}, int64(17), -0.75)
+	ops := []string{">", ">=", "<", "<="}
+	ranks := 0
+	scanChecks := 0
+	for n := 0; n < 4096; n++ {
+		a, b := bounds[(n*7+n/17)%len(bounds)], bounds[(n*19+3+n/29)%len(bounds)]
+		oa, ob := ops[(n/2)%4], ops[(n/11)%4]
+		pred := func(col, op string, pos int, rev bool) string {
+			if !rev {
+				return fmt.Sprintf("%s%s?%d", col, op, pos)
+			}
+			inv := map[string]string{">": "<", ">=": "<=", "<": ">", "<=": ">="}
+			return fmt.Sprintf("?%d%s%s", pos, inv[op], col)
+		}
+		where := pred("k", oa, 1, n%2 == 0) + " AND " + pred("k", ob, 2, n%3 == 0)
+		if n%5 == 0 {
+			where += " AND (s=1 OR s=3)"
+		}
+		q := "SELECT id FROM t WHERE " + where
+		ordered := n%4 == 0
+		if ordered {
+			q += " ORDER BY k DESC,s ASC"
+		} else if n%4 == 1 {
+			q += " ORDER BY tie"
+		}
+		var wanted []item
+		for _, row := range rows {
+			if reviewSecondaryMatch(row.k, a, oa) && reviewSecondaryMatch(row.k, b, ob) && (n%5 != 0 || row.s == 1 || row.s == 3) {
+				wanted = append(wanted, row)
+			}
+		}
+		sort.Slice(wanted, func(i, j int) bool {
+			if ordered {
+				if c := reviewSecondaryCmp(wanted[i].k, wanted[j].k); c != 0 {
+					return c > 0
+				}
+				if wanted[i].s != wanted[j].s {
+					return wanted[i].s < wanted[j].s
+				}
+			}
+			return wanted[i].id < wanted[j].id
+		})
+		if n%7 == 0 {
+			q += " LIMIT 3 OFFSET 1"
+			if len(wanted) > 0 {
+				wanted = wanted[1:]
+			}
+			if len(wanted) > 3 {
+				wanted = wanted[:3]
+			}
+		}
+		var want [][]any
+		for _, row := range wanted {
+			want = append(want, []any{row.id})
+		}
+		got, p, stats := gramResults(t, db, q, a, b)
+		if !reflect.DeepEqual(got, want) || p.Method != "btree_range" || !p.Recheck || stats.Candidates != stats.IndexKeysRead {
+			t.Fatalf("n=%d q=%s a=%#v b=%#v got=%v want=%v plan=%+v stats=%+v", n, q, a, b, got, want, p, stats)
+		}
+		if n%8 == 0 {
+			scan, _, _ := gramResults(t, db, strings.Replace(q, "FROM t ", "FROM t NOT INDEXED ", 1), a, b)
+			if !reflect.DeepEqual(got, scan) {
+				t.Fatal("forced scan mismatch", n, got, scan)
+			}
+			scanChecks++
+		}
+		ranks++
+	}
+	t.Logf("%d exact-rational mixed-storage-class two-bound cases; %d genuine scan comparisons; %d rows including duplicate suffix groups and overflow keys", ranks, scanChecks, len(rows))
+}
+
+func TestReviewSecondarySnapshotBeforeFirstNext(t *testing.T) {
+	ctx := context.Background()
+	path := filepath.Join(t.TempDir(), "shared.db")
+	opts := sqlite.Options{PageSize: 512, WALShared: true, KeepWALOnClose: true}
+	db, err := sqlite.Open(path, opts)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	execute(t, db, "CREATE TABLE t(id INTEGER PRIMARY KEY,k BLOB,v TEXT)")
+	execute(t, db, "CREATE INDEX by_k ON t(k)")
+	execute(t, db, "INSERT INTO t VALUES(-2,1,'old-one'),(-1,2,'old-two'),(1,3,'old-three'),(2,4,'old-four')")
+	peer, err := sqlite.Open(path, opts)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer peer.Close()
+	r, err := peer.Query(ctx, "SELECT id,k,v FROM t WHERE k>1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	p := r.Plan()
+	if p.Method != "btree_range" || r.Stats().Candidates != 3 || r.Stats().BaseRowFetches != 0 {
+		t.Fatal(p, r.Stats())
+	}
+	execute(t, db, "UPDATE t SET k=0,v='new-two' WHERE id=-1")
+	execute(t, db, "INSERT INTO t VALUES(3,5,'new-five')")
+	var got [][]any
+	for r.Next() {
+		got = append(got, r.Values())
+	}
+	if r.Err() != nil || !reflect.DeepEqual(got, [][]any{{int64(-1), int64(2), "old-two"}, {int64(1), int64(3), "old-three"}, {int64(2), int64(4), "old-four"}}) || !reflect.DeepEqual(p, r.Plan()) {
+		t.Fatal(got, p, r.Plan(), r.Err())
+	}
+	r.Close()
+	got, _, _ = gramResults(t, peer, "SELECT id FROM t WHERE k>1")
+	if !reflect.DeepEqual(got, [][]any{{int64(1)}, {int64(2)}, {int64(3)}}) {
+		t.Fatal(got)
+	}
+	early, err := peer.Query(ctx, "SELECT id FROM t WHERE k>1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := early.Stats()
+	if err = early.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if early.Next() || !reflect.DeepEqual(s, early.Stats()) {
+		t.Fatal("closed rows reopened", early.Stats(), s)
+	}
+	cancelCtx, cancel := context.WithCancel(ctx)
+	active, err := peer.Query(cancelCtx, "SELECT id FROM t WHERE k>1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	cancel()
+	if active.Next() || !errors.Is(active.Err(), context.Canceled) {
+		t.Fatal(active.Err())
+	}
+	active.Close()
+	if err = peer.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if err = db.Checkpoint(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if err = db.Close(); err != nil {
+		t.Fatal(err)
+	}
+}

@@ -1,0 +1,97 @@
+{
+  "changed_or_added": {
+    "docs/evidence/sql-secondary-range/baseline.txt": {
+      "base": null,
+      "candidate": "d14b2edbca2b94d1dc70b0bdc627b6962e1fc05a509d5424981553d9ca7686b1"
+    },
+    "docs/evidence/sql-secondary-range/behavioral-audit.md": {
+      "base": null,
+      "candidate": "7717595e232d0b3b711e52c1052c25862758ce29b50c167df1b9de6d7622ab36"
+    },
+    "docs/evidence/sql-secondary-range/checked-v2.exit": {
+      "base": null,
+      "candidate": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "docs/evidence/sql-secondary-range/checked-v2.txt": {
+      "base": null,
+      "candidate": "afe42d02063f1ae176765ce90cecfe4376def3889e7b81689abc41bd97001b37"
+    },
+    "docs/evidence/sql-secondary-range/final-checked.exit": {
+      "base": null,
+      "candidate": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    },
+    "docs/evidence/sql-secondary-range/final-checked.txt": {
+      "base": null,
+      "candidate": "8fa9bf89b3828eb6509ee87cdc685725012d8bb7a87026a2d595440664c018e6"
+    },
+    "docs/evidence/sql-secondary-range/oracle-initial.txt": {
+      "base": null,
+      "candidate": "59d958cb9188ddd08dc00d778e6f81c6f6be913e3d4e4d62404f6962900a8a5e"
+    },
+    "docs/evidence/sql-secondary-range/owned-base-final.tsv": {
+      "base": null,
+      "candidate": "99ddbb878173bc888992550fae9c04d564a44b6b9a2a44f37e22a8838b15b90d"
+    },
+    "docs/evidence/sql-secondary-range/owned-paths.txt": {
+      "base": null,
+      "candidate": "c48aac412c9e5ffe7d5c5c1f76c31157b3b08849e3f2e38978e03f4841d01b24"
+    },
+    "docs/evidence/sql-secondary-range/regression-initial.exit": {
+      "base": null,
+      "candidate": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    },
+    "docs/evidence/sql-secondary-range/regression-initial.txt": {
+      "base": null,
+      "candidate": "8fa9bf89b3828eb6509ee87cdc685725012d8bb7a87026a2d595440664c018e6"
+    },
+    "docs/evidence/sql-secondary-range/run-checked.sh": {
+      "base": null,
+      "candidate": "150b929f28b4b38bded1801a167c0d6d0f11feb55581cd828fda37abd824c975"
+    },
+    "docs/evidence/sql-secondary-range/unit-expanded.txt": {
+      "base": null,
+      "candidate": "d60ce8d19a948eab87f228cee8582622e1ba69bed48393932ca73921ddce251d"
+    },
+    "docs/evidence/sql-secondary-range/unit-initial.txt": {
+      "base": null,
+      "candidate": "e06f42af247b5a4caa93c8f722bc4aa91d15963f1940622706409cca8831479e"
+    },
+    "docs/progress.md": {
+      "base": "6ffe9cd346ba916f7be33cfd075df945a6d97ae2a2d04e3c409f195c94374758",
+      "candidate": "bbbfb21233748f7afeded794cdc4e98b5f349c150c3ed8e5a4ca05b24d4991c9"
+    },
+    "docs/sql-secondary-ranges.md": {
+      "base": null,
+      "candidate": "cc460e7c0be8bfc772ad5a4a608b9002cc00fc1dd3d8646ed11dd6e6df6efd92"
+    },
+    "driver/secondary_range_test.go": {
+      "base": null,
+      "candidate": "1644e0ff0e2806b54e0a856c7b29883f1cbe3841156eb543548a8c7ac0d4b1aa"
+    },
+    "internal/testkit/secondary_range_conformance_test.go": {
+      "base": null,
+      "candidate": "266e01474e9c4578242a9bab07a8685b9c4018143d63c39ef3c0a86f934a7575"
+    },
+    "sqlite/plan_index_test.go": {
+      "base": "8d997b6b5fdb3c2cefd7e18169110da4f6a244c24b6f3b76a828554a3e545c8b",
+      "candidate": "0655f9d06d73e75ff4ba82fcf2332284df8914b1ab12ada75318ceb08b2eb64f"
+    },
+    "sqlite/plan_secondary_range.go": {
+      "base": null,
+      "candidate": "798ecff28bd2b34704aab3df3059a16324471f00ff6b2c0bf08bbfa925f7543f"
+    },
+    "sqlite/plan_secondary_range_internal_test.go": {
+      "base": null,
+      "candidate": "80ec91e0da52d523a0ebb8bf210637bdddc0959bad3709d3f741f717cdc82aff"
+    },
+    "sqlite/plan_secondary_range_test.go": {
+      "base": null,
+      "candidate": "fb15a534e15dc7a211efd84df69c4ff18c1eee2a2ead9ca42fcd41f04e91a53c"
+    },
+    "sqlite/query.go": {
+      "base": "2dc48f77a8246ca78477b2620c179d7c8f5a1e87c7e2823e13c4fa8b7139fa81",
+      "candidate": "d9002c320f80b6ab93304cf5f2b936f3e02f38743eb5b8ccaa62b51f91770c64"
+    }
+  },
+  "removed": []
+}
