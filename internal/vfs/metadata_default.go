@@ -24,3 +24,14 @@ func nativeParentInfo(f *File) (os.FileInfo, error) {
 	return os.Stat(filepath.Dir(f.path))
 }
 func statParentPath(path string) (os.FileInfo, error) { return os.Stat(path) }
+
+// ResolvePathForCreate distinguishes conclusive initial absence from other
+// resolver errors. This platform's path inspection acquires no native handles.
+func ResolvePathForCreate(path string) (string, bool, error) {
+	resolved, err := ResolvePath(path)
+	return resolved, ordinaryPathAbsence(err), err
+}
+func LstatForCreate(path string) (os.FileInfo, bool, error) {
+	info, err := Lstat(path)
+	return info, ordinaryPathAbsence(err), err
+}

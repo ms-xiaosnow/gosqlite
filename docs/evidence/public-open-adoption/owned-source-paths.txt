@@ -1,0 +1,9 @@
+docs/public-open-adoption.md
+internal/pager/pager.go
+internal/pager/plain_open_admission.go
+internal/pager/public_admission_test.go
+internal/pager/shared_public_admission.go
+sqlite/close_cleanup.go
+sqlite/plaintext_cleanup.go
+sqlite/public_admission_internal_test.go
+sqlite/sqlite.go

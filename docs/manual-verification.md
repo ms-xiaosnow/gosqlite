@@ -488,3 +488,17 @@ read-only CLI queries with normal process completion. No manual tag or physical
 corruption/tamper/wrong-key/namespace/crash/hot-recovery/native-I/O-failure/
 interrupted-publication/rekey workflow ran. Cross-builds remain compile evidence.
 Broader missing SQL/recovery/platform code and M10 gates are not waived.
+
+
+## Plaintext managed ownership ordinary gate
+
+Source 7d3184f87165e11e12560884ec6e4f92c9bfd039 completed full guarded ordinary
+unit/vet/build, pinned oracle, separate race, five target builds, modules and
+unchanged-source checks at 2026-10-10T20:24:10Z (exit 0). The four owner increments and
+independent reviews are preserved under evidence/. Exceptional retirement,
+admission, traversal and absence checks were descriptor-free; native checks used
+intact ordinary create/read/write/commit/rollback/BUSY/cancel/close/reopen and
+checkpoint fixtures. None executed failed native I/O/lock/unmap/close/Sync,
+physical corruption/tamper/wrong-key/missing-file, namespace mutation, crash,
+hot recovery or interrupted publication/rekey. Those gates remain NOT_RUN with
+the previously recorded manual commands. Cross-builds are compile evidence only.

@@ -3,7 +3,6 @@ package pager
 import (
 	"bytes"
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -25,29 +24,38 @@ type Reader struct {
 	header    Header
 	rawHeader [100]byte
 	lease     *Tx
+	cleanup   *plainRetirement
+	closed    bool
 }
 
-func Open(path string) (result *Reader, retErr error) {
-	// Resolve symlinks so sidecar checks apply to the actual database pathname.
-	// Multiple hard-linked names remain unsupported by SQLite itself.
-	path, err := filepath.Abs(path)
+func Open(path string) (*Reader, error) { return OpenAdmitted(path, nil) }
+
+// OpenAdmitted consumes the public rollback probe's pre-canonical reservation.
+func OpenAdmitted(path string, admission *PlainOpenAdmission) (result *Reader, retErr error) {
+	cleanup, err := claimPlainOpen(admission)
 	if err != nil {
 		return nil, err
 	}
-	path, err = resolveNativePath(path)
+	defer func() {
+		if result == nil {
+			retErr = cleanup.begin(retErr)
+		}
+	}()
+	// Resolve symlinks so sidecar checks apply to the actual database pathname.
+	// Multiple hard-linked names remain unsupported by SQLite itself.
+	path, err = filepath.Abs(path)
 	if err != nil {
 		return nil, err
+	}
+	path, initialAbsent, err := resolveNativeReaderPath(path)
+	if err != nil {
+		return nil, markInitialReaderAbsence(err, initialAbsent)
 	}
 	file, err := openReadOnlyDatabase(path)
 	if err != nil {
 		return nil, err
 	}
-	success := false
-	defer func() {
-		if !success {
-			retErr = errors.Join(retErr, closeNativeFile(file))
-		}
-	}()
+	cleanup.main = plainFile{file}
 	info, err := statNativeFile(file)
 	if err != nil {
 		return nil, err
@@ -58,7 +66,7 @@ func Open(path string) (result *Reader, retErr error) {
 	if err = lockShared(file); err != nil {
 		return nil, err
 	}
-	r := &Reader{file: file, path: path, info: info}
+	r := &Reader{file: file, path: path, info: info, cleanup: cleanup}
 	if err = checkSidecars(path); err != nil {
 		return nil, err
 	}
@@ -74,7 +82,6 @@ func Open(path string) (result *Reader, retErr error) {
 	if err = r.checkStable(); err != nil {
 		return nil, err
 	}
-	success = true
 	return r, nil
 }
 
@@ -83,8 +90,8 @@ func Open(path string) (result *Reader, retErr error) {
 // journal (including a cold or empty one) fails closed with a distinct error.
 func checkSidecars(path string) error {
 	for _, suffix := range []string{"-wal", "-journal"} {
-		st, err := nativeLstat(path + suffix)
-		if os.IsNotExist(err) {
+		st, absent, err := nativeLstatForCreate(path + suffix)
+		if absent {
 			continue
 		}
 		if err != nil {
@@ -138,18 +145,22 @@ func (r *Reader) checkStable() error {
 	return nil
 }
 
-func (r *Reader) ReadPage(ctx context.Context, pageNo uint32) ([]byte, error) {
+func (r *Reader) ReadPage(ctx context.Context, pageNo uint32) (_ []byte, retErr error) {
 	if r.lease != nil {
 		return r.lease.ReadPage(ctx, pageNo)
 	}
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
-	r.mu.RLock()
-	defer r.mu.RUnlock()
-	if r.file == nil {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if r.closed || r.file == nil {
 		return nil, ErrClosed
 	}
+	if err := r.cleanup.check(); err != nil {
+		return nil, err
+	}
+	defer func() { retErr = r.cleanup.observe(retErr) }()
 	if pageNo == 0 || pageNo > r.header.PageCount {
 		return nil, fmt.Errorf("%w: page %d outside 1..%d", ErrCorrupt, pageNo, r.header.PageCount)
 	}
@@ -175,9 +186,15 @@ func (r *Reader) Close() error {
 	}
 	r.mu.Lock()
 	defer r.mu.Unlock()
+	if r.cleanup != nil {
+		r.closed = true
+		r.file = nil // the minimal owner already holds the managed file
+		return r.cleanup.begin(nil)
+	}
 	if r.file == nil {
 		return nil
 	}
+	r.closed = true
 	err := closeNativeFile(r.file)
 	r.file = nil
 	return err

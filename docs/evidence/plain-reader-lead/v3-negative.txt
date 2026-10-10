@@ -1,0 +1,12 @@
+--- FAIL: TestLeadCreateDecisionRejectsMixed (0.00s)
+    lead_absence_review_test.go:11: mixed diagnosis authorized create: file does not exist
+        SQLite database changed during read
+    lead_absence_review_test.go:11: mixed diagnosis authorized create: file does not exist
+        consumed diagnostic
+    lead_absence_review_test.go:11: mixed diagnosis authorized create: outer: file does not exist
+        SQLite database changed during read
+    lead_absence_review_test.go:11: mixed diagnosis authorized create: file does not exist
+        SQLite database is busy
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/sqlite	0.005s
+FAIL

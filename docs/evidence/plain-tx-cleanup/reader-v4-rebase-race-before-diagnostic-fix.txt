@@ -1,0 +1,16 @@
++ ../toolchains/go1.27.2/bin/go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ ../toolchains/go1.27.2/bin/go test -race ./internal/pager ./internal/vfs ./sqlite ./driver -run '^(TestPlainTxCleanupMemory|TestPlainCleanupMemory|TestPlaintextCleanup|TestCleanupOwnersMemory|TestCloseStatusMemory|TestCleanupOwnersBounded|TestTxCreatePageSizesAndReadSnapshot$|TestTxCommitPreservesUnrelatedHeaderAndPages$|TestTxRollbackAndStatementUndo$|TestTxFreelistAllocateFreeReuse$|TestTxBusyCommitIsRetryableWithoutSideEffects$|TestTxLimitsAndCancellationRemainAtomic$|TestTxStatementPanicAndCancellationUndo$)' -count=1
+--- FAIL: TestPlainCleanupMemoryInitialAbsence (0.00s)
+    plain_absence_test.go:28: empty constructor retirement lost initial absence file does not exist
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/pager	0.912s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	1.560s
+--- FAIL: TestPlaintextCleanupOrdinaryReaderRowsAndReopen (0.00s)
+    plaintext_cleanup_test.go:21: sqlite open: lstat /tmp/TestPlaintextCleanupOrdinaryReaderRowsAndReopen4119638322/001/ordinary.db: no such file or directory
+--- FAIL: TestPlaintextCleanupOrdinaryDatabaseSQLZeroIdle (0.00s)
+    plaintext_cleanup_test.go:102: sqlite open: lstat /tmp/TestPlaintextCleanupOrdinaryDatabaseSQLZeroIdle432353220/001/pool.db: no such file or directory
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/sqlite	0.035s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.026s
+FAIL

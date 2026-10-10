@@ -1,0 +1,29 @@
++ set -x
++ ../toolchains/go1.27.2/bin/go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ for target in darwin windows
++ for pkg in internal/pager sqlite driver
++ GOOS=darwin
++ GOARCH=amd64
++ ../toolchains/go1.27.2/bin/go test -c -o /tmp/plain-tx-v1-darwin-pager.test ./internal/pager
++ for pkg in internal/pager sqlite driver
++ GOOS=darwin
++ GOARCH=amd64
++ ../toolchains/go1.27.2/bin/go test -c -o /tmp/plain-tx-v1-darwin-sqlite.test ./sqlite
++ for pkg in internal/pager sqlite driver
++ GOOS=darwin
++ GOARCH=amd64
++ ../toolchains/go1.27.2/bin/go test -c -o /tmp/plain-tx-v1-darwin-driver.test ./driver
++ for target in darwin windows
++ for pkg in internal/pager sqlite driver
++ GOOS=windows
++ GOARCH=amd64
++ ../toolchains/go1.27.2/bin/go test -c -o /tmp/plain-tx-v1-windows-pager.test ./internal/pager
++ for pkg in internal/pager sqlite driver
++ GOOS=windows
++ GOARCH=amd64
++ ../toolchains/go1.27.2/bin/go test -c -o /tmp/plain-tx-v1-windows-sqlite.test ./sqlite
++ for pkg in internal/pager sqlite driver
++ GOOS=windows
++ GOARCH=amd64
++ ../toolchains/go1.27.2/bin/go test -c -o /tmp/plain-tx-v1-windows-driver.test ./driver

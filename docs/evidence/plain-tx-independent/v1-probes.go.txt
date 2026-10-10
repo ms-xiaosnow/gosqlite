@@ -1,0 +1,88 @@
+package pager
+
+import (
+ "errors"
+ "testing"
+ "github.com/ms-xiaosnow/gosqlite/internal/vfs"
+)
+
+// All exceptional states below use descriptor-free owners and errors. The
+// zero File is an inert logical-open placeholder and never reaches native I/O.
+func TestPlainTxIndependentDeferredClosePreservesFirstAttempt(t *testing.T) {
+ reg := &plainRetirementRegistry{limit: 1}
+ g, err := reg.reserve()
+ if err != nil { t.Fatal(err) }
+ operation := errors.New("memory original write diagnostic")
+ retirement := errors.New("memory journal retirement diagnostic")
+ main := &plainMemoryOwner{name: "main"}
+ journal := &plainMemoryOwner{name: "journal", remaining: 1, cause: retirement}
+ g.main, g.temporary = main, journal
+ tx := &Tx{file: &vfs.File{}, cleanup: g}
+ first := g.closeTemporary(operation)
+ if !errors.Is(first, retirement) || !errors.Is(first, operation) || !errors.Is(first, ErrPlaintextCleanupPending) { t.Fatal("invalid precondition", first) }
+ // This is Commit.fail's exact production-helper sequence when journal close
+ // cannot retire. Do not repeat cleanup during the transition to whole close.
+ current := tx.deferPlainRetirementLocked(true)
+ if !errors.Is(current, operation) || !errors.Is(current, retirement) {
+  t.Fatalf("deferred whole close lost a first-attempt diagnostic: operation=%v retirement=%v; %v", errors.Is(current, operation), errors.Is(current, retirement), current)
+ }
+ if journal.calls != 1 || main.calls != 0 { t.Fatal("unexpected cleanup effect") }
+}
+
+func TestPlainTxIndependentPoisonClearsLogicalUndo(t *testing.T) {
+ reg := &plainRetirementRegistry{limit: 1}
+ g, err := reg.reserve()
+ if err != nil { t.Fatal(err) }
+ g.main = &plainMemoryOwner{remaining: 1, cause: errors.New("memory main pending")}
+ tx := &Tx{file: &vfs.File{}, cleanup: g, dirty: map[uint32][]byte{1: {1, 2, 3}}, free: map[uint32]struct{}{2: {}}}
+ if _, err = tx.newUndoMarkLocked("memory mark"); err != nil { t.Fatal(err) }
+ // Exclusive's poisoned lock-error path calls poison directly; unlike Commit
+ // and Rollback, Exclusive has no deferred clearClosedUndoLocked call.
+ _ = tx.poison(errors.New("memory exclusive poison"), false)
+ if !tx.LogicallyClosed() { t.Fatal("poison did not logically close") }
+ if len(tx.undo.marks) != 0 { t.Fatalf("logically closed poison retains %d undo mark(s)", len(tx.undo.marks)) }
+}
+
+func TestPlainTxIndependentAllThreeStageLaws(t *testing.T) {
+ // Four outcomes per stage: successful retirement, consumed diagnostic,
+ // nil/noncomplete, and terminal no-numeric-retry. 64 ordered owner graphs.
+ for childMode := 0; childMode < 4; childMode++ {
+  for journalMode := 0; journalMode < 4; journalMode++ {
+   for mainMode := 0; mainMode < 4; mainMode++ {
+    reg := &plainRetirementRegistry{limit: 1}
+    g, err := reg.reserve(); if err != nil { t.Fatal(err) }
+    modes := []int{childMode, journalMode, mainMode}
+    resources := []*plainMemoryOwner{}
+    events := []string{}
+    for i, name := range []string{"child", "journal", "main"} {
+     o := &plainMemoryOwner{name: name, events: &events, cause: errors.New("memory " + name + " diagnostic")}
+     switch modes[i] { case 1: o.consumed = true; case 2: o.nilPending = true; case 3: o.terminal = true }
+     resources = append(resources, o)
+    }
+    g.nested = []plainResource{resources[0]}; g.temporary = resources[1]; g.main = resources[2]
+    token := g.begin(errors.New("memory original"))
+    boundary := 3
+    for i, mode := range modes { if mode >= 2 { boundary = i; break } }
+    for i, o := range resources {
+     want := 1; if i > boundary { want = 0 }
+     if o.calls != want { t.Fatalf("modes=%v: stage %d calls=%d want=%d events=%v", modes, i, o.calls, want, events) }
+    }
+    if errors.Is(token, ErrPlaintextCleanupPending) != (boundary != 3) || g.done != (boundary == 3) { t.Fatalf("modes=%v completion mismatch", modes) }
+    if boundary != 3 {
+     first := g.cause
+     for i := 0; i < 3; i++ {
+      token = RetryPlaintextCleanup(token)
+      if g.cause != first { t.Fatalf("modes=%v history appended", modes) }
+     }
+     if modes[boundary] == 3 && resources[boundary].rawCalls != 1 { t.Fatalf("modes=%v terminal numeric retry", modes) }
+     // The descriptor-free model now explicitly retires all blocked resources;
+     // retry must skip their Close and finish the remaining permitted stages.
+     for _, o := range resources { if o.nilPending || o.terminal { o.done = true } }
+     final := RetryPlaintextCleanup(token)
+     if errors.Is(final, ErrPlaintextCleanupPending) || !g.done || len(reg.groups) != 0 { t.Fatalf("modes=%v final=%v", modes, final) }
+     for _, o := range resources { before := o.calls; _ = RetryPlaintextCleanup(token); if o.calls != before { t.Fatalf("modes=%v replay after retirement", modes) } }
+    }
+   }
+  }
+ }
+}

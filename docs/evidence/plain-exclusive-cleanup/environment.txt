@@ -1,0 +1,5 @@
+Base: immutable plain-tx-freeze-v2, full manifest bf450dcdde4293bbd303750d9e14d65d969b8a63fad66249f7c6ba1f8d6eaaa2. Tx reviewer independently accepted that source; ReaderV5 was independently accepted by lead.
+Tool ../toolchains/go1.27.2/bin/go (Go 1.27.2); GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off GOFLAGS=-buildvcs=false.
+Shared GOCACHE=/workspace/scratch/5e06a74e5f65/durable-restart/go-cache and GOPATH=/workspace/scratch/5e06a74e5f65/durable-restart/go-path only. CGO_ENABLED=0 normal/build/vet/oracle/compile, separate CGO_ENABLED=1 race.
+Initial-normal and memory-initial precede final additional admission law. Final exact checks are normal-final/race-final/regression-final/oracle-build-vet-final/cross-compile-final.txt. No unrestricted full test-suite pass or native failure qualification is claimed.
+V2 scope correction: public exclusive pre-canonical admission/early-error adoption extends the prior V1 pager-only boundary. See v2-correction.txt. V1 freeze and evidence remain immutable; exact V2 logs are separately named v2-*.

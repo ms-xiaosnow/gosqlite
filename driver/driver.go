@@ -208,7 +208,7 @@ func (c *conn) ExecContext(ctx context.Context, query string, args []sqldriver.N
 	}
 	result, err := c.db.Exec(ctx, query, namedArguments(args)...)
 	if err != nil {
-		return nil, err
+		return nil, c.executionError(err)
 	}
 	return result, nil
 }
@@ -224,9 +224,9 @@ func (t *transaction) Commit() error {
 	if err != nil {
 		// database/sql cannot retry Commit: it considers this Tx finished even
 		// on an error. Release its uncommitted native transaction before reuse.
-		if rollbackErr := t.inner.Rollback(); rollbackErr != nil && !errors.Is(rollbackErr, sqlite.ErrClosed) {
-			t.conn.Close()
-			err = errors.Join(err, rollbackErr)
+		rollbackErr := t.inner.Rollback()
+		if rollbackErr != nil && !errors.Is(rollbackErr, sqlite.ErrClosed) || errors.Is(err, sqlite.ErrPoisoned) {
+			err = joinTransactionCleanup(err, rollbackErr, t.conn.Close())
 		}
 	}
 	return err
@@ -234,10 +234,19 @@ func (t *transaction) Commit() error {
 func (t *transaction) Rollback() error {
 	err := t.inner.Rollback()
 	if err != nil {
-		t.conn.Close()
+		err = joinTransactionCleanup(err, t.conn.Close())
 	}
 	return err
 }
+
+func joinTransactionCleanup(cause error, cleanup ...error) error {
+	err := errors.Join(append([]error{cause}, cleanup...)...)
+	if errors.Is(err, sqlite.ErrPoisoned) || errors.Is(err, sqlite.ErrCommitUncertain) || errors.Is(err, sqlite.ErrRecoveryRequired) {
+		return &sqlite.Error{Code: sqlite.CodeIOErr, Op: "driver transaction cleanup", Err: err}
+	}
+	return err
+}
+
 func namedArguments(args []sqldriver.NamedValue) []any {
 	values := make([]any, len(args))
 	for i, arg := range args {
@@ -343,4 +352,11 @@ func apiError(op string, err error) error {
 		code = sqlite.CodeMisuse
 	}
 	return &sqlite.Error{Code: code, Op: op, Err: err}
+}
+
+func (c *conn) executionError(cause error) error {
+	if !errors.Is(cause, sqlite.ErrPoisoned) {
+		return cause
+	}
+	return joinTransactionCleanup(cause, c.Close())
 }

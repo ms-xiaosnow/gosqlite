@@ -70,18 +70,20 @@ func winSnapshot(h windows.Handle, path string) (os.FileInfo, error) {
 }
 
 func winStatPath(path string, follow bool) (os.FileInfo, error) {
+	info, _, err := winStatPathForCreate(path, follow)
+	return info, err
+}
+
+func winStatPathForCreate(path string, follow bool) (os.FileInfo, bool, error) {
 	p, err := filepath.Abs(path)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 	// Temporary metadata probes permit delete sharing so they are compatible
 	// with explicitly replaceable WAL leases. The actual file and retained
 	// parent keep their stricter sharing policy throughout this observation.
 	o, err := winOpenMetadata(p, follow, true)
-	if err != nil {
-		return nil, err
-	}
-	return observeMetadata(&winMetadataOwners, o, func(h uintptr) (os.FileInfo, error) {
+	return observeMetadataForCreate(&winMetadataOwners, o, err, func(h uintptr) (os.FileInfo, error) {
 		return winSnapshot(windows.Handle(h), p)
 	}, winCloseMetadataHandle)
 }
@@ -110,15 +112,19 @@ func nativeParentInfo(f *File) (os.FileInfo, error) {
 // aliases only while choosing the canonical file family; Open still inspects
 // its final component without following and retains its checked parent.
 func ResolvePath(path string) (string, error) {
+	resolved, _, err := ResolvePathForCreate(path)
+	return resolved, err
+}
+
+// ResolvePathForCreate reports absence only when the first metadata open
+// acquired no handle. All post-acquisition inspection errors fail closed.
+func ResolvePathForCreate(path string) (string, bool, error) {
 	p, err := filepath.Abs(path)
 	if err != nil {
-		return "", err
+		return "", false, err
 	}
 	o, err := winOpenMetadata(p, true, true)
-	if err != nil {
-		return "", err
-	}
-	return observeMetadata(&winMetadataOwners, o, func(raw uintptr) (string, error) {
+	return observeMetadataForCreate(&winMetadataOwners, o, err, func(raw uintptr) (string, error) {
 		h := windows.Handle(raw)
 		if _, err := winSnapshot(h, p); err != nil {
 			return "", err
@@ -132,4 +138,9 @@ func ResolvePath(path string) (string, error) {
 		}
 		return resolved, nil
 	}, winCloseMetadataHandle)
+}
+
+// LstatForCreate applies the same no-handle provenance to the nofollow probe.
+func LstatForCreate(path string) (os.FileInfo, bool, error) {
+	return winStatPathForCreate(path, false)
 }

@@ -89,3 +89,13 @@ type nativeReaderAt struct{ file io.ReaderAt }
 func (r nativeReaderAt) ReadAt(b []byte, off int64) (int, error) {
 	return readNativeAt(r.file, b, off)
 }
+
+func resolveNativeReaderPath(path string) (string, bool, error) {
+	resolved, initialAbsent, err := vfs.ResolvePathForCreate(path)
+	return resolved, initialAbsent, nativeFileError(err)
+}
+
+func nativeLstatForCreate(path string) (os.FileInfo, bool, error) {
+	info, initialAbsent, err := vfs.LstatForCreate(path)
+	return info, initialAbsent, nativeFileError(err)
+}

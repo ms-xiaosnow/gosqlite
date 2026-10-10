@@ -74,10 +74,14 @@ func (t *Tx) journalPages(dirty []uint32) []uint32 {
 // Cancellation is checked until the journal is created. Once physical I/O
 // starts, the entire commit or error cleanup completes without cancellation.
 // A BUSY lock is returned before creating any sidecar or writing database data.
-func (t *Tx) Commit(ctx context.Context) error {
+func (t *Tx) Commit(ctx context.Context) (retErr error) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	defer t.clearClosedUndoLocked()
+	cleanup := t.plainScope()
+	if cleanup != nil {
+		defer func() { retErr = cleanup.observe(retErr) }()
+	}
 	if err := ctx.Err(); err != nil {
 		return err
 	}
@@ -100,6 +104,9 @@ func (t *Tx) Commit(ctx context.Context) error {
 		return err
 	}
 	if len(t.dirty) == 0 {
+		if t.cleanup != nil {
+			return t.retirePlainLocked(nil, nil, true)
+		}
 		var err error
 		if !t.keepFile {
 			err = closeNativeFile(t.file)
@@ -150,7 +157,13 @@ func (t *Tx) Commit(ctx context.Context) error {
 	}
 	// Pre-I/O failures remain retryable and release PENDING/EXCLUSIVE while
 	// retaining this transaction's SHARED+RESERVED locks.
-	preflight := func(e error) error {
+	preflight := func(e error, journalAcquired bool) error {
+		if cleanup != nil {
+			e = cleanup.observe(e)
+			if errors.Is(e, ErrPlaintextCleanupPending) {
+				return t.deferPlainRetirementLocked(journalAcquired)
+			}
+		}
 		if t.keepFile || t.exclusive {
 			return e
 		}
@@ -160,21 +173,37 @@ func (t *Tx) Commit(ctx context.Context) error {
 		return e
 	}
 	if err = t.checkStable(); err != nil {
-		return preflight(err)
+		return preflight(err, false)
 	}
 	if err = ctx.Err(); err != nil {
-		return preflight(err)
+		return preflight(err, false)
 	}
 	jpath := t.path + "-journal"
+	if cleanup != nil {
+		if err = cleanup.reserveTemporary(); err != nil {
+			return preflight(err, false)
+		}
+	}
 	jf, err := openJournal(jpath, os.O_WRONLY|os.O_CREATE|os.O_EXCL)
+	if cleanup != nil {
+		cleanup.acquiredTemporary(jf)
+	}
 	if err != nil {
-		return preflight(err)
+		// The journal constructor may already have created the sidecar.
+		return preflight(err, true)
 	}
 	databaseTouched := false
 	// After a database write is attempted, even an error may have changed
 	// bytes. Preserve the fully synced journal for explicit recovery.
 	fail := func(cause error) error {
-		cause = errors.Join(cause, jf.Close())
+		if cleanup != nil {
+			cause = cleanup.closeTemporary(cause)
+			if errors.Is(cause, ErrPlaintextCleanupPending) {
+				return t.deferPlainRetirementLocked(true)
+			}
+		} else {
+			cause = errors.Join(cause, jf.Close())
+		}
 		if !databaseTouched {
 			if e := os.Remove(jpath); e != nil {
 				return t.poison(errors.Join(cause, e), true)
@@ -232,7 +261,15 @@ func (t *Tx) Commit(ctx context.Context) error {
 	if err = t.file.Sync(); err != nil {
 		return fail(err)
 	}
-	if err = jf.Close(); err != nil {
+	if cleanup != nil {
+		err = cleanup.closeTemporary(nil)
+	} else {
+		err = jf.Close()
+	}
+	if err != nil {
+		if cleanup != nil && errors.Is(err, ErrPlaintextCleanupPending) {
+			return t.deferPlainRetirementLocked(true)
+		}
 		return t.poison(err, true)
 	}
 	if err = os.Remove(jpath); err != nil {
@@ -242,6 +279,9 @@ func (t *Tx) Commit(ctx context.Context) error {
 		return t.poison(errors.Join(ErrCommitUncertain, err), false)
 	}
 	t.header = finalHeader
+	if t.cleanup != nil {
+		return t.retirePlainLocked(nil, errors.Join(ErrPoisoned, ErrCommitUncertain), true)
+	}
 	if !t.keepFile {
 		err = closeNativeFile(t.file)
 	}
@@ -255,6 +295,21 @@ func (t *Tx) Commit(ctx context.Context) error {
 	return nil
 }
 func (t *Tx) poison(cause error, recovery bool) error {
+	if t.borrowedCleanup != nil {
+		if recovery {
+			cause = errors.Join(ErrRecoveryRequired, cause)
+		}
+		t.file, t.dirty, t.free = nil, nil, nil
+		t.clearClosedUndoLocked()
+		t.poisoned = t.borrowedCleanup.observe(errors.Join(ErrPoisoned, cause))
+		return t.poisoned
+	}
+	if t.cleanup != nil {
+		if recovery {
+			cause = errors.Join(ErrRecoveryRequired, cause)
+		}
+		return t.retirePlainLocked(errors.Join(ErrPoisoned, cause), nil, true)
+	}
 	if t.encrypted != nil {
 		s := t.encrypted
 		s.mu.Lock()

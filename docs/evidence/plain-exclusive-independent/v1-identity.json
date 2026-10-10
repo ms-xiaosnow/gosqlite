@@ -1,0 +1,61 @@
+{
+  "plain-reader-v5-all-sha256.txt": "12bb816edaf4b88af31c243bd409fbf2262d7ef1a5f0c1c7a3b5d46eeb725f50",
+  "plain-tx-v2-all-sha256.txt": "bf450dcdde4293bbd303750d9e14d65d969b8a63fad66249f7c6ba1f8d6eaaa2",
+  "plain-exclusive-v1-all-sha256.txt": "7fc1e3fb1ed7ad0ba51de6f3ee5450a6a4faa102effed8df1137cd2e306e4a90",
+  "plain-tx-v2-to-exclusive-v1.patch": "070e10e6bb0f529f5c506b9f1b69212d635a420f9d40155ef29dfb5c535998b3",
+  "plain-reader-freeze-v5": {
+    "verified_files": 1024,
+    "extra": [],
+    "missing": []
+  },
+  "plain-tx-freeze-v2": {
+    "verified_files": 1062,
+    "extra": [],
+    "missing": []
+  },
+  "plain-exclusive-freeze-v1": {
+    "verified_files": 1076,
+    "extra": [],
+    "missing": []
+  },
+  "plain-exclusive-independent-v1": {
+    "verified_files": 1076,
+    "extra": [],
+    "missing": []
+  },
+  "owned_manifest_sha256": "1d5e856a1e612c085f679f863f9f4f912e77d998bae8242cf3b1f710d399dc80",
+  "owned_paths": [
+    "docs/plaintext-exclusive-cleanup.md",
+    "internal/pager/checkpoint.go",
+    "internal/pager/commit.go",
+    "internal/pager/plain_cleanup.go",
+    "internal/pager/plain_session_cleanup.go",
+    "internal/pager/plain_session_cleanup_test.go",
+    "internal/pager/plain_tx_cleanup.go",
+    "internal/pager/session.go",
+    "internal/pager/tx.go",
+    "internal/pager/wal.go",
+    "sqlite/plaintext_cleanup.go",
+    "sqlite/sqlite.go"
+  ],
+  "source_diffs": [
+    "internal/pager/checkpoint.go",
+    "internal/pager/commit.go",
+    "internal/pager/plain_cleanup.go",
+    "internal/pager/plain_session_cleanup.go",
+    "internal/pager/plain_session_cleanup_test.go",
+    "internal/pager/plain_tx_cleanup.go",
+    "internal/pager/session.go",
+    "internal/pager/tx.go",
+    "internal/pager/wal.go",
+    "sqlite/plaintext_cleanup.go",
+    "sqlite/sqlite.go"
+  ],
+  "replay_all_owned_paths_match": true,
+  "main_head": "ed4a38e4738a6906027a87cf42dc9f9ac84bc32b",
+  "reader_integration_base_tree_type": "tree",
+  "reader_integration_parent_883999c_ancestor_of_main": true,
+  "source_base_to_current_main_differences": [
+    "internal/testkit/readonly_conformance_test.go"
+  ]
+}

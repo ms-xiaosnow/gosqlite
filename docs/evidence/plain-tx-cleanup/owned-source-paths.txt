@@ -1,0 +1,13 @@
+docs/plaintext-tx-cleanup.md
+driver/driver.go
+driver/plain_tx_cleanup_test.go
+internal/pager/commit.go
+internal/pager/plain_cleanup.go
+internal/pager/plain_tx_cleanup.go
+internal/pager/plain_tx_cleanup_test.go
+internal/pager/tx.go
+sqlite/plain_tx_cleanup_internal_test.go
+sqlite/plaintext_cleanup.go
+sqlite/sqlite.go
+sqlite/transaction.go
+sqlite/transaction_control.go

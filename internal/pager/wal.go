@@ -14,8 +14,8 @@ import (
 )
 
 func (s *Session) openWALLocked(ctx context.Context) error {
-	st, err := nativeLstat(s.path + "-wal")
-	if os.IsNotExist(err) {
+	st, absent, err := s.probePathLocked(s.path + "-wal")
+	if absent {
 		return nil
 	}
 	if err != nil {
@@ -24,7 +24,15 @@ func (s *Session) openWALLocked(ctx context.Context) error {
 	if !st.Mode().IsRegular() {
 		return fmt.Errorf("%w: WAL must be a regular file", ErrUnsupported)
 	}
+	if s.cleanup != nil {
+		if err = s.cleanup.reserveWAL(); err != nil {
+			return err
+		}
+	}
 	f, err := openWALFile(s.path+"-wal", os.O_RDWR, true)
+	if s.cleanup != nil {
+		s.cleanup.acquiredWAL(f)
+	}
 	if err != nil {
 		return err
 	}
@@ -55,9 +63,9 @@ func (s *Session) openWALLocked(ctx context.Context) error {
 }
 
 func (s *Session) checkWALStableLocked() error {
-	pathInfo, err := nativeLstat(s.path + "-wal")
+	pathInfo, absent, err := s.probePathLocked(s.path + "-wal")
 	if s.walFile == nil {
-		if os.IsNotExist(err) {
+		if absent {
 			return nil
 		}
 		if err != nil {
@@ -87,7 +95,8 @@ func (s *Session) checkWALStableLocked() error {
 // ensureWALLocked writes and separately syncs a fresh WAL header before any
 // frames can be appended. In particular, a frame Sync cannot replace this
 // header Sync (SQLite wal.c walFrames, header-reordering protection).
-func (s *Session) ensureWALLocked() error {
+func (s *Session) ensureWALLocked() (retErr error) {
+	defer func() { retErr = s.observeLocked(retErr) }()
 	if s.walFile != nil && s.walInfo.Size() != 0 {
 		return nil
 	}
@@ -107,7 +116,15 @@ func (s *Session) ensureWALLocked() error {
 		return err
 	}
 	if s.walFile == nil {
+		if s.cleanup != nil {
+			if err = s.cleanup.reserveWAL(); err != nil {
+				return err
+			}
+		}
 		s.walFile, err = openWALFile(s.path+"-wal", os.O_RDWR|os.O_CREATE|os.O_EXCL, true)
+		if s.cleanup != nil {
+			s.cleanup.acquiredWAL(s.walFile)
+		}
 		if err != nil {
 			return err
 		}
@@ -139,7 +156,8 @@ func (s *Session) ensureWALLocked() error {
 // WAL pathname under EXCLUSIVE, then Sync its directory. Either namespace
 // outcome represents the identical committed database; the main inode and
 // its lock are untouched. This is not a shared-WAL reset protocol.
-func (s *Session) normalizeAppendWALLocked() error {
+func (s *Session) normalizeAppendWALLocked() (retErr error) {
+	defer func() { retErr = s.observeLocked(retErr) }()
 	if s.appendSafe {
 		return nil
 	}
@@ -172,7 +190,15 @@ func (s *Session) normalizeAppendWALLocked() error {
 	if dbSize == 0 || dbSize != s.snapshot.DBSize {
 		return fmt.Errorf("%w: WAL final commit marker", ErrCorrupt)
 	}
+	if s.cleanup != nil {
+		if err := s.cleanup.reserveTemporary(); err != nil {
+			return err
+		}
+	}
 	candidate, err := vfs.CreateWALCandidate(s.path)
+	if s.cleanup != nil {
+		s.cleanup.acquiredTemporary(candidate)
+	}
 	if err != nil {
 		return nativeFileError(err)
 	}
@@ -180,7 +206,14 @@ func (s *Session) normalizeAppendWALLocked() error {
 	renamed := false
 	fail := func(cause error) error {
 		if !renamed {
-			cause = errors.Join(cause, closeNativeFile(candidate))
+			if s.cleanup != nil {
+				cause = s.cleanup.closeTemporary(cause)
+				if errors.Is(cause, ErrPlaintextCleanupPending) {
+					return s.poisonLocked(cause)
+				}
+			} else {
+				cause = errors.Join(cause, closeNativeFile(candidate))
+			}
 			if e := os.Remove(tempPath); e != nil {
 				cause = errors.Join(cause, e)
 			} else {
@@ -236,8 +269,17 @@ func (s *Session) normalizeAppendWALLocked() error {
 	renamed = true
 	old := s.walFile
 	s.walFile, s.walInfo = candidate, info
+	if s.cleanup != nil {
+		s.cleanup.replaceWAL()
+	}
 	if err = syncDirectory(s.path); err != nil {
-		return fail(errors.Join(ErrCommitUncertain, err, closeNativeFile(old)))
+		cause := errors.Join(ErrCommitUncertain, err)
+		if s.cleanup != nil {
+			cause = s.cleanup.closeTemporary(cause)
+		} else {
+			cause = errors.Join(cause, closeNativeFile(old))
+		}
+		return fail(cause)
 	}
 	s.snapshot.IndexWork += 2 * uint64(frames-s.snapshot.FrameCount)
 	s.snapshot.FrameCount, s.snapshot.ValidFrameCount = frames, frames
@@ -247,7 +289,12 @@ func (s *Session) normalizeAppendWALLocked() error {
 		s.snapshot.Pages[pageNo] = ref
 	}
 	s.appendSafe = true
-	if err = closeNativeFile(old); err != nil {
+	if s.cleanup != nil {
+		err = s.cleanup.closeTemporary(nil)
+	} else {
+		err = closeNativeFile(old)
+	}
+	if err != nil {
 		return s.poisonLocked(err)
 	}
 	return nil
@@ -355,7 +402,8 @@ func walSectorImages(ctx context.Context, dirty map[uint32][]byte, h Header, opt
 
 // appendWALPagesLocked appends one complete, synced transaction. Callers must
 // supply sector-complete images, including page one, and hold s.mu.
-func (s *Session) appendWALPagesLocked(ctx context.Context, commitPages map[uint32][]byte, finalHeader Header) error {
+func (s *Session) appendWALPagesLocked(ctx context.Context, commitPages map[uint32][]byte, finalHeader Header) (retErr error) {
+	defer func() { retErr = s.observeLocked(retErr) }()
 	var err error
 	pages := sortedPages(commitPages)
 	if len(pages) == 0 {

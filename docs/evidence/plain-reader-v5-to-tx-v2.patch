@@ -1,0 +1,1076 @@
+diff --git a/docs/plaintext-tx-cleanup.md b/docs/plaintext-tx-cleanup.md
+new file mode 100644
+--- /dev/null
++++ b/docs/plaintext-tx-cleanup.md
+@@ -0,0 +1,103 @@
++# Standalone rollback transaction managed retirement
++
++Date: 2026-10-10. This increment extends the independently reviewed
++[Reader retirement](plaintext-cleanup.md) scope to standalone rollback `OpenTx`,
++Commit, Rollback, poison and its journal. WALExclusive remains separate unfinished
++source work. Shared-WAL and encrypted algorithms/format bytes are unchanged.
++Native failure qualification and milestone/release acceptance remain NOT_RUN.
++
++## Ownership
++
++OpenTx reserves from the same 1024 opening/live/pending plaintext-scope bound
++before pager path resolution or native acquisition. Each group has two fixed
++primary slots: main and temporary journal. The root reservation charges these
++slots before any acquisition, and the temporary slot is explicitly reserved
++before openJournal. A nil-result child acquisition relinquishes its unused slot;
++error-carried managed owners are adopted before protection can be downgraded.
++The nested owner graph remains separately bounded by 4096-node discovery.
++
++The scope does not retain Tx, DB, Rows, page/undo buffers or application callbacks.
++Read/metadata and promotion failures with retained VFS ownership poison further
++transaction operations while keeping its main lock. Live retry touches only
++already-failed nested owners and a requested journal close, never an active main
++or an unrequested live journal. RetirementComplete remains authoritative for
++consumed diagnostics, incomplete nil results and terminal managed owners.
++
++Empty Commit, final successful Commit, Rollback and poison clear logical
++transaction resources and use the group. Pending scope ownership is independent
++of discarded native/public/database/sql transaction objects. Repeated native
++pager Rollback retries the group; public closed transactions are one-shot and
++use RetryPlaintextCleanup or PendingPlaintextCleanups for pending ownership.
++
++## Journal barriers
++
++Commit preserves the existing successful DELETE-journal sequence. All operation
++errors are adopted before journal Close. A nested dependency stops journal and
++main retirement; an unresolved journal stops main retirement. A failed journal
++cleanup never advances to unlink or main close. It marks the transaction logically
++closed and leaves the scope pending without automatically repeating that child's
++same cleanup attempt. Explicit retry handles only retirement, never unlink,
++publication, synchronization, transaction replay or recovery. An unreleased
++journal is classified as RecoveryRequired as well as poison.
++
++If journal retirement completes with a diagnostic, the diagnostic remains an
++error even though ownership was consumed. The source-level failure branch may
++then execute its pre-existing safe unlink/directory-sync handling; any resulting
++nested managed error is adopted before main retirement. No failure branch was
++physically executed as evidence. A consumed diagnostic while closing main after
++an acknowledged commit preserves the existing CommitUncertain classification;
++an unresolved main also carries the cleanup token. Historical pending markers
++are diagnostic-only after adoption, so a newly completed result cannot falsely
++look pending. Repeated retry history is not retained.
++
++The private KeepFile transition used by shared/exclusive WAL keeps its previous
++branch because it has no standalone Tx cleanup scope. This increment does not
++claim to repair those transition or Session ownership paths.
++
++## Public and driver behavior
++
++The inherited Reader V5 gate accepts only conclusive initial-acquisition absence
++without additional diagnostic causes. Mixed, post-acquisition or pending errors
++cannot enter the ordinary create fallback merely because they match NotExist.
++Public failed-create rollback, transaction Rows release and a newly created
++SAVEPOINT's rollback diagnostics are joined. A Commit whose pager transaction is
++logically closed also marks public Tx done, while ordinary BUSY keeps a live
++native/public transaction retryable. Read-only release failures likewise end the
++logical transaction. A public rollback invalidates its Rows once and preserves
++all release causes.
++
++The database/sql adapter still rolls back a BUSY Commit, because database/sql
++considers that transaction finished. It invalidates a poisoned connection even
++when its already-ended Tx's Rollback is a no-op, joins disposal diagnostics and
++places a CodeIOErr wrapper ahead of any earlier BUSY operation. ResetSession's
++ErrBadConn disposal can still discard diagnostics; the independent scope snapshot
++survives that path. Existing public Options/Plan/Stats/DB/Rows/Tx layouts are
++unchanged. The new logically-closed accessor is internal/pager only.
++
++## Evidence and limits
++
++Evidence is in evidence/plain-tx-cleanup. The source guard precedes every selected
++suite; the selection audit records helpers. Exceptional-state coverage is
++exclusively descriptor-free fake owner/callback/error laws. Native evidence is
++intact ordinary create/read/write/commit/rollback/BUSY/cancel/close/reopen,
++uninterrupted shared/encrypted lifecycle regressions, and official SQLite
++interoperability. Darwin/Windows are compile-only.
++
++No physical corruption/tamper/wrong-key/missing selected file, namespace
++replacement/retarget/race, crash/kill/process-exit/hot recovery, failed native
++I/O/lock/unmap/close/Sync/short write/disk-full/permissions or interrupted
++publication/rekey ran here or elsewhere. WALExclusive acquisition/candidate/
++checkpoint/Close ownership remains a real deferred code gap, not a claim of
++unrun tests alone. Complete production durability/security acceptance remains
++outstanding.
++
++The V2 correction preserves the first journal-retirement diagnostic across a
++whole-close transition even when an operation error preceded it. Closed undo
++state is cleared centrally, including direct Exclusive poison. Pending journal
++constructor ownership is conservatively RecoveryRequired. Direct OpenTx creation
++uses explicit initial no-handle absence; its previous os.IsNotExist check was
++not demonstrated to accept Windows post-acquisition joined errors.
++DB.Exec automatic rollback classifies the complete operation/cleanup join, so an
++already-wrapped BUSY cannot mask pending cleanup's CodeIOErr. Driver ExecContext
++invalidates poison connections and preserves any disposal error with that same
++precedence; ordinary execution errors keep the connection available.
+diff --git a/driver/driver.go b/driver/driver.go
+--- a/driver/driver.go
++++ b/driver/driver.go
+@@ -208,7 +208,7 @@
+ 	}
+ 	result, err := c.db.Exec(ctx, query, namedArguments(args)...)
+ 	if err != nil {
+-		return nil, err
++		return nil, c.executionError(err)
+ 	}
+ 	return result, nil
+ }
+@@ -224,9 +224,9 @@
+ 	if err != nil {
+ 		// database/sql cannot retry Commit: it considers this Tx finished even
+ 		// on an error. Release its uncommitted native transaction before reuse.
+-		if rollbackErr := t.inner.Rollback(); rollbackErr != nil && !errors.Is(rollbackErr, sqlite.ErrClosed) {
+-			t.conn.Close()
+-			err = errors.Join(err, rollbackErr)
++		rollbackErr := t.inner.Rollback()
++		if rollbackErr != nil && !errors.Is(rollbackErr, sqlite.ErrClosed) || errors.Is(err, sqlite.ErrPoisoned) {
++			err = joinTransactionCleanup(err, rollbackErr, t.conn.Close())
+ 		}
+ 	}
+ 	return err
+@@ -234,10 +234,19 @@
+ func (t *transaction) Rollback() error {
+ 	err := t.inner.Rollback()
+ 	if err != nil {
+-		t.conn.Close()
++		err = joinTransactionCleanup(err, t.conn.Close())
+ 	}
+ 	return err
+ }
++
++func joinTransactionCleanup(cause error, cleanup ...error) error {
++	err := errors.Join(append([]error{cause}, cleanup...)...)
++	if errors.Is(err, sqlite.ErrPoisoned) || errors.Is(err, sqlite.ErrCommitUncertain) || errors.Is(err, sqlite.ErrRecoveryRequired) {
++		return &sqlite.Error{Code: sqlite.CodeIOErr, Op: "driver transaction cleanup", Err: err}
++	}
++	return err
++}
++
+ func namedArguments(args []sqldriver.NamedValue) []any {
+ 	values := make([]any, len(args))
+ 	for i, arg := range args {
+@@ -344,3 +353,10 @@
+ 	}
+ 	return &sqlite.Error{Code: code, Op: op, Err: err}
+ }
++
++func (c *conn) executionError(cause error) error {
++	if !errors.Is(cause, sqlite.ErrPoisoned) {
++		return cause
++	}
++	return joinTransactionCleanup(cause, c.Close())
++}
+diff --git a/driver/plain_tx_cleanup_test.go b/driver/plain_tx_cleanup_test.go
+new file mode 100644
+--- /dev/null
++++ b/driver/plain_tx_cleanup_test.go
+@@ -0,0 +1,49 @@
++package driver
++
++import (
++	"errors"
++	"github.com/ms-xiaosnow/gosqlite/sqlite"
++	"testing"
++)
++
++func TestPlainTxCleanupMemoryDriverCodeAndInvalidation(t *testing.T) {
++	operation := &sqlite.Error{Code: sqlite.CodeBusy, Op: "commit", Err: sqlite.ErrBusy}
++	cleanup := &sqlite.Error{Code: sqlite.CodeIOErr, Op: "rollback", Err: errors.Join(sqlite.ErrPlaintextCleanupPending, sqlite.ErrPoisoned)}
++	e := joinTransactionCleanup(operation, cleanup)
++	var detail *sqlite.Error
++	if !errors.Is(e, sqlite.ErrBusy) || !errors.Is(e, sqlite.ErrPlaintextCleanupPending) || !errors.As(e, &detail) || detail.Code != sqlite.CodeIOErr {
++		t.Fatal(e)
++	}
++	conn := &conn{db: &sqlite.DB{}} // closed with no session, files, Rows or transaction
++	if !conn.IsValid() {
++		t.Fatal("new model invalid")
++	}
++	if e = conn.Close(); e != nil || conn.IsValid() {
++		t.Fatal(e)
++	}
++	if e = conn.Close(); e != nil {
++		t.Fatal(e)
++	}
++}
++
++func TestPlainTxCleanupMemoryExecErrorInvalidation(t *testing.T) {
++	busy := &sqlite.Error{Code: sqlite.CodeBusy, Op: "commit", Err: sqlite.ErrBusy}
++	for _, poison := range []bool{false, true} {
++		c := &conn{db: &sqlite.DB{}}
++		var cause error = busy
++		if poison {
++			cause = errors.Join(cause, sqlite.ErrPoisoned, sqlite.ErrPlaintextCleanupPending)
++		}
++		e := c.executionError(cause)
++		var detail *sqlite.Error
++		if !errors.Is(e, sqlite.ErrBusy) || !errors.As(e, &detail) || c.IsValid() == poison {
++			t.Fatal(e)
++		}
++		if poison && (detail.Code != sqlite.CodeIOErr || !errors.Is(e, sqlite.ErrPlaintextCleanupPending)) {
++			t.Fatal(e)
++		}
++		if !poison && e != cause {
++			t.Fatal("ordinary error changed", e)
++		}
++	}
++}
+diff --git a/internal/pager/commit.go b/internal/pager/commit.go
+--- a/internal/pager/commit.go
++++ b/internal/pager/commit.go
+@@ -74,10 +74,13 @@
+ // Cancellation is checked until the journal is created. Once physical I/O
+ // starts, the entire commit or error cleanup completes without cancellation.
+ // A BUSY lock is returned before creating any sidecar or writing database data.
+-func (t *Tx) Commit(ctx context.Context) error {
++func (t *Tx) Commit(ctx context.Context) (retErr error) {
+ 	t.mu.Lock()
+ 	defer t.mu.Unlock()
+ 	defer t.clearClosedUndoLocked()
++	if t.cleanup != nil {
++		defer func() { retErr = t.cleanup.observe(retErr) }()
++	}
+ 	if err := ctx.Err(); err != nil {
+ 		return err
+ 	}
+@@ -100,6 +103,9 @@
+ 		return err
+ 	}
+ 	if len(t.dirty) == 0 {
++		if t.cleanup != nil {
++			return t.retirePlainLocked(nil, nil, true)
++		}
+ 		var err error
+ 		if !t.keepFile {
+ 			err = closeNativeFile(t.file)
+@@ -150,7 +156,13 @@
+ 	}
+ 	// Pre-I/O failures remain retryable and release PENDING/EXCLUSIVE while
+ 	// retaining this transaction's SHARED+RESERVED locks.
+-	preflight := func(e error) error {
++	preflight := func(e error, journalAcquired bool) error {
++		if t.cleanup != nil {
++			e = t.cleanup.observe(e)
++			if errors.Is(e, ErrPlaintextCleanupPending) {
++				return t.deferPlainRetirementLocked(journalAcquired)
++			}
++		}
+ 		if t.keepFile || t.exclusive {
+ 			return e
+ 		}
+@@ -160,21 +172,37 @@
+ 		return e
+ 	}
+ 	if err = t.checkStable(); err != nil {
+-		return preflight(err)
++		return preflight(err, false)
+ 	}
+ 	if err = ctx.Err(); err != nil {
+-		return preflight(err)
++		return preflight(err, false)
+ 	}
+ 	jpath := t.path + "-journal"
++	if t.cleanup != nil {
++		if err = t.cleanup.reserveTemporary(); err != nil {
++			return preflight(err, false)
++		}
++	}
+ 	jf, err := openJournal(jpath, os.O_WRONLY|os.O_CREATE|os.O_EXCL)
+-	if err != nil {
+-		return preflight(err)
++	if t.cleanup != nil {
++		t.cleanup.acquiredTemporary(jf)
++	}
++	if err != nil {
++		// The journal constructor may already have created the sidecar.
++		return preflight(err, true)
+ 	}
+ 	databaseTouched := false
+ 	// After a database write is attempted, even an error may have changed
+ 	// bytes. Preserve the fully synced journal for explicit recovery.
+ 	fail := func(cause error) error {
+-		cause = errors.Join(cause, jf.Close())
++		if t.cleanup != nil {
++			cause = t.cleanup.closeTemporary(cause)
++			if errors.Is(cause, ErrPlaintextCleanupPending) {
++				return t.deferPlainRetirementLocked(true)
++			}
++		} else {
++			cause = errors.Join(cause, jf.Close())
++		}
+ 		if !databaseTouched {
+ 			if e := os.Remove(jpath); e != nil {
+ 				return t.poison(errors.Join(cause, e), true)
+@@ -232,7 +260,15 @@
+ 	if err = t.file.Sync(); err != nil {
+ 		return fail(err)
+ 	}
+-	if err = jf.Close(); err != nil {
++	if t.cleanup != nil {
++		err = t.cleanup.closeTemporary(nil)
++	} else {
++		err = jf.Close()
++	}
++	if err != nil {
++		if t.cleanup != nil && errors.Is(err, ErrPlaintextCleanupPending) {
++			return t.deferPlainRetirementLocked(true)
++		}
+ 		return t.poison(err, true)
+ 	}
+ 	if err = os.Remove(jpath); err != nil {
+@@ -242,6 +278,9 @@
+ 		return t.poison(errors.Join(ErrCommitUncertain, err), false)
+ 	}
+ 	t.header = finalHeader
++	if t.cleanup != nil {
++		return t.retirePlainLocked(nil, errors.Join(ErrPoisoned, ErrCommitUncertain), true)
++	}
+ 	if !t.keepFile {
+ 		err = closeNativeFile(t.file)
+ 	}
+@@ -255,6 +294,12 @@
+ 	return nil
+ }
+ func (t *Tx) poison(cause error, recovery bool) error {
++	if t.cleanup != nil {
++		if recovery {
++			cause = errors.Join(ErrRecoveryRequired, cause)
++		}
++		return t.retirePlainLocked(errors.Join(ErrPoisoned, cause), nil, true)
++	}
+ 	if t.encrypted != nil {
+ 		s := t.encrypted
+ 		s.mu.Lock()
+diff --git a/internal/pager/plain_cleanup.go b/internal/pager/plain_cleanup.go
+--- a/internal/pager/plain_cleanup.go
++++ b/internal/pager/plain_cleanup.go
+@@ -10,7 +10,7 @@
+ )
+ 
+ // ErrPlaintextCleanupPending is an immutable historical ownership token. This
+-// increment covers ordinary rollback Readers, not transactions or WAL sessions.
++// increment covers ordinary rollback Readers and standalone transactions, not WAL sessions.
+ var ErrPlaintextCleanupPending = errors.New("plaintext cleanup pending")
+ 
+ const maxPlainRetirements = 1024
+@@ -63,17 +63,20 @@
+ func (o plainTerminal) RetirementComplete() bool { return false }
+ 
+ type plainRetirement struct {
+-	mu            sync.Mutex
+-	registry      *plainRetirementRegistry
+-	main          plainResource
+-	nested        []plainResource
+-	started, done bool
+-	cause         error // first operation/cleanup error only, never a chain of retries
+-	pending       atomic.Pointer[plainCleanupError]
++	mu                                    sync.Mutex
++	registry                              *plainRetirementRegistry
++	main                                  plainResource
++	temporary                             plainResource
++	temporaryReserved, temporaryRequested bool
++	nested                                []plainResource
++	started, done                         bool
++	cause                                 error // first operation/cleanup error only, never a chain of retries
++	pending                               atomic.Pointer[plainCleanupError]
+ }
+ 
+ func (g *plainRetirement) releaseLocked() {
+-	g.main, g.nested, g.cause = nil, nil, nil
++	g.main, g.temporary, g.nested, g.cause = nil, nil, nil, nil
++	g.temporaryReserved, g.temporaryRequested = false, false
+ 	g.done = true
+ 	g.pending.Store(nil)
+ 	g.registry.mu.Lock()
+@@ -200,6 +203,13 @@
+ 		g.nested[0] = nil
+ 		g.nested = g.nested[1:]
+ 	}
++	if g.temporary != nil && (g.started || g.temporaryRequested) {
++		if !step(g.temporary) {
++			return errors.Join(errs...)
++		}
++		g.temporary = nil
++		g.temporaryRequested = false
++	}
+ 	if !g.started {
+ 		g.pending.Store(nil)
+ 		return errors.Join(errs...)
+@@ -211,6 +221,10 @@
+ 	return errors.Join(errs...)
+ }
+ func (g *plainRetirement) begin(cause error) error {
++	return g.beginClass(cause, nil, true)
++}
++
++func (g *plainRetirement) beginClass(cause, failureClass error, attempt bool) error {
+ 	g.mu.Lock()
+ 	defer g.mu.Unlock()
+ 	if g.started || g.done {
+@@ -218,20 +232,27 @@
+ 	}
+ 	g.started = true
+ 	cause = g.adoptLocked(cause) // operation obligations precede all protector retirement
+-	original := errors.Join(g.cause, cause)
++	original := errors.Join(g.cause, plainDiagnostic(cause))
++	if !attempt {
++		g.cause = errors.Join(original, ErrPoisoned)
++		return g.pendingLocked(g.cause)
++	}
+ 	err := g.retireLocked()
++	if err != nil {
++		err = errors.Join(failureClass, err)
++	}
+ 	if g.done {
+ 		return errors.Join(original, err)
+ 	}
+-	g.cause = errors.Join(original, err)
++	g.cause = plainDiagnostic(errors.Join(original, err))
+ 	return g.pendingLocked(g.cause)
+ }
+ func (g *plainRetirement) retryLocked() error {
+-	if g.done || (!g.started && len(g.nested) == 0) {
++	if g.done || (!g.started && len(g.nested) == 0 && (!g.temporaryRequested || g.temporary == nil)) {
+ 		return nil
+ 	}
+ 	err := g.retireLocked()
+-	if g.done || (!g.started && len(g.nested) == 0) {
++	if g.done || (!g.started && len(g.nested) == 0 && (!g.temporaryRequested || g.temporary == nil)) {
+ 		return err
+ 	}
+ 	return g.pendingLocked(errors.Join(g.cause, err))
+diff --git a/internal/pager/plain_tx_cleanup.go b/internal/pager/plain_tx_cleanup.go
+new file mode 100644
+--- /dev/null
++++ b/internal/pager/plain_tx_cleanup.go
+@@ -0,0 +1,96 @@
++package pager
++
++import (
++	"errors"
++	"github.com/ms-xiaosnow/gosqlite/internal/vfs"
++)
++
++// The scope's fixed temporary slot is reserved before any rollback-journal
++// acquisition. No native work, status call or scope wait occurs under admission.
++func (g *plainRetirement) reserveTemporary() error {
++	g.mu.Lock()
++	defer g.mu.Unlock()
++	if g.started || g.done {
++		return ErrClosed
++	}
++	if g.cause != nil {
++		return g.cause
++	}
++	if g.temporaryReserved || g.temporary != nil {
++		return ErrLimit
++	}
++	g.temporaryReserved = true
++	return nil
++}
++func (g *plainRetirement) acquiredTemporary(file *vfs.File) {
++	g.mu.Lock()
++	defer g.mu.Unlock()
++	g.temporaryReserved = false
++	if file != nil {
++		g.temporary = plainFile{file}
++	}
++}
++
++// Operation causes are adopted before closing the journal. The already-owned
++// temporary slot, rather than a discarded local variable, carries any close
++// obligation. An incomplete child leaves main untouched; the caller then starts
++// logical whole closure without automatically repeating this same close attempt.
++func (g *plainRetirement) closeTemporary(cause error) error {
++	g.mu.Lock()
++	defer g.mu.Unlock()
++	cause = g.adoptLocked(cause)
++	if cause != nil && g.cause == nil {
++		g.cause = plainDiagnostic(errors.Join(ErrPoisoned, cause))
++	}
++	firstAttempt := !g.temporaryRequested
++	g.temporaryRequested = true
++	err := g.retireLocked()
++	if len(g.nested) != 0 || g.temporary != nil {
++		if firstAttempt {
++			// Preserve the first operation AND child-retirement diagnostics when
++			// the caller starts whole closure; later retries do not grow history.
++			g.cause = plainDiagnostic(errors.Join(g.cause, ErrPoisoned, err))
++		}
++		return g.pendingLocked(errors.Join(g.cause, plainDiagnostic(err)))
++	}
++	return errors.Join(cause, err)
++}
++
++// Adopted historical tokens remain diagnostics without making a newly completed
++// result appear pending. Their original Is/As causes remain accessible.
++type plainDiagnosticError struct{ cause error }
++
++func (e *plainDiagnosticError) Error() string { return e.cause.Error() }
++func (e *plainDiagnosticError) Is(target error) bool {
++	return target != ErrPlaintextCleanupPending && errors.Is(e.cause, target)
++}
++func (e *plainDiagnosticError) As(target any) bool { return errors.As(e.cause, target) }
++func plainDiagnostic(err error) error {
++	if err == nil || !errors.Is(err, ErrPlaintextCleanupPending) {
++		return err
++	}
++	return &plainDiagnosticError{err}
++}
++
++func (t *Tx) retirePlainLocked(cause, failureClass error, attempt bool) error {
++	t.file, t.dirty, t.free = nil, nil, nil
++	t.clearClosedUndoLocked()
++	err := t.cleanup.beginClass(cause, failureClass, attempt)
++	t.poisoned = err
++	return err
++}
++func (t *Tx) deferPlainRetirementLocked(recovery bool) error {
++	cause := ErrPoisoned
++	if recovery {
++		cause = errors.Join(cause, ErrRecoveryRequired)
++	}
++	return t.retirePlainLocked(cause, nil, false)
++}
++
++// LogicallyClosed distinguishes an ended transaction from a retryable BUSY
++// commit. It performs no native work and does not imply physical retirement.
++func (t *Tx) LogicallyClosed() bool {
++	t.mu.Lock()
++	defer t.mu.Unlock()
++	return t.file == nil && t.encrypted == nil
++}
+diff --git a/internal/pager/plain_tx_cleanup_test.go b/internal/pager/plain_tx_cleanup_test.go
+new file mode 100644
+--- /dev/null
++++ b/internal/pager/plain_tx_cleanup_test.go
+@@ -0,0 +1,210 @@
++package pager
++
++import (
++	"context"
++	"errors"
++	"testing"
++
++	"github.com/ms-xiaosnow/gosqlite/internal/vfs"
++)
++
++// Uses only the descriptor-free owners from plain_cleanup_test.go. Placeholder
++// File values never reach a native operation in these production-helper laws.
++func TestPlainTxCleanupMemoryJournalReservation(t *testing.T) {
++	reg := &plainRetirementRegistry{limit: 1}
++	g, e := reg.reserve()
++	if e != nil {
++		t.Fatal(e)
++	}
++	main := &plainMemoryOwner{name: "main"}
++	g.main = main
++	if e = g.reserveTemporary(); e != nil || !g.temporaryReserved {
++		t.Fatal(e)
++	}
++	if e = g.reserveTemporary(); !errors.Is(e, ErrLimit) {
++		t.Fatal("duplicate journal admission", e)
++	}
++	g.acquiredTemporary(nil) // an ordinary no-resource acquisition error frees slot
++	if e = g.reserveTemporary(); e != nil {
++		t.Fatal(e)
++	}
++	g.acquiredTemporary(&vfs.File{}) // nil-raw bookkeeping is already retired
++	if e = g.reserveTemporary(); !errors.Is(e, ErrLimit) {
++		t.Fatal("existing child slot reused", e)
++	}
++	if e = g.closeTemporary(nil); e != nil || main.calls != 0 || g.temporary != nil {
++		t.Fatal(e)
++	}
++	if e = g.begin(nil); e != nil || !g.done {
++		t.Fatal(e)
++	}
++}
++func TestPlainTxCleanupMemoryJournalBarrierAndDeferredWholeClose(t *testing.T) {
++	for _, nilPending := range []bool{false, true} {
++		reg := &plainRetirementRegistry{limit: 1}
++		g, e := reg.reserve()
++		if e != nil {
++			t.Fatal(e)
++		}
++		main := &plainMemoryOwner{name: "main"}
++		journal := &plainMemoryOwner{name: "journal", remaining: 1, nilPending: nilPending, cause: errors.New("memory journal remains")}
++		g.main, g.temporary = main, journal
++		txx := &Tx{file: &vfs.File{}, cleanup: g, dirty: map[uint32][]byte{1: {1}}, free: map[uint32]struct{}{2: {}}}
++		operation := errors.New("memory commit operation")
++		e = g.closeTemporary(operation)
++		if !errors.Is(e, ErrPlaintextCleanupPending) || main.calls != 0 || journal.calls != 1 {
++			t.Fatal(e)
++		}
++		token := txx.deferPlainRetirementLocked(true)
++		if !errors.Is(token, ErrRecoveryRequired) || !errors.Is(token, ErrPlaintextCleanupPending) || !errors.Is(token, operation) || journal.calls != 1 || main.calls != 0 {
++			t.Fatal("defer repeated child or lost cause", token)
++		}
++		if !txx.LogicallyClosed() || txx.dirty != nil || txx.free != nil {
++			t.Fatal("logical state retained")
++		}
++		if _, e = txx.ReadPage(context.Background(), 1); !errors.Is(e, ErrClosed) {
++			t.Fatal(e)
++		}
++		journal.nilPending = false
++		if nilPending {
++			journal.remaining = 0
++		}
++		if e = txx.Rollback(); e != nil || !g.done || journal.calls != 2 || main.calls != 1 {
++			t.Fatal(e)
++		}
++		if e = txx.Rollback(); e != nil || main.calls != 1 {
++			t.Fatal(e)
++		}
++		if !errors.Is(token, ErrPlaintextCleanupPending) {
++			t.Fatal("old token changed")
++		}
++	}
++}
++func TestPlainTxCleanupMemoryLiveRetryPreservesUnrequestedJournal(t *testing.T) {
++	reg := &plainRetirementRegistry{limit: 1}
++	g, child, main, _ := plainMemoryGroup(t, reg)
++	journal := &plainMemoryOwner{name: "journal"}
++	g.temporary = journal
++	g.cause = errors.Join(ErrPoisoned, child.cause)
++	token := g.pendingLocked(g.cause)
++	if e := RetryPlaintextCleanup(token); e != nil || main.calls != 0 || journal.calls != 0 {
++		t.Fatal("live retry retired active transaction", e)
++	}
++	if e := g.begin(nil); !errors.Is(e, ErrPoisoned) || errors.Is(e, ErrPlaintextCleanupPending) || !g.done || journal.calls != 1 || main.calls != 1 {
++		t.Fatal(e)
++	}
++}
++func TestPlainTxCleanupMemoryConsumedCommitDiagnosticAndPoison(t *testing.T) {
++	for _, pending := range []bool{false, true} {
++		reg := &plainRetirementRegistry{limit: 1}
++		g, e := reg.reserve()
++		if e != nil {
++			t.Fatal(e)
++		}
++		main := &plainMemoryOwner{consumed: true, cause: errors.New("memory consumed main diagnostic")}
++		if pending {
++			main.remaining = 1
++		}
++		g.main = main
++		txx := &Tx{file: &vfs.File{}, cleanup: g, dirty: map[uint32][]byte{1: {1}}, free: map[uint32]struct{}{2: {}}}
++		e = txx.retirePlainLocked(nil, errors.Join(ErrPoisoned, ErrCommitUncertain), true)
++		if !errors.Is(e, ErrCommitUncertain) || !errors.Is(e, ErrPoisoned) || !errors.Is(e, main.cause) || !txx.LogicallyClosed() || txx.dirty != nil || txx.free != nil {
++			t.Fatal(e)
++		}
++		if errors.Is(e, ErrPlaintextCleanupPending) != pending {
++			t.Fatal("consumption misclassified", e)
++		}
++		if pending {
++			e = txx.Rollback()
++			if !errors.Is(e, main.cause) || errors.Is(e, ErrPlaintextCleanupPending) || !g.done {
++				t.Fatal("completion retained historical pending", e)
++			}
++		}
++		if e = txx.Rollback(); e != nil {
++			t.Fatal(e)
++		}
++	}
++	reg := &plainRetirementRegistry{limit: 1}
++	g, child, main, _ := plainMemoryGroup(t, reg)
++	child.remaining = 1
++	txx := &Tx{file: &vfs.File{}, cleanup: g, dirty: map[uint32][]byte{1: {1}}}
++	original := errors.New("memory original I/O diagnostic")
++	e := txx.poison(original, true)
++	if !errors.Is(e, ErrRecoveryRequired) || !errors.Is(e, original) || !errors.Is(e, ErrPlaintextCleanupPending) || main.calls != 0 || !txx.LogicallyClosed() {
++		t.Fatal(e)
++	}
++	if e = txx.Rollback(); e != nil || !g.done {
++		t.Fatal(e)
++	}
++}
++func TestPlainTxCleanupMemoryRollbackDropsUndoBeforeCompletion(t *testing.T) {
++	reg := &plainRetirementRegistry{limit: 1}
++	g, e := reg.reserve()
++	if e != nil {
++		t.Fatal(e)
++	}
++	main := &plainMemoryOwner{remaining: 1, cause: errors.New("memory main pending")}
++	g.main = main
++	txx := &Tx{file: &vfs.File{}, cleanup: g, dirty: map[uint32][]byte{1: {1}}, free: map[uint32]struct{}{2: {}}}
++	if _, e = txx.newUndoMarkLocked("memory mark"); e != nil {
++		t.Fatal(e)
++	}
++	if e = txx.Rollback(); !errors.Is(e, ErrPlaintextCleanupPending) || len(txx.undo.marks) != 0 || txx.dirty != nil || txx.free != nil {
++		t.Fatal(e)
++	}
++	if e = txx.Rollback(); e != nil {
++		t.Fatal(e)
++	}
++}
++
++func TestPlainTxCleanupMemoryPreservesOrdinaryErrorStructure(t *testing.T) {
++	cause := errors.New("memory ordinary diagnostic")
++	if got := plainDiagnostic(cause); got != cause {
++		t.Fatal("ordinary diagnostic structure hidden", got)
++	}
++}
++
++// Regression laws from the independent TxV1 review. All owners are memory-only.
++func TestPlainTxCleanupMemoryDeferredDiagnosticAndRecovery(t *testing.T) {
++	reg := &plainRetirementRegistry{limit: 1}
++	g, err := reg.reserve()
++	if err != nil {
++		t.Fatal(err)
++	}
++	operation, retirement := errors.New("memory operation"), errors.New("memory journal retirement")
++	main, journal := &plainMemoryOwner{}, &plainMemoryOwner{remaining: 1, cause: retirement}
++	g.main, g.temporary = main, journal
++	tx := &Tx{file: &vfs.File{}, cleanup: g}
++	first := g.closeTemporary(operation)
++	current := tx.deferPlainRetirementLocked(true)
++	for _, e := range []error{first, current, reg.snapshot()[0]} {
++		if !errors.Is(e, operation) || !errors.Is(e, retirement) || !errors.Is(e, ErrPlaintextCleanupPending) {
++			t.Fatal("first diagnostic lost", e)
++		}
++	}
++	if !errors.Is(current, ErrRecoveryRequired) || journal.calls != 1 || main.calls != 0 {
++		t.Fatal("pending journal lost recovery/barrier", current)
++	}
++	cause := g.cause
++	_ = RetryPlaintextCleanup(current)
++	if !g.done || g.cause != nil || cause == nil {
++		t.Fatal("retirement incomplete")
++	}
++}
++func TestPlainTxCleanupMemoryPoisonClearsUndoWithoutOuterDefer(t *testing.T) {
++	reg := &plainRetirementRegistry{limit: 1}
++	g, err := reg.reserve()
++	if err != nil {
++		t.Fatal(err)
++	}
++	g.main = &plainMemoryOwner{remaining: 1, cause: errors.New("memory main pending")}
++	tx := &Tx{file: &vfs.File{}, cleanup: g, dirty: map[uint32][]byte{1: {1}}, free: map[uint32]struct{}{2: {}}}
++	if _, err = tx.newUndoMarkLocked("memory mark"); err != nil {
++		t.Fatal(err)
++	}
++	_ = tx.poison(errors.New("memory exclusive poison"), false)
++	if !tx.LogicallyClosed() || len(tx.undo.marks) != 0 || tx.dirty != nil || tx.free != nil {
++		t.Fatal("logical poison retained transaction data")
++	}
++	_ = g.retry()
++}
+diff --git a/internal/pager/tx.go b/internal/pager/tx.go
+--- a/internal/pager/tx.go
++++ b/internal/pager/tx.go
+@@ -81,6 +81,7 @@
+ 	// keepFile is private to the rollback-journal WAL-mode transition. The
+ 	// WAL session already holds EXCLUSIVE and retains the same descriptor.
+ 	keepFile bool
++	cleanup  *plainRetirement
+ }
+ 
+ func normalizedOptions(o Options) (Options, error) {
+@@ -116,14 +117,23 @@
+ 	if err != nil {
+ 		return nil, err
+ 	}
++	cleanup, err := plainRetirements.reserve()
++	if err != nil {
++		return nil, err
++	}
++	defer func() {
++		if result == nil {
++			retErr = cleanup.begin(retErr)
++		}
++	}()
+ 	path, err = filepath.Abs(path)
+ 	if err != nil {
+ 		return nil, err
+ 	}
+-	resolved, err := resolveNativePath(path)
++	resolved, initialAbsent, err := resolveNativeReaderPath(path)
+ 	if err == nil {
+ 		path = resolved
+-	} else if opts.Create && os.IsNotExist(err) {
++	} else if opts.Create && initialAbsent {
+ 		dir, e := resolveNativePath(filepath.Dir(path))
+ 		if e != nil {
+ 			return nil, e
+@@ -140,12 +150,7 @@
+ 	if err != nil {
+ 		return nil, err
+ 	}
+-	success := false
+-	defer func() {
+-		if !success {
+-			retErr = errors.Join(retErr, closeNativeFile(f))
+-		}
+-	}()
++	cleanup.main = plainFile{f}
+ 	info, err := statNativeFile(f)
+ 	if err != nil {
+ 		return nil, err
+@@ -165,7 +170,7 @@
+ 	if err != nil {
+ 		return nil, err
+ 	}
+-	t := &Tx{file: f, path: path, info: info, opts: opts, dirty: make(map[uint32][]byte), free: make(map[uint32]struct{})}
++	t := &Tx{file: f, path: path, info: info, opts: opts, cleanup: cleanup, dirty: make(map[uint32][]byte), free: make(map[uint32]struct{})}
+ 	if err = t.checkSidecars(); err != nil {
+ 		return nil, err
+ 	}
+@@ -210,7 +215,6 @@
+ 	if err = ctx.Err(); err != nil {
+ 		return nil, err
+ 	}
+-	success = true
+ 	return t, nil
+ }
+ 
+@@ -233,6 +237,9 @@
+ 
+ func (t *Tx) Header() Header { t.mu.Lock(); defer t.mu.Unlock(); return t.header }
+ func (t *Tx) checkOpen() error {
++	if err := t.cleanup.check(); err != nil {
++		return err
++	}
+ 	if t.poisoned != nil {
+ 		return t.poisoned
+ 	}
+@@ -243,7 +250,10 @@
+ }
+ func (t *Tx) checkSidecars() error { return checkSidecars(t.path) }
+ 
+-func (t *Tx) checkStable() error {
++func (t *Tx) checkStable() (retErr error) {
++	if t.cleanup != nil {
++		defer func() { retErr = t.cleanup.observe(retErr) }()
++	}
+ 	if t.encrypted != nil {
+ 		return t.encrypted.checkStable()
+ 	}
+@@ -284,7 +294,10 @@
+ 	}
+ 	return nil
+ }
+-func (t *Tx) readLocked(ctx context.Context, n uint32) ([]byte, error) {
++func (t *Tx) readLocked(ctx context.Context, n uint32) (_ []byte, retErr error) {
++	if t.cleanup != nil {
++		defer func() { retErr = t.cleanup.observe(retErr) }()
++	}
+ 	if err := ctx.Err(); err != nil {
+ 		return nil, err
+ 	}
+@@ -344,7 +357,7 @@
+ 		return t.shared.promote(ctx, t)
+ 	}
+ 	if err := lockReserved(t.file); err != nil {
+-		return err
++		return t.cleanup.observe(err)
+ 	}
+ 	t.reserved = true
+ 	return nil
+@@ -446,6 +459,9 @@
+ 	if t.statement {
+ 		return fmt.Errorf("%w: rollback inside statement", ErrMisuse)
+ 	}
++	if t.cleanup != nil {
++		return t.retirePlainLocked(t.poisoned, nil, true)
++	}
+ 	if t.encrypted != nil {
+ 		err := t.encrypted.release(t)
+ 		t.clearEncrypted()
+diff --git a/sqlite/plain_tx_cleanup_internal_test.go b/sqlite/plain_tx_cleanup_internal_test.go
+new file mode 100644
+--- /dev/null
++++ b/sqlite/plain_tx_cleanup_internal_test.go
+@@ -0,0 +1,55 @@
++package sqlite
++
++import (
++	"context"
++	"errors"
++	"testing"
++
++	"github.com/ms-xiaosnow/gosqlite/internal/pager"
++)
++
++func TestPlainTxCleanupMemoryCommitLogicalInvalidation(t *testing.T) {
++	db := &DB{rows: make(map[*Rows]struct{})}
++	cleanup := errors.Join(pager.ErrPlaintextCleanupPending, pager.ErrPoisoned)
++	calls := 0
++	tx := &Tx{db: db, ctx: context.Background(), readClose: func() error { calls++; return cleanup }}
++	db.tx = tx
++	e := tx.Commit(context.Background())
++	var detail *Error
++	if !errors.Is(e, ErrPlaintextCleanupPending) || !errors.As(e, &detail) || detail.Code != CodeIOErr || !tx.done || db.tx != nil || calls != 1 {
++		t.Fatal(e)
++	}
++	if e = tx.Rollback(); e != nil || calls != 1 {
++		t.Fatal(e)
++	}
++	if _, e = tx.Query(context.Background(), "SELECT 1"); !errors.Is(e, ErrTxDone) {
++		t.Fatal(e)
++	}
++}
++func TestPlainTxCleanupMemoryRollbackPreservesRowsCause(t *testing.T) {
++	db := &DB{rows: make(map[*Rows]struct{})}
++	child, storage := errors.New("memory rows cleanup"), errors.Join(pager.ErrPlaintextCleanupPending, pager.ErrPoisoned)
++	tx := &Tx{db: db, ctx: context.Background(), activeRows: 1, readClose: func() error { return storage }}
++	db.tx = tx
++	row := &Rows{db: db, tx: tx, release: func() error { return child }}
++	db.rows[row] = struct{}{}
++	e := tx.Rollback()
++	var detail *Error
++	if !errors.Is(e, child) || !errors.Is(e, ErrPlaintextCleanupPending) || !errors.As(e, &detail) || detail.Code != CodeIOErr || !row.closed || !errors.Is(row.Err(), ErrTxDone) || !tx.done || db.tx != nil {
++		t.Fatal(e)
++	}
++	if e = tx.Rollback(); e != nil {
++		t.Fatal(e)
++	}
++}
++
++func TestPlainTxCleanupMemoryAutomaticRollbackCodePrecedence(t *testing.T) {
++	db := &DB{rows: make(map[*Rows]struct{})}
++	tx := &Tx{db: db, ctx: context.Background(), readClose: func() error { return errors.Join(pager.ErrPlaintextCleanupPending, pager.ErrPoisoned) }}
++	db.tx = tx
++	e := tx.rollbackAfterExecLocked(wrap("commit", ErrBusy))
++	var detail *Error
++	if !errors.Is(e, ErrBusy) || !errors.Is(e, ErrPlaintextCleanupPending) || !errors.As(e, &detail) || detail.Code != CodeIOErr || !tx.done || db.tx != nil {
++		t.Fatal(e)
++	}
++}
+diff --git a/sqlite/plaintext_cleanup.go b/sqlite/plaintext_cleanup.go
+--- a/sqlite/plaintext_cleanup.go
++++ b/sqlite/plaintext_cleanup.go
+@@ -3,29 +3,31 @@
+ import "github.com/ms-xiaosnow/gosqlite/internal/pager"
+ 
+ // ErrPlaintextCleanupPending marks an immutable historical cleanup token for an
+-// ordinary rollback Reader. Such tokens match ErrPoisoned and carry CodeIOErr.
++// ordinary rollback Reader or standalone Tx. Tokens match ErrPoisoned and carry CodeIOErr.
+ // A close diagnostic without this marker can describe fully consumed ownership.
+ var ErrPlaintextCleanupPending = pager.ErrPlaintextCleanupPending
+ 
+ // RetryPlaintextCleanup deliberately attempts all distinct ordinary rollback
+-// Reader groups in wrapped/joined errors. Discovery precedes effects and accepts
++// Reader/Tx groups in wrapped/joined errors. Discovery precedes effects and accepts
+ // at most 4096 error nodes. Excessive/cyclic trees return ErrMemoryLimit without
+ // cleanup or wrapping the unsafe tree; retain tokens and retry smaller trees.
+ //
+-// A live Reader token retries only failed nested probes, never its main file.
+-// After Reader.Close, child obligations retire before the protecting main file.
++// A live Reader/Tx token retries only failed nested probes or a close-requested
++// journal, never an active main file or unrequested journal. After logical close,
++// child obligations retire before the protecting main file.
+ // Retries do not open paths, replay transactions, or retry numeric native handles.
+ // Terminal ownership can remain pending indefinitely. Completed groups and errors
+ // without tokens are no-ops, not proof every subsystem is clean. This increment
+-// does not cover standalone transactions, WALShared, WALExclusive or encryption.
++// does not cover WALShared, WALExclusive or encryption.
+ func RetryPlaintextCleanup(err error) error {
+ 	return wrap("plaintext cleanup", pager.RetryPlaintextCleanup(err))
+ }
+ 
+ // PendingPlaintextCleanups returns a new snapshot of immutable pending rollback
+-// Reader tokens, including failed opens and close errors discarded by database/sql.
+-// Enumeration performs no cleanup; ordinary live and opening Readers are excluded.
+-// At most 1024 opening/live/pending groups are admitted before pager acquisition.
++// Reader/Tx tokens, including failed opens and close errors discarded by database/sql.
++// Enumeration performs no cleanup; ordinary live/opening Readers and Tx are excluded.
++// At most 1024 opening/live/pending Reader/Tx groups are admitted before pager
++// acquisition. Each scope pre-reserves main and one temporary journal slot.
+ // There is no eviction, finalizer, automatic sweep, or wait on another group at
+ // admission. Changing the returned slice does not change registry ownership.
+ func PendingPlaintextCleanups() []error {
+diff --git a/sqlite/sqlite.go b/sqlite/sqlite.go
+--- a/sqlite/sqlite.go
++++ b/sqlite/sqlite.go
+@@ -308,7 +308,7 @@
+ 			d.info = fileInfo(p.Header())
+ 			err = p.Commit(ctx)
+ 			if err != nil {
+-				_ = p.Rollback()
++				err = errors.Join(err, p.Rollback())
+ 			}
+ 		}
+ 	}
+diff --git a/sqlite/transaction.go b/sqlite/transaction.go
+--- a/sqlite/transaction.go
++++ b/sqlite/transaction.go
+@@ -176,10 +176,10 @@
+ 	} else if t.readClose != nil {
+ 		err = t.readClose()
+ 	}
+-	if err != nil {
++	if err != nil && (t.storage != nil && !t.storage.LogicallyClosed() || t.storage == nil && t.readClose == nil) {
+ 		return err
+ 	}
+-	if t.reader != nil {
++	if t.reader != nil && err == nil {
+ 		t.db.info = fileInfo(t.reader.Header())
+ 	}
+ 	t.savepoints = nil
+@@ -188,7 +188,7 @@
+ 	if t.db.tx == t {
+ 		t.db.tx = nil
+ 	}
+-	return nil
++	return err
+ }
+ func (t *Tx) Rollback() error {
+ 	t.db.mu.Lock()
+@@ -199,19 +199,19 @@
+ 	if t.done {
+ 		return nil
+ 	}
++	var err error
+ 	for r := range t.db.rows {
+ 		if r.tx == t {
+ 			r.mu.Lock()
+ 			r.err = wrap("next", ErrTxDone)
+-			_ = r.close()
++			err = errors.Join(err, r.close())
+ 			r.mu.Unlock()
+ 		}
+ 	}
+-	var err error
+ 	if t.storage != nil {
+-		err = t.storage.Rollback()
++		err = errors.Join(err, t.storage.Rollback())
+ 	} else if t.readClose != nil {
+-		err = t.readClose()
++		err = errors.Join(err, t.readClose())
+ 	}
+ 	t.savepoints = nil
+ 	t.markBytes = 0
+@@ -261,8 +261,7 @@
+ 		err = wrap("commit", t.commitLocked(ctx))
+ 	}
+ 	if err != nil {
+-		err = errors.Join(err, t.rollbackLocked())
+-		return Result{}, err
++		return Result{}, t.rollbackAfterExecLocked(err)
+ 	}
+ 	return result, nil
+ }
+@@ -341,3 +340,9 @@
+ 	}
+ 	return result, nil
+ }
++
++// DB.Exec's automatic transaction may already have classified its operation
++// error. Classify again only after adding rollback ownership diagnostics.
++func (t *Tx) rollbackAfterExecLocked(cause error) error {
++	return wrapCleanup("exec", cause, t.rollbackLocked())
++}
+diff --git a/sqlite/transaction_control.go b/sqlite/transaction_control.go
+--- a/sqlite/transaction_control.go
++++ b/sqlite/transaction_control.go
+@@ -115,7 +115,7 @@
+ 		}
+ 		err := d.tx.savepointLocked(ctx, control.Name)
+ 		if err != nil && created {
+-			_ = d.tx.rollbackLocked()
++			err = errors.Join(err, d.tx.rollbackLocked())
+ 		}
+ 		return err
+ 	case "COMMIT", "ROLLBACK":

@@ -1,0 +1,16 @@
+Immutable integration base tree: 508732922205872b7a8738b471b236fcf8ecb096
+Base supplied by lead: durable 883999c plus independently reviewed encrypted 33-path tree.
+Initial checkout: git archive of the exact tree into plain-retirement-work; no main edits, staging, commits, uploads or registry/network dependency fetches by this worker.
+Tool: /workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go
+GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off GOFLAGS=-buildvcs=false
+GOCACHE=/workspace/scratch/5e06a74e5f65/durable-restart/go-cache
+GOPATH=/workspace/scratch/5e06a74e5f65/durable-restart/go-path
+Normal/build/vet/oracle/target compile CGO_ENABLED=0; separate race CGO_ENABLED=1.
+Target checks: darwin/amd64 and windows/amd64, compile-only.
+The final no-DB descriptor-free model test was added after cross compilation. It is covered by final normal/race; all production file contents are identical to the cross-compiled production. No target runtime pass is claimed.
+The first attempted guard used relative GOPATH/GOCACHE and was refused by Go before any execution; all recorded successful suites use the absolute active shared paths above.
+No cache removal or independent compiler cache was used. Lead requested a compiler pause after this complete batch, and the worker reported no running compiler/test jobs.
+V2 supersedes the preceding test-only target timing note: final normal/race, official probe, build/vet and darwin/windows compile checks were rerun after the no-DB test and the error-code precedence correction. All V2 production and test sources now match the final recorded suites.
+
+V4 exact checks are normal-v4.txt, race-v4.txt and build-vet-v4.txt. Historical V1/V2/V3 logs remain their original source evidence.
+V5 exact checks are normal-v5.txt, race-v5.txt and build-vet-v5.txt. V4 and TxV1 source findings are documented in v5-correction.txt; earlier evidence remains tied to its historical source.

@@ -1,0 +1,14 @@
+docs/plaintext-exclusive-cleanup.md
+internal/pager/checkpoint.go
+internal/pager/commit.go
+internal/pager/plain_cleanup.go
+internal/pager/plain_open_admission.go
+internal/pager/plain_session_cleanup.go
+internal/pager/plain_session_cleanup_test.go
+internal/pager/plain_tx_cleanup.go
+internal/pager/session.go
+internal/pager/tx.go
+internal/pager/wal.go
+sqlite/plain_session_cleanup_internal_test.go
+sqlite/plaintext_cleanup.go
+sqlite/sqlite.go

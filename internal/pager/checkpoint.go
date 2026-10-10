@@ -18,7 +18,8 @@ func (s *Session) Checkpoint(ctx context.Context) error {
 	return s.checkpointLocked(ctx)
 }
 
-func (s *Session) checkpointLocked(ctx context.Context) error {
+func (s *Session) checkpointLocked(ctx context.Context) (retErr error) {
+	defer func() { retErr = s.observeLocked(retErr) }()
 	if err := ctx.Err(); err != nil {
 		return err
 	}
@@ -67,7 +68,11 @@ func (s *Session) checkpointLocked(ctx context.Context) error {
 	if err := s.file.Sync(); err != nil {
 		return fail(err)
 	}
-	if err := s.walFile.Close(); err != nil {
+	if s.cleanup != nil {
+		if err := s.cleanup.closeWAL(nil); err != nil {
+			return fail(err)
+		}
+	} else if err := s.walFile.Close(); err != nil {
 		return fail(err)
 	}
 	s.walFile = nil

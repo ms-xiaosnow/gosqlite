@@ -1,0 +1,12 @@
+V5 independent normal/race. No native failure or namespace workflow; inert owner callbacks and intact ordinary Reader lifecycle only.
+2026-10-10T19:38:45Z
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.183s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.116s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.008s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.485s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	1.304s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	1.035s
+2026-10-10T19:39:06Z
+INDEPENDENT V5 PROVENANCE NORMAL/RACE PASS

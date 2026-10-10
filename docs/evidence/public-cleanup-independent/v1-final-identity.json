@@ -1,0 +1,22 @@
+{
+  "manifest_sha256": "ad05ae86ce81cd1eeca2603bc535f508ce5c773da4b59bc49c156480e384cc33",
+  "trees": [
+    {
+      "tree": "plain-public-adoption-freeze-v1",
+      "verified_files": 1097,
+      "differences": [],
+      "declared_extras": {}
+    },
+    {
+      "tree": "public-cleanup-independent-v1",
+      "verified_files": 1097,
+      "differences": [],
+      "declared_extras": {
+        "internal/pager/public_cleanup_independent_test.go": "076df3b6f3703cadfc457e45a195ca9d7b575c723b61fb784666ca02c2d3912b",
+        "sqlite/public_cleanup_independent_test.go": "eb59cd25f44ce0d1126d29d16de90c63e306c1398920eaad58fe3a082c310231"
+      }
+    }
+  ],
+  "checks_exit": 0,
+  "production_cgo_dependencies": []
+}

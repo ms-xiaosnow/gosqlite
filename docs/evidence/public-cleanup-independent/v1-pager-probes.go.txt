@@ -1,0 +1,212 @@
+package pager
+
+import (
+	"errors"
+	"fmt"
+	"sync"
+	"testing"
+)
+
+// Independent lifecycle callbacks. They contain no paths, descriptors, native
+// calls, mappings, or application objects.
+type publicReviewOwner struct {
+	mode            int
+	done            bool
+	calls, rawCalls int
+	cause           error
+}
+
+func (o *publicReviewOwner) RetirementComplete() bool { return o.done }
+func (o *publicReviewOwner) Close() error {
+	o.calls++
+	switch o.mode {
+	case 0:
+		o.rawCalls++
+		o.done = true
+		return nil
+	case 1:
+		o.rawCalls++
+		o.done = true
+		return o.cause
+	case 2:
+		return nil
+	default:
+		if o.rawCalls == 0 {
+			o.rawCalls++
+		}
+		return o.cause
+	}
+}
+
+func TestPublicCleanupIndependentSingleTransferRaces(t *testing.T) {
+	operation := errors.New("memory prelude error")
+	for i := 0; i < 200; i++ {
+		r := &plainRetirementRegistry{limit: 1}
+		g, err := r.reserve()
+		if err != nil {
+			t.Fatal(err)
+		}
+		owner := &publicReviewOwner{}
+		g.nested = []plainResource{owner}
+		a := &PlainOpenAdmission{}
+		a.group.Store(g)
+		var claimed *plainRetirement
+		var claimErr error
+		var handled bool
+		var finished error
+		var wg sync.WaitGroup
+		wg.Add(2)
+		start := make(chan struct{})
+		go func() { defer wg.Done(); <-start; claimed, claimErr = claimPlainOpen(a) }()
+		go func() { defer wg.Done(); <-start; finished, handled = a.Finish(operation) }()
+		close(start)
+		wg.Wait()
+		if handled {
+			if claimed != nil || !errors.Is(claimErr, ErrMisuse) || !errors.Is(finished, operation) {
+				t.Fatal("two owners or lost first diagnostic", claimErr, finished)
+			}
+		} else {
+			if claimed != g || claimErr != nil || finished != operation || owner.calls != 0 {
+				t.Fatal("transferred live root was retired", claimErr, finished, owner.calls)
+			}
+			if err := claimed.begin(nil); err != nil {
+				t.Fatal(err)
+			}
+		}
+		if owner.calls != 1 || !g.done || len(r.groups) != 0 {
+			t.Fatal("one-shot ownership failed")
+		}
+		if _, handled := a.Finish(operation); handled {
+			t.Fatal("finished twice")
+		}
+
+		sr := &sharedCloseRetirementRegistry{limit: 1}
+		sg, err := sr.reserve()
+		if err != nil {
+			t.Fatal(err)
+		}
+		so := &publicReviewOwner{}
+		sg.nested = []sharedCloseResource{so}
+		sa := &SharedCloseAdmission{group: sg}
+		var taken *sharedCloseRetirement
+		var takeErr error
+		start = make(chan struct{})
+		handled = false
+		wg.Add(2)
+		go func() { defer wg.Done(); <-start; taken, takeErr = sa.take() }()
+		go func() { defer wg.Done(); <-start; finished, handled = sa.Finish(operation) }()
+		close(start)
+		wg.Wait()
+		if handled {
+			if taken != nil || !errors.Is(takeErr, ErrMisuse) || !errors.Is(finished, operation) {
+				t.Fatal("two shared owners or lost diagnostic", takeErr, finished)
+			}
+		} else {
+			if taken != sg || takeErr != nil || finished != operation || so.calls != 0 {
+				t.Fatal("transferred shared root retired", takeErr, finished, so.calls)
+			}
+			if err := taken.begin(nil); err != nil {
+				t.Fatal(err)
+			}
+		}
+		sa.Cancel()
+		if so.calls != 1 || !sg.done || len(sr.groups) != 0 {
+			t.Fatal("shared one-shot ownership failed")
+		}
+		if _, handled := sa.Finish(operation); handled {
+			t.Fatal("shared finished twice")
+		}
+	}
+}
+
+func TestPublicCleanupIndependentSharedExplicitOutcomes(t *testing.T) {
+	for mode := 0; mode < 4; mode++ {
+		r := &sharedCloseRetirementRegistry{limit: 1}
+		g, err := r.reserve()
+		if err != nil {
+			t.Fatal(err)
+		}
+		original := errors.New("memory original public error")
+		diagnostic := errors.New("memory retirement diagnostic")
+		o := &publicReviewOwner{mode: mode, cause: diagnostic}
+		g.nested = []sharedCloseResource{o}
+		a := &SharedCloseAdmission{group: g}
+		token, handled := a.Finish(original)
+		if !handled || !errors.Is(token, original) {
+			t.Fatal("lost operation cause", token)
+		}
+		if mode < 2 {
+			if !g.done || len(r.snapshot()) != 0 || errors.Is(token, ErrCloseCleanupPending) || g.cause != nil || g.nested != nil {
+				t.Fatal("consumed owner retained")
+			}
+			if mode == 1 && !errors.Is(token, diagnostic) {
+				t.Fatal("consumed diagnostic lost")
+			}
+			continue
+		}
+		if g.done || len(r.snapshot()) != 1 || !errors.Is(token, ErrCloseCleanupPending) {
+			t.Fatal("uncertainty discarded")
+		}
+		historical, first := token, g.cause
+		for i := 0; i < 5000; i++ {
+			token = RetryCloseCleanup(token)
+			if g.cause != first || g.done || !errors.Is(token, original) || !errors.Is(token, ErrCloseCleanupPending) {
+				t.Fatal("history grew or retained state lost")
+			}
+		}
+		if mode == 3 && o.rawCalls != 1 {
+			t.Fatal("terminal numeric operation replayed")
+		}
+		if mode == 2 && o.rawCalls != 0 {
+			t.Fatal("nil noncompletion invented native work")
+		}
+		o.done = true
+		if err := RetryCloseCleanup(token); err != nil || !g.done || len(r.snapshot()) != 0 {
+			t.Fatal(err)
+		}
+		calls := o.calls
+		if err := RetryCloseCleanup(historical); err != nil || o.calls != calls {
+			t.Fatal("historical token repeated effects", err)
+		}
+		if !errors.Is(historical, ErrCloseCleanupPending) {
+			t.Fatal("historical marker mutated")
+		}
+	}
+}
+
+type publicReviewUnsafe struct{ unwraps, formats int }
+
+func (e *publicReviewUnsafe) Error() string {
+	e.formats++
+	panic("unsafe original must not be formatted")
+}
+func (e *publicReviewUnsafe) Unwrap() error { e.unwraps++; return e }
+func TestPublicCleanupIndependentBoundedOpaqueSharedCause(t *testing.T) {
+	r := &sharedCloseRetirementRegistry{limit: 1}
+	g, err := r.reserve()
+	if err != nil {
+		t.Fatal(err)
+	}
+	a := &SharedCloseAdmission{group: g}
+	unsafe := &publicReviewUnsafe{}
+	token, handled := a.Finish(unsafe)
+	if !handled || !errors.Is(token, ErrLimit) || !errors.Is(token, ErrCloseCleanupPending) || len(r.snapshot()) != 1 {
+		t.Fatal("unsafe cause escaped adoption")
+	}
+	if unsafe.unwraps > maxCloseCleanupErrorNodes || unsafe.formats != 0 {
+		t.Fatal("unbounded discovery")
+	}
+	count := unsafe.unwraps
+	first := g.cause
+	_ = fmt.Sprint(token)
+	for i := 0; i < 100; i++ {
+		token = RetryCloseCleanup(token)
+		_ = fmt.Sprint(token)
+		if g.cause != first || unsafe.unwraps != count || unsafe.formats != 0 {
+			t.Fatal("retry exposed original graph")
+		}
+	}
+	if g.done || len(r.snapshot()) != 1 {
+		t.Fatal("opaque terminal evicted")
+	}
+}

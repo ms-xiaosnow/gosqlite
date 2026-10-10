@@ -1,0 +1,82 @@
++ date -u +%FT%TZ
+2026-10-10T19:51:24Z
++ /workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go version
+go version go1.27.2 linux/amd64
++ for cgo in 0 1
++ export CGO_ENABLED=0
++ CGO_ENABLED=0
++ args=()
++ '[' 0 = 1 ']'
++ /workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ /workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go test ./internal/pager ./internal/vfs ./sqlite ./driver -run '^(TestExclusiveIndependent|TestPlainSessionCleanupMemory|TestPlainTxCleanupMemory|TestPlainCleanupMemory|TestPlaintextCleanup|TestPathAbsenceMemory|TestCloseCleanupMemoryDBInvalidatesOnceAndRetries$|TestSessionDescriptorLeaseAndOrdinaryRetainedClose$|TestSessionCommitProtectsSectorNeighbors$|TestSessionReopenedWALNormalizationPreservesSnapshot$|TestWALLogicalHeaderExtentInMemory$|TestWALSectorsBoundedBeforeReadInMemory$|TestNativeWALConnectionLifecycle$|TestWALOptionsAndCanceledOpen$)' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.082s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.003s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.017s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.003s
++ /workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ /workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go test ./internal/pager ./sqlite ./driver -run '^(TestSharedWALSnapshotsPromotionAndCheckpoint|TestEncryptionOrdinaryLifecycleAndCopies|TestDriverSavepointsPoolResetAndOuterRelease|TestDriverFailedOuterReleaseRemainsActive|TestDriverDeferredBeginSeesFirstAccessState|TestWritableCommitBusyRollsBackForPool|TestWALConnectorSingleConnection|TestEncryptedConnectorOrdinaryLifecycle)$' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.017s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.016s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.027s
++ for cgo in 0 1
++ export CGO_ENABLED=1
++ CGO_ENABLED=1
++ args=()
++ '[' 1 = 1 ']'
++ args=(-race)
++ /workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ /workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go test -race ./internal/pager ./internal/vfs ./sqlite ./driver -run '^(TestExclusiveIndependent|TestPlainSessionCleanupMemory|TestPlainTxCleanupMemory|TestPlainCleanupMemory|TestPlaintextCleanup|TestPathAbsenceMemory|TestCloseCleanupMemoryDBInvalidatesOnceAndRetries$|TestSessionDescriptorLeaseAndOrdinaryRetainedClose$|TestSessionCommitProtectsSectorNeighbors$|TestSessionReopenedWALNormalizationPreservesSnapshot$|TestWALLogicalHeaderExtentInMemory$|TestWALSectorsBoundedBeforeReadInMemory$|TestNativeWALConnectionLifecycle$|TestWALOptionsAndCanceledOpen$)' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.820s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	1.025s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	1.089s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.016s
++ /workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ /workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go test -race ./internal/pager ./sqlite ./driver -run '^(TestSharedWALSnapshotsPromotionAndCheckpoint|TestEncryptionOrdinaryLifecycleAndCopies|TestDriverSavepointsPoolResetAndOuterRelease|TestDriverFailedOuterReleaseRemainsActive|TestDriverDeferredBeginSeesFirstAccessState|TestWritableCommitBusyRollsBackForPool|TestWALConnectorSingleConnection|TestEncryptedConnectorOrdinaryLifecycle)$' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.084s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	1.047s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.274s
++ export CGO_ENABLED=0
++ CGO_ENABLED=0
++ /workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ /workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go test -tags oracle ./internal/testkit -run '^(TestOracleExclusiveWALNormalInterop|TestOracleImportedWALCheckpointWithoutNativeWrite)$' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	0.399s
++ /workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go build ./...
++ /workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go vet ./internal/pager ./internal/vfs ./sqlite ./driver
++ /workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go list -deps -f '{{if .CgoFiles}}{{.ImportPath}}: {{.CgoFiles}}{{end}}' ./...
++ for target in darwin windows
++ /workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ for pkg in internal/pager sqlite driver
++ GOOS=darwin
++ GOARCH=amd64
++ /workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go test -c -o /tmp/plain-exclusive-independent-v1-darwin-pager.test ./internal/pager
++ for pkg in internal/pager sqlite driver
++ GOOS=darwin
++ GOARCH=amd64
++ /workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go test -c -o /tmp/plain-exclusive-independent-v1-darwin-sqlite.test ./sqlite
++ for pkg in internal/pager sqlite driver
++ GOOS=darwin
++ GOARCH=amd64
++ /workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go test -c -o /tmp/plain-exclusive-independent-v1-darwin-driver.test ./driver
++ for target in darwin windows
++ /workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ for pkg in internal/pager sqlite driver
++ GOOS=windows
++ GOARCH=amd64
++ /workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go test -c -o /tmp/plain-exclusive-independent-v1-windows-pager.test ./internal/pager
++ for pkg in internal/pager sqlite driver
++ GOOS=windows
++ GOARCH=amd64
++ /workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go test -c -o /tmp/plain-exclusive-independent-v1-windows-sqlite.test ./sqlite
++ for pkg in internal/pager sqlite driver
++ GOOS=windows
++ GOARCH=amd64
++ /workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go test -c -o /tmp/plain-exclusive-independent-v1-windows-driver.test ./driver
++ date -u +%FT%TZ
+2026-10-10T19:52:04Z

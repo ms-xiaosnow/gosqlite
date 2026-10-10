@@ -1,0 +1,23 @@
++ for cgo in 0 1
++ export CGO_ENABLED=0
++ CGO_ENABLED=0
++ ../toolchains/go1.27.2/bin/go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ args=()
++ '[' 0 = 1 ']'
++ ../toolchains/go1.27.2/bin/go test ./internal/pager ./sqlite ./driver -run '^(TestSessionDescriptorLeaseAndOrdinaryRetainedClose|TestSharedWALSnapshotsPromotionAndCheckpoint|TestEncryptionOrdinaryLifecycleAndCopies|TestEncryptedConnectorOrdinaryLifecycle)$' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.037s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.016s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.006s
++ for cgo in 0 1
++ export CGO_ENABLED=1
++ CGO_ENABLED=1
++ ../toolchains/go1.27.2/bin/go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ args=()
++ '[' 1 = 1 ']'
++ args=(-race)
++ ../toolchains/go1.27.2/bin/go test -race ./internal/pager ./sqlite ./driver -run '^(TestSessionDescriptorLeaseAndOrdinaryRetainedClose|TestSharedWALSnapshotsPromotionAndCheckpoint|TestEncryptionOrdinaryLifecycleAndCopies|TestEncryptedConnectorOrdinaryLifecycle)$' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.139s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	1.126s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.029s

@@ -1,0 +1,64 @@
+{
+  "manifests": [
+    {
+      "tree": "/workspace/scratch/5e06a74e5f65/durable-restart/plain-reader-freeze-v5",
+      "manifest": "plain-reader-v5-all-sha256.txt",
+      "sha256": "12bb816edaf4b88af31c243bd409fbf2262d7ef1a5f0c1c7a3b5d46eeb725f50",
+      "verified_files": 1024,
+      "differences": []
+    },
+    {
+      "tree": "/workspace/scratch/5e06a74e5f65/durable-restart/plain-tx-freeze-v2",
+      "manifest": "plain-tx-v2-all-sha256.txt",
+      "sha256": "bf450dcdde4293bbd303750d9e14d65d969b8a63fad66249f7c6ba1f8d6eaaa2",
+      "verified_files": 1062,
+      "differences": []
+    },
+    {
+      "tree": "/workspace/scratch/5e06a74e5f65/durable-restart/plain-exclusive-freeze-v2",
+      "manifest": "plain-exclusive-v2-all-sha256.txt",
+      "sha256": "6180d33214507b003d4bf78f4d0da45477b946307ec00a0665fbe3d24fa6a11d",
+      "verified_files": 1083,
+      "differences": []
+    },
+    {
+      "tree": "/workspace/scratch/5e06a74e5f65/durable-restart/plain-public-adoption-freeze-v1",
+      "manifest": "plain-public-adoption-v1-all-sha256.txt",
+      "sha256": "ad05ae86ce81cd1eeca2603bc535f508ce5c773da4b59bc49c156480e384cc33",
+      "verified_files": 1097,
+      "differences": []
+    },
+    {
+      "tree": "/workspace/scratch/5e06a74e5f65/durable-restart/public-cleanup-independent-v1",
+      "manifest": "plain-public-adoption-v1-all-sha256.txt",
+      "sha256": "ad05ae86ce81cd1eeca2603bc535f508ce5c773da4b59bc49c156480e384cc33",
+      "verified_files": 1097,
+      "differences": []
+    }
+  ],
+  "owned_manifest_sha256": "9c91e9f4ead5924ee7ff664803001017d91ee621888b5db74a9bd99efa6fe601",
+  "owned_paths": [
+    "docs/public-open-adoption.md",
+    "internal/pager/pager.go",
+    "internal/pager/plain_open_admission.go",
+    "internal/pager/public_admission_test.go",
+    "internal/pager/shared_public_admission.go",
+    "sqlite/close_cleanup.go",
+    "sqlite/plaintext_cleanup.go",
+    "sqlite/public_admission_internal_test.go",
+    "sqlite/sqlite.go"
+  ],
+  "source_delta_sha256": "dd3919ba517674d47f395d6ae8ca399a378004c6166068dc4fe796b2da1b17d1",
+  "owned_replay_matches": 9,
+  "source_changes": [
+    "internal/pager/pager.go",
+    "internal/pager/plain_open_admission.go",
+    "internal/pager/public_admission_test.go",
+    "internal/pager/shared_public_admission.go",
+    "sqlite/close_cleanup.go",
+    "sqlite/plaintext_cleanup.go",
+    "sqlite/public_admission_internal_test.go",
+    "sqlite/sqlite.go"
+  ],
+  "unowned_source_changes": []
+}

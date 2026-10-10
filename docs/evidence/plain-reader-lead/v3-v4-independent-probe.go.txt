@@ -1,0 +1,13 @@
+package sqlite
+import("errors";"fmt";"os";"testing")
+// Descriptor-free provenance decision; no database or native operation.
+func TestLeadCreateDecisionRejectsMixed(t *testing.T) {
+ for _, e := range []error{
+  errors.Join(os.ErrNotExist,ErrChanged),
+  errors.Join(os.ErrNotExist,errors.New("consumed diagnostic")),
+  fmt.Errorf("outer: %w",errors.Join(os.ErrNotExist,ErrChanged)),
+  errors.Join(errors.Join(os.ErrNotExist),errors.Join(ErrBusy)),
+ } {
+  if plainProbeMissing(e) { t.Errorf("mixed diagnosis authorized create: %v",e) }
+ }
+}

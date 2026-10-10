@@ -1,0 +1,480 @@
+diff --git a/docs/public-open-adoption.md b/docs/public-open-adoption.md
+new file mode 100644
+--- /dev/null
++++ b/docs/public-open-adoption.md
+@@ -0,0 +1,62 @@
++# Public plaintext metadata ownership adoption
++
++Date: 2026-10-10. This explicit delta extends the previously accepted ReaderV5
++pager-only boundary and exclusive V2 public boundary to every plaintext public
++OpenContext canonicalization prelude. It does not change SQLite bytes, shared
++WAL algorithms, encrypted protocols, or existing public struct layouts.
++
++## Root transfer and error replacement
++
++Public rollback and exclusive opens reserve one of the same 1024 plaintext
++roots before canonicalOpenPath. The admission transfers once into the Reader
++probe or exclusive Session. Healthy idle rollback DBs still retain no root once
++their probe retires. Ordinary initial absence consumes the probe root before a
++new OpenTx obtains its own existing root. Direct pager constructors retain their
++own pre-acquisition admission. The earlier exclusive-only internal admission
++entry point remains as an alias/wrapper around the generalized implementation.
++
++An early public error is adopted by Finish before an unused root can disappear.
++Its handled result replaces the old error, so an overbound/cyclic original is
++never rejoined after opaque bounded adoption. Pending metadata owners remain
++reachable through PendingPlaintextCleanups/RetryPlaintextCleanup even when no DB
++was returned or database/sql discards the error. Healthy opening admissions are
++excluded from pending snapshots but count toward the common bound.
++
++Shared OpenContext already reserved its 1024-session CloseAdmission before
++canonicalization, but Cancel previously abandoned that empty-looking group
++without adopting error-carried native metadata obligations. The new Finish path
++adopts those early errors with bounded 4096-node discovery into that same reserved
++close group. Its existing retirement order/status law and immutable snapshots
++provide PendingCloseCleanups/RetryCloseCleanup for this public prelude. Pager
++construction still transfers the admission and retains the separate 64-group
++OpenCleanup route. Existing Session Close, Cancel for known-unused reservations,
++and failed-pager-open state machines are unchanged; no extra native probe occurs.
++
++Both admissions have one-shot transfer/Finish arbitration. Neither root keeps a
++DB, Session, Reader, Tx, Rows, options, page data or callback. Global admission
++and snapshot locks do no native work or resource status waiting. Terminal native
++ownership remains terminal; no raw numeric handle is retried. No sweep, finalizer
++or eviction was introduced.
++
++## Scope and evidence
++
++Windows encrypted public canonicalization was source-audited and left unchanged:
++CanonicalWindowsPath opens directories through encryptedCleanups reservation,
++scopes metadata children under those roots, and remembers failures before managed
++Close. Its pending metadata ownership therefore already reaches the encrypted
++public pending/retry APIs. Non-Windows encrypted canonicalization semantics also
++remain unchanged.
++
++The shared/recovery direct absence guards still rely on legacy os.IsNotExist
++versus joined-error shape, rather than the explicit provenance APIs. That distinct
++source coupling is not silently included here. No current Windows post-inspection
++create bug was demonstrated for those os.IsNotExist callers.
++
++Evidence is under evidence/public-open-adoption. Exceptional outcomes use only
++descriptor-free admission/owner/error/callback laws. Native checks use intact
++ordinary create/read/write/rollback/BUSY/cancel/close/reopen/checkpoint and pinned
++official normal WAL interoperability. Darwin/Windows checks are compile-only.
++Physical corruption/tamper/wrong-key/missing-file or namespace fault injection,
++crash/kill/process-exit/hot recovery, failed native I/O/lock/unmap/close/Sync/
++shortwrite/diskfull/permissions and interrupted publication/rekey remain NOT_RUN.
++This is not full durability/security or release qualification.
+diff --git a/internal/pager/pager.go b/internal/pager/pager.go
+--- a/internal/pager/pager.go
++++ b/internal/pager/pager.go
+@@ -28,8 +28,11 @@
+ 	closed    bool
+ }
+ 
+-func Open(path string) (result *Reader, retErr error) {
+-	cleanup, err := plainRetirements.reserve()
++func Open(path string) (*Reader, error) { return OpenAdmitted(path, nil) }
++
++// OpenAdmitted consumes the public rollback probe's pre-canonical reservation.
++func OpenAdmitted(path string, admission *PlainOpenAdmission) (result *Reader, retErr error) {
++	cleanup, err := claimPlainOpen(admission)
+ 	if err != nil {
+ 		return nil, err
+ 	}
+diff --git a/internal/pager/plain_open_admission.go b/internal/pager/plain_open_admission.go
+--- a/internal/pager/plain_open_admission.go
++++ b/internal/pager/plain_open_admission.go
+@@ -2,19 +2,19 @@
+ 
+ import "sync/atomic"
+ 
+-// ExclusiveOpenAdmission covers public metadata before pager construction.
+-// Its single precharged root transfers into OpenSessionAdmitted; it never owns
++// PlainOpenAdmission covers rollback/exclusive public metadata before pager construction.
++// Its single precharged root transfers into OpenAdmitted or OpenSessionAdmitted; it never owns
+ // a Session/DB/callback or makes a native call while admission is locked.
+-type ExclusiveOpenAdmission struct {
++type PlainOpenAdmission struct {
+ 	group atomic.Pointer[plainRetirement]
+ }
+ 
+-func ReserveExclusiveOpen() (*ExclusiveOpenAdmission, error) {
++func ReservePlainOpen() (*PlainOpenAdmission, error) {
+ 	g, err := plainRetirements.reserve()
+ 	if err != nil {
+ 		return nil, err
+ 	}
+-	a := &ExclusiveOpenAdmission{}
++	a := &PlainOpenAdmission{}
+ 	a.group.Store(g)
+ 	return a, nil
+ }
+@@ -23,7 +23,7 @@
+ // handled is false after transfer (or prior Finish), so callers preserve their
+ // original result. A handled result must replace, not rejoin, the old cause:
+ // bounded adoption may have made an unsafe error graph opaque.
+-func (a *ExclusiveOpenAdmission) Finish(cause error) (result error, handled bool) {
++func (a *PlainOpenAdmission) Finish(cause error) (result error, handled bool) {
+ 	if a == nil {
+ 		return cause, false
+ 	}
+@@ -33,7 +33,7 @@
+ 	}
+ 	return g.begin(cause), true
+ }
+-func claimExclusiveOpen(a *ExclusiveOpenAdmission) (*plainRetirement, error) {
++func claimPlainOpen(a *PlainOpenAdmission) (*plainRetirement, error) {
+ 	if a == nil {
+ 		return plainRetirements.reserve()
+ 	}
+@@ -43,3 +43,11 @@
+ 	}
+ 	return g, nil
+ }
++
++// ExclusiveOpenAdmission preserves the exclusive-only admission entry point.
++type ExclusiveOpenAdmission = PlainOpenAdmission
++
++func ReserveExclusiveOpen() (*ExclusiveOpenAdmission, error) { return ReservePlainOpen() }
++func claimExclusiveOpen(a *ExclusiveOpenAdmission) (*plainRetirement, error) {
++	return claimPlainOpen(a)
++}
+diff --git a/internal/pager/public_admission_test.go b/internal/pager/public_admission_test.go
+new file mode 100644
+--- /dev/null
++++ b/internal/pager/public_admission_test.go
+@@ -0,0 +1,120 @@
++package pager
++
++import (
++	"errors"
++	"fmt"
++	"testing"
++)
++
++// Every owner and exceptional result is descriptor-free. These tests exercise
++// the production public Finish paths without invoking any native metadata.
++func TestPublicAdmissionMemoryPlainTransferAndEarlyFailure(t *testing.T) {
++	a, e := ReservePlainOpen()
++	if e != nil {
++		t.Fatal(e)
++	}
++	g := a.group.Load()
++	main := &plainMemoryOwner{remaining: 1, cause: errors.New("memory public metadata owner")}
++	g.nested = []plainResource{main}
++	operation := errors.New("memory initial operation")
++	token, handled := a.Finish(operation)
++	if !handled || !errors.Is(token, operation) || !errors.Is(token, main.cause) || !errors.Is(token, ErrPlaintextCleanupPending) || len(PendingPlaintextCleanups()) != 1 {
++		t.Fatal(token)
++	}
++	if e = RetryPlaintextCleanup(PendingPlaintextCleanups()[0]); e != nil || !g.done {
++		t.Fatal(e)
++	}
++	a, e = ReservePlainOpen()
++	if e != nil {
++		t.Fatal(e)
++	}
++	g, e = claimPlainOpen(a)
++	if e != nil {
++		t.Fatal(e)
++	}
++	if got, handled := a.Finish(operation); handled || got != operation {
++		t.Fatal("transferred Reader root reclaimed", got)
++	}
++	if _, e = claimPlainOpen(a); !errors.Is(e, ErrMisuse) {
++		t.Fatal("duplicate Reader root transfer", e)
++	}
++	if e = g.begin(nil); e != nil {
++		t.Fatal(e)
++	}
++}
++func TestPublicAdmissionMemorySharedEarlyFailureAndTransfer(t *testing.T) {
++	a, e := ReserveSharedClose()
++	if e != nil {
++		t.Fatal(e)
++	}
++	g := a.group
++	owner := &memoryCloseOwner{remaining: 1, cause: errors.New("memory shared public owner")}
++	g.nested = []sharedCloseResource{owner}
++	operation := errors.New("memory shared public operation")
++	token, handled := a.Finish(operation)
++	if !handled || !errors.Is(token, operation) || !errors.Is(token, owner.cause) || !errors.Is(token, ErrCloseCleanupPending) || len(PendingCloseCleanups()) != 1 {
++		t.Fatal(token)
++	}
++	a.Cancel()
++	if owner.calls != 1 || g.done {
++		t.Fatal("Cancel discarded pending owner")
++	}
++	if e = RetryCloseCleanup(PendingCloseCleanups()[0]); e != nil || !g.done {
++		t.Fatal(e)
++	}
++	a, e = ReserveSharedClose()
++	if e != nil {
++		t.Fatal(e)
++	}
++	g, e = a.take()
++	if e != nil {
++		t.Fatal(e)
++	}
++	if got, handled := a.Finish(operation); handled || got != operation {
++		t.Fatal("transferred shared root reclaimed", got)
++	}
++	g.abandon()
++}
++func TestPublicAdmissionMemoryBoundedSharedFailure(t *testing.T) {
++	reg := &sharedCloseRetirementRegistry{limit: 1}
++	g, e := reg.reserve()
++	if e != nil {
++		t.Fatal(e)
++	}
++	a := &SharedCloseAdmission{group: g}
++	cycle := &plainAbsenceCycle{}
++	token, handled := a.Finish(cycle)
++	if !handled || !errors.Is(token, ErrLimit) || !errors.Is(token, ErrCloseCleanupPending) || len(reg.snapshot()) != 1 {
++		t.Fatal("unsafe graph not retained safely")
++	}
++	_ = fmt.Sprint(token) // must never format the cyclic retained graph
++	first := g.cause
++	for i := 0; i < 3; i++ {
++		token = RetryCloseCleanup(token)
++		if g.cause != first {
++			t.Fatal("retry history grew")
++		}
++	}
++	if !errors.Is(token, ErrCloseCleanupPending) || g.done {
++		t.Fatal("terminal obligation disappeared")
++	}
++}
++func TestPublicAdmissionMemoryOrdinaryEarlyErrorsConsumeNoOwners(t *testing.T) {
++	original := errors.New("memory ordinary early setup error")
++	a, e := ReservePlainOpen()
++	if e != nil {
++		t.Fatal(e)
++	}
++	g := a.group.Load()
++	if result, handled := a.Finish(original); !handled || !errors.Is(result, original) || !g.done || errors.Is(result, ErrPlaintextCleanupPending) {
++		t.Fatal(result)
++	}
++	s, e := ReserveSharedClose()
++	if e != nil {
++		t.Fatal(e)
++	}
++	sg := s.group
++	if result, handled := s.Finish(original); !handled || !errors.Is(result, original) || !sg.done || errors.Is(result, ErrCloseCleanupPending) {
++		t.Fatal(result)
++	}
++}
+diff --git a/internal/pager/shared_public_admission.go b/internal/pager/shared_public_admission.go
+new file mode 100644
+--- /dev/null
++++ b/internal/pager/shared_public_admission.go
+@@ -0,0 +1,51 @@
++package pager
++
++import (
++	"errors"
++	"github.com/ms-xiaosnow/gosqlite/internal/vfs"
++)
++
++// Finish adopts public pre-session failures into the already-reserved shared
++// close group. After transfer it leaves the session/open-cleanup protocols alone.
++// handled permits the public layer to replace a possibly unsafe original graph
++// with the bounded result instead of joining that graph back into the error.
++func (a *SharedCloseAdmission) Finish(cause error) (result error, handled bool) {
++	if a == nil {
++		return cause, false
++	}
++	a.mu.Lock()
++	g := a.group
++	a.group = nil
++	a.mu.Unlock()
++	if g == nil {
++		return cause, false
++	}
++	return g.beginPublicOpen(cause), true
++}
++
++// This separate entry point bounds public error discovery without changing the
++// previously reviewed Session Close or failed-pager-open state machines.
++func (g *sharedCloseRetirement) beginPublicOpen(cause error) error {
++	g.mu.Lock()
++	defer g.mu.Unlock()
++	if g.started || g.done {
++		return g.retryLocked()
++	}
++	g.started = true
++	owners, discovery := vfs.CleanupOwnersBounded(cause, maxCloseCleanupErrorNodes)
++	if discovery != nil {
++		opaque := &plainUnsafeCause{retained: cause, diagnostic: errors.Join(ErrLimit, discovery)}
++		g.nested = append(g.nested, plainTerminal{cause: opaque})
++		cause = opaque
++	} else {
++		for _, owner := range owners {
++			g.nested = append(g.nested, sharedCloseNested{owner})
++		}
++	}
++	err := g.retireLocked()
++	if g.done {
++		return errors.Join(cause, err)
++	}
++	g.cause = errors.Join(cause, err)
++	return g.pendingLocked(g.cause)
++}
+diff --git a/sqlite/close_cleanup.go b/sqlite/close_cleanup.go
+--- a/sqlite/close_cleanup.go
++++ b/sqlite/close_cleanup.go
+@@ -2,9 +2,10 @@
+ 
+ import "github.com/ms-xiaosnow/gosqlite/internal/pager"
+ 
+-// ErrCloseCleanupPending marks a native shared-WAL Close result that retained
++// ErrCloseCleanupPending marks a native shared-WAL cleanup result that retained
+ // managed ownership when returned. Such errors also match ErrPoisoned and carry
+-// CodeIOErr. The historical token is immutable, even after successful cleanup.
++// CodeIOErr. It also covers public pre-session canonicalization failures.
++// The historical token is immutable, even after successful cleanup.
+ var ErrCloseCleanupPending = pager.ErrCloseCleanupPending
+ 
+ // RetryCloseCleanup synchronously attempts every distinct close group reachable
+@@ -19,11 +20,13 @@
+ // retry history is not accumulated. A retired owner can still report a Close
+ // error: an error without ErrCloseCleanupPending need not imply live ownership.
+ // Nil or an error without a cleanup token is a no-op, not a universal cleanup
+-// guarantee. This API covers native WALShared sessions only.
++// guarantee. This API covers native WALShared sessions and their reserved public
++// metadata prelude. Failed pager construction still uses RetryOpenCleanup.
+ func RetryCloseCleanup(err error) error { return wrap("close cleanup", pager.RetryCloseCleanup(err)) }
+ 
+ // PendingCloseCleanups returns a newly allocated snapshot of immutable native
+-// shared-WAL pending-close tokens, including errors discarded by database/sql.
++// shared-WAL pending-close/public-metadata tokens, including errors discarded
++// by database/sql.
+ // It performs no cleanup. Live sessions and in-flight opens are excluded. A
+ // token can already have completed when used; pass it to RetryCloseCleanup for
+ // current status. Changing this slice does not change ownership or the registry.
+@@ -32,7 +35,8 @@
+ // together. Admission is reserved before native acquisition, without eviction,
+ // finalizers, or background cleanup. Fully retired groups free capacity; terminal
+ // uncertainty may retain capacity for process lifetime. The separate 64-group
+-// failed-open limit and RetryOpenCleanup remain independent.
++// failed-pager-open limit and RetryOpenCleanup remain independent; public
++// canonicalization failures consume the pre-reserved close group instead.
+ func PendingCloseCleanups() []error {
+ 	tokens := pager.PendingCloseCleanups()
+ 	for i, token := range tokens {
+diff --git a/sqlite/plaintext_cleanup.go b/sqlite/plaintext_cleanup.go
+--- a/sqlite/plaintext_cleanup.go
++++ b/sqlite/plaintext_cleanup.go
+@@ -3,7 +3,7 @@
+ import "github.com/ms-xiaosnow/gosqlite/internal/pager"
+ 
+ // ErrPlaintextCleanupPending marks an immutable historical cleanup token for an
+-// ordinary rollback Reader, standalone Tx or exclusive-WAL Session. Tokens match
++// covered public open, rollback Reader, standalone Tx or exclusive-WAL Session. Tokens match
+ // ErrPoisoned and carry CodeIOErr.
+ // A close diagnostic without this marker can describe fully consumed ownership.
+ var ErrPlaintextCleanupPending = pager.ErrPlaintextCleanupPending
+@@ -28,7 +28,9 @@
+ // Reader/Tx/exclusive-Session tokens, including failed opens and errors discarded
+ // by database/sql.
+ // Enumeration performs no cleanup; ordinary live/opening groups are excluded.
+-// At most 1024 opening/live/pending groups are admitted before pager acquisition.
++// At most 1024 opening/live/pending groups are admitted before native acquisition.
++// Public rollback/exclusive opens reserve before canonicalization and transfer
++// that same root into their Reader probe or Session; early errors are adopted.
+ // Each pre-reserves main, current WAL and one temporary child slot (journal, WAL
+ // candidate or superseded WAL). Unused slots contain no owners.
+ // There is no eviction, finalizer, automatic sweep, or wait on another group at
+diff --git a/sqlite/public_admission_internal_test.go b/sqlite/public_admission_internal_test.go
+new file mode 100644
+--- /dev/null
++++ b/sqlite/public_admission_internal_test.go
+@@ -0,0 +1,34 @@
++package sqlite
++
++import (
++	"errors"
++	"github.com/ms-xiaosnow/gosqlite/internal/pager"
++	"testing"
++)
++
++// No native path lookup can occur: empty admissions fill the bound first.
++func TestPublicAdmissionMemoryRollbackBeforeCanonicalization(t *testing.T) {
++	var admissions []*pager.PlainOpenAdmission
++	defer func() {
++		for _, a := range admissions {
++			_, _ = a.Finish(nil)
++		}
++	}()
++	for i := 0; i < 1024; i++ {
++		a, e := pager.ReservePlainOpen()
++		if e != nil {
++			t.Fatal(i, e)
++		}
++		admissions = append(admissions, a)
++	}
++	for _, options := range []Options{{}, {NoCreate: true}, {ReadOnly: true, NoCreate: true}} {
++		db, e := Open("\x00", options)
++		var detail *Error
++		if db != nil || !errors.Is(e, ErrMemoryLimit) || !errors.As(e, &detail) || detail.Code != CodeNoMem {
++			t.Fatal("public metadata preceded admission", e)
++		}
++	}
++	if len(PendingPlaintextCleanups()) != 0 {
++		t.Fatal("empty admissions published as pending")
++	}
++}
+diff --git a/sqlite/sqlite.go b/sqlite/sqlite.go
+--- a/sqlite/sqlite.go
++++ b/sqlite/sqlite.go
+@@ -242,14 +242,14 @@
+ 		return nil, wrap("open", err)
+ 	}
+ 
+-	var exclusiveAdmission *pager.ExclusiveOpenAdmission
+-	if opts.WALExclusive {
+-		exclusiveAdmission, err = pager.ReserveExclusiveOpen()
++	var plainAdmission *pager.PlainOpenAdmission
++	if opts.Encryption == nil && !opts.WALShared {
++		plainAdmission, err = pager.ReservePlainOpen()
+ 		if err != nil {
+ 			return nil, wrap("open", err)
+ 		}
+ 		defer func() {
+-			if result, handled := exclusiveAdmission.Finish(retErr); handled {
++			if result, handled := plainAdmission.Finish(retErr); handled {
+ 				retErr = wrap("open", result)
+ 			}
+ 		}()
+@@ -260,7 +260,11 @@
+ 		if err != nil {
+ 			return nil, wrap("open", err)
+ 		}
+-		defer closeAdmission.Cancel()
++		defer func() {
++			if result, handled := closeAdmission.Finish(retErr); handled {
++				retErr = wrap("open", result)
++			}
++		}()
+ 	}
+ 	// A connection must keep naming the same path across working-directory
+ 	// changes and symlink retargeting while idle between snapshots.
+@@ -299,7 +303,7 @@
+ 		if opts.WALShared {
+ 			session, err = pager.OpenSharedSessionAdmitted(ctx, path, d.pagerOptions(), closeAdmission)
+ 		} else {
+-			session, err = pager.OpenSessionAdmitted(ctx, path, d.pagerOptions(), exclusiveAdmission)
++			session, err = pager.OpenSessionAdmitted(ctx, path, d.pagerOptions(), plainAdmission)
+ 		}
+ 		if err != nil {
+ 			return nil, wrap("open", err)
+@@ -310,7 +314,7 @@
+ 	}
+ 	// Prefer a read-only probe for existing files, so opening a handle does not
+ 	// acquire a writer lock or rewrite an unchanged database header.
+-	r, err := pager.Open(path)
++	r, err := pager.OpenAdmitted(path, plainAdmission)
+ 	if err == nil {
+ 		d.info = fileInfo(r.Header())
+ 		err = r.Close()

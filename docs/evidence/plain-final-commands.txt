@@ -1,0 +1,21 @@
+set -euo pipefail
+cd /workspace/scratch/5e06a74e5f65/durable-restart/plain-final-verify
+export PATH="$PWD/../toolchains/go1.27.2/bin:$PATH" GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off GOCACHE="$PWD/../go-cache" GOPATH="$PWD/../go-path" CGO_ENABLED=0 GOFLAGS=-buildvcs=false SQLITE_ORACLE="$PWD/../toolchains/sqlite-build-3540000/sqlite3"
+echo 'Exact plain-final7d3184 adds the independently accepted ReaderV5, TxV2, ExclusiveV2 and public rollback/shared prelude adoption chain, with checked source hashes and preserved Rows predicate startup. Exact final SQL source adds a single tagged oracle-test correction retaining original ORDER BY id as a positive complete official comparison and a genuine ORDER BY id+0 quota negative. Original1e full oracle FAIL preserved. Source1e413b4 adds the independently reviewed two-path rowid rejected-plan diagnostic correction to the exact8d7 composition. Original8d7 full unit FAIL retained; existing grams assertions untouched. Original8d7 combines reviewed Boolean/affinity/rank source816, bounded rowid/planner, identifiers/LEFT alias provenance and repaired global aggregates v3. Every patch applied by checked hunks; shared source bytes preserved. Plain Reader/Tx/exclusive and public adoption included; secondary ranges, grouping and new journal parsing excluded.'
+echo 'Additional ownership audit: descriptor-free managed retirement/admission/diagnostic/absence laws and intact ordinary native/shared/encrypted/driver lifecycle fixtures only; no native fault execution. Aggregate original/reviewed tests audit: intact ordinary SQL/typed-value/parser errors, pure-memory arithmetic/work/cancellation, native and driver normal transactions/shared snapshots, pinned CLI comparisons normal EOF; prior complete source audits and guard retained. No restricted physical/native-fault/namespace/crash/hot-recovery/interrupted-publication/rekey workflows.'
+cat ../plain-final-tree.txt
+date -u +%FT%TZ
+go run ./internal/testscope
+go test ./... -count=1 -timeout=30m
+go vet ./...
+go build -trimpath ./...
+echo 'PLAIN CLEANUP COMBINED FULL CGO0 UNIT/VET/BUILD PASS'; date -u +%FT%TZ
+./scripts/test-oracle.sh
+echo 'PLAIN CLEANUP COMBINED FULL TAGGED ORACLE PASS'; date -u +%FT%TZ
+go run ./internal/testscope
+CGO_ENABLED=1 go test -race ./... -count=1 -timeout=30m
+for target in linux/arm64 darwin/arm64 darwin/amd64 windows/amd64 windows/arm64; do GOOS=${target%/*} GOARCH=${target#*/} go build ./...; echo "cross-build $target PASS"; done
+go mod verify
+sha256sum -c ../plain-final-all-sha256.txt >/dev/null
+date -u +%FT%TZ
+echo 'PLAIN CLEANUP COMBINED FULL FROZEN AGGREGATE PASS'

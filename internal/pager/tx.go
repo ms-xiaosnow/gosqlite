@@ -80,7 +80,9 @@ type Tx struct {
 	readOnly           bool
 	// keepFile is private to the rollback-journal WAL-mode transition. The
 	// WAL session already holds EXCLUSIVE and retains the same descriptor.
-	keepFile bool
+	keepFile        bool
+	cleanup         *plainRetirement
+	borrowedCleanup *plainRetirement // exclusive WAL mode transition; never owns main retirement
 }
 
 func normalizedOptions(o Options) (Options, error) {
@@ -116,14 +118,23 @@ func OpenTx(ctx context.Context, path string, opts Options) (result *Tx, retErr 
 	if err != nil {
 		return nil, err
 	}
+	cleanup, err := plainRetirements.reserve()
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if result == nil {
+			retErr = cleanup.begin(retErr)
+		}
+	}()
 	path, err = filepath.Abs(path)
 	if err != nil {
 		return nil, err
 	}
-	resolved, err := resolveNativePath(path)
+	resolved, initialAbsent, err := resolveNativeReaderPath(path)
 	if err == nil {
 		path = resolved
-	} else if opts.Create && os.IsNotExist(err) {
+	} else if opts.Create && initialAbsent {
 		dir, e := resolveNativePath(filepath.Dir(path))
 		if e != nil {
 			return nil, e
@@ -140,12 +151,7 @@ func OpenTx(ctx context.Context, path string, opts Options) (result *Tx, retErr 
 	if err != nil {
 		return nil, err
 	}
-	success := false
-	defer func() {
-		if !success {
-			retErr = errors.Join(retErr, closeNativeFile(f))
-		}
-	}()
+	cleanup.main = plainFile{f}
 	info, err := statNativeFile(f)
 	if err != nil {
 		return nil, err
@@ -165,7 +171,7 @@ func OpenTx(ctx context.Context, path string, opts Options) (result *Tx, retErr 
 	if err != nil {
 		return nil, err
 	}
-	t := &Tx{file: f, path: path, info: info, opts: opts, dirty: make(map[uint32][]byte), free: make(map[uint32]struct{})}
+	t := &Tx{file: f, path: path, info: info, opts: opts, cleanup: cleanup, dirty: make(map[uint32][]byte), free: make(map[uint32]struct{})}
 	if err = t.checkSidecars(); err != nil {
 		return nil, err
 	}
@@ -210,7 +216,6 @@ func OpenTx(ctx context.Context, path string, opts Options) (result *Tx, retErr 
 	if err = ctx.Err(); err != nil {
 		return nil, err
 	}
-	success = true
 	return t, nil
 }
 
@@ -233,6 +238,9 @@ func emptyDatabasePage(size uint32) []byte {
 
 func (t *Tx) Header() Header { t.mu.Lock(); defer t.mu.Unlock(); return t.header }
 func (t *Tx) checkOpen() error {
+	if err := t.plainScope().check(); err != nil {
+		return err
+	}
 	if t.poisoned != nil {
 		return t.poisoned
 	}
@@ -243,7 +251,10 @@ func (t *Tx) checkOpen() error {
 }
 func (t *Tx) checkSidecars() error { return checkSidecars(t.path) }
 
-func (t *Tx) checkStable() error {
+func (t *Tx) checkStable() (retErr error) {
+	if cleanup := t.plainScope(); cleanup != nil {
+		defer func() { retErr = cleanup.observe(retErr) }()
+	}
 	if t.encrypted != nil {
 		return t.encrypted.checkStable()
 	}
@@ -284,7 +295,10 @@ func (t *Tx) checkStable() error {
 	}
 	return nil
 }
-func (t *Tx) readLocked(ctx context.Context, n uint32) ([]byte, error) {
+func (t *Tx) readLocked(ctx context.Context, n uint32) (_ []byte, retErr error) {
+	if cleanup := t.plainScope(); cleanup != nil {
+		defer func() { retErr = cleanup.observe(retErr) }()
+	}
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
@@ -344,7 +358,7 @@ func (t *Tx) promoteLocked(ctx context.Context) error {
 		return t.shared.promote(ctx, t)
 	}
 	if err := lockReserved(t.file); err != nil {
-		return err
+		return t.plainScope().observe(err)
 	}
 	t.reserved = true
 	return nil
@@ -445,6 +459,9 @@ func (t *Tx) Rollback() error {
 	defer t.clearClosedUndoLocked()
 	if t.statement {
 		return fmt.Errorf("%w: rollback inside statement", ErrMisuse)
+	}
+	if t.cleanup != nil {
+		return t.retirePlainLocked(t.poisoned, nil, true)
 	}
 	if t.encrypted != nil {
 		err := t.encrypted.release(t)

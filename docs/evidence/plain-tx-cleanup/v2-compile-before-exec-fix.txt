@@ -1,0 +1,48 @@
++ ../toolchains/go1.27.2/bin/go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ ../toolchains/go1.27.2/bin/go test -tags oracle ./internal/pager -run '^TestTxOracle' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.245s
++ ../toolchains/go1.27.2/bin/go build ./...
++ ../toolchains/go1.27.2/bin/go vet ./internal/pager ./internal/vfs ./sqlite ./driver
++ for target in darwin windows
++ for pkg in internal/pager internal/vfs sqlite driver
+++ basename internal/pager
++ GOOS=darwin
++ GOARCH=amd64
++ ../toolchains/go1.27.2/bin/go test -c -o /tmp/plain-tx-v2-darwin-pager.test ./internal/pager
++ for pkg in internal/pager internal/vfs sqlite driver
+++ basename internal/vfs
++ GOOS=darwin
++ GOARCH=amd64
++ ../toolchains/go1.27.2/bin/go test -c -o /tmp/plain-tx-v2-darwin-vfs.test ./internal/vfs
++ for pkg in internal/pager internal/vfs sqlite driver
+++ basename sqlite
++ GOOS=darwin
++ GOARCH=amd64
++ ../toolchains/go1.27.2/bin/go test -c -o /tmp/plain-tx-v2-darwin-sqlite.test ./sqlite
++ for pkg in internal/pager internal/vfs sqlite driver
+++ basename driver
++ GOOS=darwin
++ GOARCH=amd64
++ ../toolchains/go1.27.2/bin/go test -c -o /tmp/plain-tx-v2-darwin-driver.test ./driver
++ for target in darwin windows
++ for pkg in internal/pager internal/vfs sqlite driver
+++ basename internal/pager
++ GOOS=windows
++ GOARCH=amd64
++ ../toolchains/go1.27.2/bin/go test -c -o /tmp/plain-tx-v2-windows-pager.test ./internal/pager
++ for pkg in internal/pager internal/vfs sqlite driver
+++ basename internal/vfs
++ GOOS=windows
++ GOARCH=amd64
++ ../toolchains/go1.27.2/bin/go test -c -o /tmp/plain-tx-v2-windows-vfs.test ./internal/vfs
++ for pkg in internal/pager internal/vfs sqlite driver
+++ basename sqlite
++ GOOS=windows
++ GOARCH=amd64
++ ../toolchains/go1.27.2/bin/go test -c -o /tmp/plain-tx-v2-windows-sqlite.test ./sqlite
++ for pkg in internal/pager internal/vfs sqlite driver
+++ basename driver
++ GOOS=windows
++ GOARCH=amd64
++ ../toolchains/go1.27.2/bin/go test -c -o /tmp/plain-tx-v2-windows-driver.test ./driver

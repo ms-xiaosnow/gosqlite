@@ -1,0 +1,16 @@
+Final source base: immutable plain-reader-freeze-v4; manifest c6b054ec84a165336154404ddbb8368c191f5155c3a115bf9dc20b23489d8190. V4 rebase includes the required provenance guard and the Tx-specific diagnostic wrapper correction. Final exact checks are reader-v4-rebase-normal/race/regression/compile.txt. Logs named before-diagnostic-fix document earlier unsuccessful or superseded source checks.
+
+Historical pre-V4 source context follows:
+Base: immutable plain-reader-freeze-v3; full manifest SHA256 60862a4e5b928fc6825bb9960462b04bed8ca2a6dddc55f5b86c64fc89125f4f. That Reader is based on tree508732922205872b7a8738b471b236fcf8ecb096; its V2 source review passed and V3 poison-aware fallback is a separate lead review gate.
+Tool: /workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go
+GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off GOFLAGS=-buildvcs=false
+GOCACHE=/workspace/scratch/5e06a74e5f65/durable-restart/go-cache
+GOPATH=/workspace/scratch/5e06a74e5f65/durable-restart/go-path
+Normal/build/vet/oracle/compile CGO_ENABLED=0; race separately CGO_ENABLED=1.
+Source-reference guard precedes each suite; behavioral audit in test-audit.txt.
+No main edits, staging, commits, uploads, network module fetches or independent compiler cache.
+All *-final suites passed before rebasing the fallback decision law into the ReaderV3 test file; that rebase changes test location/name and import grouping only, not production behavior. The final reader-v3-rebase normal/race selections passed. Final target compile is rerun after that rebase.
+All physical/native failure exclusions remain in effect; no full unrestricted test pass or release/milestone qualification is claimed.
+
+Reader V4 rebase exact checks are reader-v4-rebase-*.txt. Earlier logs remain evidence for their pre-V4 source, preserved at ../plain-tx-pre-v4 with ../plain-tx-pre-v4-all-sha256.txt.
+Final V2 base supersedes the earlier base notes: immutable ReaderV5, manifest 12bb816edaf4b88af31c243bd409fbf2262d7ef1a5f0c1c7a3b5d46eeb725f50. See v2-correction.txt for independent findings and precise historical-source distinctions.

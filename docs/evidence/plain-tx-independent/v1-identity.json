@@ -1,0 +1,9 @@
+{
+  "candidate": "plain-tx-freeze-v1",
+  "copy": "plain-tx-independent-v1",
+  "full_manifest_sha256": "a6851fca3367ec080691cf94aedacf27fe0619530aebb4771623097d64e83646",
+  "file_count": 1045,
+  "mismatches": [],
+  "extra": [],
+  "missing": []
+}

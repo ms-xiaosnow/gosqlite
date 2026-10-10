@@ -1,0 +1,70 @@
+{
+  "base": "1e413b466d10db5c7304ba231fd5d4536dfc5fa5",
+  "tree": "2d57bc8f9fa728c737bb88d470d4f91db87791d2",
+  "owned": {
+    "docs/plaintext-cleanup.md": "b95e00b94f68bc420592cfaa5113efae8363d79a0e92039f6d87f9db8c3b1800",
+    "docs/plaintext-exclusive-cleanup.md": "936a92649b5f6e8a8473defa913be0d57ee580c45325532f1eb0fef375f88177",
+    "docs/plaintext-tx-cleanup.md": "24fa63dfe473103741c25675fe92904b1ea1adb6bae38111a8838125a2137f12",
+    "docs/public-open-adoption.md": "d8e83e19ebe309eef5f53a267c565511da20f32351fdf6b233d56853465ed541",
+    "driver/driver.go": "4c07e0b13693ee3357a6cc3d6d15e7b066ef75ff6d250fd316a2d8e66c61ba77",
+    "driver/plain_tx_cleanup_test.go": "a75621b54ad1aec2598db6d52ab074fd87aede36c11e7f87467c16fe9b56f100",
+    "internal/pager/checkpoint.go": "34938ce870f397be1f487c816f9817ed2f2f2a82cf1e79e606fbe4332132c811",
+    "internal/pager/commit.go": "502dbff8cc7bea21428267d445c37f474ec0e167d0cc87a3af55ce02fc58b3eb",
+    "internal/pager/encrypted_copy.go": "60ece8af8c7c7570919e5641ef4ec7aacd2326b91c282287e8e49d540622596c",
+    "internal/pager/native_file.go": "1f65fbde8bf3412deb1bca4372e2f691da0127af3119bfc7240ca908f64c9401",
+    "internal/pager/pager.go": "1c08ac6cd21b11ba858b444a00af6cf68d7f28aa93453c1fccdc8fef151cb8bc",
+    "internal/pager/plain_absence.go": "345e0a23885d9e7282e63625f47b4bead95fe44baab0c46f2e8141363bce80a6",
+    "internal/pager/plain_absence_test.go": "0d14d853ff138d1f14e61051c7aea64c5ea23c0db45d1628fe4e8eb7a2b31800",
+    "internal/pager/plain_cleanup.go": "fb22f2914ac9ef91dafa593e1853c971c9bec8c52ca54a0b9ec280edd3d3d3f8",
+    "internal/pager/plain_cleanup_test.go": "c77fe4a018d07d82f90688a19214e0ffe56e9b89bbc893aa91a00aa318bf71c5",
+    "internal/pager/plain_open_admission.go": "9332284fd5c82b7eebba474bf747e57f3948dc868a3f724c99ccd4a2fa6abccc",
+    "internal/pager/plain_session_cleanup.go": "7ccd574b41f9764c42a10af5956d34f69bacfcc740091efa513f5e3c510dd77d",
+    "internal/pager/plain_session_cleanup_test.go": "0b197ab14bb226edc3c5db5402f17488fc5d94e630b240e78597f5e20e8c43ee",
+    "internal/pager/plain_tx_cleanup.go": "2a4b080d737b90b4a14a33318839123d34c9b3b1bd685abdf363b59cdbcd9df3",
+    "internal/pager/plain_tx_cleanup_test.go": "b219e86e1ceeaea848140dcb04f2cc4acc8fc704dfef7effa85fd036de3ad2d8",
+    "internal/pager/public_admission_test.go": "f043dc91a1de2a0259325751c991d08f06f313b791e0ae580747a816bce75600",
+    "internal/pager/session.go": "16fd2572dd242068ddb9cf92370d4b9746c004a835cea70cf0667140e994d01c",
+    "internal/pager/shared_public_admission.go": "46723826a336a7349347e3ad1b4f721c845240b1de4ccc7bff465845c7aa584e",
+    "internal/pager/tx.go": "1ee33525f742cd76ad142f135dd4719369035186c5dd0f799838ea9e24994cce",
+    "internal/pager/wal.go": "b3665eb21c6dec10e316dcd28654f5b9bfd2d59f2964ca82a8c2989f4877c3b5",
+    "internal/vfs/cleanup_bounded.go": "b0c4191c6eeee85a6b1efb7f4e0001680aa3cfeed86ca10c5acaf7db1ff612b2",
+    "internal/vfs/cleanup_bounded_test.go": "b218802cacac16aebdc2b4467ebe28837feb4d46ddaf8098d2a02cfd34a6d7c0",
+    "internal/vfs/metadata_default.go": "4e81a04bb5fa79f3d954092be9f8d787fb3c2566598250fa13aea1051ebca7c3",
+    "internal/vfs/metadata_windows.go": "a61f5988c95d654bbf78377f42eee1ea7cdf059d8160630b4376b05135063e46",
+    "internal/vfs/path_absence.go": "3db68221029e9fc5c547663dc408b37cc63f8a2e41fda962959c4c5dafdc86a5",
+    "internal/vfs/path_absence_test.go": "08ac05b98d491822986e2c418945652ffd51670a0b02d85fa8482633f398593e",
+    "sqlite/close_cleanup.go": "f9158326fa54f6ddb84ca18f4a057e9854caaf9d9269a167c77852cbc9ea595e",
+    "sqlite/encryption_copy.go": "962f54bae02b2c658ad84dfb0c64b1f6211b8deab2ff2e0b16450c19751af953",
+    "sqlite/path_default.go": "35f0e18aebc7a10c21f4bda7d577749805451cb6813bfe50b6e8c6ff0fd9ace2",
+    "sqlite/path_windows.go": "eead5d860679207d8a76e2684186ce1ffad29f18d90e9ba10a3ae32e84ce7d32",
+    "sqlite/plain_session_cleanup_internal_test.go": "4c7679d1fd2e77396e49ab02ab5a146c5a65178a96ec04278196505c790325c3",
+    "sqlite/plain_tx_cleanup_internal_test.go": "0356da3ac71b5c8ba746e04aaaa9f9880fe61ffe7ea91642ad52af3cc33f5258",
+    "sqlite/plaintext_cleanup.go": "1f7ca2ede674f4e24151de3702bac773c95621d73d2a2d66e405a08e4606208a",
+    "sqlite/plaintext_cleanup_internal_test.go": "d344cf67c0c8ff4528fdb9150c6a475c9650fb63d294504f39006fb1b41f121d",
+    "sqlite/plaintext_cleanup_test.go": "cdc41b500bafd803e0f19e0bab3f0a82a09f423b806b1356516f77d104c1a890",
+    "sqlite/public_admission_internal_test.go": "bac52f42eef39564b2f78052d84af1d628e9cf2721d4ffec182a0efb289b3115",
+    "sqlite/rows.go": "fc7e2341b37c5a301a51b096726219bc93a31079b7ba8c9de27b9ab3ced47fc8",
+    "sqlite/sqlite.go": "8aa090a556814ce09d7ccd03e3f9743ed7fd1d82803522f320431e0aa884675c",
+    "sqlite/transaction.go": "de62765d4ba6badc70a273f05a7e5cd918c1540296f818680d3778a1351db66f",
+    "sqlite/transaction_control.go": "82de3e4ad68b5f9e95f718b5d6297c2eaad2c04e6aeb877b47039920c9437c0f"
+  },
+  "source_layers": [
+    [
+      "plain-reader-v5-source.patch",
+      "b9f45b6ea035e254ba0b6b603150e2a158533b469e47eb45261f57eedadd0af7"
+    ],
+    [
+      "plain-reader-v5-to-tx-v2.patch",
+      "688836b91343cb1c2c95c78adb2358e6485f7f72611254ede02ea2777df69e5a"
+    ],
+    [
+      "plain-tx-v2-to-exclusive-v2.patch",
+      "c5c398e60c038e257382c3a4f32971e26ba596edcd46db8044719bf3c90d9b3b"
+    ],
+    [
+      "plain-exclusive-v2-to-public-v1.patch",
+      "dd3919ba517674d47f395d6ae8ca399a378004c6166068dc4fe796b2da1b17d1"
+    ]
+  ],
+  "merged": "sqlite/rows.go retains reviewed rank startup while adding wrapCleanup to Rows.fail"
+}

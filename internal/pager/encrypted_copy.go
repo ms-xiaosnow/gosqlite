@@ -135,15 +135,19 @@ func (s *EncryptedSession) ExportPlaintext(ctx context.Context, destination stri
 // ValidatePlaintextCopySource narrows ordinary read-only alias behavior for
 // explicit copy import: the actual held source inode must have one hard link.
 // This performs no mutation or native journal recovery.
-func (r *Reader) ValidatePlaintextCopySource() error {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
+func (r *Reader) ValidatePlaintextCopySource() (retErr error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
 	if r.lease != nil {
 		return ErrUnsupported
 	}
-	if r.file == nil {
+	if r.closed || r.file == nil {
 		return ErrClosed
 	}
+	if err := r.cleanup.check(); err != nil {
+		return err
+	}
+	defer func() { retErr = r.cleanup.observe(retErr) }()
 	if err := r.checkStable(); err != nil {
 		return err
 	}

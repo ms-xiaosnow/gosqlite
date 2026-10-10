@@ -4,7 +4,6 @@ package sqlite
 
 import (
 	"errors"
-	"os"
 	"path/filepath"
 
 	"github.com/ms-xiaosnow/gosqlite/internal/encstore"
@@ -23,11 +22,11 @@ func canonicalOpenPath(path string, encrypted bool) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	canonical, err := vfs.ResolvePath(absolute)
+	canonical, absent, err := vfs.ResolvePathForCreate(absolute)
 	if err == nil {
 		return canonical, nil
 	}
-	if !errors.Is(err, os.ErrNotExist) {
+	if !absent {
 		return "", nativeOpenPathError(err)
 	}
 	parent, err := vfs.ResolvePath(filepath.Dir(absolute))
@@ -37,11 +36,11 @@ func canonicalOpenPath(path string, encrypted bool) (string, error) {
 	canonical = filepath.Join(parent, filepath.Base(absolute))
 	// Lstat rejects reparse points through an owned nofollow probe. Report
 	// uncertainty as poison; never interpret it as permission to create.
-	if info, err := vfs.Lstat(canonical); err == nil {
+	if info, absent, err := vfs.LstatForCreate(canonical); err == nil {
 		if !info.Mode().IsRegular() {
 			return "", ErrUnsupported
 		}
-	} else if !errors.Is(err, os.ErrNotExist) {
+	} else if !absent {
 		return "", nativeOpenPathError(err)
 	}
 	return canonical, nil

@@ -1,0 +1,19 @@
+{
+  "base_tree": "508732922205872b7a8738b471b236fcf8ecb096",
+  "patches": [
+    {
+      "file": "plain-reader-v5-source.patch",
+      "sha256": "b9f45b6ea035e254ba0b6b603150e2a158533b469e47eb45261f57eedadd0af7"
+    },
+    {
+      "file": "plain-reader-v5-to-tx-v2.patch",
+      "sha256": "688836b91343cb1c2c95c78adb2358e6485f7f72611254ede02ea2777df69e5a"
+    },
+    {
+      "file": "plain-tx-v2-to-exclusive-v1.patch",
+      "sha256": "070e10e6bb0f529f5c506b9f1b69212d635a420f9d40155ef29dfb5c535998b3"
+    }
+  ],
+  "complete_source_matches": 527,
+  "source_differences": []
+}

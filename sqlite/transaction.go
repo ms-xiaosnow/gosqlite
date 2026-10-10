@@ -176,10 +176,10 @@ func (t *Tx) commitLocked(ctx context.Context) error {
 	} else if t.readClose != nil {
 		err = t.readClose()
 	}
-	if err != nil {
+	if err != nil && (t.storage != nil && !t.storage.LogicallyClosed() || t.storage == nil && t.readClose == nil) {
 		return err
 	}
-	if t.reader != nil {
+	if t.reader != nil && err == nil {
 		t.db.info = fileInfo(t.reader.Header())
 	}
 	t.savepoints = nil
@@ -188,7 +188,7 @@ func (t *Tx) commitLocked(ctx context.Context) error {
 	if t.db.tx == t {
 		t.db.tx = nil
 	}
-	return nil
+	return err
 }
 func (t *Tx) Rollback() error {
 	t.db.mu.Lock()
@@ -199,19 +199,19 @@ func (t *Tx) rollbackLocked() error {
 	if t.done {
 		return nil
 	}
+	var err error
 	for r := range t.db.rows {
 		if r.tx == t {
 			r.mu.Lock()
 			r.err = wrap("next", ErrTxDone)
-			_ = r.close()
+			err = errors.Join(err, r.close())
 			r.mu.Unlock()
 		}
 	}
-	var err error
 	if t.storage != nil {
-		err = t.storage.Rollback()
+		err = errors.Join(err, t.storage.Rollback())
 	} else if t.readClose != nil {
-		err = t.readClose()
+		err = errors.Join(err, t.readClose())
 	}
 	t.savepoints = nil
 	t.markBytes = 0
@@ -261,8 +261,7 @@ func (d *DB) Exec(ctx context.Context, query string, args ...any) (Result, error
 		err = wrap("commit", t.commitLocked(ctx))
 	}
 	if err != nil {
-		err = errors.Join(err, t.rollbackLocked())
-		return Result{}, err
+		return Result{}, t.rollbackAfterExecLocked(err)
 	}
 	return result, nil
 }
@@ -340,4 +339,10 @@ func (t *Tx) execLocked(ctx context.Context, stmt sqlast.Statement, params []any
 		return Result{}, wrap("exec", err)
 	}
 	return result, nil
+}
+
+// DB.Exec's automatic transaction may already have classified its operation
+// error. Classify again only after adding rollback ownership diagnostics.
+func (t *Tx) rollbackAfterExecLocked(cause error) error {
+	return wrapCleanup("exec", cause, t.rollbackLocked())
 }

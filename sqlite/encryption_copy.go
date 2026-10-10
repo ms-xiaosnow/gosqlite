@@ -135,7 +135,7 @@ func RestoreEncrypted(ctx context.Context, archivePath, destination string, sour
 // a different absent encrypted destination. It never modifies/deletes the
 // plaintext source or erases existing plaintext copies. Native WAL imports are
 // deliberately unsupported for this copy path.
-func ImportEncrypted(ctx context.Context, sourcePath, destination string, plain Options, target EncryptionOptions) (EncryptionInfo, error) {
+func ImportEncrypted(ctx context.Context, sourcePath, destination string, plain Options, target EncryptionOptions) (_ EncryptionInfo, retErr error) {
 	if err := checkContext(ctx); err != nil {
 		return EncryptionInfo{}, wrap("encrypted import", err)
 	}
@@ -151,12 +151,12 @@ func ImportEncrypted(ctx context.Context, sourcePath, destination string, plain 
 	if err != nil {
 		return EncryptionInfo{}, wrap("encrypted import", err)
 	}
-	defer db.Close()
+	defer func() { retErr = wrapCleanup("encrypted import", retErr, db.Close()) }()
 	r, err := db.openReader(ctx)
 	if err != nil {
 		return EncryptionInfo{}, wrap("encrypted import", err)
 	}
-	defer r.Close()
+	defer func() { retErr = wrapCleanup("encrypted import", retErr, r.Close()) }()
 	if err = r.ValidatePlaintextCopySource(); err != nil {
 		return EncryptionInfo{}, wrap("encrypted import", err)
 	}

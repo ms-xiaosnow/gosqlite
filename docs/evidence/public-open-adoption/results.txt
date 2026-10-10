@@ -1,0 +1,5 @@
+Public adoption V1 exact source check batches completed 2026-10-10 20:00:44 UTC, all exit 0.
+Normal and race descriptor-free model selections, normal and race intact lifecycle selections, two pinned official WAL interop cases, build ./..., scoped vet, Darwin/Windows amd64 test compilation for pager/sqlite/driver passed.
+normal-initial.txt is the earlier smaller passing selection; normal.txt/race.txt are the final expanded passing selections.
+Source-reference guard ran before every suite. Helper audit and actual commands/output are retained beside this summary.
+No native exceptional test or unrestricted suite was run. Prohibited qualification paths remain NOT_RUN.

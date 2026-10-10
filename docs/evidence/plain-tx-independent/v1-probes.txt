@@ -1,0 +1,14 @@
++ ../toolchains/go1.27.2/bin/go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ ../toolchains/go1.27.2/bin/go test ./internal/pager -run '^TestPlainTxIndependent' -count=1
+--- FAIL: TestPlainTxIndependentDeferredClosePreservesFirstAttempt (0.00s)
+    plain_tx_independent_test.go:27: deferred whole close lost a first-attempt diagnostic: operation=true retirement=false; plaintext cleanup pending: SQLite transaction cannot continue after an I/O failure
+        memory original write diagnostic
+        SQLite transaction cannot continue after an I/O failure
+        SQLite database requires rollback-journal recovery
+        SQLite transaction cannot continue after an I/O failure
+--- FAIL: TestPlainTxIndependentPoisonClearsLogicalUndo (0.00s)
+    plain_tx_independent_test.go:43: logically closed poison retains 1 undo mark(s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/pager	0.003s
+FAIL

@@ -32,6 +32,8 @@ type Session struct {
 	snapshot   wal.Snapshot
 	active     *Tx
 	poisoned   error
+	cleanup    *plainRetirement
+	closed     bool
 	appendSafe bool // Last acknowledged WAL commit survives our append sector.
 }
 
@@ -39,7 +41,13 @@ type Session struct {
 // even if its subsequent transactions are read-only. Entering WAL mode is a
 // standard rollback-journal transaction using the same continuously locked
 // database descriptor. A mode-2 database without a WAL is valid.
-func OpenSession(ctx context.Context, path string, opts Options) (result *Session, retErr error) {
+func OpenSession(ctx context.Context, path string, opts Options) (*Session, error) {
+	return OpenSessionAdmitted(ctx, path, opts, nil)
+}
+
+// OpenSessionAdmitted consumes a pre-canonical public admission exactly once.
+// Nil requests the direct constructor's own pre-acquisition reservation.
+func OpenSessionAdmitted(ctx context.Context, path string, opts Options, admission *ExclusiveOpenAdmission) (result *Session, retErr error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
@@ -47,14 +55,23 @@ func OpenSession(ctx context.Context, path string, opts Options) (result *Sessio
 	if err != nil {
 		return nil, err
 	}
+	cleanup, err := claimExclusiveOpen(admission)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if result == nil {
+			retErr = cleanup.beginClass(retErr, nil, !cleanup.childClosePending())
+		}
+	}()
 	path, err = filepath.Abs(path)
 	if err != nil {
 		return nil, err
 	}
-	resolved, err := resolveNativePath(path)
+	resolved, initialAbsent, err := resolveNativeReaderPath(path)
 	if err == nil {
 		path = resolved
-	} else if opts.Create && os.IsNotExist(err) {
+	} else if opts.Create && initialAbsent {
 		dir, e := resolveNativePath(filepath.Dir(path))
 		if e != nil {
 			return nil, e
@@ -71,16 +88,8 @@ func OpenSession(ctx context.Context, path string, opts Options) (result *Sessio
 	if err != nil {
 		return nil, err
 	}
-	s := &Session{file: f, path: path, opts: opts}
-	success := false
-	defer func() {
-		if !success {
-			if s.walFile != nil {
-				retErr = errors.Join(retErr, closeNativeFile(s.walFile))
-			}
-			retErr = errors.Join(retErr, closeNativeFile(f))
-		}
-	}()
+	cleanup.main = plainFile{f}
+	s := &Session{file: f, path: path, opts: opts, cleanup: cleanup}
 	if err = lockShared(f); err != nil {
 		return nil, err
 	}
@@ -155,7 +164,6 @@ func OpenSession(ctx context.Context, path string, opts Options) (result *Sessio
 	if err = s.removeStaleSHMLocked(); err != nil {
 		return nil, err
 	}
-	success = true
 	return s, nil
 }
 
@@ -172,7 +180,7 @@ func writableHeader(h Header) error {
 func (s *Session) enterWALLocked(ctx context.Context) error {
 	t := &Tx{file: s.file, path: s.path, info: s.info, opts: s.opts,
 		dirty: make(map[uint32][]byte), free: make(map[uint32]struct{}),
-		originalHeader: s.rawHeader, reserved: true, keepFile: true}
+		originalHeader: s.rawHeader, reserved: true, keepFile: true, borrowedCleanup: s.cleanup}
 	var p []byte
 	var err error
 	if s.info.Size() == 0 {
@@ -231,8 +239,8 @@ func (s *Session) refreshMainLocked() error {
 }
 
 func (s *Session) checkJournalLocked() error {
-	_, err := nativeLstat(s.path + "-journal")
-	if os.IsNotExist(err) {
+	_, absent, err := s.probePathLocked(s.path + "-journal")
+	if absent {
 		return nil
 	}
 	if err != nil {
@@ -242,6 +250,9 @@ func (s *Session) checkJournalLocked() error {
 }
 
 func (s *Session) checkOpenLocked() error {
+	if err := s.cleanup.check(); err != nil {
+		return err
+	}
 	if s.poisoned != nil {
 		return s.poisoned
 	}
@@ -257,7 +268,8 @@ func (s *Session) checkStable() error {
 	return s.checkStableLocked()
 }
 
-func (s *Session) checkStableLocked() error {
+func (s *Session) checkStableLocked() (retErr error) {
+	defer func() { retErr = s.observeLocked(retErr) }()
 	if err := s.checkOpenLocked(); err != nil {
 		return err
 	}
@@ -292,8 +304,8 @@ func (s *Session) checkStableLocked() error {
 }
 
 func (s *Session) removeStaleSHMLocked() error {
-	st, err := nativeLstat(s.path + "-shm")
-	if os.IsNotExist(err) {
+	st, absent, err := s.probePathLocked(s.path + "-shm")
+	if absent {
 		return nil
 	}
 	if err != nil {
@@ -354,8 +366,7 @@ func (s *Session) begin(ctx context.Context, readOnly bool) (*Tx, error) {
 	s.mu.Unlock()
 	if !readOnly {
 		if err = t.loadFreelist(ctx); err != nil {
-			_ = t.Rollback()
-			return nil, err
+			return nil, errors.Join(err, t.Rollback())
 		}
 	}
 	return t, nil
@@ -378,7 +389,8 @@ func (s *Session) readPage(ctx context.Context, n uint32) ([]byte, error) {
 	return s.readPageLocked(ctx, n)
 }
 
-func (s *Session) readPageLocked(ctx context.Context, n uint32) ([]byte, error) {
+func (s *Session) readPageLocked(ctx context.Context, n uint32) (_ []byte, retErr error) {
+	defer func() { retErr = s.observeLocked(retErr) }()
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
@@ -397,16 +409,20 @@ func (s *Session) readPageLocked(ctx context.Context, n uint32) ([]byte, error) 
 }
 
 func (s *Session) poisonLocked(cause error) error {
-	s.poisoned = errors.Join(ErrPoisoned, cause)
+	cause = s.observeLocked(cause)
+	if s.poisoned == nil {
+		s.poisoned = errors.Join(ErrPoisoned, cause)
+	}
 	return s.poisoned
 }
 
 // Close normally checkpoints before releasing EXCLUSIVE. KeepWALOnClose
 // retains an already-synced committed WAL instead. An active lease returns
 // BUSY. A poisoned session only closes descriptors and preserves its WAL.
-func (s *Session) Close() error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
+func (s *Session) Close() error { return s.CloseWithError(nil) }
+
+// Shared-WAL construction uses a private Session without exclusive ownership.
+func (s *Session) closeLegacyLocked() error {
 	if s.file == nil {
 		return s.poisoned
 	}

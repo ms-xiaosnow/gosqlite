@@ -396,5 +396,19 @@
     "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38081496897",
     "remote_ci_status": "COMPLETED SUCCESS for exact SHA, updated2026-10-10T20:03:43Z, observed20:05:29Z. Full ordinary and complete pinned-oracle workflow.",
     "open_gates": "Unquoted Boolean identifiers/LEFT-ON alias provenance, rowid/planner ranges, global/grouped aggregates, Reader/Tx/exclusive/public canonicalization ownership and broader SQL/migration/platform work remain separate code increments. Native target runtime, physical failure/recovery and independent M10 security/legal/release acceptance NOT_RUN."
+  },
+  {
+    "stage": "Bounded rowid planning, identifier provenance and global aggregates",
+    "remote_commit": "13a214607c01c2b663dfc9d7e680050aff1bbaba",
+    "local_commit": "13a214607c01c2b663dfc9d7e680050aff1bbaba",
+    "tree": "c405112b6076b5db7d16f1664923c455db6014ff",
+    "bundle_sha256": "9ccc3b3142932c177cca5d14592344007dfa7512f43f9cdbdd8310fdbbdc4893",
+    "bundle_bytes": 2880042,
+    "library_file_id": "libfile_fa0ebcd1db288191b82cfc01ec0b9d77",
+    "library_version": 0,
+    "verified": "Expected-SHA remote readback and exact local mirror2026-10-10T20:29:47Z; full-history bundle byte-identical Library readback, clone/fsck and original goal20:30:13Z. All non-document changed bytes match source48370bbe2dc585c1b45821fbc360c525d156a9f5: full CGO0 unit/vet/build20:08:43Z, complete pinned ordinary oracle20:15:22Z, full race (SQLite418.468s), five builds/modules/full inventory PASS exit0 at20:23:10Z. Original two combined failures retained with repaired diagnostic code and independently reviewed original-query oracle positive plus genuine sort-quota negative. Exact restored focused unit/race/oracle and full vet/build started20:30Z, pending.",
+    "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38083962328",
+    "remote_ci_status": "IN_PROGRESS for exact SHA, observed2026-10-10T20:30:07Z. Full ordinary plus complete pinned-oracle workflow.",
+    "open_gates": "Plaintext ownership, secondary ranges, GROUP BY/HAVING, SQL connection counters, memory journal segments and broader SQL/native/migration code are separate increments. Native target runtime, physical failure/recovery and independent M10 acceptance NOT_RUN."
   }
 ]

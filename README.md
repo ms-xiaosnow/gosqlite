@@ -278,7 +278,9 @@ now retains nested owners and protection in bounded groups, with explicit
 [retry API](docs/shared-open-cleanup.md). Native WALShared successful Close now
 uses separately bounded retained ownership and explicit discover/retry APIs.
 Encrypted lifecycle cleanup is now implemented with bounded pending ownership.
-Rollback/WALExclusive and public plaintext metadata adoption are separate corrections.
+Rollback Reader/Tx, WALExclusive and public plaintext metadata adoption now use
+bounded minimal-owner cleanup with explicit pending/retry APIs. Native recovery
+ownership and physical failure qualification remain separate work.
 
 ## Persistent typed ANN
 
@@ -309,3 +311,16 @@ uncertainty never authorizes another raw handle close. Admission limits are1024
 opening/live/pending scopes and16384 common managed leases, with lower platform
 limits also applicable. See [encrypted ownership and remaining gates](docs/encrypted-cleanup.md).
 This remains development code with native failure/OS and security acceptance open.
+
+## Plaintext cleanup ownership
+
+Plain rollback Reader/Tx and exclusive WAL now reserve bounded cleanup roots
+before native acquisition. Public metadata preludes transfer the same admission
+into the pager, and pending obligations remain discoverable after a failed Open
+or discarded driver error. Children retire before the main database owner;
+retry never repeats logical replay, checkpoint or publication. See
+[plaintext ownership](docs/plaintext-cleanup.md),
+[transaction cleanup](docs/plaintext-tx-cleanup.md),
+[exclusive WAL cleanup](docs/plaintext-exclusive-cleanup.md) and
+[public admission](docs/public-open-adoption.md). Physical failure paths and
+Windows/Darwin runtime remain unqualified.

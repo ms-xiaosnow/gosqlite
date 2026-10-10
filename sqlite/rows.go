@@ -122,7 +122,7 @@ func (r *Rows) fail(err error) bool {
 	if err != io.EOF {
 		r.err = wrap("next", err)
 	}
-	r.close()
+	r.err = wrapCleanup("next", r.err, r.close())
 	return false
 }
 

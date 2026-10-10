@@ -1,0 +1,243 @@
+package pager
+
+import (
+	"errors"
+	"fmt"
+	"reflect"
+	"sync"
+	"testing"
+)
+
+// Descriptor-free review model. No operating-system handle is opened, closed,
+// substituted or faulted. Each callback only changes these in-memory fields.
+type exclusiveReviewOwner struct {
+	name               string
+	events             *[]string
+	complete           bool
+	calls, nativeCalls int
+	mode               int
+	diagnostic         error
+}
+
+func (o *exclusiveReviewOwner) RetirementComplete() bool { return o.complete }
+func (o *exclusiveReviewOwner) Close() error {
+	o.calls++
+	*o.events = append(*o.events, o.name)
+	if o.mode != 3 || o.nativeCalls == 0 {
+		o.nativeCalls++
+	}
+	switch o.mode {
+	case 0:
+		o.complete = true
+		return nil
+	case 1:
+		o.complete = true
+		return o.diagnostic
+	case 2:
+		return nil
+	default:
+		return o.diagnostic
+	}
+}
+func reviewExclusiveGroup(t *testing.T) (*plainRetirement, []*exclusiveReviewOwner, *[]string) {
+	t.Helper()
+	r := &plainRetirementRegistry{limit: 1}
+	g, e := r.reserve()
+	if e != nil {
+		t.Fatal(e)
+	}
+	events := new([]string)
+	var owners []*exclusiveReviewOwner
+	for _, n := range []string{"nested", "temporary", "wal", "main"} {
+		owners = append(owners, &exclusiveReviewOwner{name: n, events: events, diagnostic: errors.New("review " + n)})
+	}
+	g.nested = []plainResource{owners[0]}
+	g.temporary, g.wal, g.main = owners[1], owners[2], owners[3]
+	return g, owners, events
+}
+func TestExclusiveIndependentFourStageLaw(t *testing.T) {
+	for state := 0; state < 256; state++ {
+		t.Run(fmt.Sprint(state), func(t *testing.T) {
+			g, owners, events := reviewExclusiveGroup(t)
+			firstBlocked := 4
+			for i, o := range owners {
+				o.mode = (state >> (2 * i)) & 3
+				if o.mode >= 2 && firstBlocked == 4 {
+					firstBlocked = i
+				}
+			}
+			cause := errors.New("review first operation")
+			token := g.begin(cause)
+			if errors.Is(token, ErrPlaintextCleanupPending) != (firstBlocked < 4) || !errors.Is(token, cause) {
+				t.Fatalf("classification %v", token)
+			}
+			historical := token
+			firstCause := g.cause
+			count := firstBlocked + 1
+			if count > 4 {
+				count = 4
+			}
+			if len(*events) != count {
+				t.Fatalf("first order %v", *events)
+			}
+			for i := 0; i < count; i++ {
+				if (*events)[i] != owners[i].name {
+					t.Fatal(*events)
+				}
+			}
+			for i := 0; i < 5; i++ {
+				token = RetryPlaintextCleanup(errors.Join(historical, historical))
+				if g.cause != firstCause {
+					t.Fatal("retained history grew")
+				}
+				for j, o := range owners {
+					if j > firstBlocked && o.calls != 0 {
+						t.Fatal("protector attempted", j)
+					}
+					if o.mode == 3 && o.nativeCalls > 1 {
+						t.Fatal("terminal identity retried")
+					}
+				}
+			}
+			for _, o := range owners {
+				o.mode = 0
+			}
+			if e := RetryPlaintextCleanup(historical); e != nil || !g.done || len(g.registry.snapshot()) != 0 || len(g.registry.groups) != 0 {
+				t.Fatal("not released", e)
+			}
+			if errors.Is(historical, ErrPlaintextCleanupPending) != (firstBlocked < 4) {
+				t.Fatal("historical token mutated")
+			}
+			calls := len(*events)
+			if e := RetryPlaintextCleanup(historical); e != nil || len(*events) != calls {
+				t.Fatal("retired replay", e)
+			}
+		})
+	}
+}
+func TestExclusiveIndependentLiveRetryKeepsLiveOwners(t *testing.T) {
+	g, o, events := reviewExclusiveGroup(t)
+	o[0].mode = 2
+	token := g.pendingLocked(errors.Join(ErrPoisoned, errors.New("review pending metadata")))
+	if e := RetryPlaintextCleanup(token); !errors.Is(e, ErrPlaintextCleanupPending) {
+		t.Fatal(e)
+	}
+	o[0].mode = 0
+	if e := RetryPlaintextCleanup(token); e != nil {
+		t.Fatal(e)
+	}
+	if !reflect.DeepEqual(*events, []string{"nested", "nested"}) || g.done || g.main == nil || g.wal == nil || g.temporary == nil {
+		t.Fatal("live protector retired", *events)
+	}
+	if e := g.begin(nil); e != nil {
+		t.Fatal(e)
+	}
+	if !reflect.DeepEqual(*events, []string{"nested", "nested", "temporary", "wal", "main"}) {
+		t.Fatal(*events)
+	}
+}
+func TestExclusiveIndependentCloseFirstErrorAndConcurrentRetry(t *testing.T) {
+	g, o, events := reviewExclusiveGroup(t)
+	g.nested = nil
+	g.temporary = nil
+	o[2].mode = 2
+	s := &Session{cleanup: g}
+	checkpointCalls := 0
+	operation := errors.New("review checkpoint operation")
+	token := s.closeLocked(nil, func() error { checkpointCalls++; return g.closeWAL(operation) })
+	if !errors.Is(token, operation) || !errors.Is(token, ErrPlaintextCleanupPending) || checkpointCalls != 1 || o[2].calls != 1 || o[3].calls != 0 {
+		t.Fatal(token, *events)
+	}
+	o[2].mode = 0
+	var wg sync.WaitGroup
+	for i := 0; i < 20; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			if e := s.Close(); e != nil {
+				t.Error(e)
+			}
+		}()
+	}
+	wg.Wait()
+	if checkpointCalls != 1 || o[2].calls != 2 || o[3].calls != 1 || !g.done {
+		t.Fatal(checkpointCalls, *events)
+	}
+	if !errors.Is(token, operation) || !errors.Is(token, ErrPlaintextCleanupPending) {
+		t.Fatal("historical first error lost")
+	}
+}
+
+// Admission races and opaque-error handling remain entirely descriptor-free.
+func TestExclusiveIndependentAdmissionSingleOwner(t *testing.T) {
+	for iteration := 0; iteration < 100; iteration++ {
+		g, o, _ := reviewExclusiveGroup(t)
+		g.nested = nil
+		g.temporary = nil
+		g.wal = nil
+		a := &ExclusiveOpenAdmission{}
+		a.group.Store(g)
+		start := make(chan struct{})
+		claimed := make(chan *plainRetirement, 1)
+		finished := make(chan bool, 1)
+		var wg sync.WaitGroup
+		wg.Add(2)
+		go func() {
+			defer wg.Done()
+			<-start
+			got, e := claimExclusiveOpen(a)
+			if e != nil && !errors.Is(e, ErrMisuse) {
+				t.Error(e)
+			}
+			claimed <- got
+		}()
+		go func() {
+			defer wg.Done()
+			<-start
+			e, handled := a.Finish(nil)
+			if e != nil {
+				t.Error(e)
+			}
+			finished <- handled
+		}()
+		close(start)
+		wg.Wait()
+		got, handled := <-claimed, <-finished
+		if (got != nil) == handled {
+			t.Fatal("admission had zero or two owners")
+		}
+		if got != nil {
+			if got != g || o[3].calls != 0 {
+				t.Fatal("transfer retired live owner")
+			}
+			if e := got.begin(nil); e != nil {
+				t.Fatal(e)
+			}
+		}
+		if o[3].calls != 1 || !g.done || len(g.registry.groups) != 0 {
+			t.Fatal("scope not released exactly once")
+		}
+	}
+}
+func TestExclusiveIndependentAdmissionOpaqueError(t *testing.T) {
+	r := &plainRetirementRegistry{limit: 1}
+	g, e := r.reserve()
+	if e != nil {
+		t.Fatal(e)
+	}
+	a := &ExclusiveOpenAdmission{}
+	a.group.Store(g)
+	token, handled := a.Finish(plainMemoryCycle{})
+	if !handled || !errors.Is(token, ErrPlaintextCleanupPending) || !errors.Is(token, ErrLimit) || len(r.snapshot()) != 1 {
+		t.Fatal("unsafe graph not bounded/retained", token)
+	}
+	// Re-running discovery on the returned safe graph must terminate and preserve
+	// the opaque terminal obligation. No original cyclic graph is rejoined.
+	if e = RetryPlaintextCleanup(token); !errors.Is(e, ErrPlaintextCleanupPending) {
+		t.Fatal(e)
+	}
+	if _, handled = a.Finish(nil); handled {
+		t.Fatal("finished admission reused")
+	}
+	// This local registry contains only the synthetic cycle; no native owner.
+}

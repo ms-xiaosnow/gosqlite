@@ -1,0 +1,15 @@
+{
+  "plain-tx-freeze-v2": {
+    "mismatches": [],
+    "extra": [],
+    "missing": []
+  },
+  "plain-tx-independent-v2": {
+    "mismatches": [],
+    "extra": [
+      "internal/pager/plain_tx_independent_test.go",
+      "sqlite/plain_tx_independent_test.go"
+    ],
+    "missing": []
+  }
+}

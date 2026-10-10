@@ -1,0 +1,14 @@
+{
+  "plain-exclusive-freeze-v2": {
+    "files_verified": 1083,
+    "mismatch": [],
+    "extra": []
+  },
+  "plain-exclusive-independent-v2": {
+    "files_verified": 1083,
+    "mismatch": [],
+    "extra": [
+      "internal/pager/plain_exclusive_independent_test.go"
+    ]
+  }
+}

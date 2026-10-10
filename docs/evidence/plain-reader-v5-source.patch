@@ -1,0 +1,2073 @@
+diff --git a/docs/plaintext-cleanup.md b/docs/plaintext-cleanup.md
+new file mode 100644
+--- /dev/null
++++ b/docs/plaintext-cleanup.md
+@@ -0,0 +1,138 @@
++# Plaintext Reader managed retirement
++
++Date: 2026-10-10. This first increment covers ordinary rollback-mode
++`pager.Reader` acquisition, read-time metadata obligations and retirement. It is
++not a generic plaintext transaction/connection cleanup guarantee. Standalone Tx,
++rollback journal and WALExclusive ownership gaps remain real source gaps below.
++Shared-WAL/encrypted protocols, formats and their separate APIs are unchanged.
++Physical/native failure qualification and full M3/M8/M10 acceptance are NOT_RUN.
++
++## Ownership and ordering
++
++Before pager path resolution or its first native acquisition, Reader.Open reserves
++one of 1024 strongly retained plaintext scopes. The limit counts opening, live
++and pending Readers together, including temporary public Open probes and every
++active rollback query snapshot. Idle rollback DB handles do not retain Readers.
++A full bound returns pager ErrLimit (public ErrMemoryLimit/CodeNoMem) without that
++attempted pager acquisition. The earlier public canonicalizer's Windows metadata
++probes remain owned by their separate existing bounded registry.
++
++A scope retains only its managed main File, nested managed/terminal owners, first
++cause and one current immutable token. It has no Reader, DB, Rows, Tx, options,
++page buffers or application cleanup closure. Opaque error implementations can
++retain arbitrary caller data; this is a structural library-owned-record bound,
++not a transitive byte/RSS bound. No raw descriptor is exposed or replayed.
++
++Failed constructor errors are adopted before retiring anything. Nested failed
++probes/constructors retire before the protecting main file. Explicit
++RetirementComplete controls progress: a consumed diagnostic can advance, while
++nil from an incomplete owner cannot release its protector. Indeterminate native
++close remains the managed owner's terminal obligation and may consume capacity
++for process lifetime. There is no expiry, eviction, finalizer, automatic sweep,
++checkpoint, reopen or path-based cleanup in the retry mechanism.
++
++An ownership error encountered by a live Reader's page or plaintext-source
++validation adopts the failed probes and poisons further use before the operation
++returns. The reader retains its main snapshot protection. An explicit retry of
++that token handles only already-failed nested owners; it cannot close the main
++file of a live Reader. Even after those probes retire, that Reader remains
++poisoned until Close. Close marks the Reader closed and removes its usable file
++pointer once, then begins whole-scope child-before-main retirement. Repeated
++Close attempts only the managed scope. Header remains readable as historical
++metadata; non-canceled page reads and source validations after logical closure
++report ErrClosed.
++Per-Reader native operations are serialized; independent Readers remain separate.
++
++The registry mutex protects admission/removal/snapshot enumeration only. It never
++calls native operations or RetirementComplete, nor waits for a scope/resource
++mutex. Same-scope attempts serialize on the scope mutex. Snapshots read atomic
++immutable tokens and cannot be blocked by another scope's native status/close.
++
++## APIs and error bounds
++
++- `sqlite.ErrPlaintextCleanupPending` is an immutable historical token marker.
++  Actual tokens also match ErrPoisoned and carry CodeIOErr, including an underlying
++  BUSY cause. The bare sentinel does not itself imply poison.
++- `sqlite.RetryPlaintextCleanup(err)` discovers/deduplicates all distinct Reader
++  scopes in wrapped/joined errors before any cleanup. Discovery accepts at most
++  4096 error nodes. Excessive/cyclic graphs return ErrMemoryLimit/CodeNoMem without
++  effects and without wrapping the unsafe input. Retain tokens and retry smaller
++  trees. Errors without tokens and completed groups are no-ops, not global proof
++  of clean ownership or assurance that a later open will succeed.
++- `sqlite.PendingPlaintextCleanups()` allocates a new slice of current immutable
++  tokens, including no-DB constructor failures and errors discarded by
++  database/sql or callers. Ordinary live/opening Readers are excluded. Enumerating
++  does not retire anything; modifying the slice does not affect ownership.
++
++Internal VFS error-owner discovery is separately single-pass and limited to 4096
++nodes. A stateful custom Unwrap cannot change between a validation traversal and
++an unbounded second traversal. On refusal the original graph remains opaque in
++an explicit terminal obligation; its unsafe Unwrap/Error is not exposed through
++the returned diagnostic. Dependency cycles retain all concrete owners behind a
++terminal barrier. Existing shared-WAL CleanupOwners is not changed by this helper.
++The fixed node bound also bounds discovery metadata/dependency edges; arbitrary
++Unwrap implementations themselves can allocate without library control.
++
++Each scope preserves its first operation/first retirement cause and the current
++attempt, without appending previous retry results. Pending snapshots replace one
++current token; old caller-retained tokens are immutable at caller cost. Completed
++scopes drop owners/history and leave the registry. A fully consumed close may
++still return a diagnostic without the pending marker; old tokens retain their
++historical marker after successful retry.
++
++## Public lifecycle propagation
++
++Query planning failures join Reader.Close diagnostics. Schema's deferred reader
++release and plaintext import's source reader/database release preserve errors.
++Rows exhaustion/failure joins its release error into Rows.Err rather than losing
++it. DB/Rows/Tx invalidation keeps its existing public struct layouts; no cleanup
++registry retains their closures. Real database/sql can still discard a connection
++Close result, but the independent scope and snapshot route survive that disposal.
++Repeating DB.Close on an idle rollback handle is not a Reader retry mechanism;
++use the returned token or the snapshot API for discarded Reader cleanup.
++
++## Remaining source gaps
++
++- Standalone rollback OpenTx, empty/successful Commit, Rollback and poison clear
++  file references without a scope or public discovery route.
++- Rollback journal cleanup can leave a child incomplete and still retire main.
++- WALExclusive constructor failure, later WAL/candidate acquisition, replacement,
++  checkpoint and Session.Close need the same ownership barriers, one-time logical
++  close and no-repeat checkpoint semantics. They are not fixed by this increment.
++- Public failed-create rollback and other Tx-only discarded errors still belong
++  to that later transaction work; this Reader slice does not claim them.
++
++These are tracked code gaps, not merely unexecuted tests. Existing
++shared-open-cleanup.md, shared-close-cleanup.md and encrypted-cleanup.md retain
++their independent scopes and historical evidence.
++
++## Verification
++
++The evidence directory `evidence/plain-reader-cleanup` contains the behavioral
++selection audit, exact commands, normal/race results, official managed-probe
++interop, and Darwin/Windows compile-only results. New exceptional-state tests are
++pure memory owner/callback laws. Ordinary tests use intact databases for
++create/write/read/schema/SQL-error/cancel/read-only rollback/Rows close/DB close/
++reopen and real database/sql zero-idle disposal. The official SQLite 3.54.0 probe
++confirms that closing a managed Reader does not lose another live reservation.
++
++No physical corruption/tamper/wrong-key/missing selected file, namespace
++replacement/retarget/race, crash/kill/process-exit/hot recovery, failed native
++I/O/lock/unmap/close/Sync/short write/disk-full/permission, or interrupted
++publication/rekey workflow was executed here or moved elsewhere. Darwin/Windows
++native runtime qualification, actual teardown-failure behavior, release review
++and milestone completion remain NOT_RUN.
++
++Initial create fallback is provenance-sensitive. A rollback Reader can authorize
++normal creation only after conclusive absence during its first path resolution,
++before the main file is acquired, with no additional cleanup or operation cause.
++Later missing-path/stability errors and consumed cleanup diagnostics fail closed,
++as do pending ownership and overbound error graphs. Wrappers and single-cause
++joins preserve the initial-absence marker; raw NotExist alone does not authorize
++this fallback.
++
++On Windows the initial-absence provenance comes from the metadata open returning
++no handle, never a later handle inspection or retirement. The earlier plaintext
++public canonicalizer uses the same provenance for both resolver and nofollow
++probe fallbacks. Existing VFS ResolvePath/Lstat error shapes remain unchanged;
++new creation-aware variants separately report conclusive initial absence.
+diff --git a/internal/pager/encrypted_copy.go b/internal/pager/encrypted_copy.go
+--- a/internal/pager/encrypted_copy.go
++++ b/internal/pager/encrypted_copy.go
+@@ -135,15 +135,19 @@
+ // ValidatePlaintextCopySource narrows ordinary read-only alias behavior for
+ // explicit copy import: the actual held source inode must have one hard link.
+ // This performs no mutation or native journal recovery.
+-func (r *Reader) ValidatePlaintextCopySource() error {
+-	r.mu.RLock()
+-	defer r.mu.RUnlock()
++func (r *Reader) ValidatePlaintextCopySource() (retErr error) {
++	r.mu.Lock()
++	defer r.mu.Unlock()
+ 	if r.lease != nil {
+ 		return ErrUnsupported
+ 	}
+-	if r.file == nil {
++	if r.closed || r.file == nil {
+ 		return ErrClosed
+ 	}
++	if err := r.cleanup.check(); err != nil {
++		return err
++	}
++	defer func() { retErr = r.cleanup.observe(retErr) }()
+ 	if err := r.checkStable(); err != nil {
+ 		return err
+ 	}
+diff --git a/internal/pager/native_file.go b/internal/pager/native_file.go
+--- a/internal/pager/native_file.go
++++ b/internal/pager/native_file.go
+@@ -89,3 +89,13 @@
+ func (r nativeReaderAt) ReadAt(b []byte, off int64) (int, error) {
+ 	return readNativeAt(r.file, b, off)
+ }
++
++func resolveNativeReaderPath(path string) (string, bool, error) {
++	resolved, initialAbsent, err := vfs.ResolvePathForCreate(path)
++	return resolved, initialAbsent, nativeFileError(err)
++}
++
++func nativeLstatForCreate(path string) (os.FileInfo, bool, error) {
++	info, initialAbsent, err := vfs.LstatForCreate(path)
++	return info, initialAbsent, nativeFileError(err)
++}
+diff --git a/internal/pager/pager.go b/internal/pager/pager.go
+--- a/internal/pager/pager.go
++++ b/internal/pager/pager.go
+@@ -3,7 +3,6 @@
+ import (
+ 	"bytes"
+ 	"context"
+-	"errors"
+ 	"fmt"
+ 	"io"
+ 	"os"
+@@ -25,29 +24,35 @@
+ 	header    Header
+ 	rawHeader [100]byte
+ 	lease     *Tx
++	cleanup   *plainRetirement
++	closed    bool
+ }
+ 
+ func Open(path string) (result *Reader, retErr error) {
+-	// Resolve symlinks so sidecar checks apply to the actual database pathname.
+-	// Multiple hard-linked names remain unsupported by SQLite itself.
+-	path, err := filepath.Abs(path)
++	cleanup, err := plainRetirements.reserve()
+ 	if err != nil {
+ 		return nil, err
+ 	}
+-	path, err = resolveNativePath(path)
++	defer func() {
++		if result == nil {
++			retErr = cleanup.begin(retErr)
++		}
++	}()
++	// Resolve symlinks so sidecar checks apply to the actual database pathname.
++	// Multiple hard-linked names remain unsupported by SQLite itself.
++	path, err = filepath.Abs(path)
+ 	if err != nil {
+ 		return nil, err
++	}
++	path, initialAbsent, err := resolveNativeReaderPath(path)
++	if err != nil {
++		return nil, markInitialReaderAbsence(err, initialAbsent)
+ 	}
+ 	file, err := openReadOnlyDatabase(path)
+ 	if err != nil {
+ 		return nil, err
+ 	}
+-	success := false
+-	defer func() {
+-		if !success {
+-			retErr = errors.Join(retErr, closeNativeFile(file))
+-		}
+-	}()
++	cleanup.main = plainFile{file}
+ 	info, err := statNativeFile(file)
+ 	if err != nil {
+ 		return nil, err
+@@ -58,7 +63,7 @@
+ 	if err = lockShared(file); err != nil {
+ 		return nil, err
+ 	}
+-	r := &Reader{file: file, path: path, info: info}
++	r := &Reader{file: file, path: path, info: info, cleanup: cleanup}
+ 	if err = checkSidecars(path); err != nil {
+ 		return nil, err
+ 	}
+@@ -74,7 +79,6 @@
+ 	if err = r.checkStable(); err != nil {
+ 		return nil, err
+ 	}
+-	success = true
+ 	return r, nil
+ }
+ 
+@@ -83,8 +87,8 @@
+ // journal (including a cold or empty one) fails closed with a distinct error.
+ func checkSidecars(path string) error {
+ 	for _, suffix := range []string{"-wal", "-journal"} {
+-		st, err := nativeLstat(path + suffix)
+-		if os.IsNotExist(err) {
++		st, absent, err := nativeLstatForCreate(path + suffix)
++		if absent {
+ 			continue
+ 		}
+ 		if err != nil {
+@@ -138,18 +142,22 @@
+ 	return nil
+ }
+ 
+-func (r *Reader) ReadPage(ctx context.Context, pageNo uint32) ([]byte, error) {
++func (r *Reader) ReadPage(ctx context.Context, pageNo uint32) (_ []byte, retErr error) {
+ 	if r.lease != nil {
+ 		return r.lease.ReadPage(ctx, pageNo)
+ 	}
+ 	if err := ctx.Err(); err != nil {
+ 		return nil, err
+ 	}
+-	r.mu.RLock()
+-	defer r.mu.RUnlock()
+-	if r.file == nil {
++	r.mu.Lock()
++	defer r.mu.Unlock()
++	if r.closed || r.file == nil {
+ 		return nil, ErrClosed
+ 	}
++	if err := r.cleanup.check(); err != nil {
++		return nil, err
++	}
++	defer func() { retErr = r.cleanup.observe(retErr) }()
+ 	if pageNo == 0 || pageNo > r.header.PageCount {
+ 		return nil, fmt.Errorf("%w: page %d outside 1..%d", ErrCorrupt, pageNo, r.header.PageCount)
+ 	}
+@@ -175,9 +183,15 @@
+ 	}
+ 	r.mu.Lock()
+ 	defer r.mu.Unlock()
++	if r.cleanup != nil {
++		r.closed = true
++		r.file = nil // the minimal owner already holds the managed file
++		return r.cleanup.begin(nil)
++	}
+ 	if r.file == nil {
+ 		return nil
+ 	}
++	r.closed = true
+ 	err := closeNativeFile(r.file)
+ 	r.file = nil
+ 	return err
+diff --git a/internal/pager/plain_absence.go b/internal/pager/plain_absence.go
+new file mode 100644
+--- /dev/null
++++ b/internal/pager/plain_absence.go
+@@ -0,0 +1,82 @@
++package pager
++
++import (
++	"os"
++	"syscall"
++)
++
++// initialReaderAbsence is issued only for conclusive absence during the first
++// path resolution, before the main database has been acquired. Later missing
++// paths cannot authorize a new database, even if their ownership was consumed.
++type initialReaderAbsence struct{ cause error }
++
++func (e *initialReaderAbsence) Error() string { return e.cause.Error() }
++func (e *initialReaderAbsence) Unwrap() error { return e.cause }
++
++func markInitialReaderAbsence(cause error, initialAbsent bool) error {
++	if initialAbsent && plainSingleCause(cause, func(e error) bool {
++		if e == os.ErrNotExist {
++			return true
++		}
++		code, ok := e.(syscall.Errno)
++		return ok && code.Is(os.ErrNotExist)
++	}) {
++		return &initialReaderAbsence{cause: cause}
++	}
++	return cause
++}
++
++// ReaderProbeAbsent recognizes a single initial-acquisition absence through
++// ordinary wrappers and single-cause joins. Any additional diagnostic or pending
++// ownership rejects creation. It neither performs cleanup nor inspects paths.
++func ReaderProbeAbsent(cause error) bool {
++	return plainSingleCause(cause, func(e error) bool {
++		marker, ok := e.(*initialReaderAbsence)
++		return ok && marker != nil
++	})
++}
++
++// Bound traversal and scratch storage. Accepted leaves are deliberately opaque:
++// only the private provenance marker can authorize create, never errors.Is on an
++// arbitrary aggregate carrying NotExist alongside another cause.
++func plainSingleCause(cause error, accepted func(error) bool) bool {
++	stack := []error{cause}
++	leaves, count := 0, 0
++	for len(stack) != 0 {
++		if count >= maxPlainCleanupErrorNodes {
++			return false
++		}
++		e := stack[len(stack)-1]
++		stack = stack[:len(stack)-1]
++		count++
++		if e == nil {
++			continue
++		}
++		if accepted(e) {
++			leaves++
++			if leaves > 1 {
++				return false
++			}
++			continue
++		}
++		switch x := e.(type) {
++		case *plainCleanupError, *initialReaderAbsence:
++			return false
++		case interface{ Unwrap() []error }:
++			children := x.Unwrap()
++			if len(children) == 0 || len(children) > maxPlainCleanupErrorNodes-count-len(stack) {
++				return false
++			}
++			stack = append(stack, children...)
++		case interface{ Unwrap() error }:
++			child := x.Unwrap()
++			if child == nil {
++				return false
++			}
++			stack = append(stack, child)
++		default:
++			return false
++		}
++	}
++	return leaves == 1
++}
+diff --git a/internal/pager/plain_absence_test.go b/internal/pager/plain_absence_test.go
+new file mode 100644
+--- /dev/null
++++ b/internal/pager/plain_absence_test.go
+@@ -0,0 +1,92 @@
++package pager
++
++import (
++	"errors"
++	"fmt"
++	"os"
++	"syscall"
++	"testing"
++)
++
++// These are error/owner decision laws only. No paths, descriptors or native
++// faults are used to distinguish initial absence from a later missing path.
++func TestPlainCleanupMemoryInitialAbsence(t *testing.T) {
++	for _, cause := range []error{os.ErrNotExist, syscall.ENOENT, &os.PathError{Op: "memory", Path: "memory", Err: syscall.ENOENT}, fmt.Errorf("memory: %w", os.ErrNotExist), errors.Join(os.ErrNotExist)} {
++		marker := markInitialReaderAbsence(cause, true)
++		for _, wrapped := range []error{marker, fmt.Errorf("memory: %w", marker), errors.Join(marker), errors.Join(nil, marker)} {
++			if !ReaderProbeAbsent(wrapped) || !errors.Is(wrapped, os.ErrNotExist) {
++				t.Fatal("conclusive initial absence lost", wrapped)
++			}
++		}
++		reg := &plainRetirementRegistry{limit: 1}
++		g, err := reg.reserve()
++		if err != nil {
++			t.Fatal(err)
++		}
++		// The actual failed Reader constructor returns cleanup.begin's join.
++		if got := g.begin(marker); !ReaderProbeAbsent(got) || !g.done || len(reg.groups) != 0 {
++			t.Fatal("empty constructor retirement lost initial absence", got)
++		}
++	}
++}
++
++func TestPlainCleanupMemoryAmbiguousAbsence(t *testing.T) {
++	consumed := errors.New("memory consumed cleanup diagnostic")
++	for _, cause := range []error{nil, ErrBusy, errors.Join(os.ErrNotExist, ErrChanged), errors.Join(os.ErrNotExist, consumed), errors.Join(os.ErrNotExist, ErrPoisoned), fmt.Errorf("%w: database path: %w", ErrChanged, os.ErrNotExist)} {
++		if ReaderProbeAbsent(markInitialReaderAbsence(cause, true)) {
++			t.Fatal("ambiguous initial error authorized creation", cause)
++		}
++	}
++	marker := markInitialReaderAbsence(os.ErrNotExist, true)
++	for _, cause := range []error{os.ErrNotExist, errors.Join(os.ErrNotExist), errors.Join(marker, ErrChanged), errors.Join(marker, consumed), errors.Join(marker, marker), errors.Join(marker, ErrPoisoned)} {
++		if ReaderProbeAbsent(cause) {
++			t.Fatal("post-acquisition or mixed error authorized creation", cause)
++		}
++	}
++	for _, pending := range []bool{false, true} {
++		reg := &plainRetirementRegistry{limit: 1}
++		g, err := reg.reserve()
++		if err != nil {
++			t.Fatal(err)
++		}
++		owner := &plainMemoryOwner{consumed: true, cause: consumed}
++		if pending {
++			owner.remaining = 1
++		}
++		g.main = owner
++		got := g.begin(marker)
++		if ReaderProbeAbsent(got) || !errors.Is(got, consumed) || errors.Is(got, ErrPlaintextCleanupPending) != pending {
++			t.Fatal("cleanup diagnostic authorized creation", got)
++		}
++		if pending {
++			_ = RetryPlaintextCleanup(got)
++		}
++	}
++}
++
++type plainAbsenceCycle struct{}
++
++func (e *plainAbsenceCycle) Error() string { return "memory cycle" }
++func (e *plainAbsenceCycle) Unwrap() error { return e }
++func TestPlainCleanupMemoryAbsenceBound(t *testing.T) {
++	var wrapped error = markInitialReaderAbsence(os.ErrNotExist, true)
++	for i := 0; i < maxPlainCleanupErrorNodes; i++ {
++		wrapped = errors.Join(wrapped)
++	}
++	for _, cause := range []error{wrapped, &plainAbsenceCycle{}} {
++		if ReaderProbeAbsent(cause) {
++			t.Fatal("unbounded error graph authorized creation")
++		}
++	}
++	if ReaderProbeAbsent(markInitialReaderAbsence(&plainAbsenceCycle{}, true)) {
++		t.Fatal("unbounded initial graph authorized creation")
++	}
++}
++
++func TestPlainCleanupMemoryPostAcquisitionAbsence(t *testing.T) {
++	for _, cause := range []error{os.ErrNotExist, syscall.ENOENT, errors.Join(os.ErrNotExist)} {
++		if ReaderProbeAbsent(markInitialReaderAbsence(cause, false)) {
++			t.Fatal("post-acquisition metadata error authorized create", cause)
++		}
++	}
++}
+diff --git a/internal/pager/plain_cleanup.go b/internal/pager/plain_cleanup.go
+new file mode 100644
+--- /dev/null
++++ b/internal/pager/plain_cleanup.go
+@@ -0,0 +1,299 @@
++package pager
++
++import (
++	"errors"
++	"fmt"
++	"sync"
++	"sync/atomic"
++
++	"github.com/ms-xiaosnow/gosqlite/internal/vfs"
++)
++
++// ErrPlaintextCleanupPending is an immutable historical ownership token. This
++// increment covers ordinary rollback Readers, not transactions or WAL sessions.
++var ErrPlaintextCleanupPending = errors.New("plaintext cleanup pending")
++
++const maxPlainRetirements = 1024
++const maxPlainCleanupErrorNodes = 4096
++
++var plainRetirements = plainRetirementRegistry{limit: maxPlainRetirements}
++
++type plainRetirementRegistry struct {
++	mu     sync.Mutex
++	limit  int
++	groups map[*plainRetirement]struct{}
++}
++
++func (r *plainRetirementRegistry) reserve() (*plainRetirement, error) {
++	r.mu.Lock()
++	defer r.mu.Unlock()
++	if len(r.groups) >= r.limit {
++		return nil, fmt.Errorf("%w: plaintext live/cleanup capacity exhausted", ErrLimit)
++	}
++	if r.groups == nil {
++		r.groups = make(map[*plainRetirement]struct{})
++	}
++	g := &plainRetirement{registry: r}
++	r.groups[g] = struct{}{}
++	return g, nil
++}
++
++// No application callback, Reader, Tx, Rows, DB, page buffer or raw handle is
++// retained. Status and retirement calls always run outside registry admission.
++type plainResource interface {
++	Close() error
++	RetirementComplete() bool
++}
++
++type plainFile struct{ file *vfs.File }
++
++func (o plainFile) Close() error             { return closeNativeFile(o.file) }
++func (o plainFile) RetirementComplete() bool { return o.file.RetirementComplete() }
++
++type plainNested struct{ owner vfs.CleanupOwner }
++
++func (o plainNested) Close() error             { return nativeFileError(o.owner.Close()) }
++func (o plainNested) RetirementComplete() bool { return vfs.CleanupComplete(o.owner) }
++
++// An unsafe internal error graph cannot establish a retirement order. Retain
++// this opaque obligation and every protector, without retrying any native call.
++type plainTerminal struct{ cause error }
++
++func (o plainTerminal) Close() error             { return o.cause }
++func (o plainTerminal) RetirementComplete() bool { return false }
++
++type plainRetirement struct {
++	mu            sync.Mutex
++	registry      *plainRetirementRegistry
++	main          plainResource
++	nested        []plainResource
++	started, done bool
++	cause         error // first operation/cleanup error only, never a chain of retries
++	pending       atomic.Pointer[plainCleanupError]
++}
++
++func (g *plainRetirement) releaseLocked() {
++	g.main, g.nested, g.cause = nil, nil, nil
++	g.done = true
++	g.pending.Store(nil)
++	g.registry.mu.Lock()
++	delete(g.registry.groups, g)
++	g.registry.mu.Unlock()
++}
++
++// walkPlainErrors bounds both the node count and traversal storage. Recognized
++// tokens are leaves; their owners were already adopted when the token was made.
++func walkPlainErrors(input error, visit func(error)) error {
++	stack := []error{input}
++	count := 0
++	limit := func() error {
++		return fmt.Errorf("%w: plaintext cleanup error tree exceeds %d nodes; retain tokens and retry smaller trees", ErrLimit, maxPlainCleanupErrorNodes)
++	}
++	for len(stack) != 0 {
++		if count >= maxPlainCleanupErrorNodes {
++			return limit()
++		}
++		e := stack[len(stack)-1]
++		stack = stack[:len(stack)-1]
++		count++
++		if visit != nil {
++			visit(e)
++		}
++		switch x := e.(type) {
++		case *plainCleanupError:
++		case interface{ Unwrap() []error }:
++			children := x.Unwrap()
++			if len(children) > maxPlainCleanupErrorNodes-count-len(stack) {
++				return limit()
++			}
++			for i := len(children) - 1; i >= 0; i-- {
++				stack = append(stack, children[i])
++			}
++		case interface{ Unwrap() error }:
++			stack = append(stack, x.Unwrap())
++		}
++	}
++	return nil
++}
++
++func (g *plainRetirement) adoptLocked(cause error) error {
++	if cause == nil {
++		return nil
++	}
++	owners, err := vfs.CleanupOwnersBounded(cause, maxPlainCleanupErrorNodes)
++	if err != nil {
++		// Keep opaque ownership reachable without exposing an unsafe Unwrap tree.
++		opaque := &plainUnsafeCause{retained: cause, diagnostic: errors.Join(ErrLimit, err)}
++		g.nested = append(g.nested, plainTerminal{opaque})
++		return opaque
++	}
++	for _, owner := range owners {
++		g.nested = append(g.nested, plainNested{owner})
++	}
++	return cause
++}
++
++func (g *plainRetirement) pendingLocked(cause error) error {
++	e := &plainCleanupError{group: g, cause: cause}
++	g.pending.Store(e)
++	return e
++}
++
++// observe is called before a live Reader can discard an operation's error.
++// Once ownership failure poisons that Reader, no further native read is allowed.
++// Explicit live retry can retire nested failed probes, but never its main file.
++func (g *plainRetirement) observe(cause error) error {
++	if cause == nil || g == nil {
++		return cause
++	}
++	g.mu.Lock()
++	defer g.mu.Unlock()
++	if g.done || g.started || g.cause != nil {
++		return cause
++	}
++	cause = g.adoptLocked(cause)
++	if len(g.nested) == 0 {
++		return cause
++	}
++	g.cause = errors.Join(ErrPoisoned, cause)
++	return g.pendingLocked(g.cause)
++}
++func (g *plainRetirement) check() error {
++	if g == nil {
++		return nil
++	}
++	g.mu.Lock()
++	defer g.mu.Unlock()
++	if g.started || g.done {
++		return ErrClosed
++	}
++	if e := g.pending.Load(); e != nil {
++		return e
++	}
++	return g.cause
++}
++
++// RetirementComplete, not Close's diagnostic, controls each stage. A consumed
++// close error can advance; nil from an incomplete owner cannot release main.
++func (g *plainRetirement) retireLocked() error {
++	var errs []error
++	step := func(owner plainResource) bool {
++		if owner.RetirementComplete() {
++			return true
++		}
++		err := owner.Close()
++		if err != nil {
++			errs = append(errs, err)
++		}
++		if owner.RetirementComplete() {
++			return true
++		}
++		if err == nil {
++			errs = append(errs, ErrPoisoned)
++		}
++		return false
++	}
++	for len(g.nested) != 0 {
++		if !step(g.nested[0]) {
++			return errors.Join(errs...)
++		}
++		g.nested[0] = nil
++		g.nested = g.nested[1:]
++	}
++	if !g.started {
++		g.pending.Store(nil)
++		return errors.Join(errs...)
++	}
++	if g.main != nil && !step(g.main) {
++		return errors.Join(errs...)
++	}
++	g.releaseLocked()
++	return errors.Join(errs...)
++}
++func (g *plainRetirement) begin(cause error) error {
++	g.mu.Lock()
++	defer g.mu.Unlock()
++	if g.started || g.done {
++		return g.retryLocked()
++	}
++	g.started = true
++	cause = g.adoptLocked(cause) // operation obligations precede all protector retirement
++	original := errors.Join(g.cause, cause)
++	err := g.retireLocked()
++	if g.done {
++		return errors.Join(original, err)
++	}
++	g.cause = errors.Join(original, err)
++	return g.pendingLocked(g.cause)
++}
++func (g *plainRetirement) retryLocked() error {
++	if g.done || (!g.started && len(g.nested) == 0) {
++		return nil
++	}
++	err := g.retireLocked()
++	if g.done || (!g.started && len(g.nested) == 0) {
++		return err
++	}
++	return g.pendingLocked(errors.Join(g.cause, err))
++}
++func (g *plainRetirement) retry() error {
++	g.mu.Lock()
++	defer g.mu.Unlock()
++	return g.retryLocked()
++}
++
++type plainCleanupError struct {
++	group *plainRetirement
++	cause error
++}
++
++func (e *plainCleanupError) Error() string {
++	return fmt.Sprintf("%v: %v", ErrPlaintextCleanupPending, e.cause)
++}
++func (e *plainCleanupError) Unwrap() []error {
++	return []error{ErrPlaintextCleanupPending, ErrPoisoned, e.cause}
++}
++
++func (r *plainRetirementRegistry) snapshot() []error {
++	r.mu.Lock()
++	defer r.mu.Unlock()
++	var out []error
++	for g := range r.groups {
++		if e := g.pending.Load(); e != nil {
++			out = append(out, e)
++		}
++	}
++	return out
++}
++func PendingPlaintextCleanups() []error { return plainRetirements.snapshot() }
++func RetryPlaintextCleanup(input error) error {
++	seen := make(map[*plainRetirement]bool)
++	var groups []*plainRetirement
++	err := walkPlainErrors(input, func(e error) {
++		if token, ok := e.(*plainCleanupError); ok && token != nil && !seen[token.group] {
++			seen[token.group] = true
++			groups = append(groups, token.group)
++		}
++	})
++	if err != nil {
++		return err
++	} // complete discovery before any retirement effect
++	var errs []error
++	for _, g := range groups {
++		if err := g.retry(); err != nil {
++			errs = append(errs, err)
++		}
++	}
++	return errors.Join(errs...)
++}
++
++// retained is deliberately not exposed through Unwrap or formatted.
++type plainUnsafeCause struct {
++	retained   error
++	diagnostic error
++}
++
++func (e *plainUnsafeCause) Error() string {
++	return "plaintext cleanup retained an unsafe internal error graph"
++}
++func (e *plainUnsafeCause) Unwrap() []error { return []error{ErrPoisoned, e.diagnostic} }
+diff --git a/internal/pager/plain_cleanup_test.go b/internal/pager/plain_cleanup_test.go
+new file mode 100644
+--- /dev/null
++++ b/internal/pager/plain_cleanup_test.go
+@@ -0,0 +1,400 @@
++package pager
++
++import (
++	"context"
++	"database/sql"
++	"database/sql/driver"
++	"errors"
++	"fmt"
++	"reflect"
++	"sync"
++	"testing"
++	"time"
++
++	"github.com/ms-xiaosnow/gosqlite/internal/vfs"
++)
++
++// Every exceptional owner below is memory-only: no descriptors, paths, native
++// locks, mappings or filesystem fault hooks participate in these state laws.
++type plainMemoryOwner struct {
++	name                                 string
++	events                               *[]string
++	calls, rawCalls, remaining           int
++	done, consumed, terminal, nilPending bool
++	cause                                error
++	statusEntered, statusResume          chan struct{}
++	closeEntered, closeResume            chan struct{}
++}
++
++func (o *plainMemoryOwner) RetirementComplete() bool {
++	if o.statusEntered != nil {
++		close(o.statusEntered)
++		<-o.statusResume
++		o.statusEntered = nil
++	}
++	return o.done
++}
++func (o *plainMemoryOwner) Close() error {
++	o.calls++
++	if o.events != nil {
++		*o.events = append(*o.events, o.name)
++	}
++	if o.closeEntered != nil {
++		close(o.closeEntered)
++		<-o.closeResume
++		o.closeEntered = nil
++	}
++	if o.terminal {
++		if o.rawCalls == 0 {
++			o.rawCalls++
++		}
++		return o.cause
++	}
++	if o.nilPending {
++		return nil
++	}
++	o.rawCalls++
++	if o.remaining > 0 {
++		o.remaining--
++		return o.cause
++	}
++	o.done = true
++	if o.consumed {
++		return o.cause
++	}
++	return nil
++}
++func plainMemoryGroup(t *testing.T, r *plainRetirementRegistry) (*plainRetirement, *plainMemoryOwner, *plainMemoryOwner, *[]string) {
++	t.Helper()
++	g, err := r.reserve()
++	if err != nil {
++		t.Fatal(err)
++	}
++	events := new([]string)
++	child := &plainMemoryOwner{name: "child", events: events, cause: errors.New("memory child diagnostic")}
++	main := &plainMemoryOwner{name: "main", events: events, cause: errors.New("memory main diagnostic")}
++	g.nested = []plainResource{child}
++	g.main = main
++	return g, child, main, events
++}
++func TestPlainCleanupMemoryStagesAndConsumedDiagnostics(t *testing.T) {
++	for _, stage := range []string{"child", "main"} {
++		t.Run(stage, func(t *testing.T) {
++			reg := &plainRetirementRegistry{limit: 1}
++			g, child, main, events := plainMemoryGroup(t, reg)
++			failing := child
++			if stage == "main" {
++				failing = main
++			}
++			failing.remaining = 1
++			original := errors.New("memory original")
++			token := g.begin(original)
++			if !errors.Is(token, ErrPlaintextCleanupPending) || !errors.Is(token, ErrPoisoned) || !errors.Is(token, original) {
++				t.Fatal(token)
++			}
++			if stage == "child" && main.calls != 0 {
++				t.Fatal("main released below child")
++			}
++			if len(reg.snapshot()) != 1 {
++				t.Fatal("lost snapshot")
++			}
++			if _, err := reg.reserve(); !errors.Is(err, ErrLimit) {
++				t.Fatal("lost admission", err)
++			}
++			failing.consumed = true
++			err := RetryPlaintextCleanup(fmt.Errorf("wrapped: %w", token))
++			if !errors.Is(err, failing.cause) || errors.Is(err, ErrPlaintextCleanupPending) {
++				t.Fatal("diagnostic confused with ownership", err)
++			}
++			if !g.done || len(reg.groups) != 0 || g.main != nil || g.nested != nil || g.cause != nil {
++				t.Fatal("retired group retains state")
++			}
++			before := append([]string(nil), (*events)...)
++			if err := RetryPlaintextCleanup(token); err != nil || !reflect.DeepEqual(before, *events) {
++				t.Fatal("repeated retired owner", err)
++			}
++			if !errors.Is(token, ErrPlaintextCleanupPending) {
++				t.Fatal("historical token mutated")
++			}
++		})
++	}
++}
++func TestPlainCleanupMemoryTerminalNilAndBoundedHistory(t *testing.T) {
++	for _, nilPending := range []bool{false, true} {
++		reg := &plainRetirementRegistry{limit: 1}
++		g, child, main, _ := plainMemoryGroup(t, reg)
++		child.terminal, child.nilPending = !nilPending, nilPending
++		token := g.begin(nil)
++		original := token
++		first := g.cause
++		for i := 0; i < 5000; i++ {
++			child.cause = fmt.Errorf("memory diagnostic %d", i)
++			token = RetryPlaintextCleanup(token)
++			if !errors.Is(token, ErrPlaintextCleanupPending) || g.cause != first {
++				t.Fatal("history unbounded", token)
++			}
++		}
++		if main.calls != 0 || len(reg.groups) != 1 {
++			t.Fatal("terminal lost protector")
++		}
++		if !nilPending && child.rawCalls != 1 {
++			t.Fatal("terminal numeric owner replayed")
++		}
++		snapshot := reg.snapshot()
++		snapshot[0] = nil
++		if reg.snapshot()[0] == nil || !errors.Is(original, ErrPlaintextCleanupPending) {
++			t.Fatal("mutable snapshot")
++		}
++	}
++}
++func TestPlainCleanupMemoryAdmission1024(t *testing.T) {
++	reg := &plainRetirementRegistry{limit: maxPlainRetirements}
++	var groups []*plainRetirement
++	for i := 0; i < maxPlainRetirements; i++ {
++		g, e := reg.reserve()
++		if e != nil {
++			t.Fatal(i, e)
++		}
++		groups = append(groups, g)
++	}
++	if len(reg.snapshot()) != 0 {
++		t.Fatal("ordinary opening/live reservation is pending")
++	}
++	if _, e := reg.reserve(); !errors.Is(e, ErrLimit) {
++		t.Fatal(e)
++	}
++	for _, g := range groups {
++		if e := g.begin(nil); e != nil {
++			t.Fatal(e)
++		}
++	}
++	if len(reg.groups) != 0 {
++		t.Fatal("empty failed constructor retained")
++	}
++}
++
++type plainMemoryCycle struct{}
++
++func (plainMemoryCycle) Error() string   { return "memory cycle" }
++func (e plainMemoryCycle) Unwrap() error { return e }
++func TestPlainCleanupMemoryDiscoveryBeforeEffects(t *testing.T) {
++	reg := &plainRetirementRegistry{limit: 2}
++	a, ac, _, _ := plainMemoryGroup(t, reg)
++	b, bc, _, _ := plainMemoryGroup(t, reg)
++	ac.remaining, bc.remaining = 1, 2
++	x, y := a.begin(nil), b.begin(nil)
++	wide := make([]error, maxPlainCleanupErrorNodes)
++	for i := range wide {
++		wide[i] = x
++	}
++	for _, input := range []error{errors.Join(x, plainMemoryCycle{}), errors.Join(wide...)} {
++		e := RetryPlaintextCleanup(input)
++		if !errors.Is(e, ErrLimit) || errors.Is(e, ErrPlaintextCleanupPending) || ac.calls != 1 || bc.calls != 1 {
++			t.Fatal("partial discovery effects", e)
++		}
++	}
++	e := RetryPlaintextCleanup(errors.Join(x, fmt.Errorf("duplicate: %w", x), y))
++	if !a.done || b.done || ac.calls != 2 || bc.calls != 2 || !errors.Is(e, bc.cause) {
++		t.Fatal("distinct groups", e)
++	}
++	if e = RetryPlaintextCleanup(e); e != nil || !b.done {
++		t.Fatal(e)
++	}
++	for _, input := range []error{nil, errors.New("ordinary")} {
++		if e = RetryPlaintextCleanup(input); e != nil {
++			t.Fatal(e)
++		}
++	}
++	// An exactly 4096-node chain is permitted.
++	var chain error = x
++	for i := 1; i < maxPlainCleanupErrorNodes; i++ {
++		chain = fmt.Errorf("wrapper: %w", chain)
++	}
++	if e = RetryPlaintextCleanup(chain); e != nil {
++		t.Fatal(e)
++	}
++	if e = RetryPlaintextCleanup(fmt.Errorf("extra: %w", chain)); !errors.Is(e, ErrLimit) {
++		t.Fatal(e)
++	}
++}
++func TestPlainCleanupMemoryUnsafeInternalCauseBarrier(t *testing.T) {
++	reg := &plainRetirementRegistry{limit: 1}
++	g, _, main, _ := plainMemoryGroup(t, reg)
++	g.nested = nil
++	token := g.begin(plainMemoryCycle{})
++	if !errors.Is(token, ErrPlaintextCleanupPending) || !errors.Is(token, ErrLimit) || main.calls != 0 {
++		t.Fatal("unsafe graph released protector", token)
++	}
++	if e := RetryPlaintextCleanup(token); !errors.Is(e, ErrPlaintextCleanupPending) || main.calls != 0 {
++		t.Fatal(e)
++	}
++}
++func TestPlainCleanupMemoryLiveRetryAndReaderInvalidation(t *testing.T) {
++	reg := &plainRetirementRegistry{limit: 1}
++	g, child, main, _ := plainMemoryGroup(t, reg)
++	g.cause = errors.Join(ErrPoisoned, child.cause)
++	token := g.pendingLocked(g.cause)                // mirrors a failed read-time managed probe
++	reader := &Reader{file: &vfs.File{}, cleanup: g} // descriptor-free placeholder, never operated
++	if _, e := reader.ReadPage(context.Background(), 1); !errors.Is(e, ErrPoisoned) {
++		t.Fatal(e)
++	}
++	if e := reader.ValidatePlaintextCopySource(); !errors.Is(e, ErrPoisoned) {
++		t.Fatal(e)
++	}
++	if e := RetryPlaintextCleanup(token); e != nil || main.calls != 0 || g.done {
++		t.Fatal("live retry closed reader", e)
++	}
++	if len(reg.snapshot()) != 0 || len(reg.groups) != 1 {
++		t.Fatal("live retry ownership")
++	}
++	if e := g.check(); !errors.Is(e, ErrPoisoned) {
++		t.Fatal("live reader unpoisoned", e)
++	}
++	main.remaining = 1
++	e := reader.Close()
++	if !reader.closed || reader.file != nil || !errors.Is(e, ErrPlaintextCleanupPending) {
++		t.Fatal(e)
++	}
++	if _, e = reader.ReadPage(context.Background(), 1); !errors.Is(e, ErrClosed) {
++		t.Fatal(e)
++	}
++	if e = reader.Close(); e != nil || !g.done || main.calls != 2 {
++		t.Fatal(e)
++	}
++	if e = reader.Close(); e != nil || main.calls != 2 {
++		t.Fatal(e)
++	}
++}
++func TestPlainCleanupMemoryAdmissionIndependentOfOwnerLocks(t *testing.T) {
++	for _, blockStatus := range []bool{false, true} {
++		reg := &plainRetirementRegistry{limit: 2}
++		g, child, _, _ := plainMemoryGroup(t, reg)
++		child.remaining = 1
++		token := g.begin(nil)
++		entered, resume := make(chan struct{}), make(chan struct{})
++		if blockStatus {
++			child.statusEntered, child.statusResume = entered, resume
++		} else {
++			child.closeEntered, child.closeResume = entered, resume
++		}
++		result := make(chan error, 1)
++		go func() { result <- RetryPlaintextCleanup(token) }()
++		<-entered
++		independent := make(chan error, 1)
++		go func() {
++			if len(reg.snapshot()) != 1 {
++				independent <- errors.New("missing pending token")
++				return
++			}
++			other, e := reg.reserve()
++			if e == nil {
++				e = other.begin(nil)
++			}
++			independent <- e
++		}()
++		select {
++		case e := <-independent:
++			if e != nil {
++				t.Fatal(e)
++			}
++		case <-time.After(3 * time.Second):
++			close(resume)
++			t.Fatal("owner blocked global admission")
++		}
++		var wg sync.WaitGroup
++		for i := 0; i < 20; i++ {
++			wg.Add(1)
++			go func() {
++				defer wg.Done()
++				if e := RetryPlaintextCleanup(token); e != nil {
++					t.Error(e)
++				}
++			}()
++		}
++		close(resume)
++		if e := <-result; e != nil {
++			t.Fatal(e)
++		}
++		wg.Wait()
++		if child.calls != 2 || len(reg.groups) != 0 {
++			t.Fatal("concurrent duplicate retirement")
++		}
++	}
++}
++
++// Actual database/sql disposal over memory-only owners proves that discarding a
++// driver Close result does not discard the scope. No real native failure runs.
++type plainMemoryConnector struct {
++	g     *plainRetirement
++	reset bool
++}
++
++func (c plainMemoryConnector) Connect(context.Context) (driver.Conn, error) {
++	return &plainMemoryConn{c.g, c.reset}, nil
++}
++func (c plainMemoryConnector) Driver() driver.Driver { return c }
++func (c plainMemoryConnector) Open(string) (driver.Conn, error) {
++	return c.Connect(context.Background())
++}
++
++type plainMemoryConn struct {
++	g     *plainRetirement
++	reset bool
++}
++
++func (c *plainMemoryConn) Prepare(string) (driver.Stmt, error) { return nil, errors.New("unused") }
++func (c *plainMemoryConn) Begin() (driver.Tx, error)           { return nil, errors.New("unused") }
++func (c *plainMemoryConn) Close() error                        { return c.g.begin(nil) }
++func (c *plainMemoryConn) Ping(context.Context) error          { return nil }
++func (c *plainMemoryConn) ResetSession(context.Context) error {
++	if c.reset {
++		return driver.ErrBadConn
++	}
++	return nil
++}
++func TestPlainCleanupMemoryDatabaseSQLDiscardedClose(t *testing.T) {
++	for _, reset := range []bool{false, true} {
++		reg := &plainRetirementRegistry{limit: 1}
++		g, child, main, _ := plainMemoryGroup(t, reg)
++		child.terminal = true
++		pool := sql.OpenDB(plainMemoryConnector{g, reset})
++		if !reset {
++			pool.SetMaxIdleConns(0)
++		}
++		if e := pool.PingContext(context.Background()); e != nil {
++			t.Fatal(e)
++		}
++		if reset {
++			_ = pool.PingContext(context.Background())
++		}
++		if e := pool.Close(); e != nil && !errors.Is(e, ErrPlaintextCleanupPending) {
++			t.Fatal(e)
++		}
++		tokens := reg.snapshot()
++		if len(tokens) != 1 || main.calls != 0 {
++			t.Fatal("discarded error lost owner")
++		}
++		child.terminal = false
++		if e := RetryPlaintextCleanup(errors.Join(tokens...)); e != nil || !g.done {
++			t.Fatal(e)
++		}
++	}
++}
++
++func TestPlainCleanupMemoryNoDBFailedConstructorSnapshot(t *testing.T) {
++	reg := &plainRetirementRegistry{limit: 1}
++	g, e := reg.reserve()
++	if e != nil {
++		t.Fatal(e)
++	}
++	nested := &plainMemoryOwner{remaining: 1, cause: errors.New("memory nested constructor owner")}
++	g.nested = []plainResource{nested}
++	original := errors.New("memory constructor returns no Reader")
++	e = g.begin(original)
++	if !errors.Is(e, ErrPlaintextCleanupPending) || !errors.Is(e, original) || len(reg.snapshot()) != 1 || g.main != nil {
++		t.Fatal(e)
++	}
++	if e = RetryPlaintextCleanup(reg.snapshot()[0]); e != nil || !g.done || len(reg.groups) != 0 {
++		t.Fatal(e)
++	}
++}
+diff --git a/internal/vfs/cleanup_bounded.go b/internal/vfs/cleanup_bounded.go
+new file mode 100644
+--- /dev/null
++++ b/internal/vfs/cleanup_bounded.go
+@@ -0,0 +1,116 @@
++package vfs
++
++import "errors"
++
++// ErrCleanupLimit means an error graph could not be safely discovered in the
++// caller's budget. The refusal never wraps that possibly cyclic input.
++var ErrCleanupLimit = errors.New("native cleanup error discovery limit exceeded")
++
++// CleanupOwnersBounded is a single-pass, bounded form of CleanupOwners for
++// scopes that can receive caller-provided error implementations. It invokes
++// each encountered wrapper's Unwrap only during this traversal; a separate
++// validation pass would not constrain a stateful wrapper's second result.
++// On refusal, no ownership operation occurs and the caller must retain input
++// opaquely with all its protectors. Allocations inside Unwrap remain caller code.
++func CleanupOwnersBounded(input error, limit int) ([]CleanupOwner, error) {
++	type identity struct {
++		file     *File
++		terminal *cleanupError
++	}
++	type node struct {
++		owner CleanupOwner
++		deps  []*node
++		state uint8
++	}
++	nodes := make(map[identity]*node)
++	seen := make(map[*cleanupError]bool)
++	var order []*node
++	count := 0
++	var refusal error
++	var collect func(error) []*node
++	collect = func(err error) []*node {
++		if refusal != nil {
++			return nil
++		}
++		if count >= limit {
++			refusal = ErrCleanupLimit
++			return nil
++		}
++		count++
++		if err == nil {
++			return nil
++		}
++		switch e := err.(type) {
++		case *cleanupError:
++			id := identity{file: e.file}
++			if e.file == nil {
++				id.terminal = e
++			}
++			n := nodes[id]
++			if n == nil {
++				n = &node{owner: e}
++				nodes[id] = n
++				order = append(order, n)
++			}
++			if !seen[e] {
++				seen[e] = true
++				for _, child := range collect(e.cause) {
++					if child != n {
++						n.deps = append(n.deps, child)
++					}
++				}
++			}
++			return []*node{n}
++		case interface{ Unwrap() []error }:
++			children := e.Unwrap()
++			if len(children) > limit-count {
++				refusal = ErrCleanupLimit
++				return nil
++			}
++			var out []*node
++			for _, child := range children {
++				out = append(out, collect(child)...)
++				if refusal != nil {
++					return nil
++				}
++			}
++			return out
++		case interface{ Unwrap() error }:
++			return collect(e.Unwrap())
++		}
++		return nil
++	}
++	collect(input)
++	if refusal != nil {
++		return nil, refusal
++	}
++	var out []CleanupOwner
++	var emit func(*node) bool
++	emit = func(n *node) bool {
++		if n.state == 1 {
++			return false
++		}
++		if n.state == 2 {
++			return true
++		}
++		n.state = 1
++		for _, child := range n.deps {
++			if !emit(child) {
++				return false
++			}
++		}
++		n.state = 2
++		out = append(out, n.owner)
++		return true
++	}
++	for _, n := range order {
++		if !emit(n) {
++			out = []CleanupOwner{terminalCleanup(errors.Join(ErrPoisoned, input, errors.New("native cleanup ownership dependency cycle")))}
++			for _, n := range order {
++				out = append(out, n.owner)
++			}
++			return out, nil
++		}
++	}
++	return out, nil
++}
+diff --git a/internal/vfs/cleanup_bounded_test.go b/internal/vfs/cleanup_bounded_test.go
+new file mode 100644
+--- /dev/null
++++ b/internal/vfs/cleanup_bounded_test.go
+@@ -0,0 +1,64 @@
++package vfs
++
++import (
++	"errors"
++	"fmt"
++	"testing"
++)
++
++type boundedCleanupCycle struct{}
++
++func (boundedCleanupCycle) Error() string   { return "memory cycle" }
++func (e boundedCleanupCycle) Unwrap() error { return e }
++
++type boundedChangingWrapper struct {
++	calls int
++	first error
++}
++
++func (e *boundedChangingWrapper) Error() string { return "memory stateful wrapper" }
++func (e *boundedChangingWrapper) Unwrap() error {
++	e.calls++
++	if e.calls == 1 {
++		return e.first
++	}
++	return boundedCleanupCycle{}
++}
++func TestCleanupOwnersBoundedMemorySinglePassAndLimits(t *testing.T) {
++	file := &File{}
++	child := retainedFileCleanup(file, errors.New("memory cause"))
++	wrapper := &boundedChangingWrapper{first: child}
++	owners, e := CleanupOwnersBounded(wrapper, 4096)
++	if e != nil || len(owners) != 1 || wrapper.calls != 1 || !CleanupComplete(owners[0]) {
++		t.Fatal(owners, e, wrapper.calls)
++	}
++	for _, input := range []error{boundedCleanupCycle{}, errors.Join(child, boundedCleanupCycle{})} {
++		if owners, e = CleanupOwnersBounded(input, 4096); !errors.Is(e, ErrCleanupLimit) || len(owners) != 0 {
++			t.Fatal(e)
++		}
++	}
++	var chain error = errors.New("leaf")
++	for i := 1; i < 4096; i++ {
++		chain = fmt.Errorf("wrap: %w", chain)
++	}
++	if _, e = CleanupOwnersBounded(chain, 4096); e != nil {
++		t.Fatal(e)
++	}
++	if _, e = CleanupOwnersBounded(fmt.Errorf("extra: %w", chain), 4096); !errors.Is(e, ErrCleanupLimit) {
++		t.Fatal(e)
++	}
++}
++func TestCleanupOwnersBoundedMemoryDependencies(t *testing.T) {
++	parent, one, two := &File{}, &File{}, &File{}
++	first := retainedFileCleanup(parent, retainedFileCleanup(one, errors.New("one")))
++	second := retainedFileCleanup(parent, retainedFileCleanup(two, errors.New("two")))
++	owners, e := CleanupOwnersBounded(errors.Join(first, second), 4096)
++	if e != nil || len(owners) != 3 || owners[0].(*cleanupError).file != one || owners[1].(*cleanupError).file != two || owners[2].(*cleanupError).file != parent {
++		t.Fatal(owners, e)
++	}
++	cycle := errors.Join(retainedFileCleanup(parent, retainedFileCleanup(one, errors.New("forward"))), retainedFileCleanup(one, retainedFileCleanup(parent, errors.New("back"))))
++	owners, e = CleanupOwnersBounded(cycle, 4096)
++	if e != nil || len(owners) != 3 || CleanupComplete(owners[0]) || !errors.Is(owners[0].Close(), ErrPoisoned) {
++		t.Fatal(owners, e)
++	}
++}
+diff --git a/internal/vfs/metadata_default.go b/internal/vfs/metadata_default.go
+--- a/internal/vfs/metadata_default.go
++++ b/internal/vfs/metadata_default.go
+@@ -24,3 +24,14 @@
+ 	return os.Stat(filepath.Dir(f.path))
+ }
+ func statParentPath(path string) (os.FileInfo, error) { return os.Stat(path) }
++
++// ResolvePathForCreate distinguishes conclusive initial absence from other
++// resolver errors. This platform's path inspection acquires no native handles.
++func ResolvePathForCreate(path string) (string, bool, error) {
++	resolved, err := ResolvePath(path)
++	return resolved, ordinaryPathAbsence(err), err
++}
++func LstatForCreate(path string) (os.FileInfo, bool, error) {
++	info, err := Lstat(path)
++	return info, ordinaryPathAbsence(err), err
++}
+diff --git a/internal/vfs/metadata_windows.go b/internal/vfs/metadata_windows.go
+--- a/internal/vfs/metadata_windows.go
++++ b/internal/vfs/metadata_windows.go
+@@ -70,18 +70,20 @@
+ }
+ 
+ func winStatPath(path string, follow bool) (os.FileInfo, error) {
++	info, _, err := winStatPathForCreate(path, follow)
++	return info, err
++}
++
++func winStatPathForCreate(path string, follow bool) (os.FileInfo, bool, error) {
+ 	p, err := filepath.Abs(path)
+ 	if err != nil {
+-		return nil, err
++		return nil, false, err
+ 	}
+ 	// Temporary metadata probes permit delete sharing so they are compatible
+ 	// with explicitly replaceable WAL leases. The actual file and retained
+ 	// parent keep their stricter sharing policy throughout this observation.
+ 	o, err := winOpenMetadata(p, follow, true)
+-	if err != nil {
+-		return nil, err
+-	}
+-	return observeMetadata(&winMetadataOwners, o, func(h uintptr) (os.FileInfo, error) {
++	return observeMetadataForCreate(&winMetadataOwners, o, err, func(h uintptr) (os.FileInfo, error) {
+ 		return winSnapshot(windows.Handle(h), p)
+ 	}, winCloseMetadataHandle)
+ }
+@@ -110,15 +112,19 @@
+ // aliases only while choosing the canonical file family; Open still inspects
+ // its final component without following and retains its checked parent.
+ func ResolvePath(path string) (string, error) {
++	resolved, _, err := ResolvePathForCreate(path)
++	return resolved, err
++}
++
++// ResolvePathForCreate reports absence only when the first metadata open
++// acquired no handle. All post-acquisition inspection errors fail closed.
++func ResolvePathForCreate(path string) (string, bool, error) {
+ 	p, err := filepath.Abs(path)
+ 	if err != nil {
+-		return "", err
++		return "", false, err
+ 	}
+ 	o, err := winOpenMetadata(p, true, true)
+-	if err != nil {
+-		return "", err
+-	}
+-	return observeMetadata(&winMetadataOwners, o, func(raw uintptr) (string, error) {
++	return observeMetadataForCreate(&winMetadataOwners, o, err, func(raw uintptr) (string, error) {
+ 		h := windows.Handle(raw)
+ 		if _, err := winSnapshot(h, p); err != nil {
+ 			return "", err
+@@ -133,3 +139,8 @@
+ 		return resolved, nil
+ 	}, winCloseMetadataHandle)
+ }
++
++// LstatForCreate applies the same no-handle provenance to the nofollow probe.
++func LstatForCreate(path string) (os.FileInfo, bool, error) {
++	return winStatPathForCreate(path, false)
++}
+diff --git a/internal/vfs/path_absence.go b/internal/vfs/path_absence.go
+new file mode 100644
+--- /dev/null
++++ b/internal/vfs/path_absence.go
+@@ -0,0 +1,67 @@
++package vfs
++
++import (
++	"os"
++	"syscall"
++)
++
++// ordinaryPathAbsence accepts only one ordinary NotExist cause. It is called
++// at a no-handle failure boundary; inspection/retirement errors never reach it.
++// Limit both work and scratch storage without errors.Is on an arbitrary graph.
++func ordinaryPathAbsence(cause error) bool {
++	const limit = 4096
++	stack := []error{cause}
++	leaves, count := 0, 0
++	for len(stack) != 0 {
++		if count >= limit {
++			return false
++		}
++		e := stack[len(stack)-1]
++		stack = stack[:len(stack)-1]
++		count++
++		if e == nil {
++			continue
++		}
++		missing := e == os.ErrNotExist
++		if code, ok := e.(syscall.Errno); ok {
++			missing = code.Is(os.ErrNotExist)
++		}
++		if missing {
++			leaves++
++			if leaves > 1 {
++				return false
++			}
++			continue
++		}
++		switch x := e.(type) {
++		case interface{ Unwrap() []error }:
++			children := x.Unwrap()
++			if len(children) == 0 || len(children) > limit-count-len(stack) {
++				return false
++			}
++			stack = append(stack, children...)
++		case interface{ Unwrap() error }:
++			child := x.Unwrap()
++			if child == nil {
++				return false
++			}
++			stack = append(stack, child)
++		default:
++			return false
++		}
++	}
++	return leaves == 1
++}
++
++// observeMetadataForCreate preserves whether the initial metadata open failed
++// before acquiring a handle. A later inspection error cannot become creation
++// authority merely because cleanup completed or it happens to match NotExist.
++// Callbacks are immediate, never retained, and memory laws use no descriptors.
++func observeMetadataForCreate[T any](r *metadataOwners, o *metadataOwner, openErr error, inspect func(uintptr) (T, error), closeHandle func(uintptr) error) (T, bool, error) {
++	if openErr != nil {
++		var zero T
++		return zero, o == nil && ordinaryPathAbsence(openErr), openErr
++	}
++	value, err := observeMetadata(r, o, inspect, closeHandle)
++	return value, false, err
++}
+diff --git a/internal/vfs/path_absence_test.go b/internal/vfs/path_absence_test.go
+new file mode 100644
+--- /dev/null
++++ b/internal/vfs/path_absence_test.go
+@@ -0,0 +1,66 @@
++package vfs
++
++import (
++	"errors"
++	"fmt"
++	"os"
++	"syscall"
++	"testing"
++)
++
++// Memory callbacks use inert integer identifiers, never native resources.
++func TestPathAbsenceMemoryInitialOpenOnly(t *testing.T) {
++	for _, cause := range []error{os.ErrNotExist, syscall.ENOENT, &os.PathError{Op: "memory", Path: "memory", Err: syscall.ENOENT}, fmt.Errorf("memory: %w", os.ErrNotExist), errors.Join(os.ErrNotExist)} {
++		r := metadataOwners{limit: 1}
++		o, err := r.open(func() (uintptr, error) { return 0, cause })
++		calls := 0
++		value, absent, got := observeMetadataForCreate(&r, o, err, func(uintptr) (string, error) { calls++; return "", nil }, func(uintptr) error { calls++; return nil })
++		if !absent || got != cause || value != "" || calls != 0 || len(r.live) != 0 {
++			t.Fatal("initial no-handle absence lost", absent, got, calls)
++		}
++	}
++}
++func TestPathAbsenceMemoryInspectionNeverAuthorizes(t *testing.T) {
++	for _, inspectErr := range []error{os.ErrNotExist, syscall.ENOENT, errors.Join(os.ErrNotExist), errors.Join(os.ErrNotExist, ErrIdentity), nil} {
++		for _, closeErr := range []error{nil, errors.New("memory retirement diagnostic")} {
++			r := metadataOwners{limit: 1}
++			o, err := r.open(func() (uintptr, error) { return 19, nil })
++			if err != nil {
++				t.Fatal(err)
++			}
++			closes := 0
++			value, absent, got := observeMetadataForCreate(&r, o, nil, func(h uintptr) (string, error) {
++				if h != 19 {
++					t.Fatal(h)
++				}
++				return "observed", inspectErr
++			}, func(h uintptr) error { closes++; return closeErr })
++			if absent || closes != 1 || errors.Is(got, os.ErrNotExist) != errors.Is(inspectErr, os.ErrNotExist) {
++				t.Fatal("post-acquisition error authorized creation", absent, got, closes)
++			}
++			if inspectErr != nil || closeErr != nil {
++				if value != "" || got == nil {
++					t.Fatal("failed observation published", value, got)
++				}
++			} else if value != "observed" || got != nil {
++				t.Fatal(value, got)
++			}
++		}
++	}
++}
++
++type pathAbsenceCycle struct{}
++
++func (*pathAbsenceCycle) Error() string   { return "memory cycle" }
++func (e *pathAbsenceCycle) Unwrap() error { return e }
++func TestPathAbsenceMemoryMixedAndBounded(t *testing.T) {
++	var over error = os.ErrNotExist
++	for i := 0; i < 4096; i++ {
++		over = errors.Join(over)
++	}
++	for _, cause := range []error{nil, ErrIdentity, errors.Join(os.ErrNotExist, ErrIdentity), errors.Join(os.ErrNotExist, errors.New("consumed diagnostic")), errors.Join(os.ErrNotExist, os.ErrNotExist), over, &pathAbsenceCycle{}} {
++		if ordinaryPathAbsence(cause) {
++			t.Fatal("ambiguous graph accepted")
++		}
++	}
++}
+diff --git a/sqlite/encryption_copy.go b/sqlite/encryption_copy.go
+--- a/sqlite/encryption_copy.go
++++ b/sqlite/encryption_copy.go
+@@ -135,7 +135,7 @@
+ // a different absent encrypted destination. It never modifies/deletes the
+ // plaintext source or erases existing plaintext copies. Native WAL imports are
+ // deliberately unsupported for this copy path.
+-func ImportEncrypted(ctx context.Context, sourcePath, destination string, plain Options, target EncryptionOptions) (EncryptionInfo, error) {
++func ImportEncrypted(ctx context.Context, sourcePath, destination string, plain Options, target EncryptionOptions) (_ EncryptionInfo, retErr error) {
+ 	if err := checkContext(ctx); err != nil {
+ 		return EncryptionInfo{}, wrap("encrypted import", err)
+ 	}
+@@ -151,12 +151,12 @@
+ 	if err != nil {
+ 		return EncryptionInfo{}, wrap("encrypted import", err)
+ 	}
+-	defer db.Close()
++	defer func() { retErr = wrapCleanup("encrypted import", retErr, db.Close()) }()
+ 	r, err := db.openReader(ctx)
+ 	if err != nil {
+ 		return EncryptionInfo{}, wrap("encrypted import", err)
+ 	}
+-	defer r.Close()
++	defer func() { retErr = wrapCleanup("encrypted import", retErr, r.Close()) }()
+ 	if err = r.ValidatePlaintextCopySource(); err != nil {
+ 		return EncryptionInfo{}, wrap("encrypted import", err)
+ 	}
+diff --git a/sqlite/path_default.go b/sqlite/path_default.go
+--- a/sqlite/path_default.go
++++ b/sqlite/path_default.go
+@@ -7,6 +7,8 @@
+ 	"fmt"
+ 	"os"
+ 	"path/filepath"
++
++	"github.com/ms-xiaosnow/gosqlite/internal/vfs"
+ )
+ 
+ // Keep the existing non-Windows canonicalization and encrypted final-link
+@@ -15,6 +17,9 @@
+ 	absolute, err := filepath.Abs(path)
+ 	if err != nil {
+ 		return "", err
++	}
++	if !encrypted {
++		return canonicalPlainOpenPath(absolute)
+ 	}
+ 	if encrypted {
+ 		if info, e := os.Lstat(absolute); e == nil && !info.Mode().IsRegular() {
+@@ -41,3 +46,29 @@
+ 	}
+ 	return canonical, nil
+ }
++
++// Plain creation decisions require conclusive path-only initial absence. The
++// encrypted branch above retains its existing final-link/canonical semantics.
++func canonicalPlainOpenPath(absolute string) (string, error) {
++	canonical, absent, err := vfs.ResolvePathForCreate(absolute)
++	if err == nil {
++		return canonical, nil
++	}
++	if !absent {
++		return "", err
++	}
++	parent, err := vfs.ResolvePath(filepath.Dir(absolute))
++	if err != nil {
++		return "", err
++	}
++	canonical = filepath.Join(parent, filepath.Base(absolute))
++	info, absent, err := vfs.LstatForCreate(canonical)
++	if err != nil {
++		if !absent {
++			return "", err
++		}
++	} else if info.Mode()&os.ModeSymlink != 0 {
++		return "", fmt.Errorf("%w: dangling database symlink", ErrUnsupported)
++	}
++	return canonical, nil
++}
+diff --git a/sqlite/path_windows.go b/sqlite/path_windows.go
+--- a/sqlite/path_windows.go
++++ b/sqlite/path_windows.go
+@@ -4,7 +4,6 @@
+ 
+ import (
+ 	"errors"
+-	"os"
+ 	"path/filepath"
+ 
+ 	"github.com/ms-xiaosnow/gosqlite/internal/encstore"
+@@ -23,11 +22,11 @@
+ 	if err != nil {
+ 		return "", err
+ 	}
+-	canonical, err := vfs.ResolvePath(absolute)
++	canonical, absent, err := vfs.ResolvePathForCreate(absolute)
+ 	if err == nil {
+ 		return canonical, nil
+ 	}
+-	if !errors.Is(err, os.ErrNotExist) {
++	if !absent {
+ 		return "", nativeOpenPathError(err)
+ 	}
+ 	parent, err := vfs.ResolvePath(filepath.Dir(absolute))
+@@ -37,11 +36,11 @@
+ 	canonical = filepath.Join(parent, filepath.Base(absolute))
+ 	// Lstat rejects reparse points through an owned nofollow probe. Report
+ 	// uncertainty as poison; never interpret it as permission to create.
+-	if info, err := vfs.Lstat(canonical); err == nil {
++	if info, absent, err := vfs.LstatForCreate(canonical); err == nil {
+ 		if !info.Mode().IsRegular() {
+ 			return "", ErrUnsupported
+ 		}
+-	} else if !errors.Is(err, os.ErrNotExist) {
++	} else if !absent {
+ 		return "", nativeOpenPathError(err)
+ 	}
+ 	return canonical, nil
+diff --git a/sqlite/plaintext_cleanup.go b/sqlite/plaintext_cleanup.go
+new file mode 100644
+--- /dev/null
++++ b/sqlite/plaintext_cleanup.go
+@@ -0,0 +1,43 @@
++package sqlite
++
++import "github.com/ms-xiaosnow/gosqlite/internal/pager"
++
++// ErrPlaintextCleanupPending marks an immutable historical cleanup token for an
++// ordinary rollback Reader. Such tokens match ErrPoisoned and carry CodeIOErr.
++// A close diagnostic without this marker can describe fully consumed ownership.
++var ErrPlaintextCleanupPending = pager.ErrPlaintextCleanupPending
++
++// RetryPlaintextCleanup deliberately attempts all distinct ordinary rollback
++// Reader groups in wrapped/joined errors. Discovery precedes effects and accepts
++// at most 4096 error nodes. Excessive/cyclic trees return ErrMemoryLimit without
++// cleanup or wrapping the unsafe tree; retain tokens and retry smaller trees.
++//
++// A live Reader token retries only failed nested probes, never its main file.
++// After Reader.Close, child obligations retire before the protecting main file.
++// Retries do not open paths, replay transactions, or retry numeric native handles.
++// Terminal ownership can remain pending indefinitely. Completed groups and errors
++// without tokens are no-ops, not proof every subsystem is clean. This increment
++// does not cover standalone transactions, WALShared, WALExclusive or encryption.
++func RetryPlaintextCleanup(err error) error {
++	return wrap("plaintext cleanup", pager.RetryPlaintextCleanup(err))
++}
++
++// PendingPlaintextCleanups returns a new snapshot of immutable pending rollback
++// Reader tokens, including failed opens and close errors discarded by database/sql.
++// Enumeration performs no cleanup; ordinary live and opening Readers are excluded.
++// At most 1024 opening/live/pending groups are admitted before pager acquisition.
++// There is no eviction, finalizer, automatic sweep, or wait on another group at
++// admission. Changing the returned slice does not change registry ownership.
++func PendingPlaintextCleanups() []error {
++	tokens := pager.PendingPlaintextCleanups()
++	for i, e := range tokens {
++		tokens[i] = wrap("plaintext cleanup", e)
++	}
++	return tokens
++}
++
++// Only conclusive initial absence can authorize creation. Missing-path errors
++// after acquisition, additional diagnostics and pending ownership fail closed.
++func plainProbeMissing(err error) bool {
++	return pager.ReaderProbeAbsent(err)
++}
+diff --git a/sqlite/plaintext_cleanup_internal_test.go b/sqlite/plaintext_cleanup_internal_test.go
+new file mode 100644
+--- /dev/null
++++ b/sqlite/plaintext_cleanup_internal_test.go
+@@ -0,0 +1,72 @@
++package sqlite
++
++import (
++	"errors"
++	"github.com/ms-xiaosnow/gosqlite/internal/pager"
++	"os"
++	"testing"
++)
++
++func TestPlaintextCleanupMemoryPublicClassification(t *testing.T) {
++	original := errors.New("memory cause")
++	e := wrap("close", errors.Join(pager.ErrPlaintextCleanupPending, pager.ErrPoisoned, ErrBusy, original))
++	var detail *Error
++	if !errors.Is(e, ErrPlaintextCleanupPending) || !errors.Is(e, ErrPoisoned) || !errors.Is(e, original) || !errors.As(e, &detail) || detail.Code != CodeIOErr {
++		t.Fatal(e)
++	}
++	if e = wrap("sentinel", ErrPlaintextCleanupPending); errors.Is(e, ErrPoisoned) {
++		t.Fatal("bare sentinel inferred poison")
++	}
++	if e = RetryPlaintextCleanup(nil); e != nil {
++		t.Fatal(e)
++	}
++	if e = RetryPlaintextCleanup(errors.New("ordinary")); e != nil {
++		t.Fatal(e)
++	}
++}
++func TestPlaintextCleanupMemoryRowsFailPreservesCleanup(t *testing.T) {
++	operation, cleanup := errors.New("memory operation"), errors.New("memory cleanup")
++	db := &DB{rows: make(map[*Rows]struct{})}
++	calls := 0
++	r := &Rows{db: db, release: func() error { calls++; return cleanup }}
++	db.rows[r] = struct{}{}
++	if r.fail(operation) || !errors.Is(r.Err(), operation) || !errors.Is(r.Err(), cleanup) || calls != 1 || !r.closed || r.release != nil {
++		t.Fatal(r.Err())
++	}
++	if e := r.Close(); e != nil || calls != 1 {
++		t.Fatal(e)
++	}
++}
++
++func TestPlaintextCleanupMemoryComposedCodePrecedence(t *testing.T) {
++	operation := wrap("original operation", ErrBusy)
++	cleanup := wrap("cleanup", errors.Join(pager.ErrPlaintextCleanupPending, pager.ErrPoisoned))
++	for _, op := range []string{"schema", "encrypted import"} {
++		e := wrapCleanup(op, operation, cleanup)
++		var detail *Error
++		if !errors.Is(e, ErrBusy) || !errors.Is(e, ErrPlaintextCleanupPending) || !errors.Is(e, ErrPoisoned) || !errors.As(e, &detail) || detail.Code != CodeIOErr {
++			t.Fatal(op, e, detail)
++		}
++		if got := wrapCleanup(op, operation, nil); got != operation {
++			t.Fatal("nil cleanup changed operation")
++		}
++	}
++	db := &DB{rows: make(map[*Rows]struct{})}
++	r := &Rows{db: db, release: func() error { return cleanup }}
++	db.rows[r] = struct{}{}
++	if r.fail(operation) {
++		t.Fatal("Rows failure returned true")
++	}
++	var detail *Error
++	if !errors.Is(r.Err(), ErrBusy) || !errors.Is(r.Err(), ErrPlaintextCleanupPending) || !errors.As(r.Err(), &detail) || detail.Code != CodeIOErr {
++		t.Fatal(r.Err(), detail)
++	}
++}
++
++func TestPlaintextCleanupMemoryPoisonedProbeCannotCreate(t *testing.T) {
++	for _, cause := range []error{os.ErrNotExist, errors.Join(os.ErrNotExist, ErrChanged), errors.Join(os.ErrNotExist, errors.New("consumed cleanup diagnostic")), errors.Join(os.ErrNotExist, ErrPoisoned), wrap("open", errors.Join(os.ErrNotExist, ErrPlaintextCleanupPending, ErrPoisoned)), ErrBusy, nil} {
++		if plainProbeMissing(cause) {
++			t.Fatal("owned/ordinary nonabsence authorized create", cause)
++		}
++	}
++}
+diff --git a/sqlite/plaintext_cleanup_test.go b/sqlite/plaintext_cleanup_test.go
+new file mode 100644
+--- /dev/null
++++ b/sqlite/plaintext_cleanup_test.go
+@@ -0,0 +1,127 @@
++package sqlite_test
++
++import (
++	"context"
++	"database/sql"
++	"errors"
++	"path/filepath"
++	"testing"
++
++	driver "github.com/ms-xiaosnow/gosqlite/driver"
++	"github.com/ms-xiaosnow/gosqlite/sqlite"
++)
++
++// This is exclusively an intact ordinary lifecycle, with no failed native I/O,
++// corrupt database, namespace mutation, missing-file probe or recovery action.
++func TestPlaintextCleanupOrdinaryReaderRowsAndReopen(t *testing.T) {
++	ctx := context.Background()
++	path := filepath.Join(t.TempDir(), "ordinary.db")
++	db, e := sqlite.Open(path, sqlite.Options{})
++	if e != nil {
++		t.Fatal(e)
++	}
++	defer db.Close()
++	for _, q := range []string{"CREATE TABLE t(id INTEGER PRIMARY KEY,v TEXT)", "INSERT INTO t VALUES(1,'kept')"} {
++		if _, e = db.Exec(ctx, q); e != nil {
++			t.Fatal(e)
++		}
++	}
++	if entries, e := db.Schema(ctx); e != nil || len(entries) != 1 {
++		t.Fatal(entries, e)
++	}
++	if _, e = db.Query(ctx, "SELECT absent FROM t"); e == nil {
++		t.Fatal("expected ordinary SQL planning error")
++	}
++	rows, e := db.Query(ctx, "SELECT id,v FROM t")
++	if e != nil {
++		t.Fatal(e)
++	}
++	if !rows.Next() {
++		t.Fatal(rows.Err())
++	}
++	if e = db.Close(); e != nil {
++		t.Fatal(e)
++	}
++	if rows.Next() || !errors.Is(rows.Err(), sqlite.ErrClosed) {
++		t.Fatal("Rows not invalidated", rows.Err())
++	}
++	if e = rows.Close(); e != nil {
++		t.Fatal(e)
++	}
++	if e = db.Close(); e != nil {
++		t.Fatal(e)
++	}
++	if len(sqlite.PendingPlaintextCleanups()) != 0 {
++		t.Fatal("ordinary Reader retained cleanup")
++	}
++	db, e = sqlite.Open(path, sqlite.Options{ReadOnly: true, NoCreate: true})
++	if e != nil {
++		t.Fatal(e)
++	}
++	defer db.Close()
++	canceled, cancel := context.WithCancel(ctx)
++	cancel()
++	if _, e = db.Query(canceled, "SELECT id FROM t"); !errors.Is(e, context.Canceled) {
++		t.Fatal(e)
++	}
++	tx, e := db.Begin(ctx, sqlite.TxOptions{ReadOnly: true})
++	if e != nil {
++		t.Fatal(e)
++	}
++	rows, e = tx.Query(ctx, "SELECT id FROM t")
++	if e != nil {
++		t.Fatal(e)
++	}
++	if !rows.Next() {
++		t.Fatal(rows.Err())
++	}
++	if e = tx.Rollback(); e != nil {
++		t.Fatal(e)
++	}
++	if rows.Next() || !errors.Is(rows.Err(), sqlite.ErrTxDone) {
++		t.Fatal("transaction rows not invalidated", rows.Err())
++	}
++	if e = db.Close(); e != nil {
++		t.Fatal(e)
++	}
++	if len(sqlite.PendingPlaintextCleanups()) != 0 {
++		t.Fatal("ordinary live reader cleanup pending")
++	}
++}
++func TestPlaintextCleanupOrdinaryDatabaseSQLZeroIdle(t *testing.T) {
++	ctx := context.Background()
++	path := filepath.Join(t.TempDir(), "pool.db")
++	connector, e := driver.NewConnector(path, sqlite.Options{})
++	if e != nil {
++		t.Fatal(e)
++	}
++	pool := sql.OpenDB(connector)
++	pool.SetMaxIdleConns(0)
++	defer pool.Close()
++	if _, e = pool.ExecContext(ctx, "CREATE TABLE t(id INTEGER PRIMARY KEY,v TEXT)"); e != nil {
++		t.Fatal(e)
++	}
++	if _, e = pool.ExecContext(ctx, "INSERT INTO t VALUES(1,'kept')"); e != nil {
++		t.Fatal(e)
++	}
++	rows, e := pool.QueryContext(ctx, "SELECT v FROM t")
++	if e != nil {
++		t.Fatal(e)
++	}
++	if !rows.Next() {
++		t.Fatal(rows.Err())
++	}
++	var value string
++	if e = rows.Scan(&value); e != nil || value != "kept" {
++		t.Fatal(value, e)
++	}
++	if e = rows.Close(); e != nil {
++		t.Fatal(e)
++	}
++	if e = pool.Close(); e != nil {
++		t.Fatal(e)
++	}
++	if len(sqlite.PendingPlaintextCleanups()) != 0 {
++		t.Fatal("ordinary pool disposal pending")
++	}
++}
+diff --git a/sqlite/rows.go b/sqlite/rows.go
+--- a/sqlite/rows.go
++++ b/sqlite/rows.go
+@@ -116,7 +116,7 @@
+ 	if err != io.EOF {
+ 		r.err = wrap("next", err)
+ 	}
+-	r.close()
++	r.err = wrapCleanup("next", r.err, r.close())
+ 	return false
+ }
+ 
+diff --git a/sqlite/sqlite.go b/sqlite/sqlite.go
+--- a/sqlite/sqlite.go
++++ b/sqlite/sqlite.go
+@@ -7,7 +7,6 @@
+ 	"context"
+ 	"errors"
+ 	"fmt"
+-	"os"
+ 	"sync"
+ 
+ 	"github.com/ms-xiaosnow/gosqlite/encryption"
+@@ -116,6 +115,15 @@
+ 		code = CodeMisuse
+ 	}
+ 	return &Error{Code: code, Op: op, Err: err}
++}
++
++// wrapCleanup gives a newly pending cleanup error precedence over an already
++// wrapped operation error. errors.As must see CodeIOErr before a prior BUSY.
++func wrapCleanup(op string, cause, cleanup error) error {
++	if cleanup == nil {
++		return cause
++	}
++	return wrap(op, errors.Join(cause, cleanup))
+ }
+ 
+ // Options configures a connection. Zero-value options open read/write and
+@@ -293,7 +301,7 @@
+ 	if err == nil {
+ 		d.info = fileInfo(r.Header())
+ 		err = r.Close()
+-	} else if !opts.ReadOnly && !opts.NoCreate && errors.Is(err, os.ErrNotExist) {
++	} else if !opts.ReadOnly && !opts.NoCreate && plainProbeMissing(err) {
+ 		var p *pager.Tx
+ 		p, err = pager.OpenTx(ctx, path, d.pagerOptions())
+ 		if err == nil {
+@@ -320,7 +328,7 @@
+ func (d *DB) Info() FileInfo { d.mu.RLock(); defer d.mu.RUnlock(); return d.info }
+ 
+ // Schema returns the current catalog, including an explicit transaction's DDL.
+-func (d *DB) Schema(ctx context.Context) ([]SchemaEntry, error) {
++func (d *DB) Schema(ctx context.Context) (_ []SchemaEntry, retErr error) {
+ 	if err := checkContext(ctx); err != nil {
+ 		return nil, wrap("schema", err)
+ 	}
+@@ -348,7 +356,7 @@
+ 		close = r.Close
+ 	}
+ 	if close != nil {
+-		defer close()
++		defer func() { retErr = wrapCleanup("schema", retErr, close()) }()
+ 	}
+ 	entries, err := btree.ReadSchema(ctx, reader)
+ 	if err != nil {
+@@ -439,8 +447,7 @@
+ 	}
+ 	rows, err := d.plan(ctx, reader, sel, params)
+ 	if err != nil {
+-		reader.Close()
+-		return nil, wrap("query", err)
++		return nil, wrap("query", errors.Join(err, reader.Close()))
+ 	}
+ 	d.info = fileInfo(reader.Header())
+ 	rows.release = reader.Close

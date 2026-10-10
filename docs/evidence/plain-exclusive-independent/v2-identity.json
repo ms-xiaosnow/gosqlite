@@ -1,0 +1,40 @@
+{
+  "plain-exclusive-v2-all-sha256.txt": "6180d33214507b003d4bf78f4d0da45477b946307ec00a0665fbe3d24fa6a11d",
+  "plain-exclusive-v1-to-v2.patch": "a73341b649026892c578b13212e4c0031c7dd98b7e0d3f10f00fedb43fec7213",
+  "plain-tx-v2-to-exclusive-v2.patch": "c5c398e60c038e257382c3a4f32971e26ba596edcd46db8044719bf3c90d9b3b",
+  "candidate_files_verified": 1083,
+  "owned_manifest_sha256": "027fc39d445ed2c363272218525c3b6a7627d0dd60476c2ba0ad925fb4dd677c",
+  "owned_paths": [
+    "docs/plaintext-exclusive-cleanup.md",
+    "internal/pager/checkpoint.go",
+    "internal/pager/commit.go",
+    "internal/pager/plain_cleanup.go",
+    "internal/pager/plain_open_admission.go",
+    "internal/pager/plain_session_cleanup.go",
+    "internal/pager/plain_session_cleanup_test.go",
+    "internal/pager/plain_tx_cleanup.go",
+    "internal/pager/session.go",
+    "internal/pager/tx.go",
+    "internal/pager/wal.go",
+    "sqlite/plain_session_cleanup_internal_test.go",
+    "sqlite/plaintext_cleanup.go",
+    "sqlite/sqlite.go"
+  ],
+  "plain-exclusive-independent-replay-v2": "all owned source/document files match",
+  "plain-exclusive-independent-v1-to-v2": "all owned source/document files match",
+  "source_delta": [
+    "internal/pager/checkpoint.go",
+    "internal/pager/commit.go",
+    "internal/pager/plain_cleanup.go",
+    "internal/pager/plain_open_admission.go",
+    "internal/pager/plain_session_cleanup.go",
+    "internal/pager/plain_session_cleanup_test.go",
+    "internal/pager/plain_tx_cleanup.go",
+    "internal/pager/session.go",
+    "internal/pager/tx.go",
+    "internal/pager/wal.go",
+    "sqlite/plain_session_cleanup_internal_test.go",
+    "sqlite/plaintext_cleanup.go",
+    "sqlite/sqlite.go"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "base_commit": "1e413b466d10db5c7304ba231fd5d4536dfc5fa5",
+  "combined_tree": "2d57bc8f9fa728c737bb88d470d4f91db87791d2",
+  "verified_owned_paths": 45,
+  "owned_differences_from_public_v1": [
+    "sqlite/rows.go"
+  ],
+  "combined_rows_sha256": "fc7e2341b37c5a301a51b096726219bc93a31079b7ba8c9de27b9ab3ced47fc8",
+  "base_to_combined_rows_only_change": "Rows.fail retains close diagnostic through wrapCleanup; reviewed Boolean rank startup fields, cleanup and execution unchanged",
+  "tests_run_on_combined": false
+}

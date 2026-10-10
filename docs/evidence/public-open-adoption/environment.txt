@@ -1,0 +1,3 @@
+Base: immutable plain-exclusive-freeze-v2, manifest 6180d33214507b003d4bf78f4d0da45477b946307ec00a0665fbe3d24fa6a11d. Ancestry is accepted ReaderV5 then accepted TxV2, followed by independently reviewed exclusive ownership/public admission work.
+Tool ../toolchains/go1.27.2/bin/go. GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off GOFLAGS=-buildvcs=false. GOCACHE=/workspace/scratch/5e06a74e5f65/durable-restart/go-cache and GOPATH=/workspace/scratch/5e06a74e5f65/durable-restart/go-path only.
+CGO_ENABLED=0 normal/build/vet/oracle/target compile; separate CGO_ENABLED=1 race. Guard runs before every suite and selected helpers are audited in test-audit.txt. No native exceptional outcome is induced; no full unrestricted-suite or durability qualification claim.

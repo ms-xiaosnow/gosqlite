@@ -1,0 +1,18 @@
+package vfs
+import("errors";"fmt";"os";"syscall";"testing")
+// Inert owner identities and callbacks only; no paths or native calls.
+func TestLeadAcquisitionProvenanceMemory(t *testing.T) {
+ for depth:=0; depth<65; depth++ {
+  var cause error = syscall.ENOENT
+  for j:=0;j<depth;j++ { cause=fmt.Errorf("memory wrapper: %w",cause) }
+  for _,opened:=range []bool{false,true} {
+   reg:=metadataOwners{limit:1};calls:=0
+   var owner *metadataOwner;var openErr error
+   if opened { owner,openErr=reg.open(func()(uintptr,error){return 73,nil}) } else {owner,openErr=reg.open(func()(uintptr,error){return 0,cause})}
+   _,absent,got:=observeMetadataForCreate(&reg,owner,openErr,func(h uintptr)(string,error){calls++;if h!=73{t.Fatal(h)};return "",cause},func(h uintptr)error{calls++;return nil})
+   if absent==opened || !errors.Is(got,os.ErrNotExist) || len(reg.live)!=0 || (opened&&calls!=2) || (!opened&&calls!=0) { t.Fatalf("depth=%d opened=%t absent=%t calls=%d",depth,opened,absent,calls) }
+   mixed:=errors.Join(cause,ErrIdentity)
+   if ordinaryPathAbsence(mixed){t.Fatal("mixed acquisition diagnosis accepted")}
+  }
+ }
+}

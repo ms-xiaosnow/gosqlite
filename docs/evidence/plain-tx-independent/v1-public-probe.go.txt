@@ -1,0 +1,23 @@
+package sqlite
+
+import (
+ "context"
+ "errors"
+ "testing"
+ "github.com/ms-xiaosnow/gosqlite/internal/pager"
+)
+
+func TestPlainTxIndependentAutomaticRollbackCodePrecedence(t *testing.T) {
+ // Descriptor-free exact composition of DB.Exec's automatic-transaction error
+ // branch: an already-classified commit error followed by rollback retirement.
+ db := &DB{rows: make(map[*Rows]struct{})}
+ tx := &Tx{db: db, ctx: context.Background(), readClose: func() error {
+  return errors.Join(pager.ErrPlaintextCleanupPending, pager.ErrPoisoned)
+ }}
+ db.tx = tx
+ operation := wrap("commit", ErrBusy)
+ err := errors.Join(operation, tx.rollbackLocked())
+ var detail *Error
+ if !errors.Is(err, ErrPlaintextCleanupPending) || !errors.As(err, &detail) { t.Fatal(err) }
+ if detail.Code != CodeIOErr { t.Fatalf("automatic rollback cleanup masked by earlier operation code %d, want CodeIOErr %d: %v", detail.Code, CodeIOErr, err) }
+}

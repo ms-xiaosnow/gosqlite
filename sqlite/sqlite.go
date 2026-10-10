@@ -7,7 +7,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"sync"
 
 	"github.com/ms-xiaosnow/gosqlite/encryption"
@@ -118,6 +117,15 @@ func wrap(op string, err error) error {
 	return &Error{Code: code, Op: op, Err: err}
 }
 
+// wrapCleanup gives a newly pending cleanup error precedence over an already
+// wrapped operation error. errors.As must see CodeIOErr before a prior BUSY.
+func wrapCleanup(op string, cause, cleanup error) error {
+	if cleanup == nil {
+		return cause
+	}
+	return wrap(op, errors.Join(cause, cleanup))
+}
+
 // Options configures a connection. Zero-value options open read/write and
 // create an absent database. ReadOnly never creates or modifies files.
 type Options struct {
@@ -203,7 +211,7 @@ func Open(path string, opts Options) (*DB, error) {
 // OpenContext opens a connection while honoring cancellation before physical
 // publication. Once a mode-switch commit starts I/O it must finish or report
 // an uncertain/poisoned result rather than abandon partially published data.
-func OpenContext(ctx context.Context, path string, opts Options) (*DB, error) {
+func OpenContext(ctx context.Context, path string, opts Options) (result *DB, retErr error) {
 	if err := checkContext(ctx); err != nil {
 		return nil, wrap("open", err)
 	}
@@ -233,13 +241,30 @@ func OpenContext(ctx context.Context, path string, opts Options) (*DB, error) {
 	if err != nil {
 		return nil, wrap("open", err)
 	}
+
+	var plainAdmission *pager.PlainOpenAdmission
+	if opts.Encryption == nil && !opts.WALShared {
+		plainAdmission, err = pager.ReservePlainOpen()
+		if err != nil {
+			return nil, wrap("open", err)
+		}
+		defer func() {
+			if result, handled := plainAdmission.Finish(retErr); handled {
+				retErr = wrap("open", result)
+			}
+		}()
+	}
 	var closeAdmission *pager.SharedCloseAdmission
 	if opts.WALShared {
 		closeAdmission, err = pager.ReserveSharedClose()
 		if err != nil {
 			return nil, wrap("open", err)
 		}
-		defer closeAdmission.Cancel()
+		defer func() {
+			if result, handled := closeAdmission.Finish(retErr); handled {
+				retErr = wrap("open", result)
+			}
+		}()
 	}
 	// A connection must keep naming the same path across working-directory
 	// changes and symlink retargeting while idle between snapshots.
@@ -278,7 +303,7 @@ func OpenContext(ctx context.Context, path string, opts Options) (*DB, error) {
 		if opts.WALShared {
 			session, err = pager.OpenSharedSessionAdmitted(ctx, path, d.pagerOptions(), closeAdmission)
 		} else {
-			session, err = pager.OpenSession(ctx, path, d.pagerOptions())
+			session, err = pager.OpenSessionAdmitted(ctx, path, d.pagerOptions(), plainAdmission)
 		}
 		if err != nil {
 			return nil, wrap("open", err)
@@ -289,18 +314,18 @@ func OpenContext(ctx context.Context, path string, opts Options) (*DB, error) {
 	}
 	// Prefer a read-only probe for existing files, so opening a handle does not
 	// acquire a writer lock or rewrite an unchanged database header.
-	r, err := pager.Open(path)
+	r, err := pager.OpenAdmitted(path, plainAdmission)
 	if err == nil {
 		d.info = fileInfo(r.Header())
 		err = r.Close()
-	} else if !opts.ReadOnly && !opts.NoCreate && errors.Is(err, os.ErrNotExist) {
+	} else if !opts.ReadOnly && !opts.NoCreate && plainProbeMissing(err) {
 		var p *pager.Tx
 		p, err = pager.OpenTx(ctx, path, d.pagerOptions())
 		if err == nil {
 			d.info = fileInfo(p.Header())
 			err = p.Commit(ctx)
 			if err != nil {
-				_ = p.Rollback()
+				err = errors.Join(err, p.Rollback())
 			}
 		}
 	}
@@ -320,7 +345,7 @@ func (d *DB) pagerOptions() pager.Options {
 func (d *DB) Info() FileInfo { d.mu.RLock(); defer d.mu.RUnlock(); return d.info }
 
 // Schema returns the current catalog, including an explicit transaction's DDL.
-func (d *DB) Schema(ctx context.Context) ([]SchemaEntry, error) {
+func (d *DB) Schema(ctx context.Context) (_ []SchemaEntry, retErr error) {
 	if err := checkContext(ctx); err != nil {
 		return nil, wrap("schema", err)
 	}
@@ -348,7 +373,7 @@ func (d *DB) Schema(ctx context.Context) ([]SchemaEntry, error) {
 		close = r.Close
 	}
 	if close != nil {
-		defer close()
+		defer func() { retErr = wrapCleanup("schema", retErr, close()) }()
 	}
 	entries, err := btree.ReadSchema(ctx, reader)
 	if err != nil {
@@ -385,8 +410,8 @@ func (d *DB) Close() error {
 			err = errors.Join(err, d.tx.rollbackLocked())
 		}
 	} else {
-		// Native shared-WAL logical closure does not imply owner retirement.
-		// Other modes retain their pre-existing one-shot Close contract.
+		// Managed session logical closure does not imply owner retirement.
+		// One-shot modes without the retry bridge keep their Close contract.
 		if _, ok := d.session.(interface{ CloseWithError(error) error }); !ok {
 			return nil
 		}
@@ -439,8 +464,7 @@ func (d *DB) Query(ctx context.Context, query string, args ...any) (*Rows, error
 	}
 	rows, err := d.plan(ctx, reader, sel, params)
 	if err != nil {
-		reader.Close()
-		return nil, wrap("query", err)
+		return nil, wrap("query", errors.Join(err, reader.Close()))
 	}
 	d.info = fileInfo(reader.Header())
 	rows.release = reader.Close

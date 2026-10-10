@@ -1,0 +1,13 @@
+diff --git a/sqlite/rows.go b/sqlite/rows.go
+index 9b92e90..e468582 100644
+--- a/sqlite/rows.go
++++ b/sqlite/rows.go
+@@ -122,7 +122,7 @@ func (r *Rows) fail(err error) bool {
+ 	if err != io.EOF {
+ 		r.err = wrap("next", err)
+ 	}
+-	r.close()
++	r.err = wrapCleanup("next", r.err, r.close())
+ 	return false
+ }
+ 

@@ -1,0 +1,11 @@
+set -euo pipefail
+cd /workspace/scratch/5e06a74e5f65/durable-restart/plain-reader-lead-review/candidate-v5
+export PATH="$PWD/../../toolchains/go1.27.2/bin:$PATH" GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off CGO_ENABLED=0 GOFLAGS=-buildvcs=false GOCACHE="$PWD/../../go-cache" GOPATH="$PWD/../../go-path"
+echo 'V5 independent normal/race. No native failure or namespace workflow; inert owner callbacks and intact ordinary Reader lifecycle only.'
+date -u +%FT%TZ
+go run ./internal/testscope
+go test ./internal/pager ./internal/vfs ./sqlite -run '^(TestLead|TestPlainCleanupMemory|TestPlaintextCleanup|TestPathAbsenceMemory|TestMetadataOwners|TestMetadataObservation|TestMetadataRejected|TestMetadataOwnershipCallChainSource)' -count=1
+go run ./internal/testscope
+CGO_ENABLED=1 go test -race ./internal/pager ./internal/vfs ./sqlite -run '^(TestLead|TestPlainCleanupMemory|TestPlaintextCleanup|TestPathAbsenceMemory|TestMetadataOwners|TestMetadataObservation|TestMetadataRejected|TestMetadataOwnershipCallChainSource)' -count=1
+date -u +%FT%TZ
+echo 'INDEPENDENT V5 PROVENANCE NORMAL/RACE PASS'

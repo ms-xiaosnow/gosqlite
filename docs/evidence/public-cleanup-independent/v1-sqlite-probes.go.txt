@@ -1,0 +1,86 @@
+package sqlite
+
+import (
+	"context"
+	"errors"
+	"github.com/ms-xiaosnow/gosqlite/internal/pager"
+	"path/filepath"
+	"testing"
+)
+
+// Holds 1023 empty memory reservations, leaving one real acquisition slot.
+// All physical work is intact ordinary creation, DML, read-only probes, and
+// orderly closure. This is not a missing-selected-file or native-fault test.
+func TestPublicCleanupIndependentPlainOrdinaryCapacityTransfer(t *testing.T) {
+	var holds []*pager.PlainOpenAdmission
+	defer func() {
+		for _, a := range holds {
+			_, _ = a.Finish(nil)
+		}
+	}()
+	for i := 0; i < 1023; i++ {
+		a, err := pager.ReservePlainOpen()
+		if err != nil {
+			t.Fatal(i, err)
+		}
+		holds = append(holds, a)
+	}
+	ctx := context.Background()
+	path := filepath.Join(t.TempDir(), "ordinary.db")
+	db, err := Open(path, Options{})
+	if err != nil {
+		t.Fatal("prelude/Reader/create did not share or release its last slot", err)
+	}
+	defer db.Close()
+	for _, q := range []string{"CREATE TABLE t(id INTEGER PRIMARY KEY, v TEXT)", "INSERT INTO t VALUES(1,'intact')"} {
+		if _, err := db.Exec(ctx, q); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := db.Close(); err != nil {
+		t.Fatal(err)
+	}
+	for _, options := range []Options{{NoCreate: true}, {ReadOnly: true, NoCreate: true}} {
+		opened, err := Open(path, options)
+		if err != nil {
+			t.Fatal("Reader took a second precharged slot", err)
+		}
+		rows, err := opened.Query(ctx, "SELECT v FROM t WHERE id=1")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !rows.Next() || rows.Values()[0] != "intact" || rows.Next() || rows.Err() != nil {
+			t.Fatal("ordinary row changed", rows.Err())
+		}
+		if err := rows.Close(); err != nil {
+			t.Fatal(err)
+		}
+		if err := opened.Close(); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if len(PendingPlaintextCleanups()) != 0 {
+		t.Fatal("ordinary work leaked a pending root")
+	}
+}
+
+func TestPublicCleanupIndependentPreflightClassification(t *testing.T) {
+	canceled, cancel := context.WithCancel(context.Background())
+	cancel()
+	for _, options := range []Options{{}, {ReadOnly: true}, {WALExclusive: true}, {WALShared: true}} {
+		db, err := OpenContext(canceled, "unused", options)
+		var detail *Error
+		if db != nil || !errors.Is(err, context.Canceled) || !errors.As(err, &detail) || detail.Code != CodeInterrupt {
+			t.Fatal(err)
+		}
+	}
+	for _, options := range []Options{{WALExclusive: true, WALShared: true}, {ReadOnly: true, WALShared: true}, {KeepWALOnClose: true}, {MaxSortBytes: -1}} {
+		db, err := Open("unused", options)
+		if db != nil || err == nil {
+			t.Fatal("invalid preflight accepted")
+		}
+	}
+	if len(PendingPlaintextCleanups()) != 0 || len(PendingCloseCleanups()) != 0 {
+		t.Fatal("preflight manufactured pending ownership")
+	}
+}

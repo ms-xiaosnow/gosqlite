@@ -1,0 +1,21 @@
+set -euo pipefail
+cd /workspace/scratch/5e06a74e5f65/durable-restart/plain-reader-lead-review
+export PATH="$PWD/../toolchains/go1.27.2/bin:$PATH" GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off CGO_ENABLED=0 GOFLAGS=-buildvcs=false GOCACHE="$PWD/../go-cache" GOPATH="$PWD/../go-path"
+echo 'Independent V4 bounded initial-absence review; descriptor-free tests and ordinary intact creation only.'
+date -u +%FT%TZ
+cd negative-v3
+go run ./internal/testscope
+set +e
+go test ./sqlite -run '^TestLeadCreateDecisionRejectsMixed$' -count=1 > ../v3-negative.txt 2>&1
+s=$?
+set -e
+printf '%s\n' "$s" > ../v3-negative.exit
+test "$s" = 1
+cat ../v3-negative.txt
+cd ../candidate
+go run ./internal/testscope
+go test ./internal/pager ./sqlite ./internal/vfs -run '^(TestLeadCreateDecisionRejectsMixed|TestPlainCleanupMemory|TestPlaintextCleanup|TestCleanupOwnersBoundedMemory)' -count=1
+go run ./internal/testscope
+CGO_ENABLED=1 go test -race ./internal/pager ./sqlite ./internal/vfs -run '^(TestLeadCreateDecisionRejectsMixed|TestPlainCleanupMemory|TestPlaintextCleanup|TestCleanupOwnersBoundedMemory)' -count=1
+date -u +%FT%TZ
+echo 'INDEPENDENT V4 PROVENANCE NORMAL/RACE PASS; V3 NEGATIVE CONTROL FAIL AS EXPECTED'

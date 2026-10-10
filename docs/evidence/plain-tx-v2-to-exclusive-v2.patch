@@ -1,0 +1,1252 @@
+diff --git a/docs/plaintext-exclusive-cleanup.md b/docs/plaintext-exclusive-cleanup.md
+new file mode 100644
+--- /dev/null
++++ b/docs/plaintext-exclusive-cleanup.md
+@@ -0,0 +1,98 @@
++# Exclusive WAL managed retirement
++
++Date: 2026-10-10. This third increment extends the accepted Reader and standalone
++rollback-transaction owner scheme to WALExclusive Session construction, live
++metadata/read failures, mode-transition journals, WAL creation/reopen,
++uninterrupted normalization, checkpoint and disposal. Shared WAL and encryption
++retain their existing protocols, bytes and separate cleanup APIs. Native failure
++qualification and full durability/security acceptance remain NOT_RUN.
++
++## Bounded ownership and dependency order
++
++The common plaintext registry admits at most 1024 opening/live/pending roots.
++An exclusive root is reserved before path resolution or native acquisition and
++precharges three fixed direct slots: main, current WAL, and temporary. The
++last holds at most one transition journal, normalization candidate or superseded
++WAL. Explicit child reservation precedes each acquisition, and successful child
++handles are adopted immediately before any observation. Native constructor errors
++are adopted before any protector can close. Nested VFS discovery retains its
++4096-node bound. Admission/snapshots never wait on native/status calls.
++
++The owner keeps no Session, DB, Reader, Tx, Rows, options, page map, undo buffer or
++application callback. Retirement order is nested obligations, temporary child,
++current WAL, then protecting main. Status decides completion independently of
++Close's diagnostic. Terminal managed resources never retry a numeric handle.
++A live retry retires only failed nested or explicitly close-requested children;
++it cannot close an active WAL/main or an unrequested journal/candidate. Ordinary
++live/opening groups are excluded from pending snapshots but count toward capacity.
++
++## Mode transition and normalization
++
++The exclusive rollback-journal mode transition borrows its Session scope. It
++uses the precharged temporary slot, adopts errors before journal/main protection
++can drop, and logically ends its ephemeral Tx without closing the Session main.
++Shared WAL's private nil-scope KeepFile branch is unchanged.
++
++A normalization candidate is reserved/adopted before writing. On successful
++replace, already-owned candidate/current-WAL slots are relabelled atomically
++under the group lock, with the old WAL moved to temporary ownership. Its
++retirement completes before the current WAL/main can retire. A failed child
++close prevents unlink/removal and parent release. Pending constructor/journal
++errors and ordinary diagnostics survive one-time closure and public wrapping.
++Existing frame/checksum/sync/publication algorithms and on-disk formats are
++unchanged. Exceptional branches were source-reviewed and model-tested only.
++
++## Checkpoint, Close and public disposal
++
++Checkpoint's current WAL close uses the managed slot. Incomplete retirement
++holds main and prevents later unlink. A consumed close diagnostic still poisons
++the operation; explicit retry never repeats checkpoint, namespace mutation,
++transaction replay or synchronization.
++
++CloseWithError accepts prior Rows/Tx disposal errors before protection drops.
++An active lease returns BUSY without clearing options or logical state. Otherwise
++Close attempts its optional checkpoint once only when there is no prior error,
++poison or KeepWALOnClose option. It then invalidates logical Session resources,
++clears options and snapshot, and begins ordered retirement. A just-failed child
++close is not automatically attempted a second time by the same Close operation.
++Repeated Close performs only explicit owner retirement. The DB Close bridge
++invalidates Rows/Tx once and supports retry without rerunning their callbacks.
++Errors discarded by database/sql remain discoverable in the independent pending
++snapshot. RetryPlaintextCleanup/PendingPlaintextCleanups now explicitly cover
++rollback Reader, standalone Tx and WALExclusive Session; WALShared/encryption
++remain separately scoped. Existing public struct layouts are unchanged.
++
++## Evidence and remaining limits
++
++Evidence is under evidence/plain-exclusive-cleanup. Exceptional outcomes use
++only descriptor-free fake owner/error/callback laws, including 256 ordered
++four-stage graphs, first diagnostic retention, admission-before-path, active BUSY,
++checkpoint-once, borrowed journal and candidate swap barriers. Actual native
++checks use intact ordinary read/write/rollback/BUSY/cancel/close/reopen/checkpoint
++and pinned official normal interoperability. Darwin/Windows checks are compile-only.
++
++No physical database corruption/tamper/wrong key/missing selected file, namespace
++replacement/retarget/race injection, crash/kill/process exit/hot recovery, failed
++native I/O/lock/unmap/close/Sync/shortwrite/diskfull/permissions or interrupted
++publication/rekey was tested here or elsewhere. Legacy shared/recovery absence
++checks still depend on current os.IsNotExist/joined-error behavior rather than
++the explicit provenance variants. The Reader V5 report tracks that separate
++source coupling; this increment does not silently alter those protocols.
++
++## V2 public metadata admission
++
++WALExclusive public OpenContext now reserves its plaintext root before public
++canonicalization. An untransferred admission adopts any early canonicalization
++or setup error into the same bounded owner/snapshot scheme. Its one-shot atomic
++transfer gives that exact root to OpenSessionAdmitted; the public deferred Finish
++cannot then close the live Session. Direct OpenSession still reserves its own
++root before pager metadata. An unsafe graph is replaced by bounded opaque
++adoption, rather than rejoined to the unbounded original at the public boundary.
++
++This explicitly extends the earlier V1 pager-only admission boundary. ReaderV5's
++public rollback canonicalization and the shared CloseAdmission Cancel path remain
++separate actual discovery gaps: VFS metadata tombstones are strong, but those
++public early errors do not enter their mode's public pending cleanup API.
++Encrypted Windows canonicalization already opens directories through the
++pre-acquisition encrypted registry and adopts child errors before Close; its
++public pending/retry route therefore remains available for those failures.
+diff --git a/internal/pager/checkpoint.go b/internal/pager/checkpoint.go
+--- a/internal/pager/checkpoint.go
++++ b/internal/pager/checkpoint.go
+@@ -18,7 +18,8 @@
+ 	return s.checkpointLocked(ctx)
+ }
+ 
+-func (s *Session) checkpointLocked(ctx context.Context) error {
++func (s *Session) checkpointLocked(ctx context.Context) (retErr error) {
++	defer func() { retErr = s.observeLocked(retErr) }()
+ 	if err := ctx.Err(); err != nil {
+ 		return err
+ 	}
+@@ -67,7 +68,11 @@
+ 	if err := s.file.Sync(); err != nil {
+ 		return fail(err)
+ 	}
+-	if err := s.walFile.Close(); err != nil {
++	if s.cleanup != nil {
++		if err := s.cleanup.closeWAL(nil); err != nil {
++			return fail(err)
++		}
++	} else if err := s.walFile.Close(); err != nil {
+ 		return fail(err)
+ 	}
+ 	s.walFile = nil
+diff --git a/internal/pager/commit.go b/internal/pager/commit.go
+--- a/internal/pager/commit.go
++++ b/internal/pager/commit.go
+@@ -78,8 +78,9 @@
+ 	t.mu.Lock()
+ 	defer t.mu.Unlock()
+ 	defer t.clearClosedUndoLocked()
+-	if t.cleanup != nil {
+-		defer func() { retErr = t.cleanup.observe(retErr) }()
++	cleanup := t.plainScope()
++	if cleanup != nil {
++		defer func() { retErr = cleanup.observe(retErr) }()
+ 	}
+ 	if err := ctx.Err(); err != nil {
+ 		return err
+@@ -157,8 +158,8 @@
+ 	// Pre-I/O failures remain retryable and release PENDING/EXCLUSIVE while
+ 	// retaining this transaction's SHARED+RESERVED locks.
+ 	preflight := func(e error, journalAcquired bool) error {
+-		if t.cleanup != nil {
+-			e = t.cleanup.observe(e)
++		if cleanup != nil {
++			e = cleanup.observe(e)
+ 			if errors.Is(e, ErrPlaintextCleanupPending) {
+ 				return t.deferPlainRetirementLocked(journalAcquired)
+ 			}
+@@ -178,14 +179,14 @@
+ 		return preflight(err, false)
+ 	}
+ 	jpath := t.path + "-journal"
+-	if t.cleanup != nil {
+-		if err = t.cleanup.reserveTemporary(); err != nil {
++	if cleanup != nil {
++		if err = cleanup.reserveTemporary(); err != nil {
+ 			return preflight(err, false)
+ 		}
+ 	}
+ 	jf, err := openJournal(jpath, os.O_WRONLY|os.O_CREATE|os.O_EXCL)
+-	if t.cleanup != nil {
+-		t.cleanup.acquiredTemporary(jf)
++	if cleanup != nil {
++		cleanup.acquiredTemporary(jf)
+ 	}
+ 	if err != nil {
+ 		// The journal constructor may already have created the sidecar.
+@@ -195,8 +196,8 @@
+ 	// After a database write is attempted, even an error may have changed
+ 	// bytes. Preserve the fully synced journal for explicit recovery.
+ 	fail := func(cause error) error {
+-		if t.cleanup != nil {
+-			cause = t.cleanup.closeTemporary(cause)
++		if cleanup != nil {
++			cause = cleanup.closeTemporary(cause)
+ 			if errors.Is(cause, ErrPlaintextCleanupPending) {
+ 				return t.deferPlainRetirementLocked(true)
+ 			}
+@@ -260,13 +261,13 @@
+ 	if err = t.file.Sync(); err != nil {
+ 		return fail(err)
+ 	}
+-	if t.cleanup != nil {
+-		err = t.cleanup.closeTemporary(nil)
++	if cleanup != nil {
++		err = cleanup.closeTemporary(nil)
+ 	} else {
+ 		err = jf.Close()
+ 	}
+ 	if err != nil {
+-		if t.cleanup != nil && errors.Is(err, ErrPlaintextCleanupPending) {
++		if cleanup != nil && errors.Is(err, ErrPlaintextCleanupPending) {
+ 			return t.deferPlainRetirementLocked(true)
+ 		}
+ 		return t.poison(err, true)
+@@ -294,6 +295,15 @@
+ 	return nil
+ }
+ func (t *Tx) poison(cause error, recovery bool) error {
++	if t.borrowedCleanup != nil {
++		if recovery {
++			cause = errors.Join(ErrRecoveryRequired, cause)
++		}
++		t.file, t.dirty, t.free = nil, nil, nil
++		t.clearClosedUndoLocked()
++		t.poisoned = t.borrowedCleanup.observe(errors.Join(ErrPoisoned, cause))
++		return t.poisoned
++	}
+ 	if t.cleanup != nil {
+ 		if recovery {
+ 			cause = errors.Join(ErrRecoveryRequired, cause)
+diff --git a/internal/pager/plain_cleanup.go b/internal/pager/plain_cleanup.go
+--- a/internal/pager/plain_cleanup.go
++++ b/internal/pager/plain_cleanup.go
+@@ -10,7 +10,7 @@
+ )
+ 
+ // ErrPlaintextCleanupPending is an immutable historical ownership token. This
+-// increment covers ordinary rollback Readers and standalone transactions, not WAL sessions.
++// increment covers rollback Readers, standalone transactions and exclusive WAL sessions.
+ var ErrPlaintextCleanupPending = errors.New("plaintext cleanup pending")
+ 
+ const maxPlainRetirements = 1024
+@@ -67,6 +67,8 @@
+ 	registry                              *plainRetirementRegistry
+ 	main                                  plainResource
+ 	temporary                             plainResource
++	wal                                   plainResource
++	walReserved, walRequested             bool
+ 	temporaryReserved, temporaryRequested bool
+ 	nested                                []plainResource
+ 	started, done                         bool
+@@ -75,7 +77,8 @@
+ }
+ 
+ func (g *plainRetirement) releaseLocked() {
+-	g.main, g.temporary, g.nested, g.cause = nil, nil, nil, nil
++	g.main, g.temporary, g.wal, g.nested, g.cause = nil, nil, nil, nil, nil
++	g.walReserved, g.walRequested = false, false
+ 	g.temporaryReserved, g.temporaryRequested = false, false
+ 	g.done = true
+ 	g.pending.Store(nil)
+@@ -210,6 +213,13 @@
+ 		g.temporary = nil
+ 		g.temporaryRequested = false
+ 	}
++	if g.wal != nil && (g.started || g.walRequested) {
++		if !step(g.wal) {
++			return errors.Join(errs...)
++		}
++		g.wal = nil
++		g.walRequested = false
++	}
+ 	if !g.started {
+ 		g.pending.Store(nil)
+ 		return errors.Join(errs...)
+@@ -248,11 +258,11 @@
+ 	return g.pendingLocked(g.cause)
+ }
+ func (g *plainRetirement) retryLocked() error {
+-	if g.done || (!g.started && len(g.nested) == 0 && (!g.temporaryRequested || g.temporary == nil)) {
++	if g.done || (!g.started && len(g.nested) == 0 && (!g.temporaryRequested || g.temporary == nil) && (!g.walRequested || g.wal == nil)) {
+ 		return nil
+ 	}
+ 	err := g.retireLocked()
+-	if g.done || (!g.started && len(g.nested) == 0 && (!g.temporaryRequested || g.temporary == nil)) {
++	if g.done || (!g.started && len(g.nested) == 0 && (!g.temporaryRequested || g.temporary == nil) && (!g.walRequested || g.wal == nil)) {
+ 		return err
+ 	}
+ 	return g.pendingLocked(errors.Join(g.cause, err))
+diff --git a/internal/pager/plain_open_admission.go b/internal/pager/plain_open_admission.go
+new file mode 100644
+--- /dev/null
++++ b/internal/pager/plain_open_admission.go
+@@ -0,0 +1,45 @@
++package pager
++
++import "sync/atomic"
++
++// ExclusiveOpenAdmission covers public metadata before pager construction.
++// Its single precharged root transfers into OpenSessionAdmitted; it never owns
++// a Session/DB/callback or makes a native call while admission is locked.
++type ExclusiveOpenAdmission struct {
++	group atomic.Pointer[plainRetirement]
++}
++
++func ReserveExclusiveOpen() (*ExclusiveOpenAdmission, error) {
++	g, err := plainRetirements.reserve()
++	if err != nil {
++		return nil, err
++	}
++	a := &ExclusiveOpenAdmission{}
++	a.group.Store(g)
++	return a, nil
++}
++
++// Finish adopts an early public-open error and retires an untransferred root.
++// handled is false after transfer (or prior Finish), so callers preserve their
++// original result. A handled result must replace, not rejoin, the old cause:
++// bounded adoption may have made an unsafe error graph opaque.
++func (a *ExclusiveOpenAdmission) Finish(cause error) (result error, handled bool) {
++	if a == nil {
++		return cause, false
++	}
++	g := a.group.Swap(nil)
++	if g == nil {
++		return cause, false
++	}
++	return g.begin(cause), true
++}
++func claimExclusiveOpen(a *ExclusiveOpenAdmission) (*plainRetirement, error) {
++	if a == nil {
++		return plainRetirements.reserve()
++	}
++	g := a.group.Swap(nil)
++	if g == nil {
++		return nil, ErrMisuse
++	}
++	return g, nil
++}
+diff --git a/internal/pager/plain_session_cleanup.go b/internal/pager/plain_session_cleanup.go
+new file mode 100644
+--- /dev/null
++++ b/internal/pager/plain_session_cleanup.go
+@@ -0,0 +1,115 @@
++package pager
++
++import (
++	"context"
++	"errors"
++	"os"
++
++	"github.com/ms-xiaosnow/gosqlite/internal/vfs"
++	"github.com/ms-xiaosnow/gosqlite/internal/wal"
++)
++
++// Exclusive sessions charge a fixed current-WAL slot in addition to main and
++// temporary (journal, candidate or superseded WAL), before any acquisition.
++func (g *plainRetirement) reserveWAL() error {
++	g.mu.Lock()
++	defer g.mu.Unlock()
++	if g.started || g.done {
++		return ErrClosed
++	}
++	if g.cause != nil {
++		return g.cause
++	}
++	if g.walReserved || g.wal != nil {
++		return ErrLimit
++	}
++	g.walReserved = true
++	return nil
++}
++func (g *plainRetirement) acquiredWAL(file *vfs.File) {
++	g.mu.Lock()
++	defer g.mu.Unlock()
++	g.walReserved = false
++	if file != nil {
++		g.wal = plainFile{file}
++	}
++}
++func (g *plainRetirement) replaceWAL() {
++	g.mu.Lock()
++	defer g.mu.Unlock()
++	// Both files were already owned before the namespace operation. No native
++	// call occurs here; ownership is merely relabelled after successful replace.
++	g.wal, g.temporary = g.temporary, g.wal
++	g.temporaryRequested = false
++}
++func (g *plainRetirement) closeWAL(cause error) error {
++	g.mu.Lock()
++	defer g.mu.Unlock()
++	cause = g.adoptLocked(cause)
++	if cause != nil && g.cause == nil {
++		g.cause = plainDiagnostic(errors.Join(ErrPoisoned, cause))
++	}
++	firstAttempt := !g.walRequested
++	g.walRequested = true
++	err := g.retireLocked()
++	if len(g.nested) != 0 || g.wal != nil {
++		if firstAttempt {
++			g.cause = plainDiagnostic(errors.Join(g.cause, ErrPoisoned, err))
++		}
++		return g.pendingLocked(errors.Join(g.cause, plainDiagnostic(err)))
++	}
++	return errors.Join(cause, err)
++}
++func (g *plainRetirement) childClosePending() bool {
++	g.mu.Lock()
++	defer g.mu.Unlock()
++	return g.pending.Load() != nil && (g.temporaryRequested || g.walRequested)
++}
++func (s *Session) observeLocked(cause error) error {
++	e := s.cleanup.observe(cause)
++	if s.cleanup != nil && s.poisoned == nil && errors.Is(e, ErrPlaintextCleanupPending) {
++		s.poisoned = e
++	}
++	return e
++}
++
++// CloseWithError adopts DB/Rows/Tx cleanup errors before any protection can
++// drop. The one-time checkpoint is never repeated by explicit retirement retry.
++func (s *Session) CloseWithError(cause error) error {
++	s.mu.Lock()
++	defer s.mu.Unlock()
++	return s.closeLocked(cause, func() error { return s.checkpointLocked(context.Background()) })
++}
++func (s *Session) closeLocked(cause error, checkpoint func() error) error {
++	if s.cleanup == nil {
++		return errors.Join(cause, s.closeLegacyLocked())
++	}
++	if s.closed {
++		return s.cleanup.retry()
++	}
++	cause = s.observeLocked(cause)
++	if s.active != nil {
++		return errors.Join(cause, ErrBusy)
++	}
++	cause = errors.Join(cause, s.poisoned, s.cleanup.check())
++	if cause == nil && !s.opts.KeepWALOnClose {
++		cause = checkpoint()
++	}
++	// Clear all logical/session state before retirement. The registry retains
++	// only managed owners and diagnostics, never Session, leases or options.
++	s.closed = true
++	s.file, s.walFile, s.info, s.walInfo = nil, nil, nil, nil
++	s.snapshot = wal.Snapshot{}
++	s.opts = Options{}
++	s.poisoned = nil
++	return s.cleanup.beginClass(cause, nil, !s.cleanup.childClosePending())
++}
++
++// Shared-WAL's private transition Session keeps its existing metadata branch.
++func (s *Session) probePathLocked(path string) (os.FileInfo, bool, error) {
++	if s.cleanup != nil {
++		return nativeLstatForCreate(path)
++	}
++	info, err := nativeLstat(path)
++	return info, os.IsNotExist(err), err
++}
+diff --git a/internal/pager/plain_session_cleanup_test.go b/internal/pager/plain_session_cleanup_test.go
+new file mode 100644
+--- /dev/null
++++ b/internal/pager/plain_session_cleanup_test.go
+@@ -0,0 +1,249 @@
++package pager
++
++import (
++	"context"
++	"errors"
++	"reflect"
++	"testing"
++
++	"github.com/ms-xiaosnow/gosqlite/internal/vfs"
++	"github.com/ms-xiaosnow/gosqlite/internal/wal"
++)
++
++// Every exceptional owner below is a descriptor-free state model. Inert File
++// values mark logical openness only; Close always reaches the model owners.
++func plainSessionMemory(t *testing.T) (*Session, *plainRetirement, *plainMemoryOwner, *plainMemoryOwner) {
++	t.Helper()
++	r := &plainRetirementRegistry{limit: 1}
++	g, err := r.reserve()
++	if err != nil {
++		t.Fatal(err)
++	}
++	main, current := &plainMemoryOwner{name: "main"}, &plainMemoryOwner{name: "wal"}
++	g.main, g.wal = main, current
++	s := &Session{file: &vfs.File{}, walFile: &vfs.File{}, cleanup: g, opts: Options{PageSize: 4096}, snapshot: wal.Snapshot{Pages: map[uint32]wal.PageRef{1: {Frame: 1}}}}
++	return s, g, main, current
++}
++func TestPlainSessionCleanupMemoryCheckpointOnceAndBarrier(t *testing.T) {
++	s, g, main, current := plainSessionMemory(t)
++	diagnostic := errors.New("memory WAL retirement")
++	current.remaining, current.cause = 1, diagnostic
++	checkpoints := 0
++	token := s.closeLocked(nil, func() error { checkpoints++; return g.closeWAL(nil) })
++	if !errors.Is(token, ErrPlaintextCleanupPending) || !errors.Is(token, diagnostic) || checkpoints != 1 || current.calls != 1 || main.calls != 0 {
++		t.Fatal(token, checkpoints, current.calls, main.calls)
++	}
++	if !s.closed || s.file != nil || s.walFile != nil || s.opts != (Options{}) || s.snapshot.Pages != nil {
++		t.Fatal("logical state retained")
++	}
++	if e := s.closeLocked(nil, func() error { checkpoints++; return nil }); e != nil || checkpoints != 1 || !g.done || main.calls != 1 {
++		t.Fatal(e, checkpoints)
++	}
++	if e := RetryPlaintextCleanup(token); e != nil || main.calls != 1 || current.calls != 2 {
++		t.Fatal("completed token replay", e)
++	}
++}
++func TestPlainSessionCleanupMemoryBusyKeepAndPriorError(t *testing.T) {
++	for _, mode := range []string{"keep", "cause", "poison"} {
++		s, g, main, current := plainSessionMemory(t)
++		s.active = &Tx{}
++		originalOptions := s.opts
++		calls := 0
++		if e := s.closeLocked(nil, func() error { calls++; return nil }); !errors.Is(e, ErrBusy) || s.closed || s.opts != originalOptions || main.calls != 0 || current.calls != 0 || calls != 0 {
++			t.Fatal("BUSY changed session", e)
++		}
++		s.active = nil
++		var cause error
++		diagnostic := errors.New("memory prior disposal")
++		switch mode {
++		case "keep":
++			s.opts.KeepWALOnClose = true
++		case "cause":
++			cause = diagnostic
++		case "poison":
++			s.poisoned = diagnostic
++		}
++		e := s.closeLocked(cause, func() error { calls++; return nil })
++		if calls != 0 || !g.done || main.calls != 1 || current.calls != 1 {
++			t.Fatal("skip policy or retirement", mode, e)
++		}
++		if mode != "keep" && !errors.Is(e, diagnostic) {
++			t.Fatal("prior cause lost", e)
++		}
++	}
++}
++func TestPlainSessionCleanupMemoryCandidateSwapOrder(t *testing.T) {
++	s, g, main, old := plainSessionMemory(t)
++	events := []string{}
++	main.events, old.events = &events, &events
++	old.remaining, old.cause = 1, errors.New("memory superseded WAL close")
++	candidate := &plainMemoryOwner{name: "candidate", events: &events}
++	if e := g.reserveTemporary(); e != nil {
++		t.Fatal(e)
++	}
++	// Acquisition callbacks publish into the pre-reserved slot; model owners are
++	// installed directly without obtaining any native resource.
++	g.temporaryReserved = false
++	g.temporary = candidate
++	g.replaceWAL()
++	if g.wal != candidate || g.temporary != old {
++		t.Fatal("replacement lost an owner")
++	}
++	operation := errors.New("memory directory diagnostic")
++	pending := g.closeTemporary(operation)
++	if !errors.Is(pending, old.cause) || !errors.Is(pending, operation) || candidate.calls != 0 || main.calls != 0 {
++		t.Fatal(pending)
++	}
++	current := s.closeLocked(pending, func() error { t.Fatal("poison checkpoint"); return nil })
++	if old.calls != 1 || !errors.Is(current, old.cause) || !errors.Is(current, operation) {
++		t.Fatal("close retried or lost first error", current)
++	}
++	if e := RetryPlaintextCleanup(current); e != nil {
++		t.Fatal(e)
++	}
++	if !reflect.DeepEqual(events, []string{"wal", "wal", "candidate", "main"}) || !g.done {
++		t.Fatal(events)
++	}
++}
++func TestPlainSessionCleanupMemoryReservationAndBorrowedJournal(t *testing.T) {
++	s, g, main, current := plainSessionMemory(t)
++	if e := g.reserveWAL(); !errors.Is(e, ErrLimit) {
++		t.Fatal("overwrote current WAL", e)
++	}
++	if e := g.reserveTemporary(); e != nil {
++		t.Fatal(e)
++	}
++	if e := g.reserveTemporary(); !errors.Is(e, ErrLimit) {
++		t.Fatal(e)
++	}
++	g.acquiredTemporary(nil)
++	if g.temporaryReserved {
++		t.Fatal("unused reservation retained")
++	}
++	tx := &Tx{file: &vfs.File{}, borrowedCleanup: g, keepFile: true, dirty: map[uint32][]byte{1: {1}}, free: map[uint32]struct{}{}}
++	if _, e := tx.newUndoMarkLocked("memory"); e != nil {
++		t.Fatal(e)
++	}
++	e := tx.poison(errors.New("memory transition failure"), true)
++	if !errors.Is(e, ErrPoisoned) || !errors.Is(e, ErrRecoveryRequired) || !tx.LogicallyClosed() || len(tx.undo.marks) != 0 || main.calls != 0 || current.calls != 0 {
++		t.Fatal(e)
++	}
++	if e = s.closeLocked(e, func() error { t.Fatal("failed transition checkpoint"); return nil }); !errors.Is(e, ErrRecoveryRequired) || !g.done {
++		t.Fatal(e)
++	}
++}
++func TestPlainSessionCleanupMemoryFourStageOutcomes(t *testing.T) {
++	for bits := 0; bits < 256; bits++ {
++		r := &plainRetirementRegistry{limit: 1}
++		g, e := r.reserve()
++		if e != nil {
++			t.Fatal(e)
++		}
++		owners := make([]*plainMemoryOwner, 4)
++		firstBlocked := 4
++		for i, name := range []string{"nested", "temporary", "wal", "main"} {
++			mode := (bits >> (i * 2)) & 3
++			o := &plainMemoryOwner{name: name, cause: errors.New("memory " + name)}
++			switch mode {
++			case 1:
++				o.consumed = true
++			case 2:
++				o.nilPending = true
++			case 3:
++				o.terminal = true
++			}
++			if mode >= 2 && firstBlocked == 4 {
++				firstBlocked = i
++			}
++			owners[i] = o
++		}
++		g.nested = []plainResource{owners[0]}
++		g.temporary, g.wal, g.main = owners[1], owners[2], owners[3]
++		token := g.begin(nil)
++		if errors.Is(token, ErrPlaintextCleanupPending) != (firstBlocked < 4) {
++			t.Fatal(bits, token)
++		}
++		firstCause := g.cause
++		if firstBlocked < 4 {
++			for i := 0; i < 3; i++ {
++				token = RetryPlaintextCleanup(token)
++				if g.cause != firstCause {
++					t.Fatal("unbounded retry history")
++				}
++			}
++		}
++		for i, o := range owners {
++			if i > firstBlocked && o.calls != 0 {
++				t.Fatal("protector retired below incomplete child", bits, i)
++			}
++			if o.terminal && o.rawCalls > 1 {
++				t.Fatal("terminal native identity retried")
++			}
++			if o.terminal || o.nilPending {
++				o.done = true
++			}
++		}
++		if e = RetryPlaintextCleanup(token); errors.Is(e, ErrPlaintextCleanupPending) || !g.done || len(r.groups) != 0 {
++			t.Fatal(bits, e)
++		}
++	}
++}
++
++func TestPlainSessionCleanupMemoryAdmissionBeforePath(t *testing.T) {
++	var groups []*plainRetirement
++	defer func() {
++		for _, g := range groups {
++			_ = g.begin(nil)
++		}
++	}()
++	for i := 0; i < maxPlainRetirements; i++ {
++		g, e := plainRetirements.reserve()
++		if e != nil {
++			t.Fatal("unexpected live scope", i, e)
++		}
++		groups = append(groups, g)
++	}
++	// Invalid input must never reach path handling because admission is full.
++	s, e := OpenSession(context.Background(), "\x00", Options{Create: true})
++	if s != nil || !errors.Is(e, ErrLimit) || len(PendingPlaintextCleanups()) != 0 {
++		t.Fatal("acquisition preceded admission", e)
++	}
++}
++
++func TestPlainSessionCleanupMemoryPublicAdmissionTransfer(t *testing.T) {
++	a, err := ReserveExclusiveOpen()
++	if err != nil {
++		t.Fatal(err)
++	}
++	g := a.group.Load()
++	owner := &plainMemoryOwner{remaining: 1, cause: errors.New("memory public metadata retirement")}
++	g.nested = []plainResource{owner}
++	original := errors.New("memory public path error")
++	pending, handled := a.Finish(original)
++	if !handled || !errors.Is(pending, ErrPlaintextCleanupPending) || !errors.Is(pending, original) || len(PendingPlaintextCleanups()) != 1 {
++		t.Fatal("no-DB error not discoverable", pending)
++	}
++	if _, handled = a.Finish(original); handled || owner.calls != 1 {
++		t.Fatal("admission finalized twice")
++	}
++	if e := RetryPlaintextCleanup(PendingPlaintextCleanups()[0]); e != nil || !g.done {
++		t.Fatal(e)
++	}
++	a, err = ReserveExclusiveOpen()
++	if err != nil {
++		t.Fatal(err)
++	}
++	transferred, err := claimExclusiveOpen(a)
++	if err != nil {
++		t.Fatal(err)
++	}
++	if _, handled = a.Finish(original); handled {
++		t.Fatal("transferred owner retired by public defer")
++	}
++	if _, err = claimExclusiveOpen(a); !errors.Is(err, ErrMisuse) {
++		t.Fatal("admission claimed twice", err)
++	}
++	if e := transferred.begin(nil); e != nil {
++		t.Fatal(e)
++	}
++}
+diff --git a/internal/pager/plain_tx_cleanup.go b/internal/pager/plain_tx_cleanup.go
+--- a/internal/pager/plain_tx_cleanup.go
++++ b/internal/pager/plain_tx_cleanup.go
+@@ -84,6 +84,12 @@
+ 	if recovery {
+ 		cause = errors.Join(cause, ErrRecoveryRequired)
+ 	}
++	if t.borrowedCleanup != nil {
++		t.file, t.dirty, t.free = nil, nil, nil
++		t.clearClosedUndoLocked()
++		t.poisoned = errors.Join(cause, t.borrowedCleanup.check())
++		return t.poisoned
++	}
+ 	return t.retirePlainLocked(cause, nil, false)
+ }
+ 
+@@ -94,3 +100,16 @@
+ 	defer t.mu.Unlock()
+ 	return t.file == nil && t.encrypted == nil
+ }
++
++func (t *Tx) plainScope() *plainRetirement {
++	if t.cleanup != nil {
++		return t.cleanup
++	}
++	if t.borrowedCleanup != nil {
++		return t.borrowedCleanup
++	}
++	if t.session != nil {
++		return t.session.cleanup
++	}
++	return nil
++}
+diff --git a/internal/pager/session.go b/internal/pager/session.go
+--- a/internal/pager/session.go
++++ b/internal/pager/session.go
+@@ -32,6 +32,8 @@
+ 	snapshot   wal.Snapshot
+ 	active     *Tx
+ 	poisoned   error
++	cleanup    *plainRetirement
++	closed     bool
+ 	appendSafe bool // Last acknowledged WAL commit survives our append sector.
+ }
+ 
+@@ -39,7 +41,13 @@
+ // even if its subsequent transactions are read-only. Entering WAL mode is a
+ // standard rollback-journal transaction using the same continuously locked
+ // database descriptor. A mode-2 database without a WAL is valid.
+-func OpenSession(ctx context.Context, path string, opts Options) (result *Session, retErr error) {
++func OpenSession(ctx context.Context, path string, opts Options) (*Session, error) {
++	return OpenSessionAdmitted(ctx, path, opts, nil)
++}
++
++// OpenSessionAdmitted consumes a pre-canonical public admission exactly once.
++// Nil requests the direct constructor's own pre-acquisition reservation.
++func OpenSessionAdmitted(ctx context.Context, path string, opts Options, admission *ExclusiveOpenAdmission) (result *Session, retErr error) {
+ 	if err := ctx.Err(); err != nil {
+ 		return nil, err
+ 	}
+@@ -47,14 +55,23 @@
+ 	if err != nil {
+ 		return nil, err
+ 	}
++	cleanup, err := claimExclusiveOpen(admission)
++	if err != nil {
++		return nil, err
++	}
++	defer func() {
++		if result == nil {
++			retErr = cleanup.beginClass(retErr, nil, !cleanup.childClosePending())
++		}
++	}()
+ 	path, err = filepath.Abs(path)
+ 	if err != nil {
+ 		return nil, err
+ 	}
+-	resolved, err := resolveNativePath(path)
++	resolved, initialAbsent, err := resolveNativeReaderPath(path)
+ 	if err == nil {
+ 		path = resolved
+-	} else if opts.Create && os.IsNotExist(err) {
++	} else if opts.Create && initialAbsent {
+ 		dir, e := resolveNativePath(filepath.Dir(path))
+ 		if e != nil {
+ 			return nil, e
+@@ -71,16 +88,8 @@
+ 	if err != nil {
+ 		return nil, err
+ 	}
+-	s := &Session{file: f, path: path, opts: opts}
+-	success := false
+-	defer func() {
+-		if !success {
+-			if s.walFile != nil {
+-				retErr = errors.Join(retErr, closeNativeFile(s.walFile))
+-			}
+-			retErr = errors.Join(retErr, closeNativeFile(f))
+-		}
+-	}()
++	cleanup.main = plainFile{f}
++	s := &Session{file: f, path: path, opts: opts, cleanup: cleanup}
+ 	if err = lockShared(f); err != nil {
+ 		return nil, err
+ 	}
+@@ -155,7 +164,6 @@
+ 	if err = s.removeStaleSHMLocked(); err != nil {
+ 		return nil, err
+ 	}
+-	success = true
+ 	return s, nil
+ }
+ 
+@@ -172,7 +180,7 @@
+ func (s *Session) enterWALLocked(ctx context.Context) error {
+ 	t := &Tx{file: s.file, path: s.path, info: s.info, opts: s.opts,
+ 		dirty: make(map[uint32][]byte), free: make(map[uint32]struct{}),
+-		originalHeader: s.rawHeader, reserved: true, keepFile: true}
++		originalHeader: s.rawHeader, reserved: true, keepFile: true, borrowedCleanup: s.cleanup}
+ 	var p []byte
+ 	var err error
+ 	if s.info.Size() == 0 {
+@@ -231,8 +239,8 @@
+ }
+ 
+ func (s *Session) checkJournalLocked() error {
+-	_, err := nativeLstat(s.path + "-journal")
+-	if os.IsNotExist(err) {
++	_, absent, err := s.probePathLocked(s.path + "-journal")
++	if absent {
+ 		return nil
+ 	}
+ 	if err != nil {
+@@ -242,6 +250,9 @@
+ }
+ 
+ func (s *Session) checkOpenLocked() error {
++	if err := s.cleanup.check(); err != nil {
++		return err
++	}
+ 	if s.poisoned != nil {
+ 		return s.poisoned
+ 	}
+@@ -257,7 +268,8 @@
+ 	return s.checkStableLocked()
+ }
+ 
+-func (s *Session) checkStableLocked() error {
++func (s *Session) checkStableLocked() (retErr error) {
++	defer func() { retErr = s.observeLocked(retErr) }()
+ 	if err := s.checkOpenLocked(); err != nil {
+ 		return err
+ 	}
+@@ -292,8 +304,8 @@
+ }
+ 
+ func (s *Session) removeStaleSHMLocked() error {
+-	st, err := nativeLstat(s.path + "-shm")
+-	if os.IsNotExist(err) {
++	st, absent, err := s.probePathLocked(s.path + "-shm")
++	if absent {
+ 		return nil
+ 	}
+ 	if err != nil {
+@@ -354,8 +366,7 @@
+ 	s.mu.Unlock()
+ 	if !readOnly {
+ 		if err = t.loadFreelist(ctx); err != nil {
+-			_ = t.Rollback()
+-			return nil, err
++			return nil, errors.Join(err, t.Rollback())
+ 		}
+ 	}
+ 	return t, nil
+@@ -378,7 +389,8 @@
+ 	return s.readPageLocked(ctx, n)
+ }
+ 
+-func (s *Session) readPageLocked(ctx context.Context, n uint32) ([]byte, error) {
++func (s *Session) readPageLocked(ctx context.Context, n uint32) (_ []byte, retErr error) {
++	defer func() { retErr = s.observeLocked(retErr) }()
+ 	if err := ctx.Err(); err != nil {
+ 		return nil, err
+ 	}
+@@ -397,16 +409,20 @@
+ }
+ 
+ func (s *Session) poisonLocked(cause error) error {
+-	s.poisoned = errors.Join(ErrPoisoned, cause)
++	cause = s.observeLocked(cause)
++	if s.poisoned == nil {
++		s.poisoned = errors.Join(ErrPoisoned, cause)
++	}
+ 	return s.poisoned
+ }
+ 
+ // Close normally checkpoints before releasing EXCLUSIVE. KeepWALOnClose
+ // retains an already-synced committed WAL instead. An active lease returns
+ // BUSY. A poisoned session only closes descriptors and preserves its WAL.
+-func (s *Session) Close() error {
+-	s.mu.Lock()
+-	defer s.mu.Unlock()
++func (s *Session) Close() error { return s.CloseWithError(nil) }
++
++// Shared-WAL construction uses a private Session without exclusive ownership.
++func (s *Session) closeLegacyLocked() error {
+ 	if s.file == nil {
+ 		return s.poisoned
+ 	}
+diff --git a/internal/pager/tx.go b/internal/pager/tx.go
+--- a/internal/pager/tx.go
++++ b/internal/pager/tx.go
+@@ -80,8 +80,9 @@
+ 	readOnly           bool
+ 	// keepFile is private to the rollback-journal WAL-mode transition. The
+ 	// WAL session already holds EXCLUSIVE and retains the same descriptor.
+-	keepFile bool
+-	cleanup  *plainRetirement
++	keepFile        bool
++	cleanup         *plainRetirement
++	borrowedCleanup *plainRetirement // exclusive WAL mode transition; never owns main retirement
+ }
+ 
+ func normalizedOptions(o Options) (Options, error) {
+@@ -237,7 +238,7 @@
+ 
+ func (t *Tx) Header() Header { t.mu.Lock(); defer t.mu.Unlock(); return t.header }
+ func (t *Tx) checkOpen() error {
+-	if err := t.cleanup.check(); err != nil {
++	if err := t.plainScope().check(); err != nil {
+ 		return err
+ 	}
+ 	if t.poisoned != nil {
+@@ -251,8 +252,8 @@
+ func (t *Tx) checkSidecars() error { return checkSidecars(t.path) }
+ 
+ func (t *Tx) checkStable() (retErr error) {
+-	if t.cleanup != nil {
+-		defer func() { retErr = t.cleanup.observe(retErr) }()
++	if cleanup := t.plainScope(); cleanup != nil {
++		defer func() { retErr = cleanup.observe(retErr) }()
+ 	}
+ 	if t.encrypted != nil {
+ 		return t.encrypted.checkStable()
+@@ -295,8 +296,8 @@
+ 	return nil
+ }
+ func (t *Tx) readLocked(ctx context.Context, n uint32) (_ []byte, retErr error) {
+-	if t.cleanup != nil {
+-		defer func() { retErr = t.cleanup.observe(retErr) }()
++	if cleanup := t.plainScope(); cleanup != nil {
++		defer func() { retErr = cleanup.observe(retErr) }()
+ 	}
+ 	if err := ctx.Err(); err != nil {
+ 		return nil, err
+@@ -357,7 +358,7 @@
+ 		return t.shared.promote(ctx, t)
+ 	}
+ 	if err := lockReserved(t.file); err != nil {
+-		return t.cleanup.observe(err)
++		return t.plainScope().observe(err)
+ 	}
+ 	t.reserved = true
+ 	return nil
+diff --git a/internal/pager/wal.go b/internal/pager/wal.go
+--- a/internal/pager/wal.go
++++ b/internal/pager/wal.go
+@@ -14,8 +14,8 @@
+ )
+ 
+ func (s *Session) openWALLocked(ctx context.Context) error {
+-	st, err := nativeLstat(s.path + "-wal")
+-	if os.IsNotExist(err) {
++	st, absent, err := s.probePathLocked(s.path + "-wal")
++	if absent {
+ 		return nil
+ 	}
+ 	if err != nil {
+@@ -24,7 +24,15 @@
+ 	if !st.Mode().IsRegular() {
+ 		return fmt.Errorf("%w: WAL must be a regular file", ErrUnsupported)
+ 	}
++	if s.cleanup != nil {
++		if err = s.cleanup.reserveWAL(); err != nil {
++			return err
++		}
++	}
+ 	f, err := openWALFile(s.path+"-wal", os.O_RDWR, true)
++	if s.cleanup != nil {
++		s.cleanup.acquiredWAL(f)
++	}
+ 	if err != nil {
+ 		return err
+ 	}
+@@ -55,9 +63,9 @@
+ }
+ 
+ func (s *Session) checkWALStableLocked() error {
+-	pathInfo, err := nativeLstat(s.path + "-wal")
++	pathInfo, absent, err := s.probePathLocked(s.path + "-wal")
+ 	if s.walFile == nil {
+-		if os.IsNotExist(err) {
++		if absent {
+ 			return nil
+ 		}
+ 		if err != nil {
+@@ -87,7 +95,8 @@
+ // ensureWALLocked writes and separately syncs a fresh WAL header before any
+ // frames can be appended. In particular, a frame Sync cannot replace this
+ // header Sync (SQLite wal.c walFrames, header-reordering protection).
+-func (s *Session) ensureWALLocked() error {
++func (s *Session) ensureWALLocked() (retErr error) {
++	defer func() { retErr = s.observeLocked(retErr) }()
+ 	if s.walFile != nil && s.walInfo.Size() != 0 {
+ 		return nil
+ 	}
+@@ -107,7 +116,15 @@
+ 		return err
+ 	}
+ 	if s.walFile == nil {
++		if s.cleanup != nil {
++			if err = s.cleanup.reserveWAL(); err != nil {
++				return err
++			}
++		}
+ 		s.walFile, err = openWALFile(s.path+"-wal", os.O_RDWR|os.O_CREATE|os.O_EXCL, true)
++		if s.cleanup != nil {
++			s.cleanup.acquiredWAL(s.walFile)
++		}
+ 		if err != nil {
+ 			return err
+ 		}
+@@ -139,7 +156,8 @@
+ // WAL pathname under EXCLUSIVE, then Sync its directory. Either namespace
+ // outcome represents the identical committed database; the main inode and
+ // its lock are untouched. This is not a shared-WAL reset protocol.
+-func (s *Session) normalizeAppendWALLocked() error {
++func (s *Session) normalizeAppendWALLocked() (retErr error) {
++	defer func() { retErr = s.observeLocked(retErr) }()
+ 	if s.appendSafe {
+ 		return nil
+ 	}
+@@ -172,7 +190,15 @@
+ 	if dbSize == 0 || dbSize != s.snapshot.DBSize {
+ 		return fmt.Errorf("%w: WAL final commit marker", ErrCorrupt)
+ 	}
++	if s.cleanup != nil {
++		if err := s.cleanup.reserveTemporary(); err != nil {
++			return err
++		}
++	}
+ 	candidate, err := vfs.CreateWALCandidate(s.path)
++	if s.cleanup != nil {
++		s.cleanup.acquiredTemporary(candidate)
++	}
+ 	if err != nil {
+ 		return nativeFileError(err)
+ 	}
+@@ -180,7 +206,14 @@
+ 	renamed := false
+ 	fail := func(cause error) error {
+ 		if !renamed {
+-			cause = errors.Join(cause, closeNativeFile(candidate))
++			if s.cleanup != nil {
++				cause = s.cleanup.closeTemporary(cause)
++				if errors.Is(cause, ErrPlaintextCleanupPending) {
++					return s.poisonLocked(cause)
++				}
++			} else {
++				cause = errors.Join(cause, closeNativeFile(candidate))
++			}
+ 			if e := os.Remove(tempPath); e != nil {
+ 				cause = errors.Join(cause, e)
+ 			} else {
+@@ -236,8 +269,17 @@
+ 	renamed = true
+ 	old := s.walFile
+ 	s.walFile, s.walInfo = candidate, info
++	if s.cleanup != nil {
++		s.cleanup.replaceWAL()
++	}
+ 	if err = syncDirectory(s.path); err != nil {
+-		return fail(errors.Join(ErrCommitUncertain, err, closeNativeFile(old)))
++		cause := errors.Join(ErrCommitUncertain, err)
++		if s.cleanup != nil {
++			cause = s.cleanup.closeTemporary(cause)
++		} else {
++			cause = errors.Join(cause, closeNativeFile(old))
++		}
++		return fail(cause)
+ 	}
+ 	s.snapshot.IndexWork += 2 * uint64(frames-s.snapshot.FrameCount)
+ 	s.snapshot.FrameCount, s.snapshot.ValidFrameCount = frames, frames
+@@ -247,7 +289,12 @@
+ 		s.snapshot.Pages[pageNo] = ref
+ 	}
+ 	s.appendSafe = true
+-	if err = closeNativeFile(old); err != nil {
++	if s.cleanup != nil {
++		err = s.cleanup.closeTemporary(nil)
++	} else {
++		err = closeNativeFile(old)
++	}
++	if err != nil {
+ 		return s.poisonLocked(err)
+ 	}
+ 	return nil
+@@ -355,7 +402,8 @@
+ 
+ // appendWALPagesLocked appends one complete, synced transaction. Callers must
+ // supply sector-complete images, including page one, and hold s.mu.
+-func (s *Session) appendWALPagesLocked(ctx context.Context, commitPages map[uint32][]byte, finalHeader Header) error {
++func (s *Session) appendWALPagesLocked(ctx context.Context, commitPages map[uint32][]byte, finalHeader Header) (retErr error) {
++	defer func() { retErr = s.observeLocked(retErr) }()
+ 	var err error
+ 	pages := sortedPages(commitPages)
+ 	if len(pages) == 0 {
+diff --git a/sqlite/plain_session_cleanup_internal_test.go b/sqlite/plain_session_cleanup_internal_test.go
+new file mode 100644
+--- /dev/null
++++ b/sqlite/plain_session_cleanup_internal_test.go
+@@ -0,0 +1,30 @@
++package sqlite
++
++import (
++	"errors"
++	"github.com/ms-xiaosnow/gosqlite/internal/pager"
++	"testing"
++)
++
++// Empty admissions and invalid input only. Capacity must reject before any
++// canonicalization/native metadata, so this is not a native failure probe.
++func TestPlainSessionCleanupMemoryPublicAdmissionBeforePath(t *testing.T) {
++	var admissions []*pager.ExclusiveOpenAdmission
++	defer func() {
++		for _, a := range admissions {
++			_, _ = a.Finish(nil)
++		}
++	}()
++	for i := 0; i < 1024; i++ {
++		a, e := pager.ReserveExclusiveOpen()
++		if e != nil {
++			t.Fatal(i, e)
++		}
++		admissions = append(admissions, a)
++	}
++	db, e := Open("\x00", Options{WALExclusive: true})
++	var detail *Error
++	if db != nil || !errors.Is(e, ErrMemoryLimit) || !errors.As(e, &detail) || detail.Code != CodeNoMem || len(PendingPlaintextCleanups()) != 0 {
++		t.Fatal("canonicalization preceded plaintext admission", e)
++	}
++}
+diff --git a/sqlite/plaintext_cleanup.go b/sqlite/plaintext_cleanup.go
+--- a/sqlite/plaintext_cleanup.go
++++ b/sqlite/plaintext_cleanup.go
+@@ -3,31 +3,34 @@
+ import "github.com/ms-xiaosnow/gosqlite/internal/pager"
+ 
+ // ErrPlaintextCleanupPending marks an immutable historical cleanup token for an
+-// ordinary rollback Reader or standalone Tx. Tokens match ErrPoisoned and carry CodeIOErr.
++// ordinary rollback Reader, standalone Tx or exclusive-WAL Session. Tokens match
++// ErrPoisoned and carry CodeIOErr.
+ // A close diagnostic without this marker can describe fully consumed ownership.
+ var ErrPlaintextCleanupPending = pager.ErrPlaintextCleanupPending
+ 
+ // RetryPlaintextCleanup deliberately attempts all distinct ordinary rollback
+-// Reader/Tx groups in wrapped/joined errors. Discovery precedes effects and accepts
++// Reader/Tx/exclusive-Session groups in wrapped/joined errors. Discovery precedes effects and accepts
+ // at most 4096 error nodes. Excessive/cyclic trees return ErrMemoryLimit without
+ // cleanup or wrapping the unsafe tree; retain tokens and retry smaller trees.
+ //
+-// A live Reader/Tx token retries only failed nested probes or a close-requested
+-// journal, never an active main file or unrequested journal. After logical close,
++// A live group retries only failed nested probes or close-requested child files,
++// never an active main file or an unrequested live journal/WAL. After logical close,
+ // child obligations retire before the protecting main file.
+ // Retries do not open paths, replay transactions, or retry numeric native handles.
+ // Terminal ownership can remain pending indefinitely. Completed groups and errors
+ // without tokens are no-ops, not proof every subsystem is clean. This increment
+-// does not cover WALShared, WALExclusive or encryption.
++// does not cover WALShared or encryption; those retain their separate APIs.
+ func RetryPlaintextCleanup(err error) error {
+ 	return wrap("plaintext cleanup", pager.RetryPlaintextCleanup(err))
+ }
+ 
+ // PendingPlaintextCleanups returns a new snapshot of immutable pending rollback
+-// Reader/Tx tokens, including failed opens and close errors discarded by database/sql.
+-// Enumeration performs no cleanup; ordinary live/opening Readers and Tx are excluded.
+-// At most 1024 opening/live/pending Reader/Tx groups are admitted before pager
+-// acquisition. Each scope pre-reserves main and one temporary journal slot.
++// Reader/Tx/exclusive-Session tokens, including failed opens and errors discarded
++// by database/sql.
++// Enumeration performs no cleanup; ordinary live/opening groups are excluded.
++// At most 1024 opening/live/pending groups are admitted before pager acquisition.
++// Each pre-reserves main, current WAL and one temporary child slot (journal, WAL
++// candidate or superseded WAL). Unused slots contain no owners.
+ // There is no eviction, finalizer, automatic sweep, or wait on another group at
+ // admission. Changing the returned slice does not change registry ownership.
+ func PendingPlaintextCleanups() []error {
+diff --git a/sqlite/sqlite.go b/sqlite/sqlite.go
+--- a/sqlite/sqlite.go
++++ b/sqlite/sqlite.go
+@@ -211,7 +211,7 @@
+ // OpenContext opens a connection while honoring cancellation before physical
+ // publication. Once a mode-switch commit starts I/O it must finish or report
+ // an uncertain/poisoned result rather than abandon partially published data.
+-func OpenContext(ctx context.Context, path string, opts Options) (*DB, error) {
++func OpenContext(ctx context.Context, path string, opts Options) (result *DB, retErr error) {
+ 	if err := checkContext(ctx); err != nil {
+ 		return nil, wrap("open", err)
+ 	}
+@@ -240,6 +240,19 @@
+ 	opts, err := normalizeConnectionLimits(opts)
+ 	if err != nil {
+ 		return nil, wrap("open", err)
++	}
++
++	var exclusiveAdmission *pager.ExclusiveOpenAdmission
++	if opts.WALExclusive {
++		exclusiveAdmission, err = pager.ReserveExclusiveOpen()
++		if err != nil {
++			return nil, wrap("open", err)
++		}
++		defer func() {
++			if result, handled := exclusiveAdmission.Finish(retErr); handled {
++				retErr = wrap("open", result)
++			}
++		}()
+ 	}
+ 	var closeAdmission *pager.SharedCloseAdmission
+ 	if opts.WALShared {
+@@ -286,7 +299,7 @@
+ 		if opts.WALShared {
+ 			session, err = pager.OpenSharedSessionAdmitted(ctx, path, d.pagerOptions(), closeAdmission)
+ 		} else {
+-			session, err = pager.OpenSession(ctx, path, d.pagerOptions())
++			session, err = pager.OpenSessionAdmitted(ctx, path, d.pagerOptions(), exclusiveAdmission)
+ 		}
+ 		if err != nil {
+ 			return nil, wrap("open", err)
+@@ -393,8 +406,8 @@
+ 			err = errors.Join(err, d.tx.rollbackLocked())
+ 		}
+ 	} else {
+-		// Native shared-WAL logical closure does not imply owner retirement.
+-		// Other modes retain their pre-existing one-shot Close contract.
++		// Managed session logical closure does not imply owner retirement.
++		// One-shot modes without the retry bridge keep their Close contract.
+ 		if _, ok := d.session.(interface{ CloseWithError(error) error }); !ok {
+ 			return nil
+ 		}

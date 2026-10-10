@@ -115,7 +115,7 @@ func (d *DB) controlLocked(ctx context.Context, control *sqlast.Transaction) err
 		}
 		err := d.tx.savepointLocked(ctx, control.Name)
 		if err != nil && created {
-			_ = d.tx.rollbackLocked()
+			err = errors.Join(err, d.tx.rollbackLocked())
 		}
 		return err
 	case "COMMIT", "ROLLBACK":

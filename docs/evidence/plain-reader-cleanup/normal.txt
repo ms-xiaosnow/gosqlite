@@ -1,0 +1,6 @@
++ ../toolchains/go1.27.2/bin/go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ ../toolchains/go1.27.2/bin/go test ./internal/pager ./sqlite ./internal/vfs -run '^(TestPlainCleanupMemory|TestPlaintextCleanup|TestReadOnlyPageAccess$|TestCleanupOwnersMemory|TestCleanupOwnersBoundedMemory|TestCloseStatusMemory)' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.094s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.008s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.046s

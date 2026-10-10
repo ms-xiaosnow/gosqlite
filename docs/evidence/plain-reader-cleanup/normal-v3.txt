@@ -1,0 +1,4 @@
++ ../toolchains/go1.27.2/bin/go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ ../toolchains/go1.27.2/bin/go test ./sqlite -run '^TestPlaintextCleanup' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.008s

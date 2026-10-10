@@ -1,0 +1,52 @@
+{
+  "candidate": {
+    "files": 1062,
+    "mismatches": [],
+    "extra": [],
+    "missing": []
+  },
+  "copy": {
+    "files": 1062,
+    "mismatches": [],
+    "extra": [],
+    "missing": []
+  },
+  "base": {
+    "files": 1024,
+    "mismatches": [],
+    "extra": [],
+    "missing": []
+  },
+  "full_manifest_sha256": "bf450dcdde4293bbd303750d9e14d65d969b8a63fad66249f7c6ba1f8d6eaaa2",
+  "owned_manifest_sha256": "9d95728c0541ee69f1d3f37878a1287c347baf98b982e594964bcd3241977dab",
+  "owned_paths": [
+    "docs/plaintext-tx-cleanup.md",
+    "driver/driver.go",
+    "driver/plain_tx_cleanup_test.go",
+    "internal/pager/commit.go",
+    "internal/pager/plain_cleanup.go",
+    "internal/pager/plain_tx_cleanup.go",
+    "internal/pager/plain_tx_cleanup_test.go",
+    "internal/pager/tx.go",
+    "sqlite/plain_tx_cleanup_internal_test.go",
+    "sqlite/plaintext_cleanup.go",
+    "sqlite/sqlite.go",
+    "sqlite/transaction.go",
+    "sqlite/transaction_control.go"
+  ],
+  "production_test_diffs_from_v5": [
+    "driver/driver.go",
+    "driver/plain_tx_cleanup_test.go",
+    "internal/pager/commit.go",
+    "internal/pager/plain_cleanup.go",
+    "internal/pager/plain_tx_cleanup.go",
+    "internal/pager/plain_tx_cleanup_test.go",
+    "internal/pager/tx.go",
+    "sqlite/plain_tx_cleanup_internal_test.go",
+    "sqlite/plaintext_cleanup.go",
+    "sqlite/sqlite.go",
+    "sqlite/transaction.go",
+    "sqlite/transaction_control.go"
+  ],
+  "unowned_production_test_diffs": []
+}

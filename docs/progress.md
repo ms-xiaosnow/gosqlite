@@ -768,3 +768,40 @@ Windows/Darwin runtime, physical failures/recovery, independent security/legal o
 M10 final acceptance. The current compatibility matrix is consolidated; its old
 chronological statements are preserved in docs/history rather than left to
 contradict the current feature summary.
+
+
+### Plaintext cleanup ownership chain
+
+Exact combined source 7d3184f87165e11e12560884ec6e4f92c9bfd039 adds four
+independently reviewed corrections: Reader V5, rollback Tx V2, exclusive WAL V2
+and public metadata-admission V1. The checked 45-path composition preserves the
+previous SQL source, including predicate startup and the original rowid sorting
+query's positive oracle control. Existing storage bytes and exported layouts are
+unchanged. Private ownership and lifecycle behavior are materially corrected.
+
+Bounded minimal roots are reserved before native acquisition; unresolved metadata,
+journal and WAL obligations stay reachable through explicit pending/retry APIs.
+Children retire before their main database owner and lock. Initial ownerless
+absence has explicit provenance; post-acquisition errors cannot authorize file
+creation by broad errors.Is matching. Public rollback/exclusive canonicalization
+transfers the reserved root once. Shared pre-session errors enter the existing
+successful-close registry, whereas failed pager construction retains its separate
+failed-open registry. Logical close, checkpoint and key/data release remain
+one-shot; cleanup retries only retire retained obligations. No registry retains
+DB/Tx/Rows, plaintext pages, options or arbitrary callbacks.
+
+The original Reader V3/V4 and Tx V1/Exclusive V1 review failures are retained with
+the fixed-version reports. Descriptor-free negative controls and bounded owner
+laws are distinct from intact native lifecycle tests. Source inspection of the
+existing encrypted Windows canonicalization found its metadata owners already
+retained; that protocol is unchanged. Native recovery ownership and shared/recovery
+legacy absence coupling remain separate code work, not covered by this claim.
+
+The exact combined frozen source passed full guarded CGO0 unit/vet/build, the
+complete pinned ordinary SQLite oracle, full race, five target cross-builds,
+module verification and complete inventory at 2026-10-10T20:24:10Z with exit 0. Exact
+commands and output are plain-final-commands.txt and plain-final-lead-checks.txt.
+All published non-document changed bytes equal that tested source. Remote CI
+and Library-restored exact commit checks are recorded separately. This checkpoint
+does not qualify native failure paths, physical recovery, Windows/Darwin runtime,
+independent security/legal review or M10 release acceptance.

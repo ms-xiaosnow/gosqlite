@@ -1,0 +1,6 @@
++ ../toolchains/go1.27.2/bin/go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ ../toolchains/go1.27.2/bin/go test -tags oracle ./internal/testkit -run '^(TestOracleExclusiveWALNormalInterop|TestOracleImportedWALCheckpointWithoutNativeWrite)$' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	0.346s
++ ../toolchains/go1.27.2/bin/go build ./...
++ ../toolchains/go1.27.2/bin/go vet ./internal/pager ./internal/vfs ./sqlite ./driver
