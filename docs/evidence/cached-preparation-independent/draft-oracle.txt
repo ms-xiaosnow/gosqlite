@@ -1,0 +1,6 @@
+=== RUN   TestReviewPreparationOracleDefaultRuntimeAndInvalid
+--- PASS: TestReviewPreparationOracleDefaultRuntimeAndInvalid (0.02s)
+=== RUN   TestReviewPreparationUnsupportedCatalogCannotWrite
+--- PASS: TestReviewPreparationUnsupportedCatalogCannotWrite (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	0.032s

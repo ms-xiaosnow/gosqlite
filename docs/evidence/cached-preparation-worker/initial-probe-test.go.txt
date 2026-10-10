@@ -1,0 +1,3 @@
+package sqlite
+import("context";"testing")
+func TestCachedPreparationProbe(t *testing.T) { db,path:=reviewTransactionDB(t); reviewTransactionExec(t,db,"CREATE TABLE t(id INTEGER PRIMARY KEY)"); reviewTransactionExec(t,db,"INSERT INTO t VALUES(1),(2)"); t.Logf("cache=%+v info=%+v opts=%+v",db.preparation,db.info,db.opts); p,e:=Open(path,Options{});if e!=nil{t.Fatal(e)}; defer p.Close();reviewTransactionExec(t,p,"BEGIN EXCLUSIVE");reviewTransactionExec(t,db,"BEGIN");e=db.tx.ensureSnapshotLocked(context.Background());t.Logf("snapshot error=%#v, onlyBusy=%v",e,onlyBusy(e));_,e=db.Exec(context.Background(),"DELETE FROM t");t.Logf("delete=%v cache=%+v counters=%+v",e,db.preparation,db.counters); reviewTransactionExec(t,p,"ROLLBACK") }

@@ -1,0 +1,1 @@
+PASS: exact baseline 7c8f7a266a63a713b22709268fdd4d25f1b875d1 + checked source.patch reproduces all 1264 paths and bytes, file modes, final tree 18cab5976106fc7a794066d50c9d8a0c199efe49; worktree and freeze identical; baseline unchanged.

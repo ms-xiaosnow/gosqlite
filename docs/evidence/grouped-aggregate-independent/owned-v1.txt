@@ -1,0 +1,7 @@
+Behavior audit: new grouped tests are pure AST/state/quota laws or ordinary intact SQL fixtures, typed-value errors, normal close/cancel, prepared statements, shared snapshots and transaction BUSY/rollback/checkpoint. Reviewed helper transitive behavior. CLI completes ordinarily. No restricted workflow.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.004s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.021s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.018s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	0.505s

@@ -1,0 +1,733 @@
+Behavior audit: extra tests use ordinary SQL-created intact private fixtures and read-only pinned CLI normal completion, scalar error expectations and bounded result comparison only. No excluded workflow.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestGroupedReviewerTopKDetails
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_LIMIT_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_LIMIT_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=3 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY k+0 LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_LIMIT_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=4 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY k+0 LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_LIMIT_1_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_LIMIT_1_OFFSET_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=3 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY k+0 LIMIT 1 OFFSET 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_LIMIT_1_OFFSET_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=4 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY k+0 LIMIT 1 OFFSET 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_LIMIT_2_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_LIMIT_2_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_LIMIT_2_OFFSET_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=4 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY k+0 LIMIT 2 OFFSET 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_LIMIT_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=1 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY k+0 DESC LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_LIMIT_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=3 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY k+0 DESC LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_LIMIT_1_OFFSET_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=1 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY k+0 DESC LIMIT 1 OFFSET 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_LIMIT_1_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_LIMIT_1_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_LIMIT_2_OFFSET_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=1 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY k+0 DESC LIMIT 2 OFFSET 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_LIMIT_2_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_LIMIT_2_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_NULLS_LAST_LIMIT_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_NULLS_LAST_LIMIT_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=3 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY k+0 NULLS LAST LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_NULLS_LAST_LIMIT_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=4 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY k+0 NULLS LAST LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_NULLS_LAST_LIMIT_1_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_NULLS_LAST_LIMIT_1_OFFSET_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=3 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY k+0 NULLS LAST LIMIT 1 OFFSET 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_NULLS_LAST_LIMIT_1_OFFSET_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=4 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY k+0 NULLS LAST LIMIT 1 OFFSET 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_NULLS_LAST_LIMIT_2_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_NULLS_LAST_LIMIT_2_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_NULLS_LAST_LIMIT_2_OFFSET_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=4 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY k+0 NULLS LAST LIMIT 2 OFFSET 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_NULLS_LAST_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_NULLS_LAST_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_NULLS_LAST_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_NULLS_LAST_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_NULLS_LAST_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_NULLS_LAST_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_NULLS_FIRST_LIMIT_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=1 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY k+0 DESC NULLS FIRST LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_NULLS_FIRST_LIMIT_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=3 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY k+0 DESC NULLS FIRST LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_NULLS_FIRST_LIMIT_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_NULLS_FIRST_LIMIT_1_OFFSET_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=1 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY k+0 DESC NULLS FIRST LIMIT 1 OFFSET 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_NULLS_FIRST_LIMIT_1_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_NULLS_FIRST_LIMIT_1_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_NULLS_FIRST_LIMIT_2_OFFSET_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=1 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY k+0 DESC NULLS FIRST LIMIT 2 OFFSET 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_NULLS_FIRST_LIMIT_2_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_NULLS_FIRST_LIMIT_2_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_NULLS_FIRST_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_NULLS_FIRST_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_NULLS_FIRST_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_NULLS_FIRST_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_NULLS_FIRST_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_NULLS_FIRST_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_LIMIT_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_LIMIT_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=3 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY count(*) LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_LIMIT_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=4 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY count(*) LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_LIMIT_1_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_LIMIT_1_OFFSET_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=3 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY count(*) LIMIT 1 OFFSET 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_LIMIT_1_OFFSET_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=4 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY count(*) LIMIT 1 OFFSET 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_LIMIT_2_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_LIMIT_2_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_LIMIT_2_OFFSET_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=4 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY count(*) LIMIT 2 OFFSET 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_LIMIT_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=1 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY count(*) DESC LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_LIMIT_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=3 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY count(*) DESC LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_LIMIT_1_OFFSET_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=1 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY count(*) DESC LIMIT 1 OFFSET 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_LIMIT_1_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_LIMIT_1_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_LIMIT_2_OFFSET_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=1 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY count(*) DESC LIMIT 2 OFFSET 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_LIMIT_2_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_LIMIT_2_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_NULLS_LAST_LIMIT_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_NULLS_LAST_LIMIT_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=3 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY count(*) NULLS LAST LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_NULLS_LAST_LIMIT_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=4 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY count(*) NULLS LAST LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_NULLS_LAST_LIMIT_1_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_NULLS_LAST_LIMIT_1_OFFSET_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=3 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY count(*) NULLS LAST LIMIT 1 OFFSET 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_NULLS_LAST_LIMIT_1_OFFSET_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=4 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY count(*) NULLS LAST LIMIT 1 OFFSET 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_NULLS_LAST_LIMIT_2_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_NULLS_LAST_LIMIT_2_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_NULLS_LAST_LIMIT_2_OFFSET_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=4 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY count(*) NULLS LAST LIMIT 2 OFFSET 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_NULLS_LAST_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_NULLS_LAST_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_NULLS_LAST_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_NULLS_LAST_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_NULLS_LAST_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_NULLS_LAST_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_NULLS_FIRST_LIMIT_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=1 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY count(*) DESC NULLS FIRST LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_NULLS_FIRST_LIMIT_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=3 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY count(*) DESC NULLS FIRST LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_NULLS_FIRST_LIMIT_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_NULLS_FIRST_LIMIT_1_OFFSET_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=1 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY count(*) DESC NULLS FIRST LIMIT 1 OFFSET 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_NULLS_FIRST_LIMIT_1_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_NULLS_FIRST_LIMIT_1_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_NULLS_FIRST_LIMIT_2_OFFSET_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=1 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY count(*) DESC NULLS FIRST LIMIT 2 OFFSET 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_NULLS_FIRST_LIMIT_2_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_NULLS_FIRST_LIMIT_2_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_NULLS_FIRST_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_NULLS_FIRST_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_NULLS_FIRST_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_NULLS_FIRST_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_NULLS_FIRST_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_NULLS_FIRST_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_LIMIT_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_LIMIT_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=3 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY abs(k-k) LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_LIMIT_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=4 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY abs(k-k) LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_LIMIT_1_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_LIMIT_1_OFFSET_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=3 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY abs(k-k) LIMIT 1 OFFSET 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_LIMIT_1_OFFSET_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=4 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY abs(k-k) LIMIT 1 OFFSET 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_LIMIT_2_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_LIMIT_2_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_LIMIT_2_OFFSET_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=4 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY abs(k-k) LIMIT 2 OFFSET 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_LIMIT_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=1 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY abs(k-k) DESC LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_LIMIT_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=3 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY abs(k-k) DESC LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_LIMIT_1_OFFSET_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=1 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY abs(k-k) DESC LIMIT 1 OFFSET 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_LIMIT_1_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_LIMIT_1_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_LIMIT_2_OFFSET_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=1 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY abs(k-k) DESC LIMIT 2 OFFSET 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_LIMIT_2_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_LIMIT_2_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_NULLS_LAST_LIMIT_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_NULLS_LAST_LIMIT_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=3 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY abs(k-k) NULLS LAST LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_NULLS_LAST_LIMIT_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=4 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY abs(k-k) NULLS LAST LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_NULLS_LAST_LIMIT_1_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_NULLS_LAST_LIMIT_1_OFFSET_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=3 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY abs(k-k) NULLS LAST LIMIT 1 OFFSET 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_NULLS_LAST_LIMIT_1_OFFSET_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=4 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY abs(k-k) NULLS LAST LIMIT 1 OFFSET 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_NULLS_LAST_LIMIT_2_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_NULLS_LAST_LIMIT_2_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_NULLS_LAST_LIMIT_2_OFFSET_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=4 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY abs(k-k) NULLS LAST LIMIT 2 OFFSET 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_NULLS_LAST_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_NULLS_LAST_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_NULLS_LAST_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_NULLS_LAST_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_NULLS_LAST_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_NULLS_LAST_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_NULLS_FIRST_LIMIT_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=1 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY abs(k-k) DESC NULLS FIRST LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_NULLS_FIRST_LIMIT_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=3 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY abs(k-k) DESC NULLS FIRST LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_NULLS_FIRST_LIMIT_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_NULLS_FIRST_LIMIT_1_OFFSET_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=1 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY abs(k-k) DESC NULLS FIRST LIMIT 1 OFFSET 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_NULLS_FIRST_LIMIT_1_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_NULLS_FIRST_LIMIT_1_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_NULLS_FIRST_LIMIT_2_OFFSET_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=1 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY abs(k-k) DESC NULLS FIRST LIMIT 2 OFFSET 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_NULLS_FIRST_LIMIT_2_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_NULLS_FIRST_LIMIT_2_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_NULLS_FIRST_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_NULLS_FIRST_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_NULLS_FIRST_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_NULLS_FIRST_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_NULLS_FIRST_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_NULLS_FIRST_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_LIMIT_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_LIMIT_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=3 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY CASE WHEN k=1 THEN NULL ELSE 0 END LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_LIMIT_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=4 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY CASE WHEN k=1 THEN NULL ELSE 0 END LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_LIMIT_1_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_LIMIT_1_OFFSET_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=3 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY CASE WHEN k=1 THEN NULL ELSE 0 END LIMIT 1 OFFSET 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_LIMIT_1_OFFSET_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=4 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY CASE WHEN k=1 THEN NULL ELSE 0 END LIMIT 1 OFFSET 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_LIMIT_2_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_LIMIT_2_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_LIMIT_2_OFFSET_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=4 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY CASE WHEN k=1 THEN NULL ELSE 0 END LIMIT 2 OFFSET 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_LIMIT_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=1 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY CASE WHEN k=1 THEN NULL ELSE 0 END DESC LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_LIMIT_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=3 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY CASE WHEN k=1 THEN NULL ELSE 0 END DESC LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_LIMIT_1_OFFSET_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=1 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY CASE WHEN k=1 THEN NULL ELSE 0 END DESC LIMIT 1 OFFSET 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_LIMIT_1_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_LIMIT_1_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_LIMIT_2_OFFSET_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=1 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY CASE WHEN k=1 THEN NULL ELSE 0 END DESC LIMIT 2 OFFSET 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_LIMIT_2_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_LIMIT_2_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_NULLS_LAST_LIMIT_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_NULLS_LAST_LIMIT_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=3 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY CASE WHEN k=1 THEN NULL ELSE 0 END NULLS LAST LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_NULLS_LAST_LIMIT_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=4 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY CASE WHEN k=1 THEN NULL ELSE 0 END NULLS LAST LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_NULLS_LAST_LIMIT_1_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_NULLS_LAST_LIMIT_1_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_NULLS_LAST_LIMIT_1_OFFSET_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=4 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY CASE WHEN k=1 THEN NULL ELSE 0 END NULLS LAST LIMIT 1 OFFSET 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_NULLS_LAST_LIMIT_2_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_NULLS_LAST_LIMIT_2_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_NULLS_LAST_LIMIT_2_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_NULLS_LAST_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_NULLS_LAST_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_NULLS_LAST_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_NULLS_LAST_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_NULLS_LAST_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_NULLS_LAST_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_NULLS_FIRST_LIMIT_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_NULLS_FIRST_LIMIT_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=3 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY CASE WHEN k=1 THEN NULL ELSE 0 END DESC NULLS FIRST LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_NULLS_FIRST_LIMIT_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_NULLS_FIRST_LIMIT_1_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_NULLS_FIRST_LIMIT_1_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_NULLS_FIRST_LIMIT_1_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_NULLS_FIRST_LIMIT_2_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_NULLS_FIRST_LIMIT_2_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_NULLS_FIRST_LIMIT_2_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_NULLS_FIRST_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_NULLS_FIRST_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_NULLS_FIRST_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_NULLS_FIRST_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_NULLS_FIRST_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_NULLS_FIRST_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_LIMIT_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_LIMIT_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=3 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY CASE WHEN k=4 THEN NULL ELSE k END LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_LIMIT_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_LIMIT_1_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_LIMIT_1_OFFSET_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=3 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY CASE WHEN k=4 THEN NULL ELSE k END LIMIT 1 OFFSET 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_LIMIT_1_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_LIMIT_2_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_LIMIT_2_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_LIMIT_2_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_LIMIT_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=1 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY CASE WHEN k=4 THEN NULL ELSE k END DESC LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_LIMIT_1_OFFSET_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=1 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY CASE WHEN k=4 THEN NULL ELSE k END DESC LIMIT 1 OFFSET 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_LIMIT_1_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_LIMIT_1_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_LIMIT_2_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_LIMIT_2_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_LIMIT_2_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_NULLS_LAST_LIMIT_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_NULLS_LAST_LIMIT_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=3 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY CASE WHEN k=4 THEN NULL ELSE k END NULLS LAST LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_NULLS_LAST_LIMIT_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=4 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY CASE WHEN k=4 THEN NULL ELSE k END NULLS LAST LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_NULLS_LAST_LIMIT_1_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_NULLS_LAST_LIMIT_1_OFFSET_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=3 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY CASE WHEN k=4 THEN NULL ELSE k END NULLS LAST LIMIT 1 OFFSET 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_NULLS_LAST_LIMIT_1_OFFSET_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=4 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY CASE WHEN k=4 THEN NULL ELSE k END NULLS LAST LIMIT 1 OFFSET 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_NULLS_LAST_LIMIT_2_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_NULLS_LAST_LIMIT_2_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_NULLS_LAST_LIMIT_2_OFFSET_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=4 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY CASE WHEN k=4 THEN NULL ELSE k END NULLS LAST LIMIT 2 OFFSET 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_NULLS_LAST_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_NULLS_LAST_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_NULLS_LAST_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_NULLS_LAST_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_NULLS_LAST_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_NULLS_LAST_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_NULLS_FIRST_LIMIT_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=1 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY CASE WHEN k=4 THEN NULL ELSE k END DESC NULLS FIRST LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_NULLS_FIRST_LIMIT_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=3 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY CASE WHEN k=4 THEN NULL ELSE k END DESC NULLS FIRST LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_NULLS_FIRST_LIMIT_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_NULLS_FIRST_LIMIT_1_OFFSET_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=1 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY CASE WHEN k=4 THEN NULL ELSE k END DESC NULLS FIRST LIMIT 1 OFFSET 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_NULLS_FIRST_LIMIT_1_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_NULLS_FIRST_LIMIT_1_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_NULLS_FIRST_LIMIT_2_OFFSET_1
+    grouped_reviewer_oracle_test.go:98: native query "SELECT k,CASE WHEN k=1 THEN abs(-9223372036854775808) ELSE count(*) END FROM rk GROUP BY k ORDER BY CASE WHEN k=4 THEN NULL ELSE k END DESC NULLS FIRST LIMIT 2 OFFSET 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_NULLS_FIRST_LIMIT_2_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_NULLS_FIRST_LIMIT_2_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_NULLS_FIRST_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_NULLS_FIRST_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_NULLS_FIRST_LIMIT_-1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_NULLS_FIRST_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_NULLS_FIRST_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_NULLS_FIRST_LIMIT_9223372036854775807_OFFSET_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END,count(*)_AS_n_FROM_rk_GROUP_BY_k_ORDER_BY_3_LIMIT_1
+    grouped_reviewer_oracle_test.go:105: native query "SELECT k,CASE WHEN k=3 THEN abs(-9223372036854775808) ELSE count(*) END,count(*) AS n FROM rk GROUP BY k ORDER BY 3 LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END,count(*)_AS_n_FROM_rk_GROUP_BY_k_ORDER_BY_n_LIMIT_1
+    grouped_reviewer_oracle_test.go:105: native query "SELECT k,CASE WHEN k=3 THEN abs(-9223372036854775808) ELSE count(*) END,count(*) AS n FROM rk GROUP BY k ORDER BY n LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END,count(*)_AS_n_FROM_rk_GROUP_BY_k_ORDER_BY_n+0_LIMIT_1
+    grouped_reviewer_oracle_test.go:105: native query "SELECT k,CASE WHEN k=3 THEN abs(-9223372036854775808) ELSE count(*) END,count(*) AS n FROM rk GROUP BY k ORDER BY n+0 LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END,count(*)_AS_n_FROM_rk_GROUP_BY_k_ORDER_BY_n_DESC_LIMIT_1
+    grouped_reviewer_oracle_test.go:105: native query "SELECT k,CASE WHEN k=3 THEN abs(-9223372036854775808) ELSE count(*) END,count(*) AS n FROM rk GROUP BY k ORDER BY n DESC LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END,count(*)_AS_n_FROM_rk_GROUP_BY_k_ORDER_BY_2_LIMIT_1
+=== RUN   TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END,count(*)_AS_n_FROM_rk_GROUP_BY_k_ORDER_BY_2_DESC_LIMIT_1
+--- FAIL: TestGroupedReviewerTopKDetails (1.06s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_LIMIT_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_LIMIT_1 (0.01s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_LIMIT_1_OFFSET_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_LIMIT_1_OFFSET_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_LIMIT_1_OFFSET_1 (0.01s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_LIMIT_2_OFFSET_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_LIMIT_9223372036854775807_OFFSET_1 (0.01s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_LIMIT_1 (0.01s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_LIMIT_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_LIMIT_1_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_LIMIT_1_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_LIMIT_1_OFFSET_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_NULLS_LAST_LIMIT_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_NULLS_LAST_LIMIT_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_NULLS_LAST_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_NULLS_LAST_LIMIT_1_OFFSET_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_NULLS_LAST_LIMIT_1_OFFSET_1 (0.01s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_NULLS_LAST_LIMIT_1_OFFSET_1 (0.01s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_NULLS_LAST_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_NULLS_LAST_LIMIT_2_OFFSET_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_NULLS_LAST_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_NULLS_LAST_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_NULLS_LAST_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_NULLS_LAST_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_NULLS_LAST_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_NULLS_LAST_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_NULLS_LAST_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_NULLS_FIRST_LIMIT_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_NULLS_FIRST_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_NULLS_FIRST_LIMIT_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_NULLS_FIRST_LIMIT_1_OFFSET_1 (0.01s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_NULLS_FIRST_LIMIT_1_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_NULLS_FIRST_LIMIT_1_OFFSET_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_NULLS_FIRST_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_NULLS_FIRST_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_NULLS_FIRST_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_NULLS_FIRST_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_NULLS_FIRST_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_NULLS_FIRST_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_NULLS_FIRST_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_NULLS_FIRST_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_k+0_DESC_NULLS_FIRST_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_LIMIT_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_LIMIT_1 (0.01s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_LIMIT_1 (0.01s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_LIMIT_1_OFFSET_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_LIMIT_1_OFFSET_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_LIMIT_1_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_LIMIT_2_OFFSET_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_LIMIT_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_LIMIT_1 (0.01s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_LIMIT_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_LIMIT_1_OFFSET_1 (0.01s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_LIMIT_1_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_LIMIT_1_OFFSET_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_LIMIT_2_OFFSET_1 (0.01s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_LIMIT_9223372036854775807_OFFSET_1 (0.01s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_NULLS_LAST_LIMIT_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_NULLS_LAST_LIMIT_1 (0.01s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_NULLS_LAST_LIMIT_1 (0.01s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_NULLS_LAST_LIMIT_1_OFFSET_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_NULLS_LAST_LIMIT_1_OFFSET_1 (0.01s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_NULLS_LAST_LIMIT_1_OFFSET_1 (0.01s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_NULLS_LAST_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_NULLS_LAST_LIMIT_2_OFFSET_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_NULLS_LAST_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_NULLS_LAST_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_NULLS_LAST_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_NULLS_LAST_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_NULLS_LAST_LIMIT_9223372036854775807_OFFSET_1 (0.01s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_NULLS_LAST_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_NULLS_LAST_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_NULLS_FIRST_LIMIT_1 (0.01s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_NULLS_FIRST_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_NULLS_FIRST_LIMIT_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_NULLS_FIRST_LIMIT_1_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_NULLS_FIRST_LIMIT_1_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_NULLS_FIRST_LIMIT_1_OFFSET_1 (0.01s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_NULLS_FIRST_LIMIT_2_OFFSET_1 (0.01s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_NULLS_FIRST_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_NULLS_FIRST_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_NULLS_FIRST_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_NULLS_FIRST_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_NULLS_FIRST_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_NULLS_FIRST_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_NULLS_FIRST_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_count(*)_DESC_NULLS_FIRST_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_LIMIT_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_LIMIT_1 (0.01s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_LIMIT_1 (0.01s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_LIMIT_1_OFFSET_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_LIMIT_1_OFFSET_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_LIMIT_1_OFFSET_1 (0.01s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_LIMIT_2_OFFSET_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_LIMIT_1 (0.01s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_LIMIT_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_LIMIT_1_OFFSET_1 (0.01s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_LIMIT_1_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_LIMIT_1_OFFSET_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_LIMIT_2_OFFSET_1 (0.01s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_LIMIT_2_OFFSET_1 (0.01s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_NULLS_LAST_LIMIT_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_NULLS_LAST_LIMIT_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_NULLS_LAST_LIMIT_1 (0.01s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_NULLS_LAST_LIMIT_1_OFFSET_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_NULLS_LAST_LIMIT_1_OFFSET_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_NULLS_LAST_LIMIT_1_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_NULLS_LAST_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_NULLS_LAST_LIMIT_2_OFFSET_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_NULLS_LAST_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_NULLS_LAST_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_NULLS_LAST_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_NULLS_LAST_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_NULLS_LAST_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_NULLS_LAST_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_NULLS_LAST_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_NULLS_FIRST_LIMIT_1 (0.01s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_NULLS_FIRST_LIMIT_1 (0.01s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_NULLS_FIRST_LIMIT_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_NULLS_FIRST_LIMIT_1_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_NULLS_FIRST_LIMIT_1_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_NULLS_FIRST_LIMIT_1_OFFSET_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_NULLS_FIRST_LIMIT_2_OFFSET_1 (0.01s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_NULLS_FIRST_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_NULLS_FIRST_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_NULLS_FIRST_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_NULLS_FIRST_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_NULLS_FIRST_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_NULLS_FIRST_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_NULLS_FIRST_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_abs(k-k)_DESC_NULLS_FIRST_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_LIMIT_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_LIMIT_1 (0.01s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_LIMIT_1 (0.01s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_LIMIT_1_OFFSET_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_LIMIT_1_OFFSET_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_LIMIT_1_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_LIMIT_2_OFFSET_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_LIMIT_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_LIMIT_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_LIMIT_1_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_LIMIT_1_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_LIMIT_1_OFFSET_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_NULLS_LAST_LIMIT_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_NULLS_LAST_LIMIT_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_NULLS_LAST_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_NULLS_LAST_LIMIT_1_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_NULLS_LAST_LIMIT_1_OFFSET_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_NULLS_LAST_LIMIT_1_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_NULLS_LAST_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_NULLS_LAST_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_NULLS_LAST_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_NULLS_LAST_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_NULLS_LAST_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_NULLS_LAST_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_NULLS_LAST_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_NULLS_LAST_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_NULLS_LAST_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_NULLS_FIRST_LIMIT_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_NULLS_FIRST_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_NULLS_FIRST_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_NULLS_FIRST_LIMIT_1_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_NULLS_FIRST_LIMIT_1_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_NULLS_FIRST_LIMIT_1_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_NULLS_FIRST_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_NULLS_FIRST_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_NULLS_FIRST_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_NULLS_FIRST_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_NULLS_FIRST_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_NULLS_FIRST_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_NULLS_FIRST_LIMIT_9223372036854775807_OFFSET_1 (0.01s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_NULLS_FIRST_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=1_THEN_NULL_ELSE_0_END_DESC_NULLS_FIRST_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_LIMIT_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_LIMIT_1_OFFSET_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_LIMIT_1_OFFSET_1 (0.01s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_LIMIT_1_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_LIMIT_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_LIMIT_1_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_LIMIT_1_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_LIMIT_1_OFFSET_1 (0.01s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_NULLS_LAST_LIMIT_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_NULLS_LAST_LIMIT_1 (0.01s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_NULLS_LAST_LIMIT_1 (0.01s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_NULLS_LAST_LIMIT_1_OFFSET_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_NULLS_LAST_LIMIT_1_OFFSET_1 (0.01s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_NULLS_LAST_LIMIT_1_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_NULLS_LAST_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_NULLS_LAST_LIMIT_2_OFFSET_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_NULLS_LAST_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_NULLS_LAST_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_NULLS_LAST_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_NULLS_LAST_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_NULLS_LAST_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_NULLS_LAST_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_NULLS_LAST_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_NULLS_FIRST_LIMIT_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_NULLS_FIRST_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_NULLS_FIRST_LIMIT_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_NULLS_FIRST_LIMIT_1_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_NULLS_FIRST_LIMIT_1_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_NULLS_FIRST_LIMIT_1_OFFSET_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_NULLS_FIRST_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_NULLS_FIRST_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_NULLS_FIRST_LIMIT_2_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_NULLS_FIRST_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_NULLS_FIRST_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_NULLS_FIRST_LIMIT_-1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_NULLS_FIRST_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_NULLS_FIRST_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=4_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_rk_GROUP_BY_k_ORDER_BY_CASE_WHEN_k=4_THEN_NULL_ELSE_k_END_DESC_NULLS_FIRST_LIMIT_9223372036854775807_OFFSET_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END,count(*)_AS_n_FROM_rk_GROUP_BY_k_ORDER_BY_3_LIMIT_1 (0.01s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END,count(*)_AS_n_FROM_rk_GROUP_BY_k_ORDER_BY_n_LIMIT_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END,count(*)_AS_n_FROM_rk_GROUP_BY_k_ORDER_BY_n+0_LIMIT_1 (0.00s)
+    --- FAIL: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END,count(*)_AS_n_FROM_rk_GROUP_BY_k_ORDER_BY_n_DESC_LIMIT_1 (0.01s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END,count(*)_AS_n_FROM_rk_GROUP_BY_k_ORDER_BY_2_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerTopKDetails/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END,count(*)_AS_n_FROM_rk_GROUP_BY_k_ORDER_BY_2_DESC_LIMIT_1 (0.00s)
+=== RUN   TestGroupedReviewerRowidStream
+=== RUN   TestGroupedReviewerRowidStream/SELECT_id,count(*)_FROM_rp_WHERE_abs(v)>0_GROUP_BY_id_LIMIT_1
+    grouped_reviewer_rowid_test.go:18: native iteration "SELECT id,count(*) FROM rp WHERE abs(v)>0 GROUP BY id LIMIT 1": sqlite next: integer overflow
+=== RUN   TestGroupedReviewerRowidStream/SELECT_id,count(*)_FROM_rp_NOT_INDEXED_WHERE_abs(v)>0_GROUP_BY_id_LIMIT_1
+    grouped_reviewer_rowid_test.go:18: native iteration "SELECT id,count(*) FROM rp NOT INDEXED WHERE abs(v)>0 GROUP BY id LIMIT 1": sqlite next: integer overflow
+=== RUN   TestGroupedReviewerRowidStream/SELECT_id,count(*)_FROM_rp_WHERE_CASE_WHEN_id=3_THEN_abs(v)_ELSE_1_END_GROUP_BY_id_LIMIT_1
+    grouped_reviewer_rowid_test.go:18: native iteration "SELECT id,count(*) FROM rp WHERE CASE WHEN id=3 THEN abs(v) ELSE 1 END GROUP BY id LIMIT 1": sqlite next: integer overflow
+=== RUN   TestGroupedReviewerRowidStream/SELECT_id,count(*)_FROM_rp_WHERE_abs(v)>0_GROUP_BY_id_ORDER_BY_id_LIMIT_1
+    grouped_reviewer_rowid_test.go:18: native iteration "SELECT id,count(*) FROM rp WHERE abs(v)>0 GROUP BY id ORDER BY id LIMIT 1": sqlite next: integer overflow
+=== RUN   TestGroupedReviewerRowidStream/SELECT_id,count(*)_FROM_rp_WHERE_abs(v)>0_GROUP_BY_id_ORDER_BY_id_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerRowidStream/SELECT_id,count(*)_FROM_rp_WHERE_abs(v)>0_GROUP_BY_id+0,id_LIMIT_1
+    grouped_reviewer_rowid_test.go:18: native iteration "SELECT id,count(*) FROM rp WHERE abs(v)>0 GROUP BY id+0,id LIMIT 1": sqlite next: integer overflow
+=== RUN   TestGroupedReviewerRowidStream/SELECT_id,count(*)_FROM_rp_WHERE_abs(CASE_WHEN_id=2_THEN_-9223372036854775808_ELSE_1_END)>0_GROUP_BY_id_LIMIT_1
+=== RUN   TestGroupedReviewerRowidStream/SELECT_id,count(*)_FROM_rp_WHERE_abs(CASE_WHEN_id=4_THEN_-9223372036854775808_ELSE_1_END)>0_GROUP_BY_id_LIMIT_1_OFFSET_1
+    grouped_reviewer_rowid_test.go:18: native iteration "SELECT id,count(*) FROM rp WHERE abs(CASE WHEN id=4 THEN -9223372036854775808 ELSE 1 END)>0 GROUP BY id LIMIT 1 OFFSET 1": sqlite next: integer overflow
+=== RUN   TestGroupedReviewerRowidStream/SELECT_id,count(*)_FROM_rp_WHERE_abs(v)>0_GROUP_BY_id,id_LIMIT_1
+    grouped_reviewer_rowid_test.go:18: native iteration "SELECT id,count(*) FROM rp WHERE abs(v)>0 GROUP BY id,id LIMIT 1": sqlite next: integer overflow
+=== RUN   TestGroupedReviewerRowidStream/SELECT_id,count(*)_FROM_rp_WHERE_abs(v)>0_GROUP_BY_id,v_LIMIT_1
+    grouped_reviewer_rowid_test.go:18: native iteration "SELECT id,count(*) FROM rp WHERE abs(v)>0 GROUP BY id,v LIMIT 1": sqlite next: integer overflow
+--- FAIL: TestGroupedReviewerRowidStream (0.06s)
+    --- FAIL: TestGroupedReviewerRowidStream/SELECT_id,count(*)_FROM_rp_WHERE_abs(v)>0_GROUP_BY_id_LIMIT_1 (0.01s)
+    --- FAIL: TestGroupedReviewerRowidStream/SELECT_id,count(*)_FROM_rp_NOT_INDEXED_WHERE_abs(v)>0_GROUP_BY_id_LIMIT_1 (0.01s)
+    --- FAIL: TestGroupedReviewerRowidStream/SELECT_id,count(*)_FROM_rp_WHERE_CASE_WHEN_id=3_THEN_abs(v)_ELSE_1_END_GROUP_BY_id_LIMIT_1 (0.01s)
+    --- FAIL: TestGroupedReviewerRowidStream/SELECT_id,count(*)_FROM_rp_WHERE_abs(v)>0_GROUP_BY_id_ORDER_BY_id_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerRowidStream/SELECT_id,count(*)_FROM_rp_WHERE_abs(v)>0_GROUP_BY_id_ORDER_BY_id_DESC_LIMIT_1 (0.00s)
+    --- FAIL: TestGroupedReviewerRowidStream/SELECT_id,count(*)_FROM_rp_WHERE_abs(v)>0_GROUP_BY_id+0,id_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerRowidStream/SELECT_id,count(*)_FROM_rp_WHERE_abs(CASE_WHEN_id=2_THEN_-9223372036854775808_ELSE_1_END)>0_GROUP_BY_id_LIMIT_1 (0.00s)
+    --- FAIL: TestGroupedReviewerRowidStream/SELECT_id,count(*)_FROM_rp_WHERE_abs(CASE_WHEN_id=4_THEN_-9223372036854775808_ELSE_1_END)>0_GROUP_BY_id_LIMIT_1_OFFSET_1 (0.01s)
+    --- FAIL: TestGroupedReviewerRowidStream/SELECT_id,count(*)_FROM_rp_WHERE_abs(v)>0_GROUP_BY_id,id_LIMIT_1 (0.01s)
+    --- FAIL: TestGroupedReviewerRowidStream/SELECT_id,count(*)_FROM_rp_WHERE_abs(v)>0_GROUP_BY_id,v_LIMIT_1 (0.00s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/testkit	1.127s
+FAIL

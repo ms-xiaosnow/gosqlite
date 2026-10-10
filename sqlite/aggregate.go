@@ -11,7 +11,7 @@ import (
 // Detection runs over the parser's already bounded tree before binding. Every
 // aggregate clause activates one budget before engine-owned parameter copies.
 func selectUsesAggregate(s *sqlast.Select) bool {
-	found := false
+	found := len(s.GroupBy) > 0 || s.Having != nil
 	check := func(e sqlast.Expr) {
 		_ = sqlast.Walk(e, func(e sqlast.Expr) error {
 			if c, ok := e.(*sqlast.Call); ok && sqlast.AggregateName(c.Name) {
@@ -22,6 +22,10 @@ func selectUsesAggregate(s *sqlast.Select) bool {
 	}
 	for _, c := range s.Columns {
 		check(c.Expr)
+	}
+	check(s.Having)
+	for _, e := range s.GroupBy {
+		check(e)
 	}
 	check(s.Where)
 	check(s.Limit)

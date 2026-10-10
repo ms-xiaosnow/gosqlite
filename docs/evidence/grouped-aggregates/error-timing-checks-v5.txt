@@ -1,0 +1,8 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+--- FAIL: TestGroupedAggregateOracleErrorTimingAndBounds (0.08s)
+    --- FAIL: TestGroupedAggregateOracleErrorTimingAndBounds/SELECT_k,sum(abs(v))_FROM_group_errors_GROUP_BY_k_ORDER_BY_k_DESC_LIMIT_1 (0.00s)
+        grouped_aggregate_conformance_test.go:137: oracle want integer overflow got <nil> 3|3
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/testkit	0.081s
+FAIL
+error_timing_exit=1

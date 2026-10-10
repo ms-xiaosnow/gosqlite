@@ -1,0 +1,3 @@
+Audited official-only ordinary in-memory SQL stream/sort plan probes; no file faults or excluded behavior.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+Error in 5th command line argument: integer overflow

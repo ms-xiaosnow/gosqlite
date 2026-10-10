@@ -1,0 +1,1403 @@
+diff --git a/docs/sql-cached-preparation.md b/docs/sql-cached-preparation.md
+new file mode 100644
+index 0000000..e64881e
+--- /dev/null
++++ b/docs/sql-cached-preparation.md
+@@ -0,0 +1,124 @@
++# Bounded cached-schema preparation for early BUSY
++
++## Scope
++
++This slice closes the connection-counter slice's ordinary rollback-mode
++cached-schema admission gap for supported INSERT, UPDATE and DELETE statements.
++A connection that has retained a complete, supported ordinary table/index schema
++can distinguish invalid preparation from valid DML when a peer's ordinary
++EXCLUSIVE lock prevents acquiring the first snapshot:
++
++- Invalid table/column/target, VALUES cardinality or function arity returns the
++  ordinary native preparation error and preserves all counters.
++- Valid DML returns BUSY, resets `changes()` to zero and preserves
++  `total_changes()` and `last_insert_rowid()`.
++- Runtime expressions are not evaluated. For example, integer overflow in an
++  otherwise valid UPDATE remains behind execution BUSY.
++- Fresh/no-cache connections preserve the previous conservative BUSY outcome.
++  Syntax and parameter binding still happen before snapshot admission.
++
++This is bounded early-BUSY classification, not a reusable executable plan or
++complete SQLite preparation equivalence. All successful snapshot paths retain
++native catalog/ownership validation and their existing error order. The public
++Options and Result layouts and statement-specific Result contract are unchanged.
++Private DB/Tx layout gains metadata and schema-change tracking.
++
++## Authority, immutability and limits
++
++The connection-owned cache contains copied table and column names, an INTEGER
++PRIMARY KEY ordinal and a schema cookie. It retains no root page numbers,
++default-expression ASTs, declared types, index/extension definitions, row data,
++reader, pager transaction or storage handle. Published entries are never mutated.
++The shared INSERT/UPDATE/DELETE preparation routines are used by ordinary
++execution and cache classification; they perform the same name/target/arity
++checks, including TRUE/FALSE column shadowing. The cache cannot execute a plan.
++
++Normal snapshot/lock acquisition is always attempted first. Cached metadata is
++consulted only if admission fails with an error tree containing ordinary BUSY
++sentinels and nothing else. A joined cleanup, cancellation, changed-file, poison
++or other native error is not converted into preparation success/error. Read-only
++and active-Rows gates still precede this path. Context cancellation during cached
++preparation preserves counters. Parameter values are neither retained nor
++inspected by this metadata-only step.
++
++Retained metadata uses a conservative per-table/per-column/string charge bounded
++by min(MaxSortBytes, 16 MiB), including its 256-byte fixed charge. This reuses the
++existing option without changing its layout; it adds no unbounded global cache.
++This is a separate retained-metadata allowance, not a joint cap with an active
++query's existing sort budget.
++A metadata-reading query uses an additional conservative declaration-parsing
++charge (128 times SQL bytes plus entry overhead) against that same bound. The
++existing SQL/token/depth and schema byte/entry limits also apply. Cache construction
++is optional: exceeding its allowance discards the cache and preserves the
++ordinary query/write result, rather than introducing a new query error.
++
++## Population and lifecycle
++
++A supported SQL write's fully validated catalog, after normal ownership checking,
++can populate the cache even if subsequent DML preparation fails. An ordinary
++user-table query or the native Schema API can also populate it after optional
++validation of the complete ordinary catalog. All copied strings have independent
++storage. Closing the connection releases the cache.
++
++Snapshot success compares the observed cookie and discards a mismatching cache.
++Normal execution always reparses its current catalog rather than authorizing data
++access from the old cache. A peer's schema change not yet observed under a snapshot
++can therefore leave stale name-binding information while EXCLUSIVE blocks access,
++as with SQLite. Once a snapshot is admitted, fresh schema validation is decisive.
++
++Successful native CREATE TABLE updates the statement-local catalog before the
++immutable cache replacement; ordinary CREATE INDEX advances its cookie without
++changing table/column binding. SQL DDL rollback, automatic failed-commit rollback
++of DDL, and ROLLBACK TO that discards DDL invalidate metadata. A full rollback
++following schema changes also invalidates it. Data-only rollback/savepoint undo
++keeps schema metadata and, as before, never undoes the SQL connection counters.
++
++## Explicit remaining differences
++
++- Session-backed WAL/encrypted connections, extension-owned schemas and catalogs
++  with unsupported declarations do not use early cached preparation. Their
++  previous first-snapshot admission behavior remains. Ordinary validated writer
++  promotion and commit BUSY accounting are unchanged.
++- Cache quota rejection is a deliberate no-cache state. It is not SQLite parity
++  for that unavailable preparation state.
++- Native constant SELECT and SQL sqlite_schema projection keep their existing
++  behavior and do not themselves populate this optional cache. Official SQLite
++  may initialize its schema even for SELECT 1 or counter-only SELECT. Native
++  explicit deferred constant queries remain snapshot-free.
++- This change does not emulate every stale-schema preparation/reprepare rule
++  after a lock becomes available. In particular, official SQLite can report an
++  old column-count error for INSERT after a peer drops/recreates a table, until
++  another suitable statement refreshes its schema. Native successful admission
++  uses the current catalog. The retained oracle negative demonstrates this
++  distinction; passing histories refresh with a fixed-label count query before
++  proceeding. No full stale-preparation parity is claimed.
++- Driver Prepare retains its existing reusable SQL-text behavior, parsing it
++  for validity rather than retaining an AST. This is native execution-time
++  metadata preparation, not a new public prepared API.
++- Existing unsupported triggers/FK/conflict policies/views/virtual tables,
++  INSERT SELECT, RETURNING and WITHOUT ROWID are not implemented by this slice.
++
++## Verification and pinned reference
++
++Reference is official SQLite 3.54.0, source ID
++`2026-10-09 15:46:58 be8d059e9a49089ab2dce5ed26dd87aaf598fdc5fbe0b107c0dd758464bcd5e3`.
++The pinned local public source's `sqlite3ReadSchema`/`sqlite3Init` retain loaded
++schema; `schemaIsValid` preserves an existing preparation error if its schema
++check cannot start a read transaction. OP_Transaction checks cookies only after
++transaction admission and suppresses counter publication on schema reprepare.
++`sqlite3RollbackAll` resets connection schemas after schema-changing rollback.
++
++New tests cover fresh/read-warm/cache-disabled states, typed counters and native
++primary errors, ordinary cooperative locks, stale positive/negative names,
++SQL-only peer ALTER/DROP/recreate, explicit transactions and DDL savepoints,
++parameters, deterministic pre-cancellation, metadata immutability/quotas,
++prepared driver reuse and unchanged Result values. The previous counter histories
++retain partial source-row INSERT/ABORT, rollback, maintenance exclusion and
++statement-specific results. Typed oracle histories run across 512/4096/65536-byte
++pages; the existing rollback/shared-WAL histories remain selected. Pure error-tree
++classification tests do not inject or execute native failures.
++
++Only selected audited normal/race/oracle, affected vet and production build checks
++qualify this slice. No broad suite, physical corruption/tamper/wrong-key,
++namespace mutation, selected-file disappearance, native failure, crash/kill/hot
++recovery, interrupted publication or rekey scenario is executed or qualified.
+diff --git a/docs/sql-connection-counters.md b/docs/sql-connection-counters.md
+index bcd4fd9..d70956b 100644
+--- a/docs/sql-connection-counters.md
++++ b/docs/sql-connection-counters.md
+@@ -80,14 +80,13 @@ The existing active-Rows restrictions remain: transaction-owned Rows reject a
+ write/control with BUSY before execution and preserve counters. Session-backed
+ connections retain their single local lease. An autocommit rollback-mode Rows
+ lease can make an attempted automatic commit BUSY. This is not a claim of SQLite's
+-more permissive same-connection read-cursor/write behavior. Snapshot-acquisition BUSY before catalog validation also preserves counters.
+-This deliberately differs from SQLite's cached-schema execution: under a peer's
+-EXCLUSIVE lock, SQLite can distinguish valid DML (resetting changes to zero)
+-from invalid table/column names (preserving its prior state). This engine cannot
+-validate either before acquiring its snapshot, so it treats both as native
+-admission failures and does not guess that a statement executed. Exact SQLite
+-preparation/BUSY equivalence needs a separately bounded schema/statement cache.
+-The oracle explicitly asserts this divergence rather than counting it as parity.
++more permissive same-connection read-cursor/write behavior. For supported ordinary rollback-mode schemas retained within the metadata budget,
++[cached preparation](sql-cached-preparation.md) now distinguishes invalid DML
++(preparation error, counters preserved) from valid DML whose first snapshot is
++blocked (BUSY, changes resets to zero). Fresh/no-cache, session-backed,
++extension-owned and unsupported catalog states retain conservative admission
++behavior. The linked scope documents cache population, invalidation, quotas and
++remaining SQLite preparation differences; full preparation parity is not claimed.
+ Pre-canceled contexts are rejected without changing counters. Cancellation after a row insertion rolls
+ back the native statement's data, publishes no total, and keeps that successful
+ rowid. Native cancellation retains its existing statement-local rollback behavior;
+diff --git a/driver/preparation_cache_test.go b/driver/preparation_cache_test.go
+new file mode 100644
+index 0000000..1090b9b
+--- /dev/null
++++ b/driver/preparation_cache_test.go
+@@ -0,0 +1,72 @@
++package driver
++
++import (
++	"context"
++	"errors"
++	"testing"
++
++	"github.com/ms-xiaosnow/gosqlite/sqlite"
++)
++
++func TestDriverCachedPreparationBusyReuse(t *testing.T) {
++	db, _ := writableDatabase(t)
++	db.SetMaxOpenConns(2)
++	ctx := context.Background()
++	a, e := db.Conn(ctx)
++	if e != nil {
++		t.Fatal(e)
++	}
++	defer a.Close()
++	b, e := db.Conn(ctx)
++	if e != nil {
++		t.Fatal(e)
++	}
++	defer b.Close()
++	mustExec(t, a, "CREATE TABLE t(id INTEGER PRIMARY KEY,v)")
++	mustExec(t, a, "INSERT INTO t VALUES(1,1),(2,2)")
++	valid, e := a.PrepareContext(ctx, "UPDATE t SET v=? WHERE id=?")
++	if e != nil {
++		t.Fatal(e)
++	}
++	defer valid.Close()
++	invalid, e := a.PrepareContext(ctx, "UPDATE t SET missing=?")
++	if e != nil {
++		t.Fatal(e)
++	}
++	defer invalid.Close()
++	check := func(changes, total int64) {
++		t.Helper()
++		var c, tc, id int64
++		e := a.QueryRowContext(ctx, "SELECT changes(),total_changes(),last_insert_rowid()").Scan(&c, &tc, &id)
++		if e != nil || c != changes || tc != total || id != 2 {
++			t.Fatal(c, tc, id, e)
++		}
++	}
++	mustExec(t, b, "BEGIN EXCLUSIVE")
++	// Driver preparation remains reusable SQL syntax. Native execution performs
++	// cached name validation; parameters are bound normally before admission.
++	if _, e = invalid.ExecContext(ctx, 3); e == nil || errors.Is(e, sqlite.ErrBusy) {
++		t.Fatal(e)
++	}
++	mustExec(t, b, "ROLLBACK")
++	check(2, 2)
++	mustExec(t, b, "BEGIN EXCLUSIVE")
++	if _, e = valid.ExecContext(ctx, 3, 1); !errors.Is(e, sqlite.ErrBusy) {
++		t.Fatal(e)
++	}
++	mustExec(t, b, "ROLLBACK")
++	check(0, 2)
++	r, e := valid.ExecContext(ctx, 3, 1)
++	if e != nil {
++		t.Fatal(e)
++	}
++	checkAffected(t, r, 1)
++	if id, e := r.LastInsertId(); e != nil || id != 0 {
++		t.Fatal(id, e)
++	}
++	check(1, 3)
++	var v int64
++	if e = a.QueryRowContext(ctx, "SELECT v FROM t WHERE id=1").Scan(&v); e != nil || v != 3 {
++		t.Fatal(v, e)
++	}
++}
+diff --git a/internal/testkit/connection_counters_conformance_test.go b/internal/testkit/connection_counters_conformance_test.go
+index f744a93..d073ddf 100644
+--- a/internal/testkit/connection_counters_conformance_test.go
++++ b/internal/testkit/connection_counters_conformance_test.go
+@@ -238,6 +238,15 @@ func startCounterLiveOracle(t *testing.T, path string) *counterLiveOracle {
+ 			t.Errorf("normal oracle completion: write=%v close=%v wait=%v expected logical error=%v", writeErr, closeErr, waitErr, p.errored)
+ 		}
+ 	})
++	// Finish shell startup before another process requests EXCLUSIVE. The
++	// dot-command handshake does not prepare SQL or initialize schema metadata.
++	if _, err := io.WriteString(p.in, ".print __counter_ready__\n"); err != nil {
++		t.Fatal(err)
++	}
++	line, err := p.out.ReadString('\n')
++	if err != nil || strings.TrimSpace(line) != "__counter_ready__" {
++		t.Fatal("oracle startup handshake", line, err)
++	}
+ 	return p
+ }
+ func (p *counterLiveOracle) run(q string, wantBusy bool) []byte {
+@@ -342,18 +351,11 @@ func TestConnectionCountersOracleBusyOutcomes(t *testing.T) {
+ 	execBoth(b, y, "ROLLBACK")
+ 	compare("SELECT * FROM t")
+ 	execBoth(a, x, "UPDATE t SET id=id")
+-	beforeAdmission := confNative(t, a, connectionOracleSelect)
+ 	execBoth(b, y, "BEGIN EXCLUSIVE")
+ 	busyBoth(a, x, "DELETE FROM t")
+ 	execBoth(b, y, "ROLLBACK")
+-	// Deliberate bounded divergence: native snapshot admission precedes catalog
+-	// preparation, unlike official SQLite's cached-schema execution. Do not
+-	// guess "executed DML" for an operation whose names cannot be validated.
+-	confCompare(t, beforeAdmission, confNative(t, a, connectionOracleSelect))
+-	officialAdmission, err := confQuoted(x.run(connectionOracleSelect, false))
+-	if err != nil || len(officialAdmission) != 2 || officialAdmission[1][0] != int64(0) {
+-		t.Fatal("official executed-BUSY state", officialAdmission, err)
+-	}
++	// The ordinary cached schema now reaches the same executed-BUSY boundary.
++	compare(connectionOracleSelect)
+ 	execBoth(a, x, "UPDATE t SET id=id")
+ 	compare(connectionOracleSelect)
+ 	execBoth(a, x, "BEGIN")
+diff --git a/internal/testkit/preparation_cache_conformance_test.go b/internal/testkit/preparation_cache_conformance_test.go
+new file mode 100644
+index 0000000..4f18ba2
+--- /dev/null
++++ b/internal/testkit/preparation_cache_conformance_test.go
+@@ -0,0 +1,257 @@
++//go:build oracle
++
++package testkit_test
++
++import (
++	"bytes"
++	"context"
++	"errors"
++	"fmt"
++	"io"
++	"os/exec"
++	"path/filepath"
++	"reflect"
++	"strings"
++	"testing"
++
++	"github.com/ms-xiaosnow/gosqlite/sqlite"
++)
++
++func cachedOracleError(t *testing.T, p *counterLiveOracle, q, category string) {
++	t.Helper()
++	if _, err := io.WriteString(p.in, q+";\n.print __cached_done__\n"); err != nil {
++		t.Fatal(err)
++	}
++	var out bytes.Buffer
++	for {
++		line, err := p.out.ReadString('\n')
++		if err != nil {
++			t.Fatal(err)
++		}
++		if strings.TrimSpace(line) == "__cached_done__" {
++			break
++		}
++		out.WriteString(line)
++	}
++	if !strings.Contains(out.String(), category) || (!strings.Contains(out.String(), "Parse error") && !strings.Contains(out.String(), "Error")) {
++		t.Fatalf("%s expected %q: %s", q, category, out.String())
++	}
++	p.errored = true
++}
++
++func TestCachedPreparationOracleHistories(t *testing.T) {
++	for _, size := range []uint32{512, 4096, 65536} {
++		t.Run(fmt.Sprint(size), func(t *testing.T) {
++			ctx := context.Background()
++			path := filepath.Join(t.TempDir(), "native.db")
++			a, err := sqlite.Open(path, sqlite.Options{PageSize: size})
++			if err != nil {
++				t.Fatal(err)
++			}
++			defer a.Close()
++			b, err := sqlite.Open(path, sqlite.Options{})
++			if err != nil {
++				t.Fatal(err)
++			}
++			defer b.Close()
++			official := filepath.Join(t.TempDir(), "official.db")
++			x, y := startCounterLiveOracle(t, official), startCounterLiveOracle(t, official)
++			x.run(fmt.Sprintf("PRAGMA page_size=%d", size), false)
++			both := func(db *sqlite.DB, p *counterLiveOracle, q string) {
++				t.Helper()
++				if _, e := db.Exec(ctx, q); e != nil {
++					t.Fatal(q, e)
++				}
++				p.run(q, false)
++			}
++			fail := func(q string, code sqlite.Code, category string) {
++				t.Helper()
++				r, e := a.Exec(ctx, q)
++				var detail *sqlite.Error
++				if !errors.As(e, &detail) || detail.Code != code {
++					t.Fatal(q, e)
++				}
++				n, _ := r.RowsAffected()
++				id, _ := r.LastInsertId()
++				if n != 0 || id != 0 {
++					t.Fatal(r)
++				}
++				cachedOracleError(t, x, q, category)
++			}
++			compare := func(q string) {
++				t.Helper()
++				n := confNative(t, a, q)
++				want, e := confQuoted(x.run(q, false))
++				if e != nil {
++					t.Fatal(e)
++				}
++				var got [][]any
++				if len(n.rows) > 0 {
++					labels := make([]any, len(n.columns))
++					for i, s := range n.columns {
++						labels[i] = s
++					}
++					got = append(got, labels)
++					got = append(got, n.rows...)
++				}
++				if !reflect.DeepEqual(got, want) {
++					t.Fatalf("%s native=%#v official=%#v", q, got, want)
++				}
++			}
++			both(a, x, "CREATE TABLE t(id INTEGER PRIMARY KEY,v,true)")
++			both(a, x, "INSERT INTO t VALUES(1,10,1),(2,20,0)")
++			for _, test := range []struct {
++				q        string
++				code     sqlite.Code
++				category string
++			}{
++				{"DELETE FROM absent", sqlite.CodeError, "no such table"},
++				{"UPDATE t SET missing=1", sqlite.CodeError, "no such column"},
++				{"INSERT INTO t(id) VALUES(3,4)", sqlite.CodeError, "2 values for 1 columns"},
++				{"INSERT INTO t VALUES(3,missing,0)", sqlite.CodeError, "no such column"},
++				{"UPDATE t SET v=changes(1)", sqlite.CodeError, "wrong number of arguments"},
++				{"DELETE FROM t WHERE CASE WHEN 0 THEN missing ELSE 1 END", sqlite.CodeError, "no such column"},
++				{"UPDATE t SET v=abs(-9223372036854775808)", sqlite.CodeBusy, "database is locked"},
++				{"INSERT INTO t VALUES(3,4,1)", sqlite.CodeBusy, "database is locked"},
++				{"DELETE FROM t WHERE true", sqlite.CodeBusy, "database is locked"},
++			} {
++				both(a, x, "UPDATE t SET v=v")
++				both(b, y, "BEGIN EXCLUSIVE")
++				fail(test.q, test.code, test.category)
++				both(b, y, "ROLLBACK")
++				compare(connectionOracleSelect)
++				compare("SELECT * FROM t ORDER BY id")
++			}
++			// Ordinary peer SQL changes declarations, never bytes or filesystem names.
++			external := func(q string) {
++				t.Helper()
++				cmd := exec.Command(confOracle(t), "-batch", path)
++				cmd.Stdin = strings.NewReader(q + ";\n")
++				out, e := cmd.CombinedOutput()
++				if e != nil {
++					t.Fatal(q, string(out), e)
++				}
++				y.run(q, false)
++			}
++			external("CREATE TABLE added(x); ALTER TABLE t ADD COLUMN newcol")
++			both(b, y, "BEGIN EXCLUSIVE")
++			fail("DELETE FROM added", sqlite.CodeError, "no such table")
++			fail("UPDATE t SET newcol=1", sqlite.CodeError, "no such column")
++			both(b, y, "ROLLBACK")
++			compare(connectionOracleSelect)
++			both(a, x, "UPDATE t SET newcol=1")
++			compare(connectionOracleSelect)
++			external("DROP TABLE t; CREATE TABLE t(different)")
++			both(b, y, "BEGIN EXCLUSIVE")
++			fail("UPDATE t SET newcol=1", sqlite.CodeBusy, "database is locked")
++			fail("UPDATE t SET different=1", sqlite.CodeError, "no such column")
++			both(b, y, "ROLLBACK")
++			compare(connectionOracleSelect)
++			compare("SELECT count(*) AS n FROM t")
++			both(a, x, "INSERT INTO t VALUES(1),(2)")
++			compare("SELECT * FROM t ORDER BY different")
++			compare(connectionOracleSelect)
++			for _, savepoint := range []bool{false, true} {
++				both(a, x, "BEGIN")
++				if savepoint {
++					both(a, x, "SAVEPOINT s")
++				}
++				both(a, x, "CREATE TABLE discarded(x)")
++				both(a, x, "INSERT INTO discarded VALUES(10),(20)")
++				if savepoint {
++					both(a, x, "ROLLBACK TO s")
++					both(a, x, "RELEASE s")
++					both(a, x, "COMMIT")
++				} else {
++					both(a, x, "ROLLBACK")
++				}
++				both(b, y, "BEGIN EXCLUSIVE")
++				fail("DELETE FROM discarded", sqlite.CodeBusy, "database is locked")
++				fail("DELETE FROM t", sqlite.CodeBusy, "database is locked")
++				both(b, y, "ROLLBACK")
++				compare(connectionOracleSelect)
++				// Restore schema knowledge after invalidation for the next iteration.
++				compare("SELECT * FROM t ORDER BY different")
++			}
++			// Explicit deferred transactions must retain their empty snapshot on BUSY.
++			both(a, x, "UPDATE t SET different=different")
++			both(b, y, "BEGIN EXCLUSIVE")
++			both(a, x, "BEGIN")
++			fail("DELETE FROM absent", sqlite.CodeError, "no such table")
++			compare(connectionOracleSelect)
++			fail("DELETE FROM t", sqlite.CodeBusy, "database is locked")
++			compare(connectionOracleSelect)
++			both(b, y, "ROLLBACK")
++			both(a, x, "ROLLBACK")
++			compare(connectionOracleSelect)
++			compare("SELECT * FROM t ORDER BY different")
++		})
++	}
++}
++
++func TestCachedPreparationOracleFreshAndReadWarm(t *testing.T) {
++	ctx := context.Background()
++	path := filepath.Join(t.TempDir(), "native.db")
++	a, e := sqlite.Open(path, sqlite.Options{})
++	if e != nil {
++		t.Fatal(e)
++	}
++	defer a.Close()
++	for _, q := range []string{"CREATE TABLE t(id INTEGER PRIMARY KEY)", "INSERT INTO t VALUES(1),(2)"} {
++		if _, e = a.Exec(ctx, q); e != nil {
++			t.Fatal(e)
++		}
++	}
++	official := filepath.Join(t.TempDir(), "official.db")
++	setup, lock := startCounterLiveOracle(t, official), startCounterLiveOracle(t, official)
++	setup.run("CREATE TABLE t(id INTEGER PRIMARY KEY); INSERT INTO t VALUES(1),(2)", false)
++	b, e := sqlite.Open(path, sqlite.Options{})
++	if e != nil {
++		t.Fatal(e)
++	}
++	defer b.Close()
++	for _, warm := range []bool{false, true} {
++		fresh, e := sqlite.Open(path, sqlite.Options{})
++		if e != nil {
++			t.Fatal(e)
++		}
++		ref := startCounterLiveOracle(t, official)
++		if warm {
++			confNative(t, fresh, "SELECT * FROM t")
++			ref.run("SELECT * FROM t", false)
++		}
++		if _, e = b.Exec(ctx, "BEGIN EXCLUSIVE"); e != nil {
++			t.Fatal(e)
++		}
++		lock.run("BEGIN EXCLUSIVE", false)
++		for _, q := range []string{"DELETE FROM missing", "UPDATE t SET missing=1", "DELETE FROM t"} {
++			_, e = fresh.Exec(ctx, q)
++			var d *sqlite.Error
++			want := sqlite.CodeBusy
++			category := "database is locked"
++			if warm && q != "DELETE FROM t" {
++				want = sqlite.CodeError
++				category = "no such"
++			}
++			if !errors.As(e, &d) || d.Code != want {
++				t.Fatal(warm, q, e)
++			}
++			cachedOracleError(t, ref, q, category)
++		}
++		if _, e = b.Exec(ctx, "ROLLBACK"); e != nil {
++			t.Fatal(e)
++		}
++		lock.run("ROLLBACK", false)
++		n := confNative(t, fresh, connectionOracleSelect)
++		want, e := confQuoted(ref.run(connectionOracleSelect, false))
++		if e != nil {
++			t.Fatal(e)
++		}
++		if len(want) != 2 || !reflect.DeepEqual(n.rows, want[1:]) {
++			t.Fatal(n, want)
++		}
++		if e = fresh.Close(); e != nil {
++			t.Fatal(e)
++		}
++	}
++}
+diff --git a/sqlite/connection_counters_internal_test.go b/sqlite/connection_counters_internal_test.go
+index 5fe08a6..105e0f0 100644
+--- a/sqlite/connection_counters_internal_test.go
++++ b/sqlite/connection_counters_internal_test.go
+@@ -68,14 +68,18 @@ func TestConnectionCountersLazyTransactionReads(t *testing.T) {
+ 			t.Fatal("connection counters forced a snapshot")
+ 		}
+ 	}
+-	// This is admission before the catalog could be read, not an executed DML.
+-	for _, q := range []string{"DELETE FROM t", "DELETE FROM missing"} {
+-		if _, err := db.Exec(context.Background(), q); !errors.Is(err, ErrBusy) {
+-			t.Fatal(q, err)
+-		}
+-		if got := reviewTransactionScalar(t, db, "SELECT changes()"); got != int64(2) {
+-			t.Fatal(q, got)
+-		}
++	// The cached ordinary schema distinguishes preparation from execution BUSY.
++	if _, err := db.Exec(context.Background(), "DELETE FROM missing"); err == nil || errors.Is(err, ErrBusy) {
++		t.Fatal(err)
++	}
++	if got := reviewTransactionScalar(t, db, "SELECT changes()"); got != int64(2) {
++		t.Fatal(got)
++	}
++	if _, err := db.Exec(context.Background(), "DELETE FROM t"); !errors.Is(err, ErrBusy) {
++		t.Fatal(err)
++	}
++	if got := reviewTransactionScalar(t, db, "SELECT changes()"); got != int64(0) {
++		t.Fatal(got)
+ 	}
+ 	reviewTransactionExec(t, peer, "ROLLBACK")
+ 	reviewTransactionExec(t, db, "ROLLBACK")
+diff --git a/sqlite/preparation_cache.go b/sqlite/preparation_cache.go
+new file mode 100644
+index 0000000..a10ee58
+--- /dev/null
++++ b/sqlite/preparation_cache.go
+@@ -0,0 +1,182 @@
++package sqlite
++
++import (
++	"context"
++	"strings"
++
++	"github.com/ms-xiaosnow/gosqlite/internal/btree"
++	sqlast "github.com/ms-xiaosnow/gosqlite/internal/sql"
++	"github.com/ms-xiaosnow/gosqlite/internal/vfs"
++)
++
++// preparationSchema is immutable, connection-owned name-binding metadata. It
++// contains no roots, defaults, indexes, records, readers, or storage handles.
++// It can classify a failed first snapshot admission; it cannot execute a plan.
++// The bounded profile is ordinary rollback-mode table/index catalogs. Session
++// modes and extension/unsupported catalogs retain their existing admission path.
++type preparationSchema struct {
++	cookie uint32
++	tables map[string]*writeTable
++	bytes  int64
++}
++
++func (d *DB) preparationLimit() int64 {
++	limit := d.opts.MaxSortBytes
++	if limit > btree.MaxSchemaBytes {
++		limit = btree.MaxSchemaBytes
++	}
++	return limit
++}
++
++func (d *DB) observePreparationCookieLocked(cookie uint32) {
++	if d.preparation != nil && d.preparation.cookie != cookie {
++		d.preparation = nil
++	}
++}
++
++// Cache creation is optional. Declining it must not turn a successful ordinary
++// read/write into a resource or schema error. Admission without a cache remains
++// conservative. Each replacement drops the previous retained metadata first.
++func (d *DB) rememberPreparationCatalogLocked(ctx context.Context, cookie uint32, c *writeCatalog) {
++	d.preparation = nil
++	if d.session != nil || ctx.Err() != nil || len(c.extensions.indexes) != 0 {
++		return
++	}
++	limit, charge := d.preparationLimit(), int64(256)
++	if charge > limit {
++		return
++	}
++	for name, tab := range c.tables {
++		if extensionReserved(name) {
++			return
++		}
++		charge += int64(256 + 2*len(name) + len(tab.name))
++		for _, col := range tab.columns {
++			charge += int64(256 + 2*len(col.Name))
++		}
++		if charge > limit || ctx.Err() != nil {
++			return
++		}
++	}
++	cache := &preparationSchema{cookie: cookie, tables: make(map[string]*writeTable, len(c.tables)), bytes: charge}
++	for name, tab := range c.tables {
++		if ctx.Err() != nil {
++			return
++		}
++		copyTab := &table{name: strings.Clone(tab.name), ipk: tab.ipk, columns: make([]sqlast.ColumnDef, len(tab.columns)), index: make(map[string]int, len(tab.index))}
++		for i, col := range tab.columns {
++			copyTab.columns[i].Name = strings.Clone(col.Name)
++			copyTab.index[fold(col.Name)] = i
++		}
++		cache.tables[strings.Clone(name)] = &writeTable{table: copyTab}
++	}
++	d.preparation = cache
++}
++
++// A read may initialize preparation metadata without granting write permission.
++// Validate the entire ordinary catalog, including index declarations. Reject
++// extension, trigger, view and unrecognized schemas from this optional path.
++// Charge declaration parsing conservatively before allocating parser state;
++// the parser additionally has its existing SQL/token/depth limits.
++func (d *DB) observePreparationEntriesLocked(ctx context.Context, cookie uint32, entries []btree.SchemaEntry) {
++	d.preparation = nil
++	if d.session != nil {
++		return
++	}
++	charge, limit := int64(256), d.preparationLimit()
++	if charge > limit {
++		return
++	}
++	for _, e := range entries {
++		if (e.Type != "table" && e.Type != "index") || extensionReserved(e.Name) {
++			return
++		}
++		charge += int64(512 + len(e.Name) + len(e.TableName) + len(e.SQL)*128)
++		if charge > limit || ctx.Err() != nil {
++			return
++		}
++	}
++	c, err := buildWriteCatalog(ctx, entries, &extensionCatalog{})
++	if err != nil {
++		return
++	}
++	d.rememberPreparationCatalogLocked(ctx, cookie, c)
++}
++
++func validatePreparation(ctx context.Context, e sqlast.Expr, tab *table) error {
++	if err := ctx.Err(); err != nil {
++		return err
++	}
++	return sqlast.Walk(e, func(e sqlast.Expr) error {
++		if err := ctx.Err(); err != nil {
++			return err
++		}
++		return validateNode(e, tab, nil)
++	})
++}
++
++// onlyBusy accepts ordinary wrapping/joining of BUSY alone. It deliberately
++// excludes any accompanying cleanup, I/O, context, changed-file or poison error.
++// No failure is suppressed merely because errors.Is would find BUSY in it.
++func onlyBusy(err error) bool {
++	if err == ErrBusy || err == vfs.ErrBusy {
++		return true
++	}
++	if many, ok := err.(interface{ Unwrap() []error }); ok {
++		children := many.Unwrap()
++		if len(children) == 0 {
++			return false
++		}
++		for _, child := range children {
++			if !onlyBusy(child) {
++				return false
++			}
++		}
++		return true
++	}
++	if one, ok := err.(interface{ Unwrap() error }); ok {
++		return onlyBusy(one.Unwrap())
++	}
++	return false
++}
++
++func (t *Tx) cachedPreparationFailureLocked(ctx context.Context, stmt sqlast.Statement, admission error) (mutationOutcome, error) {
++	d := t.db
++	d.observePreparationCookieLocked(d.info.SchemaCookie)
++	cache := d.preparation
++	if !onlyBusy(admission) || !isMutationStatement(stmt) || d.session != nil || cache == nil {
++		return mutationOutcome{}, wrap("exec", admission)
++	}
++	if err := ctx.Err(); err != nil {
++		return mutationOutcome{}, wrap("exec", err)
++	}
++	var name string
++	switch s := stmt.(type) {
++	case *sqlast.Insert:
++		name = s.Table
++	case *sqlast.Update:
++		name = s.Table
++	case *sqlast.Delete:
++		name = s.Table
++	}
++	// Reuse exactly the ordinary native name/target/arity preparation routines.
++	// No expression evaluation or data access occurs, even for runtime errors.
++	c := &writeCatalog{tables: cache.tables}
++	tab, err := c.find(name)
++	if err == nil {
++		switch s := stmt.(type) {
++		case *sqlast.Insert:
++			_, err = tab.prepareInsert(ctx, s)
++		case *sqlast.Update:
++			_, err = tab.prepareUpdate(ctx, s)
++		case *sqlast.Delete:
++			err = tab.prepareDelete(ctx, s)
++		}
++	}
++	if err != nil {
++		return mutationOutcome{}, wrap("exec", err)
++	}
++	// A prepared DML statement reached execution admission, but no rows or pager
++	// transaction were acquired. Only changes() resets; totals and insert ID stay.
++	return mutationOutcome{started: true}, wrap("exec", admission)
++}
+diff --git a/sqlite/preparation_cache_test.go b/sqlite/preparation_cache_test.go
+new file mode 100644
+index 0000000..b0cfad7
+--- /dev/null
++++ b/sqlite/preparation_cache_test.go
+@@ -0,0 +1,282 @@
++package sqlite
++
++import (
++	"context"
++	"database/sql"
++	"errors"
++	"fmt"
++	"path/filepath"
++	"reflect"
++	"strings"
++	"testing"
++
++	sqlast "github.com/ms-xiaosnow/gosqlite/internal/sql"
++	"github.com/ms-xiaosnow/gosqlite/internal/vfs"
++)
++
++func cachedPeer(t *testing.T, path string) *DB {
++	t.Helper()
++	p, err := Open(path, Options{})
++	if err != nil {
++		t.Fatal(err)
++	}
++	t.Cleanup(func() {
++		if err := p.Close(); err != nil {
++			t.Error(err)
++		}
++	})
++	return p
++}
++func cachedCode(t *testing.T, err error, code Code) {
++	t.Helper()
++	var detail *Error
++	if !errors.As(err, &detail) || detail.Code != code {
++		t.Fatalf("code %v: %v", code, err)
++	}
++}
++func cachedCounters(t *testing.T, db *DB, changes, total, id int64) {
++	t.Helper()
++	if got := db.counters; got != (sqlast.ConnectionState{Changes: changes, TotalChanges: total, LastInsertRowID: id}) {
++		t.Fatal(got)
++	}
++}
++
++func TestCachedPreparationOutcomes(t *testing.T) {
++	for _, explicit := range []bool{false, true} {
++		t.Run(fmt.Sprint(explicit), func(t *testing.T) {
++			db, path := reviewTransactionDB(t)
++			reviewTransactionExec(t, db, "CREATE TABLE t(id INTEGER PRIMARY KEY,v,true)")
++			reviewTransactionExec(t, db, "INSERT INTO t VALUES(1,10,1),(2,20,0)")
++			peer := cachedPeer(t, path)
++			reviewTransactionExec(t, peer, "BEGIN EXCLUSIVE")
++			if explicit {
++				reviewTransactionExec(t, db, "BEGIN")
++			}
++			invalid := []string{
++				"DELETE FROM missing", "DELETE FROM t WHERE missing=1", "UPDATE t SET missing=1", "UPDATE t SET v=missing", "UPDATE t SET v=changes(1)",
++				"INSERT INTO t(missing) VALUES(1)", "INSERT INTO t(id) VALUES(1,2)", "INSERT INTO t VALUES(3,changes(1),0)", "INSERT INTO t VALUES(3,missing,0)",
++				"UPDATE t SET id=1,rowid=2", "DELETE FROM t WHERE CASE WHEN 0 THEN missing ELSE 1 END", "UPDATE t SET v=true.missing",
++			}
++			for _, q := range invalid {
++				r, e := db.Exec(context.Background(), q)
++				cachedCode(t, e, CodeError)
++				if r != (Result{}) {
++					t.Fatal(q, r)
++				}
++				cachedCounters(t, db, 2, 2, 2)
++			}
++			// Binding and pre-cancellation still precede any lock or cached preparation.
++			for _, args := range [][]any{nil, {sql.Named("other", 3)}, {make(chan int)}} {
++				_, e := db.Exec(context.Background(), "UPDATE t SET v=:v", args...)
++				cachedCode(t, e, CodeError)
++				cachedCounters(t, db, 2, 2, 2)
++			}
++			ctx, cancel := context.WithCancel(context.Background())
++			cancel()
++			_, e := db.Exec(ctx, "DELETE FROM t")
++			cachedCode(t, e, CodeInterrupt)
++			cachedCounters(t, db, 2, 2, 2)
++			for _, q := range []string{"UPDATE t SET v=abs(-9223372036854775808)", "INSERT INTO t VALUES(3,4,1)", "DELETE FROM t WHERE true", "UPDATE t SET v=:v WHERE id=?2"} {
++				var args []any
++				if strings.Contains(q, ":v") {
++					args = []any{3, 1}
++				}
++				_, e := db.Exec(context.Background(), q, args...)
++				cachedCode(t, e, CodeBusy)
++				cachedCounters(t, db, 0, 2, 2)
++				if db.tx != nil && (db.tx.reader != nil || db.tx.storage != nil) {
++					t.Fatal("cache acquired a reader or storage")
++				}
++			}
++			reviewTransactionExec(t, peer, "ROLLBACK")
++			if explicit {
++				reviewTransactionExec(t, db, "ROLLBACK")
++			}
++			if got := reviewTransactionScalar(t, db, "SELECT count(*) FROM t"); got != int64(2) {
++				t.Fatal(got)
++			}
++			r, e := db.Exec(context.Background(), "UPDATE t SET v=v")
++			if e != nil {
++				t.Fatal(e)
++			}
++			n, _ := r.RowsAffected()
++			id, _ := r.LastInsertId()
++			if n != 2 || id != 0 {
++				t.Fatal(r)
++			}
++			cachedCounters(t, db, 2, 4, 2)
++		})
++	}
++}
++
++func TestCachedPreparationFreshReadWarmAndQuota(t *testing.T) {
++	db, path := reviewTransactionDB(t)
++	reviewTransactionExec(t, db, "CREATE TABLE t(id INTEGER PRIMARY KEY,v)")
++	reviewTransactionExec(t, db, "INSERT INTO t VALUES(1,1),(2,2)")
++	fresh := cachedPeer(t, path)
++	peer := cachedPeer(t, path)
++	if fresh.preparation != nil {
++		t.Fatal("Open loaded schema")
++	}
++	reviewTransactionExec(t, peer, "BEGIN EXCLUSIVE")
++	for _, q := range []string{"DELETE FROM t", "DELETE FROM missing", "UPDATE t SET missing=1"} {
++		_, e := fresh.Exec(context.Background(), q)
++		cachedCode(t, e, CodeBusy)
++		cachedCounters(t, fresh, 0, 0, 0)
++	}
++	reviewTransactionExec(t, peer, "ROLLBACK")
++	if got := reviewTransactionScalar(t, fresh, "SELECT count(*) FROM t"); got != int64(2) {
++		t.Fatal(got)
++	}
++	if fresh.preparation == nil {
++		t.Fatal("read did not warm ordinary schema")
++	}
++	reviewTransactionExec(t, peer, "BEGIN EXCLUSIVE")
++	_, e := fresh.Exec(context.Background(), "DELETE FROM missing")
++	cachedCode(t, e, CodeError)
++	_, e = fresh.Exec(context.Background(), "DELETE FROM t")
++	cachedCode(t, e, CodeBusy)
++	reviewTransactionExec(t, peer, "ROLLBACK")
++	limited, e := Open(filepath.Join(t.TempDir(), "small.db"), Options{MaxSortBytes: 512})
++	if e != nil {
++		t.Fatal(e)
++	}
++	defer limited.Close()
++	reviewTransactionExec(t, limited, "CREATE TABLE t(id INTEGER PRIMARY KEY)")
++	reviewTransactionExec(t, limited, "INSERT INTO t VALUES(1),(2)")
++	if limited.preparation != nil {
++		t.Fatal("cache exceeded configured memory allowance")
++	}
++	p := cachedPeer(t, limited.path)
++	reviewTransactionExec(t, p, "BEGIN EXCLUSIVE")
++	_, e = limited.Exec(context.Background(), "DELETE FROM t")
++	cachedCode(t, e, CodeBusy)
++	cachedCounters(t, limited, 2, 2, 2)
++	reviewTransactionExec(t, p, "ROLLBACK")
++}
++
++func TestCachedPreparationSchemaLifecycle(t *testing.T) {
++	db, path := reviewTransactionDB(t)
++	reviewTransactionExec(t, db, "CREATE TABLE t(id INTEGER PRIMARY KEY,v)")
++	reviewTransactionExec(t, db, "INSERT INTO t VALUES(1,1),(2,2)")
++	peer := cachedPeer(t, path)
++	// Own successful DDL is available immediately, without an intervening DML.
++	reviewTransactionExec(t, db, "CREATE TABLE own(x)")
++	reviewTransactionExec(t, peer, "BEGIN EXCLUSIVE")
++	_, e := db.Exec(context.Background(), "DELETE FROM own WHERE missing=1")
++	cachedCode(t, e, CodeError)
++	cachedCounters(t, db, 2, 2, 2)
++	_, e = db.Exec(context.Background(), "DELETE FROM own")
++	cachedCode(t, e, CodeBusy)
++	cachedCounters(t, db, 0, 2, 2)
++	reviewTransactionExec(t, peer, "ROLLBACK")
++	// An unseen peer schema remains stale until a normal snapshot is obtained.
++	reviewTransactionExec(t, peer, "CREATE TABLE added(x)")
++	reviewTransactionExec(t, peer, "BEGIN EXCLUSIVE")
++	_, e = db.Exec(context.Background(), "DELETE FROM added")
++	cachedCode(t, e, CodeError)
++	reviewTransactionExec(t, peer, "ROLLBACK")
++	reviewTransactionExec(t, db, "INSERT INTO added VALUES(1),(2)")
++	cachedCounters(t, db, 2, 4, 2)
++	reviewTransactionExec(t, peer, "BEGIN EXCLUSIVE")
++	_, e = db.Exec(context.Background(), "DELETE FROM added")
++	cachedCode(t, e, CodeBusy)
++	cachedCounters(t, db, 0, 4, 2)
++	reviewTransactionExec(t, peer, "ROLLBACK")
++	for _, savepoint := range []bool{false, true} {
++		reviewTransactionExec(t, db, "UPDATE t SET v=v")
++		reviewTransactionExec(t, db, "BEGIN")
++		if savepoint {
++			reviewTransactionExec(t, db, "SAVEPOINT s")
++		}
++		reviewTransactionExec(t, db, "CREATE TABLE discarded(x)")
++		reviewTransactionExec(t, db, "INSERT INTO discarded VALUES(10),(20)")
++		before := db.counters
++		if savepoint {
++			reviewTransactionExec(t, db, "ROLLBACK TO s")
++			reviewTransactionExec(t, db, "RELEASE s")
++			reviewTransactionExec(t, db, "COMMIT")
++		} else {
++			reviewTransactionExec(t, db, "ROLLBACK")
++		}
++		if db.preparation != nil {
++			t.Fatal("DDL rollback retained schema")
++		}
++		reviewTransactionExec(t, peer, "BEGIN EXCLUSIVE")
++		for _, q := range []string{"DELETE FROM discarded", "DELETE FROM t"} {
++			_, e = db.Exec(context.Background(), q)
++			cachedCode(t, e, CodeBusy)
++			if db.counters != before {
++				t.Fatal(db.counters, before)
++			}
++		}
++		reviewTransactionExec(t, peer, "ROLLBACK")
++		_, e = db.Exec(context.Background(), "DELETE FROM discarded")
++		cachedCode(t, e, CodeError)
++	}
++}
++
++func TestCachedPreparationMetadataIsolation(t *testing.T) {
++	db, _ := reviewTransactionDB(t)
++	reviewTransactionExec(t, db, "CREATE TABLE t(id INTEGER PRIMARY KEY,v DEFAULT 42)")
++	old := db.preparation
++	if old == nil || old.bytes > db.preparationLimit() {
++		t.Fatal(old)
++	}
++	for _, tab := range old.tables {
++		if tab.root != 0 || len(tab.indexes) != 0 || len(tab.extensions) != 0 {
++			t.Fatal("cache contains storage metadata")
++		}
++		for _, col := range tab.columns {
++			if col.Default != nil || col.Type != "" {
++				t.Fatal("cache retained expression or irrelevant type")
++			}
++		}
++	}
++	before := fmt.Sprint(old.tables["t"].columns)
++	reviewTransactionExec(t, db, "CREATE TABLE added(x)")
++	if len(old.tables) != 1 || fmt.Sprint(old.tables["t"].columns) != before {
++		t.Fatal("mutated published metadata")
++	}
++	if reflect.ValueOf(db.preparation).Pointer() == reflect.ValueOf(old).Pointer() {
++		t.Fatal("schema not replaced")
++	}
++	if err := db.Close(); err != nil {
++		t.Fatal(err)
++	}
++	if db.preparation != nil {
++		t.Fatal("Close retained schema")
++	}
++}
++
++func TestCachedPreparationBusyClassification(t *testing.T) {
++	// Pure error-tree classification; no native failure is injected or executed.
++	for _, e := range []error{ErrBusy, fmt.Errorf("lock: %w", ErrBusy), errors.Join(ErrBusy, vfs.ErrBusy)} {
++		if !onlyBusy(e) {
++			t.Fatal(e)
++		}
++	}
++	for _, e := range []error{nil, context.Canceled, errors.Join(ErrBusy, context.Canceled), errors.Join(ErrBusy, ErrPoisoned), errors.Join(ErrBusy, ErrChanged), errors.Join(ErrBusy, fmt.Errorf("other"))} {
++		if onlyBusy(e) {
++			t.Fatal(e)
++		}
++	}
++}
++
++func TestCachedPreparationEmptyQuota(t *testing.T) {
++	for _, limit := range []int64{1, 64, 255} {
++		db, err := Open(filepath.Join(t.TempDir(), "empty.db"), Options{MaxSortBytes: limit})
++		if err != nil {
++			t.Fatal(err)
++		}
++		if _, err = db.Schema(context.Background()); err != nil {
++			t.Fatal(err)
++		}
++		if db.preparation != nil {
++			t.Fatalf("limit %d retained %d", limit, db.preparation.bytes)
++		}
++		if err = db.Close(); err != nil {
++			t.Fatal(err)
++		}
++	}
++}
+diff --git a/sqlite/query.go b/sqlite/query.go
+index e1b5354..0de3407 100644
+--- a/sqlite/query.go
++++ b/sqlite/query.go
+@@ -50,6 +50,7 @@ func (d *DB) table(ctx context.Context, reader btree.PageReader, sel *sqlast.Sel
+ 		if err != nil {
+ 			return nil, err
+ 		}
++		d.observePreparationEntriesLocked(ctx, reader.Header().SchemaCookie, entries)
+ 		found := false
+ 		for _, entry := range entries {
+ 			if fold(entry.Name) != fold(sel.From) {
+diff --git a/sqlite/sqlite.go b/sqlite/sqlite.go
+index 0875b32..2ac7a1b 100644
+--- a/sqlite/sqlite.go
++++ b/sqlite/sqlite.go
+@@ -191,16 +191,17 @@ type SchemaEntry struct {
+ // per connection. Independent DB handles can be used concurrently.
+ type DB struct {
+ 	// Counters are connection state, protected by mu; never part of pager undo.
+-	counters sqlast.ConnectionState
+-	mu       sync.RWMutex
+-	path     string
+-	info     FileInfo
+-	opts     Options
+-	closed   bool
+-	tx       *Tx
+-	rows     map[*Rows]struct{}
+-	session  pageSession
+-	methods  *registry.Registry
++	counters    sqlast.ConnectionState
++	preparation *preparationSchema
++	mu          sync.RWMutex
++	path        string
++	info        FileInfo
++	opts        Options
++	closed      bool
++	tx          *Tx
++	rows        map[*Rows]struct{}
++	session     pageSession
++	methods     *registry.Registry
+ }
+ 
+ // Open opens a SQLite-format file. An absent file is created unless ReadOnly
+@@ -381,6 +382,7 @@ func (d *DB) Schema(ctx context.Context) (_ []SchemaEntry, retErr error) {
+ 	if err != nil {
+ 		return nil, wrap("schema", err)
+ 	}
++	d.observePreparationEntriesLocked(ctx, reader.Header().SchemaCookie, entries)
+ 	d.info = fileInfo(reader.Header())
+ 	result := make([]SchemaEntry, len(entries))
+ 	for i, e := range entries {
+@@ -402,6 +404,7 @@ func (d *DB) Close() error {
+ 	var err error
+ 	if !d.closed {
+ 		d.closed = true
++		d.preparation = nil
+ 		for r := range d.rows {
+ 			r.mu.Lock()
+ 			r.err = wrap("next", ErrClosed)
+diff --git a/sqlite/transaction.go b/sqlite/transaction.go
+index 1074e96..dff63e2 100644
+--- a/sqlite/transaction.go
++++ b/sqlite/transaction.go
+@@ -28,6 +28,7 @@ type Tx struct {
+ 	readClose          func() error
+ 	activeRows         int
+ 	ownershipValidated bool
++	schemaChanged      bool
+ 	initialInfo        FileInfo
+ 	readOnly           bool
+ 	savepointTxn       bool
+@@ -219,6 +220,9 @@ func (t *Tx) rollbackLocked() error {
+ 	t.savepoints = nil
+ 	t.markBytes = 0
+ 	t.done = true
++	if t.schemaChanged {
++		t.db.preparation = nil
++	}
+ 	t.db.info = t.initialInfo
+ 	if t.db.tx == t {
+ 		t.db.tx = nil
+@@ -336,13 +340,11 @@ func (t *Tx) execStatementLocked(ctx context.Context, stmt sqlast.Statement, par
+ 		return mutationOutcome{}, wrap("exec", fmt.Errorf("%w: close transaction rows before executing a write", ErrBusy))
+ 	}
+ 	if err := t.ensureSnapshotLocked(ctx); err != nil {
+-		// No catalog is available yet, so this native admission failure cannot
+-		// distinguish a valid DML execution from an invalid table/column name.
+-		// Preserve state instead of guessing that a statement executed.
+-		return mutationOutcome{}, wrap("exec", err)
++		return t.cachedPreparationFailureLocked(ctx, stmt, err)
+ 	}
+ 	ctx = sqlast.WithConnectionState(ctx, &t.db.counters)
+ 	var result mutationOutcome
++	beforeStatementSchema := t.reader.Header().SchemaCookie
+ 	err := t.storage.Statement(ctx, func() error {
+ 		catalog, err := t.validateCatalog(ctx)
+ 		if err != nil {
+@@ -351,6 +353,7 @@ func (t *Tx) execStatementLocked(ctx context.Context, stmt sqlast.Statement, par
+ 		if err = t.checkWriteOwnership(ctx, catalog); err != nil {
+ 			return err
+ 		}
++		t.db.rememberPreparationCatalogLocked(ctx, t.reader.Header().SchemaCookie, catalog)
+ 		if !isMutationStatement(stmt) {
+ 			if err = t.storage.PromoteWrite(ctx); err != nil {
+ 				return err
+@@ -380,8 +383,28 @@ func (t *Tx) execStatementLocked(ctx context.Context, stmt sqlast.Statement, par
+ 		if err != nil {
+ 			return err
+ 		}
+-		return t.refreshExtensionSchemaCookies(ctx, catalog, beforeSchema)
++		if err = t.refreshExtensionSchemaCookies(ctx, catalog, beforeSchema); err != nil {
++			return err
++		}
++		// Ordinary CREATE TABLE updates this statement-local catalog; ordinary
++		// indexes do not affect name/column preparation. Extension DDL does.
++		switch s := stmt.(type) {
++		case *sqlast.CreateTable:
++			t.db.rememberPreparationCatalogLocked(ctx, t.reader.Header().SchemaCookie, catalog)
++		case *sqlast.CreateIndex:
++			if s.Method == "" {
++				t.db.rememberPreparationCatalogLocked(ctx, t.reader.Header().SchemaCookie, catalog)
++			} else {
++				t.db.preparation = nil
++			}
++		}
++		return nil
+ 	})
++	if t.reader.Header().SchemaCookie != beforeStatementSchema {
++		t.schemaChanged = true
++	}
++	// A statement rollback must never leave metadata for its discarded schema.
++	t.db.observePreparationCookieLocked(t.reader.Header().SchemaCookie)
+ 	if err != nil {
+ 		return result, wrap("exec", err)
+ 	}
+diff --git a/sqlite/transaction_control.go b/sqlite/transaction_control.go
+index 3c70e3a..4425978 100644
+--- a/sqlite/transaction_control.go
++++ b/sqlite/transaction_control.go
+@@ -67,6 +67,7 @@ func (t *Tx) ensureSnapshotLocked(ctx context.Context) error {
+ 		}
+ 		t.reader, t.storage = p, p
+ 	}
++	d.observePreparationCookieLocked(t.reader.Header().SchemaCookie)
+ 	t.initialInfo = fileInfo(t.reader.Header())
+ 	d.info = t.initialInfo
+ 	return nil
+@@ -201,6 +202,10 @@ func (t *Tx) savepointControlLocked(ctx context.Context, control *sqlast.Transac
+ 		t.discardSavepointsLocked(i)
+ 		return nil
+ 	}
++	beforeSchema := uint32(0)
++	if t.reader != nil {
++		beforeSchema = t.reader.Header().SchemaCookie
++	}
+ 	if t.storage != nil {
+ 		if err := t.storage.RollbackTo(ctx, t.savepoints[i].id); err != nil {
+ 			return err
+@@ -209,6 +214,9 @@ func (t *Tx) savepointControlLocked(ctx context.Context, control *sqlast.Transac
+ 	t.discardSavepointsLocked(i + 1)
+ 	t.ownershipValidated = false
+ 	if t.reader != nil {
++		if t.reader.Header().SchemaCookie != beforeSchema {
++			t.db.preparation = nil
++		}
+ 		t.db.info = fileInfo(t.reader.Header())
+ 	}
+ 	return nil
+diff --git a/sqlite/write_rows.go b/sqlite/write_rows.go
+index 9a673b5..24d21a5 100644
+--- a/sqlite/write_rows.go
++++ b/sqlite/write_rows.go
+@@ -126,12 +126,7 @@ func (t *Tx) removeIndexes(ctx context.Context, tab *writeTable, rowid int64, va
+ 	}
+ 	return nil
+ }
+-func (t *Tx) insert(ctx context.Context, c *writeCatalog, stmt *sqlast.Insert, params []any) (mutationOutcome, error) {
+-	var result mutationOutcome
+-	tab, err := c.find(stmt.Table)
+-	if err != nil {
+-		return result, err
+-	}
++func (tab *writeTable) prepareInsert(ctx context.Context, stmt *sqlast.Insert) ([]int, error) {
+ 	var targets []int
+ 	seen := map[int]bool{}
+ 	if len(stmt.Columns) == 0 && !stmt.DefaultValues {
+@@ -146,10 +141,10 @@ func (t *Tx) insert(ctx context.Context, c *writeCatalog, stmt *sqlast.Insert, p
+ 		for _, name := range stmt.Columns {
+ 			i, err := tab.target(name)
+ 			if err != nil {
+-				return result, err
++				return nil, err
+ 			}
+ 			if seen[i] {
+-				return result, fmt.Errorf("%w: duplicate rowid target", ErrUnsupported)
++				return nil, fmt.Errorf("%w: duplicate rowid target", ErrUnsupported)
+ 			}
+ 			seen[i] = true
+ 			targets = append(targets, i)
+@@ -161,14 +156,61 @@ func (t *Tx) insert(ctx context.Context, c *writeCatalog, stmt *sqlast.Insert, p
+ 	}
+ 	for _, exprs := range rows {
+ 		if !stmt.DefaultValues && len(exprs) != len(targets) {
+-			return result, fmt.Errorf("VALUES column count mismatch")
++			return nil, fmt.Errorf("VALUES column count mismatch")
+ 		}
+ 		for _, expr := range exprs {
+-			if err := validate(expr, nil, nil); err != nil {
+-				return result, err
++			if err := validatePreparation(ctx, expr, nil); err != nil {
++				return nil, err
+ 			}
+ 		}
+ 	}
++	return targets, nil
++}
++
++func (tab *writeTable) prepareUpdate(ctx context.Context, stmt *sqlast.Update) ([]int, error) {
++	var err error
++	targets := make([]int, len(stmt.Assignments))
++	seen := map[int]bool{}
++	for i, assignment := range stmt.Assignments {
++		targets[i], err = tab.target(assignment.Column)
++		if err != nil {
++			return nil, err
++		}
++		if seen[targets[i]] {
++			return nil, fmt.Errorf("%w: duplicate rowid target", ErrUnsupported)
++		}
++		seen[targets[i]] = true
++		stmt.Assignments[i].Expr = bindBooleans(assignment.Expr, tab.table)
++		if err := validatePreparation(ctx, stmt.Assignments[i].Expr, tab.table); err != nil {
++			return nil, err
++		}
++	}
++	stmt.Where = bindBooleans(stmt.Where, tab.table)
++	if err := validatePreparation(ctx, stmt.Where, tab.table); err != nil {
++		return nil, err
++	}
++	return targets, nil
++}
++
++func (tab *writeTable) prepareDelete(ctx context.Context, stmt *sqlast.Delete) error {
++	stmt.Where = bindBooleans(stmt.Where, tab.table)
++	return validatePreparation(ctx, stmt.Where, tab.table)
++}
++
++func (t *Tx) insert(ctx context.Context, c *writeCatalog, stmt *sqlast.Insert, params []any) (mutationOutcome, error) {
++	var result mutationOutcome
++	tab, err := c.find(stmt.Table)
++	if err != nil {
++		return result, err
++	}
++	targets, err := tab.prepareInsert(ctx, stmt)
++	if err != nil {
++		return result, err
++	}
++	rows := stmt.Rows
++	if stmt.DefaultValues {
++		rows = [][]sqlast.Expr{nil}
++	}
+ 	result.started = true
+ 	if err := t.storage.PromoteWrite(ctx); err != nil {
+ 		return result, err
+@@ -307,24 +349,8 @@ func (t *Tx) update(ctx context.Context, c *writeCatalog, stmt *sqlast.Update, p
+ 	if err != nil {
+ 		return result, err
+ 	}
+-	targets := make([]int, len(stmt.Assignments))
+-	seen := map[int]bool{}
+-	for i, assignment := range stmt.Assignments {
+-		targets[i], err = tab.target(assignment.Column)
+-		if err != nil {
+-			return result, err
+-		}
+-		if seen[targets[i]] {
+-			return result, fmt.Errorf("%w: duplicate rowid target", ErrUnsupported)
+-		}
+-		seen[targets[i]] = true
+-		stmt.Assignments[i].Expr = bindBooleans(assignment.Expr, tab.table)
+-		if err := validate(stmt.Assignments[i].Expr, tab.table, nil); err != nil {
+-			return result, err
+-		}
+-	}
+-	stmt.Where = bindBooleans(stmt.Where, tab.table)
+-	if err := validate(stmt.Where, tab.table, nil); err != nil {
++	targets, err := tab.prepareUpdate(ctx, stmt)
++	if err != nil {
+ 		return result, err
+ 	}
+ 	result.started = true
+@@ -412,8 +438,7 @@ func (t *Tx) delete(ctx context.Context, c *writeCatalog, stmt *sqlast.Delete, p
+ 	if err != nil {
+ 		return result, err
+ 	}
+-	stmt.Where = bindBooleans(stmt.Where, tab.table)
+-	if err := validate(stmt.Where, tab.table, nil); err != nil {
++	if err := tab.prepareDelete(ctx, stmt); err != nil {
+ 		return result, err
+ 	}
+ 	result.started = true
+diff --git a/sqlite/write_schema.go b/sqlite/write_schema.go
+index e83613b..6233424 100644
+--- a/sqlite/write_schema.go
++++ b/sqlite/write_schema.go
+@@ -38,9 +38,17 @@ func (t *Tx) validateCatalog(ctx context.Context) (*writeCatalog, error) {
+ 	if err != nil {
+ 		return nil, err
+ 	}
++	return buildWriteCatalog(ctx, entries, extensions)
++}
++
++// buildWriteCatalog validates declarations only. It never reads row pages.
++func buildWriteCatalog(ctx context.Context, entries []btree.SchemaEntry, extensions *extensionCatalog) (*writeCatalog, error) {
+ 	c := &writeCatalog{tables: map[string]*writeTable{}, names: map[string]string{}, extensions: extensions}
+ 	roots := map[uint32]bool{1: true}
+ 	for _, e := range entries {
++		if err := ctx.Err(); err != nil {
++			return nil, err
++		}
+ 		if e.Type == "trigger" {
+ 			if _, owned := extensions.guards[fold(e.Name)]; owned {
+ 				continue
+@@ -85,6 +93,9 @@ func (t *Tx) validateCatalog(ctx context.Context) (*writeCatalog, error) {
+ 		c.tables[fold(e.Name)] = tab
+ 	}
+ 	for _, e := range entries {
++		if err := ctx.Err(); err != nil {
++			return nil, err
++		}
+ 		if e.Type != "index" {
+ 			continue
+ 		}
+@@ -196,14 +207,21 @@ func (t *Tx) createTable(ctx context.Context, c *writeCatalog, def *sqlast.Creat
+ 		}
+ 		return fmt.Errorf("object already exists: %s", def.Name)
+ 	}
+-	if _, err := writableTable(def, 0); err != nil {
++	tab, err := writableTable(def, 0)
++	if err != nil {
+ 		return err
+ 	}
+ 	root, err := btree.CreateTree(ctx, t.storage, btree.TableTree)
+ 	if err != nil {
+ 		return err
+ 	}
+-	return t.addSchema(ctx, "table", def.Name, def.Name, root, def.SQL)
++	if err = t.addSchema(ctx, "table", def.Name, def.Name, root, def.SQL); err != nil {
++		return err
++	}
++	tab.root = root
++	c.tables[fold(def.Name)] = tab
++	c.names[fold(def.Name)] = "table"
++	return nil
+ }
+ func (t *Tx) createIndex(ctx context.Context, c *writeCatalog, def *sqlast.CreateIndex) error {
+ 	if err := newSchemaName(def.Name); err != nil {

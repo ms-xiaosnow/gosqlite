@@ -1,0 +1,15 @@
+Exact composition13f53e4. Selected checks use descriptor-free cache/quota/AST laws, intact SQL/Tx/cooperating locks and ordinary official EOF. Promoted original GROUP BY query retained as a typed native and official positive; strict cached ordinary BUSY outcome now matches original official control. Obsolete imported review expectations were identified before execution; no failed run is fabricated.
+13f53e4cdadaaca2530e17e5f7a61b9dfe8e5c33
+2026-10-10T20:47:43Z
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.613s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.080s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.012s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	3.148s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.182s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	1.056s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	1.865s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	4.101s
+2026-10-10T20:48:25Z
+COMPOSED GROUPING/COUNTERS/CACHED PREPARATION SELECTED GATE PASS

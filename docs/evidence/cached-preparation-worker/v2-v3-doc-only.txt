@@ -1,0 +1,1 @@
+PASS: v2 to final v3 differs only in docs/sql-cached-preparation.md; every production and test source byte is identical.

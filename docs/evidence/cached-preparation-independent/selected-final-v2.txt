@@ -1,0 +1,239 @@
+2026-10-10T20:41:03Z
+go version go1.27.2 linux/amd64
+3.54.0 2026-10-09 15:46:58 be8d059e9a49089ab2dce5ed26dd87aaf598fdc5fbe0b107c0dd758464bcd5e3 (64-bit)
+548d3c32f83fa81152f543eb1526be7884cfe0526eb5e9ce29d3eca14786e7e0  /workspace/scratch/5e06a74e5f65/durable-restart/sql-preparation-independent-final-v2/../toolchains/go1.27.2/bin/go
+470775f6ada29ccfb2d3046ac2b4c975df95a9c20b782332d4e8ba6b6233e6c6  /workspace/scratch/5e06a74e5f65/durable-restart/sql-preparation-independent-final-v2/../toolchains/sqlite-build-3540000/sqlite3
+Selected-source behavioral review: intact ordinary SQL databases, cooperative locks, SQL-only peer DDL, supported expressions/counters, logical errors, explicit/automatic transaction and savepoint rollback, binding/context/quota, bounded copied metadata, read-only/active Rows and driver pool reset. Pure error-tree tests perform no native failure operation. Oracle subprocesses synchronize startup and finish with EOF/.quit and Wait. No restricted physical/namespace/native-failure/crash/recovery work; no broad suite or manual tags.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestConnectionFunctionContextAndVolatility
+--- PASS: TestConnectionFunctionContextAndVolatility (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.003s
+=== RUN   TestConnectionCountersCancellationAfterInsertedRow
+--- PASS: TestConnectionCountersCancellationAfterInsertedRow (0.00s)
+=== RUN   TestConnectionCountersLazyTransactionReads
+--- PASS: TestConnectionCountersLazyTransactionReads (0.00s)
+=== RUN   TestCachedPreparationOutcomes
+=== RUN   TestCachedPreparationOutcomes/false
+=== RUN   TestCachedPreparationOutcomes/true
+--- PASS: TestCachedPreparationOutcomes (0.00s)
+    --- PASS: TestCachedPreparationOutcomes/false (0.00s)
+    --- PASS: TestCachedPreparationOutcomes/true (0.00s)
+=== RUN   TestCachedPreparationFreshReadWarmAndQuota
+--- PASS: TestCachedPreparationFreshReadWarmAndQuota (0.00s)
+=== RUN   TestCachedPreparationSchemaLifecycle
+--- PASS: TestCachedPreparationSchemaLifecycle (0.00s)
+=== RUN   TestCachedPreparationMetadataIsolation
+--- PASS: TestCachedPreparationMetadataIsolation (0.00s)
+=== RUN   TestCachedPreparationBusyClassification
+--- PASS: TestCachedPreparationBusyClassification (0.00s)
+=== RUN   TestCachedPreparationEmptyQuota
+--- PASS: TestCachedPreparationEmptyQuota (0.00s)
+=== RUN   TestReviewPreparationEmptyQuota
+--- PASS: TestReviewPreparationEmptyQuota (0.00s)
+=== RUN   TestReviewPreparationErrorPrecedenceAndIsolation
+=== RUN   TestReviewPreparationErrorPrecedenceAndIsolation/false
+=== RUN   TestReviewPreparationErrorPrecedenceAndIsolation/true
+--- PASS: TestReviewPreparationErrorPrecedenceAndIsolation (0.00s)
+    --- PASS: TestReviewPreparationErrorPrecedenceAndIsolation/false (0.00s)
+    --- PASS: TestReviewPreparationErrorPrecedenceAndIsolation/true (0.00s)
+=== RUN   TestReviewPreparationReadOnlyAndRows
+--- PASS: TestReviewPreparationReadOnlyAndRows (0.00s)
+=== RUN   TestReviewPreparationDeclaredNamesOwnStorage
+--- PASS: TestReviewPreparationDeclaredNamesOwnStorage (0.00s)
+=== RUN   TestReviewPreparationDDLBusyRollback
+--- PASS: TestReviewPreparationDDLBusyRollback (0.00s)
+=== RUN   TestReviewPreparationExcludedExtensionAndSession
+--- PASS: TestReviewPreparationExcludedExtensionAndSession (0.04s)
+=== RUN   TestReviewPreparationRequiredNegative
+--- PASS: TestReviewPreparationRequiredNegative (0.00s)
+=== RUN   TestConnectionCountersStatementsAndUndo
+=== RUN   TestConnectionCountersStatementsAndUndo/false
+=== RUN   TestConnectionCountersStatementsAndUndo/true
+--- PASS: TestConnectionCountersStatementsAndUndo (0.03s)
+    --- PASS: TestConnectionCountersStatementsAndUndo/false (0.01s)
+    --- PASS: TestConnectionCountersStatementsAndUndo/true (0.01s)
+=== RUN   TestConnectionCountersAdmissionRowsAndReopen
+--- PASS: TestConnectionCountersAdmissionRowsAndReopen (0.00s)
+=== RUN   TestConnectionCountersStreamingDynamicAndBusyCommit
+--- PASS: TestConnectionCountersStreamingDynamicAndBusyCommit (0.00s)
+=== RUN   TestConnectionCountersConcurrentNative
+--- PASS: TestConnectionCountersConcurrentNative (0.00s)
+=== RUN   TestConnectionCountersExtensionMaintenanceExcluded
+--- PASS: TestConnectionCountersExtensionMaintenanceExcluded (0.31s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.416s
+=== RUN   TestDriverConnectionCountersPreparedPinnedAndPoolReset
+--- PASS: TestDriverConnectionCountersPreparedPinnedAndPoolReset (0.01s)
+=== RUN   TestDriverCachedPreparationBusyReuse
+--- PASS: TestDriverCachedPreparationBusyReuse (0.00s)
+=== RUN   TestReviewPreparationDriverPreparedLockAndReset
+--- PASS: TestReviewPreparationDriverPreparedLockAndReset (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.018s
+Selected-source behavioral review: intact ordinary SQL databases, cooperative locks, SQL-only peer DDL, supported expressions/counters, logical errors, explicit/automatic transaction and savepoint rollback, binding/context/quota, bounded copied metadata, read-only/active Rows and driver pool reset. Pure error-tree tests perform no native failure operation. Oracle subprocesses synchronize startup and finish with EOF/.quit and Wait. No restricted physical/namespace/native-failure/crash/recovery work; no broad suite or manual tags.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestConnectionFunctionContextAndVolatility
+--- PASS: TestConnectionFunctionContextAndVolatility (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	1.018s
+=== RUN   TestConnectionCountersCancellationAfterInsertedRow
+--- PASS: TestConnectionCountersCancellationAfterInsertedRow (0.01s)
+=== RUN   TestConnectionCountersLazyTransactionReads
+--- PASS: TestConnectionCountersLazyTransactionReads (0.00s)
+=== RUN   TestCachedPreparationOutcomes
+=== RUN   TestCachedPreparationOutcomes/false
+=== RUN   TestCachedPreparationOutcomes/true
+--- PASS: TestCachedPreparationOutcomes (0.01s)
+    --- PASS: TestCachedPreparationOutcomes/false (0.01s)
+    --- PASS: TestCachedPreparationOutcomes/true (0.01s)
+=== RUN   TestCachedPreparationFreshReadWarmAndQuota
+--- PASS: TestCachedPreparationFreshReadWarmAndQuota (0.01s)
+=== RUN   TestCachedPreparationSchemaLifecycle
+--- PASS: TestCachedPreparationSchemaLifecycle (0.01s)
+=== RUN   TestCachedPreparationMetadataIsolation
+--- PASS: TestCachedPreparationMetadataIsolation (0.00s)
+=== RUN   TestCachedPreparationBusyClassification
+--- PASS: TestCachedPreparationBusyClassification (0.00s)
+=== RUN   TestCachedPreparationEmptyQuota
+--- PASS: TestCachedPreparationEmptyQuota (0.00s)
+=== RUN   TestReviewPreparationEmptyQuota
+--- PASS: TestReviewPreparationEmptyQuota (0.00s)
+=== RUN   TestReviewPreparationErrorPrecedenceAndIsolation
+=== RUN   TestReviewPreparationErrorPrecedenceAndIsolation/false
+=== RUN   TestReviewPreparationErrorPrecedenceAndIsolation/true
+--- PASS: TestReviewPreparationErrorPrecedenceAndIsolation (0.01s)
+    --- PASS: TestReviewPreparationErrorPrecedenceAndIsolation/false (0.00s)
+    --- PASS: TestReviewPreparationErrorPrecedenceAndIsolation/true (0.00s)
+=== RUN   TestReviewPreparationReadOnlyAndRows
+--- PASS: TestReviewPreparationReadOnlyAndRows (0.00s)
+=== RUN   TestReviewPreparationDeclaredNamesOwnStorage
+--- PASS: TestReviewPreparationDeclaredNamesOwnStorage (0.00s)
+=== RUN   TestReviewPreparationDDLBusyRollback
+--- PASS: TestReviewPreparationDDLBusyRollback (0.01s)
+=== RUN   TestReviewPreparationExcludedExtensionAndSession
+--- PASS: TestReviewPreparationExcludedExtensionAndSession (0.09s)
+=== RUN   TestReviewPreparationRequiredNegative
+--- PASS: TestReviewPreparationRequiredNegative (0.00s)
+=== RUN   TestConnectionCountersStatementsAndUndo
+=== RUN   TestConnectionCountersStatementsAndUndo/false
+=== RUN   TestConnectionCountersStatementsAndUndo/true
+--- PASS: TestConnectionCountersStatementsAndUndo (0.29s)
+    --- PASS: TestConnectionCountersStatementsAndUndo/false (0.05s)
+    --- PASS: TestConnectionCountersStatementsAndUndo/true (0.24s)
+=== RUN   TestConnectionCountersAdmissionRowsAndReopen
+--- PASS: TestConnectionCountersAdmissionRowsAndReopen (0.01s)
+=== RUN   TestConnectionCountersStreamingDynamicAndBusyCommit
+--- PASS: TestConnectionCountersStreamingDynamicAndBusyCommit (0.00s)
+=== RUN   TestConnectionCountersConcurrentNative
+--- PASS: TestConnectionCountersConcurrentNative (0.01s)
+=== RUN   TestConnectionCountersExtensionMaintenanceExcluded
+--- PASS: TestConnectionCountersExtensionMaintenanceExcluded (0.81s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	2.310s
+=== RUN   TestDriverConnectionCountersPreparedPinnedAndPoolReset
+--- PASS: TestDriverConnectionCountersPreparedPinnedAndPoolReset (0.02s)
+=== RUN   TestDriverCachedPreparationBusyReuse
+--- PASS: TestDriverCachedPreparationBusyReuse (0.01s)
+=== RUN   TestReviewPreparationDriverPreparedLockAndReset
+--- PASS: TestReviewPreparationDriverPreparedLockAndReset (0.01s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.048s
+Selected-source behavioral review: intact ordinary SQL databases, cooperative locks, SQL-only peer DDL, supported expressions/counters, logical errors, explicit/automatic transaction and savepoint rollback, binding/context/quota, bounded copied metadata, read-only/active Rows and driver pool reset. Pure error-tree tests perform no native failure operation. Oracle subprocesses synchronize startup and finish with EOF/.quit and Wait. No restricted physical/namespace/native-failure/crash/recovery work; no broad suite or manual tags.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestConnectionCountersOracleHistories
+=== RUN   TestConnectionCountersOracleHistories/page512/sharedfalse
+=== RUN   TestConnectionCountersOracleHistories/page512/sharedtrue
+=== RUN   TestConnectionCountersOracleHistories/page4096/sharedfalse
+=== RUN   TestConnectionCountersOracleHistories/page4096/sharedtrue
+=== RUN   TestConnectionCountersOracleHistories/page65536/sharedfalse
+=== RUN   TestConnectionCountersOracleHistories/page65536/sharedtrue
+--- PASS: TestConnectionCountersOracleHistories (0.28s)
+    --- PASS: TestConnectionCountersOracleHistories/page512/sharedfalse (0.03s)
+    --- PASS: TestConnectionCountersOracleHistories/page512/sharedtrue (0.04s)
+    --- PASS: TestConnectionCountersOracleHistories/page4096/sharedfalse (0.03s)
+    --- PASS: TestConnectionCountersOracleHistories/page4096/sharedtrue (0.04s)
+    --- PASS: TestConnectionCountersOracleHistories/page65536/sharedfalse (0.06s)
+    --- PASS: TestConnectionCountersOracleHistories/page65536/sharedtrue (0.09s)
+=== RUN   TestConnectionCountersOracleFunctionErrors
+=== RUN   TestConnectionCountersOracleFunctionErrors/SELECT_changes(1)
+=== RUN   TestConnectionCountersOracleFunctionErrors/SELECT_total_changes(NULL)
+=== RUN   TestConnectionCountersOracleFunctionErrors/SELECT_last_insert_rowid(1,2)
+=== RUN   TestConnectionCountersOracleFunctionErrors/SELECT_changes(1)_LIMIT_0
+=== RUN   TestConnectionCountersOracleFunctionErrors/SELECT_CASE_WHEN_0_THEN_total_changes(1)_ELSE_1_END
+--- PASS: TestConnectionCountersOracleFunctionErrors (0.02s)
+    --- PASS: TestConnectionCountersOracleFunctionErrors/SELECT_changes(1) (0.00s)
+    --- PASS: TestConnectionCountersOracleFunctionErrors/SELECT_total_changes(NULL) (0.00s)
+    --- PASS: TestConnectionCountersOracleFunctionErrors/SELECT_last_insert_rowid(1,2) (0.00s)
+    --- PASS: TestConnectionCountersOracleFunctionErrors/SELECT_changes(1)_LIMIT_0 (0.00s)
+    --- PASS: TestConnectionCountersOracleFunctionErrors/SELECT_CASE_WHEN_0_THEN_total_changes(1)_ELSE_1_END (0.00s)
+=== RUN   TestConnectionCountersOracleBusyOutcomes
+--- PASS: TestConnectionCountersOracleBusyOutcomes (0.02s)
+=== RUN   TestCachedPreparationOracleHistories
+=== RUN   TestCachedPreparationOracleHistories/512
+=== RUN   TestCachedPreparationOracleHistories/4096
+=== RUN   TestCachedPreparationOracleHistories/65536
+--- PASS: TestCachedPreparationOracleHistories (0.23s)
+    --- PASS: TestCachedPreparationOracleHistories/512 (0.08s)
+    --- PASS: TestCachedPreparationOracleHistories/4096 (0.05s)
+    --- PASS: TestCachedPreparationOracleHistories/65536 (0.10s)
+=== RUN   TestCachedPreparationOracleFreshAndReadWarm
+--- PASS: TestCachedPreparationOracleFreshAndReadWarm (0.05s)
+=== RUN   TestReviewPreparationOracleDefaultRuntimeAndInvalid
+--- PASS: TestReviewPreparationOracleDefaultRuntimeAndInvalid (0.09s)
+=== RUN   TestReviewPreparationUnsupportedCatalogCannotWrite
+--- PASS: TestReviewPreparationUnsupportedCatalogCannotWrite (0.01s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	0.706s
+Selected-source behavioral review: intact ordinary SQL databases, cooperative locks, SQL-only peer DDL, supported expressions/counters, logical errors, explicit/automatic transaction and savepoint rollback, binding/context/quota, bounded copied metadata, read-only/active Rows and driver pool reset. Pure error-tree tests perform no native failure operation. Oracle subprocesses synchronize startup and finish with EOF/.quit and Wait. No restricted physical/namespace/native-failure/crash/recovery work; no broad suite or manual tags.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestConnectionCountersOracleHistories
+=== RUN   TestConnectionCountersOracleHistories/page512/sharedfalse
+=== RUN   TestConnectionCountersOracleHistories/page512/sharedtrue
+=== RUN   TestConnectionCountersOracleHistories/page4096/sharedfalse
+=== RUN   TestConnectionCountersOracleHistories/page4096/sharedtrue
+=== RUN   TestConnectionCountersOracleHistories/page65536/sharedfalse
+=== RUN   TestConnectionCountersOracleHistories/page65536/sharedtrue
+--- PASS: TestConnectionCountersOracleHistories (1.18s)
+    --- PASS: TestConnectionCountersOracleHistories/page512/sharedfalse (0.07s)
+    --- PASS: TestConnectionCountersOracleHistories/page512/sharedtrue (0.11s)
+    --- PASS: TestConnectionCountersOracleHistories/page4096/sharedfalse (0.08s)
+    --- PASS: TestConnectionCountersOracleHistories/page4096/sharedtrue (0.14s)
+    --- PASS: TestConnectionCountersOracleHistories/page65536/sharedfalse (0.31s)
+    --- PASS: TestConnectionCountersOracleHistories/page65536/sharedtrue (0.47s)
+=== RUN   TestConnectionCountersOracleFunctionErrors
+=== RUN   TestConnectionCountersOracleFunctionErrors/SELECT_changes(1)
+=== RUN   TestConnectionCountersOracleFunctionErrors/SELECT_total_changes(NULL)
+=== RUN   TestConnectionCountersOracleFunctionErrors/SELECT_last_insert_rowid(1,2)
+=== RUN   TestConnectionCountersOracleFunctionErrors/SELECT_changes(1)_LIMIT_0
+=== RUN   TestConnectionCountersOracleFunctionErrors/SELECT_CASE_WHEN_0_THEN_total_changes(1)_ELSE_1_END
+--- PASS: TestConnectionCountersOracleFunctionErrors (0.02s)
+    --- PASS: TestConnectionCountersOracleFunctionErrors/SELECT_changes(1) (0.00s)
+    --- PASS: TestConnectionCountersOracleFunctionErrors/SELECT_total_changes(NULL) (0.00s)
+    --- PASS: TestConnectionCountersOracleFunctionErrors/SELECT_last_insert_rowid(1,2) (0.00s)
+    --- PASS: TestConnectionCountersOracleFunctionErrors/SELECT_changes(1)_LIMIT_0 (0.00s)
+    --- PASS: TestConnectionCountersOracleFunctionErrors/SELECT_CASE_WHEN_0_THEN_total_changes(1)_ELSE_1_END (0.00s)
+=== RUN   TestConnectionCountersOracleBusyOutcomes
+--- PASS: TestConnectionCountersOracleBusyOutcomes (0.03s)
+=== RUN   TestCachedPreparationOracleHistories
+=== RUN   TestCachedPreparationOracleHistories/512
+=== RUN   TestCachedPreparationOracleHistories/4096
+=== RUN   TestCachedPreparationOracleHistories/65536
+--- PASS: TestCachedPreparationOracleHistories (0.38s)
+    --- PASS: TestCachedPreparationOracleHistories/512 (0.10s)
+    --- PASS: TestCachedPreparationOracleHistories/4096 (0.09s)
+    --- PASS: TestCachedPreparationOracleHistories/65536 (0.18s)
+=== RUN   TestCachedPreparationOracleFreshAndReadWarm
+--- PASS: TestCachedPreparationOracleFreshAndReadWarm (0.03s)
+=== RUN   TestReviewPreparationOracleDefaultRuntimeAndInvalid
+--- PASS: TestReviewPreparationOracleDefaultRuntimeAndInvalid (0.06s)
+=== RUN   TestReviewPreparationUnsupportedCatalogCannotWrite
+--- PASS: TestReviewPreparationUnsupportedCatalogCannotWrite (0.01s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	2.719s
+Selected-source behavioral review: intact ordinary SQL databases, cooperative locks, SQL-only peer DDL, supported expressions/counters, logical errors, explicit/automatic transaction and savepoint rollback, binding/context/quota, bounded copied metadata, read-only/active Rows and driver pool reset. Pure error-tree tests perform no native failure operation. Oracle subprocesses synchronize startup and finish with EOF/.quit and Wait. No restricted physical/namespace/native-failure/crash/recovery work; no broad suite or manual tags.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+Selected-source behavioral review: intact ordinary SQL databases, cooperative locks, SQL-only peer DDL, supported expressions/counters, logical errors, explicit/automatic transaction and savepoint rollback, binding/context/quota, bounded copied metadata, read-only/active Rows and driver pool reset. Pure error-tree tests perform no native failure operation. Oracle subprocesses synchronize startup and finish with EOF/.quit and Wait. No restricted physical/namespace/native-failure/crash/recovery work; no broad suite or manual tags.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+SELECTED INDEPENDENT NORMAL/RACE/ORACLE/VET/BUILD PASS
+2026-10-10T20:41:38Z

@@ -1,0 +1,220 @@
+package sqlite_test
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"path/filepath"
+	"reflect"
+	"sync"
+	"testing"
+
+	"github.com/ms-xiaosnow/gosqlite/sqlite"
+)
+
+const reviewCounterSQL = "SELECT changes(),total_changes(),last_insert_rowid(),typeof(changes()),typeof(total_changes()),typeof(last_insert_rowid())"
+
+func reviewCounterOpen(t *testing.T, opts sqlite.Options) (*sqlite.DB, string) {
+	t.Helper()
+	path := filepath.Join(t.TempDir(), "intact.db")
+	db, err := sqlite.Open(path, opts)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		if err := db.Close(); err != nil {
+			t.Error(err)
+		}
+	})
+	return db, path
+}
+func reviewCounterQuery(t *testing.T, db *sqlite.DB, q string) [][]any {
+	t.Helper()
+	r, err := db.Query(context.Background(), q)
+	if err != nil {
+		t.Fatal(q, err)
+	}
+	defer r.Close()
+	var out [][]any
+	for r.Next() {
+		out = append(out, r.Values())
+	}
+	if r.Err() != nil {
+		t.Fatal(q, r.Err())
+	}
+	return out
+}
+func reviewCounterWant(t *testing.T, db *sqlite.DB, c, total, last int64) {
+	t.Helper()
+	got := reviewCounterQuery(t, db, reviewCounterSQL)
+	want := [][]any{{c, total, last, "integer", "integer", "integer"}}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("counter tuple got %#v want %#v", got, want)
+	}
+}
+func reviewCounterExec(t *testing.T, db *sqlite.DB, q string) {
+	t.Helper()
+	if _, err := db.Exec(context.Background(), q); err != nil {
+		t.Fatal(q, err)
+	}
+}
+func TestReviewConnectionCountersNegativeBaseline(t *testing.T) {
+	db, _ := reviewCounterOpen(t, sqlite.Options{})
+	reviewCounterWant(t, db, 0, 0, 0)
+}
+
+func TestReviewConnectionCountersExtensionAndAbort(t *testing.T) {
+	for _, wal := range []bool{false, true} {
+		t.Run(fmt.Sprint(wal), func(t *testing.T) {
+			db, _ := reviewCounterOpen(t, sqlite.Options{WALShared: wal})
+			ctx := context.Background()
+			reviewCounterExec(t, db, "CREATE TABLE t(id INTEGER PRIMARY KEY,v TEXT NOT NULL)")
+			reviewCounterExec(t, db, "INSERT INTO t VALUES(8,'a'),(9,'b')")
+			reviewCounterWant(t, db, 2, 2, 9)
+			if err := db.CreateGramsIndex(ctx, "grams", "t", []string{"v"}); err != nil {
+				t.Fatal(err)
+			}
+			reviewCounterWant(t, db, 2, 2, 9)
+			if err := db.Reindex(ctx, "grams"); err != nil {
+				t.Fatal(err)
+			}
+			reviewCounterWant(t, db, 2, 2, 9)
+			reviewCounterExec(t, db, "REINDEX grams")
+			reviewCounterWant(t, db, 2, 2, 9)
+			reviewCounterExec(t, db, "BEGIN")
+			reviewCounterExec(t, db, "SAVEPOINT s")
+			reviewCounterExec(t, db, "INSERT INTO t VALUES(last_insert_rowid()+1,'c'),(last_insert_rowid()+1,'d')")
+			reviewCounterWant(t, db, 2, 4, 11)
+			reviewCounterExec(t, db, "ROLLBACK TO s")
+			reviewCounterWant(t, db, 2, 4, 11)
+			if _, err := db.Exec(ctx, "UPDATE t SET v=CASE WHEN id=9 THEN NULL ELSE 'z' END"); !errors.Is(err, sqlite.ErrConstraint) {
+				t.Fatal(err)
+			}
+			reviewCounterWant(t, db, 0, 4, 11)
+			if got := reviewCounterQuery(t, db, "SELECT id,v FROM t ORDER BY id"); !reflect.DeepEqual(got, [][]any{{int64(8), "a"}, {int64(9), "b"}}) {
+				t.Fatal(got)
+			}
+			reviewCounterExec(t, db, "UPDATE t SET v=v")
+			reviewCounterWant(t, db, 2, 6, 11)
+			if _, err := db.Exec(ctx, "DELETE FROM t WHERE abs(-9223372036854775808)=id"); err == nil {
+				t.Fatal("expected expression error")
+			}
+			reviewCounterWant(t, db, 0, 6, 11)
+			reviewCounterExec(t, db, "ROLLBACK")
+			reviewCounterWant(t, db, 0, 6, 11)
+			if err := db.CheckExtensionIndex(ctx, "grams"); err != nil {
+				t.Fatal(err)
+			}
+			reviewCounterWant(t, db, 0, 6, 11)
+		})
+	}
+}
+
+func TestReviewConnectionCountersBusyTransitions(t *testing.T) {
+	for _, mode := range []string{"BEGIN IMMEDIATE", "BEGIN EXCLUSIVE", "BEGIN"} {
+		t.Run(mode, func(t *testing.T) {
+			db, path := reviewCounterOpen(t, sqlite.Options{})
+			reviewCounterExec(t, db, "CREATE TABLE t(id INTEGER PRIMARY KEY)")
+			reviewCounterExec(t, db, "INSERT INTO t VALUES(1),(2)")
+			peer, err := sqlite.Open(path, sqlite.Options{})
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer peer.Close()
+			reviewCounterExec(t, peer, mode)
+			if mode == "BEGIN" {
+				reviewCounterQuery(t, peer, "SELECT * FROM t")
+			}
+			if _, err := db.Exec(context.Background(), "INSERT INTO t VALUES(10)"); !errors.Is(err, sqlite.ErrBusy) {
+				t.Fatal(err)
+			}
+			reviewCounterExec(t, peer, "ROLLBACK")
+			last := int64(2)
+			if mode == "BEGIN" {
+				last = 10
+			}
+			// Native snapshot admission precedes preparation: EXCLUSIVE BUSY is
+			// explicitly outside SQLite's cached-schema parity, so preserve prior
+			// counters. The strict official expectation is retained as negative evidence.
+			changes := int64(0)
+			if mode == "BEGIN EXCLUSIVE" {
+				changes = 2
+			}
+			reviewCounterWant(t, db, changes, 2, last)
+			if got := reviewCounterQuery(t, db, "SELECT count(*) FROM t"); !reflect.DeepEqual(got, [][]any{{int64(2)}}) {
+				t.Fatal(got)
+			}
+		})
+	}
+}
+
+func TestReviewConnectionCountersBusyPreparation(t *testing.T) {
+	db, path := reviewCounterOpen(t, sqlite.Options{})
+	reviewCounterExec(t, db, "CREATE TABLE t(id INTEGER PRIMARY KEY)")
+	reviewCounterExec(t, db, "INSERT INTO t VALUES(1),(2)")
+	peer, err := sqlite.Open(path, sqlite.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer peer.Close()
+	reviewCounterExec(t, peer, "BEGIN EXCLUSIVE")
+	_, err = db.Exec(context.Background(), "DELETE FROM missing")
+	reviewCounterExec(t, peer, "ROLLBACK")
+	t.Logf("native error: %v", err)
+	reviewCounterWant(t, db, 2, 2, 2)
+}
+
+func TestReviewConnectionCountersConcurrentReadAndDisposal(t *testing.T) {
+	db, _ := reviewCounterOpen(t, sqlite.Options{})
+	reviewCounterExec(t, db, "CREATE TABLE t(id INTEGER PRIMARY KEY)")
+	reviewCounterExec(t, db, "INSERT INTO t VALUES(3),(4)")
+	var wg sync.WaitGroup
+	for range 8 {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for range 10 {
+				reviewCounterWant(t, db, 2, 2, 4)
+			}
+		}()
+	}
+	wg.Wait()
+	rows, err := db.Query(context.Background(), reviewCounterSQL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = db.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if rows.Next() || !errors.Is(rows.Err(), sqlite.ErrClosed) {
+		t.Fatal(rows.Err())
+	}
+	if err = rows.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = db.Query(context.Background(), reviewCounterSQL); !errors.Is(err, sqlite.ErrClosed) {
+		t.Fatal(err)
+	}
+}
+
+func TestReviewConnectionCountersUnsupportedScope(t *testing.T) {
+	db, _ := reviewCounterOpen(t, sqlite.Options{})
+	reviewCounterExec(t, db, "CREATE TABLE t(id INTEGER PRIMARY KEY)")
+	reviewCounterExec(t, db, "INSERT INTO t VALUES(1),(2)")
+	for _, q := range []string{"INSERT OR IGNORE INTO t VALUES(1)", "INSERT INTO t SELECT 3", "CREATE TRIGGER tr AFTER INSERT ON t BEGIN DELETE FROM t; END", "CREATE TABLE child(id REFERENCES t(id))"} {
+		if _, err := db.Exec(context.Background(), q); !errors.Is(err, sqlite.ErrUnsupported) {
+			t.Fatal(q, err)
+		}
+		reviewCounterWant(t, db, 2, 2, 2)
+	}
+	for _, q := range []string{"SELECT changes(),count(*) FROM t GROUP BY id", "SELECT changes() OVER () FROM t"} {
+		r, err := db.Query(context.Background(), q)
+		if r != nil {
+			r.Close()
+		}
+		if !errors.Is(err, sqlite.ErrUnsupported) {
+			t.Fatal(q, err)
+		}
+		reviewCounterWant(t, db, 2, 2, 2)
+	}
+}

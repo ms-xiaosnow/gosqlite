@@ -1,0 +1,7 @@
+a0d9797563febf1da8b131d6e34107f0a50613811e78599d81639b048c4c28a9  ../toolchains/sqlite-src-3540000/src/func.c
+8b0ec9d5a4b2012f8940a3b12b3e21d6ec80cee045c4b5b63fc1d1c37691badc  ../toolchains/sqlite-src-3540000/src/main.c
+686f42bed71dded9d9bc33fd4111dc65cbe7e9ba8a94b3f40eb13a1050624289  ../toolchains/sqlite-src-3540000/src/vdbe.c
+f7b74c8ab39183a98637c96f39d681dab4f2c162228d606f96227dc7dbadd932  ../toolchains/sqlite-src-3540000/src/vdbeaux.c
+a66be104bd89782526c11e251b88a92d7aaf91a2bf53460a8a6a3fb4dfb13226  ../toolchains/sqlite-src-3540000/src/sqlite.h.in
+470775f6ada29ccfb2d3046ac2b4c975df95a9c20b782332d4e8ba6b6233e6c6  ../toolchains/sqlite-build-3540000/sqlite3
+548d3c32f83fa81152f543eb1526be7884cfe0526eb5e9ce29d3eca14786e7e0  ../toolchains/go1.27.2/bin/go

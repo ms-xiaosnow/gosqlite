@@ -28,6 +28,7 @@ type Tx struct {
 	readClose          func() error
 	activeRows         int
 	ownershipValidated bool
+	schemaChanged      bool
 	initialInfo        FileInfo
 	readOnly           bool
 	savepointTxn       bool
@@ -36,7 +37,9 @@ type Tx struct {
 	done               bool
 }
 
-// Result describes the last successful statement; DDL reports zero changes.
+// Result describes one successful statement, independently of the connection
+// SQL counters. DDL and transaction controls report zero affected rows. The
+// insert ID is the final inserted rowid for INSERT, and zero for other statements.
 type Result struct{ affected, lastID int64 }
 
 func (r Result) RowsAffected() (int64, error) { return r.affected, nil }
@@ -137,6 +140,7 @@ func (t *Tx) queryLocked(ctx context.Context, query string, args []any) (*Rows, 
 	if !ok {
 		return nil, wrap("query", ErrReadOnly)
 	}
+	ctx = sqlast.WithConnectionState(ctx, &t.db.counters)
 	ctx, params, err := t.db.bindSelect(ctx, sel, args)
 	if err != nil {
 		return nil, wrap("bind", err)
@@ -216,6 +220,9 @@ func (t *Tx) rollbackLocked() error {
 	t.savepoints = nil
 	t.markBytes = 0
 	t.done = true
+	if t.schemaChanged {
+		t.db.preparation = nil
+	}
 	t.db.info = t.initialInfo
 	if t.db.tx == t {
 		t.db.tx = nil
@@ -256,14 +263,17 @@ func (d *DB) Exec(ctx context.Context, query string, args ...any) (Result, error
 	if err != nil {
 		return Result{}, wrap("exec", err)
 	}
-	result, err := t.execLocked(ctx, stmt, params)
+	outcome, err := t.execStatementLocked(ctx, stmt, params)
 	if err == nil {
 		err = wrap("commit", t.commitLocked(ctx))
 	}
+	// An automatic statement is not complete until commit succeeds. Explicit
+	// transactions publish statement counts earlier through execLocked instead.
+	d.finishMutationLocked(outcome, err)
 	if err != nil {
 		return Result{}, t.rollbackAfterExecLocked(err)
 	}
-	return result, nil
+	return outcome.Result, nil
 }
 func (t *Tx) Exec(ctx context.Context, query string, args ...any) (Result, error) {
 	if err := checkContext(ctx); err != nil {
@@ -282,22 +292,59 @@ func (t *Tx) Exec(ctx context.Context, query string, args ...any) (Result, error
 	return t.execLocked(ctx, stmt, params)
 }
 func (t *Tx) execLocked(ctx context.Context, stmt sqlast.Statement, params []any) (Result, error) {
+	outcome, err := t.execStatementLocked(ctx, stmt, params)
+	t.db.finishMutationLocked(outcome, err)
+	if err != nil {
+		return Result{}, err
+	}
+	return outcome.Result, nil
+}
+
+// mutationOutcome distinguishes rejected/preparation errors from an executed
+// DML statement. Aborted execution resets changes(), but contributes no total.
+type mutationOutcome struct {
+	Result
+	started bool
+}
+
+func (d *DB) finishMutationLocked(outcome mutationOutcome, err error) {
+	if !outcome.started {
+		return
+	}
+	d.counters.Changes = 0
+	if err == nil {
+		d.counters.Changes = outcome.affected
+		d.counters.TotalChanges += outcome.affected
+	}
+}
+
+func isMutationStatement(stmt sqlast.Statement) bool {
+	switch stmt.(type) {
+	case *sqlast.Insert, *sqlast.Update, *sqlast.Delete:
+		return true
+	}
+	return false
+}
+
+func (t *Tx) execStatementLocked(ctx context.Context, stmt sqlast.Statement, params []any) (mutationOutcome, error) {
 	if err := t.check(); err != nil {
-		return Result{}, wrap("exec", err)
+		return mutationOutcome{}, wrap("exec", err)
 	}
 	if control, ok := stmt.(*sqlast.Transaction); ok {
-		return Result{}, wrap("exec", t.db.controlLocked(ctx, control))
+		return mutationOutcome{}, wrap("exec", t.db.controlLocked(ctx, control))
 	}
 	if t.readOnly {
-		return Result{}, wrap("exec", ErrReadOnly)
+		return mutationOutcome{}, wrap("exec", ErrReadOnly)
 	}
 	if t.activeRows != 0 {
-		return Result{}, wrap("exec", fmt.Errorf("%w: close transaction rows before executing a write", ErrBusy))
+		return mutationOutcome{}, wrap("exec", fmt.Errorf("%w: close transaction rows before executing a write", ErrBusy))
 	}
 	if err := t.ensureSnapshotLocked(ctx); err != nil {
-		return Result{}, wrap("exec", err)
+		return t.cachedPreparationFailureLocked(ctx, stmt, err)
 	}
-	var result Result
+	ctx = sqlast.WithConnectionState(ctx, &t.db.counters)
+	var result mutationOutcome
+	beforeStatementSchema := t.reader.Header().SchemaCookie
 	err := t.storage.Statement(ctx, func() error {
 		catalog, err := t.validateCatalog(ctx)
 		if err != nil {
@@ -306,8 +353,11 @@ func (t *Tx) execLocked(ctx context.Context, stmt sqlast.Statement, params []any
 		if err = t.checkWriteOwnership(ctx, catalog); err != nil {
 			return err
 		}
-		if err = t.storage.PromoteWrite(ctx); err != nil {
-			return err
+		t.db.rememberPreparationCatalogLocked(ctx, t.reader.Header().SchemaCookie, catalog)
+		if !isMutationStatement(stmt) {
+			if err = t.storage.PromoteWrite(ctx); err != nil {
+				return err
+			}
 		}
 		beforeSchema := t.reader.Header().SchemaCookie
 		switch s := stmt.(type) {
@@ -333,10 +383,30 @@ func (t *Tx) execLocked(ctx context.Context, stmt sqlast.Statement, params []any
 		if err != nil {
 			return err
 		}
-		return t.refreshExtensionSchemaCookies(ctx, catalog, beforeSchema)
+		if err = t.refreshExtensionSchemaCookies(ctx, catalog, beforeSchema); err != nil {
+			return err
+		}
+		// Ordinary CREATE TABLE updates this statement-local catalog; ordinary
+		// indexes do not affect name/column preparation. Extension DDL does.
+		switch s := stmt.(type) {
+		case *sqlast.CreateTable:
+			t.db.rememberPreparationCatalogLocked(ctx, t.reader.Header().SchemaCookie, catalog)
+		case *sqlast.CreateIndex:
+			if s.Method == "" {
+				t.db.rememberPreparationCatalogLocked(ctx, t.reader.Header().SchemaCookie, catalog)
+			} else {
+				t.db.preparation = nil
+			}
+		}
+		return nil
 	})
+	if t.reader.Header().SchemaCookie != beforeStatementSchema {
+		t.schemaChanged = true
+	}
+	// A statement rollback must never leave metadata for its discarded schema.
+	t.db.observePreparationCookieLocked(t.reader.Header().SchemaCookie)
 	if err != nil {
-		return Result{}, wrap("exec", err)
+		return result, wrap("exec", err)
 	}
 	return result, nil
 }

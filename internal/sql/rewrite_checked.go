@@ -4,13 +4,29 @@ package sql
 // visiting children or allocating each copied node. Both callbacks may stop the
 // traversal; replacements are not revisited (aliases may share bound trees).
 func RewriteChecked(e Expr, enter func(Expr) error, visit func(Expr) (Expr, error)) (Expr, error) {
+	return rewriteChecked(e, enter, visit, nil)
+}
+
+// RewritePrunedChecked replaces a complete expression before its children,
+// and stops at accepted replacements. This preserves GROUP BY expression
+// identity when both a complete key and one of its subexpressions are keys.
+func RewritePrunedChecked(e Expr, enter func(Expr) error, replace func(Expr) (Expr, bool, error)) (Expr, error) {
+	return rewriteChecked(e, enter, func(e Expr) (Expr, error) { return e, nil }, replace)
+}
+func rewriteChecked(e Expr, enter func(Expr) error, visit func(Expr) (Expr, error), replace func(Expr) (Expr, bool, error)) (Expr, error) {
 	if e == nil {
 		return nil, nil
 	}
 	if err := enter(e); err != nil {
 		return nil, err
 	}
-	r := func(e Expr) (Expr, error) { return RewriteChecked(e, enter, visit) }
+	if replace != nil {
+		out, stop, err := replace(e)
+		if err != nil || stop {
+			return out, err
+		}
+	}
+	r := func(e Expr) (Expr, error) { return rewriteChecked(e, enter, visit, replace) }
 	var err error
 	switch x := e.(type) {
 	case *Unary:

@@ -22,7 +22,8 @@ type relationalLeaf struct {
 	budget   *relationalBudget
 	stats    *QueryStats
 	reader   *relationalReader
-	cursor   *btree.Cursor
+	cursor   source
+	reverse  bool
 	rowBytes int64
 	closed   bool
 }
@@ -36,7 +37,7 @@ func (s *relationalLeaf) Next() (int64, []any, error) {
 	}
 	if s.cursor == nil {
 		s.reader = &relationalReader{base: s.base, budget: s.budget}
-		c, err := btree.NewBudgetCursor(s.ctx, s.reader, s.binding.table.root, func(payload int) error {
+		beforeRecord := func(payload int) error {
 			// A one-byte serial-type can yield a 16-byte interface value. This
 			// includes decode slices, payload copies, default/IPK expansion and the
 			// current normalized tuple before any of those allocations occur.
@@ -49,7 +50,14 @@ func (s *relationalLeaf) Next() (int64, []any, error) {
 			}
 			s.rowBytes += cost
 			return nil
-		})
+		}
+		var c source
+		var err error
+		if s.reverse {
+			c, err = btree.NewRowIDRangeCursor(s.ctx, &relationalDirectionalReader{relationalReader: s.reader, beforeRecord: beforeRecord}, s.binding.table.root, nil, nil, true, btree.RangeLimits{})
+		} else {
+			c, err = btree.NewBudgetCursor(s.ctx, s.reader, s.binding.table.root, beforeRecord)
+		}
 		if err != nil {
 			return 0, nil, err
 		}
@@ -296,3 +304,12 @@ func (s *relationalLeaf) Allocate(n int64) error {
 	s.rowBytes += n
 	return nil
 }
+
+// Preserve the leaf's per-record preflight when the existing bounded rowid
+// cursor wraps its reader. Page reservations still belong to the root budget.
+type relationalDirectionalReader struct {
+	*relationalReader
+	beforeRecord func(int) error
+}
+
+func (r *relationalDirectionalReader) BeforeRecord(n int) error { return r.beforeRecord(n) }

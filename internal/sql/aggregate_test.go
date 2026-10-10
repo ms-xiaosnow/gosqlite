@@ -62,12 +62,12 @@ func TestGlobalAggregateArithmetic(t *testing.T) {
 	}
 }
 func TestGlobalAggregateGrammar(t *testing.T) {
-	for _, q := range []string{"SELECT count(*) FROM t", "SELECT sum(x) FROM t", "SELECT count()", "SELECT sum(x),total(x),avg(x),min(x),max(x) FROM t", "SELECT typeof(sum(x)),coalesce(avg(x),0) FROM t"} {
+	for _, q := range []string{"SELECT count(*) FROM t", "SELECT sum(x) FROM t", "SELECT sum(x) FROM t GROUP BY x", "SELECT count(*) FROM t HAVING count(*)>0", "SELECT count()", "SELECT sum(x),total(x),avg(x),min(x),max(x) FROM t", "SELECT typeof(sum(x)),coalesce(avg(x),0) FROM t"} {
 		if _, err := Parse(q); err != nil {
 			t.Fatal(q, err)
 		}
 	}
-	for _, q := range []string{"SELECT count(DISTINCT x) FROM t", "SELECT sum(x) OVER () FROM t", "SELECT count(*) FILTER (WHERE x) FROM t", "SELECT sum(x ORDER BY x) FROM t", "SELECT sum(x) FROM t GROUP BY x", "SELECT count(*) FROM t HAVING count(*)>0"} {
+	for _, q := range []string{"SELECT count(DISTINCT x) FROM t", "SELECT sum(x) OVER () FROM t", "SELECT count(*) FILTER (WHERE x) FROM t", "SELECT sum(x ORDER BY x) FROM t"} {
 		if _, err := Parse(q); err == nil {
 			t.Fatal("accepted", q)
 		}

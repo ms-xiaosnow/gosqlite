@@ -1,0 +1,257 @@
+//go:build oracle
+
+package testkit_test
+
+import (
+	"bytes"
+	"context"
+	"errors"
+	"fmt"
+	"io"
+	"os/exec"
+	"path/filepath"
+	"reflect"
+	"strings"
+	"testing"
+
+	"github.com/ms-xiaosnow/gosqlite/sqlite"
+)
+
+func cachedOracleError(t *testing.T, p *counterLiveOracle, q, category string) {
+	t.Helper()
+	if _, err := io.WriteString(p.in, q+";\n.print __cached_done__\n"); err != nil {
+		t.Fatal(err)
+	}
+	var out bytes.Buffer
+	for {
+		line, err := p.out.ReadString('\n')
+		if err != nil {
+			t.Fatal(err)
+		}
+		if strings.TrimSpace(line) == "__cached_done__" {
+			break
+		}
+		out.WriteString(line)
+	}
+	if !strings.Contains(out.String(), category) || (!strings.Contains(out.String(), "Parse error") && !strings.Contains(out.String(), "Error")) {
+		t.Fatalf("%s expected %q: %s", q, category, out.String())
+	}
+	p.errored = true
+}
+
+func TestCachedPreparationOracleHistories(t *testing.T) {
+	for _, size := range []uint32{512, 4096, 65536} {
+		t.Run(fmt.Sprint(size), func(t *testing.T) {
+			ctx := context.Background()
+			path := filepath.Join(t.TempDir(), "native.db")
+			a, err := sqlite.Open(path, sqlite.Options{PageSize: size})
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer a.Close()
+			b, err := sqlite.Open(path, sqlite.Options{})
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer b.Close()
+			official := filepath.Join(t.TempDir(), "official.db")
+			x, y := startCounterLiveOracle(t, official), startCounterLiveOracle(t, official)
+			x.run(fmt.Sprintf("PRAGMA page_size=%d", size), false)
+			both := func(db *sqlite.DB, p *counterLiveOracle, q string) {
+				t.Helper()
+				if _, e := db.Exec(ctx, q); e != nil {
+					t.Fatal(q, e)
+				}
+				p.run(q, false)
+			}
+			fail := func(q string, code sqlite.Code, category string) {
+				t.Helper()
+				r, e := a.Exec(ctx, q)
+				var detail *sqlite.Error
+				if !errors.As(e, &detail) || detail.Code != code {
+					t.Fatal(q, e)
+				}
+				n, _ := r.RowsAffected()
+				id, _ := r.LastInsertId()
+				if n != 0 || id != 0 {
+					t.Fatal(r)
+				}
+				cachedOracleError(t, x, q, category)
+			}
+			compare := func(q string) {
+				t.Helper()
+				n := confNative(t, a, q)
+				want, e := confQuoted(x.run(q, false))
+				if e != nil {
+					t.Fatal(e)
+				}
+				var got [][]any
+				if len(n.rows) > 0 {
+					labels := make([]any, len(n.columns))
+					for i, s := range n.columns {
+						labels[i] = s
+					}
+					got = append(got, labels)
+					got = append(got, n.rows...)
+				}
+				if !reflect.DeepEqual(got, want) {
+					t.Fatalf("%s native=%#v official=%#v", q, got, want)
+				}
+			}
+			both(a, x, "CREATE TABLE t(id INTEGER PRIMARY KEY,v,true)")
+			both(a, x, "INSERT INTO t VALUES(1,10,1),(2,20,0)")
+			for _, test := range []struct {
+				q        string
+				code     sqlite.Code
+				category string
+			}{
+				{"DELETE FROM absent", sqlite.CodeError, "no such table"},
+				{"UPDATE t SET missing=1", sqlite.CodeError, "no such column"},
+				{"INSERT INTO t(id) VALUES(3,4)", sqlite.CodeError, "2 values for 1 columns"},
+				{"INSERT INTO t VALUES(3,missing,0)", sqlite.CodeError, "no such column"},
+				{"UPDATE t SET v=changes(1)", sqlite.CodeError, "wrong number of arguments"},
+				{"DELETE FROM t WHERE CASE WHEN 0 THEN missing ELSE 1 END", sqlite.CodeError, "no such column"},
+				{"UPDATE t SET v=abs(-9223372036854775808)", sqlite.CodeBusy, "database is locked"},
+				{"INSERT INTO t VALUES(3,4,1)", sqlite.CodeBusy, "database is locked"},
+				{"DELETE FROM t WHERE true", sqlite.CodeBusy, "database is locked"},
+			} {
+				both(a, x, "UPDATE t SET v=v")
+				both(b, y, "BEGIN EXCLUSIVE")
+				fail(test.q, test.code, test.category)
+				both(b, y, "ROLLBACK")
+				compare(connectionOracleSelect)
+				compare("SELECT * FROM t ORDER BY id")
+			}
+			// Ordinary peer SQL changes declarations, never bytes or filesystem names.
+			external := func(q string) {
+				t.Helper()
+				cmd := exec.Command(confOracle(t), "-batch", path)
+				cmd.Stdin = strings.NewReader(q + ";\n")
+				out, e := cmd.CombinedOutput()
+				if e != nil {
+					t.Fatal(q, string(out), e)
+				}
+				y.run(q, false)
+			}
+			external("CREATE TABLE added(x); ALTER TABLE t ADD COLUMN newcol")
+			both(b, y, "BEGIN EXCLUSIVE")
+			fail("DELETE FROM added", sqlite.CodeError, "no such table")
+			fail("UPDATE t SET newcol=1", sqlite.CodeError, "no such column")
+			both(b, y, "ROLLBACK")
+			compare(connectionOracleSelect)
+			both(a, x, "UPDATE t SET newcol=1")
+			compare(connectionOracleSelect)
+			external("DROP TABLE t; CREATE TABLE t(different)")
+			both(b, y, "BEGIN EXCLUSIVE")
+			fail("UPDATE t SET newcol=1", sqlite.CodeBusy, "database is locked")
+			fail("UPDATE t SET different=1", sqlite.CodeError, "no such column")
+			both(b, y, "ROLLBACK")
+			compare(connectionOracleSelect)
+			compare("SELECT count(*) AS n FROM t")
+			both(a, x, "INSERT INTO t VALUES(1),(2)")
+			compare("SELECT * FROM t ORDER BY different")
+			compare(connectionOracleSelect)
+			for _, savepoint := range []bool{false, true} {
+				both(a, x, "BEGIN")
+				if savepoint {
+					both(a, x, "SAVEPOINT s")
+				}
+				both(a, x, "CREATE TABLE discarded(x)")
+				both(a, x, "INSERT INTO discarded VALUES(10),(20)")
+				if savepoint {
+					both(a, x, "ROLLBACK TO s")
+					both(a, x, "RELEASE s")
+					both(a, x, "COMMIT")
+				} else {
+					both(a, x, "ROLLBACK")
+				}
+				both(b, y, "BEGIN EXCLUSIVE")
+				fail("DELETE FROM discarded", sqlite.CodeBusy, "database is locked")
+				fail("DELETE FROM t", sqlite.CodeBusy, "database is locked")
+				both(b, y, "ROLLBACK")
+				compare(connectionOracleSelect)
+				// Restore schema knowledge after invalidation for the next iteration.
+				compare("SELECT * FROM t ORDER BY different")
+			}
+			// Explicit deferred transactions must retain their empty snapshot on BUSY.
+			both(a, x, "UPDATE t SET different=different")
+			both(b, y, "BEGIN EXCLUSIVE")
+			both(a, x, "BEGIN")
+			fail("DELETE FROM absent", sqlite.CodeError, "no such table")
+			compare(connectionOracleSelect)
+			fail("DELETE FROM t", sqlite.CodeBusy, "database is locked")
+			compare(connectionOracleSelect)
+			both(b, y, "ROLLBACK")
+			both(a, x, "ROLLBACK")
+			compare(connectionOracleSelect)
+			compare("SELECT * FROM t ORDER BY different")
+		})
+	}
+}
+
+func TestCachedPreparationOracleFreshAndReadWarm(t *testing.T) {
+	ctx := context.Background()
+	path := filepath.Join(t.TempDir(), "native.db")
+	a, e := sqlite.Open(path, sqlite.Options{})
+	if e != nil {
+		t.Fatal(e)
+	}
+	defer a.Close()
+	for _, q := range []string{"CREATE TABLE t(id INTEGER PRIMARY KEY)", "INSERT INTO t VALUES(1),(2)"} {
+		if _, e = a.Exec(ctx, q); e != nil {
+			t.Fatal(e)
+		}
+	}
+	official := filepath.Join(t.TempDir(), "official.db")
+	setup, lock := startCounterLiveOracle(t, official), startCounterLiveOracle(t, official)
+	setup.run("CREATE TABLE t(id INTEGER PRIMARY KEY); INSERT INTO t VALUES(1),(2)", false)
+	b, e := sqlite.Open(path, sqlite.Options{})
+	if e != nil {
+		t.Fatal(e)
+	}
+	defer b.Close()
+	for _, warm := range []bool{false, true} {
+		fresh, e := sqlite.Open(path, sqlite.Options{})
+		if e != nil {
+			t.Fatal(e)
+		}
+		ref := startCounterLiveOracle(t, official)
+		if warm {
+			confNative(t, fresh, "SELECT * FROM t")
+			ref.run("SELECT * FROM t", false)
+		}
+		if _, e = b.Exec(ctx, "BEGIN EXCLUSIVE"); e != nil {
+			t.Fatal(e)
+		}
+		lock.run("BEGIN EXCLUSIVE", false)
+		for _, q := range []string{"DELETE FROM missing", "UPDATE t SET missing=1", "DELETE FROM t"} {
+			_, e = fresh.Exec(ctx, q)
+			var d *sqlite.Error
+			want := sqlite.CodeBusy
+			category := "database is locked"
+			if warm && q != "DELETE FROM t" {
+				want = sqlite.CodeError
+				category = "no such"
+			}
+			if !errors.As(e, &d) || d.Code != want {
+				t.Fatal(warm, q, e)
+			}
+			cachedOracleError(t, ref, q, category)
+		}
+		if _, e = b.Exec(ctx, "ROLLBACK"); e != nil {
+			t.Fatal(e)
+		}
+		lock.run("ROLLBACK", false)
+		n := confNative(t, fresh, connectionOracleSelect)
+		want, e := confQuoted(ref.run(connectionOracleSelect, false))
+		if e != nil {
+			t.Fatal(e)
+		}
+		if len(want) != 2 || !reflect.DeepEqual(n.rows, want[1:]) {
+			t.Fatal(n, want)
+		}
+		if e = fresh.Close(); e != nil {
+			t.Fatal(e)
+		}
+	}
+}

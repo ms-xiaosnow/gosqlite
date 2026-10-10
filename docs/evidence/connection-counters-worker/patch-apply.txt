@@ -1,0 +1,4 @@
+apply full byte inventory PASS (1259 files)
+freeze full byte inventory PASS (1259 files)
+work full byte inventory PASS (1259 files)
+Owned patch applied exactly against baseline 7d3184f87165e11e12560884ec6e4f92c9bfd039. Main repository untouched.

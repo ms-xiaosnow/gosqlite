@@ -1,0 +1,1306 @@
+diff --git a/docs/sql-connection-counters.md b/docs/sql-connection-counters.md
+new file mode 100644
+index 0000000..bcd4fd9
+--- /dev/null
++++ b/docs/sql-connection-counters.md
+@@ -0,0 +1,130 @@
++# SQL connection counters
++
++The bounded native SQL profile implements the zero-argument functions
++`changes()`, `total_changes()` and `last_insert_rowid()`. Each returns an SQLite
++INTEGER (Go `int64`). Wrong arity is an ordinary SQL error, including dead arms
++and `LIMIT 0`. Names use the existing ASCII case-insensitive function lookup.
++
++## Connection state and statement outcomes
++
++Each newly opened native `DB` is a separate connection with all three values
++initially zero. State is memory-only, survives ordinary transaction/savepoint
++rollback, and resets on closing and opening a new connection. Another connection's
++writes never affect these values. The state is not persisted in a database page,
++WAL, extension table or transaction undo record.
++
++- Successful INSERT/UPDATE/DELETE sets `changes()` to its directly affected row
++  count and adds that count to `total_changes()`. An UPDATE counts matched rows
++  even when assigned values equal existing values. A zero-row UPDATE/DELETE sets
++  `changes()` to zero and adds nothing to the total.
++- `last_insert_rowid()` changes after each successful row insertion, including an
++  explicit zero or negative rowid. UPDATE, including rowid-changing UPDATE, and
++  DELETE leave it unchanged. A later failing row can roll back the statement's
++  data without restoring the last successfully inserted rowid.
++- Constraint/expression failure after DML execution starts resets `changes()` to
++  zero and adds nothing to `total_changes()`. Earlier successfully inserted rows'
++  last rowid remains observable even though their data was rolled back. SQL
++  parsing, binding/name/arity errors and unsupported-feature rejection before
++  execution preserve prior counters.
++- DDL, index maintenance and transaction/savepoint controls leave all three
++  unchanged. Successful statements inside an explicit transaction update the
++  counters before COMMIT. COMMIT, ROLLBACK and ROLLBACK TO do not recompute or undo
++  them. An automatic DML statement adds its row count only after commit succeeds.
++- Ordinary writer-promotion BUSY after DML preparation sets `changes()` to zero. An automatic
++  commit BUSY contributes no rows to the total, but retains a successfully
++  inserted rowid. A BUSY explicit COMMIT leaves the earlier completed statements'
++  counters unchanged, just as it leaves that native transaction retryable.
++
++The functions observe their actual evaluation context, not a per-query snapshot.
++During multirow INSERT, `changes()` and `total_changes()` retain the preceding
++completed statement's values, while `last_insert_rowid()` can observe the prior
++VALUES row's successful insertion. They are not deterministic expressions and
++are excluded from constant substitution/startup hoisting. Scalar projection,
++WHERE/ON, ordering, limits, aliases, and supported global aggregates use the same
++connection state. Existing eager sorting can materialize results before Rows
++iteration; a streaming projection reads state when that row is evaluated.
++
++## Native and database/sql Result
++
++The existing `Result` contract is preserved. It is a statement result, not a
++snapshot of the connection SQL functions:
++
++- `RowsAffected()` is this successful statement's direct row count. DDL and
++  transaction controls return zero.
++- `LastInsertId()` and `LastInsertID()` return the final inserted rowid for a
++  successful INSERT. They return zero for UPDATE, DELETE, DDL and controls, even
++  when the SQL `last_insert_rowid()` retains a nonzero value.
++- After an execution error, disregard the returned Result; no successful result
++  is supplied by database/sql. The native error path returns the existing zero
++  Result.
++
++No exported configuration/result fields or their types changed. `DB` gained
++private lock-owned state; its private Go struct layout therefore changed.
++No disk format changed. Driver prepared statements reuse the same native
++connection, so counters carry across repeated execution. For direct SQL counters,
++use a pinned `sql.Conn` or `sql.Tx`: separate pooled `sql.DB` calls can select
++unrelated physical connections. ResetSession rollback of an abandoned transaction
++preserves the physical connection's counters and does not make its data committed.
++
++## Bounded scope and safety
++
++This work does not implement general triggers, foreign keys, REPLACE/IGNORE/FAIL/
++ROLLBACK conflict policies, views, virtual tables, INSERT SELECT, RETURNING, or
++WITHOUT ROWID. The catalog/parser continue to reject those unsupported mutation
++semantics. Their auxiliary-row accounting is not claimed. Engine-owned grams13/
++ANN maintenance is implementation bookkeeping and is excluded from these direct
++source-row counts. SQL calls in persisted DEFAULT expressions remain unsupported
++under the existing default-expression restrictions.
++
++The existing active-Rows restrictions remain: transaction-owned Rows reject a
++write/control with BUSY before execution and preserve counters. Session-backed
++connections retain their single local lease. An autocommit rollback-mode Rows
++lease can make an attempted automatic commit BUSY. This is not a claim of SQLite's
++more permissive same-connection read-cursor/write behavior. Snapshot-acquisition BUSY before catalog validation also preserves counters.
++This deliberately differs from SQLite's cached-schema execution: under a peer's
++EXCLUSIVE lock, SQLite can distinguish valid DML (resetting changes to zero)
++from invalid table/column names (preserving its prior state). This engine cannot
++validate either before acquiring its snapshot, so it treats both as native
++admission failures and does not guess that a statement executed. Exact SQLite
++preparation/BUSY equivalence needs a separately bounded schema/statement cache.
++The oracle explicitly asserts this divergence rather than counting it as parity.
++Pre-canceled contexts are rejected without changing counters. Cancellation after a row insertion rolls
++back the native statement's data, publishes no total, and keeps that successful
++rowid. Native cancellation retains its existing statement-local rollback behavior;
++it is not a claim of complete `sqlite3_interrupt()` transaction semantics.
++
++All evaluation and mutation is serialized by the existing DB mutex, including
++Rows.Next. The internal expression context holds the same connection-owned state
++pointer; it never re-locks DB, uses no global side table, and installs no per-call
++function map/closure. One fixed context node is retained per query/write, not per
++row or function call; the existing relational statement fixed-state allowance
++covers this context node. Existing Go SQL-value boxing still applies.
++
++## Evidence and reference
++
++Pinned public SQLite 3.54.0 source ID:
++`2026-10-09 15:46:58 be8d059e9a49089ab2dce5ed26dd87aaf598fdc5fbe0b107c0dd758464bcd5e3`.
++The reference `src/sqlite.h.in` documents the three connection APIs;
++`src/vdbe.c` OP_Insert updates the last rowid, and `src/vdbeaux.c`
++`sqlite3VdbeHalt` / `sqlite3VdbeSetChanges` distinguish statement completion,
++statement rollback and connection totals. Public reference documentation:
++[changes](https://www.sqlite.org/c3ref/changes.html),
++[total changes](https://www.sqlite.org/c3ref/total_changes.html),
++[last insert rowid](https://www.sqlite.org/c3ref/last_insert_rowid.html).
++
++- `sqlite/connection_counters_test.go`: native statement outcomes, explicit and
++  automatic rollback, active Rows, connection isolation, reopen, extension
++  bookkeeping exclusion and concurrent serialized writes.
++- `sqlite/connection_counters_internal_test.go`: deterministic ordinary context
++  cancellation after a successful row insertion.
++- `driver/connection_counters_test.go`: pinned connections, prepared reuse,
++  statement-specific Result values and pool-reset rollback.
++- `internal/sql/connection_test.go`: scalar context, arity and nondeterminism.
++- `internal/testkit/connection_counters_conformance_test.go`: complete typed
++  values and column labels across 512/4096/65536-byte rollback/shared-WAL histories,
++  runtime/preparation error categories and native primary codes, plus live
++  ordinary BUSY outcomes. Expected logical failures finish by ordinary CLI EOF.
++
++Only selected normal/race/oracle/build/vet checks qualify this slice. These are
++ordinary intact-file results, not evidence for crash, corruption, failed native
++I/O/cleanup, namespace replacement, hot recovery or interrupted publication.
+diff --git a/driver/connection_counters_test.go b/driver/connection_counters_test.go
+new file mode 100644
+index 0000000..3d77fb8
+--- /dev/null
++++ b/driver/connection_counters_test.go
+@@ -0,0 +1,77 @@
++package driver
++
++import (
++	"context"
++	"testing"
++)
++
++func TestDriverConnectionCountersPreparedPinnedAndPoolReset(t *testing.T) {
++	db, _ := writableDatabase(t)
++	db.SetMaxOpenConns(2)
++	ctx := context.Background()
++	a, err := db.Conn(ctx)
++	if err != nil {
++		t.Fatal(err)
++	}
++	defer a.Close()
++	b, err := db.Conn(ctx)
++	if err != nil {
++		t.Fatal(err)
++	}
++	defer b.Close()
++	mustExec(t, a, "CREATE TABLE t(id INTEGER PRIMARY KEY,v)")
++	stmt, err := a.PrepareContext(ctx, "INSERT INTO t VALUES(?,last_insert_rowid())")
++	if err != nil {
++		t.Fatal(err)
++	}
++	defer stmt.Close()
++	for _, id := range []int64{10, 20, 30} {
++		r, err := stmt.ExecContext(ctx, id)
++		if err != nil {
++			t.Fatal(err)
++		}
++		checkAffected(t, r, 1)
++		if got, err := r.LastInsertId(); err != nil || got != id {
++			t.Fatal(got, err)
++		}
++	}
++	var changes, total, last int64
++	if err = a.QueryRowContext(ctx, "SELECT changes(),total_changes(),last_insert_rowid()").Scan(&changes, &total, &last); err != nil || changes != 1 || total != 3 || last != 30 {
++		t.Fatal(changes, total, last, err)
++	}
++	if err = b.QueryRowContext(ctx, "SELECT changes(),total_changes(),last_insert_rowid()").Scan(&changes, &total, &last); err != nil || changes != 0 || total != 0 || last != 0 {
++		t.Fatal(changes, total, last, err)
++	}
++	mustExec(t, a, "BEGIN")
++	mustExec(t, a, "INSERT INTO t VALUES(99,0)")
++	mustExec(t, a, "ROLLBACK")
++	if err = a.QueryRowContext(ctx, "SELECT changes(),total_changes(),last_insert_rowid()").Scan(&changes, &total, &last); err != nil || changes != 1 || total != 4 || last != 99 {
++		t.Fatal(changes, total, last, err)
++	}
++	r := mustExec(t, a, "UPDATE t SET v=v")
++	checkAffected(t, r, 3)
++	if got, err := r.LastInsertId(); err != nil || got != 0 {
++		t.Fatal("statement result insert-ID contract", got, err)
++	}
++	if err = stmt.Close(); err != nil {
++		t.Fatal(err)
++	}
++	mustExec(t, a, "SAVEPOINT abandoned")
++	mustExec(t, a, "INSERT INTO t VALUES(100,0)")
++	if err = a.Close(); err != nil {
++		t.Fatal(err)
++	}
++	// b remains pinned, forcing reuse of a's physical connection.
++	reused, err := db.Conn(ctx)
++	if err != nil {
++		t.Fatal(err)
++	}
++	defer reused.Close()
++	if err = reused.QueryRowContext(ctx, "SELECT changes(),total_changes(),last_insert_rowid()").Scan(&changes, &total, &last); err != nil || changes != 1 || total != 8 || last != 100 {
++		t.Fatal(changes, total, last, err)
++	}
++	var n int64
++	if err = reused.QueryRowContext(ctx, "SELECT count(*) FROM t").Scan(&n); err != nil || n != 3 {
++		t.Fatal(n, err)
++	}
++}
+diff --git a/internal/sql/connection.go b/internal/sql/connection.go
+new file mode 100644
+index 0000000..9d15cf4
+--- /dev/null
++++ b/internal/sql/connection.go
+@@ -0,0 +1,43 @@
++package sql
++
++import "context"
++
++// ConnectionState is volatile SQL connection state, not transactional data.
++// Its owner serializes every evaluation and mutation with the connection lock.
++// It must not be copied into a statement: last_insert_rowid() can change between
++// VALUES rows, and another completed statement can affect a streaming SELECT.
++type ConnectionState struct {
++	Changes, TotalChanges, LastInsertRowID int64
++}
++
++type connectionStateKey struct{}
++
++// WithConnectionState adds one bounded context node per query/write, with no
++// function registry, per-row closure or per-call allocation. The scalar
++// evaluator never reacquires the connection lock held by its caller.
++func WithConnectionState(ctx context.Context, state *ConnectionState) context.Context {
++	return context.WithValue(ctx, connectionStateKey{}, state)
++}
++
++func isConnectionFunction(name string) bool {
++	return name == "changes" || name == "total_changes" || name == "last_insert_rowid"
++}
++
++func evalConnectionFunction(name string, argc int, ctx context.Context) (any, error) {
++	if err := ValidateFunction(name, argc); err != nil {
++		return nil, err
++	}
++	if ctx != nil {
++		if state, ok := ctx.Value(connectionStateKey{}).(*ConnectionState); ok && state != nil {
++			switch name {
++			case "changes":
++				return state.Changes, nil
++			case "total_changes":
++				return state.TotalChanges, nil
++			case "last_insert_rowid":
++				return state.LastInsertRowID, nil
++			}
++		}
++	}
++	return nil, &ErrUnsupported{Feature: "connection function outside SQL statement context"}
++}
+diff --git a/internal/sql/connection_test.go b/internal/sql/connection_test.go
+new file mode 100644
+index 0000000..27cdb0e
+--- /dev/null
++++ b/internal/sql/connection_test.go
+@@ -0,0 +1,40 @@
++package sql
++
++import (
++	"context"
++	"errors"
++	"testing"
++)
++
++func TestConnectionFunctionContextAndVolatility(t *testing.T) {
++	state := ConnectionState{Changes: 2, TotalChanges: 9, LastInsertRowID: -3}
++	ctx := &EvalContext{Context: WithConnectionState(context.Background(), &state)}
++	for _, tc := range []struct {
++		name string
++		want int64
++	}{{"changes", 2}, {"total_changes", 9}, {"last_insert_rowid", -3}} {
++		e := &Call{Name: tc.name}
++		got, err := Eval(e, ctx)
++		if err != nil || got != tc.want {
++			t.Fatal(tc.name, got, err)
++		}
++		if ConstantExpression(e, ctx) {
++			t.Fatal("connection counter classified deterministic", tc.name)
++		}
++		if _, err := Eval(e, nil); err == nil {
++			t.Fatal("fabricated missing connection value")
++		}
++		if err := ValidateFunction(tc.name, 1); err == nil {
++			t.Fatal("accepted wrong arity")
++		}
++	}
++	state.LastInsertRowID = 42
++	if got, err := Eval(&Call{Name: "LAST_INSERT_ROWID"}, ctx); err != nil || got != int64(42) {
++		t.Fatal(got, err)
++	}
++	c, cancel := context.WithCancel(ctx.Context)
++	cancel()
++	if _, err := Eval(&Call{Name: "changes"}, &EvalContext{Context: c}); !errors.Is(err, context.Canceled) {
++		t.Fatal(err)
++	}
++}
+diff --git a/internal/sql/eval.go b/internal/sql/eval.go
+index b1246db..b78b8fd 100644
+--- a/internal/sql/eval.go
++++ b/internal/sql/eval.go
+@@ -327,6 +327,9 @@ func Eval(e Expr, ctx *EvalContext) (any, error) {
+ 		return evalInList(x, ctx)
+ 	case *Call:
+ 		name := FoldName(x.Name)
++		if isConnectionFunction(name) {
++			return evalConnectionFunction(name, len(x.Args), ctx.Context)
++		}
+ 		if name == "coalesce" || name == "ifnull" {
+ 			if name == "ifnull" && len(x.Args) != 2 || name == "coalesce" && len(x.Args) < 2 {
+ 				return nil, fmt.Errorf("wrong number of arguments to %s()", name)
+diff --git a/internal/sql/functions.go b/internal/sql/functions.go
+index 59db28c..40cc0c3 100644
+--- a/internal/sql/functions.go
++++ b/internal/sql/functions.go
+@@ -164,6 +164,8 @@ func ValidateFunction(name string, argc int) error {
+ 	}
+ 	want := 1
+ 	switch name {
++	case "changes", "total_changes", "last_insert_rowid":
++		want = 0
+ 	case "sparsevec", "sparsevec_dims", "sparsevec_nnz", "sparsevec_norm", "sparsevec_to_text", "sparsevec_from_vector", "vector_from_sparsevec", "abs", "length", "lower", "upper", "typeof", "hex", "vector", "vector_dims", "vector_norm", "vector_to_text", "bit_vector", "bit_dims", "bit_to_text", "binary_quantize", "halfvec", "halfvec_dims", "halfvec_norm", "halfvec_to_text", "halfvec_from_vector", "vector_from_halfvec", "halfvec_conversion_changed", "halfvec_conversion_max_abs", "halfvec_conversion_max_rel":
+ 	case "nullif", "ifnull", "bigram_similarity", "l2_distance", "l1_distance", "cosine_distance", "inner_product", "negative_inner_product", "hamming_distance", "jaccard_distance":
+ 		want = 2
+diff --git a/internal/testkit/connection_counters_conformance_test.go b/internal/testkit/connection_counters_conformance_test.go
+new file mode 100644
+index 0000000..f744a93
+--- /dev/null
++++ b/internal/testkit/connection_counters_conformance_test.go
+@@ -0,0 +1,379 @@
++//go:build oracle
++
++package testkit_test
++
++import (
++	"bufio"
++	"bytes"
++	"context"
++	"errors"
++	"fmt"
++	"io"
++	"os/exec"
++	"path/filepath"
++	"reflect"
++	"regexp"
++	"strings"
++	"testing"
++
++	"github.com/ms-xiaosnow/gosqlite/sqlite"
++)
++
++const connectionOracleSelect = "SELECT changes(),total_changes(),last_insert_rowid(),typeof(changes()),typeof(total_changes()),typeof(last_insert_rowid())"
++
++type connectionStep struct {
++	query    string
++	read     bool
++	code     sqlite.Code
++	category string
++}
++
++// The complete history runs on one official connection and one native
++// connection. Normal EOF is used, even after expected logical SQL errors.
++// Quote-mode output compares every label, value, and INTEGER/REAL/TEXT class;
++// error steps check primary native codes and matching official error categories.
++func TestConnectionCountersOracleHistories(t *testing.T) {
++	steps := []connectionStep{
++		{query: connectionOracleSelect, read: true},
++		{query: "CREATE TABLE t(id INTEGER PRIMARY KEY,v NOT NULL,c,tc,li)"},
++		{query: "CREATE INDEX ix ON t(v)"},
++		{query: "INSERT INTO t VALUES(4,'a',changes(),total_changes(),last_insert_rowid()),(7,'b',changes(),total_changes(),last_insert_rowid())"},
++		{query: "SELECT * FROM t ORDER BY id", read: true},
++		{query: "SELECT changes()+1,total_changes()*2,CAST(last_insert_rowid() AS TEXT),last_insert_rowid() IN (1,7)", read: true},
++		{query: "SELECT count(*),sum(changes()),total_changes(),last_insert_rowid() FROM t", read: true},
++		{query: "SELECT t.id,e.id,changes(),total_changes(),last_insert_rowid() FROM t LEFT JOIN t e ON e.id=t.id AND changes()>0 ORDER BY t.id", read: true},
++		{query: "SELECT id FROM t WHERE changes()=2 ORDER BY total_changes(),id LIMIT changes() OFFSET 0", read: true},
++		{query: "UPDATE t SET v=v,c=changes(),tc=total_changes(),li=last_insert_rowid()"},
++		{query: "SELECT * FROM t ORDER BY id", read: true},
++		{query: "UPDATE t SET id=id+20 WHERE id=4"},
++		{query: "CREATE TABLE extra(x)"},
++		{query: "CREATE TABLE IF NOT EXISTS extra(x)"},
++		{query: "CREATE INDEX extra_x ON extra(x)"},
++		{query: "UPDATE t SET v=v WHERE id=-1"},
++		{query: "DELETE FROM t WHERE id=-1"},
++		{query: "BEGIN"},
++		{query: "INSERT INTO t VALUES(30,'undo',0,0,0)"},
++		{query: "SAVEPOINT s"},
++		{query: "INSERT INTO t VALUES(40,'undo',0,0,0),(50,'undo',0,0,0)"},
++		{query: "ROLLBACK TO s"},
++		{query: "RELEASE s"},
++		{query: "ROLLBACK"},
++		{query: "INSERT INTO t VALUES(60,'first',0,0,0),(70,NULL,0,0,0)", code: sqlite.CodeConstraint, category: "NOT NULL constraint failed"},
++		{query: "SELECT * FROM t ORDER BY id", read: true},
++		{query: "BEGIN"},
++		{query: "INSERT INTO t VALUES(80,'first',0,0,0),(90,NULL,0,0,0)", code: sqlite.CodeConstraint, category: "NOT NULL constraint failed"},
++		{query: "SELECT * FROM t ORDER BY id", read: true},
++		{query: "ROLLBACK"},
++		{query: "UPDATE t SET v=v"},
++		{query: "UPDATE t SET missing=1", code: sqlite.CodeError, category: "no such column"},
++		{query: "DELETE FROM absent", code: sqlite.CodeError, category: "no such table"},
++		{query: "INSERT INTO t(id) VALUES(1,2)", code: sqlite.CodeError, category: "2 values for 1 columns"},
++		{query: "UPDATE t SET v=changes(1)", code: sqlite.CodeError, category: "wrong number of arguments"},
++		{query: "UPDATE t SET v=abs(-9223372036854775808)", code: sqlite.CodeError, category: "integer overflow"},
++		{query: "INSERT INTO t VALUES(7,'dupe',0,0,0)", code: sqlite.CodeConstraint, category: "UNIQUE constraint failed"},
++		{query: "INSERT INTO t VALUES(0,'zero',0,0,0),(-7,'negative',0,0,0)"},
++		{query: "DELETE FROM t WHERE id=-7"},
++		{query: "SAVEPOINT outermost"},
++		{query: "INSERT INTO t VALUES(99,'release',0,0,0)"},
++		{query: "RELEASE outermost"},
++		{query: "DELETE FROM t"},
++		{query: "UPDATE t SET v=1"},
++		{query: "INSERT INTO t(id,v) VALUES(NULL,'generated')"},
++		{query: "SELECT * FROM t ORDER BY id", read: true},
++	}
++	for _, size := range []uint32{512, 4096, 65536} {
++		for _, shared := range []bool{false, true} {
++			t.Run(fmt.Sprintf("page%d/shared%t", size, shared), func(t *testing.T) {
++				path := filepath.Join(t.TempDir(), "native.db")
++				db, err := sqlite.Open(path, sqlite.Options{PageSize: size, WALShared: shared})
++				if err != nil {
++					t.Fatal(err)
++				}
++				defer db.Close()
++				var script strings.Builder
++				fmt.Fprintf(&script, "PRAGMA page_size=%d;\n", size)
++				// Suppress journal_mode's setup row, then compare only task statements.
++				if shared {
++					script.WriteString(".output /dev/null\nPRAGMA journal_mode=WAL;\n.output stdout\n")
++				}
++				var got [][]any
++				appendQuery := func(q string) {
++					r := confNative(t, db, q)
++					if len(r.rows) > 0 {
++						var labels []any
++						for _, label := range r.columns {
++							labels = append(labels, label)
++						}
++						got = append(got, labels)
++						got = append(got, r.rows...)
++					}
++					script.WriteString(q + ";\n")
++				}
++				var categories []string
++				for _, step := range steps {
++					if step.read {
++						appendQuery(step.query)
++						continue
++					}
++					result, err := db.Exec(context.Background(), step.query)
++					if step.code == 0 {
++						if err != nil {
++							t.Fatal(step.query, err)
++						}
++					} else {
++						var detail *sqlite.Error
++						if !errors.As(err, &detail) || detail.Code != step.code {
++							t.Fatalf("%s want code %v: %v", step.query, step.code, err)
++						}
++						if n, _ := result.RowsAffected(); n != 0 {
++							t.Fatal("failed result rows", n)
++						}
++						if n, _ := result.LastInsertId(); n != 0 {
++							t.Fatal("failed result id", n)
++						}
++						categories = append(categories, step.category)
++					}
++					script.WriteString(step.query + ";\n")
++					appendQuery(connectionOracleSelect)
++				}
++				cmd := exec.Command(confOracle(t), "-batch", "-quote", "-header", filepath.Join(t.TempDir(), "official.db"))
++				cmd.Stdin = strings.NewReader(script.String())
++				var stderr bytes.Buffer
++				cmd.Stderr = &stderr
++				out, oracleErr := cmd.Output()
++				if oracleErr == nil {
++					t.Fatal("official history should report expected logical errors")
++				}
++				matches := regexp.MustCompile(`(?m)^(?:Parse error|Error) near line \d+: (.*)$`).FindAllStringSubmatch(stderr.String(), -1)
++				if len(matches) != len(categories) {
++					t.Fatalf("official error count %d want %d: %s", len(matches), len(categories), stderr.String())
++				}
++				for i, want := range categories {
++					if !strings.Contains(matches[i][1], want) {
++						t.Fatalf("official error %d want %q: %s", i, want, matches[i][1])
++					}
++				}
++				want, err := confQuoted(out)
++				if err != nil {
++					t.Fatal(err)
++				}
++				if !reflect.DeepEqual(got, want) {
++					for i := 0; i < len(got) && i < len(want); i++ {
++						if !reflect.DeepEqual(got[i], want[i]) {
++							t.Fatalf("complete history row %d native=%#v official=%#v", i, got[i], want[i])
++						}
++					}
++					t.Fatalf("history rows native=%d official=%d", len(got), len(want))
++				}
++				if err = db.Close(); err != nil {
++					t.Fatal(err)
++				}
++				writeIntegrity(t, path)
++			})
++		}
++	}
++}
++
++func TestConnectionCountersOracleFunctionErrors(t *testing.T) {
++	for _, q := range []string{"SELECT changes(1)", "SELECT total_changes(NULL)", "SELECT last_insert_rowid(1,2)", "SELECT changes(1) LIMIT 0", "SELECT CASE WHEN 0 THEN total_changes(1) ELSE 1 END"} {
++		t.Run(q, func(t *testing.T) {
++			db, err := sqlite.Open(filepath.Join(t.TempDir(), "native.db"), sqlite.Options{})
++			if err != nil {
++				t.Fatal(err)
++			}
++			defer db.Close()
++			out, oracleErr := exec.Command(confOracle(t), "-batch", "-bail", ":memory:", q).CombinedOutput()
++			if oracleErr == nil || !strings.Contains(string(out), "wrong number of arguments") {
++				t.Fatal(string(out), oracleErr)
++			}
++			rows, err := db.Query(context.Background(), q)
++			if err == nil {
++				rows.Close()
++				t.Fatal("accepted invalid counter arity")
++			}
++			var detail *sqlite.Error
++			if !errors.As(err, &detail) || detail.Code != sqlite.CodeError || !strings.Contains(err.Error(), "wrong number of arguments") {
++				t.Fatal(err)
++			}
++		})
++	}
++}
++
++// Merging the child's stdout and stderr before reading provides deterministic
++// error/marker ordering without polling, goroutines or termination hooks.
++type counterLiveOracle struct {
++	t               *testing.T
++	cmd             *exec.Cmd
++	in              io.WriteCloser
++	out             *bufio.Reader
++	errored, closed bool
++}
++
++func startCounterLiveOracle(t *testing.T, path string) *counterLiveOracle {
++	t.Helper()
++	p := &counterLiveOracle{t: t, cmd: exec.Command(confOracle(t), "-batch", "-header", "-quote", path)}
++	var err error
++	p.in, err = p.cmd.StdinPipe()
++	if err != nil {
++		t.Fatal(err)
++	}
++	out, err := p.cmd.StdoutPipe()
++	if err != nil {
++		t.Fatal(err)
++	}
++	p.cmd.Stderr = p.cmd.Stdout
++	p.out = bufio.NewReader(out)
++	if err = p.cmd.Start(); err != nil {
++		t.Fatal(err)
++	}
++	t.Cleanup(func() {
++		if p.closed {
++			return
++		}
++		p.closed = true
++		_, writeErr := io.WriteString(p.in, ".quit\n")
++		closeErr := p.in.Close()
++		waitErr := p.cmd.Wait()
++		if writeErr != nil || closeErr != nil || (waitErr != nil) != p.errored {
++			t.Errorf("normal oracle completion: write=%v close=%v wait=%v expected logical error=%v", writeErr, closeErr, waitErr, p.errored)
++		}
++	})
++	return p
++}
++func (p *counterLiveOracle) run(q string, wantBusy bool) []byte {
++	p.t.Helper()
++	if _, err := io.WriteString(p.in, q+";\n.print __counter_done__\n"); err != nil {
++		p.t.Fatal(err)
++	}
++	var out bytes.Buffer
++	for {
++		line, err := p.out.ReadString('\n')
++		if err != nil {
++			p.t.Fatal("unexpected oracle EOF", err)
++		}
++		if strings.TrimSpace(line) == "__counter_done__" {
++			break
++		}
++		out.WriteString(line)
++	}
++	if wantBusy {
++		if !strings.Contains(out.String(), "database is locked") {
++			p.t.Fatal("wanted official BUSY", out.String())
++		}
++		p.errored = true
++		return nil
++	}
++	if strings.Contains(out.String(), "Error") || strings.Contains(out.String(), "Parse error") {
++		p.t.Fatal("unexpected official error", out.String())
++	}
++	return out.Bytes()
++}
++func TestConnectionCountersOracleBusyOutcomes(t *testing.T) {
++	ctx := context.Background()
++	path := filepath.Join(t.TempDir(), "native.db")
++	a, err := sqlite.Open(path, sqlite.Options{})
++	if err != nil {
++		t.Fatal(err)
++	}
++	defer a.Close()
++	b, err := sqlite.Open(path, sqlite.Options{})
++	if err != nil {
++		t.Fatal(err)
++	}
++	defer b.Close()
++	reference := filepath.Join(t.TempDir(), "official.db")
++	x, y := startCounterLiveOracle(t, reference), startCounterLiveOracle(t, reference)
++	execBoth := func(db *sqlite.DB, p *counterLiveOracle, q string) {
++		t.Helper()
++		if _, err := db.Exec(ctx, q); err != nil {
++			t.Fatal(q, err)
++		}
++		p.run(q, false)
++	}
++	busyBoth := func(db *sqlite.DB, p *counterLiveOracle, q string) {
++		t.Helper()
++		if _, err := db.Exec(ctx, q); !errors.Is(err, sqlite.ErrBusy) {
++			t.Fatal("native want BUSY", q, err)
++		}
++		p.run(q, true)
++	}
++	compare := func(q string) {
++		t.Helper()
++		native := confNative(t, a, q)
++		raw := x.run(q, false)
++		official, err := confQuoted(raw)
++		if err != nil {
++			t.Fatal(err)
++		}
++		var got [][]any
++		var labels []any
++		for _, v := range native.columns {
++			labels = append(labels, v)
++		}
++		if len(native.rows) > 0 {
++			got = append(got, labels)
++			got = append(got, native.rows...)
++		}
++		if !reflect.DeepEqual(got, official) {
++			t.Fatalf("%s native=%#v official=%#v", q, got, official)
++		}
++	}
++	execBoth(a, x, "CREATE TABLE t(id INTEGER PRIMARY KEY)")
++	execBoth(a, x, "INSERT INTO t VALUES(1),(2)")
++	execBoth(b, y, "BEGIN IMMEDIATE")
++	busyBoth(a, x, "UPDATE t SET id=id")
++	compare(connectionOracleSelect)
++	execBoth(b, y, "ROLLBACK")
++	execBoth(a, x, "UPDATE t SET id=id")
++	execBoth(b, y, "BEGIN")
++	peerRows, err := b.Query(ctx, "SELECT * FROM t")
++	if err != nil {
++		t.Fatal(err)
++	}
++	if !peerRows.Next() {
++		t.Fatal(peerRows.Err())
++	}
++	y.run("SELECT * FROM t", false)
++	busyBoth(a, x, "INSERT INTO t VALUES(3)")
++	compare(connectionOracleSelect)
++	if err = peerRows.Close(); err != nil {
++		t.Fatal(err)
++	}
++	execBoth(b, y, "ROLLBACK")
++	compare("SELECT * FROM t")
++	execBoth(a, x, "UPDATE t SET id=id")
++	beforeAdmission := confNative(t, a, connectionOracleSelect)
++	execBoth(b, y, "BEGIN EXCLUSIVE")
++	busyBoth(a, x, "DELETE FROM t")
++	execBoth(b, y, "ROLLBACK")
++	// Deliberate bounded divergence: native snapshot admission precedes catalog
++	// preparation, unlike official SQLite's cached-schema execution. Do not
++	// guess "executed DML" for an operation whose names cannot be validated.
++	confCompare(t, beforeAdmission, confNative(t, a, connectionOracleSelect))
++	officialAdmission, err := confQuoted(x.run(connectionOracleSelect, false))
++	if err != nil || len(officialAdmission) != 2 || officialAdmission[1][0] != int64(0) {
++		t.Fatal("official executed-BUSY state", officialAdmission, err)
++	}
++	execBoth(a, x, "UPDATE t SET id=id")
++	compare(connectionOracleSelect)
++	execBoth(a, x, "BEGIN")
++	execBoth(a, x, "INSERT INTO t VALUES(4)")
++	execBoth(b, y, "BEGIN")
++	peerRows, err = b.Query(ctx, "SELECT * FROM t")
++	if err != nil {
++		t.Fatal(err)
++	}
++	if !peerRows.Next() {
++		t.Fatal(peerRows.Err())
++	}
++	y.run("SELECT * FROM t", false)
++	busyBoth(a, x, "COMMIT")
++	compare(connectionOracleSelect)
++	if err = peerRows.Close(); err != nil {
++		t.Fatal(err)
++	}
++	execBoth(b, y, "ROLLBACK")
++	execBoth(a, x, "ROLLBACK")
++	compare(connectionOracleSelect)
++	compare("SELECT * FROM t")
++}
+diff --git a/sqlite/connection_counters_internal_test.go b/sqlite/connection_counters_internal_test.go
+new file mode 100644
+index 0000000..5fe08a6
+--- /dev/null
++++ b/sqlite/connection_counters_internal_test.go
+@@ -0,0 +1,82 @@
++package sqlite
++
++import (
++	"context"
++	"errors"
++	"testing"
++)
++
++// Cancellation is an ordinary context cancellation, triggered at a deterministic
++// logical row boundary. No I/O, pager, lock or cleanup failure is injected.
++type counterCancelContext struct {
++	context.Context
++	cancel context.CancelFunc
++	db     *DB
++}
++
++func (c *counterCancelContext) Err() error {
++	if c.db.counters.LastInsertRowID == 3 {
++		c.cancel()
++	}
++	return c.Context.Err()
++}
++func TestConnectionCountersCancellationAfterInsertedRow(t *testing.T) {
++	for _, explicit := range []bool{false, true} {
++		db, _ := reviewTransactionDB(t)
++		reviewTransactionExec(t, db, "CREATE TABLE t(id INTEGER PRIMARY KEY)")
++		reviewTransactionExec(t, db, "INSERT INTO t VALUES(1),(2)")
++		if explicit {
++			reviewTransactionExec(t, db, "BEGIN")
++		}
++		ctx, cancel := context.WithCancel(context.Background())
++		_, err := db.Exec(&counterCancelContext{Context: ctx, cancel: cancel, db: db}, "INSERT INTO t VALUES(3),(4)")
++		cancel()
++		if !errors.Is(err, context.Canceled) {
++			t.Fatal(err)
++		}
++		if db.counters.Changes != 0 || db.counters.TotalChanges != 2 || db.counters.LastInsertRowID != 3 {
++			t.Fatal(db.counters)
++		}
++		if got := reviewTransactionScalar(t, db, "SELECT count(*) FROM t"); got != int64(2) {
++			t.Fatal(got)
++		}
++		if explicit {
++			if db.Autocommit() {
++				t.Fatal("native statement rollback lost transaction")
++			}
++			reviewTransactionExec(t, db, "ROLLBACK")
++		}
++	}
++}
++
++func TestConnectionCountersLazyTransactionReads(t *testing.T) {
++	db, path := reviewTransactionDB(t)
++	reviewTransactionExec(t, db, "CREATE TABLE t(id INTEGER PRIMARY KEY)")
++	reviewTransactionExec(t, db, "INSERT INTO t VALUES(1),(2)")
++	peer, err := Open(path, Options{})
++	if err != nil {
++		t.Fatal(err)
++	}
++	defer peer.Close()
++	reviewTransactionExec(t, peer, "BEGIN EXCLUSIVE")
++	reviewTransactionExec(t, db, "BEGIN")
++	for _, q := range []string{"SELECT changes()", "SELECT total_changes()", "SELECT last_insert_rowid()"} {
++		if got := reviewTransactionScalar(t, db, q); got != int64(2) {
++			t.Fatal(q, got)
++		}
++		if db.tx.reader != nil || db.tx.storage != nil {
++			t.Fatal("connection counters forced a snapshot")
++		}
++	}
++	// This is admission before the catalog could be read, not an executed DML.
++	for _, q := range []string{"DELETE FROM t", "DELETE FROM missing"} {
++		if _, err := db.Exec(context.Background(), q); !errors.Is(err, ErrBusy) {
++			t.Fatal(q, err)
++		}
++		if got := reviewTransactionScalar(t, db, "SELECT changes()"); got != int64(2) {
++			t.Fatal(q, got)
++		}
++	}
++	reviewTransactionExec(t, peer, "ROLLBACK")
++	reviewTransactionExec(t, db, "ROLLBACK")
++}
+diff --git a/sqlite/connection_counters_test.go b/sqlite/connection_counters_test.go
+new file mode 100644
+index 0000000..5039c1a
+--- /dev/null
++++ b/sqlite/connection_counters_test.go
+@@ -0,0 +1,230 @@
++package sqlite_test
++
++import (
++	"context"
++	"errors"
++	"fmt"
++	"reflect"
++	"sync"
++	"testing"
++
++	"github.com/ms-xiaosnow/gosqlite/sqlite"
++)
++
++const counterSelect = "SELECT changes(),total_changes(),last_insert_rowid(),typeof(changes()),typeof(total_changes()),typeof(last_insert_rowid())"
++
++func checkCounters(t *testing.T, db *sqlite.DB, changes, total, last int64) {
++	t.Helper()
++	got := query(t, db, counterSelect)
++	want := [][]any{{changes, total, last, "integer", "integer", "integer"}}
++	if !reflect.DeepEqual(got, want) {
++		t.Fatalf("counters got %#v want %#v", got, want)
++	}
++}
++
++// Only intact SQL-created databases, normal transactions and logical errors.
++func TestConnectionCountersStatementsAndUndo(t *testing.T) {
++	for _, shared := range []bool{false, true} {
++		t.Run(fmt.Sprint(shared), func(t *testing.T) {
++			db, _ := writable(t, sqlite.Options{WALShared: shared})
++			checkCounters(t, db, 0, 0, 0)
++			execute(t, db, "CREATE TABLE t(id INTEGER PRIMARY KEY,v NOT NULL,c,tc,li)")
++			execute(t, db, "CREATE INDEX ix ON t(v)")
++			checkCounters(t, db, 0, 0, 0)
++			res := execute(t, db, "INSERT INTO t VALUES(4,'a',changes(),total_changes(),last_insert_rowid()),(7,'b',changes(),total_changes(),last_insert_rowid())")
++			if n, _ := res.RowsAffected(); n != 2 {
++				t.Fatal(n)
++			}
++			if n, _ := res.LastInsertID(); n != 7 {
++				t.Fatal(n)
++			}
++			if got := query(t, db, "SELECT id,c,tc,li FROM t ORDER BY id"); !reflect.DeepEqual(got, [][]any{{int64(4), int64(0), int64(0), int64(0)}, {int64(7), int64(0), int64(0), int64(4)}}) {
++				t.Fatal(got)
++			}
++			checkCounters(t, db, 2, 2, 7)
++			for _, q := range []string{"CREATE TABLE extra(x)", "CREATE TABLE IF NOT EXISTS extra(x)", "CREATE INDEX extra_x ON extra(x)", "BEGIN", "SAVEPOINT s", "ROLLBACK TO s", "RELEASE s", "COMMIT"} {
++				execute(t, db, q)
++				checkCounters(t, db, 2, 2, 7)
++			}
++			res = execute(t, db, "UPDATE t SET v=v,c=changes(),tc=total_changes(),li=last_insert_rowid()")
++			if n, _ := res.RowsAffected(); n != 2 {
++				t.Fatal(n)
++			}
++			if n, _ := res.LastInsertId(); n != 0 {
++				t.Fatal(n)
++			}
++			checkCounters(t, db, 2, 4, 7)
++			execute(t, db, "UPDATE t SET id=id+20 WHERE id=4")
++			checkCounters(t, db, 1, 5, 7)
++			execute(t, db, "DELETE FROM t WHERE id=-1")
++			checkCounters(t, db, 0, 5, 7)
++			execute(t, db, "BEGIN")
++			execute(t, db, "INSERT INTO t VALUES(30,'undo',0,0,0)")
++			checkCounters(t, db, 1, 6, 30)
++			execute(t, db, "SAVEPOINT s")
++			execute(t, db, "INSERT INTO t VALUES(40,'undo',0,0,0),(50,'undo',0,0,0)")
++			execute(t, db, "ROLLBACK TO s")
++			checkCounters(t, db, 2, 8, 50)
++			execute(t, db, "ROLLBACK")
++			checkCounters(t, db, 2, 8, 50)
++			for _, q := range []string{"INSERT INTO t VALUES(60,'first',0,0,0),(70,NULL,0,0,0)", "BEGIN", "INSERT INTO t VALUES(60,'first',0,0,0),(70,NULL,0,0,0)"} {
++				if q == "BEGIN" {
++					execute(t, db, q)
++					continue
++				}
++				r, err := db.Exec(context.Background(), q)
++				if !errors.Is(err, sqlite.ErrConstraint) {
++					t.Fatal(q, err)
++				}
++				if n, _ := r.RowsAffected(); n != 0 {
++					t.Fatal(n)
++				}
++				checkCounters(t, db, 0, 8, 60)
++			}
++			execute(t, db, "ROLLBACK")
++			execute(t, db, "UPDATE t SET v=v")
++			checkCounters(t, db, 2, 10, 60)
++			for _, q := range []string{"UPDATE t SET missing=1", "DELETE FROM absent", "INSERT INTO t(id) VALUES(1,2)", "UPDATE t SET v=changes(1)", "INSERT OR IGNORE INTO t VALUES(99,'x',0,0,0)"} {
++				if _, err := db.Exec(context.Background(), q); err == nil {
++					t.Fatal(q)
++				}
++				checkCounters(t, db, 2, 10, 60)
++			}
++			if _, err := db.Exec(context.Background(), "UPDATE t SET v=abs(-9223372036854775808)"); err == nil {
++				t.Fatal("missing execution error")
++			}
++			checkCounters(t, db, 0, 10, 60)
++			execute(t, db, "DELETE FROM t")
++			checkCounters(t, db, 2, 12, 60)
++			execute(t, db, "UPDATE t SET v=1")
++			checkCounters(t, db, 0, 12, 60)
++		})
++	}
++}
++
++func TestConnectionCountersAdmissionRowsAndReopen(t *testing.T) {
++	db, path := writable(t, sqlite.Options{})
++	execute(t, db, "CREATE TABLE t(id INTEGER PRIMARY KEY,v)")
++	execute(t, db, "INSERT INTO t VALUES(9,1),(10,2)")
++	ctx, cancel := context.WithCancel(context.Background())
++	cancel()
++	if _, err := db.Exec(ctx, "INSERT INTO t VALUES(11,3)"); !errors.Is(err, context.Canceled) {
++		t.Fatal(err)
++	}
++	checkCounters(t, db, 2, 2, 10)
++	tx, err := db.Begin(context.Background())
++	if err != nil {
++		t.Fatal(err)
++	}
++	rows, err := tx.Query(context.Background(), counterSelect)
++	if err != nil {
++		t.Fatal(err)
++	}
++	if _, err = tx.Exec(context.Background(), "INSERT INTO t VALUES(11,3)"); !errors.Is(err, sqlite.ErrBusy) {
++		t.Fatal(err)
++	}
++	if !rows.Next() || !reflect.DeepEqual(rows.Values(), []any{int64(2), int64(2), int64(10), "integer", "integer", "integer"}) {
++		t.Fatal(rows.Values(), rows.Err())
++	}
++	if err = rows.Close(); err != nil {
++		t.Fatal(err)
++	}
++	txExecute(t, tx, "INSERT INTO t VALUES(-7,3)")
++	checkCounters(t, db, 1, 3, -7)
++	if err = tx.Rollback(); err != nil {
++		t.Fatal(err)
++	}
++	checkCounters(t, db, 1, 3, -7)
++	peer, err := sqlite.Open(path, sqlite.Options{})
++	if err != nil {
++		t.Fatal(err)
++	}
++	defer peer.Close()
++	checkCounters(t, peer, 0, 0, 0)
++	execute(t, peer, "UPDATE t SET v=v")
++	checkCounters(t, peer, 2, 2, 0)
++	checkCounters(t, db, 1, 3, -7)
++	if err = db.Close(); err != nil {
++		t.Fatal(err)
++	}
++	reopened, err := sqlite.Open(path, sqlite.Options{})
++	if err != nil {
++		t.Fatal(err)
++	}
++	defer reopened.Close()
++	checkCounters(t, reopened, 0, 0, 0)
++}
++
++func TestConnectionCountersStreamingDynamicAndBusyCommit(t *testing.T) {
++	db, _ := writable(t, sqlite.Options{})
++	execute(t, db, "CREATE TABLE t(id INTEGER PRIMARY KEY,v)")
++	execute(t, db, "INSERT INTO t VALUES(1,1),(2,2)")
++	rows, err := db.Query(context.Background(), "SELECT id,changes(),total_changes(),last_insert_rowid() FROM t")
++	if err != nil {
++		t.Fatal(err)
++	}
++	defer rows.Close()
++	if !rows.Next() {
++		t.Fatal(rows.Err())
++	}
++	// The existing rollback-mode cursor lease prevents the automatic commit.
++	// No change total is published; the successful insertion rowid survives.
++	if _, err = db.Exec(context.Background(), "INSERT INTO t VALUES(50,50)"); !errors.Is(err, sqlite.ErrBusy) {
++		t.Fatal(err)
++	}
++	if !rows.Next() || !reflect.DeepEqual(rows.Values(), []any{int64(2), int64(0), int64(2), int64(50)}) {
++		t.Fatal(rows.Values(), rows.Err())
++	}
++	if err = rows.Close(); err != nil {
++		t.Fatal(err)
++	}
++	checkCounters(t, db, 0, 2, 50)
++	if got := query(t, db, "SELECT count(*) FROM t"); !reflect.DeepEqual(got, [][]any{{int64(2)}}) {
++		t.Fatal(got)
++	}
++}
++
++func TestConnectionCountersConcurrentNative(t *testing.T) {
++	db, _ := writable(t, sqlite.Options{})
++	execute(t, db, "CREATE TABLE t(id INTEGER PRIMARY KEY)")
++	tx, err := db.Begin(context.Background())
++	if err != nil {
++		t.Fatal(err)
++	}
++	var wg sync.WaitGroup
++	for k := 0; k < 4; k++ {
++		wg.Add(1)
++		go func(k int) {
++			defer wg.Done()
++			for j := 1; j <= 10; j++ {
++				if _, err := tx.Exec(context.Background(), "INSERT INTO t VALUES(?)", k*10+j); err != nil {
++					t.Error(err)
++				}
++			}
++		}(k)
++	}
++	wg.Wait()
++	if err = tx.Commit(context.Background()); err != nil {
++		t.Fatal(err)
++	}
++	got := query(t, db, "SELECT changes(),total_changes()")
++	if !reflect.DeepEqual(got, [][]any{{int64(1), int64(40)}}) {
++		t.Fatal(got)
++	}
++}
++
++func TestConnectionCountersExtensionMaintenanceExcluded(t *testing.T) {
++	db, _ := writable(t, sqlite.Options{})
++	execute(t, db, "CREATE TABLE docs(id INTEGER PRIMARY KEY,body TEXT)")
++	execute(t, db, "INSERT INTO docs VALUES(20,'words'),(30,'more words')")
++	execute(t, db, "CREATE INDEX grams ON docs(body) USING grams13")
++	checkCounters(t, db, 2, 2, 30)
++	execute(t, db, "INSERT INTO docs VALUES(40,'new words')")
++	checkCounters(t, db, 1, 3, 40)
++	execute(t, db, "UPDATE docs SET body='changed words'")
++	checkCounters(t, db, 3, 6, 40)
++	execute(t, db, "REINDEX grams")
++	checkCounters(t, db, 3, 6, 40)
++	execute(t, db, "DELETE FROM docs")
++	checkCounters(t, db, 3, 9, 40)
++}
+diff --git a/sqlite/sqlite.go b/sqlite/sqlite.go
+index 803423a..0875b32 100644
+--- a/sqlite/sqlite.go
++++ b/sqlite/sqlite.go
+@@ -190,15 +190,17 @@ type SchemaEntry struct {
+ // snapshot and overlay until Commit/Rollback. Concurrent methods are serialized
+ // per connection. Independent DB handles can be used concurrently.
+ type DB struct {
+-	mu      sync.RWMutex
+-	path    string
+-	info    FileInfo
+-	opts    Options
+-	closed  bool
+-	tx      *Tx
+-	rows    map[*Rows]struct{}
+-	session pageSession
+-	methods *registry.Registry
++	// Counters are connection state, protected by mu; never part of pager undo.
++	counters sqlast.ConnectionState
++	mu       sync.RWMutex
++	path     string
++	info     FileInfo
++	opts     Options
++	closed   bool
++	tx       *Tx
++	rows     map[*Rows]struct{}
++	session  pageSession
++	methods  *registry.Registry
+ }
+ 
+ // Open opens a SQLite-format file. An absent file is created unless ReadOnly
+@@ -454,6 +456,7 @@ func (d *DB) Query(ctx context.Context, query string, args ...any) (*Rows, error
+ 	if !ok {
+ 		return nil, wrap("query", ErrReadOnly)
+ 	}
++	ctx = sqlast.WithConnectionState(ctx, &d.counters)
+ 	ctx, params, err := d.bindSelect(ctx, sel, args)
+ 	if err != nil {
+ 		return nil, wrap("bind", err)
+diff --git a/sqlite/transaction.go b/sqlite/transaction.go
+index fa34da1..1074e96 100644
+--- a/sqlite/transaction.go
++++ b/sqlite/transaction.go
+@@ -36,7 +36,9 @@ type Tx struct {
+ 	done               bool
+ }
+ 
+-// Result describes the last successful statement; DDL reports zero changes.
++// Result describes one successful statement, independently of the connection
++// SQL counters. DDL and transaction controls report zero affected rows. The
++// insert ID is the final inserted rowid for INSERT, and zero for other statements.
+ type Result struct{ affected, lastID int64 }
+ 
+ func (r Result) RowsAffected() (int64, error) { return r.affected, nil }
+@@ -137,6 +139,7 @@ func (t *Tx) queryLocked(ctx context.Context, query string, args []any) (*Rows,
+ 	if !ok {
+ 		return nil, wrap("query", ErrReadOnly)
+ 	}
++	ctx = sqlast.WithConnectionState(ctx, &t.db.counters)
+ 	ctx, params, err := t.db.bindSelect(ctx, sel, args)
+ 	if err != nil {
+ 		return nil, wrap("bind", err)
+@@ -256,14 +259,17 @@ func (d *DB) Exec(ctx context.Context, query string, args ...any) (Result, error
+ 	if err != nil {
+ 		return Result{}, wrap("exec", err)
+ 	}
+-	result, err := t.execLocked(ctx, stmt, params)
++	outcome, err := t.execStatementLocked(ctx, stmt, params)
+ 	if err == nil {
+ 		err = wrap("commit", t.commitLocked(ctx))
+ 	}
++	// An automatic statement is not complete until commit succeeds. Explicit
++	// transactions publish statement counts earlier through execLocked instead.
++	d.finishMutationLocked(outcome, err)
+ 	if err != nil {
+ 		return Result{}, t.rollbackAfterExecLocked(err)
+ 	}
+-	return result, nil
++	return outcome.Result, nil
+ }
+ func (t *Tx) Exec(ctx context.Context, query string, args ...any) (Result, error) {
+ 	if err := checkContext(ctx); err != nil {
+@@ -282,22 +288,61 @@ func (t *Tx) Exec(ctx context.Context, query string, args ...any) (Result, error
+ 	return t.execLocked(ctx, stmt, params)
+ }
+ func (t *Tx) execLocked(ctx context.Context, stmt sqlast.Statement, params []any) (Result, error) {
++	outcome, err := t.execStatementLocked(ctx, stmt, params)
++	t.db.finishMutationLocked(outcome, err)
++	if err != nil {
++		return Result{}, err
++	}
++	return outcome.Result, nil
++}
++
++// mutationOutcome distinguishes rejected/preparation errors from an executed
++// DML statement. Aborted execution resets changes(), but contributes no total.
++type mutationOutcome struct {
++	Result
++	started bool
++}
++
++func (d *DB) finishMutationLocked(outcome mutationOutcome, err error) {
++	if !outcome.started {
++		return
++	}
++	d.counters.Changes = 0
++	if err == nil {
++		d.counters.Changes = outcome.affected
++		d.counters.TotalChanges += outcome.affected
++	}
++}
++
++func isMutationStatement(stmt sqlast.Statement) bool {
++	switch stmt.(type) {
++	case *sqlast.Insert, *sqlast.Update, *sqlast.Delete:
++		return true
++	}
++	return false
++}
++
++func (t *Tx) execStatementLocked(ctx context.Context, stmt sqlast.Statement, params []any) (mutationOutcome, error) {
+ 	if err := t.check(); err != nil {
+-		return Result{}, wrap("exec", err)
++		return mutationOutcome{}, wrap("exec", err)
+ 	}
+ 	if control, ok := stmt.(*sqlast.Transaction); ok {
+-		return Result{}, wrap("exec", t.db.controlLocked(ctx, control))
++		return mutationOutcome{}, wrap("exec", t.db.controlLocked(ctx, control))
+ 	}
+ 	if t.readOnly {
+-		return Result{}, wrap("exec", ErrReadOnly)
++		return mutationOutcome{}, wrap("exec", ErrReadOnly)
+ 	}
+ 	if t.activeRows != 0 {
+-		return Result{}, wrap("exec", fmt.Errorf("%w: close transaction rows before executing a write", ErrBusy))
++		return mutationOutcome{}, wrap("exec", fmt.Errorf("%w: close transaction rows before executing a write", ErrBusy))
+ 	}
+ 	if err := t.ensureSnapshotLocked(ctx); err != nil {
+-		return Result{}, wrap("exec", err)
++		// No catalog is available yet, so this native admission failure cannot
++		// distinguish a valid DML execution from an invalid table/column name.
++		// Preserve state instead of guessing that a statement executed.
++		return mutationOutcome{}, wrap("exec", err)
+ 	}
+-	var result Result
++	ctx = sqlast.WithConnectionState(ctx, &t.db.counters)
++	var result mutationOutcome
+ 	err := t.storage.Statement(ctx, func() error {
+ 		catalog, err := t.validateCatalog(ctx)
+ 		if err != nil {
+@@ -306,8 +351,10 @@ func (t *Tx) execLocked(ctx context.Context, stmt sqlast.Statement, params []any
+ 		if err = t.checkWriteOwnership(ctx, catalog); err != nil {
+ 			return err
+ 		}
+-		if err = t.storage.PromoteWrite(ctx); err != nil {
+-			return err
++		if !isMutationStatement(stmt) {
++			if err = t.storage.PromoteWrite(ctx); err != nil {
++				return err
++			}
+ 		}
+ 		beforeSchema := t.reader.Header().SchemaCookie
+ 		switch s := stmt.(type) {
+@@ -336,7 +383,7 @@ func (t *Tx) execLocked(ctx context.Context, stmt sqlast.Statement, params []any
+ 		return t.refreshExtensionSchemaCookies(ctx, catalog, beforeSchema)
+ 	})
+ 	if err != nil {
+-		return Result{}, wrap("exec", err)
++		return result, wrap("exec", err)
+ 	}
+ 	return result, nil
+ }
+diff --git a/sqlite/write_rows.go b/sqlite/write_rows.go
+index 134c8f4..9a673b5 100644
+--- a/sqlite/write_rows.go
++++ b/sqlite/write_rows.go
+@@ -126,8 +126,8 @@ func (t *Tx) removeIndexes(ctx context.Context, tab *writeTable, rowid int64, va
+ 	}
+ 	return nil
+ }
+-func (t *Tx) insert(ctx context.Context, c *writeCatalog, stmt *sqlast.Insert, params []any) (Result, error) {
+-	var result Result
++func (t *Tx) insert(ctx context.Context, c *writeCatalog, stmt *sqlast.Insert, params []any) (mutationOutcome, error) {
++	var result mutationOutcome
+ 	tab, err := c.find(stmt.Table)
+ 	if err != nil {
+ 		return result, err
+@@ -169,6 +169,10 @@ func (t *Tx) insert(ctx context.Context, c *writeCatalog, stmt *sqlast.Insert, p
+ 			}
+ 		}
+ 	}
++	result.started = true
++	if err := t.storage.PromoteWrite(ctx); err != nil {
++		return result, err
++	}
+ 	for _, exprs := range rows {
+ 		if err := ctx.Err(); err != nil {
+ 			return result, err
+@@ -213,6 +217,9 @@ func (t *Tx) insert(ctx context.Context, c *writeCatalog, stmt *sqlast.Insert, p
+ 		if err = btree.InsertTable(ctx, t.storage, tab.root, rowid, tab.physical(values)); err != nil {
+ 			return result, err
+ 		}
++		// Keep the last successful row insertion even if a later row aborts
++		// this statement, or a transaction/savepoint later rolls it back.
++		t.db.counters.LastInsertRowID = rowid
+ 		if err = t.addIndexes(ctx, tab, rowid, values); err != nil {
+ 			return result, err
+ 		}
+@@ -294,8 +301,8 @@ func (t *Tx) matchRows(ctx context.Context, tab *writeTable, where sqlast.Expr,
+ 	}
+ 	return ids, nil
+ }
+-func (t *Tx) update(ctx context.Context, c *writeCatalog, stmt *sqlast.Update, params []any) (Result, error) {
+-	var result Result
++func (t *Tx) update(ctx context.Context, c *writeCatalog, stmt *sqlast.Update, params []any) (mutationOutcome, error) {
++	var result mutationOutcome
+ 	tab, err := c.find(stmt.Table)
+ 	if err != nil {
+ 		return result, err
+@@ -317,6 +324,13 @@ func (t *Tx) update(ctx context.Context, c *writeCatalog, stmt *sqlast.Update, p
+ 		}
+ 	}
+ 	stmt.Where = bindBooleans(stmt.Where, tab.table)
++	if err := validate(stmt.Where, tab.table, nil); err != nil {
++		return result, err
++	}
++	result.started = true
++	if err := t.storage.PromoteWrite(ctx); err != nil {
++		return result, err
++	}
+ 	ids, err := t.matchRows(ctx, tab, stmt.Where, params)
+ 	if err != nil {
+ 		return result, err
+@@ -392,13 +406,20 @@ func (t *Tx) update(ctx context.Context, c *writeCatalog, stmt *sqlast.Update, p
+ 	}
+ 	return result, nil
+ }
+-func (t *Tx) delete(ctx context.Context, c *writeCatalog, stmt *sqlast.Delete, params []any) (Result, error) {
+-	var result Result
++func (t *Tx) delete(ctx context.Context, c *writeCatalog, stmt *sqlast.Delete, params []any) (mutationOutcome, error) {
++	var result mutationOutcome
+ 	tab, err := c.find(stmt.Table)
+ 	if err != nil {
+ 		return result, err
+ 	}
+ 	stmt.Where = bindBooleans(stmt.Where, tab.table)
++	if err := validate(stmt.Where, tab.table, nil); err != nil {
++		return result, err
++	}
++	result.started = true
++	if err := t.storage.PromoteWrite(ctx); err != nil {
++		return result, err
++	}
+ 	ids, err := t.matchRows(ctx, tab, stmt.Where, params)
+ 	if err != nil {
+ 		return result, err

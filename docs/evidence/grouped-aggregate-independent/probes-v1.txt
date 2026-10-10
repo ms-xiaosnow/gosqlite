@@ -1,0 +1,1032 @@
+Behavior audit: added tests/helpers use ordinary SQL fresh intact private fixtures, SQL errors, read-only pinned CLI normal completion. No physical/namespace/native-fault/crash/interrupted publication/rekey workflows. Group keys include storage-class/NUL and large integer boundary data; no corruption.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestGroupedReviewerDifferential
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*)_FROM_rg_GROUP_BY_k
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*)_FROM_rg_GROUP_BY_k_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*)_FROM_rg_GROUP_BY_k_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),min(v)_FROM_rg_GROUP_BY_k
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),min(v)_FROM_rg_GROUP_BY_k_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),min(v)_FROM_rg_GROUP_BY_k_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),max(v)_FROM_rg_GROUP_BY_k
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),max(v)_FROM_rg_GROUP_BY_k_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),max(v)_FROM_rg_GROUP_BY_k_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),min(v),max(w)_FROM_rg_GROUP_BY_k
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),min(v),max(w)_FROM_rg_GROUP_BY_k_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),max(v),min(w)_FROM_rg_GROUP_BY_k
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),max(v),min(w)_FROM_rg_GROUP_BY_k_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),max(v),min(w)_FROM_rg_GROUP_BY_k_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),min(v),max(w),min(v)_FROM_rg_GROUP_BY_k
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),min(v),max(w),min(v)_FROM_rg_GROUP_BY_k_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),min(v),max(w),min(v)_FROM_rg_GROUP_BY_k_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),min(v),min(w),max(v)_FROM_rg_GROUP_BY_k
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),min(v),min(w),max(v)_FROM_rg_GROUP_BY_k_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),min(v),min(w),max(v)_FROM_rg_GROUP_BY_k_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),max(w),min(v),max(w)_FROM_rg_GROUP_BY_k
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),max(w),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),max(w),min(v),max(w)_FROM_rg_GROUP_BY_k_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),CASE_WHEN_count(*)>1_THEN_min(v)_ELSE_max(w)_END_FROM_rg_GROUP_BY_k
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),CASE_WHEN_count(*)>1_THEN_min(v)_ELSE_max(w)_END_FROM_rg_GROUP_BY_k_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),CASE_WHEN_count(*)>1_THEN_min(v)_ELSE_max(w)_END_FROM_rg_GROUP_BY_k_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*)_FROM_rg_GROUP_BY_+k
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*)_FROM_rg_GROUP_BY_+k_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*)_FROM_rg_GROUP_BY_+k_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),min(v)_FROM_rg_GROUP_BY_+k
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),min(v)_FROM_rg_GROUP_BY_+k_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),min(v)_FROM_rg_GROUP_BY_+k_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),max(v)_FROM_rg_GROUP_BY_+k
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),max(v)_FROM_rg_GROUP_BY_+k_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),max(v)_FROM_rg_GROUP_BY_+k_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),min(v),max(w)_FROM_rg_GROUP_BY_+k
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),min(v),max(w)_FROM_rg_GROUP_BY_+k_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),max(v),min(w)_FROM_rg_GROUP_BY_+k
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),max(v),min(w)_FROM_rg_GROUP_BY_+k_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),max(v),min(w)_FROM_rg_GROUP_BY_+k_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),min(v),max(w),min(v)_FROM_rg_GROUP_BY_+k
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),min(v),max(w),min(v)_FROM_rg_GROUP_BY_+k_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),min(v),max(w),min(v)_FROM_rg_GROUP_BY_+k_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),min(v),min(w),max(v)_FROM_rg_GROUP_BY_+k
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),min(v),min(w),max(v)_FROM_rg_GROUP_BY_+k_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),min(v),min(w),max(v)_FROM_rg_GROUP_BY_+k_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),max(w),min(v),max(w)_FROM_rg_GROUP_BY_+k
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),max(w),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),max(w),min(v),max(w)_FROM_rg_GROUP_BY_+k_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),CASE_WHEN_count(*)>1_THEN_min(v)_ELSE_max(w)_END_FROM_rg_GROUP_BY_+k
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),CASE_WHEN_count(*)>1_THEN_min(v)_ELSE_max(w)_END_FROM_rg_GROUP_BY_+k_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),CASE_WHEN_count(*)>1_THEN_min(v)_ELSE_max(w)_END_FROM_rg_GROUP_BY_+k_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*)_FROM_rg_GROUP_BY_k+0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*)_FROM_rg_GROUP_BY_k+0_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),min(v)_FROM_rg_GROUP_BY_k+0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),min(v)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),min(v)_FROM_rg_GROUP_BY_k+0_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),max(v)_FROM_rg_GROUP_BY_k+0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),max(v)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),max(v)_FROM_rg_GROUP_BY_k+0_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),min(v),max(w)_FROM_rg_GROUP_BY_k+0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),min(v),max(w)_FROM_rg_GROUP_BY_k+0_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),max(v),min(w)_FROM_rg_GROUP_BY_k+0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),max(v),min(w)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),max(v),min(w)_FROM_rg_GROUP_BY_k+0_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),min(v),max(w),min(v)_FROM_rg_GROUP_BY_k+0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),min(v),max(w),min(v)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),min(v),max(w),min(v)_FROM_rg_GROUP_BY_k+0_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),min(v),min(w),max(v)_FROM_rg_GROUP_BY_k+0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),min(v),min(w),max(v)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),min(v),min(w),max(v)_FROM_rg_GROUP_BY_k+0_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),max(w),min(v),max(w)_FROM_rg_GROUP_BY_k+0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),max(w),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),max(w),min(v),max(w)_FROM_rg_GROUP_BY_k+0_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),CASE_WHEN_count(*)>1_THEN_min(v)_ELSE_max(w)_END_FROM_rg_GROUP_BY_k+0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),CASE_WHEN_count(*)>1_THEN_min(v)_ELSE_max(w)_END_FROM_rg_GROUP_BY_k+0_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),CASE_WHEN_count(*)>1_THEN_min(v)_ELSE_max(w)_END_FROM_rg_GROUP_BY_k+0_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),count(*)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),count(*)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),count(*)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),min(v)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),min(v)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),min(v)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),max(v)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),max(v)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),max(v)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),min(v),max(w)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),min(v),max(w)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),min(v),max(w)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),max(v),min(w)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),max(v),min(w)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),max(v),min(w)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),min(v),max(w),min(v)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),min(v),max(w),min(v)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),min(v),max(w),min(v)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),min(v),min(w),max(v)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),min(v),min(w),max(v)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),min(v),min(w),max(v)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),max(w),min(v),max(w)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),max(w),min(v),max(w)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),max(w),min(v),max(w)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),CASE_WHEN_count(*)>1_THEN_min(v)_ELSE_max(w)_END_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),CASE_WHEN_count(*)>1_THEN_min(v)_ELSE_max(w)_END_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),CASE_WHEN_count(*)>1_THEN_min(v)_ELSE_max(w)_END_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),min(v)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),min(v)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),min(v)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),max(v)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),max(v)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),max(v)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),max(v),min(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),max(v),min(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),max(v),min(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),min(v),max(w),min(v)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),min(v),max(w),min(v)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),min(v),max(w),min(v)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),min(v),min(w),max(v)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),min(v),min(w),max(v)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),min(v),min(w),max(v)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),max(w),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),max(w),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),max(w),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),CASE_WHEN_count(*)>1_THEN_min(v)_ELSE_max(w)_END_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),CASE_WHEN_count(*)>1_THEN_min(v)_ELSE_max(w)_END_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),CASE_WHEN_count(*)>1_THEN_min(v)_ELSE_max(w)_END_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),count(*)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT)
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),count(*)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT)_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),count(*)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT)_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),min(v)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT)
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),min(v)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT)_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),min(v)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT)_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),max(v)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT)
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),max(v)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT)_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),max(v)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT)_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT)
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT)_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT)_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),max(v),min(w)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT)
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),max(v),min(w)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT)_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),max(v),min(w)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT)_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),min(v),max(w),min(v)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT)
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),min(v),max(w),min(v)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT)_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),min(v),max(w),min(v)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT)_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),min(v),min(w),max(v)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT)
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),min(v),min(w),max(v)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT)_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),min(v),min(w),max(v)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT)_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),max(w),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT)
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),max(w),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT)_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),max(w),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT)_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),CASE_WHEN_count(*)>1_THEN_min(v)_ELSE_max(w)_END_FROM_rg_GROUP_BY_CAST(k_AS_TEXT)
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),CASE_WHEN_count(*)>1_THEN_min(v)_ELSE_max(w)_END_FROM_rg_GROUP_BY_CAST(k_AS_TEXT)_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),CASE_WHEN_count(*)>1_THEN_min(v)_ELSE_max(w)_END_FROM_rg_GROUP_BY_CAST(k_AS_TEXT)_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),count(*)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB)
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),count(*)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB)_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),count(*)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB)_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),min(v)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB)
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),min(v)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB)_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),min(v)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB)_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),max(v)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB)
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),max(v)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB)_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),max(v)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB)_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB)
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB)_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB)_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),max(v),min(w)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB)
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),max(v),min(w)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB)_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),max(v),min(w)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB)_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),min(v),max(w),min(v)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB)
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),min(v),max(w),min(v)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB)_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),min(v),max(w),min(v)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB)_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),min(v),min(w),max(v)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB)
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),min(v),min(w),max(v)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB)_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),min(v),min(w),max(v)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB)_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),max(w),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB)
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),max(w),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB)_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),max(w),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB)_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),CASE_WHEN_count(*)>1_THEN_min(v)_ELSE_max(w)_END_FROM_rg_GROUP_BY_CAST(k_AS_BLOB)
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),CASE_WHEN_count(*)>1_THEN_min(v)_ELSE_max(w)_END_FROM_rg_GROUP_BY_CAST(k_AS_BLOB)_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),CASE_WHEN_count(*)>1_THEN_min(v)_ELSE_max(w)_END_FROM_rg_GROUP_BY_CAST(k_AS_BLOB)_ORDER_BY_3_DESC,1,2
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_typeof(k)='integer'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_count(*)>0_AND_typeof(k)='integer'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_typeof(k)='integer'_AND_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_count(*)<0_OR_typeof(k)='integer'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_typeof(k)='real'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_count(*)>0_AND_typeof(k)='real'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_typeof(k)='real'_AND_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_count(*)<0_OR_typeof(k)='real'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_typeof(k)='text'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_count(*)>0_AND_typeof(k)='text'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_typeof(k)='text'_AND_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_count(*)<0_OR_typeof(k)='text'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_typeof(k)='blob'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_count(*)>0_AND_typeof(k)='blob'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_typeof(k)='blob'_AND_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_count(*)<0_OR_typeof(k)='blob'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_(k)_IS_NULL
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_count(*)>0_AND_(k)_IS_NULL
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_(k)_IS_NULL_AND_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_count(*)<0_OR_(k)_IS_NULL
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_(k)=1
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_count(*)>0_AND_(k)=1
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_(k)=1_AND_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_count(*)<0_OR_(k)=1
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_(k)='1'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_count(*)>0_AND_(k)='1'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_(k)='1'_AND_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_count(*)<0_OR_(k)='1'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_NOT_((k)_IS_NULL)
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_count(*)>0_AND_NOT_((k)_IS_NULL)
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_NOT_((k)_IS_NULL)_AND_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_count(*)<0_OR_NOT_((k)_IS_NULL)
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_CASE_WHEN_typeof(k)='real'_THEN_1_ELSE_0_END
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_count(*)>0_AND_CASE_WHEN_typeof(k)='real'_THEN_1_ELSE_0_END
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_CASE_WHEN_typeof(k)='real'_THEN_1_ELSE_0_END_AND_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_count(*)<0_OR_CASE_WHEN_typeof(k)='real'_THEN_1_ELSE_0_END
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_typeof(+k)='integer'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_count(*)>0_AND_typeof(+k)='integer'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_typeof(+k)='integer'_AND_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_count(*)<0_OR_typeof(+k)='integer'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_typeof(+k)='real'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_count(*)>0_AND_typeof(+k)='real'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_typeof(+k)='real'_AND_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_count(*)<0_OR_typeof(+k)='real'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_typeof(+k)='text'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_count(*)>0_AND_typeof(+k)='text'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_typeof(+k)='text'_AND_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_count(*)<0_OR_typeof(+k)='text'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_typeof(+k)='blob'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_count(*)>0_AND_typeof(+k)='blob'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_typeof(+k)='blob'_AND_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_count(*)<0_OR_typeof(+k)='blob'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_(+k)_IS_NULL
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_count(*)>0_AND_(+k)_IS_NULL
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_(+k)_IS_NULL_AND_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_count(*)<0_OR_(+k)_IS_NULL
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_(+k)=1
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_count(*)>0_AND_(+k)=1
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_(+k)=1_AND_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_count(*)<0_OR_(+k)=1
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_(+k)='1'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_count(*)>0_AND_(+k)='1'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_(+k)='1'_AND_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_count(*)<0_OR_(+k)='1'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_NOT_((+k)_IS_NULL)
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_count(*)>0_AND_NOT_((+k)_IS_NULL)
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_NOT_((+k)_IS_NULL)_AND_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_count(*)<0_OR_NOT_((+k)_IS_NULL)
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_CASE_WHEN_typeof(+k)='real'_THEN_1_ELSE_0_END
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_count(*)>0_AND_CASE_WHEN_typeof(+k)='real'_THEN_1_ELSE_0_END
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_CASE_WHEN_typeof(+k)='real'_THEN_1_ELSE_0_END_AND_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_count(*)<0_OR_CASE_WHEN_typeof(+k)='real'_THEN_1_ELSE_0_END
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_typeof(k+0)='integer'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)>0_AND_typeof(k+0)='integer'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_typeof(k+0)='integer'_AND_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)<0_OR_typeof(k+0)='integer'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_typeof(k+0)='real'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)>0_AND_typeof(k+0)='real'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_typeof(k+0)='real'_AND_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)<0_OR_typeof(k+0)='real'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_typeof(k+0)='text'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)>0_AND_typeof(k+0)='text'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_typeof(k+0)='text'_AND_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)<0_OR_typeof(k+0)='text'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_typeof(k+0)='blob'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)>0_AND_typeof(k+0)='blob'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_typeof(k+0)='blob'_AND_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)<0_OR_typeof(k+0)='blob'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_(k+0)_IS_NULL
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)>0_AND_(k+0)_IS_NULL
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_(k+0)_IS_NULL_AND_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)<0_OR_(k+0)_IS_NULL
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_(k+0)=1
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)>0_AND_(k+0)=1
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_(k+0)=1_AND_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)<0_OR_(k+0)=1
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_(k+0)='1'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)>0_AND_(k+0)='1'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_(k+0)='1'_AND_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)<0_OR_(k+0)='1'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_NOT_((k+0)_IS_NULL)
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)>0_AND_NOT_((k+0)_IS_NULL)
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_NOT_((k+0)_IS_NULL)_AND_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)<0_OR_NOT_((k+0)_IS_NULL)
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_CASE_WHEN_typeof(k+0)='real'_THEN_1_ELSE_0_END
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)>0_AND_CASE_WHEN_typeof(k+0)='real'_THEN_1_ELSE_0_END
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_CASE_WHEN_typeof(k+0)='real'_THEN_1_ELSE_0_END_AND_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)<0_OR_CASE_WHEN_typeof(k+0)='real'_THEN_1_ELSE_0_END
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_typeof(CAST(k_AS_NUMERIC))='integer'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)>0_AND_typeof(CAST(k_AS_NUMERIC))='integer'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_typeof(CAST(k_AS_NUMERIC))='integer'_AND_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)<0_OR_typeof(CAST(k_AS_NUMERIC))='integer'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_typeof(CAST(k_AS_NUMERIC))='real'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)>0_AND_typeof(CAST(k_AS_NUMERIC))='real'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_typeof(CAST(k_AS_NUMERIC))='real'_AND_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)<0_OR_typeof(CAST(k_AS_NUMERIC))='real'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_typeof(CAST(k_AS_NUMERIC))='text'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)>0_AND_typeof(CAST(k_AS_NUMERIC))='text'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_typeof(CAST(k_AS_NUMERIC))='text'_AND_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)<0_OR_typeof(CAST(k_AS_NUMERIC))='text'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_typeof(CAST(k_AS_NUMERIC))='blob'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)>0_AND_typeof(CAST(k_AS_NUMERIC))='blob'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_typeof(CAST(k_AS_NUMERIC))='blob'_AND_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)<0_OR_typeof(CAST(k_AS_NUMERIC))='blob'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_(CAST(k_AS_NUMERIC))_IS_NULL
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)>0_AND_(CAST(k_AS_NUMERIC))_IS_NULL
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_(CAST(k_AS_NUMERIC))_IS_NULL_AND_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)<0_OR_(CAST(k_AS_NUMERIC))_IS_NULL
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_(CAST(k_AS_NUMERIC))=1
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)>0_AND_(CAST(k_AS_NUMERIC))=1
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_(CAST(k_AS_NUMERIC))=1_AND_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)<0_OR_(CAST(k_AS_NUMERIC))=1
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_(CAST(k_AS_NUMERIC))='1'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)>0_AND_(CAST(k_AS_NUMERIC))='1'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_(CAST(k_AS_NUMERIC))='1'_AND_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)<0_OR_(CAST(k_AS_NUMERIC))='1'
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_NOT_((CAST(k_AS_NUMERIC))_IS_NULL)
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)>0_AND_NOT_((CAST(k_AS_NUMERIC))_IS_NULL)
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_NOT_((CAST(k_AS_NUMERIC))_IS_NULL)_AND_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)<0_OR_NOT_((CAST(k_AS_NUMERIC))_IS_NULL)
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_CASE_WHEN_typeof(CAST(k_AS_NUMERIC))='real'_THEN_1_ELSE_0_END
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)>0_AND_CASE_WHEN_typeof(CAST(k_AS_NUMERIC))='real'_THEN_1_ELSE_0_END
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_CASE_WHEN_typeof(CAST(k_AS_NUMERIC))='real'_THEN_1_ELSE_0_END_AND_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)<0_OR_CASE_WHEN_typeof(CAST(k_AS_NUMERIC))='real'_THEN_1_ELSE_0_END
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,k+0,typeof(k),typeof(k+0),min(v),max(w)_FROM_rg_WHERE_id<17_GROUP_BY_k,k+0
+=== RUN   TestGroupedReviewerDifferential/SELECT_k+0,k,typeof(k+0),typeof(k),min(v),max(w)_FROM_rg_WHERE_id<17_GROUP_BY_k+0,k
+=== RUN   TestGroupedReviewerDifferential/SELECT_k+0,typeof(k+0),min(v),max(w)_FROM_rg_WHERE_id<17_GROUP_BY_k+0_ORDER_BY_k+0_DESC
+=== RUN   TestGroupedReviewerDifferential/SELECT_count(*)_FROM_rg_GROUP_BY_(1=1)_HAVING_count(*)>0
+=== RUN   TestGroupedReviewerDifferential/SELECT_true,count(*)_FROM_rg_GROUP_BY_true
+=== RUN   TestGroupedReviewerDifferential/SELECT_false,count(*)_FROM_rg_GROUP_BY_false
+=== RUN   TestGroupedReviewerDifferential/SELECT_k_AS_q,count(*)_AS_q_FROM_rg_WHERE_id<17_GROUP_BY_q_ORDER_BY_q
+=== RUN   TestGroupedReviewerDifferential/SELECT_k_AS_q,count(*)_FROM_rg_WHERE_id<17_GROUP_BY_+1_ORDER_BY_-(-1)
+=== RUN   TestGroupedReviewerDifferential/SELECT_count(*)_FROM_rg_HAVING_0
+=== RUN   TestGroupedReviewerDifferential/SELECT_count(*)_FROM_rz_HAVING_count(*)=0
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_ORDER_BY_k_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_ORDER_BY_k+0_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_LIMIT_0_OFFSET_NULL
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_0
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_0_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_0_ORDER_BY_k_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_0_ORDER_BY_k+0_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_0_LIMIT_0_OFFSET_NULL
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_0.0
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_0.0_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_0.0_ORDER_BY_k_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_0.0_ORDER_BY_k+0_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_0.0_LIMIT_0_OFFSET_NULL
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_'0'
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_'0'_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_'0'_ORDER_BY_k_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_'0'_ORDER_BY_k+0_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_'0'_LIMIT_0_OFFSET_NULL
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_NULL
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_NULL_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_NULL_ORDER_BY_k_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_NULL_ORDER_BY_k+0_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_NULL_LIMIT_0_OFFSET_NULL
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_false
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_false_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_false_ORDER_BY_k_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_false_ORDER_BY_k+0_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_false_LIMIT_0_OFFSET_NULL
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_k=1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_k=1_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_k=1_ORDER_BY_k_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_k=1_ORDER_BY_k+0_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_k=1_LIMIT_0_OFFSET_NULL
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_count(*)=0
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_count(*)=0_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_count(*)=0_ORDER_BY_k_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_count(*)=0_ORDER_BY_k+0_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_count(*)=0_LIMIT_0_OFFSET_NULL
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_count(*)>0_AND_k=1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_count(*)>0_AND_k=1_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_count(*)>0_AND_k=1_ORDER_BY_k_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_count(*)>0_AND_k=1_ORDER_BY_k+0_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_count(*)>0_AND_k=1_LIMIT_0_OFFSET_NULL
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_k=1_OR_count(*)<0
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_k=1_OR_count(*)<0_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_k=1_OR_count(*)<0_ORDER_BY_k_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_k=1_OR_count(*)<0_ORDER_BY_k+0_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_k=1_OR_count(*)<0_LIMIT_0_OFFSET_NULL
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_ORDER_BY_k_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_ORDER_BY_k+0_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_LIMIT_0_OFFSET_NULL
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_0
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_0_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_0_ORDER_BY_k_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_0_ORDER_BY_k+0_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_0_LIMIT_0_OFFSET_NULL
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_0.0
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_0.0_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_0.0_ORDER_BY_k_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_0.0_ORDER_BY_k+0_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_0.0_LIMIT_0_OFFSET_NULL
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_'0'
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_'0'_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_'0'_ORDER_BY_k_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_'0'_ORDER_BY_k+0_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_'0'_LIMIT_0_OFFSET_NULL
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_NULL
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_NULL_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_NULL_ORDER_BY_k_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_NULL_ORDER_BY_k+0_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_NULL_LIMIT_0_OFFSET_NULL
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_false
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_false_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_false_ORDER_BY_k_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_false_ORDER_BY_k+0_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_false_LIMIT_0_OFFSET_NULL
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_k=1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_k=1_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_k=1_ORDER_BY_k_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_k=1_ORDER_BY_k+0_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_k=1_LIMIT_0_OFFSET_NULL
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_count(*)=0
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_count(*)=0_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_count(*)=0_ORDER_BY_k_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_count(*)=0_ORDER_BY_k+0_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_count(*)=0_LIMIT_0_OFFSET_NULL
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_count(*)>0_AND_k=1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_count(*)>0_AND_k=1_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_count(*)>0_AND_k=1_ORDER_BY_k_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_count(*)>0_AND_k=1_ORDER_BY_k+0_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_count(*)>0_AND_k=1_LIMIT_0_OFFSET_NULL
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_k=1_OR_count(*)<0
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_k=1_OR_count(*)<0_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_k=1_OR_count(*)<0_ORDER_BY_k_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_k=1_OR_count(*)<0_ORDER_BY_k+0_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_k=1_OR_count(*)<0_LIMIT_0_OFFSET_NULL
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_ORDER_BY_k_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_ORDER_BY_k+0_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_LIMIT_0_OFFSET_NULL
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_0
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_0_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_0_ORDER_BY_k_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_0_ORDER_BY_k+0_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_0_LIMIT_0_OFFSET_NULL
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_0.0
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_0.0_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_0.0_ORDER_BY_k_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_0.0_ORDER_BY_k+0_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_0.0_LIMIT_0_OFFSET_NULL
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_'0'
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_'0'_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_'0'_ORDER_BY_k_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_'0'_ORDER_BY_k+0_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_'0'_LIMIT_0_OFFSET_NULL
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_NULL
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_NULL_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_NULL_ORDER_BY_k_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_NULL_ORDER_BY_k+0_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_NULL_LIMIT_0_OFFSET_NULL
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_false
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_false_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_false_ORDER_BY_k_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_false_ORDER_BY_k+0_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_false_LIMIT_0_OFFSET_NULL
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_k=1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_k=1_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_k=1_ORDER_BY_k_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_k=1_ORDER_BY_k+0_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_k=1_LIMIT_0_OFFSET_NULL
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_count(*)=0
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_count(*)=0_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_count(*)=0_ORDER_BY_k_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_count(*)=0_ORDER_BY_k+0_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_count(*)=0_LIMIT_0_OFFSET_NULL
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_count(*)>0_AND_k=1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_count(*)>0_AND_k=1_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_count(*)>0_AND_k=1_ORDER_BY_k_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_count(*)>0_AND_k=1_ORDER_BY_k+0_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_count(*)>0_AND_k=1_LIMIT_0_OFFSET_NULL
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_k=1_OR_count(*)<0
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_k=1_OR_count(*)<0_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_k=1_OR_count(*)<0_ORDER_BY_k_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_k=1_OR_count(*)<0_ORDER_BY_k+0_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_k=1_OR_count(*)<0_LIMIT_0_OFFSET_NULL
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_re_GROUP_BY_k_ORDER_BY_k+0_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,CASE_WHEN_k=2_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_re_GROUP_BY_k_ORDER_BY_k+0_LIMIT_1
+    grouped_reviewer_oracle_test.go:74: native query "SELECT k,CASE WHEN k=2 THEN abs(-9223372036854775808) ELSE count(*) END FROM re GROUP BY k ORDER BY k+0 LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_re_GROUP_BY_k_ORDER_BY_k+0_LIMIT_1
+    grouped_reviewer_oracle_test.go:74: native query "SELECT k,CASE WHEN k=3 THEN abs(-9223372036854775808) ELSE count(*) END FROM re GROUP BY k ORDER BY k+0 LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_re_GROUP_BY_k_ORDER_BY_k+0_LIMIT_1_OFFSET_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,CASE_WHEN_k=2_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_re_GROUP_BY_k_ORDER_BY_k+0_LIMIT_1_OFFSET_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_re_GROUP_BY_k_ORDER_BY_k+0_LIMIT_1_OFFSET_1
+    grouped_reviewer_oracle_test.go:74: native query "SELECT k,CASE WHEN k=3 THEN abs(-9223372036854775808) ELSE count(*) END FROM re GROUP BY k ORDER BY k+0 LIMIT 1 OFFSET 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_re_GROUP_BY_k_ORDER_BY_k+0_DESC_LIMIT_1
+    grouped_reviewer_oracle_test.go:74: native query "SELECT k,CASE WHEN k=1 THEN abs(-9223372036854775808) ELSE count(*) END FROM re GROUP BY k ORDER BY k+0 DESC LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,CASE_WHEN_k=2_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_re_GROUP_BY_k_ORDER_BY_k+0_DESC_LIMIT_1
+    grouped_reviewer_oracle_test.go:74: native query "SELECT k,CASE WHEN k=2 THEN abs(-9223372036854775808) ELSE count(*) END FROM re GROUP BY k ORDER BY k+0 DESC LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_re_GROUP_BY_k_ORDER_BY_k+0_DESC_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_re_GROUP_BY_k_ORDER_BY_k+0_NULLS_LAST_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,CASE_WHEN_k=2_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_re_GROUP_BY_k_ORDER_BY_k+0_NULLS_LAST_LIMIT_1
+    grouped_reviewer_oracle_test.go:74: native query "SELECT k,CASE WHEN k=2 THEN abs(-9223372036854775808) ELSE count(*) END FROM re GROUP BY k ORDER BY k+0 NULLS LAST LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_re_GROUP_BY_k_ORDER_BY_k+0_NULLS_LAST_LIMIT_1
+    grouped_reviewer_oracle_test.go:74: native query "SELECT k,CASE WHEN k=3 THEN abs(-9223372036854775808) ELSE count(*) END FROM re GROUP BY k ORDER BY k+0 NULLS LAST LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_re_GROUP_BY_k_ORDER_BY_k+0,k_LIMIT_1
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,CASE_WHEN_k=2_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_re_GROUP_BY_k_ORDER_BY_k+0,k_LIMIT_1
+    grouped_reviewer_oracle_test.go:74: native query "SELECT k,CASE WHEN k=2 THEN abs(-9223372036854775808) ELSE count(*) END FROM re GROUP BY k ORDER BY k+0,k LIMIT 1": sqlite query: integer overflow
+=== RUN   TestGroupedReviewerDifferential/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_re_GROUP_BY_k_ORDER_BY_k+0,k_LIMIT_1
+    grouped_reviewer_oracle_test.go:74: native query "SELECT k,CASE WHEN k=3 THEN abs(-9223372036854775808) ELSE count(*) END FROM re GROUP BY k ORDER BY k+0,k LIMIT 1": sqlite query: integer overflow
+--- FAIL: TestGroupedReviewerDifferential (2.57s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*)_FROM_rg_GROUP_BY_k (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*)_FROM_rg_GROUP_BY_k_HAVING_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*)_FROM_rg_GROUP_BY_k_ORDER_BY_3_DESC,1,2 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),min(v)_FROM_rg_GROUP_BY_k (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),min(v)_FROM_rg_GROUP_BY_k_HAVING_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),min(v)_FROM_rg_GROUP_BY_k_ORDER_BY_3_DESC,1,2 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),max(v)_FROM_rg_GROUP_BY_k (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),max(v)_FROM_rg_GROUP_BY_k_HAVING_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),max(v)_FROM_rg_GROUP_BY_k_ORDER_BY_3_DESC,1,2 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),min(v),max(w)_FROM_rg_GROUP_BY_k (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),min(v),max(w)_FROM_rg_GROUP_BY_k_ORDER_BY_3_DESC,1,2 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),max(v),min(w)_FROM_rg_GROUP_BY_k (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),max(v),min(w)_FROM_rg_GROUP_BY_k_HAVING_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),max(v),min(w)_FROM_rg_GROUP_BY_k_ORDER_BY_3_DESC,1,2 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),min(v),max(w),min(v)_FROM_rg_GROUP_BY_k (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),min(v),max(w),min(v)_FROM_rg_GROUP_BY_k_HAVING_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),min(v),max(w),min(v)_FROM_rg_GROUP_BY_k_ORDER_BY_3_DESC,1,2 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),min(v),min(w),max(v)_FROM_rg_GROUP_BY_k (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),min(v),min(w),max(v)_FROM_rg_GROUP_BY_k_HAVING_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),min(v),min(w),max(v)_FROM_rg_GROUP_BY_k_ORDER_BY_3_DESC,1,2 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),max(w),min(v),max(w)_FROM_rg_GROUP_BY_k (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),max(w),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),max(w),min(v),max(w)_FROM_rg_GROUP_BY_k_ORDER_BY_3_DESC,1,2 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),CASE_WHEN_count(*)>1_THEN_min(v)_ELSE_max(w)_END_FROM_rg_GROUP_BY_k (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),CASE_WHEN_count(*)>1_THEN_min(v)_ELSE_max(w)_END_FROM_rg_GROUP_BY_k_HAVING_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),CASE_WHEN_count(*)>1_THEN_min(v)_ELSE_max(w)_END_FROM_rg_GROUP_BY_k_ORDER_BY_3_DESC,1,2 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*)_FROM_rg_GROUP_BY_+k (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*)_FROM_rg_GROUP_BY_+k_HAVING_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*)_FROM_rg_GROUP_BY_+k_ORDER_BY_3_DESC,1,2 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),min(v)_FROM_rg_GROUP_BY_+k (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),min(v)_FROM_rg_GROUP_BY_+k_HAVING_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),min(v)_FROM_rg_GROUP_BY_+k_ORDER_BY_3_DESC,1,2 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),max(v)_FROM_rg_GROUP_BY_+k (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),max(v)_FROM_rg_GROUP_BY_+k_HAVING_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),max(v)_FROM_rg_GROUP_BY_+k_ORDER_BY_3_DESC,1,2 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),min(v),max(w)_FROM_rg_GROUP_BY_+k (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),min(v),max(w)_FROM_rg_GROUP_BY_+k_ORDER_BY_3_DESC,1,2 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),max(v),min(w)_FROM_rg_GROUP_BY_+k (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),max(v),min(w)_FROM_rg_GROUP_BY_+k_HAVING_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),max(v),min(w)_FROM_rg_GROUP_BY_+k_ORDER_BY_3_DESC,1,2 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),min(v),max(w),min(v)_FROM_rg_GROUP_BY_+k (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),min(v),max(w),min(v)_FROM_rg_GROUP_BY_+k_HAVING_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),min(v),max(w),min(v)_FROM_rg_GROUP_BY_+k_ORDER_BY_3_DESC,1,2 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),min(v),min(w),max(v)_FROM_rg_GROUP_BY_+k (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),min(v),min(w),max(v)_FROM_rg_GROUP_BY_+k_HAVING_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),min(v),min(w),max(v)_FROM_rg_GROUP_BY_+k_ORDER_BY_3_DESC,1,2 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),max(w),min(v),max(w)_FROM_rg_GROUP_BY_+k (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),max(w),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),max(w),min(v),max(w)_FROM_rg_GROUP_BY_+k_ORDER_BY_3_DESC,1,2 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),CASE_WHEN_count(*)>1_THEN_min(v)_ELSE_max(w)_END_FROM_rg_GROUP_BY_+k (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),CASE_WHEN_count(*)>1_THEN_min(v)_ELSE_max(w)_END_FROM_rg_GROUP_BY_+k_HAVING_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),CASE_WHEN_count(*)>1_THEN_min(v)_ELSE_max(w)_END_FROM_rg_GROUP_BY_+k_ORDER_BY_3_DESC,1,2 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*)_FROM_rg_GROUP_BY_k+0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*)_FROM_rg_GROUP_BY_k+0_ORDER_BY_3_DESC,1,2 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),min(v)_FROM_rg_GROUP_BY_k+0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),min(v)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),min(v)_FROM_rg_GROUP_BY_k+0_ORDER_BY_3_DESC,1,2 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),max(v)_FROM_rg_GROUP_BY_k+0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),max(v)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),max(v)_FROM_rg_GROUP_BY_k+0_ORDER_BY_3_DESC,1,2 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),min(v),max(w)_FROM_rg_GROUP_BY_k+0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),min(v),max(w)_FROM_rg_GROUP_BY_k+0_ORDER_BY_3_DESC,1,2 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),max(v),min(w)_FROM_rg_GROUP_BY_k+0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),max(v),min(w)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),max(v),min(w)_FROM_rg_GROUP_BY_k+0_ORDER_BY_3_DESC,1,2 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),min(v),max(w),min(v)_FROM_rg_GROUP_BY_k+0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),min(v),max(w),min(v)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),min(v),max(w),min(v)_FROM_rg_GROUP_BY_k+0_ORDER_BY_3_DESC,1,2 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),min(v),min(w),max(v)_FROM_rg_GROUP_BY_k+0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),min(v),min(w),max(v)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),min(v),min(w),max(v)_FROM_rg_GROUP_BY_k+0_ORDER_BY_3_DESC,1,2 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),max(w),min(v),max(w)_FROM_rg_GROUP_BY_k+0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),max(w),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),max(w),min(v),max(w)_FROM_rg_GROUP_BY_k+0_ORDER_BY_3_DESC,1,2 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),CASE_WHEN_count(*)>1_THEN_min(v)_ELSE_max(w)_END_FROM_rg_GROUP_BY_k+0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),CASE_WHEN_count(*)>1_THEN_min(v)_ELSE_max(w)_END_FROM_rg_GROUP_BY_k+0_HAVING_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),CASE_WHEN_count(*)>1_THEN_min(v)_ELSE_max(w)_END_FROM_rg_GROUP_BY_k+0_ORDER_BY_3_DESC,1,2 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),count(*)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),count(*)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END_HAVING_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),count(*)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END_ORDER_BY_3_DESC,1,2 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),min(v)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),min(v)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END_HAVING_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),min(v)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END_ORDER_BY_3_DESC,1,2 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),max(v)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),max(v)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END_HAVING_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),max(v)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END_ORDER_BY_3_DESC,1,2 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),min(v),max(w)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),min(v),max(w)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END_HAVING_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),min(v),max(w)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END_ORDER_BY_3_DESC,1,2 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),max(v),min(w)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),max(v),min(w)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END_HAVING_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),max(v),min(w)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END_ORDER_BY_3_DESC,1,2 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),min(v),max(w),min(v)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),min(v),max(w),min(v)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END_HAVING_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),min(v),max(w),min(v)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END_ORDER_BY_3_DESC,1,2 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),min(v),min(w),max(v)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),min(v),min(w),max(v)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END_HAVING_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),min(v),min(w),max(v)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END_ORDER_BY_3_DESC,1,2 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),max(w),min(v),max(w)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),max(w),min(v),max(w)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END_HAVING_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),max(w),min(v),max(w)_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END_ORDER_BY_3_DESC,1,2 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),CASE_WHEN_count(*)>1_THEN_min(v)_ELSE_max(w)_END_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),CASE_WHEN_count(*)>1_THEN_min(v)_ELSE_max(w)_END_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END_HAVING_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),hex(CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END),CASE_WHEN_count(*)>1_THEN_min(v)_ELSE_max(w)_END_FROM_rg_GROUP_BY_CASE_WHEN_k_IS_NULL_THEN_8_ELSE_k_END_ORDER_BY_3_DESC,1,2 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC) (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_ORDER_BY_3_DESC,1,2 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),min(v)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC) (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),min(v)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),min(v)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_ORDER_BY_3_DESC,1,2 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),max(v)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC) (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),max(v)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),max(v)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_ORDER_BY_3_DESC,1,2 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC) (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_ORDER_BY_3_DESC,1,2 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),max(v),min(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC) (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),max(v),min(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),max(v),min(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_ORDER_BY_3_DESC,1,2 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),min(v),max(w),min(v)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC) (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),min(v),max(w),min(v)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),min(v),max(w),min(v)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_ORDER_BY_3_DESC,1,2 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),min(v),min(w),max(v)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC) (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),min(v),min(w),max(v)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),min(v),min(w),max(v)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_ORDER_BY_3_DESC,1,2 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),max(w),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC) (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),max(w),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),max(w),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_ORDER_BY_3_DESC,1,2 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),CASE_WHEN_count(*)>1_THEN_min(v)_ELSE_max(w)_END_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC) (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),CASE_WHEN_count(*)>1_THEN_min(v)_ELSE_max(w)_END_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),CASE_WHEN_count(*)>1_THEN_min(v)_ELSE_max(w)_END_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_ORDER_BY_3_DESC,1,2 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),count(*)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT) (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),count(*)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT)_HAVING_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),count(*)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT)_ORDER_BY_3_DESC,1,2 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),min(v)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT) (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),min(v)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT)_HAVING_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),min(v)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT)_ORDER_BY_3_DESC,1,2 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),max(v)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT) (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),max(v)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT)_HAVING_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),max(v)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT)_ORDER_BY_3_DESC,1,2 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT) (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT)_HAVING_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT)_ORDER_BY_3_DESC,1,2 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),max(v),min(w)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT) (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),max(v),min(w)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT)_HAVING_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),max(v),min(w)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT)_ORDER_BY_3_DESC,1,2 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),min(v),max(w),min(v)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT) (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),min(v),max(w),min(v)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT)_HAVING_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),min(v),max(w),min(v)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT)_ORDER_BY_3_DESC,1,2 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),min(v),min(w),max(v)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT) (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),min(v),min(w),max(v)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT)_HAVING_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),min(v),min(w),max(v)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT)_ORDER_BY_3_DESC,1,2 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),max(w),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT) (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),max(w),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT)_HAVING_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),max(w),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_TEXT)_ORDER_BY_3_DESC,1,2 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),CASE_WHEN_count(*)>1_THEN_min(v)_ELSE_max(w)_END_FROM_rg_GROUP_BY_CAST(k_AS_TEXT) (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),CASE_WHEN_count(*)>1_THEN_min(v)_ELSE_max(w)_END_FROM_rg_GROUP_BY_CAST(k_AS_TEXT)_HAVING_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_TEXT)),hex(CAST(k_AS_TEXT)),CASE_WHEN_count(*)>1_THEN_min(v)_ELSE_max(w)_END_FROM_rg_GROUP_BY_CAST(k_AS_TEXT)_ORDER_BY_3_DESC,1,2 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),count(*)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB) (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),count(*)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB)_HAVING_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),count(*)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB)_ORDER_BY_3_DESC,1,2 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),min(v)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB) (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),min(v)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB)_HAVING_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),min(v)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB)_ORDER_BY_3_DESC,1,2 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),max(v)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB) (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),max(v)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB)_HAVING_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),max(v)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB)_ORDER_BY_3_DESC,1,2 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB) (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB)_HAVING_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB)_ORDER_BY_3_DESC,1,2 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),max(v),min(w)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB) (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),max(v),min(w)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB)_HAVING_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),max(v),min(w)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB)_ORDER_BY_3_DESC,1,2 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),min(v),max(w),min(v)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB) (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),min(v),max(w),min(v)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB)_HAVING_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),min(v),max(w),min(v)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB)_ORDER_BY_3_DESC,1,2 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),min(v),min(w),max(v)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB) (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),min(v),min(w),max(v)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB)_HAVING_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),min(v),min(w),max(v)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB)_ORDER_BY_3_DESC,1,2 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),max(w),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB) (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),max(w),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB)_HAVING_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),max(w),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_BLOB)_ORDER_BY_3_DESC,1,2 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),CASE_WHEN_count(*)>1_THEN_min(v)_ELSE_max(w)_END_FROM_rg_GROUP_BY_CAST(k_AS_BLOB) (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),CASE_WHEN_count(*)>1_THEN_min(v)_ELSE_max(w)_END_FROM_rg_GROUP_BY_CAST(k_AS_BLOB)_HAVING_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_BLOB)),hex(CAST(k_AS_BLOB)),CASE_WHEN_count(*)>1_THEN_min(v)_ELSE_max(w)_END_FROM_rg_GROUP_BY_CAST(k_AS_BLOB)_ORDER_BY_3_DESC,1,2 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_typeof(k)='integer' (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_count(*)>0_AND_typeof(k)='integer' (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_typeof(k)='integer'_AND_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_count(*)<0_OR_typeof(k)='integer' (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_typeof(k)='real' (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_count(*)>0_AND_typeof(k)='real' (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_typeof(k)='real'_AND_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_count(*)<0_OR_typeof(k)='real' (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_typeof(k)='text' (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_count(*)>0_AND_typeof(k)='text' (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_typeof(k)='text'_AND_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_count(*)<0_OR_typeof(k)='text' (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_typeof(k)='blob' (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_count(*)>0_AND_typeof(k)='blob' (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_typeof(k)='blob'_AND_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_count(*)<0_OR_typeof(k)='blob' (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_(k)_IS_NULL (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_count(*)>0_AND_(k)_IS_NULL (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_(k)_IS_NULL_AND_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_count(*)<0_OR_(k)_IS_NULL (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_(k)=1 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_count(*)>0_AND_(k)=1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_(k)=1_AND_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_count(*)<0_OR_(k)=1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_(k)='1' (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_count(*)>0_AND_(k)='1' (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_(k)='1'_AND_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_count(*)<0_OR_(k)='1' (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_NOT_((k)_IS_NULL) (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_count(*)>0_AND_NOT_((k)_IS_NULL) (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_NOT_((k)_IS_NULL)_AND_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_count(*)<0_OR_NOT_((k)_IS_NULL) (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_CASE_WHEN_typeof(k)='real'_THEN_1_ELSE_0_END (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_count(*)>0_AND_CASE_WHEN_typeof(k)='real'_THEN_1_ELSE_0_END (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_CASE_WHEN_typeof(k)='real'_THEN_1_ELSE_0_END_AND_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k),hex(k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k_HAVING_count(*)<0_OR_CASE_WHEN_typeof(k)='real'_THEN_1_ELSE_0_END (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_typeof(+k)='integer' (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_count(*)>0_AND_typeof(+k)='integer' (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_typeof(+k)='integer'_AND_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_count(*)<0_OR_typeof(+k)='integer' (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_typeof(+k)='real' (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_count(*)>0_AND_typeof(+k)='real' (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_typeof(+k)='real'_AND_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_count(*)<0_OR_typeof(+k)='real' (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_typeof(+k)='text' (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_count(*)>0_AND_typeof(+k)='text' (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_typeof(+k)='text'_AND_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_count(*)<0_OR_typeof(+k)='text' (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_typeof(+k)='blob' (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_count(*)>0_AND_typeof(+k)='blob' (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_typeof(+k)='blob'_AND_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_count(*)<0_OR_typeof(+k)='blob' (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_(+k)_IS_NULL (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_count(*)>0_AND_(+k)_IS_NULL (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_(+k)_IS_NULL_AND_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_count(*)<0_OR_(+k)_IS_NULL (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_(+k)=1 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_count(*)>0_AND_(+k)=1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_(+k)=1_AND_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_count(*)<0_OR_(+k)=1 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_(+k)='1' (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_count(*)>0_AND_(+k)='1' (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_(+k)='1'_AND_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_count(*)<0_OR_(+k)='1' (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_NOT_((+k)_IS_NULL) (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_count(*)>0_AND_NOT_((+k)_IS_NULL) (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_NOT_((+k)_IS_NULL)_AND_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_count(*)<0_OR_NOT_((+k)_IS_NULL) (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_CASE_WHEN_typeof(+k)='real'_THEN_1_ELSE_0_END (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_count(*)>0_AND_CASE_WHEN_typeof(+k)='real'_THEN_1_ELSE_0_END (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_CASE_WHEN_typeof(+k)='real'_THEN_1_ELSE_0_END_AND_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(+k),hex(+k),count(*),min(v),max(w)_FROM_rg_GROUP_BY_+k_HAVING_count(*)<0_OR_CASE_WHEN_typeof(+k)='real'_THEN_1_ELSE_0_END (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_typeof(k+0)='integer' (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)>0_AND_typeof(k+0)='integer' (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_typeof(k+0)='integer'_AND_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)<0_OR_typeof(k+0)='integer' (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_typeof(k+0)='real' (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)>0_AND_typeof(k+0)='real' (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_typeof(k+0)='real'_AND_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)<0_OR_typeof(k+0)='real' (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_typeof(k+0)='text' (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)>0_AND_typeof(k+0)='text' (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_typeof(k+0)='text'_AND_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)<0_OR_typeof(k+0)='text' (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_typeof(k+0)='blob' (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)>0_AND_typeof(k+0)='blob' (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_typeof(k+0)='blob'_AND_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)<0_OR_typeof(k+0)='blob' (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_(k+0)_IS_NULL (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)>0_AND_(k+0)_IS_NULL (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_(k+0)_IS_NULL_AND_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)<0_OR_(k+0)_IS_NULL (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_(k+0)=1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)>0_AND_(k+0)=1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_(k+0)=1_AND_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)<0_OR_(k+0)=1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_(k+0)='1' (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)>0_AND_(k+0)='1' (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_(k+0)='1'_AND_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)<0_OR_(k+0)='1' (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_NOT_((k+0)_IS_NULL) (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)>0_AND_NOT_((k+0)_IS_NULL) (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_NOT_((k+0)_IS_NULL)_AND_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)<0_OR_NOT_((k+0)_IS_NULL) (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_CASE_WHEN_typeof(k+0)='real'_THEN_1_ELSE_0_END (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)>0_AND_CASE_WHEN_typeof(k+0)='real'_THEN_1_ELSE_0_END (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_CASE_WHEN_typeof(k+0)='real'_THEN_1_ELSE_0_END_AND_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(k+0),hex(k+0),count(*),min(v),max(w)_FROM_rg_GROUP_BY_k+0_HAVING_count(*)<0_OR_CASE_WHEN_typeof(k+0)='real'_THEN_1_ELSE_0_END (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_typeof(CAST(k_AS_NUMERIC))='integer' (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)>0_AND_typeof(CAST(k_AS_NUMERIC))='integer' (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_typeof(CAST(k_AS_NUMERIC))='integer'_AND_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)<0_OR_typeof(CAST(k_AS_NUMERIC))='integer' (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_typeof(CAST(k_AS_NUMERIC))='real' (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)>0_AND_typeof(CAST(k_AS_NUMERIC))='real' (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_typeof(CAST(k_AS_NUMERIC))='real'_AND_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)<0_OR_typeof(CAST(k_AS_NUMERIC))='real' (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_typeof(CAST(k_AS_NUMERIC))='text' (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)>0_AND_typeof(CAST(k_AS_NUMERIC))='text' (0.04s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_typeof(CAST(k_AS_NUMERIC))='text'_AND_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)<0_OR_typeof(CAST(k_AS_NUMERIC))='text' (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_typeof(CAST(k_AS_NUMERIC))='blob' (0.06s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)>0_AND_typeof(CAST(k_AS_NUMERIC))='blob' (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_typeof(CAST(k_AS_NUMERIC))='blob'_AND_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)<0_OR_typeof(CAST(k_AS_NUMERIC))='blob' (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_(CAST(k_AS_NUMERIC))_IS_NULL (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)>0_AND_(CAST(k_AS_NUMERIC))_IS_NULL (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_(CAST(k_AS_NUMERIC))_IS_NULL_AND_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)<0_OR_(CAST(k_AS_NUMERIC))_IS_NULL (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_(CAST(k_AS_NUMERIC))=1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)>0_AND_(CAST(k_AS_NUMERIC))=1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_(CAST(k_AS_NUMERIC))=1_AND_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)<0_OR_(CAST(k_AS_NUMERIC))=1 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_(CAST(k_AS_NUMERIC))='1' (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)>0_AND_(CAST(k_AS_NUMERIC))='1' (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_(CAST(k_AS_NUMERIC))='1'_AND_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)<0_OR_(CAST(k_AS_NUMERIC))='1' (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_NOT_((CAST(k_AS_NUMERIC))_IS_NULL) (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)>0_AND_NOT_((CAST(k_AS_NUMERIC))_IS_NULL) (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_NOT_((CAST(k_AS_NUMERIC))_IS_NULL)_AND_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)<0_OR_NOT_((CAST(k_AS_NUMERIC))_IS_NULL) (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_CASE_WHEN_typeof(CAST(k_AS_NUMERIC))='real'_THEN_1_ELSE_0_END (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)>0_AND_CASE_WHEN_typeof(CAST(k_AS_NUMERIC))='real'_THEN_1_ELSE_0_END (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_CASE_WHEN_typeof(CAST(k_AS_NUMERIC))='real'_THEN_1_ELSE_0_END_AND_count(*)>0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_typeof(CAST(k_AS_NUMERIC)),hex(CAST(k_AS_NUMERIC)),count(*),min(v),max(w)_FROM_rg_GROUP_BY_CAST(k_AS_NUMERIC)_HAVING_count(*)<0_OR_CASE_WHEN_typeof(CAST(k_AS_NUMERIC))='real'_THEN_1_ELSE_0_END (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,k+0,typeof(k),typeof(k+0),min(v),max(w)_FROM_rg_WHERE_id<17_GROUP_BY_k,k+0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k+0,k,typeof(k+0),typeof(k),min(v),max(w)_FROM_rg_WHERE_id<17_GROUP_BY_k+0,k (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k+0,typeof(k+0),min(v),max(w)_FROM_rg_WHERE_id<17_GROUP_BY_k+0_ORDER_BY_k+0_DESC (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_count(*)_FROM_rg_GROUP_BY_(1=1)_HAVING_count(*)>0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_true,count(*)_FROM_rg_GROUP_BY_true (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_false,count(*)_FROM_rg_GROUP_BY_false (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k_AS_q,count(*)_AS_q_FROM_rg_WHERE_id<17_GROUP_BY_q_ORDER_BY_q (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k_AS_q,count(*)_FROM_rg_WHERE_id<17_GROUP_BY_+1_ORDER_BY_-(-1) (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_count(*)_FROM_rg_HAVING_0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_count(*)_FROM_rz_HAVING_count(*)=0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_ORDER_BY_k_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_ORDER_BY_k+0_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_LIMIT_0_OFFSET_NULL (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_0_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_0_ORDER_BY_k_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_0_ORDER_BY_k+0_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_0_LIMIT_0_OFFSET_NULL (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_0.0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_0.0_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_0.0_ORDER_BY_k_DESC_LIMIT_1 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_0.0_ORDER_BY_k+0_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_0.0_LIMIT_0_OFFSET_NULL (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_'0' (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_'0'_LIMIT_1 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_'0'_ORDER_BY_k_DESC_LIMIT_1 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_'0'_ORDER_BY_k+0_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_'0'_LIMIT_0_OFFSET_NULL (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_NULL (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_NULL_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_NULL_ORDER_BY_k_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_NULL_ORDER_BY_k+0_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_NULL_LIMIT_0_OFFSET_NULL (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_false (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_false_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_false_ORDER_BY_k_DESC_LIMIT_1 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_false_ORDER_BY_k+0_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_false_LIMIT_0_OFFSET_NULL (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_k=1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_k=1_LIMIT_1 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_k=1_ORDER_BY_k_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_k=1_ORDER_BY_k+0_DESC_LIMIT_1 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_k=1_LIMIT_0_OFFSET_NULL (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_count(*)=0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_count(*)=0_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_count(*)=0_ORDER_BY_k_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_count(*)=0_ORDER_BY_k+0_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_count(*)=0_LIMIT_0_OFFSET_NULL (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_count(*)>0_AND_k=1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_count(*)>0_AND_k=1_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_count(*)>0_AND_k=1_ORDER_BY_k_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_count(*)>0_AND_k=1_ORDER_BY_k+0_DESC_LIMIT_1 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_count(*)>0_AND_k=1_LIMIT_0_OFFSET_NULL (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_k=1_OR_count(*)<0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_k=1_OR_count(*)<0_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_k=1_OR_count(*)<0_ORDER_BY_k_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_k=1_OR_count(*)<0_ORDER_BY_k+0_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_re_GROUP_BY_k_HAVING_k=1_OR_count(*)<0_LIMIT_0_OFFSET_NULL (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_ORDER_BY_k_DESC_LIMIT_1 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_ORDER_BY_k+0_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_LIMIT_0_OFFSET_NULL (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_0_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_0_ORDER_BY_k_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_0_ORDER_BY_k+0_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_0_LIMIT_0_OFFSET_NULL (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_0.0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_0.0_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_0.0_ORDER_BY_k_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_0.0_ORDER_BY_k+0_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_0.0_LIMIT_0_OFFSET_NULL (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_'0' (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_'0'_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_'0'_ORDER_BY_k_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_'0'_ORDER_BY_k+0_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_'0'_LIMIT_0_OFFSET_NULL (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_NULL (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_NULL_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_NULL_ORDER_BY_k_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_NULL_ORDER_BY_k+0_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_NULL_LIMIT_0_OFFSET_NULL (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_false (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_false_LIMIT_1 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_false_ORDER_BY_k_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_false_ORDER_BY_k+0_DESC_LIMIT_1 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_false_LIMIT_0_OFFSET_NULL (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_k=1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_k=1_LIMIT_1 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_k=1_ORDER_BY_k_DESC_LIMIT_1 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_k=1_ORDER_BY_k+0_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_k=1_LIMIT_0_OFFSET_NULL (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_count(*)=0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_count(*)=0_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_count(*)=0_ORDER_BY_k_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_count(*)=0_ORDER_BY_k+0_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_count(*)=0_LIMIT_0_OFFSET_NULL (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_count(*)>0_AND_k=1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_count(*)>0_AND_k=1_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_count(*)>0_AND_k=1_ORDER_BY_k_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_count(*)>0_AND_k=1_ORDER_BY_k+0_DESC_LIMIT_1 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_count(*)>0_AND_k=1_LIMIT_0_OFFSET_NULL (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_k=1_OR_count(*)<0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_k=1_OR_count(*)<0_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_k=1_OR_count(*)<0_ORDER_BY_k_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_k=1_OR_count(*)<0_ORDER_BY_k+0_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(v)_FROM_ro_GROUP_BY_k_HAVING_k=1_OR_count(*)<0_LIMIT_0_OFFSET_NULL (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_ORDER_BY_k_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_ORDER_BY_k+0_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_LIMIT_0_OFFSET_NULL (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_0 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_0_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_0_ORDER_BY_k_DESC_LIMIT_1 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_0_ORDER_BY_k+0_DESC_LIMIT_1 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_0_LIMIT_0_OFFSET_NULL (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_0.0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_0.0_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_0.0_ORDER_BY_k_DESC_LIMIT_1 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_0.0_ORDER_BY_k+0_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_0.0_LIMIT_0_OFFSET_NULL (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_'0' (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_'0'_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_'0'_ORDER_BY_k_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_'0'_ORDER_BY_k+0_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_'0'_LIMIT_0_OFFSET_NULL (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_NULL (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_NULL_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_NULL_ORDER_BY_k_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_NULL_ORDER_BY_k+0_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_NULL_LIMIT_0_OFFSET_NULL (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_false (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_false_LIMIT_1 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_false_ORDER_BY_k_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_false_ORDER_BY_k+0_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_false_LIMIT_0_OFFSET_NULL (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_k=1 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_k=1_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_k=1_ORDER_BY_k_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_k=1_ORDER_BY_k+0_DESC_LIMIT_1 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_k=1_LIMIT_0_OFFSET_NULL (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_count(*)=0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_count(*)=0_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_count(*)=0_ORDER_BY_k_DESC_LIMIT_1 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_count(*)=0_ORDER_BY_k+0_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_count(*)=0_LIMIT_0_OFFSET_NULL (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_count(*)>0_AND_k=1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_count(*)>0_AND_k=1_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_count(*)>0_AND_k=1_ORDER_BY_k_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_count(*)>0_AND_k=1_ORDER_BY_k+0_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_count(*)>0_AND_k=1_LIMIT_0_OFFSET_NULL (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_k=1_OR_count(*)<0 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_k=1_OR_count(*)<0_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_k=1_OR_count(*)<0_ORDER_BY_k_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_k=1_OR_count(*)<0_ORDER_BY_k+0_DESC_LIMIT_1 (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,sum(abs(v))_FROM_rz_GROUP_BY_k_HAVING_k=1_OR_count(*)<0_LIMIT_0_OFFSET_NULL (0.01s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_re_GROUP_BY_k_ORDER_BY_k+0_LIMIT_1 (0.00s)
+    --- FAIL: TestGroupedReviewerDifferential/SELECT_k,CASE_WHEN_k=2_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_re_GROUP_BY_k_ORDER_BY_k+0_LIMIT_1 (0.00s)
+    --- FAIL: TestGroupedReviewerDifferential/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_re_GROUP_BY_k_ORDER_BY_k+0_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_re_GROUP_BY_k_ORDER_BY_k+0_LIMIT_1_OFFSET_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,CASE_WHEN_k=2_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_re_GROUP_BY_k_ORDER_BY_k+0_LIMIT_1_OFFSET_1 (0.00s)
+    --- FAIL: TestGroupedReviewerDifferential/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_re_GROUP_BY_k_ORDER_BY_k+0_LIMIT_1_OFFSET_1 (0.00s)
+    --- FAIL: TestGroupedReviewerDifferential/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_re_GROUP_BY_k_ORDER_BY_k+0_DESC_LIMIT_1 (0.01s)
+    --- FAIL: TestGroupedReviewerDifferential/SELECT_k,CASE_WHEN_k=2_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_re_GROUP_BY_k_ORDER_BY_k+0_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_re_GROUP_BY_k_ORDER_BY_k+0_DESC_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_re_GROUP_BY_k_ORDER_BY_k+0_NULLS_LAST_LIMIT_1 (0.00s)
+    --- FAIL: TestGroupedReviewerDifferential/SELECT_k,CASE_WHEN_k=2_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_re_GROUP_BY_k_ORDER_BY_k+0_NULLS_LAST_LIMIT_1 (0.00s)
+    --- FAIL: TestGroupedReviewerDifferential/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_re_GROUP_BY_k_ORDER_BY_k+0_NULLS_LAST_LIMIT_1 (0.00s)
+    --- PASS: TestGroupedReviewerDifferential/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_re_GROUP_BY_k_ORDER_BY_k+0,k_LIMIT_1 (0.00s)
+    --- FAIL: TestGroupedReviewerDifferential/SELECT_k,CASE_WHEN_k=2_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_re_GROUP_BY_k_ORDER_BY_k+0,k_LIMIT_1 (0.00s)
+    --- FAIL: TestGroupedReviewerDifferential/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_re_GROUP_BY_k_ORDER_BY_k+0,k_LIMIT_1 (0.00s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/testkit	2.580s
+FAIL

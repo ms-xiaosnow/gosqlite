@@ -1,0 +1,17 @@
+=== RUN   TestCachedPreparationOracleHistories
+=== RUN   TestCachedPreparationOracleHistories/512
+    preparation_cache_conformance_test.go:120: DELETE FROM absent sqlite exec: SQLite database is busy: native file lock busy
+=== RUN   TestCachedPreparationOracleHistories/4096
+    preparation_cache_conformance_test.go:120: DELETE FROM absent sqlite exec: SQLite database is busy: native file lock busy
+=== RUN   TestCachedPreparationOracleHistories/65536
+    preparation_cache_conformance_test.go:120: DELETE FROM absent sqlite exec: SQLite database is busy: native file lock busy
+--- FAIL: TestCachedPreparationOracleHistories (0.03s)
+    --- FAIL: TestCachedPreparationOracleHistories/512 (0.01s)
+    --- FAIL: TestCachedPreparationOracleHistories/4096 (0.00s)
+    --- FAIL: TestCachedPreparationOracleHistories/65536 (0.01s)
+=== RUN   TestCachedPreparationOracleFreshAndReadWarm
+    preparation_cache_conformance_test.go:237: true DELETE FROM missing sqlite exec: SQLite database is busy: native file lock busy
+--- FAIL: TestCachedPreparationOracleFreshAndReadWarm (0.01s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/testkit	0.042s
+FAIL

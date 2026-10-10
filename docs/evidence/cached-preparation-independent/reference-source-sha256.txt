@@ -1,0 +1,3 @@
+0481c754223ea1f1b2e47e15bb60f7c7cfb8412c70d06d5247c462034ed93b05  durable-restart/toolchains/sqlite-src-3540000/src/prepare.c
+686f42bed71dded9d9bc33fd4111dc65cbe7e9ba8a94b3f40eb13a1050624289  durable-restart/toolchains/sqlite-src-3540000/src/vdbe.c
+8b0ec9d5a4b2012f8940a3b12b3e21d6ec80cee045c4b5b63fc1d1c37691badc  durable-restart/toolchains/sqlite-src-3540000/src/main.c

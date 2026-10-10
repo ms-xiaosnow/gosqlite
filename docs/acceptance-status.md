@@ -9,7 +9,7 @@ terminal results are recorded separately in checkpoints.json and progress.md.
 | Category | Goal clauses | Current concrete work / evidence |
 |---|---|---|
 | 必须实现 | G1, §§3/4.1, M3 | Aligned finite-count multi-segment memory replay and minimal native recovery ownership are integrated with ordinary byte-only/source evidence; physical recovery remains unexecuted. Fix the newly observed rollback reader-open stat/SHARED timing race, finish shared initial-absence provenance, define safe public recovery integration and supported WAL-tail handling. Physical execution remains separately restricted |
-| 必须实现 | §4.2, §§11.1/11.3 | Correct known supported-query error/order differences. Planner candidate fixes420 old cases but retains16+2 failures and is held; grouped/counter/cached-preparation code awaits a separately passing combined tree. Phased optional grammar is lower priority |
+| 必须实现 | §4.2, §§11.1/11.3 | Correct known supported-query error/order differences. Grouped/counter/cached-preparation code is integrated and exact-source full gates passed. Planner correction remains held: its8472 retained comparisons pass, but a fresh1824-case review finds23 inherited real error/phase differences (plus7 unspecified-order differences), now under correction. Phased optional grammar is lower priority |
 | 必须实现 | §§8.1/12.2 | Safe usable encrypted backup/rekey CLI v2 passed independent ordinary review and awaits combined integration. Generic plaintext backup and native whole-database check are narrower scope decisions, not implied by extension checking or official integrity_check |
 | 必须实现 | §9.2(2/5) | Caller-dataset norms/exact-distance/Top-K verification v1 is held: an independently reproduced 16,000-dimensional signed-IP case exceeds its too-narrow numerical bound by 14.0724 times. A derived correction is in progress; count/PK/component fidelity already exists. ANN recall remains separate |
 | 必须实现 | §5.2, M10/§11.3 | Add NFC-normalized randomized input corpus, grams build/space/P50/P95 harness, transaction-throughput/real-duration soak harness and variance-aware performance CI. The first rollback 20-second soak failed after 14.0159 seconds with ErrChanged and is retained; shared/encrypted short profiles passed. Fix the reader race before acceptance. Do not call repeated unit tests a long soak |
@@ -25,3 +25,18 @@ The goal supplies no numeric large-benchmark size or soak duration: predeclare a
 justified workload and report actual data/clock/confidence, not flag maximums.
 No additional user action is currently needed for permitted code, harnesses or
 ordinary tests. Eventual real access/review decisions cannot be replaced by docs.
+
+## Subsequent evidence and active corrections
+
+The bounded Reader post-SHARED metadata fix has independent source/ordinary tests
+and four20-second candidate samples, while two baseline controls failed ErrChanged.
+It is not included here and long-soak acceptance remains pending. Shared absence
+provenance is corrected in an isolated freeze and is under independent lead review.
+CLI backup/rekey and importer-distance v2 now have scoped independent PASS but
+await combined integration; distance v1 false rejection remains failed history.
+Grams normalized corpus and smoke/medium harness have independent PASS; actual
+size amplification/slowdown observations are retained, without a speedup claim.
+Transaction harness v2 is held for mixed-error classification and close/retirement
+reporting defects exposed by pure-memory/source review; v3 correction is active.
+Native whole-profile check and conservative performance CI tooling are implementing.
+These are source/evidence statuses, not replacement M10 acceptance.

@@ -1,0 +1,28 @@
+Source/behavior audit for cached-schema preparation, 2026-10-10 UTC
+
+Pinned local public SQLite: toolchains/sqlite-build-3540000/sqlite3.c
+SHA256 2da161e310ef0aba3465f22a4d12b8a43723236f0942fa76e8aac523c3317243
+Pinned official CLI SHA256 470775f6ada29ccfb2d3046ac2b4c975df95a9c20b782332d4e8ba6b6233e6c6
+SQLite 3.54.0, source ID 2026-10-09 15:46:58 be8d059e9a49089ab2dce5ed26dd87aaf598fdc5fbe0b107c0dd758464bcd5e3.
+
+Public source inspection:
+- sqlite3Init/sqlite3ReadSchema, amalgamation 148817-148870: persistent loaded-schema state, no re-read when initialized.
+- schemaIsValid, 148879-148922: prepares schema-cookie retry after selected preparation failures. If opening a read transaction returns BUSY, it leaves the original preparation error in place.
+- sqlite3Prepare, 149183-149212: schemaIsValid only on failures with checkSchema set; failed preparation does not yield a VM.
+- OP_Transaction, 100500-100585: snapshot/transaction admission precedes cookie generation check; schema mismatch suppresses changeCntOn until reprepare.
+- sqlite3RollbackAll, 189802-189833: schema-changing rollback expires prepared statements and resets all connection schemas.
+- Existing counter source review in sql-connection-counters-evidence and independent final README remains applicable to VM change publication and source-row INSERT tracking.
+
+Native production review:
+- Cache is a DB mutex-owned pointer, no global map or cross-connection sharing. Query/Schema/write/close hooks run under the existing lock. Rows own no cache reference.
+- Cache entries are independent string copies and copied column arrays/maps. Zero roots, nil defaults/extensions/indexes, no reader or pager handle. Mutating statement ASTs during shared preparation cannot mutate schema entries.
+- Metadata budget includes fixed allocation, per-table and per-column allowance and copied string bytes. Empty-cache fixed quota bug found independently was fixed before final freeze. Optional read catalog parsing is charged separately before parsing and retains parser bounds.
+- Normal successful snapshot first invalidates a stale cookie and always rebuilds its current writable catalog. Existing ownership validation and storage.Statement execute before real DML data access. A cache cannot return success from snapshot admission or skip row/index validation.
+- Only pure ordinary pager/VFS BUSY leaves in the native error tree enable cached classification. Any other leaf leaves native admission error and non-started outcome unchanged. This was unit-tested without any native failure injection.
+- Shared prepareInsert/prepareUpdate/prepareDelete preserve the original target/bind/arity checks, now with context checks at expression nodes. Parameters still bind before DB lock/snapshot; runtime expressions never run from the cache.
+- mutationOutcome.started feeds the existing completion routine only. Changes resets on classified executed BUSY; total/last-rowid untouched. Source-row insertion/ABORT accounting and automatic-vs-explicit completion remain in their original code positions.
+- Successful CREATE updates statement-local catalog only. Cache snapshots remain immutable. Schema cookie guards, DDL full rollback, DDL-discarding savepoint rollback, failed automatic DDL commit and Close disposal were reviewed and tested.
+- Session/extension/unsupported-catalog cache exclusions preserve their old early-admission behavior. Constant SELECT and SQL sqlite_schema projection do not populate this optional cache; DB constants still open a reader, Tx constants stay lazy.
+
+Selected test behavior audit:
+New tests use new intact SQL-created files, ordinary CREATE/ALTER/DROP/recreate via public SQL, normal cooperative EXCLUSIVE locks, savepoints/rollback, context/quota rejection, normal Close and subprocess .quit/EOF/Wait. No native failure injection, crash/kill, physical mutation, selected-file disappearance, namespace mutation, corruption/tamper/wrong-key, interrupted publication or recovery. Existing selected owner tests were reviewed for the same ordinary-data scope. Broad suites were not run.

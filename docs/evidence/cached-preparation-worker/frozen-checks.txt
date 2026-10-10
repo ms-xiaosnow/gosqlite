@@ -1,0 +1,225 @@
+2026-10-10T20:40:19Z
+go version go1.27.2 linux/amd64
+3.54.0 2026-10-09 15:46:58 be8d059e9a49089ab2dce5ed26dd87aaf598fdc5fbe0b107c0dd758464bcd5e3 (64-bit)
+Behavior audit: selected owner/new sources use intact SQL-created databases, ordinary SQL DML/DDL/transactions/savepoints, cooperative locks, logical errors, quota/context rejection, EOF/.quit/Wait oracle completion. Existing counters cover partial source-row insertion/ABORT, extension maintenance and driver pool reset. Pure error-tree tests invoke no native operation. No physical tamper/namespace/native failure/recovery/crash/kill/interrupted publication test is selected.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestConnectionCountersCancellationAfterInsertedRow
+--- PASS: TestConnectionCountersCancellationAfterInsertedRow (0.00s)
+=== RUN   TestConnectionCountersLazyTransactionReads
+--- PASS: TestConnectionCountersLazyTransactionReads (0.00s)
+=== RUN   TestSQLExpressionFeaturesDMLBindingDefaults
+--- PASS: TestSQLExpressionFeaturesDMLBindingDefaults (0.00s)
+=== RUN   TestCachedPreparationOutcomes
+=== RUN   TestCachedPreparationOutcomes/false
+=== RUN   TestCachedPreparationOutcomes/true
+--- PASS: TestCachedPreparationOutcomes (0.00s)
+    --- PASS: TestCachedPreparationOutcomes/false (0.00s)
+    --- PASS: TestCachedPreparationOutcomes/true (0.00s)
+=== RUN   TestCachedPreparationFreshReadWarmAndQuota
+--- PASS: TestCachedPreparationFreshReadWarmAndQuota (0.00s)
+=== RUN   TestCachedPreparationSchemaLifecycle
+--- PASS: TestCachedPreparationSchemaLifecycle (0.00s)
+=== RUN   TestCachedPreparationMetadataIsolation
+--- PASS: TestCachedPreparationMetadataIsolation (0.00s)
+=== RUN   TestCachedPreparationBusyClassification
+--- PASS: TestCachedPreparationBusyClassification (0.00s)
+=== RUN   TestCachedPreparationEmptyQuota
+--- PASS: TestCachedPreparationEmptyQuota (0.00s)
+=== RUN   TestConnectionCountersStatementsAndUndo
+=== RUN   TestConnectionCountersStatementsAndUndo/false
+=== RUN   TestConnectionCountersStatementsAndUndo/true
+--- PASS: TestConnectionCountersStatementsAndUndo (0.03s)
+    --- PASS: TestConnectionCountersStatementsAndUndo/false (0.01s)
+    --- PASS: TestConnectionCountersStatementsAndUndo/true (0.02s)
+=== RUN   TestConnectionCountersAdmissionRowsAndReopen
+--- PASS: TestConnectionCountersAdmissionRowsAndReopen (0.00s)
+=== RUN   TestConnectionCountersStreamingDynamicAndBusyCommit
+--- PASS: TestConnectionCountersStreamingDynamicAndBusyCommit (0.00s)
+=== RUN   TestConnectionCountersConcurrentNative
+--- PASS: TestConnectionCountersConcurrentNative (0.01s)
+=== RUN   TestConnectionCountersExtensionMaintenanceExcluded
+--- PASS: TestConnectionCountersExtensionMaintenanceExcluded (0.23s)
+=== RUN   TestTransactionDeferredSnapshotTiming
+=== RUN   TestTransactionDeferredSnapshotTiming/false
+=== RUN   TestTransactionDeferredSnapshotTiming/true
+--- PASS: TestTransactionDeferredSnapshotTiming (0.01s)
+    --- PASS: TestTransactionDeferredSnapshotTiming/false (0.00s)
+    --- PASS: TestTransactionDeferredSnapshotTiming/true (0.01s)
+=== RUN   TestTransactionSavepointNamesDDLAndStatementFailure
+--- PASS: TestTransactionSavepointNamesDDLAndStatementFailure (0.01s)
+=== RUN   TestTransactionImmediateExclusiveAndFailedOuterRelease
+=== RUN   TestTransactionImmediateExclusiveAndFailedOuterRelease/false
+=== RUN   TestTransactionImmediateExclusiveAndFailedOuterRelease/true
+--- PASS: TestTransactionImmediateExclusiveAndFailedOuterRelease (0.01s)
+    --- PASS: TestTransactionImmediateExclusiveAndFailedOuterRelease/false (0.00s)
+    --- PASS: TestTransactionImmediateExclusiveAndFailedOuterRelease/true (0.00s)
+=== RUN   TestTransactionSavepointLimitsAndRowsRestrictions
+--- PASS: TestTransactionSavepointLimitsAndRowsRestrictions (0.00s)
+=== RUN   TestTransactionLazySavepointQuotaFailureState
+--- PASS: TestTransactionLazySavepointQuotaFailureState (0.00s)
+=== RUN   TestNativeDefaultsAffinityAndRowIDs
+--- PASS: TestNativeDefaultsAffinityAndRowIDs (0.01s)
+=== RUN   TestNativeStatementRollbackAndTransactionalDDL
+--- PASS: TestNativeStatementRollbackAndTransactionalDDL (0.00s)
+=== RUN   TestNativeSnapshotsBusyAndCleanup
+--- PASS: TestNativeSnapshotsBusyAndCleanup (0.00s)
+=== RUN   TestNativeBudgetsCancellationAndReadOnly
+--- PASS: TestNativeBudgetsCancellationAndReadOnly (0.01s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.434s
+=== RUN   TestDriverConnectionCountersPreparedPinnedAndPoolReset
+--- PASS: TestDriverConnectionCountersPreparedPinnedAndPoolReset (0.00s)
+=== RUN   TestDriverCachedPreparationBusyReuse
+--- PASS: TestDriverCachedPreparationBusyReuse (0.00s)
+=== RUN   TestDriverSavepointsPoolResetAndOuterRelease
+--- PASS: TestDriverSavepointsPoolResetAndOuterRelease (0.01s)
+=== RUN   TestDriverFailedOuterReleaseRemainsActive
+--- PASS: TestDriverFailedOuterReleaseRemainsActive (0.00s)
+=== RUN   TestDriverDeferredBeginSeesFirstAccessState
+--- PASS: TestDriverDeferredBeginSeesFirstAccessState (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.029s
+=== RUN   TestConnectionFunctionContextAndVolatility
+--- PASS: TestConnectionFunctionContextAndVolatility (0.00s)
+=== RUN   TestBooleanScalarVersusPredicate
+--- PASS: TestBooleanScalarVersusPredicate (0.00s)
+=== RUN   TestBooleanThreeValuedTruthTables
+--- PASS: TestBooleanThreeValuedTruthTables (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.024s
+Behavior audit: selected owner/new sources use intact SQL-created databases, ordinary SQL DML/DDL/transactions/savepoints, cooperative locks, logical errors, quota/context rejection, EOF/.quit/Wait oracle completion. Existing counters cover partial source-row insertion/ABORT, extension maintenance and driver pool reset. Pure error-tree tests invoke no native operation. No physical tamper/namespace/native failure/recovery/crash/kill/interrupted publication test is selected.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestConnectionCountersOracleHistories
+=== RUN   TestConnectionCountersOracleHistories/page512/sharedfalse
+=== RUN   TestConnectionCountersOracleHistories/page512/sharedtrue
+=== RUN   TestConnectionCountersOracleHistories/page4096/sharedfalse
+=== RUN   TestConnectionCountersOracleHistories/page4096/sharedtrue
+=== RUN   TestConnectionCountersOracleHistories/page65536/sharedfalse
+=== RUN   TestConnectionCountersOracleHistories/page65536/sharedtrue
+--- PASS: TestConnectionCountersOracleHistories (0.24s)
+    --- PASS: TestConnectionCountersOracleHistories/page512/sharedfalse (0.02s)
+    --- PASS: TestConnectionCountersOracleHistories/page512/sharedtrue (0.03s)
+    --- PASS: TestConnectionCountersOracleHistories/page4096/sharedfalse (0.03s)
+    --- PASS: TestConnectionCountersOracleHistories/page4096/sharedtrue (0.04s)
+    --- PASS: TestConnectionCountersOracleHistories/page65536/sharedfalse (0.05s)
+    --- PASS: TestConnectionCountersOracleHistories/page65536/sharedtrue (0.06s)
+=== RUN   TestConnectionCountersOracleFunctionErrors
+=== RUN   TestConnectionCountersOracleFunctionErrors/SELECT_changes(1)
+=== RUN   TestConnectionCountersOracleFunctionErrors/SELECT_total_changes(NULL)
+=== RUN   TestConnectionCountersOracleFunctionErrors/SELECT_last_insert_rowid(1,2)
+=== RUN   TestConnectionCountersOracleFunctionErrors/SELECT_changes(1)_LIMIT_0
+=== RUN   TestConnectionCountersOracleFunctionErrors/SELECT_CASE_WHEN_0_THEN_total_changes(1)_ELSE_1_END
+--- PASS: TestConnectionCountersOracleFunctionErrors (0.01s)
+    --- PASS: TestConnectionCountersOracleFunctionErrors/SELECT_changes(1) (0.00s)
+    --- PASS: TestConnectionCountersOracleFunctionErrors/SELECT_total_changes(NULL) (0.00s)
+    --- PASS: TestConnectionCountersOracleFunctionErrors/SELECT_last_insert_rowid(1,2) (0.00s)
+    --- PASS: TestConnectionCountersOracleFunctionErrors/SELECT_changes(1)_LIMIT_0 (0.00s)
+    --- PASS: TestConnectionCountersOracleFunctionErrors/SELECT_CASE_WHEN_0_THEN_total_changes(1)_ELSE_1_END (0.00s)
+=== RUN   TestConnectionCountersOracleBusyOutcomes
+--- PASS: TestConnectionCountersOracleBusyOutcomes (0.01s)
+=== RUN   TestCachedPreparationOracleHistories
+=== RUN   TestCachedPreparationOracleHistories/512
+=== RUN   TestCachedPreparationOracleHistories/4096
+=== RUN   TestCachedPreparationOracleHistories/65536
+--- PASS: TestCachedPreparationOracleHistories (0.20s)
+    --- PASS: TestCachedPreparationOracleHistories/512 (0.04s)
+    --- PASS: TestCachedPreparationOracleHistories/4096 (0.08s)
+    --- PASS: TestCachedPreparationOracleHistories/65536 (0.08s)
+=== RUN   TestCachedPreparationOracleFreshAndReadWarm
+--- PASS: TestCachedPreparationOracleFreshAndReadWarm (0.02s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	0.489s
+Behavior audit: selected owner/new sources use intact SQL-created databases, ordinary SQL DML/DDL/transactions/savepoints, cooperative locks, logical errors, quota/context rejection, EOF/.quit/Wait oracle completion. Existing counters cover partial source-row insertion/ABORT, extension maintenance and driver pool reset. Pure error-tree tests invoke no native operation. No physical tamper/namespace/native failure/recovery/crash/kill/interrupted publication test is selected.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestConnectionCountersCancellationAfterInsertedRow
+--- PASS: TestConnectionCountersCancellationAfterInsertedRow (0.01s)
+=== RUN   TestConnectionCountersLazyTransactionReads
+--- PASS: TestConnectionCountersLazyTransactionReads (0.00s)
+=== RUN   TestCachedPreparationOutcomes
+=== RUN   TestCachedPreparationOutcomes/false
+=== RUN   TestCachedPreparationOutcomes/true
+--- PASS: TestCachedPreparationOutcomes (0.01s)
+    --- PASS: TestCachedPreparationOutcomes/false (0.01s)
+    --- PASS: TestCachedPreparationOutcomes/true (0.00s)
+=== RUN   TestCachedPreparationFreshReadWarmAndQuota
+--- PASS: TestCachedPreparationFreshReadWarmAndQuota (0.01s)
+=== RUN   TestCachedPreparationSchemaLifecycle
+--- PASS: TestCachedPreparationSchemaLifecycle (0.01s)
+=== RUN   TestCachedPreparationMetadataIsolation
+--- PASS: TestCachedPreparationMetadataIsolation (0.00s)
+=== RUN   TestCachedPreparationBusyClassification
+--- PASS: TestCachedPreparationBusyClassification (0.00s)
+=== RUN   TestCachedPreparationEmptyQuota
+--- PASS: TestCachedPreparationEmptyQuota (0.00s)
+=== RUN   TestConnectionCountersStatementsAndUndo
+=== RUN   TestConnectionCountersStatementsAndUndo/false
+=== RUN   TestConnectionCountersStatementsAndUndo/true
+--- PASS: TestConnectionCountersStatementsAndUndo (0.10s)
+    --- PASS: TestConnectionCountersStatementsAndUndo/false (0.03s)
+    --- PASS: TestConnectionCountersStatementsAndUndo/true (0.07s)
+=== RUN   TestConnectionCountersAdmissionRowsAndReopen
+--- PASS: TestConnectionCountersAdmissionRowsAndReopen (0.01s)
+=== RUN   TestConnectionCountersStreamingDynamicAndBusyCommit
+--- PASS: TestConnectionCountersStreamingDynamicAndBusyCommit (0.00s)
+=== RUN   TestConnectionCountersConcurrentNative
+--- PASS: TestConnectionCountersConcurrentNative (0.01s)
+=== RUN   TestConnectionCountersExtensionMaintenanceExcluded
+--- PASS: TestConnectionCountersExtensionMaintenanceExcluded (0.76s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	2.045s
+=== RUN   TestDriverConnectionCountersPreparedPinnedAndPoolReset
+--- PASS: TestDriverConnectionCountersPreparedPinnedAndPoolReset (0.01s)
+=== RUN   TestDriverCachedPreparationBusyReuse
+--- PASS: TestDriverCachedPreparationBusyReuse (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.047s
+=== RUN   TestConnectionFunctionContextAndVolatility
+--- PASS: TestConnectionFunctionContextAndVolatility (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	1.043s
+Behavior audit: selected owner/new sources use intact SQL-created databases, ordinary SQL DML/DDL/transactions/savepoints, cooperative locks, logical errors, quota/context rejection, EOF/.quit/Wait oracle completion. Existing counters cover partial source-row insertion/ABORT, extension maintenance and driver pool reset. Pure error-tree tests invoke no native operation. No physical tamper/namespace/native failure/recovery/crash/kill/interrupted publication test is selected.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestConnectionCountersOracleHistories
+=== RUN   TestConnectionCountersOracleHistories/page512/sharedfalse
+=== RUN   TestConnectionCountersOracleHistories/page512/sharedtrue
+=== RUN   TestConnectionCountersOracleHistories/page4096/sharedfalse
+=== RUN   TestConnectionCountersOracleHistories/page4096/sharedtrue
+=== RUN   TestConnectionCountersOracleHistories/page65536/sharedfalse
+=== RUN   TestConnectionCountersOracleHistories/page65536/sharedtrue
+--- PASS: TestConnectionCountersOracleHistories (0.65s)
+    --- PASS: TestConnectionCountersOracleHistories/page512/sharedfalse (0.05s)
+    --- PASS: TestConnectionCountersOracleHistories/page512/sharedtrue (0.11s)
+    --- PASS: TestConnectionCountersOracleHistories/page4096/sharedfalse (0.05s)
+    --- PASS: TestConnectionCountersOracleHistories/page4096/sharedtrue (0.10s)
+    --- PASS: TestConnectionCountersOracleHistories/page65536/sharedfalse (0.11s)
+    --- PASS: TestConnectionCountersOracleHistories/page65536/sharedtrue (0.22s)
+=== RUN   TestConnectionCountersOracleFunctionErrors
+=== RUN   TestConnectionCountersOracleFunctionErrors/SELECT_changes(1)
+=== RUN   TestConnectionCountersOracleFunctionErrors/SELECT_total_changes(NULL)
+=== RUN   TestConnectionCountersOracleFunctionErrors/SELECT_last_insert_rowid(1,2)
+=== RUN   TestConnectionCountersOracleFunctionErrors/SELECT_changes(1)_LIMIT_0
+=== RUN   TestConnectionCountersOracleFunctionErrors/SELECT_CASE_WHEN_0_THEN_total_changes(1)_ELSE_1_END
+--- PASS: TestConnectionCountersOracleFunctionErrors (0.02s)
+    --- PASS: TestConnectionCountersOracleFunctionErrors/SELECT_changes(1) (0.00s)
+    --- PASS: TestConnectionCountersOracleFunctionErrors/SELECT_total_changes(NULL) (0.00s)
+    --- PASS: TestConnectionCountersOracleFunctionErrors/SELECT_last_insert_rowid(1,2) (0.00s)
+    --- PASS: TestConnectionCountersOracleFunctionErrors/SELECT_changes(1)_LIMIT_0 (0.00s)
+    --- PASS: TestConnectionCountersOracleFunctionErrors/SELECT_CASE_WHEN_0_THEN_total_changes(1)_ELSE_1_END (0.00s)
+=== RUN   TestConnectionCountersOracleBusyOutcomes
+--- PASS: TestConnectionCountersOracleBusyOutcomes (0.02s)
+=== RUN   TestCachedPreparationOracleHistories
+=== RUN   TestCachedPreparationOracleHistories/512
+=== RUN   TestCachedPreparationOracleHistories/4096
+=== RUN   TestCachedPreparationOracleHistories/65536
+--- PASS: TestCachedPreparationOracleHistories (0.29s)
+    --- PASS: TestCachedPreparationOracleHistories/512 (0.09s)
+    --- PASS: TestCachedPreparationOracleHistories/4096 (0.07s)
+    --- PASS: TestCachedPreparationOracleHistories/65536 (0.13s)
+=== RUN   TestCachedPreparationOracleFreshAndReadWarm
+--- PASS: TestCachedPreparationOracleFreshAndReadWarm (0.03s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	2.045s
+Behavior audit: selected owner/new sources use intact SQL-created databases, ordinary SQL DML/DDL/transactions/savepoints, cooperative locks, logical errors, quota/context rejection, EOF/.quit/Wait oracle completion. Existing counters cover partial source-row insertion/ABORT, extension maintenance and driver pool reset. Pure error-tree tests invoke no native operation. No physical tamper/namespace/native failure/recovery/crash/kill/interrupted publication test is selected.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+SELECTED NORMAL/RACE/ORACLE/VET/BUILD PASS
+2026-10-10T20:40:53Z

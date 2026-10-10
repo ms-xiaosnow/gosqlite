@@ -1,0 +1,8 @@
+=== RUN   TestReviewPreparationExcludedExtensionAndSession
+--- PASS: TestReviewPreparationExcludedExtensionAndSession (0.03s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.042s
+=== RUN   TestReviewPreparationDriverPreparedLockAndReset
+--- PASS: TestReviewPreparationDriverPreparedLockAndReset (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.007s

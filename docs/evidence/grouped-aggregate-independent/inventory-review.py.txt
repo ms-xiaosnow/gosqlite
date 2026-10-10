@@ -1,0 +1,17 @@
+from pathlib import Path
+import hashlib,json,shutil,subprocess,sys
+p=Path('/workspace/scratch/5e06a74e5f65/durable-restart'); evidence=p/'gosqlite/docs/evidence/grouped-aggregate-independent'; ver=sys.argv[1] if len(sys.argv)>1 else 'v1'
+src=p/('grouped-aggregate-freeze-'+ver); base=p/'aggregate-combined-lead-verify'; dst=p/('grouped-review-copy-'+ver); pe=p/'grouped-aggregate-evidence'
+def hashes(root): return {str(f.relative_to(root)):hashlib.sha256(f.read_bytes()).hexdigest() for f in sorted(root.rglob('*')) if f.is_file() and '.git' not in f.relative_to(root).parts}
+def manifest(path): return {s.split('  ',1)[1]:s.split('  ',1)[0] for s in path.read_text().splitlines()}
+a=hashes(src); z=hashes(base); assert a==manifest(pe/('freeze-'+ver+'-all-sha256.txt')); assert z==manifest(p/'aggregate-combined-lead-all-sha256.txt')
+owned=[f for f in sorted(set(a)|set(z)) if a.get(f)!=z.get(f)]; expected=(pe/('owned-'+ver+'-paths.txt')).read_text().splitlines(); assert owned==sorted(expected),(owned,expected)
+patch=pe/('grouped-aggregate-'+ver+'.patch'); patchsha=hashlib.sha256(patch.read_bytes()).hexdigest()
+if ver=='v1': assert patchsha=='71c1bcc1d16e306120cc023c038ee350fe2adf89a49060257a9ab2ba27dba5e9'
+assert not dst.exists(); shutil.copytree(src,dst); subprocess.run(['git','init','-q'],cwd=dst,check=True); subprocess.run(['git','add','-f','.'],cwd=dst,check=True); tree=subprocess.check_output(['git','write-tree'],cwd=dst).decode().strip()
+if ver=='v1': assert tree=='dffdc169ee2f0f032fe10852baf8420f6530aec8'
+roundtrip=p/('grouped-review-patch-'+ver); assert not roundtrip.exists(); shutil.copytree(base,roundtrip); subprocess.run(['git','init','-q'],cwd=roundtrip,check=True); subprocess.run(['git','add','-f','.'],cwd=roundtrip,check=True); basetree=subprocess.check_output(['git','write-tree'],cwd=roundtrip).decode().strip(); assert basetree=='8d7a0fcc5a2e3a83850ea780b64b403047677568'
+subprocess.run(['git','apply','--check',str(patch)],cwd=roundtrip,check=True); subprocess.run(['git','apply',str(patch)],cwd=roundtrip,check=True); assert hashes(roundtrip)==a
+(evidence/('inventory-'+ver+'.json')).write_text(json.dumps({'files':len(a),'base_files':len(z),'tree':tree,'base_tree':basetree,'patch_sha256':patchsha,'owned_paths':owned,'removed_paths':sorted(set(z)-set(a)),'full_manifest_verified':True,'patch_roundtrip_verified':True},indent=2)+'\n')
+shutil.copy(evidence/'grouped_reviewer_oracle_test.go.txt',dst/'internal/testkit/grouped_reviewer_oracle_test.go')
+print(tree,len(a),'files,',len(owned),'owned paths, exact baseline/patch roundtrip verified')

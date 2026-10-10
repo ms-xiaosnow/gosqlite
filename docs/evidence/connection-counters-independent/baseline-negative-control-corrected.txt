@@ -1,0 +1,7 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestReviewConnectionCountersNegativeBaseline
+    connection_counters_independent_test.go:63: SELECT changes(),total_changes(),last_insert_rowid(),typeof(changes()),typeof(total_changes()),typeof(last_insert_rowid()) sqlite query: unsupported SQLite feature: unsupported SQL: function changes
+--- FAIL: TestReviewConnectionCountersNegativeBaseline (0.00s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/sqlite	0.005s
+FAIL

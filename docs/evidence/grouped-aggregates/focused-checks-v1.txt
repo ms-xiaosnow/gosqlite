@@ -1,0 +1,25 @@
+Grouped scope: reviewed intact ordinary SQL/typed-value/parser errors, normal shared snapshots/Tx/BUSY/rollback/cancel/close/checkpoint, pure-memory quotas/math only. No restricted physical/namespace/native-fault/crash/interrupted publication/rekey workflows. No manual tags, no test-process kills, no cache clearing.
+2026-10-10T20:08:44Z
+go version go1.27.2 linux/amd64
+3.54.0|2026-10-09 15:46:58 be8d059e9a49089ab2dce5ed26dd87aaf598fdc5fbe0b107c0dd758464bcd5e3
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.008s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.224s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.151s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	1.033s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	1.070s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	1.402s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.333s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	1.820s
+core cross-build linux/arm64 PASS
+core cross-build darwin/arm64 PASS
+core cross-build darwin/amd64 PASS
+core cross-build windows/amd64 PASS
+core cross-build windows/arm64 PASS
+all modules verified
+Production sqlite/driver CgoFiles closure empty
+2026-10-10T20:09:49Z
+FOCUSED GROUPED CHECKS PASS; no complete repository test pass claimed

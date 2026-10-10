@@ -1,0 +1,444 @@
+diff --git a/sqlite/connection_counters_independent_test.go b/sqlite/connection_counters_independent_test.go
+new file mode 100644
+index 0000000..6dff624
+--- /dev/null
++++ b/sqlite/connection_counters_independent_test.go
+@@ -0,0 +1,224 @@
++package sqlite_test
++
++import (
++	"context"
++	"errors"
++	"fmt"
++	"path/filepath"
++	"reflect"
++	"sync"
++	"testing"
++
++	"github.com/ms-xiaosnow/gosqlite/sqlite"
++)
++
++const reviewCounterSQL = "SELECT changes(),total_changes(),last_insert_rowid(),typeof(changes()),typeof(total_changes()),typeof(last_insert_rowid())"
++
++func reviewCounterOpen(t *testing.T, opts sqlite.Options) (*sqlite.DB, string) {
++	t.Helper()
++	path := filepath.Join(t.TempDir(), "intact.db")
++	db, err := sqlite.Open(path, opts)
++	if err != nil {
++		t.Fatal(err)
++	}
++	t.Cleanup(func() {
++		if err := db.Close(); err != nil {
++			t.Error(err)
++		}
++	})
++	return db, path
++}
++func reviewCounterQuery(t *testing.T, db *sqlite.DB, q string) [][]any {
++	t.Helper()
++	r, err := db.Query(context.Background(), q)
++	if err != nil {
++		t.Fatal(q, err)
++	}
++	defer r.Close()
++	var out [][]any
++	for r.Next() {
++		out = append(out, r.Values())
++	}
++	if r.Err() != nil {
++		t.Fatal(q, r.Err())
++	}
++	return out
++}
++func reviewCounterWant(t *testing.T, db *sqlite.DB, c, total, last int64) {
++	t.Helper()
++	got := reviewCounterQuery(t, db, reviewCounterSQL)
++	want := [][]any{{c, total, last, "integer", "integer", "integer"}}
++	if !reflect.DeepEqual(got, want) {
++		t.Fatalf("counter tuple got %#v want %#v", got, want)
++	}
++}
++func reviewCounterExec(t *testing.T, db *sqlite.DB, q string) {
++	t.Helper()
++	if _, err := db.Exec(context.Background(), q); err != nil {
++		t.Fatal(q, err)
++	}
++}
++func TestReviewConnectionCountersNegativeBaseline(t *testing.T) {
++	db, _ := reviewCounterOpen(t, sqlite.Options{})
++	reviewCounterWant(t, db, 0, 0, 0)
++}
++
++func TestReviewConnectionCountersExtensionAndAbort(t *testing.T) {
++	for _, wal := range []bool{false, true} {
++		t.Run(fmt.Sprint(wal), func(t *testing.T) {
++			db, _ := reviewCounterOpen(t, sqlite.Options{WALShared: wal})
++			ctx := context.Background()
++			reviewCounterExec(t, db, "CREATE TABLE t(id INTEGER PRIMARY KEY,v TEXT NOT NULL)")
++			reviewCounterExec(t, db, "INSERT INTO t VALUES(8,'a'),(9,'b')")
++			reviewCounterWant(t, db, 2, 2, 9)
++			if err := db.CreateGramsIndex(ctx, "grams", "t", []string{"v"}); err != nil {
++				t.Fatal(err)
++			}
++			reviewCounterWant(t, db, 2, 2, 9)
++			if err := db.Reindex(ctx, "grams"); err != nil {
++				t.Fatal(err)
++			}
++			reviewCounterWant(t, db, 2, 2, 9)
++			reviewCounterExec(t, db, "REINDEX grams")
++			reviewCounterWant(t, db, 2, 2, 9)
++			reviewCounterExec(t, db, "BEGIN")
++			reviewCounterExec(t, db, "SAVEPOINT s")
++			reviewCounterExec(t, db, "INSERT INTO t VALUES(last_insert_rowid()+1,'c'),(last_insert_rowid()+1,'d')")
++			reviewCounterWant(t, db, 2, 4, 11)
++			reviewCounterExec(t, db, "ROLLBACK TO s")
++			reviewCounterWant(t, db, 2, 4, 11)
++			if _, err := db.Exec(ctx, "UPDATE t SET v=CASE WHEN id=9 THEN NULL ELSE 'z' END"); !errors.Is(err, sqlite.ErrConstraint) {
++				t.Fatal(err)
++			}
++			reviewCounterWant(t, db, 0, 4, 11)
++			if got := reviewCounterQuery(t, db, "SELECT id,v FROM t ORDER BY id"); !reflect.DeepEqual(got, [][]any{{int64(8), "a"}, {int64(9), "b"}}) {
++				t.Fatal(got)
++			}
++			reviewCounterExec(t, db, "UPDATE t SET v=v")
++			reviewCounterWant(t, db, 2, 6, 11)
++			if _, err := db.Exec(ctx, "DELETE FROM t WHERE abs(-9223372036854775808)=id"); err == nil {
++				t.Fatal("expected expression error")
++			}
++			reviewCounterWant(t, db, 0, 6, 11)
++			reviewCounterExec(t, db, "ROLLBACK")
++			reviewCounterWant(t, db, 0, 6, 11)
++			if err := db.CheckExtensionIndex(ctx, "grams"); err != nil {
++				t.Fatal(err)
++			}
++			reviewCounterWant(t, db, 0, 6, 11)
++		})
++	}
++}
++
++func TestReviewConnectionCountersBusyTransitions(t *testing.T) {
++	for _, mode := range []string{"BEGIN IMMEDIATE", "BEGIN EXCLUSIVE", "BEGIN"} {
++		t.Run(mode, func(t *testing.T) {
++			db, path := reviewCounterOpen(t, sqlite.Options{})
++			reviewCounterExec(t, db, "CREATE TABLE t(id INTEGER PRIMARY KEY)")
++			reviewCounterExec(t, db, "INSERT INTO t VALUES(1),(2)")
++			peer, err := sqlite.Open(path, sqlite.Options{})
++			if err != nil {
++				t.Fatal(err)
++			}
++			defer peer.Close()
++			reviewCounterExec(t, peer, mode)
++			if mode == "BEGIN" {
++				reviewCounterQuery(t, peer, "SELECT * FROM t")
++			}
++			if _, err := db.Exec(context.Background(), "INSERT INTO t VALUES(10)"); !errors.Is(err, sqlite.ErrBusy) {
++				t.Fatal(err)
++			}
++			reviewCounterExec(t, peer, "ROLLBACK")
++			last := int64(2)
++			if mode == "BEGIN" {
++				last = 10
++			}
++			// Native snapshot admission precedes preparation: EXCLUSIVE BUSY is
++			// explicitly outside SQLite's cached-schema parity, so preserve prior
++			// counters. The strict official expectation is retained as negative evidence.
++			changes := int64(0)
++			if mode == "BEGIN EXCLUSIVE" {
++				changes = 2
++			}
++			reviewCounterWant(t, db, changes, 2, last)
++			if got := reviewCounterQuery(t, db, "SELECT count(*) FROM t"); !reflect.DeepEqual(got, [][]any{{int64(2)}}) {
++				t.Fatal(got)
++			}
++		})
++	}
++}
++
++func TestReviewConnectionCountersBusyPreparation(t *testing.T) {
++	db, path := reviewCounterOpen(t, sqlite.Options{})
++	reviewCounterExec(t, db, "CREATE TABLE t(id INTEGER PRIMARY KEY)")
++	reviewCounterExec(t, db, "INSERT INTO t VALUES(1),(2)")
++	peer, err := sqlite.Open(path, sqlite.Options{})
++	if err != nil {
++		t.Fatal(err)
++	}
++	defer peer.Close()
++	reviewCounterExec(t, peer, "BEGIN EXCLUSIVE")
++	_, err = db.Exec(context.Background(), "DELETE FROM missing")
++	reviewCounterExec(t, peer, "ROLLBACK")
++	t.Logf("native error: %v", err)
++	reviewCounterWant(t, db, 2, 2, 2)
++}
++
++func TestReviewConnectionCountersConcurrentReadAndDisposal(t *testing.T) {
++	db, _ := reviewCounterOpen(t, sqlite.Options{})
++	reviewCounterExec(t, db, "CREATE TABLE t(id INTEGER PRIMARY KEY)")
++	reviewCounterExec(t, db, "INSERT INTO t VALUES(3),(4)")
++	var wg sync.WaitGroup
++	for range 8 {
++		wg.Add(1)
++		go func() {
++			defer wg.Done()
++			for range 10 {
++				reviewCounterWant(t, db, 2, 2, 4)
++			}
++		}()
++	}
++	wg.Wait()
++	rows, err := db.Query(context.Background(), reviewCounterSQL)
++	if err != nil {
++		t.Fatal(err)
++	}
++	if err = db.Close(); err != nil {
++		t.Fatal(err)
++	}
++	if rows.Next() || !errors.Is(rows.Err(), sqlite.ErrClosed) {
++		t.Fatal(rows.Err())
++	}
++	if err = rows.Close(); err != nil {
++		t.Fatal(err)
++	}
++	if _, err = db.Query(context.Background(), reviewCounterSQL); !errors.Is(err, sqlite.ErrClosed) {
++		t.Fatal(err)
++	}
++}
++
++func TestReviewConnectionCountersUnsupportedScope(t *testing.T) {
++	db, _ := reviewCounterOpen(t, sqlite.Options{})
++	reviewCounterExec(t, db, "CREATE TABLE t(id INTEGER PRIMARY KEY)")
++	reviewCounterExec(t, db, "INSERT INTO t VALUES(1),(2)")
++	for _, q := range []string{"INSERT OR IGNORE INTO t VALUES(1)", "INSERT INTO t SELECT 3", "CREATE TRIGGER tr AFTER INSERT ON t BEGIN DELETE FROM t; END", "CREATE TABLE child(id REFERENCES t(id))"} {
++		// Unsupported grammar can reject during parsing with CodeError rather
++		// than an ErrUnsupported sentinel; no mutation may be accepted.
++		_, err := db.Exec(context.Background(), q)
++		var detail *sqlite.Error
++		if !errors.As(err, &detail) || detail.Code != sqlite.CodeError {
++			t.Fatal(q, err)
++		}
++		reviewCounterWant(t, db, 2, 2, 2)
++	}
++	for _, q := range []string{"SELECT changes(),count(*) FROM t GROUP BY id", "SELECT changes() OVER () FROM t"} {
++		r, err := db.Query(context.Background(), q)
++		if r != nil {
++			r.Close()
++		}
++		if !errors.Is(err, sqlite.ErrUnsupported) {
++			t.Fatal(q, err)
++		}
++		reviewCounterWant(t, db, 2, 2, 2)
++	}
++}
+diff --git a/driver/connection_counters_independent_test.go b/driver/connection_counters_independent_test.go
+new file mode 100644
+index 0000000..79af29c
+--- /dev/null
++++ b/driver/connection_counters_independent_test.go
+@@ -0,0 +1,63 @@
++package driver
++
++import (
++	"context"
++	"errors"
++	"testing"
++
++	"github.com/ms-xiaosnow/gosqlite/sqlite"
++)
++
++func TestReviewConnectionCountersPreparedReuse(t *testing.T) {
++	db, _ := writableDatabase(t)
++	db.SetMaxOpenConns(1)
++	ctx := context.Background()
++	c, err := db.Conn(ctx)
++	if err != nil {
++		t.Fatal(err)
++	}
++	defer c.Close()
++	mustExec(t, c, "CREATE TABLE t(id INTEGER PRIMARY KEY,v NOT NULL)")
++	get, err := c.PrepareContext(ctx, "SELECT changes(),total_changes(),last_insert_rowid(),typeof(last_insert_rowid())")
++	if err != nil {
++		t.Fatal(err)
++	}
++	defer get.Close()
++	insert, err := c.PrepareContext(ctx, "INSERT INTO t VALUES(?,?),(last_insert_rowid()+1,?)")
++	if err != nil {
++		t.Fatal(err)
++	}
++	defer insert.Close()
++	check := func(wc, wt, wl int64) {
++		t.Helper()
++		var a, b, d int64
++		var typ string
++		if err := get.QueryRowContext(ctx).Scan(&a, &b, &d, &typ); err != nil || a != wc || b != wt || d != wl || typ != "integer" {
++			t.Fatal(a, b, d, typ, err)
++		}
++	}
++	check(0, 0, 0)
++	for i := int64(0); i < 3; i++ {
++		r, err := insert.ExecContext(ctx, i*10, "a", "b")
++		if err != nil {
++			t.Fatal(err)
++		}
++		checkAffected(t, r, 2)
++		check(2, (i+1)*2, i*10+1)
++	}
++	if _, err := insert.ExecContext(ctx, 30, "first", nil); !errors.Is(err, sqlite.ErrConstraint) {
++		t.Fatal(err)
++	}
++	check(0, 6, 30)
++	mustExec(t, c, "BEGIN")
++	mustExec(t, c, "INSERT INTO t VALUES(100,'rollback')")
++	check(1, 7, 100)
++	mustExec(t, c, "ROLLBACK")
++	check(1, 7, 100)
++	cancelctx, cancel := context.WithCancel(ctx)
++	cancel()
++	if _, err := insert.ExecContext(cancelctx, 200, "a", "b"); !errors.Is(err, context.Canceled) {
++		t.Fatal(err)
++	}
++	check(1, 7, 100)
++}
+diff --git a/internal/testkit/connection_counters_independent_test.go b/internal/testkit/connection_counters_independent_test.go
+new file mode 100644
+index 0000000..0b9b4bf
+--- /dev/null
++++ b/internal/testkit/connection_counters_independent_test.go
+@@ -0,0 +1,139 @@
++//go:build oracle
++
++package testkit_test
++
++import (
++	"bytes"
++	"context"
++	"errors"
++	"os/exec"
++	"path/filepath"
++	"reflect"
++	"regexp"
++	"strings"
++	"testing"
++
++	"github.com/ms-xiaosnow/gosqlite/sqlite"
++)
++
++// Ordinary SQL histories only. Expected SQL failures are sent on their own
++// lines because the official shell skips the remaining statements on that line.
++// The shell receives ordinary EOF and is never killed.
++func TestReviewConnectionCountersTypedOracle(t *testing.T) {
++	const counts = "SELECT changes(),total_changes(),last_insert_rowid(),typeof(changes()),typeof(total_changes()),typeof(last_insert_rowid())"
++	type step struct {
++		q        string
++		read     bool
++		code     sqlite.Code
++		category string
++	}
++	steps := []step{
++		{q: counts, read: true},
++		{q: "CREATE TABLE t(id INTEGER PRIMARY KEY,v NOT NULL,c,tot,prev)"},
++		{q: "INSERT INTO t VALUES(8,'x',changes(),total_changes(),last_insert_rowid()),(9,'y',changes(),total_changes(),last_insert_rowid())"},
++		{q: "CREATE INDEX idx ON t(v)"},
++		{q: "INSERT INTO t VALUES(last_insert_rowid()+1,'z',changes(),total_changes(),last_insert_rowid()),(last_insert_rowid()+1,'w',changes(),total_changes(),last_insert_rowid())"},
++		{q: "SELECT * FROM t ORDER BY id", read: true},
++		{q: "BEGIN"},
++		{q: "SAVEPOINT a"},
++		{q: "INSERT INTO t VALUES(20,'temporary',changes(),total_changes(),last_insert_rowid())"},
++		{q: "ROLLBACK TO a"},
++		{q: "UPDATE t SET v=CASE WHEN id=9 THEN NULL ELSE 'changed' END", code: sqlite.CodeConstraint, category: "NOT NULL constraint failed"},
++		{q: "SELECT * FROM t ORDER BY id", read: true},
++		{q: "UPDATE t SET c=changes(),tot=total_changes(),prev=last_insert_rowid()"},
++		{q: "DELETE FROM t WHERE abs(-9223372036854775808)=id", code: sqlite.CodeError, category: "integer overflow"},
++		{q: "UPDATE t SET id=8 WHERE id=9", code: sqlite.CodeConstraint, category: "UNIQUE constraint failed"},
++		{q: "INSERT INTO t VALUES(30,'first',1,2,3),(8,'duplicate',1,2,3)", code: sqlite.CodeConstraint, category: "UNIQUE constraint failed"},
++		{q: "INSERT INTO t VALUES(40,'first',1,2,3),('bad','mismatch',1,2,3)", code: sqlite.CodeMismatch, category: "datatype mismatch"},
++		{q: "ROLLBACK"},
++		{q: "SELECT * FROM t ORDER BY id", read: true},
++		{q: "INSERT INTO t(id,v) VALUES(NULL,'allocated')"},
++		{q: "UPDATE t SET id=100 WHERE id=8"},
++		{q: "SELECT id,CHANGES(),TOTAL_CHANGES(),LAST_INSERT_ROWID() FROM t WHERE id=last_insert_rowid() ORDER BY id", read: true},
++		{q: "SELECT changes()+total_changes(),last_insert_rowid() BETWEEN 1 AND 100,CASE changes() WHEN 1 THEN typeof(total_changes()) ELSE 'bad' END", read: true},
++		{q: "SELECT COUNT(*),SUM(changes()),MAX(total_changes()),MIN(last_insert_rowid()) FROM t", read: true},
++		{q: "UPDATE t SET v='kept' WHERE 0"},
++		{q: "INSERT INTO t(id,v) VALUES(101,'end')"},
++		{q: "DELETE FROM t WHERE total_changes()>0"},
++		{q: "INSERT INTO t(id,v) VALUES(0,'zero')"},
++		{q: "INSERT INTO t(id,v) VALUES(-9223372036854775808,'min')"},
++		{q: "DELETE FROM t WHERE id=-9223372036854775808"},
++		{q: "SELECT * FROM t ORDER BY id", read: true},
++	}
++	for _, shared := range []bool{false, true} {
++		t.Run(map[bool]string{false: "rollback", true: "shared"}[shared], func(t *testing.T) {
++			db, err := sqlite.Open(filepath.Join(t.TempDir(), "native.db"), sqlite.Options{WALShared: shared})
++			if err != nil {
++				t.Fatal(err)
++			}
++			defer db.Close()
++			var script strings.Builder
++			var got [][]any
++			var categories []string
++			if shared {
++				script.WriteString(".output /dev/null\nPRAGMA journal_mode=WAL;\n.output stdout\n")
++			}
++			read := func(q string) {
++				r := confNative(t, db, q)
++				if len(r.rows) > 0 {
++					labels := make([]any, len(r.columns))
++					for i, v := range r.columns {
++						labels[i] = v
++					}
++					got = append(got, labels)
++					got = append(got, r.rows...)
++				}
++				script.WriteString(q + ";\n")
++			}
++			for _, s := range steps {
++				if s.read {
++					read(s.q)
++					continue
++				}
++				_, e := db.Exec(context.Background(), s.q)
++				if s.code == 0 {
++					if e != nil {
++						t.Fatal(s.q, e)
++					}
++				} else {
++					var detail *sqlite.Error
++					if !errors.As(e, &detail) || detail.Code != s.code {
++						t.Fatal(s.q, e)
++					}
++					categories = append(categories, s.category)
++				}
++				script.WriteString(s.q + ";\n")
++				read(counts)
++			}
++			cmd := exec.Command(confOracle(t), "-batch", "-quote", "-header", filepath.Join(t.TempDir(), "official.db"))
++			cmd.Stdin = strings.NewReader(script.String())
++			var stderr bytes.Buffer
++			cmd.Stderr = &stderr
++			out, e := cmd.Output()
++			if e == nil {
++				t.Fatal("expected logical failures")
++			}
++			matches := regexp.MustCompile(`(?m)^(?:Parse error|Error) near line \d+: (.*)$`).FindAllStringSubmatch(stderr.String(), -1)
++			if len(matches) != len(categories) {
++				t.Fatal(stderr.String())
++			}
++			for i, s := range categories {
++				if !strings.Contains(matches[i][1], s) {
++					t.Fatal(i, s, matches[i][1])
++				}
++			}
++			want, e := confQuoted(out)
++			if e != nil {
++				t.Fatal(e)
++			}
++			if !reflect.DeepEqual(got, want) {
++				for i := 0; i < len(got) && i < len(want); i++ {
++					if !reflect.DeepEqual(got[i], want[i]) {
++						t.Fatalf("row %d got %#v want %#v", i, got[i], want[i])
++					}
++				}
++				t.Fatalf("row count %d %d", len(got), len(want))
++			}
++		})
++	}
++}

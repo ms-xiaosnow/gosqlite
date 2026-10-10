@@ -50,6 +50,7 @@ func (d *DB) table(ctx context.Context, reader btree.PageReader, sel *sqlast.Sel
 		if err != nil {
 			return nil, err
 		}
+		d.observePreparationEntriesLocked(ctx, reader.Header().SchemaCookie, entries)
 		found := false
 		for _, entry := range entries {
 			if fold(entry.Name) != fold(sel.From) {

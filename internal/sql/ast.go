@@ -30,6 +30,8 @@ type Select struct {
 	From, Alias   string
 	Relation      Relation // Non-nil for multi-source FROM; legacy leaf fields are preserved.
 	Where         Expr
+	GroupBy       []Expr
+	Having        Expr
 	OrderBy       []OrderTerm
 	Limit, Offset Expr
 	// Explain requests plan rows; NotIndexed explicitly disables index filtering.

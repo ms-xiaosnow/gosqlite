@@ -1,0 +1,9 @@
+--- FAIL: TestGlobalAggregateGrammar (0.00s)
+    aggregate_test.go:72: accepted SELECT sum(x) FROM t GROUP BY x
+--- FAIL: TestBooleanIdentifierRetainedRejections (0.00s)
+    boolean_identifier_test.go:96: SELECT true FROM false GROUP BY true: expected structured unsupported, got <nil>
+--- FAIL: TestRejectUnsupported (0.00s)
+    sql_test.go:98: accepted unsupported: SELECT x FROM t GROUP BY x
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/sql	0.004s
+FAIL

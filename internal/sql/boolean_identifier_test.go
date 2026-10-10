@@ -84,7 +84,7 @@ func TestBooleanIdentifierRetainedRejections(t *testing.T) {
 		"SELECT 1 AS NULL", "SELECT 1 AS SELECT", "SELECT 1 AS WHERE", "SELECT 1 AS JOIN",
 		"CREATE TABLE NULL(x)", "CREATE TABLE true(NULL INTEGER)",
 		"SELECT NULL()", "SELECT NULL.true", "SELECT true.NULL",
-		"SELECT DISTINCT true FROM false", "SELECT true FROM false GROUP BY true",
+		"SELECT DISTINCT true FROM false",
 		"SELECT true FROM false RIGHT JOIN t ON true", "SELECT true FROM false NATURAL JOIN t",
 		"SELECT true FROM false JOIN t USING(true)", "SELECT true FROM main.false",
 		"SELECT true OVER()", "SELECT false FILTER(WHERE true)",

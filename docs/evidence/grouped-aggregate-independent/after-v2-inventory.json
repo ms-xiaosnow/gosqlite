@@ -1,0 +1,16 @@
+{
+  "tree": "6774495e7289aa1cf7a652df673ba2610117900e",
+  "files": 1265,
+  "base_files": 1225,
+  "owned_paths": 52,
+  "removed_paths": [],
+  "added_reviewer_files": [
+    "internal/testkit/grouped_reviewer_oracle_test.go",
+    "internal/testkit/grouped_reviewer_rowid_test.go",
+    "sqlite/grouped_reviewer_budget_test.go"
+  ],
+  "patch_sha256": "d456e8caef731c0c3ee897e774e4c98e5d5c59a364111276a45eca925b521577",
+  "v1_v2_patch_sha256": "c1b0ea77824b4b5ef5c7096f5c5c741f06ce5927cd6437399ed5520514352110",
+  "freeze_and_copy_hashes_unchanged": true,
+  "goal_and_modules_unchanged": true
+}

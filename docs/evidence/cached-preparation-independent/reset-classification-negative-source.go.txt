@@ -1,0 +1,182 @@
+package sqlite
+
+import (
+	"context"
+	"strings"
+
+	"github.com/ms-xiaosnow/gosqlite/internal/btree"
+	sqlast "github.com/ms-xiaosnow/gosqlite/internal/sql"
+	"github.com/ms-xiaosnow/gosqlite/internal/vfs"
+)
+
+// preparationSchema is immutable, connection-owned name-binding metadata. It
+// contains no roots, defaults, indexes, records, readers, or storage handles.
+// It can classify a failed first snapshot admission; it cannot execute a plan.
+// The bounded profile is ordinary rollback-mode table/index catalogs. Session
+// modes and extension/unsupported catalogs retain their existing admission path.
+type preparationSchema struct {
+	cookie uint32
+	tables map[string]*writeTable
+	bytes  int64
+}
+
+func (d *DB) preparationLimit() int64 {
+	limit := d.opts.MaxSortBytes
+	if limit > btree.MaxSchemaBytes {
+		limit = btree.MaxSchemaBytes
+	}
+	return limit
+}
+
+func (d *DB) observePreparationCookieLocked(cookie uint32) {
+	if d.preparation != nil && d.preparation.cookie != cookie {
+		d.preparation = nil
+	}
+}
+
+// Cache creation is optional. Declining it must not turn a successful ordinary
+// read/write into a resource or schema error. Admission without a cache remains
+// conservative. Each replacement drops the previous retained metadata first.
+func (d *DB) rememberPreparationCatalogLocked(ctx context.Context, cookie uint32, c *writeCatalog) {
+	d.preparation = nil
+	if d.session != nil || ctx.Err() != nil || len(c.extensions.indexes) != 0 {
+		return
+	}
+	limit, charge := d.preparationLimit(), int64(256)
+	if charge > limit {
+		return
+	}
+	for name, tab := range c.tables {
+		if extensionReserved(name) {
+			return
+		}
+		charge += int64(256 + 2*len(name) + len(tab.name))
+		for _, col := range tab.columns {
+			charge += int64(256 + 2*len(col.Name))
+		}
+		if charge > limit || ctx.Err() != nil {
+			return
+		}
+	}
+	cache := &preparationSchema{cookie: cookie, tables: make(map[string]*writeTable, len(c.tables)), bytes: charge}
+	for name, tab := range c.tables {
+		if ctx.Err() != nil {
+			return
+		}
+		copyTab := &table{name: strings.Clone(tab.name), ipk: tab.ipk, columns: make([]sqlast.ColumnDef, len(tab.columns)), index: make(map[string]int, len(tab.index))}
+		for i, col := range tab.columns {
+			copyTab.columns[i].Name = strings.Clone(col.Name)
+			copyTab.index[fold(col.Name)] = i
+		}
+		cache.tables[strings.Clone(name)] = &writeTable{table: copyTab}
+	}
+	d.preparation = cache
+}
+
+// A read may initialize preparation metadata without granting write permission.
+// Validate the entire ordinary catalog, including index declarations. Reject
+// extension, trigger, view and unrecognized schemas from this optional path.
+// Charge declaration parsing conservatively before allocating parser state;
+// the parser additionally has its existing SQL/token/depth limits.
+func (d *DB) observePreparationEntriesLocked(ctx context.Context, cookie uint32, entries []btree.SchemaEntry) {
+	d.preparation = nil
+	if d.session != nil {
+		return
+	}
+	charge, limit := int64(256), d.preparationLimit()
+	if charge > limit {
+		return
+	}
+	for _, e := range entries {
+		if (e.Type != "table" && e.Type != "index") || extensionReserved(e.Name) {
+			return
+		}
+		charge += int64(512 + len(e.Name) + len(e.TableName) + len(e.SQL)*128)
+		if charge > limit || ctx.Err() != nil {
+			return
+		}
+	}
+	c, err := buildWriteCatalog(ctx, entries, &extensionCatalog{})
+	if err != nil {
+		return
+	}
+	d.rememberPreparationCatalogLocked(ctx, cookie, c)
+}
+
+func validatePreparation(ctx context.Context, e sqlast.Expr, tab *table) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	return sqlast.Walk(e, func(e sqlast.Expr) error {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		return validateNode(e, tab, nil)
+	})
+}
+
+// onlyBusy accepts ordinary wrapping/joining of BUSY alone. It deliberately
+// excludes any accompanying cleanup, I/O, context, changed-file or poison error.
+// No failure is suppressed merely because errors.Is would find BUSY in it.
+func onlyBusy(err error) bool {
+	if err == ErrBusy || err == vfs.ErrBusy {
+		return true
+	}
+	if many, ok := err.(interface{ Unwrap() []error }); ok {
+		children := many.Unwrap()
+		if len(children) == 0 {
+			return false
+		}
+		for _, child := range children {
+			if !onlyBusy(child) {
+				return false
+			}
+		}
+		return true
+	}
+	if one, ok := err.(interface{ Unwrap() error }); ok {
+		return onlyBusy(one.Unwrap())
+	}
+	return false
+}
+
+func (t *Tx) cachedPreparationFailureLocked(ctx context.Context, stmt sqlast.Statement, admission error) (mutationOutcome, error) {
+	d := t.db
+	d.observePreparationCookieLocked(d.info.SchemaCookie)
+	cache := d.preparation
+	if !onlyBusy(admission) || !isMutationStatement(stmt) || d.session != nil || cache == nil {
+		return mutationOutcome{}, wrap("exec", admission)
+	}
+	if err := ctx.Err(); err != nil {
+		return mutationOutcome{}, wrap("exec", err)
+	}
+	var name string
+	switch s := stmt.(type) {
+	case *sqlast.Insert:
+		name = s.Table
+	case *sqlast.Update:
+		name = s.Table
+	case *sqlast.Delete:
+		name = s.Table
+	}
+	// Reuse exactly the ordinary native name/target/arity preparation routines.
+	// No expression evaluation or data access occurs, even for runtime errors.
+	c := &writeCatalog{tables: cache.tables}
+	tab, err := c.find(name)
+	if err == nil {
+		switch s := stmt.(type) {
+		case *sqlast.Insert:
+			_, err = tab.prepareInsert(ctx, s)
+		case *sqlast.Update:
+			_, err = tab.prepareUpdate(ctx, s)
+		case *sqlast.Delete:
+			err = tab.prepareDelete(ctx, s)
+		}
+	}
+	if err != nil {
+		return mutationOutcome{}, wrap("exec", err)
+	}
+	// A prepared DML statement reached execution admission, but no rows or pager
+	// transaction were acquired. Only changes() resets; totals and insert ID stay.
+	return mutationOutcome{}, wrap("exec", admission)
+}

@@ -1,0 +1,1 @@
+PASS: final freeze, work and baseline+patch replay retain all 1264 exact paths/bytes; immutable baseline retains all 1259 original paths/bytes. Checked after final selected run.

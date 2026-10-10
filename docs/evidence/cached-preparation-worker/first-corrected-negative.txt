@@ -1,0 +1,11 @@
+=== RUN   TestConnectionCountersLazyTransactionReads
+    connection_counters_internal_test.go:77: DELETE FROM t 0
+--- FAIL: TestConnectionCountersLazyTransactionReads (0.00s)
+=== RUN   TestCachedPreparationProbe
+    preparation_cache_probe_test.go:3: cache=&{cookie:1 tables:map[t:0xa14be399040] bytes:775} info={PageSize:4096 UsableSize:4096 PageCount:2 SchemaCookie:1 SchemaFormat:4 TextEncoding:1 ReadVersion:1 WriteVersion:1} opts={Encryption:<nil> IndexMethods:0xa14be3826d8 ReadOnly:false NoCreate:false WALExclusive:false WALShared:false WALPowersafeOverwrite:false KeepWALOnClose:false MaxSortBytes:67108864 MaxTransactionPages:4096 MaxTransactionUndoBytes:0 PageSize:0 SectorSize:0}
+    preparation_cache_probe_test.go:3: snapshot error=&errors.joinError{errs:[]error{(*errors.joinError)(0xa14be3b2db0)}}, onlyBusy=true
+    preparation_cache_probe_test.go:3: delete=sqlite exec: SQLite database is busy: native file lock busy cache=&{cookie:1 tables:map[t:0xa14be399040] bytes:775} counters={Changes:0 TotalChanges:2 LastInsertRowID:2}
+--- PASS: TestCachedPreparationProbe (0.00s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/sqlite	0.022s
+FAIL

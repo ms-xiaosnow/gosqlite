@@ -1,0 +1,12 @@
+Audited official-only ordinary in-memory SQL probes; no excluded behavior.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+SELECT id FROM rp WHERE abs(v)>0 GROUP BY id LIMIT 1 exit 1 stdout  stderr Error in 5th command line argument: integer overflow
+
+SELECT id FROM rp WHERE abs(v)>0 GROUP BY id ORDER BY id LIMIT 1 exit 1 stdout  stderr Error in 5th command line argument: integer overflow
+
+SELECT id,count(*) FROM rp WHERE abs(v)>0 GROUP BY id,v ORDER BY id DESC LIMIT 1 exit 1 stdout  stderr Error in 5th command line argument: integer overflow
+
+SELECT id,count(*) FROM rp WHERE abs(v)>0 GROUP BY v,id ORDER BY id DESC LIMIT 1 exit 1 stdout  stderr Error in 5th command line argument: integer overflow
+
+SELECT id,count(*) FROM rp WHERE abs(v)>0 GROUP BY id ORDER BY id DESC,id ASC LIMIT 1 exit 1 stdout  stderr Error in 5th command line argument: integer overflow
+

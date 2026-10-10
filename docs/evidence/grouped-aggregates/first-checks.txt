@@ -1,0 +1,23 @@
+Reviewed selected tests: pure-memory parser/global arithmetic; grouped tests only intact owned ordinary SQL, normal close/cancel, quota and read-only oracle processes with normal EOF. No restricted physical/native-fault/namespace/crash workflows.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+--- FAIL: TestGlobalAggregateGrammar (0.00s)
+    aggregate_test.go:72: accepted SELECT sum(x) FROM t GROUP BY x
+--- FAIL: TestBooleanIdentifierRetainedRejections (0.00s)
+    boolean_identifier_test.go:96: SELECT true FROM false GROUP BY true: expected structured unsupported, got <nil>
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/sql	0.010s
+FAIL
+legacy_grammar_exit=1
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.019s
+native_exit=0
+--- FAIL: TestGroupedAggregateOracleValues (0.14s)
+    --- FAIL: TestGroupedAggregateOracleValues/SELECT_k,count(*),sum(v),total(v),avg(v),min(v),max(v)_FROM_g_GROUP_BY_k (0.00s)
+        grouped_aggregate_conformance_test.go:47: row 1 column 0: got int64(1); oracle float64(1)
+    --- FAIL: TestGroupedAggregateOracleValues/SELECT_k+0_AS_key,count(*)_FROM_g_GROUP_BY_key_ORDER_BY_key (0.00s)
+        grouped_aggregate_conformance_test.go:47: native query "SELECT k+0 AS key,count(*) FROM g GROUP BY key ORDER BY key": sqlite query: unsupported SQLite feature: unsupported SQL: reserved identifier key at byte 14
+    --- FAIL: TestGroupedAggregateOracleValues/k (0.00s)
+        grouped_aggregate_conformance_test.go:56: row 1 column 0: got int64(1); oracle float64(1)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/testkit	0.140s
+FAIL
+oracle_exit=1

@@ -1,0 +1,3 @@
+All 45 existing exported sqlite/driver struct definitions text-identical to base.
+go.mod unchanged c027e254cadfd3b4b6487d6189972460cf97b60e1802522f7ddd71f08e303a3a
+go.sum unchanged c89d6859061226d04dcd09404790a57c6ec323d79d16fe2f9ac2e84239695e7f

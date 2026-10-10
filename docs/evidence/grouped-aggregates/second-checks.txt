@@ -1,0 +1,21 @@
+Reviewed selected tests: pure-memory parser/global arithmetic; grouped tests only intact owned ordinary SQL, normal close/cancel, quota and read-only oracle processes with normal EOF. No restricted physical/native-fault/namespace/crash workflows.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+--- FAIL: TestGlobalAggregateGrammar (0.00s)
+    aggregate_test.go:72: accepted SELECT sum(x) FROM t GROUP BY x
+--- FAIL: TestBooleanIdentifierRetainedRejections (0.00s)
+    boolean_identifier_test.go:96: SELECT true FROM false GROUP BY true: expected structured unsupported, got <nil>
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/sql	0.003s
+FAIL
+legacy_grammar_exit=1
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.009s
+native_exit=0
+--- FAIL: TestGroupedAggregateOracleValues (0.10s)
+    --- FAIL: TestGroupedAggregateOracleValues/k+0 (0.00s)
+        grouped_aggregate_conformance_test.go:61: row 2 column 0: got float64(2); oracle int64(2)
+    --- FAIL: TestGroupedAggregateOracleValues/CASE_WHEN_k_IS_NULL_THEN_x'00'_ELSE_k_END (0.00s)
+        grouped_aggregate_conformance_test.go:61: row 0 column 0: got float64(1); oracle int64(1)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/testkit	0.105s
+FAIL
+oracle_exit=1

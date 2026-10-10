@@ -327,6 +327,9 @@ func Eval(e Expr, ctx *EvalContext) (any, error) {
 		return evalInList(x, ctx)
 	case *Call:
 		name := FoldName(x.Name)
+		if isConnectionFunction(name) {
+			return evalConnectionFunction(name, len(x.Args), ctx.Context)
+		}
 		if name == "coalesce" || name == "ifnull" {
 			if name == "ifnull" && len(x.Args) != 2 || name == "coalesce" && len(x.Args) < 2 {
 				return nil, fmt.Errorf("wrong number of arguments to %s()", name)

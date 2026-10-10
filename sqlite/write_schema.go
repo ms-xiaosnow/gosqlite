@@ -38,9 +38,17 @@ func (t *Tx) validateCatalog(ctx context.Context) (*writeCatalog, error) {
 	if err != nil {
 		return nil, err
 	}
+	return buildWriteCatalog(ctx, entries, extensions)
+}
+
+// buildWriteCatalog validates declarations only. It never reads row pages.
+func buildWriteCatalog(ctx context.Context, entries []btree.SchemaEntry, extensions *extensionCatalog) (*writeCatalog, error) {
 	c := &writeCatalog{tables: map[string]*writeTable{}, names: map[string]string{}, extensions: extensions}
 	roots := map[uint32]bool{1: true}
 	for _, e := range entries {
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
 		if e.Type == "trigger" {
 			if _, owned := extensions.guards[fold(e.Name)]; owned {
 				continue
@@ -85,6 +93,9 @@ func (t *Tx) validateCatalog(ctx context.Context) (*writeCatalog, error) {
 		c.tables[fold(e.Name)] = tab
 	}
 	for _, e := range entries {
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
 		if e.Type != "index" {
 			continue
 		}
@@ -196,14 +207,21 @@ func (t *Tx) createTable(ctx context.Context, c *writeCatalog, def *sqlast.Creat
 		}
 		return fmt.Errorf("object already exists: %s", def.Name)
 	}
-	if _, err := writableTable(def, 0); err != nil {
+	tab, err := writableTable(def, 0)
+	if err != nil {
 		return err
 	}
 	root, err := btree.CreateTree(ctx, t.storage, btree.TableTree)
 	if err != nil {
 		return err
 	}
-	return t.addSchema(ctx, "table", def.Name, def.Name, root, def.SQL)
+	if err = t.addSchema(ctx, "table", def.Name, def.Name, root, def.SQL); err != nil {
+		return err
+	}
+	tab.root = root
+	c.tables[fold(def.Name)] = tab
+	c.names[fold(def.Name)] = "table"
+	return nil
 }
 func (t *Tx) createIndex(ctx context.Context, c *writeCatalog, def *sqlast.CreateIndex) error {
 	if err := newSchemaName(def.Name); err != nil {

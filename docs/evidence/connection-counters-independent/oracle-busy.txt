@@ -1,0 +1,22 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+{"sql": "SELECT sqlite_version(),sqlite_source_id();", "out": ["'3.54.0','2026-10-09 15:46:58 be8d059e9a49089ab2dce5ed26dd87aaf598fdc5fbe0b107c0dd758464bcd5e3'"]}
+{"sql": "CREATE TABLE t(id INTEGER PRIMARY KEY); INSERT INTO t VALUES(1),(2);", "out": []}
+{"sql": "BEGIN EXCLUSIVE;", "out": []}
+{"sql": "INSERT INTO t VALUES(3); SELECT changes(),total_changes(),last_insert_rowid();", "out": ["Error near line 5: database is locked"]}
+{"sql": "DELETE FROM missing; SELECT changes(),total_changes(),last_insert_rowid();", "out": ["Parse error near line 7: no such table: missing"]}
+{"sql": "ROLLBACK;", "out": []}
+{"sql": "INSERT INTO t VALUES(4),(5);", "out": []}
+{"sql": "BEGIN IMMEDIATE;", "out": []}
+{"sql": "INSERT INTO t VALUES(3); SELECT changes(),total_changes(),last_insert_rowid();", "out": ["Error near line 11: database is locked"]}
+{"sql": "ROLLBACK;", "out": []}
+{"sql": "INSERT INTO t VALUES(6),(7); BEGIN;", "out": []}
+{"sql": "BEGIN EXCLUSIVE;", "out": []}
+{"sql": "INSERT INTO t VALUES(3); SELECT changes(),total_changes(),last_insert_rowid();", "out": ["Error near line 15: database is locked"]}
+{"sql": "ROLLBACK;", "out": []}
+{"sql": "ROLLBACK; INSERT INTO t VALUES(8),(9);", "out": []}
+{"sql": "BEGIN; SELECT * FROM t;", "out": ["1", "2", "4", "5", "6", "7", "8", "9"]}
+{"sql": "INSERT INTO t VALUES(10); SELECT changes(),total_changes(),last_insert_rowid();", "out": ["Error near line 19: database is locked"]}
+{"sql": "ROLLBACK;", "out": []}
+{"sql": "SELECT * FROM t;", "out": ["1", "2", "4", "5", "6", "7", "8", "9"]}
+normal EOF status 1
+normal EOF status 0

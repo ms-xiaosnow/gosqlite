@@ -1,0 +1,6 @@
+=== RUN   TestReviewPreparationRequiredNegative
+    preparation_negative_test.go:23: required cached preparation error, got sqlite exec: SQLite database is busy: native file lock busy
+--- FAIL: TestReviewPreparationRequiredNegative (0.00s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/sqlite	0.016s
+FAIL

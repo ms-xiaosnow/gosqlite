@@ -1,0 +1,13 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestGroupedAggregateOraclePromotedCapabilities
+=== RUN   TestGroupedAggregateOraclePromotedCapabilities/SELECT_sum(x)_FROM_t_GROUP_BY_x
+=== RUN   TestGroupedAggregateOraclePromotedCapabilities/SELECT_count(*)_FROM_t_HAVING_count(*)>0
+=== RUN   TestGroupedAggregateOraclePromotedCapabilities/SELECT_x_FROM_t_GROUP_BY_x
+=== RUN   TestGroupedAggregateOraclePromotedCapabilities/SELECT_true_FROM_false_GROUP_BY_true
+--- PASS: TestGroupedAggregateOraclePromotedCapabilities (0.03s)
+    --- PASS: TestGroupedAggregateOraclePromotedCapabilities/SELECT_sum(x)_FROM_t_GROUP_BY_x (0.00s)
+    --- PASS: TestGroupedAggregateOraclePromotedCapabilities/SELECT_count(*)_FROM_t_HAVING_count(*)>0 (0.00s)
+    --- PASS: TestGroupedAggregateOraclePromotedCapabilities/SELECT_x_FROM_t_GROUP_BY_x (0.00s)
+    --- PASS: TestGroupedAggregateOraclePromotedCapabilities/SELECT_true_FROM_false_GROUP_BY_true (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	0.039s

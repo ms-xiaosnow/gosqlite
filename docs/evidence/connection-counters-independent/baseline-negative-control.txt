@@ -1,0 +1,16 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+go: downloading golang.org/x/text v0.43.0
+go: downloading golang.org/x/crypto v0.58.0
+go: downloading golang.org/x/sys v0.49.0
+# github.com/ms-xiaosnow/gosqlite/sqlite
+encryption/kdf.go:9:2: module lookup disabled by GOPROXY=off
+# github.com/ms-xiaosnow/gosqlite/sqlite
+extension/grams13/config.go:15:2: module lookup disabled by GOPROXY=off
+# github.com/ms-xiaosnow/gosqlite/sqlite
+extension/grams13/tokenizer.go:11:2: module lookup disabled by GOPROXY=off
+# github.com/ms-xiaosnow/gosqlite/sqlite
+extension/grams13/config.go:16:2: module lookup disabled by GOPROXY=off
+# github.com/ms-xiaosnow/gosqlite/sqlite
+internal/encstore/platform_linux.go:9:2: module lookup disabled by GOPROXY=off
+FAIL	github.com/ms-xiaosnow/gosqlite/sqlite [setup failed]
+FAIL

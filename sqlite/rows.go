@@ -157,12 +157,17 @@ func (r *Rows) Next() bool {
 	if r.limit >= 0 && r.emitted >= r.limit {
 		return r.fail(io.EOF)
 	}
+	if _, grouped := r.source.(*groupedAggregateSource); grouped && r.sorted == nil {
+		if err := r.materializeGrouped(); err != nil {
+			return r.fail(err)
+		}
+	}
 	// The previous result's backing buffers are no longer live before fetch
 	// releases its charge and starts allocating the next joined row.
 	r.current = nil
 	for {
 		var row resultRow
-		if len(r.order) > 0 {
+		if len(r.order) > 0 || r.sorted != nil {
 			if r.sortIndex >= len(r.sorted) {
 				return r.fail(io.EOF)
 			}
@@ -354,6 +359,12 @@ func (r *Rows) evaluateSourceRow(rowid int64, values []any) (resultRow, int64, b
 			}
 			return resultRow{}, 0, false, nil
 		}
+	}
+	// Grouped OFFSET skips scalar projection only after finalized aggregates
+	// and HAVING. Finite general ordering has a separate top-K admission path.
+	if _, grouped := r.source.(*groupedAggregateSource); grouped && len(r.order) == 0 && r.skipped < r.offset {
+		r.skipped++
+		return resultRow{}, 0, false, nil
 	}
 	var distance any
 	if r.vectorRank != nil {

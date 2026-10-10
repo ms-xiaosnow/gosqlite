@@ -126,12 +126,7 @@ func (t *Tx) removeIndexes(ctx context.Context, tab *writeTable, rowid int64, va
 	}
 	return nil
 }
-func (t *Tx) insert(ctx context.Context, c *writeCatalog, stmt *sqlast.Insert, params []any) (Result, error) {
-	var result Result
-	tab, err := c.find(stmt.Table)
-	if err != nil {
-		return result, err
-	}
+func (tab *writeTable) prepareInsert(ctx context.Context, stmt *sqlast.Insert) ([]int, error) {
 	var targets []int
 	seen := map[int]bool{}
 	if len(stmt.Columns) == 0 && !stmt.DefaultValues {
@@ -146,10 +141,10 @@ func (t *Tx) insert(ctx context.Context, c *writeCatalog, stmt *sqlast.Insert, p
 		for _, name := range stmt.Columns {
 			i, err := tab.target(name)
 			if err != nil {
-				return result, err
+				return nil, err
 			}
 			if seen[i] {
-				return result, fmt.Errorf("%w: duplicate rowid target", ErrUnsupported)
+				return nil, fmt.Errorf("%w: duplicate rowid target", ErrUnsupported)
 			}
 			seen[i] = true
 			targets = append(targets, i)
@@ -161,13 +156,64 @@ func (t *Tx) insert(ctx context.Context, c *writeCatalog, stmt *sqlast.Insert, p
 	}
 	for _, exprs := range rows {
 		if !stmt.DefaultValues && len(exprs) != len(targets) {
-			return result, fmt.Errorf("VALUES column count mismatch")
+			return nil, fmt.Errorf("VALUES column count mismatch")
 		}
 		for _, expr := range exprs {
-			if err := validate(expr, nil, nil); err != nil {
-				return result, err
+			if err := validatePreparation(ctx, expr, nil); err != nil {
+				return nil, err
 			}
 		}
+	}
+	return targets, nil
+}
+
+func (tab *writeTable) prepareUpdate(ctx context.Context, stmt *sqlast.Update) ([]int, error) {
+	var err error
+	targets := make([]int, len(stmt.Assignments))
+	seen := map[int]bool{}
+	for i, assignment := range stmt.Assignments {
+		targets[i], err = tab.target(assignment.Column)
+		if err != nil {
+			return nil, err
+		}
+		if seen[targets[i]] {
+			return nil, fmt.Errorf("%w: duplicate rowid target", ErrUnsupported)
+		}
+		seen[targets[i]] = true
+		stmt.Assignments[i].Expr = bindBooleans(assignment.Expr, tab.table)
+		if err := validatePreparation(ctx, stmt.Assignments[i].Expr, tab.table); err != nil {
+			return nil, err
+		}
+	}
+	stmt.Where = bindBooleans(stmt.Where, tab.table)
+	if err := validatePreparation(ctx, stmt.Where, tab.table); err != nil {
+		return nil, err
+	}
+	return targets, nil
+}
+
+func (tab *writeTable) prepareDelete(ctx context.Context, stmt *sqlast.Delete) error {
+	stmt.Where = bindBooleans(stmt.Where, tab.table)
+	return validatePreparation(ctx, stmt.Where, tab.table)
+}
+
+func (t *Tx) insert(ctx context.Context, c *writeCatalog, stmt *sqlast.Insert, params []any) (mutationOutcome, error) {
+	var result mutationOutcome
+	tab, err := c.find(stmt.Table)
+	if err != nil {
+		return result, err
+	}
+	targets, err := tab.prepareInsert(ctx, stmt)
+	if err != nil {
+		return result, err
+	}
+	rows := stmt.Rows
+	if stmt.DefaultValues {
+		rows = [][]sqlast.Expr{nil}
+	}
+	result.started = true
+	if err := t.storage.PromoteWrite(ctx); err != nil {
+		return result, err
 	}
 	for _, exprs := range rows {
 		if err := ctx.Err(); err != nil {
@@ -213,6 +259,9 @@ func (t *Tx) insert(ctx context.Context, c *writeCatalog, stmt *sqlast.Insert, p
 		if err = btree.InsertTable(ctx, t.storage, tab.root, rowid, tab.physical(values)); err != nil {
 			return result, err
 		}
+		// Keep the last successful row insertion even if a later row aborts
+		// this statement, or a transaction/savepoint later rolls it back.
+		t.db.counters.LastInsertRowID = rowid
 		if err = t.addIndexes(ctx, tab, rowid, values); err != nil {
 			return result, err
 		}
@@ -294,29 +343,20 @@ func (t *Tx) matchRows(ctx context.Context, tab *writeTable, where sqlast.Expr, 
 	}
 	return ids, nil
 }
-func (t *Tx) update(ctx context.Context, c *writeCatalog, stmt *sqlast.Update, params []any) (Result, error) {
-	var result Result
+func (t *Tx) update(ctx context.Context, c *writeCatalog, stmt *sqlast.Update, params []any) (mutationOutcome, error) {
+	var result mutationOutcome
 	tab, err := c.find(stmt.Table)
 	if err != nil {
 		return result, err
 	}
-	targets := make([]int, len(stmt.Assignments))
-	seen := map[int]bool{}
-	for i, assignment := range stmt.Assignments {
-		targets[i], err = tab.target(assignment.Column)
-		if err != nil {
-			return result, err
-		}
-		if seen[targets[i]] {
-			return result, fmt.Errorf("%w: duplicate rowid target", ErrUnsupported)
-		}
-		seen[targets[i]] = true
-		stmt.Assignments[i].Expr = bindBooleans(assignment.Expr, tab.table)
-		if err := validate(stmt.Assignments[i].Expr, tab.table, nil); err != nil {
-			return result, err
-		}
+	targets, err := tab.prepareUpdate(ctx, stmt)
+	if err != nil {
+		return result, err
 	}
-	stmt.Where = bindBooleans(stmt.Where, tab.table)
+	result.started = true
+	if err := t.storage.PromoteWrite(ctx); err != nil {
+		return result, err
+	}
 	ids, err := t.matchRows(ctx, tab, stmt.Where, params)
 	if err != nil {
 		return result, err
@@ -392,13 +432,19 @@ func (t *Tx) update(ctx context.Context, c *writeCatalog, stmt *sqlast.Update, p
 	}
 	return result, nil
 }
-func (t *Tx) delete(ctx context.Context, c *writeCatalog, stmt *sqlast.Delete, params []any) (Result, error) {
-	var result Result
+func (t *Tx) delete(ctx context.Context, c *writeCatalog, stmt *sqlast.Delete, params []any) (mutationOutcome, error) {
+	var result mutationOutcome
 	tab, err := c.find(stmt.Table)
 	if err != nil {
 		return result, err
 	}
-	stmt.Where = bindBooleans(stmt.Where, tab.table)
+	if err := tab.prepareDelete(ctx, stmt); err != nil {
+		return result, err
+	}
+	result.started = true
+	if err := t.storage.PromoteWrite(ctx); err != nil {
+		return result, err
+	}
 	ids, err := t.matchRows(ctx, tab, stmt.Where, params)
 	if err != nil {
 		return result, err

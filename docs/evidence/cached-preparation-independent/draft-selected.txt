@@ -1,0 +1,14 @@
+=== RUN   TestReviewPreparationErrorPrecedenceAndIsolation
+=== RUN   TestReviewPreparationErrorPrecedenceAndIsolation/false
+=== RUN   TestReviewPreparationErrorPrecedenceAndIsolation/true
+--- PASS: TestReviewPreparationErrorPrecedenceAndIsolation (0.00s)
+    --- PASS: TestReviewPreparationErrorPrecedenceAndIsolation/false (0.00s)
+    --- PASS: TestReviewPreparationErrorPrecedenceAndIsolation/true (0.00s)
+=== RUN   TestReviewPreparationReadOnlyAndRows
+--- PASS: TestReviewPreparationReadOnlyAndRows (0.00s)
+=== RUN   TestReviewPreparationDeclaredNamesOwnStorage
+--- PASS: TestReviewPreparationDeclaredNamesOwnStorage (0.00s)
+=== RUN   TestReviewPreparationDDLBusyRollback
+--- PASS: TestReviewPreparationDDLBusyRollback (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.012s

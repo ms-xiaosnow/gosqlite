@@ -1,0 +1,17 @@
+Exact Library-restored rollback replay/ownership checkpoint. Existing guarded journal suite uses bounded memory serialization/parser models; new recovery selection is only memory ownership or AST source laws. RecoverRollback is NOT invoked. No physical native failure/namespace/crash/hot-recovery workflow.
+8bfb357394965ef31cdd928374d8c5e21afaf89c
+2026-10-10T21:17:44Z
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/journal	0.089s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.025s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/journal	1.795s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.026s
+restored cross-build linux/arm64 PASS
+restored cross-build darwin/arm64 PASS
+restored cross-build darwin/amd64 PASS
+restored cross-build windows/amd64 PASS
+restored cross-build windows/arm64 PASS
+all modules verified
+2026-10-10T21:18:34Z
+EXACT RESTORED MEMORY REPLAY AND RECOVERY OWNERSHIP CHECKPOINT PASS

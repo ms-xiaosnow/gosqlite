@@ -1,0 +1,142 @@
+//go:build oracle
+
+package testkit_test
+
+import (
+	"bytes"
+	"context"
+	"errors"
+	"os/exec"
+	"path/filepath"
+	"reflect"
+	"regexp"
+	"strings"
+	"testing"
+
+	"github.com/ms-xiaosnow/gosqlite/sqlite"
+)
+
+// Ordinary SQL histories only. Expected SQL failures are sent on their own
+// lines because the official shell skips the remaining statements on that line.
+// The shell receives ordinary EOF and is never killed.
+func TestReviewConnectionCountersTypedOracle(t *testing.T) {
+	const counts = "SELECT changes(),total_changes(),last_insert_rowid(),typeof(changes()),typeof(total_changes()),typeof(last_insert_rowid())"
+	type step struct {
+		q        string
+		read     bool
+		code     sqlite.Code
+		category string
+	}
+	steps := []step{
+		{q: counts, read: true},
+		{q: "CREATE TABLE t(id INTEGER PRIMARY KEY,v NOT NULL,c,tot,prev)"},
+		{q: "INSERT INTO t VALUES(8,'x',changes(),total_changes(),last_insert_rowid()),(9,'y',changes(),total_changes(),last_insert_rowid())"},
+		{q: "CREATE INDEX idx ON t(v)"},
+		{q: "INSERT INTO t VALUES(last_insert_rowid()+1,'z',changes(),total_changes(),last_insert_rowid()),(last_insert_rowid()+1,'w',changes(),total_changes(),last_insert_rowid())"},
+		{q: "SELECT * FROM t ORDER BY id", read: true},
+		{q: "BEGIN"},
+		{q: "SAVEPOINT a"},
+		{q: "INSERT INTO t VALUES(20,'temporary',changes(),total_changes(),last_insert_rowid())"},
+		{q: "ROLLBACK TO a"},
+		{q: "UPDATE t SET v=CASE WHEN id=9 THEN NULL ELSE 'changed' END", code: sqlite.CodeConstraint, category: "NOT NULL constraint failed"},
+		{q: "SELECT * FROM t ORDER BY id", read: true},
+		{q: "UPDATE t SET c=changes(),tot=total_changes(),prev=last_insert_rowid()"},
+		{q: "DELETE FROM t WHERE abs(-9223372036854775808)=id", code: sqlite.CodeError, category: "integer overflow"},
+		{q: "UPDATE t SET id=8 WHERE id=9", code: sqlite.CodeConstraint, category: "UNIQUE constraint failed"},
+		{q: "INSERT INTO t VALUES(30,'first',1,2,3),(8,'duplicate',1,2,3)", code: sqlite.CodeConstraint, category: "UNIQUE constraint failed"},
+		{q: "INSERT INTO t VALUES(40,'first',1,2,3),('bad','mismatch',1,2,3)", code: sqlite.CodeMismatch, category: "datatype mismatch"},
+		{q: "ROLLBACK"},
+		{q: "SELECT * FROM t ORDER BY id", read: true},
+		{q: "INSERT INTO t(id,v) VALUES(NULL,'allocated')"},
+		{q: "UPDATE t SET id=100 WHERE id=8"},
+		{q: "SELECT id,CHANGES(),TOTAL_CHANGES(),LAST_INSERT_ROWID() FROM t WHERE id=last_insert_rowid() ORDER BY id", read: true},
+		{q: "SELECT changes()+total_changes(),last_insert_rowid() BETWEEN 1 AND 100,CASE changes() WHEN 1 THEN typeof(total_changes()) ELSE 'bad' END", read: true},
+		{q: "SELECT COUNT(*),SUM(changes()),MAX(total_changes()),MIN(last_insert_rowid()) FROM t", read: true},
+		{q: "SELECT changes(),count(*) FROM t GROUP BY id", read: true},
+		{q: "SELECT id,COUNT(*),SUM(changes()),MAX(total_changes()),MIN(last_insert_rowid()) FROM t GROUP BY id ORDER BY id DESC LIMIT 2", read: true},
+		{q: "SELECT changes() AS c,count(*) AS n FROM t GROUP BY changes() HAVING count(*)>0 ORDER BY n DESC", read: true},
+		{q: "UPDATE t SET v='kept' WHERE 0"},
+		{q: "INSERT INTO t(id,v) VALUES(101,'end')"},
+		{q: "DELETE FROM t WHERE total_changes()>0"},
+		{q: "INSERT INTO t(id,v) VALUES(0,'zero')"},
+		{q: "INSERT INTO t(id,v) VALUES(-9223372036854775808,'min')"},
+		{q: "DELETE FROM t WHERE id=-9223372036854775808"},
+		{q: "SELECT * FROM t ORDER BY id", read: true},
+	}
+	for _, shared := range []bool{false, true} {
+		t.Run(map[bool]string{false: "rollback", true: "shared"}[shared], func(t *testing.T) {
+			db, err := sqlite.Open(filepath.Join(t.TempDir(), "native.db"), sqlite.Options{WALShared: shared})
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer db.Close()
+			var script strings.Builder
+			var got [][]any
+			var categories []string
+			if shared {
+				script.WriteString(".output /dev/null\nPRAGMA journal_mode=WAL;\n.output stdout\n")
+			}
+			read := func(q string) {
+				r := confNative(t, db, q)
+				if len(r.rows) > 0 {
+					labels := make([]any, len(r.columns))
+					for i, v := range r.columns {
+						labels[i] = v
+					}
+					got = append(got, labels)
+					got = append(got, r.rows...)
+				}
+				script.WriteString(q + ";\n")
+			}
+			for _, s := range steps {
+				if s.read {
+					read(s.q)
+					continue
+				}
+				_, e := db.Exec(context.Background(), s.q)
+				if s.code == 0 {
+					if e != nil {
+						t.Fatal(s.q, e)
+					}
+				} else {
+					var detail *sqlite.Error
+					if !errors.As(e, &detail) || detail.Code != s.code {
+						t.Fatal(s.q, e)
+					}
+					categories = append(categories, s.category)
+				}
+				script.WriteString(s.q + ";\n")
+				read(counts)
+			}
+			cmd := exec.Command(confOracle(t), "-batch", "-quote", "-header", filepath.Join(t.TempDir(), "official.db"))
+			cmd.Stdin = strings.NewReader(script.String())
+			var stderr bytes.Buffer
+			cmd.Stderr = &stderr
+			out, e := cmd.Output()
+			if e == nil {
+				t.Fatal("expected logical failures")
+			}
+			matches := regexp.MustCompile(`(?m)^(?:Parse error|Error) near line \d+: (.*)$`).FindAllStringSubmatch(stderr.String(), -1)
+			if len(matches) != len(categories) {
+				t.Fatal(stderr.String())
+			}
+			for i, s := range categories {
+				if !strings.Contains(matches[i][1], s) {
+					t.Fatal(i, s, matches[i][1])
+				}
+			}
+			want, e := confQuoted(out)
+			if e != nil {
+				t.Fatal(e)
+			}
+			if !reflect.DeepEqual(got, want) {
+				for i := 0; i < len(got) && i < len(want); i++ {
+					if !reflect.DeepEqual(got[i], want[i]) {
+						t.Fatalf("row %d got %#v want %#v", i, got[i], want[i])
+					}
+				}
+				t.Fatalf("row count %d %d", len(got), len(want))
+			}
+		})
+	}
+}

@@ -327,3 +327,9 @@ Windows/Darwin runtime remain unqualified.
 
 The required remaining work is separated by goal clause and evidence in
 [acceptance status](docs/acceptance-status.md); full M10 acceptance is pending.
+
+Supported bounded GROUP BY/HAVING, connection SQL counters and rollback cached
+ordinary preparation are described in [grouped aggregates](docs/grouped-aggregates.md),
+[connection state](docs/sql-connection-counters.md) and
+[preparation boundaries](docs/sql-cached-preparation.md). The profile remains
+explicitly partial; final M10 qualification is outstanding.

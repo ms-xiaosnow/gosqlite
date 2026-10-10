@@ -1,0 +1,16 @@
+Audited ordinary in-memory SQL to inspect rowid grouping NULL-order controls.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+SELECT id,count(*) FROM rp WHERE abs(v)>0 GROUP BY id ORDER BY id DESC LIMIT 1 exit 0 stdout 4,1
+ stderr 
+SELECT id,count(*) FROM rp WHERE abs(v)>0 GROUP BY id ORDER BY id DESC NULLS FIRST LIMIT 1 exit 1 stdout  stderr Error in 5th command line argument: integer overflow
+
+SELECT id,count(*) FROM rp WHERE abs(v)>0 GROUP BY id ORDER BY id DESC NULLS LAST LIMIT 1 exit 0 stdout 4,1
+ stderr 
+SELECT id,count(*) FROM rp WHERE abs(v)>0 GROUP BY id ORDER BY id ASC NULLS LAST LIMIT 1 exit 1 stdout  stderr Error in 5th command line argument: integer overflow
+
+SELECT id,count(*) FROM rp WHERE abs(v)>0 GROUP BY id ORDER BY id ASC NULLS FIRST LIMIT 1 exit 1 stdout  stderr Error in 5th command line argument: integer overflow
+
+SELECT id,count(*) FROM rp WHERE abs(v)>0 GROUP BY id ORDER BY +id DESC LIMIT 1 exit 1 stdout  stderr Error in 5th command line argument: integer overflow
+
+SELECT id,count(*) FROM rp WHERE abs(v)>0 GROUP BY id ORDER BY _rowid_ DESC LIMIT 1 exit 0 stdout 4,1
+ stderr 

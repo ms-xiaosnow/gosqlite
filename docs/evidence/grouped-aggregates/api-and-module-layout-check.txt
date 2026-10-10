@@ -1,0 +1,1 @@
+All 45 existing exported sqlite/driver struct definitions are text-identical. go.mod/go.sum are byte-identical. Internal sql.Select intentionally adds grouping/HAVING AST fields.

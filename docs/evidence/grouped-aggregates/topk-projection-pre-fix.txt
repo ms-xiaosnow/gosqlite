@@ -1,0 +1,12 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+--- FAIL: TestGroupedAggregateOracleTopKProjectionTiming (0.03s)
+    --- FAIL: TestGroupedAggregateOracleTopKProjectionTiming/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_top_projection_GROUP_BY_k_ORDER_BY_k+0_LIMIT_1 (0.00s)
+        grouped_aggregate_conformance_test.go:249: native query "SELECT k,CASE WHEN k=3 THEN abs(-9223372036854775808) ELSE count(*) END FROM top_projection GROUP BY k ORDER BY k+0 LIMIT 1": sqlite query: integer overflow
+    --- FAIL: TestGroupedAggregateOracleTopKProjectionTiming/SELECT_k,CASE_WHEN_k=1_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_top_projection_GROUP_BY_k_ORDER_BY_k+0_DESC_LIMIT_1 (0.00s)
+        grouped_aggregate_conformance_test.go:249: native query "SELECT k,CASE WHEN k=1 THEN abs(-9223372036854775808) ELSE count(*) END FROM top_projection GROUP BY k ORDER BY k+0 DESC LIMIT 1": sqlite query: integer overflow
+    --- FAIL: TestGroupedAggregateOracleTopKProjectionTiming/SELECT_k,CASE_WHEN_k=3_THEN_abs(-9223372036854775808)_ELSE_count(*)_END_FROM_top_projection_GROUP_BY_k_ORDER_BY_k+0_LIMIT_1_OFFSET_1 (0.00s)
+        grouped_aggregate_conformance_test.go:249: native query "SELECT k,CASE WHEN k=3 THEN abs(-9223372036854775808) ELSE count(*) END FROM top_projection GROUP BY k ORDER BY k+0 LIMIT 1 OFFSET 1": sqlite query: integer overflow
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/testkit	0.029s
+FAIL
+probe_exit=1

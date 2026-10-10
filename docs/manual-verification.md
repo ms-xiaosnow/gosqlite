@@ -538,3 +538,41 @@ full-source results are retained separately, not substituted for this combined
 identity. Native failure/crash/namespace recovery remains NOT_RUN. Shared legacy
 absence provenance and the separately reproduced ordinary rollback reader-open
 stat/SHARED timing race remain genuine engineering gaps. M10 is unfinished.
+
+
+## Bounded grouped aggregates, connection state and cached ordinary preparation
+
+Exact combined source13f53e4cdadaaca2530e17e5f7a61b9dfe8e5c33 adds79 checked paths
+onto verified replay/ownership source293a25e4ed905f970b437c28ce6419c1e1b89176.
+It composes independently reviewed grouped-v2, counters-v1, cached-preparation-v3
+and independent regressions by checked Git hunks, preserving existing range,
+cleanup and recovery code. GROUP BY/HAVING retains bounded group/representative/
+state allocations, conservative supported keys and proved rowid grouping. Stable
+LIMIT/OFFSET admission and lookahead fixes retain earlier failing transcripts.
+
+Counter state is connection-local and distinct from statement Result; successful
+source inserts, ABORT, transaction rollback/savepoints, DDL and maintenance have
+explicit typed SQLite controls. Warm cached ordinary preparation now distinguishes
+invalid SQL from execution-BUSY. Cache admission includes fixed empty-catalog
+cost, invalidation, binding and supported DDL/rollback paths. Metadata cache never
+authorizes data or native acquisition. Sessions/extensions/constant-query warming
+and complete stale-schema reprepare remain unsupported cache profiles.
+
+Two imported legacy assertions were identified as outdated BEFORE execution, not
+reported as failed runs. The retained warm valid INSERT under EXCLUSIVE now has
+strict official changes=0, not the old limitation's2; missing-table control is
+strengthened to reject BUSY. Original GROUP BY counter SQL is retained as a full
+typed value positive, with official counterpart and additional grouped histories;
+the actual unsupported window negative remains unchanged. All old source/assertion
+artifacts are preserved. No control is replaced by a log-only assertion.
+
+Exact-source focused normal/race/typed oracle/oracle-race preflight passed20:48:25Z. Full guarded CGO0 unit/vet/build20:52:30Z, complete pinned
+ordinary oracle21:05:18Z, full race(SQLite475.910s), five target builds, module
+verification and all hashes PASS exit0 at2026-10-10T21:14:01Z. All published
+non-document changed bytes equal that fixed source. Exact remote/restored/CI
+gates are separately recorded; no recovery/native-fault or foreign runtime ran.
+
+Known wider planner error/phase differences remain held and corrective. Reader/
+shared acquisition fixes, CLI/import verification, grams/transaction harnesses and
+native integrity/performance-CI additions are excluded from this checkpoint.
+M10 remains unfinished; no complete-goal delivery claim follows.

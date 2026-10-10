@@ -1,0 +1,12 @@
+docs/sql-connection-counters.md: OK
+driver/connection_counters_test.go: OK
+internal/sql/connection.go: OK
+internal/sql/connection_test.go: OK
+internal/sql/eval.go: OK
+internal/sql/functions.go: OK
+internal/testkit/connection_counters_conformance_test.go: OK
+sqlite/connection_counters_internal_test.go: OK
+sqlite/connection_counters_test.go: OK
+sqlite/sqlite.go: OK
+sqlite/transaction.go: OK
+sqlite/write_rows.go: OK

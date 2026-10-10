@@ -1,0 +1,23 @@
+{
+  "count": 1264,
+  "baseline_count": 1259,
+  "changed_paths": [
+    "docs/sql-cached-preparation.md",
+    "docs/sql-connection-counters.md",
+    "driver/preparation_cache_test.go",
+    "internal/testkit/connection_counters_conformance_test.go",
+    "internal/testkit/preparation_cache_conformance_test.go",
+    "sqlite/connection_counters_internal_test.go",
+    "sqlite/preparation_cache.go",
+    "sqlite/preparation_cache_test.go",
+    "sqlite/query.go",
+    "sqlite/sqlite.go",
+    "sqlite/transaction.go",
+    "sqlite/transaction_control.go",
+    "sqlite/write_rows.go",
+    "sqlite/write_schema.go"
+  ],
+  "copy_match": true,
+  "replay_match": true,
+  "patch_sha256": "c96429d2427037bfc6c2286ff2a744300484f8f0834c419e4ace6c1bafcd50e0"
+}

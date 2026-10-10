@@ -1,0 +1,11 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+--- FAIL: TestGroupedAggregateGrammarAndParameters (0.00s)
+    grouped_aggregate_test.go:30: accepted SELECT x FROM t GROUP BY ROLLUP(x)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/sql	0.005s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.056s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.023s
+FAIL
+selected_exit=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	0.465s
+oracle_exit=0

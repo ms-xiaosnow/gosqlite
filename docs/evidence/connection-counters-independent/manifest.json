@@ -1,0 +1,58 @@
+{
+  "baseline_tree": "7d3184f87165e11e12560884ec6e4f92c9bfd039",
+  "final_tree": "7c8f7a266a63a713b22709268fdd4d25f1b875d1",
+  "frozen_path": "/workspace/scratch/5e06a74e5f65/durable-restart/sql-connection-counters-freeze-v1",
+  "all_inventory_sha256": "f05142b0c8e291c41614596e45013e3f87dc5ee4389792b9ea1671c14414710f",
+  "patch_sha256": "7a09d38be5ccb2fd18b11e3f74a1d57ba8b98e04ef7bd6a56491dd5b8ec0099c",
+  "owned": {
+    "docs/sql-connection-counters.md": {
+      "base": null,
+      "final": "d9bb78f78eba49457b39da77c865742efd74b91ae5d5bbdf4ab5a348bc9ab07f"
+    },
+    "driver/connection_counters_test.go": {
+      "base": null,
+      "final": "3ce899674d9fb00ca7e279ae55407c81063979368d27bc246fcadbec0c5fb06e"
+    },
+    "internal/sql/connection.go": {
+      "base": null,
+      "final": "a7c78f002a4fbcbdb06b2f1eb67bd8bbf7f35273af8ba5f8b4107e2b8554cc18"
+    },
+    "internal/sql/connection_test.go": {
+      "base": null,
+      "final": "4cbcf21d49add6b4641f26d962a7186030c6633782913af53464fcc26215d87b"
+    },
+    "internal/sql/eval.go": {
+      "base": "58d59db04058658f2b4f71a793ca2188dd719b991799bc66131f21e750ce5c64",
+      "final": "e0ab68fde71ef889eefcb96027ebf7e44305e3a61b37097df306965b275da586"
+    },
+    "internal/sql/functions.go": {
+      "base": "1ee9170c20d4fbe4dcbc68a1bd79a32dfb2384a5418ce706121d903913375504",
+      "final": "c17fd03232f81371d065ce03e5cdff67db83bae99a7add2f1c90bbccbf8d1e3e"
+    },
+    "internal/testkit/connection_counters_conformance_test.go": {
+      "base": null,
+      "final": "35334dca69d3d9782018c960b6024eb23e47ba56b43e28e15d96972bb47ea47c"
+    },
+    "sqlite/connection_counters_internal_test.go": {
+      "base": null,
+      "final": "6e45d4e650d43a76390cd0c624481fc94d663cb4623f28086b5945d84f8c42ad"
+    },
+    "sqlite/connection_counters_test.go": {
+      "base": null,
+      "final": "ffe6fffbc5f31f71fd6ce80dc698a20392928c920682558d63ceb78b71971bcf"
+    },
+    "sqlite/sqlite.go": {
+      "base": "8aa090a556814ce09d7ccd03e3f9743ed7fd1d82803522f320431e0aa884675c",
+      "final": "2226d376e46b8537a959f2cab65c9e7cc92784494b03fc2d5e762081e0a5adbc"
+    },
+    "sqlite/transaction.go": {
+      "base": "de62765d4ba6badc70a273f05a7e5cd918c1540296f818680d3778a1351db66f",
+      "final": "5da7cfc906ae432ba80d1cb197560be8f2a551b16489a8ebd623dd57642a8c11"
+    },
+    "sqlite/write_rows.go": {
+      "base": "fcaaea72411f006d5045253e0a169fcffa5c0959ceedfcff285efe27cf2fcd36",
+      "final": "58e915de4533e4e66bb9be85160da7f60b008a42f9a90f370e20a7a8085284df"
+    }
+  },
+  "object_store": "/workspace/scratch/5e06a74e5f65/durable-restart/sql-counter-inventory-zd9e_hse/objects.git"
+}

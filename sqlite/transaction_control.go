@@ -67,6 +67,7 @@ func (t *Tx) ensureSnapshotLocked(ctx context.Context) error {
 		}
 		t.reader, t.storage = p, p
 	}
+	d.observePreparationCookieLocked(t.reader.Header().SchemaCookie)
 	t.initialInfo = fileInfo(t.reader.Header())
 	d.info = t.initialInfo
 	return nil
@@ -201,6 +202,10 @@ func (t *Tx) savepointControlLocked(ctx context.Context, control *sqlast.Transac
 		t.discardSavepointsLocked(i)
 		return nil
 	}
+	beforeSchema := uint32(0)
+	if t.reader != nil {
+		beforeSchema = t.reader.Header().SchemaCookie
+	}
 	if t.storage != nil {
 		if err := t.storage.RollbackTo(ctx, t.savepoints[i].id); err != nil {
 			return err
@@ -209,6 +214,9 @@ func (t *Tx) savepointControlLocked(ctx context.Context, control *sqlast.Transac
 	t.discardSavepointsLocked(i + 1)
 	t.ownershipValidated = false
 	if t.reader != nil {
+		if t.reader.Header().SchemaCookie != beforeSchema {
+			t.db.preparation = nil
+		}
 		t.db.info = fileInfo(t.reader.Header())
 	}
 	return nil

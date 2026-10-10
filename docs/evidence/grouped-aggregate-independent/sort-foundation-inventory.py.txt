@@ -1,0 +1,14 @@
+from pathlib import Path
+import hashlib,json,subprocess,shutil
+p=Path('/workspace/scratch/5e06a74e5f65/durable-restart'); src=p/'sql-final-verify'; dst=p/'grouped-review-sort-foundation'; ev=p/'gosqlite/docs/evidence/grouped-aggregate-independent'
+manifest={s.split('  ',1)[1]:s.split('  ',1)[0] for s in (p/'sql-final-all-sha256.txt').read_text().splitlines()}
+actual={str(f.relative_to(src)):hashlib.sha256(f.read_bytes()).hexdigest() for f in sorted(src.rglob('*')) if f.is_file()}
+assert actual==manifest
+patch=p/'sql-final-oracle-sort.patch'; assert hashlib.sha256(patch.read_bytes()).hexdigest()=='ff51f7c64de46363d186c3c9adebdde181fb23a0d7789c0e0f4428be7dddb42a'
+subprocess.run(['git','diff','--exit-code','1e413b466d10db5c7304ba231fd5d4536dfc5fa5','48370bbe2dc585c1b45821fbc360c525d156a9f5','--',':(exclude)internal/testkit/readonly_conformance_test.go'],cwd=p/'gosqlite',check=True)
+assert not dst.exists(); shutil.copytree(src,dst)
+subprocess.run(['git','init','-q'],cwd=dst,check=True); subprocess.run(['git','add','-f','.'],cwd=dst,check=True)
+tree=subprocess.check_output(['git','write-tree'],cwd=dst).decode().strip(); assert tree=='48370bbe2dc585c1b45821fbc360c525d156a9f5'
+reversedpatch=subprocess.run(['git','apply','--reverse','--check',str(patch)],cwd=dst,check=True)
+(ev/'sort-foundation-inventory.json').write_text(json.dumps({'tree':tree,'files':len(actual),'sha256_manifest_match':True,'patch_sha256':hashlib.sha256(patch.read_bytes()).hexdigest(),'only_changed_path':'internal/testkit/readonly_conformance_test.go','goal_sha256':actual['goal.md'],'copy':str(dst)},indent=2)+'\n')
+print(tree,len(actual),'full files verified; isolated copy and reverse patch check PASS')

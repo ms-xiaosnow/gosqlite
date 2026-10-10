@@ -257,6 +257,41 @@ func (p *parser) selectStmt() (*Select, error) {
 			return nil, err
 		}
 	}
+	if p.take("GROUP") {
+		if err := p.need("BY"); err != nil {
+			return nil, err
+		}
+		for {
+			if p.is("ROLLUP") || p.is("CUBE") {
+				return nil, p.unsupported("GROUP BY grouping sets")
+			}
+			e, err := p.expression(0)
+			if err != nil {
+				return nil, err
+			}
+			if len(s.GroupBy) >= MaxColumns {
+				return nil, p.unsupported("GROUP BY terms exceed 2000")
+			}
+			s.GroupBy = append(s.GroupBy, e)
+			if !p.take(",") {
+				break
+			}
+		}
+	}
+	if p.take("HAVING") {
+		var err error
+		s.Having, err = p.expression(0)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if len(s.GroupBy) > 0 || s.Having != nil {
+		for _, c := range s.Columns {
+			if _, star := c.Expr.(*Star); star {
+				return nil, p.unsupported("wildcard in grouped projection")
+			}
+		}
+	}
 	if p.take("ORDER") {
 		if err := p.need("BY"); err != nil {
 			return nil, err

@@ -1,0 +1,19 @@
+//go:build oracle
+package testkit_test
+import "testing"
+func TestGroupedReviewerRowidStream(t *testing.T) {
+ db,path:=aggregateOracleFixture(t,false)
+ confCLI(t,path,"CREATE TABLE rp(id INTEGER PRIMARY KEY,v); INSERT INTO rp VALUES(1,1),(2,2),(3,-9223372036854775808),(4,4);",false)
+ for _,q:=range []string{
+ "SELECT id,count(*) FROM rp WHERE abs(v)>0 GROUP BY id LIMIT 1",
+ "SELECT id,count(*) FROM rp NOT INDEXED WHERE abs(v)>0 GROUP BY id LIMIT 1",
+ "SELECT id,count(*) FROM rp WHERE CASE WHEN id=3 THEN abs(v) ELSE 1 END GROUP BY id LIMIT 1",
+ "SELECT id,count(*) FROM rp WHERE abs(v)>0 GROUP BY id ORDER BY id LIMIT 1",
+ "SELECT id,count(*) FROM rp WHERE abs(v)>0 GROUP BY id ORDER BY id DESC LIMIT 1",
+ "SELECT id,count(*) FROM rp WHERE abs(v)>0 GROUP BY id+0,id LIMIT 1",
+ "SELECT id,count(*) FROM rp WHERE abs(CASE WHEN id=2 THEN -9223372036854775808 ELSE 1 END)>0 GROUP BY id LIMIT 1",
+ "SELECT id,count(*) FROM rp WHERE abs(CASE WHEN id=4 THEN -9223372036854775808 ELSE 1 END)>0 GROUP BY id LIMIT 1 OFFSET 1",
+ "SELECT id,count(*) FROM rp WHERE abs(v)>0 GROUP BY id,id LIMIT 1",
+ "SELECT id,count(*) FROM rp WHERE abs(v)>0 GROUP BY id,v LIMIT 1",
+ } {t.Run(q,func(t *testing.T){groupedReviewerCompare(t,db,path,q)})}
+}

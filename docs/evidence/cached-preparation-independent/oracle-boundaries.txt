@@ -1,0 +1,179 @@
+SQL setup 'CREATE TABLE t(id INTEGER PRIMARY KEY,v); INSERT INTO t VALUES(1,1),(2,2);'
+SQL lock 'BEGIN EXCLUSIVE;'
+SQL cold 'DELETE FROM absent;'
+Parse error near line 1: database is locked (5)
+SQL cold 'UPDATE t SET missing=1;'
+Parse error near line 3: database is locked (5)
+SQL cold 'DELETE FROM t;'
+Parse error near line 5: database is locked (5)
+SQL cold 'SELECT changes(),total_changes(),last_insert_rowid();'
+Parse error near line 7: database is locked (5)
+SQL lock 'ROLLBACK;'
+SQL constant 'SELECT 1;'
+'1'
+1
+SQL lock 'BEGIN EXCLUSIVE;'
+SQL constant 'DELETE FROM absent;'
+Parse error near line 3: no such table: absent
+SQL constant 'UPDATE t SET missing=1;'
+Parse error near line 5: no such column: missing
+SQL constant 'DELETE FROM t;'
+Error near line 7: database is locked
+SQL constant 'SELECT changes(),total_changes(),last_insert_rowid();'
+'changes()','total_changes()','last_insert_rowid()'
+0,0,0
+SQL lock 'ROLLBACK;'
+SQL counter 'SELECT changes(),total_changes(),last_insert_rowid();'
+'changes()','total_changes()','last_insert_rowid()'
+0,0,0
+SQL lock 'BEGIN EXCLUSIVE;'
+SQL counter 'DELETE FROM absent;'
+Parse error near line 3: no such table: absent
+SQL counter 'UPDATE t SET missing=1;'
+Parse error near line 5: no such column: missing
+SQL counter 'DELETE FROM t;'
+Error near line 7: database is locked
+SQL counter 'SELECT changes(),total_changes(),last_insert_rowid();'
+'changes()','total_changes()','last_insert_rowid()'
+0,0,0
+SQL lock 'ROLLBACK;'
+SQL read 'SELECT * FROM t;'
+'id','v'
+1,1
+2,2
+SQL lock 'BEGIN EXCLUSIVE;'
+SQL read 'DELETE FROM absent;'
+Parse error near line 3: no such table: absent
+SQL read 'UPDATE t SET missing=1;'
+Parse error near line 5: no such column: missing
+SQL read 'DELETE FROM t;'
+Error near line 7: database is locked
+SQL read 'SELECT changes(),total_changes(),last_insert_rowid();'
+'changes()','total_changes()','last_insert_rowid()'
+0,0,0
+SQL lock 'ROLLBACK;'
+SQL invalid 'DELETE FROM absent;'
+Parse error near line 1: no such table: absent
+SQL lock 'BEGIN EXCLUSIVE;'
+SQL invalid 'DELETE FROM absent;'
+Parse error near line 3: no such table: absent
+SQL invalid 'UPDATE t SET missing=1;'
+Parse error near line 5: no such column: missing
+SQL invalid 'DELETE FROM t;'
+Error near line 7: database is locked
+SQL invalid 'SELECT changes(),total_changes(),last_insert_rowid();'
+'changes()','total_changes()','last_insert_rowid()'
+0,0,0
+SQL lock 'ROLLBACK;'
+SQL schema 'SELECT name FROM sqlite_schema;'
+'name'
+'t'
+SQL lock 'BEGIN EXCLUSIVE;'
+SQL schema 'DELETE FROM absent;'
+Parse error near line 3: no such table: absent
+SQL schema 'UPDATE t SET missing=1;'
+Parse error near line 5: no such column: missing
+SQL schema 'DELETE FROM t;'
+Error near line 7: database is locked
+SQL schema 'SELECT changes(),total_changes(),last_insert_rowid();'
+'changes()','total_changes()','last_insert_rowid()'
+0,0,0
+SQL lock 'ROLLBACK;'
+SQL full 'UPDATE t SET v=v;'
+SQL full 'BEGIN; CREATE TABLE own(x); ROLLBACK;'
+SQL lock 'BEGIN EXCLUSIVE;'
+SQL full 'DELETE FROM absent;'
+Parse error near line 5: database is locked (5)
+SQL full 'DELETE FROM t;'
+Parse error near line 7: database is locked (5)
+SQL full 'SELECT changes(),total_changes(),last_insert_rowid();'
+'changes()','total_changes()','last_insert_rowid()'
+2,2,0
+SQL lock 'ROLLBACK;'
+SQL savepoint 'UPDATE t SET v=v;'
+SQL savepoint 'SAVEPOINT s; CREATE TABLE own(x); ROLLBACK TO s; RELEASE s;'
+SQL lock 'BEGIN EXCLUSIVE;'
+SQL savepoint 'DELETE FROM absent;'
+Parse error near line 5: database is locked (5)
+SQL savepoint 'DELETE FROM t;'
+Parse error near line 7: database is locked (5)
+SQL savepoint 'SELECT changes(),total_changes(),last_insert_rowid();'
+'changes()','total_changes()','last_insert_rowid()'
+2,2,0
+SQL lock 'ROLLBACK;'
+SQL emptyrollback 'UPDATE t SET v=v;'
+SQL emptyrollback 'BEGIN; ROLLBACK;'
+SQL lock 'BEGIN EXCLUSIVE;'
+SQL emptyrollback 'DELETE FROM absent;'
+Parse error near line 5: no such table: absent
+SQL emptyrollback 'DELETE FROM t;'
+Error near line 7: database is locked
+SQL emptyrollback 'SELECT changes(),total_changes(),last_insert_rowid();'
+'changes()','total_changes()','last_insert_rowid()'
+0,2,0
+SQL lock 'ROLLBACK;'
+SQL failedcreate 'UPDATE t SET v=v;'
+SQL failedcreate 'BEGIN; CREATE TABLE t(x); ROLLBACK;'
+Parse error near line 3: table t already exists
+  CREATE TABLE t(x); ROLLBACK;
+               ^--- error here
+SQL lock 'BEGIN EXCLUSIVE;'
+SQL failedcreate 'DELETE FROM absent;'
+Parse error near line 5: no such table: absent
+SQL failedcreate 'DELETE FROM t;'
+Error near line 7: database is locked
+SQL failedcreate 'SELECT changes(),total_changes(),last_insert_rowid();'
+'changes()','total_changes()','last_insert_rowid()'
+0,2,0
+SQL lock 'ROLLBACK;'
+SQL createindex 'UPDATE t SET v=v;'
+SQL createindex 'BEGIN; CREATE INDEX own_ix ON t(v); ROLLBACK;'
+SQL lock 'BEGIN EXCLUSIVE;'
+SQL createindex 'DELETE FROM absent;'
+Parse error near line 5: database is locked (5)
+SQL createindex 'DELETE FROM t;'
+Parse error near line 7: database is locked (5)
+SQL createindex 'SELECT changes(),total_changes(),last_insert_rowid();'
+'changes()','total_changes()','last_insert_rowid()'
+2,2,0
+SQL lock 'ROLLBACK;'
+SQL refresh 'UPDATE t SET v=v;'
+SQL lock 'ALTER TABLE t ADD COLUMN newer; CREATE TABLE fresh(x);'
+SQL refresh 'UPDATE t SET newer=7;'
+SQL refresh 'INSERT INTO fresh VALUES(8);'
+SQL refresh 'SELECT changes(),total_changes(),last_insert_rowid();'
+'changes()','total_changes()','last_insert_rowid()'
+1,5,1
+SQL lock 'DROP TABLE t; CREATE TABLE t(id INTEGER PRIMARY KEY,different); INSERT INTO t VALUES(1,11),(2,12);'
+SQL refresh 'UPDATE t SET newer=7;'
+Error near line 9: no such column: newer
+SQL refresh 'SELECT changes(),total_changes(),last_insert_rowid();'
+'changes()','total_changes()','last_insert_rowid()'
+1,5,1
+SQL refresh 'SELECT * FROM t;'
+'id','different'
+1,11
+2,12
+SQL refresh 'CREATE TABLE own(x);'
+SQL refresh 'INSERT INTO own VALUES(9),(10);'
+SQL lock 'BEGIN EXCLUSIVE;'
+SQL refresh 'UPDATE own SET x=x;'
+Error near line 19: database is locked
+SQL refresh 'SELECT changes(),total_changes(),last_insert_rowid();'
+'changes()','total_changes()','last_insert_rowid()'
+0,7,2
+SQL lock 'ROLLBACK;'
+NORMAL END setup 0
+NORMAL END lock 0
+NORMAL END cold 1
+NORMAL END constant 1
+NORMAL END counter 1
+NORMAL END read 1
+NORMAL END invalid 1
+NORMAL END schema 1
+NORMAL END full 1
+NORMAL END savepoint 1
+NORMAL END emptyrollback 1
+NORMAL END failedcreate 1
+NORMAL END createindex 1
+NORMAL END refresh 1

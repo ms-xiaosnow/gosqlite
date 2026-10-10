@@ -1,0 +1,34 @@
+=== RUN   TestConnectionCountersCancellationAfterInsertedRow
+--- PASS: TestConnectionCountersCancellationAfterInsertedRow (0.00s)
+=== RUN   TestConnectionCountersLazyTransactionReads
+--- PASS: TestConnectionCountersLazyTransactionReads (0.00s)
+=== RUN   TestCachedPreparationOutcomes
+=== RUN   TestCachedPreparationOutcomes/false
+=== RUN   TestCachedPreparationOutcomes/true
+--- PASS: TestCachedPreparationOutcomes (0.01s)
+    --- PASS: TestCachedPreparationOutcomes/false (0.00s)
+    --- PASS: TestCachedPreparationOutcomes/true (0.01s)
+=== RUN   TestCachedPreparationFreshReadWarmAndQuota
+--- PASS: TestCachedPreparationFreshReadWarmAndQuota (0.00s)
+=== RUN   TestCachedPreparationSchemaLifecycle
+--- PASS: TestCachedPreparationSchemaLifecycle (0.01s)
+=== RUN   TestCachedPreparationMetadataIsolation
+--- PASS: TestCachedPreparationMetadataIsolation (0.00s)
+=== RUN   TestCachedPreparationBusyClassification
+--- PASS: TestCachedPreparationBusyClassification (0.00s)
+=== RUN   TestConnectionCountersStatementsAndUndo
+=== RUN   TestConnectionCountersStatementsAndUndo/false
+=== RUN   TestConnectionCountersStatementsAndUndo/true
+--- PASS: TestConnectionCountersStatementsAndUndo (0.03s)
+    --- PASS: TestConnectionCountersStatementsAndUndo/false (0.02s)
+    --- PASS: TestConnectionCountersStatementsAndUndo/true (0.02s)
+=== RUN   TestConnectionCountersAdmissionRowsAndReopen
+--- PASS: TestConnectionCountersAdmissionRowsAndReopen (0.00s)
+=== RUN   TestConnectionCountersStreamingDynamicAndBusyCommit
+--- PASS: TestConnectionCountersStreamingDynamicAndBusyCommit (0.00s)
+=== RUN   TestConnectionCountersConcurrentNative
+--- PASS: TestConnectionCountersConcurrentNative (0.00s)
+=== RUN   TestConnectionCountersExtensionMaintenanceExcluded
+--- PASS: TestConnectionCountersExtensionMaintenanceExcluded (0.31s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.418s

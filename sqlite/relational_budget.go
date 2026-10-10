@@ -14,7 +14,7 @@ import (
 // quota. Earlier streaming rows are not a complete answer; always check Rows.Err.
 var ErrQueryWorkLimit = errors.New("relational query work limit exceeded")
 
-// RelationalLimits bounds multi-source FROM and global aggregate execution. Zero uses 16,777,216
+// RelationalLimits bounds multi-source FROM and global/grouped aggregate execution. Zero uses 16,777,216
 // work units and Options.MaxSortBytes respectively. MaxBytes can only lower that
 // connection memory cap. These limits do not change legacy non-aggregate single-table or
 // ANN limits. Cancellation applies in addition to the quotas, including child

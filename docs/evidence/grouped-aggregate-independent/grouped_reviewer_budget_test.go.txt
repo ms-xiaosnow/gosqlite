@@ -1,0 +1,34 @@
+package sqlite
+
+import (
+ "bytes"
+ "context"
+ "errors"
+ "testing"
+)
+
+// Ordinary SQL fixture and pure statement-budget limits only. The ordered
+// cases exercise capacity growth and repeated top-K candidate replacement.
+func TestGroupedReviewerRetentionAdmission(t *testing.T) {
+ db,_:=relationalFixture(t,Options{})
+ reviewVectorExec(t,db,"CREATE TABLE rbudget(id INTEGER PRIMARY KEY,k,payload BLOB)")
+ for i:=1;i<=40;i++ {reviewVectorExec(t,db,"INSERT INTO rbudget VALUES(?,?,?)",i,i,bytes.Repeat([]byte{byte(i)},1024))}
+ for _,q:=range []string{
+  "SELECT k,max(payload),count(*) FROM rbudget GROUP BY k ORDER BY -k LIMIT 7",
+  "SELECT id,max(payload),count(*) FROM rbudget GROUP BY id ORDER BY id DESC LIMIT 7",
+  "SELECT id,max(payload),count(*) FROM rbudget GROUP BY id ORDER BY id+0 LIMIT 7",
+ } {t.Run(q,func(t *testing.T){
+  r,err:=db.Query(context.Background(),q);if err!=nil{t.Fatal(err)}
+  count:=0;var saved []byte
+  for r.Next(){count++;if count==1{saved=r.Values()[1].([]byte); old:=saved[0];saved[0]^=255;if r.Values()[1].([]byte)[0]!=old{t.Fatal("public BLOB aliases grouped state")}}}
+  if r.Err()!=nil||count!=7{t.Fatal(count,r.Err())};stats:=r.RelationalStats();if stats.CurrentBytes!=0{t.Fatal(stats)}
+  if len(saved)!=1024{t.Fatal("retained public value changed")}
+  for _,lim:=range []RelationalLimits{{MaxWork:stats.Work-1},{MaxBytes:stats.PeakBytes-1}}{
+   rows,e:=db.Query(WithRelationalLimits(context.Background(),lim),q)
+   if e==nil {if rows.Next(){t.Fatalf("budget published a partial answer: %v %#v",lim,rows.Values())};e=rows.Err();if rows.RelationalStats().CurrentBytes!=0{t.Fatal(rows.RelationalStats())};rows.Close()}
+   if !errors.Is(e,ErrQueryWorkLimit)&&!errors.Is(e,ErrMemoryLimit){t.Fatal(lim,e)}
+  }
+  // A failed quota query must not strand a root row lease or connection.
+  rows,e:=db.Query(context.Background(),"SELECT count(*) FROM rbudget");if e!=nil{t.Fatal(e)};if !rows.Next()||rows.Values()[0]!=int64(40){t.Fatal(rows.Values(),rows.Err())};rows.Close()
+ })}
+}

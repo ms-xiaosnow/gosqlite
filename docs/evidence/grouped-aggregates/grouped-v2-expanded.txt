@@ -1,0 +1,11 @@
+Same reviewed ordinary SQL/read-only oracle and pure-memory quota/cancel scope; rowid stream matrix adds no physical workflow.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.024s
+--- FAIL: TestGroupedAggregateOracleRowidStream (0.41s)
+    --- FAIL: TestGroupedAggregateOracleRowidStream/SELECT_id,count(*)_FROM_stream_group_WHERE_CASE_WHEN_id=3_THEN_abs(-9223372036854775808)_ELSE_1_END_GROUP_BY_id_ORDER_BY_id_NULLS_LAST_LIMIT_1 (0.00s)
+        grouped_aggregate_conformance_test.go:272: error published partial answer [1 1]
+    --- FAIL: TestGroupedAggregateOracleRowidStream/SELECT_id,count(*)_FROM_stream_group_WHERE_CASE_WHEN_id=4_THEN_abs(-9223372036854775808)_ELSE_1_END_GROUP_BY_id_ORDER_BY_id_NULLS_LAST_LIMIT_1 (0.00s)
+        grouped_aggregate_conformance_test.go:272: error published partial answer [1 1]
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/testkit	0.874s
+FAIL

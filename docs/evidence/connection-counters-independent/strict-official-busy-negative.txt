@@ -1,0 +1,13 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestReviewConnectionCountersBusyTransitions
+=== RUN   TestReviewConnectionCountersBusyTransitions/BEGIN_IMMEDIATE
+=== RUN   TestReviewConnectionCountersBusyTransitions/BEGIN_EXCLUSIVE
+    connection_counters_independent_test.go:136: counter tuple got [][]interface {}{[]interface {}{2, 2, 2, "integer", "integer", "integer"}} want [][]interface {}{[]interface {}{0, 2, 2, "integer", "integer", "integer"}}
+=== RUN   TestReviewConnectionCountersBusyTransitions/BEGIN
+--- FAIL: TestReviewConnectionCountersBusyTransitions (0.00s)
+    --- PASS: TestReviewConnectionCountersBusyTransitions/BEGIN_IMMEDIATE (0.00s)
+    --- FAIL: TestReviewConnectionCountersBusyTransitions/BEGIN_EXCLUSIVE (0.00s)
+    --- PASS: TestReviewConnectionCountersBusyTransitions/BEGIN (0.00s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/sqlite	0.007s
+FAIL

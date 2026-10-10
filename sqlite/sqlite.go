@@ -190,15 +190,18 @@ type SchemaEntry struct {
 // snapshot and overlay until Commit/Rollback. Concurrent methods are serialized
 // per connection. Independent DB handles can be used concurrently.
 type DB struct {
-	mu      sync.RWMutex
-	path    string
-	info    FileInfo
-	opts    Options
-	closed  bool
-	tx      *Tx
-	rows    map[*Rows]struct{}
-	session pageSession
-	methods *registry.Registry
+	// Counters are connection state, protected by mu; never part of pager undo.
+	counters    sqlast.ConnectionState
+	preparation *preparationSchema
+	mu          sync.RWMutex
+	path        string
+	info        FileInfo
+	opts        Options
+	closed      bool
+	tx          *Tx
+	rows        map[*Rows]struct{}
+	session     pageSession
+	methods     *registry.Registry
 }
 
 // Open opens a SQLite-format file. An absent file is created unless ReadOnly
@@ -379,6 +382,7 @@ func (d *DB) Schema(ctx context.Context) (_ []SchemaEntry, retErr error) {
 	if err != nil {
 		return nil, wrap("schema", err)
 	}
+	d.observePreparationEntriesLocked(ctx, reader.Header().SchemaCookie, entries)
 	d.info = fileInfo(reader.Header())
 	result := make([]SchemaEntry, len(entries))
 	for i, e := range entries {
@@ -400,6 +404,7 @@ func (d *DB) Close() error {
 	var err error
 	if !d.closed {
 		d.closed = true
+		d.preparation = nil
 		for r := range d.rows {
 			r.mu.Lock()
 			r.err = wrap("next", ErrClosed)
@@ -454,6 +459,7 @@ func (d *DB) Query(ctx context.Context, query string, args ...any) (*Rows, error
 	if !ok {
 		return nil, wrap("query", ErrReadOnly)
 	}
+	ctx = sqlast.WithConnectionState(ctx, &d.counters)
 	ctx, params, err := d.bindSelect(ctx, sel, args)
 	if err != nil {
 		return nil, wrap("bind", err)

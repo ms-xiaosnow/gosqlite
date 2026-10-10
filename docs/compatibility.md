@@ -48,16 +48,16 @@ ADR0015](decisions/0015-native-darwin-windows-backends.md) and
 |---|---|---|
 | Basic DDL/DML | partial | Simple rowid CREATE TABLE, nonunique BINARY ASC CREATE INDEX, multirow INSERT, UPDATE/DELETE, transactional DDL, REINDEX for supported extension indices |
 | Constraints/schema | partial | INTEGER PRIMARY KEY rowid alias, NOT NULL and supported literal DEFAULT; noninteger PK metadata can be read but does not imply enforcement. UNIQUE/CHECK/FK/compound PK/generated columns/STRICT/general schema alterations remain unsupported |
-| Transaction control | partial | Native/driver and retained-connection BEGIN, COMMIT/END, ROLLBACK, SAVEPOINT, RELEASE, ROLLBACK TO; bounded statement/savepoint undo and read-own-writes. changes()/last_insert_rowid() SQL state and cursor relaxation remain code gaps |
+| Transaction control | partial | Native/driver and retained-connection BEGIN, COMMIT/END, ROLLBACK, SAVEPOINT, RELEASE, ROLLBACK TO; bounded statement/savepoint undo and read-own-writes. Connection changes()/total_changes()/last_insert_rowid() now have bounded native/driver state. General cursor relaxation remains code work |
 | SELECT and JOIN | partial | No FROM/single table and bounded named-table comma/INNER/CROSS/LEFT nested loops, aliases/qualified columns/stars, WHERE/ON, binds, ordering/NULL placement/LIMIT/OFFSET; one root snapshot/Tx lease. USING/NATURAL/RIGHT/FULL/derived/subquery relations remain unsupported |
 | Boolean and affinity semantics | partial | Context-sensitive scalar versus predicate/CASE branching, three-valued logic, bounded constant startup/substitution and declared-versus-absent comparison affinity; unquoted TRUE/FALSE identifier precedence and scoped SQLite direct LEFT-ON result-alias provenance are implemented. Known remaining planner-dependent differences include CAST/IPK equality suppressing an earlier error in SQLite and LEFT-only WHERE pushdown ahead of an error-producing ON; these are code gaps, not full oracle parity |
 | Other scalar expressions | partial | CASE/CAST/BETWEEN/IN-list, arithmetic/bitwise/concat, default BINARY comparisons, supported scalar functions and rune LIKE/ESCAPE; scalar COLLATE/general collation registration and unlisted functions remain unsupported |
-| Global aggregates | partial | Bounded native COUNT(*)/COUNT(expr)/SUM/TOTAL/AVG/MIN/MAX, supported scalar result wrappers and existing joins; exact storage-class/NULL/arithmetic/error comparisons against pinned SQLite. GROUP BY/HAVING, DISTINCT/FILTER/windows, ambiguous bare-column projections and general aggregate ordering remain required code |
+| Global aggregates | partial | Bounded native COUNT(*)/COUNT(expr)/SUM/TOTAL/AVG/MIN/MAX, supported scalar result wrappers and existing joins; exact storage-class/NULL/arithmetic/error comparisons against pinned SQLite. GROUP BY/HAVING are implemented for bounded declared key/expression profiles, including proved rowid grouping/ordering and top-K projection admission. DISTINCT/FILTER/windows and ambiguous bare-column projections remain unsupported |
 | Rowid equality/ranges/order | partial | Genuine equality seeks and signed bounded forward/reverse inequality cursors, conservative residual recheck and proven rowid ORDER BY elimination. Error-capable projections/residuals retain the original path; NOT INDEXED forces scan/sort |
 | Secondary equality | partial | Genuine leading equality-prefix B-tree cursor, bounded rowid candidates and source seeks with residual recheck; ANN/grams precedence preserved |
 | Secondary leading inequalities | partial | Genuine leading BINARY ASC index bounds, bounded signed-rowid candidates and base seeks with complete residual recheck; existing ordering remains materialized and diagnostics count actual attempted work |
 | Composite ranges/covering/join plans/statistics | unsupported | Composite equality-plus-range, general secondary reverse/covering/order plans, join index pushdown and ANALYZE statistics remain code work |
-| Diagnostics | partial | EXPLAIN QUERY PLAN and immutable Plan/Stats report actual supported access. Global aggregate plans say AGGREGATE/global; JOIN plans say nested_loop. Range counters do not invent work or include unmeasured speedups |
+| Diagnostics | partial | EXPLAIN QUERY PLAN and immutable Plan/Stats report actual supported access. Aggregate plans distinguish global and grouped execution, including documented rowid grouping. JOIN plans report the actual nested-loop path. Range counters do not invent work or include unmeasured speedups |
 | Remaining SQL | unsupported | Subqueries, CTEs, DISTINCT/compound UNION, windows, JSON, ON CONFLICT/UPSERT, general ALTER/view/trigger, FTS5, ATTACH/DETACH and unlisted PRAGMAs remain required implementation work |
 | database/sql | partial | Connector, prepared SQL/binds, normal transactions, streaming rows, cancellation and connection disposal; statement preparation is not a claim of reusable compiled AST execution |
 
@@ -106,3 +106,12 @@ acceptance gates. No restricted test is relocated to CI or another environment.
 Required code, automatically runnable evidence, restricted manual gates and real
 external environments are separated in [acceptance status](acceptance-status.md).
 The dated clause-by-clause source audit remains a historical evidence snapshot.
+
+Bounded rollback cached-schema preparation distinguishes invalid ordinary SQL
+from valid execution-BUSY without exposing cached metadata as data authorization.
+The strict official warm-schema BUSY control now passes. Session/extension/
+constant-query warming and general stale-schema reprepare remain separate gaps;
+this is not reusable compiled-AST or complete SQLite prepare parity. See
+[connection counters](sql-connection-counters.md),
+[cached preparation](sql-cached-preparation.md) and
+[grouped aggregates](grouped-aggregates.md).

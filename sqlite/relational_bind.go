@@ -301,6 +301,50 @@ func (d *DB) planRelational(ctx context.Context, reader btree.PageReader, origin
 	if err != nil {
 		return nil, err
 	}
+	// GROUP BY uses source-name precedence, with result aliases and integer
+	// ordinals as fallbacks. Aggregates in a resolved key are rejected below.
+	sel.GroupBy = nil
+	for _, e := range original.GroupBy {
+		if err = budget.reserve(32); err != nil {
+			return nil, err
+		}
+		var bound sqlast.Expr
+		if n, ok := integerConstant(e); ok {
+			if n <= 0 || n > int64(len(r.exprs)) {
+				return nil, fmt.Errorf("GROUP BY position outside result column range")
+			}
+			bound = r.exprs[n-1]
+		} else {
+			bound, err = scope.bind(e, aliases)
+			if err != nil {
+				return nil, err
+			}
+		}
+		sel.GroupBy = append(sel.GroupBy, bound)
+	}
+	if original.Having != nil && len(original.GroupBy) == 0 {
+		found := false
+		for _, e := range r.exprs {
+			if err = sqlast.Walk(e, func(e sqlast.Expr) error {
+				if err := budget.step(relationalNodeWork(e)); err != nil {
+					return err
+				}
+				if c, ok := e.(*sqlast.Call); ok && sqlast.AggregateName(c.Name) {
+					found = true
+				}
+				return nil
+			}); err != nil {
+				return nil, err
+			}
+		}
+		if !found {
+			return nil, fmt.Errorf("HAVING clause on a non-aggregate query")
+		}
+	}
+	sel.Having, err = scope.bind(original.Having, aliases)
+	if err != nil {
+		return nil, err
+	}
 	for _, o := range original.OrderBy {
 		if err := sqlast.Walk(o.Expr, func(e sqlast.Expr) error { return budget.step(relationalNodeWork(e)) }); err != nil {
 			return nil, err
@@ -426,7 +470,7 @@ func (d *DB) planRelational(ctx context.Context, reader btree.PageReader, origin
 		return nil, err
 	}
 	if aggregate {
-		for _, e := range r.exprs {
+		for _, e := range append(append([]sqlast.Expr{}, r.exprs...), sel.Having) {
 			if err = checkAggregateExpression(e, true, false, budget); err != nil {
 				return nil, err
 			}
@@ -436,7 +480,18 @@ func (d *DB) planRelational(ctx context.Context, reader btree.PageReader, origin
 				return nil, err
 			}
 		}
+		for _, e := range sel.GroupBy {
+			if err = checkAggregateExpression(e, false, false, budget); err != nil {
+				return nil, err
+			}
+		}
 		for _, o := range r.order {
+			if len(sel.GroupBy) > 0 && o.column < 0 {
+				if err = checkAggregateExpression(o.expr, true, false, budget); err != nil {
+					return nil, err
+				}
+				continue
+			}
 			if o.column < 0 {
 				return nil, fmt.Errorf("%w: global aggregate ORDER BY requires a result alias or ordinal", ErrUnsupported)
 			}
@@ -444,7 +499,7 @@ func (d *DB) planRelational(ctx context.Context, reader btree.PageReader, origin
 	}
 	// Include ON-only grams calls in the same snapshot-bound function registry.
 	projections := r.exprs
-	r.exprs = append(append([]sqlast.Expr{}, projections...), onExprs...)
+	r.exprs = append(append(append(append([]sqlast.Expr{}, projections...), onExprs...), sel.GroupBy...), sel.Having)
 	// Preflight the legacy registry's metadata-only scan, including shared
 	// alias trees, before entering its unchanged single-source helper.
 	for _, e := range append(append([]sqlast.Expr{}, r.exprs...), sel.Where) {
@@ -460,6 +515,9 @@ func (d *DB) planRelational(ctx context.Context, reader btree.PageReader, origin
 	err = d.prepareGramFunctions(ctx, schemaReader, r)
 	r.exprs = projections
 	if err != nil {
+		return nil, err
+	}
+	if err = r.promoteGroupedHaving(); err != nil {
 		return nil, err
 	}
 	sel.Where, err = r.clonePredicate(sel.Where)
@@ -506,10 +564,23 @@ func (d *DB) planRelational(ctx context.Context, reader btree.PageReader, origin
 	}
 	r.queryPlan = QueryPlan{Access: "JOIN", Table: strings.Join(tables, ", "), Method: "nested_loop", Reason: "left-to-right bounded nested-loop table scans; ON before null extension; WHERE after join; no index or ANN pushdown"}
 	if aggregate {
-		if err = r.prepareAggregate(factory); err != nil {
+		if len(sel.GroupBy) > 0 || sel.Having != nil {
+			err = r.prepareGroupedAggregate(factory)
+		} else {
+			err = r.prepareAggregate(factory)
+		}
+		if err != nil {
 			return nil, err
 		}
 		r.queryPlan = QueryPlan{Access: "AGGREGATE", Table: strings.Join(tables, ", "), Method: "global", Reason: "native bounded global aggregate over table scans and left-to-right joins; no index or ANN pushdown"}
+		if len(sel.GroupBy) > 0 {
+			r.queryPlan.Method = "grouped"
+			r.queryPlan.Reason = "native bounded sorted-key grouping over table scans and left-to-right joins; no index or ANN pushdown"
+			if grouped, ok := r.source.(*groupedAggregateSource); ok && grouped.stream {
+				r.queryPlan.Method = "grouped_rowid"
+				r.queryPlan.Reason = "native bounded unique physical-rowid grouping stream with next-qualified-row lookahead; one table snapshot; no secondary-index or ANN pushdown"
+			}
+		}
 	}
 	if aggregate {
 		// Binding is unconditional and complete before any bound expression is
@@ -535,7 +606,9 @@ func (d *DB) planRelational(ctx context.Context, reader btree.PageReader, origin
 				r.offset = max(r.offset, 0)
 			}
 		}
-		r.source.(*aggregateSource).discardOutput = r.offset > 0
+		if src, ok := r.source.(*aggregateSource); ok {
+			src.discardOutput = r.offset > 0
+		}
 	}
 	if original.Explain {
 		r.explainDetail = r.queryPlan.Detail()
@@ -550,7 +623,12 @@ func (d *DB) planRelational(ctx context.Context, reader btree.PageReader, origin
 		}
 	}
 	if len(r.order) > 0 && r.limit != 0 {
-		if err = r.materialize(); err != nil {
+		if _, grouped := r.source.(*groupedAggregateSource); grouped && r.limit > 0 {
+			err = r.materializeGroupedOrdered()
+		} else {
+			err = r.materialize()
+		}
+		if err != nil {
 			return nil, err
 		}
 	}

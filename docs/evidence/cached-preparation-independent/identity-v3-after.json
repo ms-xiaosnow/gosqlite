@@ -1,0 +1,12 @@
+{
+  "owner_count": 1264,
+  "review_count": 1268,
+  "owner_unchanged": true,
+  "baseline_plus_owner_and_independent_patch_exact": true,
+  "independent_only_additions": [
+    "driver/preparation_independent_test.go",
+    "internal/testkit/preparation_independent_test.go",
+    "sqlite/preparation_independent_test.go",
+    "sqlite/preparation_negative_test.go"
+  ]
+}

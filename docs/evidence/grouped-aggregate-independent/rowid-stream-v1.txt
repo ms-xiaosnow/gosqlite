@@ -1,0 +1,21 @@
+Behavior reviewed: pure ordinary SQL-created intact rowid fixture, read-only official CLI normal completion, scalar overflow in ordinary data. No excluded workflows.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestGroupedReviewerRowidStream
+=== RUN   TestGroupedReviewerRowidStream/SELECT_id,count(*)_FROM_rp_WHERE_abs(v)>0_GROUP_BY_id_LIMIT_1
+    grouped_reviewer_rowid_test.go:13: native iteration "SELECT id,count(*) FROM rp WHERE abs(v)>0 GROUP BY id LIMIT 1": sqlite next: integer overflow
+=== RUN   TestGroupedReviewerRowidStream/SELECT_id,count(*)_FROM_rp_NOT_INDEXED_WHERE_abs(v)>0_GROUP_BY_id_LIMIT_1
+    grouped_reviewer_rowid_test.go:13: native iteration "SELECT id,count(*) FROM rp NOT INDEXED WHERE abs(v)>0 GROUP BY id LIMIT 1": sqlite next: integer overflow
+=== RUN   TestGroupedReviewerRowidStream/SELECT_id,count(*)_FROM_rp_WHERE_CASE_WHEN_id=3_THEN_abs(v)_ELSE_1_END_GROUP_BY_id_LIMIT_1
+    grouped_reviewer_rowid_test.go:13: native iteration "SELECT id,count(*) FROM rp WHERE CASE WHEN id=3 THEN abs(v) ELSE 1 END GROUP BY id LIMIT 1": sqlite next: integer overflow
+=== RUN   TestGroupedReviewerRowidStream/SELECT_id,count(*)_FROM_rp_WHERE_abs(v)>0_GROUP_BY_id_ORDER_BY_id_LIMIT_1
+    grouped_reviewer_rowid_test.go:13: native iteration "SELECT id,count(*) FROM rp WHERE abs(v)>0 GROUP BY id ORDER BY id LIMIT 1": sqlite next: integer overflow
+=== RUN   TestGroupedReviewerRowidStream/SELECT_id,count(*)_FROM_rp_WHERE_abs(v)>0_GROUP_BY_id_ORDER_BY_id_DESC_LIMIT_1
+--- FAIL: TestGroupedReviewerRowidStream (0.04s)
+    --- FAIL: TestGroupedReviewerRowidStream/SELECT_id,count(*)_FROM_rp_WHERE_abs(v)>0_GROUP_BY_id_LIMIT_1 (0.01s)
+    --- FAIL: TestGroupedReviewerRowidStream/SELECT_id,count(*)_FROM_rp_NOT_INDEXED_WHERE_abs(v)>0_GROUP_BY_id_LIMIT_1 (0.00s)
+    --- FAIL: TestGroupedReviewerRowidStream/SELECT_id,count(*)_FROM_rp_WHERE_CASE_WHEN_id=3_THEN_abs(v)_ELSE_1_END_GROUP_BY_id_LIMIT_1 (0.01s)
+    --- FAIL: TestGroupedReviewerRowidStream/SELECT_id,count(*)_FROM_rp_WHERE_abs(v)>0_GROUP_BY_id_ORDER_BY_id_LIMIT_1 (0.01s)
+    --- PASS: TestGroupedReviewerRowidStream/SELECT_id,count(*)_FROM_rp_WHERE_abs(v)>0_GROUP_BY_id_ORDER_BY_id_DESC_LIMIT_1 (0.00s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/testkit	0.042s
+FAIL

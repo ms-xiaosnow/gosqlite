@@ -195,3 +195,7 @@ func parseNullCheck(x *Binary) Expr {
 	}
 	return x
 }
+
+// SyntacticFalse identifies the pinned EP_IsFalse form without evaluating an
+// expression. GROUP BY's HAVING-to-WHERE transform must leave it after grouping.
+func SyntacticFalse(e Expr) bool { truth, known := literalTruth(e); return known && !truth }

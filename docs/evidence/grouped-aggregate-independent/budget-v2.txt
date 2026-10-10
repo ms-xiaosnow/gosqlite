@@ -1,0 +1,14 @@
+Reviewed ordinary intact SQL fixture, normal row/BLOB lifetime and pure work/memory quota enforcement. No excluded workflows.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestGroupedReviewerRetentionAdmission
+=== RUN   TestGroupedReviewerRetentionAdmission/SELECT_k,max(payload),count(*)_FROM_rbudget_GROUP_BY_k_ORDER_BY_-k_LIMIT_7
+=== RUN   TestGroupedReviewerRetentionAdmission/SELECT_id,max(payload),count(*)_FROM_rbudget_GROUP_BY_id_ORDER_BY_id_DESC_LIMIT_7
+=== RUN   TestGroupedReviewerRetentionAdmission/SELECT_id,max(payload),count(*)_FROM_rbudget_GROUP_BY_id_ORDER_BY_id+0_LIMIT_7
+--- PASS: TestGroupedReviewerRetentionAdmission (0.03s)
+    --- PASS: TestGroupedReviewerRetentionAdmission/SELECT_k,max(payload),count(*)_FROM_rbudget_GROUP_BY_k_ORDER_BY_-k_LIMIT_7 (0.00s)
+    --- PASS: TestGroupedReviewerRetentionAdmission/SELECT_id,max(payload),count(*)_FROM_rbudget_GROUP_BY_id_ORDER_BY_id_DESC_LIMIT_7 (0.00s)
+    --- PASS: TestGroupedReviewerRetentionAdmission/SELECT_id,max(payload),count(*)_FROM_rbudget_GROUP_BY_id_ORDER_BY_id+0_LIMIT_7 (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.035s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	1.098s

@@ -95,8 +95,9 @@ retire obligations rather than repeating logical publication or checkpoint.
 Explicit native recovery now uses bounded minimal ownership and initial-absence provenance. Automatic Open recovery, remaining shared absence handling and the newly observed rollback reader-open timing race remain code work; no physical recovery execution is claimed.
 
 The SQL executor remains in sqlite with scoped pull operators, bound expression
-metadata and conservative shared budgets. Global aggregates are implemented;
-reviewed GROUP BY and connection-counter/cache additions await their separate
-combined checkpoint. The current [compatibility matrix](compatibility.md) and
+metadata and conservative shared budgets. Global and supported grouped aggregates are implemented with shared bounded
+key/state/representative budgets. Connection counters and bounded cached ordinary
+preparation are integrated; session/extension/constant-query warming and complete
+stale-schema reprepare remain outside the supported cache profile. The current [compatibility matrix](compatibility.md) and
 [acceptance work](acceptance-status.md) are authoritative; earlier architecture
 text is preserved in history/before-acceptance-audit-architecture.md.

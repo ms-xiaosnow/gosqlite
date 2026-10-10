@@ -1,0 +1,6 @@
+=== RUN   TestReviewPreparationRequiredNegative
+    preparation_negative_test.go:30: required valid execution BUSY changes=0, got sqlite exec: SQLite database is busy: native file lock busy sql.ConnectionState{Changes:2, TotalChanges:2, LastInsertRowID:2}
+--- FAIL: TestReviewPreparationRequiredNegative (0.00s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/sqlite	0.007s
+FAIL
