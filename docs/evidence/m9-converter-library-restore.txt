@@ -1,0 +1,22 @@
+2026-10-10T14:07:23Z
+93fd4751994b6c3dfbb32531b031c1e1c706d2cf
+Restored converter-focused validation; not a full all-package/oracle rerun.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	0.165s
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.049s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/migrate-pgembedding	0.026s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	2.513s
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	1.232s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/migrate-pgembedding	1.082s
+id=3 distance=0
+id=1 distance=5
+id=2 distance=6
+id=4 distance=<nil>
+Verified: five converted statements, genuine local HNSW build, exact Manhattan results and normal reopen.
+Application setting: native VectorSearchOptions.EFSearch=64; no SQL SET or transaction wrapper was generated.
+Source SHA-256: 294644487abf8c956bcfced9d21c56fb00a4fdf567833ed3014147871cafa372
+Converted SQL SHA-256: 23ed91559d2b290762855b60922e4065a07ee2b670422b8d63ccdb8da281be8d
+all modules verified
+2026-10-10T14:07:43Z
+M9 B LIBRARY RESTORE FOCUSED CHECKS PASS

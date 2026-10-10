@@ -129,7 +129,7 @@ Fresh restart, 2026-10-10 UTC. Historical work and test results are not acceptan
 - Review initially caught two grams fallback-reason regressions; move equality extraction before safety classification fixed them without changing scan results. Final component logs retained. Physical durability remains excluded.
 
 ### M9: Migration and extended vector types
-- Status: checkpoint A inspector, checkpoint B typed SQL converter, checkpoint E BIT integration and extended memory primitives implemented. Resumable import/transition tooling, half/sparse SQL and all extended ANN remain incomplete code.
+- Status: checkpoint A inspector, checkpoint B typed SQL converter, checkpoint E BIT and F HALFVEC integration plus extended memory primitives implemented. Resumable import/transition tooling, sparse SQL and all extended ANN remain incomplete code.
 - Inspector: strict bounded exact-schema JSON, extension/type/method/operator/function identity chain, dependency/shape/default findings, direct finite binary32 real[] conversion, deterministic JSON/Markdown and CLI reports. Reports do not execute SQL or authorize changes. Invalid legacy defaults100/16 and example3/5 are review findings with no usable proposed target. Programmatic structs receive aggregate preflight; canonical inspected-facts hashes and optional unchanged-source hashes are distinguished.
 - Component checks: CGO0 unit/vet/build, separate race, CLI and bounded memory fuzz pass (real-array62076, catalog194 inputs). Independent tests include201 finite binary32 roundtrips, NULL/shape/redaction, duplicate/unknown/UTF8 JSON, ownership spoofing, nonfinite profile numbers, mutated catalog provenance and deterministic cancellation. Initial invalid-parameter proposal assertion failed and was fixed; logs retained. See m9-inspector-components.txt and review evidence.
 - Public references: old embedding0.3.6 commit5d48508aeaeb86b9e9c630468ada7a124b905795, exact Apache2 LICENSE/NOTICE and source manifest. Current Neon page was retrieved but lacks the requested chapter; the historical official2024 chapter is linked, not mislabeled current. Export SQL is source-reviewed but not PostgreSQL-executed. Synthetic catalogs are explicitly synthetic.
@@ -228,3 +228,24 @@ unit81.243s/race406.026s; oracle testkit301.806s/sqlite97.002s. The exact durabl
 718e3109fccc0f4d728d6f95b555cf4fd6e3e282 and Library
 libfile_a2e7be4289308191896d1abf730de740 were already verified; its restored full
 checks and CI38057793162 are tracked independently.
+
+### M9 checkpoint F: HALFVEC SQL and exact ranking
+- Delivered: HALFVEC(1..16000), distinct canonical GSH persistence/nullable
+  bindings/defaults/mutations, closed-metric DB/Tx.HalfSearch and bounded exact
+  SQL ranking, explicit dense/half conversions and three precision-loss reports,
+  half subvector/quantization, and bound representation tracking through supported
+  aliases/value-preserving expressions. Mixed dense/half signatures reject.
+- Focused guarded component tests x3, exhaustive half primitives,76 retained
+  published SQL fixture cases, dense/BIT regressions, race/vet/build and four
+  official SQLite oracle cases x3 passed. Independent review added driver,
+  resource/ranking/snapshot and six-way page-size/mode evidence. It fixed valid
+  explicit replacement after an external numeric half default while retaining
+  native CREATE strictness. No live PostgreSQL was run.
+- Same-snapshot example: dense nearest row20; one rounded half candidate picks
+  row10 and recall0, two reranked candidates recover row20 and recall1. Query
+  conversion changes2 components, maximum absolute error0.00020003318786621094
+  and relative error1. Exact rescoring cannot recover an omitted candidate.
+- Evidence: m9-half-sql components/review/source hashes/example, half-vector.md.
+  Frozen full aggregate tree98d857b4e07b755fa9bd67346905785135fba2ef is running
+  separately from later sparse/native-platform/shared-encryption/importer edits.
+  Sparse SQL, all extended ANN and restricted/independent release gates remain open.

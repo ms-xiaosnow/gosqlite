@@ -225,7 +225,7 @@ func (t *Tx) insert(ctx context.Context, c *writeCatalog, stmt *sqlast.Insert, p
 	return result, nil
 }
 func (tab *writeTable) evalContext(ctx context.Context, params []any, rowid int64, values []any) *sqlast.EvalContext {
-	return &sqlast.EvalContext{Context: ctx, Params: params, Resolver: func(q, name string) (any, error) {
+	return &sqlast.EvalContext{Context: ctx, Params: params, DeclaredType: declaredTypeFor(tab.table), Resolver: func(q, name string) (any, error) {
 		i, err := tab.column(q, name)
 		if err != nil {
 			return nil, err
@@ -340,6 +340,13 @@ func (t *Tx) update(ctx context.Context, c *writeCatalog, stmt *sqlast.Update, p
 					return result, err
 				}
 			} else {
+				if v != nil {
+					source := sqlast.VectorExpressionRepresentation(assignment.Expr, ec.DeclaredType)
+					target := sqlast.VectorExpressionRepresentation(&sqlast.Column{Name: tab.columns[targets[i]].Name}, ec.DeclaredType)
+					if source != "" && target != "" && source != target && (source == "halfvec" || target == "halfvec" || source == "mixed") {
+						return result, fmt.Errorf("%w: explicit vector representation conversion required", ErrMismatch)
+					}
+				}
 				values[targets[i]] = v
 			}
 		}

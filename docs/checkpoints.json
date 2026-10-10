@@ -182,9 +182,23 @@
     "bundle_bytes": 1171835,
     "library_file_id": "libfile_a2e7be4289308191896d1abf730de740",
     "library_version": 0,
-    "verified": "Guarded remote readback/exact local mirror; full-history bundle; byte-identical Library readback, clean clone/fsck and unchanged goal hash verified. Frozen source full guarded CGO0 unit/vet/build, CGO1 race, pinned SQLite oracle, four cross-builds, module/no-CGO closure and unchanged source/fixtures passed exit0 at2026-10-10T14:02:38Z. Restored full checks began14:02:47Z and remain running.",
+    "verified": "Guarded remote readback/exact local mirror; full-history bundle; byte-identical Library readback, clean clone/fsck and unchanged goal hash verified. Frozen source full guarded CGO0 unit/vet/build, CGO1 race, pinned SQLite oracle, four cross-builds, module/no-CGO closure and unchanged source/fixtures passed exit0 at2026-10-10T14:02:38Z. Restored full guarded unit/vet/build/race and pinned SQLite oracle passed exit0 at2026-10-10T14:24:14Z; clean restored Git tree. Evidence docs/evidence/s1-library-restore.txt.",
     "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38057793162",
-    "remote_ci_status": "IN_PROGRESS for exact SHA, observed2026-10-10T13:59:18Z.",
+    "remote_ci_status": "COMPLETED SUCCESS for exact SHA, updated2026-10-10T14:08:49Z, observed14:09:45Z.",
     "open_gates": "Active-Rows cursor parity, exceptional failed-open resource retirement, half/sparse SQL and all typed ANN, migration importer/templates, encrypted shared sessions, native platform/recovery/broader SQL code and restricted/independent acceptance remain separately open."
+  },
+  {
+    "stage": "M9 B typed offline pg_embedding SQL converter",
+    "remote_commit": "93fd4751994b6c3dfbb32531b031c1e1c706d2cf",
+    "local_commit": "93fd4751994b6c3dfbb32531b031c1e1c706d2cf",
+    "tree": "5694dc2cd1b62c97c059d021cdb5d5dbb865bd0b",
+    "bundle_sha256": "5f7d8ec6567c71d1d03922f947d6bb1f1e0e209d1171c992439e66412ea9f139",
+    "bundle_bytes": 1243461,
+    "library_file_id": "libfile_bbd06cc066bc819193500e9e3eb95006",
+    "library_version": 0,
+    "verified": "Guarded remote readback/exact local mirror, full-history bundle, byte-identical Library readback, clean clone/fsck and original goal hash verified at2026-10-10T14:06:53Z. Restored focused migration/CLI/example unit/vet/race, full production build, runnable example/module verification and clean-tree check passed exit0 at14:07:43Z. This is not a full restored all-package/oracle rerun; unchanged core has separately recorded S1 full oracle evidence.",
+    "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38058308322",
+    "remote_ci_status": "COMPLETED SUCCESS for exact SHA, updated2026-10-10T14:16:31Z, observed14:18:39Z.",
+    "open_gates": "Resumable CSV/NDJSON import and transition bundles, remaining extended SQL/ANN, encrypted concurrent sessions, native target-runtime/broader recovery/SQL and restricted/independent acceptance remain open. No live PostgreSQL execution."
   }
 ]

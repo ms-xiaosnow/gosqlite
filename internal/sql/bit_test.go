@@ -135,7 +135,7 @@ func TestBitScalarStrictBoundaries(t *testing.T) {
 			t.Fatalf("accepted %s", expr)
 		}
 	}
-	for _, name := range []string{"HALFVEC(2)", "SPARSEVEC(2)"} {
+	for _, name := range []string{"SPARSEVEC(2)"} {
 		if _, err := Parse("CREATE TABLE t(v " + name + ")"); err == nil {
 			t.Fatal("unimplemented type accepted", name)
 		}

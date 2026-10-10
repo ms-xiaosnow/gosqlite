@@ -5,9 +5,9 @@ ordinary SQLite-compatible storage, `database/sql`, and exact ranking. It also
 adds dense `subvector` and `binary_quantize` SQL functions. Existing dense
 `VECTOR(n)`, GSV v1 bytes, numeric metrics and `VectorSearch` APIs are unchanged.
 
-HALFVEC/SPARSEVEC SQL and native typed search remain subsequent checkpoints.
-Their mathematical values/codecs already exist; that does not imply database
-integration. Bit, half and sparse ANN remain unsupported. No PostgreSQL runtime,
+HALFVEC SQL and native typed search are now documented in half-vector.md.
+SPARSEVEC SQL remains a subsequent checkpoint; its memory value/codec alone
+does not imply database integration. Bit, half and sparse ANN remain unsupported. No PostgreSQL runtime,
 wire format, cast, operator-class or general SQL compatibility is claimed.
 
 ## Typed SQL and strict representation identity
@@ -145,7 +145,8 @@ SELECT vector_to_text(subvector('[1,2,3,4,5]',-1,3)); -- [1]
 SELECT bit_to_text(binary_quantize('[-1,-0,0,1e-45,3]')); -- 00011
 ```
 
-At this checkpoint these transforms accept dense values only. `subvector`
+The original examples below use dense values. These transforms now also accept
+HALFVEC with explicit representation-preserving semantics described in half-vector.md. `subvector`
 preserves exact binary32 bits and returns GSV. Start/count must have SQL INTEGER
 storage and fit signed int32; numeric text and REAL values are not coerced.
 Count must be positive. End is computed from original start+count, then start

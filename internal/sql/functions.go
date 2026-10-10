@@ -12,22 +12,31 @@ import (
 // BuiltinFunctions is read-only after initialization. Per-connection overrides
 // and extension functions belong in EvalContext.Functions, avoiding global races.
 var BuiltinFunctions = map[string]Function{
-	"bit_vector":             builtinVectorFunction("bit_vector"),
-	"bit_dims":               builtinVectorFunction("bit_dims"),
-	"bit_to_text":            builtinVectorFunction("bit_to_text"),
-	"hamming_distance":       builtinVectorFunction("hamming_distance"),
-	"jaccard_distance":       builtinVectorFunction("jaccard_distance"),
-	"subvector":              builtinVectorFunction("subvector"),
-	"binary_quantize":        builtinVectorFunction("binary_quantize"),
-	"vector":                 builtinVectorFunction("vector"),
-	"vector_dims":            builtinVectorFunction("vector_dims"),
-	"vector_norm":            builtinVectorFunction("vector_norm"),
-	"vector_to_text":         builtinVectorFunction("vector_to_text"),
-	"l2_distance":            builtinVectorFunction("l2_distance"),
-	"l1_distance":            builtinVectorFunction("l1_distance"),
-	"cosine_distance":        builtinVectorFunction("cosine_distance"),
-	"inner_product":          builtinVectorFunction("inner_product"),
-	"negative_inner_product": builtinVectorFunction("negative_inner_product"),
+	"halfvec":                    builtinVectorFunction("halfvec"),
+	"halfvec_dims":               builtinVectorFunction("halfvec_dims"),
+	"halfvec_norm":               builtinVectorFunction("halfvec_norm"),
+	"halfvec_to_text":            builtinVectorFunction("halfvec_to_text"),
+	"halfvec_from_vector":        builtinVectorFunction("halfvec_from_vector"),
+	"vector_from_halfvec":        builtinVectorFunction("vector_from_halfvec"),
+	"halfvec_conversion_changed": builtinVectorFunction("halfvec_conversion_changed"),
+	"halfvec_conversion_max_abs": builtinVectorFunction("halfvec_conversion_max_abs"),
+	"halfvec_conversion_max_rel": builtinVectorFunction("halfvec_conversion_max_rel"),
+	"bit_vector":                 builtinVectorFunction("bit_vector"),
+	"bit_dims":                   builtinVectorFunction("bit_dims"),
+	"bit_to_text":                builtinVectorFunction("bit_to_text"),
+	"hamming_distance":           builtinVectorFunction("hamming_distance"),
+	"jaccard_distance":           builtinVectorFunction("jaccard_distance"),
+	"subvector":                  builtinVectorFunction("subvector"),
+	"binary_quantize":            builtinVectorFunction("binary_quantize"),
+	"vector":                     builtinVectorFunction("vector"),
+	"vector_dims":                builtinVectorFunction("vector_dims"),
+	"vector_norm":                builtinVectorFunction("vector_norm"),
+	"vector_to_text":             builtinVectorFunction("vector_to_text"),
+	"l2_distance":                builtinVectorFunction("l2_distance"),
+	"l1_distance":                builtinVectorFunction("l1_distance"),
+	"cosine_distance":            builtinVectorFunction("cosine_distance"),
+	"inner_product":              builtinVectorFunction("inner_product"),
+	"negative_inner_product":     builtinVectorFunction("negative_inner_product"),
 	"ngram_similarity": func(a []any) (any, error) {
 		return similarityFunction(context.Background(), "ngram_similarity", a)
 	},
@@ -147,7 +156,7 @@ func ValidateFunction(name string, argc int) error {
 	}
 	want := 1
 	switch name {
-	case "abs", "length", "lower", "upper", "typeof", "hex", "vector", "vector_dims", "vector_norm", "vector_to_text", "bit_vector", "bit_dims", "bit_to_text", "binary_quantize":
+	case "abs", "length", "lower", "upper", "typeof", "hex", "vector", "vector_dims", "vector_norm", "vector_to_text", "bit_vector", "bit_dims", "bit_to_text", "binary_quantize", "halfvec", "halfvec_dims", "halfvec_norm", "halfvec_to_text", "halfvec_from_vector", "vector_from_halfvec", "halfvec_conversion_changed", "halfvec_conversion_max_abs", "halfvec_conversion_max_rel":
 	case "nullif", "ifnull", "bigram_similarity", "l2_distance", "l1_distance", "cosine_distance", "inner_product", "negative_inner_product", "hamming_distance", "jaccard_distance":
 		want = 2
 	case "subvector":

@@ -31,6 +31,9 @@ func IsVectorDeclaration(declared string) bool {
 	if _, ok := VectorDimensions(declared); ok {
 		return true
 	}
+	if _, ok := HalfDimensions(declared); ok {
+		return true
+	}
 	_, ok := BitDimensions(declared)
 	return ok
 }

@@ -32,6 +32,11 @@ func decodeVectorColumn(value any, dimensions int) (vector.Vector, bool, error) 
 // columnValue validates supported vector types on interpretation, preserving the actual SQL
 // storage class for reads. Writes canonicalize through storedColumnValue.
 func columnValue(value any, declared string) (any, error) {
+	if n, ok := sqlast.HalfDimensions(declared); ok {
+		if _, _, err := decodeHalfColumn(value, n); err != nil {
+			return nil, err
+		}
+	}
 	if n, ok := sqlast.VectorDimensions(declared); ok {
 		if _, _, err := decodeVectorColumn(value, n); err != nil {
 			return nil, err
@@ -46,6 +51,13 @@ func columnValue(value any, declared string) (any, error) {
 }
 
 func storedColumnValue(value any, declared string) (any, error) {
+	if n, ok := sqlast.HalfDimensions(declared); ok {
+		v, null, err := decodeHalfColumn(value, n)
+		if err != nil || null {
+			return nil, err
+		}
+		return v.MarshalBinary()
+	}
 	if n, ok := sqlast.BitDimensions(declared); ok {
 		v, null, err := decodeBitColumn(value, n)
 		if err != nil || null {
@@ -89,6 +101,9 @@ func decodeBitColumn(value any, dimensions int) (vector.BitVector, bool, error) 
 // value and let column interpretation reject it rather than invent lost width.
 // Existing dense/default behavior is intentionally unchanged.
 func missingColumnValue(value any, declared string) (any, error) {
+	if _, half := sqlast.HalfDimensions(declared); half {
+		return sqlast.ApplyAffinity(value, declared)
+	}
 	if _, bit := sqlast.BitDimensions(declared); bit {
 		return sqlast.ApplyAffinity(value, declared)
 	}

@@ -267,3 +267,14 @@ also passed; no non-Linux runtime was executed. The example uses a new synthetic
 local database, valid SQL and normal close/reopen. No supplied SQL is executed
 by the converter CLI, and no PostgreSQL server was used. Exact outputs, source
 identity and unchanged-tree checks are in evidence/m9-converter-isolated-final.txt.
+
+## M9 F HALFVEC ordinary verification
+
+Focused commands and actual PASS results are in m9-half-sql-components.txt and
+m9-half-sql-review.txt. Guarded CGO0 repeated tests, separate CGO1 races, pinned
+public source/math fixtures and ordinary official SQLite interop use intact files
+and legal SQL. External numeric defaults/type rejection are SQL compatibility
+cases, not physical damage. The full aggregate uses an immutable archive tree
+98d857b4e07b755fa9bd67346905785135fba2ef and GOFLAGS=-buildvcs=false because
+the archive has no Git metadata; -timeout=30m is an ordinary test-run ceiling.
+No native target runtime, physical fault/recovery or cryptographic audit is implied.

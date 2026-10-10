@@ -348,7 +348,7 @@ func (p *parser) createTable() (*CreateTable, error) {
 			switch upperName(t.Text) {
 			case "INTEGER", "INT", "TEXT", "REAL", "BLOB", "NUMERIC":
 				c.Type = upperName(p.next().Text)
-			case "VECTOR", "BIT":
+			case "VECTOR", "BIT", "HALFVEC":
 				typeName := upperName(p.next().Text)
 				maxDimension := 16000
 				if typeName == "BIT" {

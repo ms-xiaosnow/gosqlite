@@ -1,0 +1,121 @@
+M9 HALFVEC SQL / ordinary SQLite interoperation independent review
+Recorded 2026-10-10 UTC; Linux amd64; Go 1.27.2.
+
+Scope and execution boundaries
+- Only the named ordinary tests listed below were executed by this review.
+- Test-side SQLite oracle: ../toolchains/sqlite-build-3540000/sqlite3.
+  confOracle verifies both version 3.54.0 and source identity:
+  2026-10-09 15:46:58 be8d059e9a49089ab2dce5ed26dd87aaf598fdc5fbe0b107c0dd758464bcd5e3
+- The oracle is never linked into production. No live PostgreSQL was run.
+- Malformed representation cases are ordinary invalid SQL values/parameters or
+  in-memory source values. Files remain intact. All external values are inserted
+  through official SQLite SQL. No physical corruption, tamper, wrong-key,
+  namespace replacement/retarget/race, fault/short-write/disk-full/permission,
+  forced termination, crash, recovery, interrupted publication, or rekey test
+  was executed. No manual_* tags, broad package run, or aggregate was executed.
+- This is focused review evidence, not a full-tree/release qualification claim.
+
+Files added by this review
+  driver/half_conformance_test.go
+  sqlite/half_review_test.go
+  internal/testkit/half_conformance_test.go
+  docs/evidence/m9-half-sql-review.txt
+
+Verified ordinary behavior
+1. Driver HalfVector/NullHalfVector/Text/GSH bindings, typed nil/NULL, literal
+   defaults, independent exact GSH bytes, binary16 ties-to-even, signed zero,
+   smallest subnormal, immutable accessor copies, scanner destination retention
+   after error, cross-kind scanner rejection, input-buffer mutation, prepared
+   statements, statement rollback after finite-range failure, savepoint undo,
+   outer transaction rollback, connection-pool reset/outer RELEASE and reopen.
+   Both rollback and shared-WAL modes passed.
+2. Native/SQL exact L2, L1, negative IP and cosine rankings against independent
+   binary16 widening + scalar arithmetic + full sorting. The reference never
+   calls production HalfVector.Values, any production distance, or heap ordering.
+   Two queries, filtered/unfiltered sets, NULLs, MinInt64/MaxInt64 ties, limits,
+   OFFSET, reversed function arguments, heap/fullsort parity, native NULL
+   exclusion, component/candidate diagnostics, and explicit no-half-ANN plans.
+3. Memory-source typed validation even with a NULL query; lazy malformed query
+   suppression for NULL candidates; source quotas counting filtered/NULL rows;
+   component quotas with no published partial ranks; heap/general-sort memory
+   limits; midscan SQL/native cancellation; custom Valuer callback cancellation
+   and errors; reader release checked by a normal second-connection write and
+   checkpoint; close releases bound/decoded half state while retaining diagnostics.
+4. Lossy materialization fixture: two distinct dense neighbors collapse to tied
+   half values. Candidate limit 1 yields observed dense recall@1=0; limit 2 yields
+   1 for this fixture only. Conversion changed-count/max-absolute/max-relative
+   error match independent arithmetic and SQL diagnostics. Candidate selection,
+   business filter, dense reranking and baseline stay on one read transaction
+   despite another connection committing a changed candidate/filter. Fresh state
+   is observed after ending the snapshot. There is no general recall guarantee.
+5. Official storage interoperation at page sizes 512/4096/65536, each with
+   rollback and shared WAL: native canonical GSH/defaults, dense GSV and GSB
+   preservation, 16000-coordinate BLOB/overflow-page round trip, rollback,
+   checkpoint, close/reopen, external legal TEXT and GSH, reversed operators and
+   functions, WHERE result-alias identity, subvector, binary_quantize, exact native
+   ranking, explicit TEXT-to-canonical UPDATE, byte/storage-class comparison and
+   official integrity_check. TEXT/GSH equality retains SQLite storage semantics.
+6. External ALTER-added short-record defaults: valid half TEXT, GSH, and numeric
+   affinity. Numeric values reject when interpreted; ordinary unrelated projection
+   or false filter may exclude them. Explicit valid rewrites succeed. External
+   INTEGER, REAL, textual BLOB and GSV values in HALFVEC are legal ordinary SQLite
+   data but fail typed half interpretation; no guessing/automatic repair occurs.
+7. External dense/HALFVEC TEXT retains known identity through supported functions,
+   aliases and coalesce. Generic numerical mixed-kind use, wrong constructors,
+   wrong conversion source signatures, and implicit cross-kind assignments fail.
+   Explicit halfvec_from_vector/vector_from_halfvec remain legal. Untyped TEXT
+   numeric calls continue to use dense arithmetic.
+8. Existing driver BIT bindings, BIT independent native/SQL rankings, and dense
+   native/heap/fullsort independent-reference regressions passed three runs.
+
+Finding and resolution
+- Found: loading an existing official schema revalidated HALFVEC defaults using
+  native write rules. ALTER ... ADD h HALFVEC(1) DEFAULT '1' correctly failed
+  typed reads, but also prevented explicit UPDATE h='[1.0001]' of that value.
+- Production owner fixed sqlite/write_schema.go: existing-catalog HALFVEC
+  defaults retain expression validation but defer typed validation until value
+  use. Native CREATE still validates before schema publication. The numeric
+  default regression and the complete four-test oracle selection passed 3 times.
+- Review-harness corrections: aggregate count is outside the current SQL subset;
+  result aliases are exercised in supported WHERE/ORDER contexts rather than
+  sibling projection expressions; successful materialize already releases source.
+  These initial test failures were not production defects.
+
+Commands and outcomes
+Common environment (all commands from repository root):
+  GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off
+  GOCACHE=$PWD/../go-cache GOPATH=$PWD/../go-path
+  GO=../toolchains/go1.27.2/bin/go
+Before every test command:
+  CGO_ENABLED=0 $GO run ./internal/testscope
+  PASS: Ordinary test source-reference guard PASS; behavioral review is still required.
+
+CGO_ENABLED=0 $GO test ./driver ./sqlite -count=3 -v -run
+'^(TestDriverHalfBindingOwnershipTransactionsAndPool|TestHalfReviewIndependentNativeHeapAndFullSort|TestHalfReviewMemoryTypedNullAndLogicalBudgets|TestHalfReviewCallbackCancellationAndReaderRelease|TestHalfReviewLossyRerankSameSnapshotDiagnostics|TestDriverBitBindingsTransactionsAndReopen|TestBitSQLAndNativeIndependentRanking|TestVectorReviewHeapAndNativeIndependentReference)$'
+PASS: driver 0.152s; sqlite 0.994s. All selected tests passed in each of 3 runs.
+
+CGO_ENABLED=1 $GO test -race ./driver ./sqlite -count=1 -v -run
+'^(TestDriverHalfBindingOwnershipTransactionsAndPool|TestHalfReviewIndependentNativeHeapAndFullSort|TestHalfReviewMemoryTypedNullAndLogicalBudgets|TestHalfReviewCallbackCancellationAndReaderRelease|TestHalfReviewLossyRerankSameSnapshotDiagnostics)$'
+PASS: driver 1.095s; sqlite 1.229s. No race report. CGO1 used only for this separate race check.
+
+CGO_ENABLED=0 SQLITE_ORACLE=$PWD/../toolchains/sqlite-build-3540000/sqlite3
+$GO test -tags oracle ./internal/testkit -count=3 -v -run
+'^(TestOracleHalfCanonicalStorageTextAndOverflowInterop|TestOracleHalfExternalNumericAffinityAndAddedDefaults|TestOracleHalfExternalTextRepresentationIdentity|TestOracleHalfExternalLegalStorageClassBoundary)$'
+PASS: internal/testkit 1.274s. All 4 tests and every 3-page x 2-mode matrix
+passed in each of 3 runs. Pinned source identity checked, not silently skipped.
+
+Review test source SHA256
+98160e2f0f219ba33ce553dd36d7a67a20ed075c572946163acb3df61538be1b  driver/half_conformance_test.go
+9e71d42397d82ddf38e1430caba0d1a5e7a11656354e9dc615a0392e4b5ea5a5  sqlite/half_review_test.go
+28239e4304bfb7fb262eafe4e3970ca4f95ce2f0a79cff149c08a21fcfa83306  internal/testkit/half_conformance_test.go
+
+Reviewed production source snapshot SHA256 (record time)
+337b549ea16faa0331f608ea6572740d47aba3d7b5b4685896631e187218a333  internal/sql/half.go
+be79e5c1213277be07f4c4268da128acf47d780e505155c8dbedde5013f146a1  sqlite/half_search.go
+593e321cb1a027dfd556f977103ee175026341fd433d003f974c7ec630978fb0  sqlite/half_value.go
+c8d800442ec8603c607643e085aacf83820733a714fef5c2398dcc3488c420c4  sqlite/plan_half.go
+7b9f11583dc824f8d63f0d2111cdf25871e6f5f70c51720734f508bf7ef39024  sqlite/plan_vector.go
+732f6150ff6a8d5924338ea99304d0968f0d38b4cf17795c41798ed493e161ca  sqlite/rows.go
+3b9d30317a5dd4eb29cfb0d468e0eb16c862fe01e987a1c893a83dbbcc5e3975  sqlite/vector_value.go
+1c215fc20dd2e3ef27cc86cbe603b1b6b52d5216b520475fa730ee05df94e80f  sqlite/write_rows.go
+4fba4615feb1ae74c3a13ebeb8e64fab089b6edb2df39c0dbe6176594e84e2f4  sqlite/write_schema.go

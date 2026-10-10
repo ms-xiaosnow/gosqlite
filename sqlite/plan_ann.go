@@ -26,6 +26,10 @@ func (r *Rows) prepareANNVector(reader btree.PageReader) error {
 		}
 		return nil
 	}
+	if v.half {
+		r.queryPlan.ANNFallback = "HALFVEC(n) ANN is unsupported; exact binary16 ranking"
+		return nil
+	}
 	if v.bitMetric != "" {
 		r.queryPlan.ANNFallback = "BIT(n) ANN is unsupported; exact packed-bit ranking"
 		return nil

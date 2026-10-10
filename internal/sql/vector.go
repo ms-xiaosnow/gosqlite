@@ -84,6 +84,9 @@ func vectorOperatorFunction(op string) string {
 func isVectorOperator(op string) bool { return vectorOperatorFunction(op) != "" }
 
 func isVectorFunction(name string) bool {
+	if isHalfFunction(name) {
+		return true
+	}
 	switch name {
 	case "vector", "vector_dims", "vector_norm", "vector_to_text", "l2_distance", "l1_distance", "cosine_distance", "inner_product", "negative_inner_product", "bit_vector", "bit_dims", "bit_to_text", "hamming_distance", "jaccard_distance", "subvector", "binary_quantize":
 		return true
@@ -121,6 +124,19 @@ func vectorFunction(ctx context.Context, name string, args []any) (any, error) {
 	}
 	if isBitFunction(name) {
 		return bitFunction(ctx, name, args)
+	}
+	if isHalfFunction(name) {
+		return halfFunction(ctx, name, args)
+	}
+	if halfOverload(name) {
+		for i, value := range args {
+			if name == "subvector" && i > 0 {
+				break
+			}
+			if isHalfBlob(value) {
+				return halfFunction(ctx, name, args)
+			}
+		}
 	}
 	a, err := VectorValue(args[0])
 	if err != nil {

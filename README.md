@@ -2,7 +2,7 @@
 
 Historical test-scope statements are corrected in [the namespace-test audit](docs/test-scope-audit.md); the affected tests are now excluded from ordinary workflows.
 
-A native Go database kernel targeting tested subsets of SQLite 3.54.0 files and SQL. Current development: persistent HNSW/IVFFlat, exact typed-vector KNN and same-snapshot hybrid ranking, plus experimental authenticated snapshot and dirty-page WAL storage, ordinary B-tree equality planning, nested savepoints, BIT exact search, extended vector primitives, and bounded pg_embedding catalog inspection/typed offline SQL conversion. It is not production-ready. No CGO, SQLite subprocess, C ABI, or remote SQL engine is used in production.
+A native Go database kernel targeting tested subsets of SQLite 3.54.0 files and SQL. Current development: persistent HNSW/IVFFlat, exact typed-vector KNN and same-snapshot hybrid ranking, plus experimental authenticated snapshot and dirty-page WAL storage, ordinary B-tree equality planning, nested savepoints, BIT/HALFVEC exact search, extended vector primitives, and bounded pg_embedding catalog inspection/typed offline SQL conversion. It is not production-ready. No CGO, SQLite subprocess, C ABI, or remote SQL engine is used in production.
 
 ## Try the implemented SQL path
 
@@ -60,7 +60,7 @@ SQLITE_ORACLE=/absolute/path/to/verified/sqlite3 ./scripts/test-oracle.sh
 
 See [progress](docs/progress.md), [compatibility](docs/compatibility.md), [architecture](docs/architecture.md), [sources](docs/upstream.md), and [manual verification](docs/manual-verification.md). The unchanged [original goal](goal.md) remains the contract. [Restart protocol](docs/restart.md) and checkpoint records preserve durable development history.
 
-Qualified crash recovery, concurrent encrypted writer/readers, broader SQL/native-platform support, half/sparse SQL and all extended-vector ANN integration, and the remaining pg_embedding import/transition tooling remain unfinished implementation work. Full SQLite/PostgreSQL semantics, SEE file compatibility and production security are not claimed.
+Qualified crash recovery, concurrent encrypted writer/readers, broader SQL/native-platform support, sparse SQL and all extended-vector ANN integration, and the remaining pg_embedding import/transition tooling remain unfinished implementation work. Full SQLite/PostgreSQL semantics, SEE file compatibility and production security are not claimed.
 
 
 ## Explicit exclusive WAL
@@ -177,3 +177,11 @@ Runtime bind adapters and query-setting artifacts are part of the contract,
 including NULL/width/range checks. See [converter boundaries](docs/migration-converter.md)
 and the runnable examples/migrate-pgembedding. CSV/NDJSON import and transition
 bundles remain separate unfinished implementations.
+
+## Half-precision vectors
+
+HALFVEC(1..16000) stores distinct GSH binary16 values, with strict typed SQL,
+DB/Tx.HalfSearch and exact bounded ranking. Conversions and loss-report functions
+are explicit; dense and half representations do not silently mix. See
+[half-precision SQL](docs/half-vector.md) and examples/half-rerank, which measures
+lost dense recall from a truncated rounded candidate set. Half ANN is unfinished.

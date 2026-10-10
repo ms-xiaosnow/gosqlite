@@ -458,7 +458,7 @@ func (d *DB) similarityFilter(ctx context.Context, reader btree.PageReader, tab 
 		return nil, err
 	}
 	return func(id int64, values []any) (bool, error) {
-		ec := &sqlast.EvalContext{Context: ctx, Params: params, Functions: r.functions}
+		ec := &sqlast.EvalContext{Context: ctx, Params: params, Functions: r.functions, DeclaredType: declaredTypeFor(tab)}
 		ec.Resolver = func(q, name string) (any, error) {
 			i, err := tab.column(q, name)
 			if err != nil {

@@ -234,7 +234,7 @@ func (r *Rows) evaluateSourceRow(rowid int64, values []any) (resultRow, int64, b
 			}
 		}
 	}
-	ec := &sqlast.EvalContext{Context: r.ctx, Params: r.params, Functions: r.functions}
+	ec := &sqlast.EvalContext{Context: r.ctx, Params: r.params, Functions: r.functions, DeclaredType: declaredTypeFor(r.table)}
 	ec.Resolver = func(q, name string) (any, error) {
 		i, err := r.table.column(q, name)
 		if err != nil {
@@ -258,13 +258,14 @@ func (r *Rows) evaluateSourceRow(rowid int64, values []any) (resultRow, int64, b
 	// WHERE accepts result aliases only when no physical column shadows
 	// them. Their expressions were already bound against the source.
 	physicalResolver, physicalAffinity := ec.Resolver, ec.Affinity
+	physicalType := ec.DeclaredType
 	ec.Resolver = func(q, name string) (any, error) {
 		value, err := physicalResolver(q, name)
 		if err == nil || q != "" {
 			return value, err
 		}
 		if i, ok := r.aliases[fold(name)]; ok {
-			return sqlast.Eval(r.exprs[i], &sqlast.EvalContext{Context: r.ctx, Params: r.params, Resolver: physicalResolver, Affinity: physicalAffinity, Functions: r.functions})
+			return sqlast.Eval(r.exprs[i], &sqlast.EvalContext{Context: r.ctx, Params: r.params, Resolver: physicalResolver, Affinity: physicalAffinity, Functions: r.functions, DeclaredType: physicalType})
 		}
 		return nil, err
 	}
@@ -277,6 +278,17 @@ func (r *Rows) evaluateSourceRow(rowid int64, values []any) (resultRow, int64, b
 				if c, ok := r.exprs[i].(*sqlast.Column); ok {
 					return physicalAffinity(c.Table, c.Name)
 				}
+			}
+		}
+		return ""
+	}
+	ec.DeclaredType = func(q, name string) string {
+		if typ := physicalType(q, name); typ != "" {
+			return typ
+		}
+		if q == "" {
+			if i, ok := r.aliases[fold(name)]; ok {
+				return sqlast.VectorExpressionRepresentation(r.exprs[i], physicalType)
 			}
 		}
 		return ""

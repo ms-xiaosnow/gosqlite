@@ -16,12 +16,15 @@ type Function func([]any) (any, error)
 type EvalContext struct {
 	// Context is the actual operation context for bounded extension functions.
 	// A nil value retains Background semantics for pure internal evaluation.
-	Context   context.Context
-	Row       map[string]any
-	Params    []any
-	Resolver  func(table, name string) (any, error)
-	Affinity  func(table, name string) string
-	Functions map[string]Function
+	Context  context.Context
+	Row      map[string]any
+	Params   []any
+	Resolver func(table, name string) (any, error)
+	Affinity func(table, name string) string
+	// DeclaredType preserves representation identity separately from SQL affinity.
+	// Derived aliases may return a closed vector/halfvec/bit/mixed kind tag.
+	DeclaredType func(table, name string) string
+	Functions    map[string]Function
 }
 
 func Eval(e Expr, ctx *EvalContext) (any, error) {
@@ -88,7 +91,7 @@ func Eval(e Expr, ctx *EvalContext) (any, error) {
 		}
 		switch x.Op {
 		case "<->", "<#>", "<=>", "<+>", "<~>", "<%>":
-			return vectorFunction(ctx.Context, vectorOperatorFunction(x.Op), []any{a, b})
+			return vectorExpressionFunction(ctx, vectorOperatorFunction(x.Op), []Expr{x.Left, x.Right}, []any{a, b})
 		case "AND":
 			at, an := Truth(a)
 			bt, bn := Truth(b)
@@ -261,7 +264,7 @@ func Eval(e Expr, ctx *EvalContext) (any, error) {
 			return similarityFunction(ctx.Context, name, args)
 		}
 		if fn == nil && isVectorFunction(name) {
-			return vectorFunction(ctx.Context, name, args)
+			return vectorExpressionFunction(ctx, name, x.Args, args)
 		}
 		if fn == nil {
 			fn = BuiltinFunctions[name]

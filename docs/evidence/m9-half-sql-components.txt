@@ -1,0 +1,27 @@
+M9 checkpoint F HALFVEC SQL/native component verification
+UTC: 2026-10-10T14:02:14Z
+Base HEAD: 718e3109fccc0f4d728d6f95b555cf4fd6e3e282
+go version go1.27.2 linux/amd64
+Offline env: GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off; GOCACHE=../go-cache GOPATH=../go-path
+Scope: ordinary intact SQL/storage/snapshot/rollback/reopen; in-memory invalid codecs; pinned published expectations. No aggregate or restricted physical/fault/recovery workflows.
+$ CGO_ENABLED=0 go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
+$ CGO_ENABLED=0 go test ./extension/vector -run "^(TestHalf|TestExtendedPublished|TestExtendedTypeBoundaryContracts|TestExtendedMetricContextPublication|TestSubvectorPinnedEdges|TestBinaryQuantizePinned)" -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	0.081s
+$ CGO_ENABLED=0 go test ./internal/sql ./sqlite ./driver ./examples/half-rerank -run "^(TestHalf|TestDriverHalf)" -count=3
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.012s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.485s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.073s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/half-rerank	0.011s
+$ CGO_ENABLED=0 go test ./internal/sql ./sqlite ./driver ./examples/bit-rerank -run "^(TestBit|TestVector|TestDriverDenseVector|TestDriverVectorQuota|TestDriverBit)" -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.021s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	1.522s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.034s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/bit-rerank	0.006s
+$ CGO_ENABLED=1 go test -race ./internal/sql ./sqlite ./driver ./examples/half-rerank -run "^(TestHalf|TestDriverHalf)" -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	1.029s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	1.546s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.119s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/half-rerank	1.040s
+$ CGO_ENABLED=0 go vet ./internal/sql ./sqlite ./driver ./examples/half-rerank
+$ CGO_ENABLED=0 go build ./internal/sql ./sqlite ./driver ./examples/half-rerank

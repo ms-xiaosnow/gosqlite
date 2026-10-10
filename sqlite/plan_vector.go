@@ -13,6 +13,8 @@ import (
 // vectorRank owns bounded ranking and optional ANN candidate selection.
 // The heap is never an index; QueryPlan reports the actual source method.
 type vectorRank struct {
+	half                bool
+	parsedHalf          vector.HalfVector
 	bitMetric           vector.BitMetricKind
 	bitLimits           BitSearchLimits
 	parsedBit           vector.BitVector
@@ -106,6 +108,11 @@ func (r *Rows) prepareVectorRank() error {
 		return nil
 	}
 	dims, ok := sqlast.VectorDimensions(r.table.columns[ordinal].Type)
+	half := false
+	if !ok && bitMetric == "" {
+		dims, ok = sqlast.HalfDimensions(r.table.columns[ordinal].Type)
+		half = ok
+	}
 	if bitMetric != "" {
 		dims, ok = sqlast.BitDimensions(r.table.columns[ordinal].Type)
 	}
@@ -129,10 +136,13 @@ func (r *Rows) prepareVectorRank() error {
 	}
 	// Preserve scalar laziness: do not parse input or reject zero cosine norms
 	// until a non-NULL row actually requires a distance. EXPLAIN does no scoring.
-	r.vectorRank = &vectorRank{bitMetric: bitMetric, bitLimits: DefaultBitSearchLimits(), ordinal: ordinal, dimensions: dims, query: query, metric: metric, retain: int(retain), limits: limits}
+	r.vectorRank = &vectorRank{half: half, bitMetric: bitMetric, bitLimits: DefaultBitSearchLimits(), ordinal: ordinal, dimensions: dims, query: query, metric: metric, retain: int(retain), limits: limits}
 	r.queryPlan.VectorMetric = metric
 	r.queryPlan.VectorBitMetric = bitMetric
 	r.queryPlan.VectorRepresentation = "vector"
+	if half {
+		r.queryPlan.VectorRepresentation = "halfvec"
+	}
 	if bitMetric != "" {
 		r.queryPlan.VectorRepresentation = "bit"
 	}
@@ -145,6 +155,9 @@ func (r *Rows) prepareVectorRank() error {
 }
 
 func (v *vectorRank) score(r *Rows, value any) (any, error) {
+	if v.half {
+		return v.scoreHalf(r, value)
+	}
 	if v.bitMetric != "" {
 		return v.scoreBit(r, value)
 	}
@@ -245,6 +258,12 @@ func (r *Rows) materializeVector() error {
 	}
 	retained := vectorRowHeap{}
 	var used int64
+	if r.vectorRank.half {
+		used = int64(r.vectorRank.dimensions) * 16
+		if used >= r.db.opts.MaxSortBytes {
+			return ErrMemoryLimit
+		}
+	}
 	for {
 		row, cost, err := r.fetch()
 		if err == io.EOF {
