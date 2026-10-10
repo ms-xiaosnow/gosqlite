@@ -314,3 +314,21 @@ and m9-sparse-review.txt; future expression/import/platform work is excluded by
 immutable lead snapshot57b02e0fa1f99f4c6a4f470c7741624cce1ba977. No full project,
 sparse ANN, native target-runtime or independent acceptance follows from these
 focused checks.
+
+## M9 C import ordinary verification
+
+Logs distinguish full focused source tree964ecebd1c9b3c479c440f815b2435394ff03326
+from final text-ownership delta tree3f83ee9453319a71b0db3c78a098a7855a2986ff.
+Both archives were immutable and used GOFLAGS=-buildvcs=false solely because they
+lack Git metadata. Named importer/CLI CGO0 and separate CGO1 race, scoped vet/build,
+old inspector/converter regressions and synthetic example passed; final delta
+adds CSV retained-text heap checks and reruns importer/parser/CLI validation.
+The before-fix memory-retention failure is retained, not discarded.
+
+A deliberately committed stop is a normal API return and normal connection close.
+Resume reopens intact correctly committed data; no crash, kill, failed native I/O,
+namespace race/replacement, corrupt files or interrupted publication was used.
+Semantic cosine-zero/index-budget failures preserve pending state and are not
+physical fault injection. Tests write only synthetic sources and new databases.
+Reports distinguish supplied-export fidelity, exact-distance reference checks,
+actual ANN recall measurements, and acceptance gates that remain NOT_RUN.

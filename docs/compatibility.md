@@ -150,3 +150,17 @@ decoding the next candidate. Native MaxNonzeros and SQL SQLVectorRankNonzeros bo
 query support plus examined row support; no allocation depends on declared1e9
 coordinates. Exact scalar/native/heap/full-sort results agree. Dense conversion is
 explicit and bounded by dense limits; sparse ANN is required future code.
+
+Offline import is explicitly mapped, one-table local CSV/NDJSON ingestion, never
+live PostgreSQL execution. New destinations are exclusively reserved; existing
+unrelated files are never adopted. Data, provenance, rejection hashes and batch
+cursor commit together. Resume rehashes the immutable source and replays the
+complete committed prefix before seeking. Int64 never passes through float64;
+float4 parses directly with strict nonzero-underflow rejection. Retained decoded
+text owns its bytes rather than retaining a whole CSV record. Batches have explicit
+row/decoded-byte caps plus separately documented parser/native budgets.
+Verification compares every accepted typed value, exact component bits, counts,
+boundaries and canonical hashes. Index readiness requires actual native trained
+HNSW/IVF identity/consistency; pending builds retain accepted data. This does not
+prove original bits lost by a low-precision export, arbitrary source schema or
+server semantics, ANN recall, or abrupt-interruption recovery. See import-pgembedding.md.

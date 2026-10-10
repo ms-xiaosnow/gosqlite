@@ -1,0 +1,33 @@
+M9 checkpoint C FINAL CSV text-retention delta verification
+UTC: 2026-10-10T14:39:23Z
+Frozen Git tree: 3f83ee9453319a71b0db3c78a098a7855a2986ff
+Immutable archive: ../import-final-verify; offline module/cache configuration; GOFLAGS=-buildvcs=false.
+go version go1.27.2 linux/amd64
+Delta: clone retained text away from encoding/csv record backing; pure-memory 32-record regression failed before fix (3,412,304 bytes versus 421,892 bound), then passed after fix. Earlier full candidate log remains ../m9c-frozen-components-before-csv-clone.txt.
+$ sha256sum --quiet -c ../import-final-frozen-all-sha256.txt
+$ CGO_ENABLED=0 go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
+$ CGO_ENABLED=0 go test ./migration/postgres ./cmd/gosqlite -run "^(TestImport|TestMigrateImport)" -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	3.486s
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.018s
+$ CGO_ENABLED=0 go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
+$ CGO_ENABLED=1 go test -race ./migration/postgres ./cmd/gosqlite -run "^(TestImport|TestMigrateImport)" -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	16.862s
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	1.111s
+$ CGO_ENABLED=0 go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
+$ CGO_ENABLED=0 go test ./migration/postgres -run "^TestImportRecordsCSVTextDoesNotRetainNumericRecord$" -count=3
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	0.435s
+$ CGO_ENABLED=0 go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
+$ CGO_ENABLED=1 go test -race ./migration/postgres -run "^TestImportRecordsCSVTextDoesNotRetainNumericRecord$" -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	1.985s
+$ CGO_ENABLED=0 go vet ./migration/postgres ./cmd/gosqlite ./examples/pgembedding-import
+$ CGO_ENABLED=0 go build ./migration/postgres ./cmd/gosqlite ./examples/pgembedding-import
+$ CGO_ENABLED=0 go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
+$ CGO_ENABLED=0 go run ./examples/pgembedding-import > ../m9c-final-example.json
+$ sha256sum --quiet -c ../import-final-frozen-all-sha256.txt
+Final immutable archive hashes unchanged.
+FINAL DELTA PASS. No aggregate, disk faults/tamper/wrong-key, namespace replacement/races, crash/process-kill/hot-recovery or interrupted publication/rekey exercises.

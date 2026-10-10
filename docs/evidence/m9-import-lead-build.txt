@@ -1,0 +1,10 @@
+Final immutable C integration build checks; tree3f83ee9453319a71b0db3c78a098a7855a2986ff
+2026-10-10T14:43:30Z
+Ordinary test source-reference guard PASS; behavioral review is still required.
+cross-build linux/amd64 PASS
+cross-build linux/arm64 PASS
+cross-build darwin/arm64 PASS
+cross-build windows/amd64 PASS
+all modules verified
+2026-10-10T14:44:04Z
+FINAL IMPORT FROZEN INTEGRATION BUILD PASS

@@ -129,7 +129,7 @@ Fresh restart, 2026-10-10 UTC. Historical work and test results are not acceptan
 - Review initially caught two grams fallback-reason regressions; move equality extraction before safety classification fixed them without changing scan results. Final component logs retained. Physical durability remains excluded.
 
 ### M9: Migration and extended vector types
-- Status: checkpoint A inspector, checkpoint B typed SQL converter, checkpoint E BIT, F HALFVEC and G SPARSEVEC integration plus extended memory primitives implemented. Resumable import/transition tooling and all extended ANN remain incomplete code.
+- Status: checkpoint A inspector, checkpoint B typed SQL converter, checkpoint E BIT, F HALFVEC and G SPARSEVEC integration plus extended memory primitives implemented. Resumable mapped import is implemented; transition tooling and all extended ANN remain incomplete code.
 - Inspector: strict bounded exact-schema JSON, extension/type/method/operator/function identity chain, dependency/shape/default findings, direct finite binary32 real[] conversion, deterministic JSON/Markdown and CLI reports. Reports do not execute SQL or authorize changes. Invalid legacy defaults100/16 and example3/5 are review findings with no usable proposed target. Programmatic structs receive aggregate preflight; canonical inspected-facts hashes and optional unchanged-source hashes are distinguished.
 - Component checks: CGO0 unit/vet/build, separate race, CLI and bounded memory fuzz pass (real-array62076, catalog194 inputs). Independent tests include201 finite binary32 roundtrips, NULL/shape/redaction, duplicate/unknown/UTF8 JSON, ownership spoofing, nonfinite profile numbers, mutated catalog provenance and deterministic cancellation. Initial invalid-parameter proposal assertion failed and was fixed; logs retained. See m9-inspector-components.txt and review evidence.
 - Public references: old embedding0.3.6 commit5d48508aeaeb86b9e9c630468ada7a124b905795, exact Apache2 LICENSE/NOTICE and source manifest. Current Neon page was retrieved but lacks the requested chapter; the historical official2024 chapter is linked, not mislabeled current. Export SQL is source-reviewed but not PostgreSQL-executed. Synthetic catalogs are explicitly synthetic.
@@ -308,3 +308,37 @@ See checkpoints.json and s1-library-restore.txt for distinct evidence scopes.
   unchanged complete source inventory. Later importer/SQL/platform edits excluded.
   No live PostgreSQL execution or sparse ANN is claimed; all extended ANN and
   restricted/independent release gates remain open.
+
+### M9 checkpoint C: resumable native CSV/NDJSON import
+- Delivered: strict bounded versioned manifest and record framing, exact field/
+  NULL/type maps, direct int64 and binary32 parsing, new-destination reservation,
+  native batched DML/provenance/rejection/cursor atomicity, deliberate committed
+  stop and normal reopen/resume, exhaustive export/database verification and
+  deterministic canonical hashes. CLI defaults dry-run; writes require --apply.
+- Genuine HNSW/IVF builds and exact native config/source identity follow data
+  completion; partial index progress and semantic failures remain explicit pending
+  states. No conflicting object is overwritten. Quarantine distinguishes rejected
+  PKs from the verified absent-key set; duplicate rejection does not invent loss.
+- Seventeen independent review tests pass CGO0 and separate race, with fixes for
+  memory/hash allocation, explicit index method and state/identity consistency.
+  Final isolated source3f83ee9453319a71b0db3c78a098a7855a2986ff excludes D/S2/
+  Windows-encrypted changes. Final source delta clones retained CSV text; a memory
+  regression failed at3,412,304 retained bytes before the fix and passes after it.
+  Earlier full focused unit/race/vet/build/example evidence and final delta checks
+  are preserved separately, with unchanged archive hashes.
+- Synthetic64-row CSV/NDJSON outputs share canonical hash
+  recorded in m9-import-example.json; no general recall promise follows.
+  Both real indexes achieve recall@4=1 on its seeded bounded query. Separate
+  independent256-bit distance comparisons preserve per-PK tolerances and treat
+  numerical cosine ties explicitly, without deleting cases or changing metrics.
+- Evidence: import-pgembedding.md, m9-import components/review/final-delta/source
+  hashes/example/retention-before-fix. No live PostgreSQL, source-schema behavior,
+  crash/interrupted-commit or physical durability acceptance is claimed. Required
+  transition templates, extended ANN/broader SQL/recovery and independent gates
+  remain separate work.
+
+Native/shared-encrypted immutable treeba85a097c9c10cf96e0bc9049d796887cfd3ba80
+full guarded CGO0 unit/vet/build, CGO1 race, pinned SQLite oracle, four cross-builds,
+module/no-CGO and unchanged full-source/fixture checks passed exit0 at
+2026-10-10T14:44:18Z. See native-shared-aggregate.txt. This excludes newer sparse,
+importer, expression and Windows-encrypted code; native runtime remains Linux.

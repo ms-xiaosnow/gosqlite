@@ -2,7 +2,7 @@
 
 Historical test-scope statements are corrected in [the namespace-test audit](docs/test-scope-audit.md); the affected tests are now excluded from ordinary workflows.
 
-A native Go database kernel targeting tested subsets of SQLite 3.54.0 files and SQL. Current development: persistent HNSW/IVFFlat, exact typed-vector KNN and same-snapshot hybrid ranking, plus experimental authenticated snapshot, dirty-page WAL and concurrent encrypted sessions, ordinary B-tree equality planning, nested savepoints, BIT/HALFVEC/SPARSEVEC exact search, extended vector primitives, and bounded pg_embedding catalog inspection/typed offline SQL conversion. It is not production-ready. No CGO, SQLite subprocess, C ABI, or remote SQL engine is used in production.
+A native Go database kernel targeting tested subsets of SQLite 3.54.0 files and SQL. Current development: persistent HNSW/IVFFlat, exact typed-vector KNN and same-snapshot hybrid ranking, plus experimental authenticated snapshot, dirty-page WAL and concurrent encrypted sessions, ordinary B-tree equality planning, nested savepoints, BIT/HALFVEC/SPARSEVEC exact search, extended vector primitives, and bounded pg_embedding catalog inspection, typed offline SQL conversion and resumable CSV/NDJSON import. It is not production-ready. No CGO, SQLite subprocess, C ABI, or remote SQL engine is used in production.
 
 ## Try the implemented SQL path
 
@@ -60,7 +60,7 @@ SQLITE_ORACLE=/absolute/path/to/verified/sqlite3 ./scripts/test-oracle.sh
 
 See [progress](docs/progress.md), [compatibility](docs/compatibility.md), [architecture](docs/architecture.md), [sources](docs/upstream.md), and [manual verification](docs/manual-verification.md). The unchanged [original goal](goal.md) remains the contract. [Restart protocol](docs/restart.md) and checkpoint records preserve durable development history.
 
-Qualified crash recovery, non-Linux encrypted coordination, broader SQL and all extended-vector ANN integration, and the remaining pg_embedding import/transition tooling remain unfinished implementation work. Full SQLite/PostgreSQL semantics, SEE file compatibility and production security are not claimed.
+Qualified crash recovery, non-Linux encrypted coordination, broader SQL and all extended-vector ANN integration, and pg_embedding transition tooling remain unfinished implementation work. Full SQLite/PostgreSQL semantics, SEE file compatibility and production security are not claimed.
 
 
 ## Explicit exclusive WAL
@@ -145,8 +145,8 @@ This legacy mode remains exclusive. EncryptionWALShared and examples/encrypted-s
 
 The migration inspector reads bounded local catalog JSON, checks extension/type/
 operator ownership and legacy option semantics, and emits a deterministic review
-report. It does not connect to or modify PostgreSQL, convert queries, or import
-data yet. See [migration scope and examples](docs/migration-pgembedding.md).
+report. It does not connect to or modify PostgreSQL, execute source SQL or import data; those are separate explicit conversion and
+local import commands. See [migration scope and examples](docs/migration-pgembedding.md).
 
 `extension/vector` also supplies distinct immutable half, packed-bit and sparse
 values, codecs, exact metrics, nullable adapters, subvector and quantization.
@@ -209,3 +209,14 @@ billion-dimensional coordinate space. Four numeric metrics, strict driver/defaul
 DML semantics and explicit bounded conversion are implemented. Sparse ANN and
 unbounded densification remain refused. See [sparse SQL](docs/sparse-vector.md)
 and examples/sparse-exact for true large-dimension, small-support operations.
+
+## Offline CSV/NDJSON import and verification
+
+The local pg_embedding importer defaults to read-only validation. Explicit --apply
+creates a new native database; --resume uses a committed in-database cursor after
+normal close/reopen. Exact int64 keys, NULLs and directly rounded binary32 vector
+bits are checked exhaustively against the supplied immutable export. Optional
+quarantine reports rejected and genuinely missing keys separately. Real HNSW/IVF
+indexes build after rows, with explicit pending states on semantic/index limits.
+See [import contract](docs/import-pgembedding.md) and examples/pgembedding-import.
+This does not migrate server-side grants/triggers/policies or establish crash safety.

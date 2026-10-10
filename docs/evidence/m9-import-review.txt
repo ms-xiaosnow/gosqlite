@@ -1,0 +1,223 @@
+Independent M9 C resumable importer review, 2026-10-10 UTC
+
+Reviewer-owned files:
+  migration/postgres/import_review_test.go
+  docs/evidence/m9-import-review.txt
+No production edits, staging, commits, or aggregate qualification by reviewer.
+
+Seventeen named independent regressions cover:
+- Exact signed int64 extrema, NULLs, signed binary32 zero, subnormals, extrema,
+  and decimal binary32 double-rounding traps; an independent framed encoder
+  checks both reported SHA-256 values against explicit expected component bits.
+- Duplicate current-batch rollback and normal unchanged resume failure: data,
+  accepted provenance, rejections, batch sequence and cursor remain atomic.
+- Quarantine across deliberate committed-boundary pause/normal close/reopen;
+  duplicate keys within/across batches, invalid PK and binary32 underflow.
+- Source SHA-256 preflight and pre-canceled apply create no destination;
+  manifest identity changes cannot resume; existing destinations require resume.
+- An unrelated, intact native SQLite database remains byte-identical after
+  rejecting both new import and resume. No namespace changes are exercised.
+- CSV multiline/CRLF offsets, final record without newline, NULL, and a
+  SQL-looking text value retained exactly through bound parameters.
+- Missing/extra/duplicate NDJSON fields remain fatal schema errors even under
+  quarantine, with no current-batch publication or fabricated rejections.
+- Expected-row-count mismatch stays incomplete; empty NDJSON, header-only CSV,
+  and all-rejected inputs preserve their distinct normal completion states.
+- Real persisted HNSW and trained IVF indexes are used by native approximate
+  searches after normal reopen. Cosine zero and insufficient IVF training rows
+  retain all data in data_complete_index_pending, including repeated normal
+  resume. Successful first-index progress survives a second-index blocker.
+- Unordered dry-run stops at the explicit 65,536 unique-key budget; ascending
+  65,537-row dry-run succeeds without destination creation.
+- A bounded raw record whose decoded data exceeds the batch-byte cap fails as
+  a resource error, not quarantine. Byte-bounded carry retains the exact last
+  committed record offset and imports the deferred record once after resume.
+- Pure-memory malformed manifest/job/native-index models fail closed on
+  required fields, identity, versions, phases, canonical index configuration,
+  source/column/ordinal, and non-ready IVF state. No disk metadata is altered.
+- The independently checked missing-PK set is sorted/unique and excludes a
+  rejected key with an earlier or later accepted source row. Unparseable PKs
+  remain explicitly counted rather than inventing identifiers.
+
+Source review and resolved findings:
+- Fresh output reservation is O_EXCL, closes the raw descriptor before native
+  locking, confirms identity, runs native pager Create/Commit, then opens sqlite
+  with NoCreate. Resume never initializes an existing or missing destination.
+  Namespace immutability/exclusive ownership remain documented preconditions.
+- Source uses a held regular-file identity and bounded streaming SHA-256 check
+  before output creation, and rechecks source identity/size/hash at completion.
+- Reported early findings were fixed by the owner: an all-row dry-run seen set,
+  hash decoding before length checking, empty index-method default ambiguity,
+  and permissive completed/index-phase metadata invariants.
+- Ascending dry-run/apply/verification are streaming in source rows. Apply uses
+  bounded batches and PK provenance point lookups. Unordered dry-run has the
+  explicit 65,536-key cap; rejection/missing-key reports are separately capped
+  at 10,000 rejected rows. Native ANN construction has its own bounded quotas.
+- Only typed deterministic row errors may be quarantined. Source-read errors
+  have an isolated type that cannot become row errors or false EOF. Schema,
+  context, resource and database failures stop. All importer data is bound;
+  identifiers come from validated components, never a supplied SQL program.
+- Commit errors return without retrying the uncertain batch. Ordinary resume
+  reopens and exhaustively reconciles committed metadata/source/data first.
+- Metadata is checked under native read snapshots. Completion is published only
+  after a normal close/reopen exhaustive check, followed by another complete
+  data/source/index reconciliation inside the writer-reserved publication
+  transaction. Index identity checks use bounded read-only native catalog
+  queries; extension-owned tables are never directly modified by the importer.
+- Quarantine produces complete_with_rejections, never complete_verified.
+  Verification failures do not retain a success status. Exact-distance and ANN
+  recall fields explicitly remain not_run, separate from fidelity verification.
+
+Scope: only new intact synthetic exports/databases, ordinary valid native SQL,
+normal close/reopen, cancellation before output creation, deterministic format
+errors and in-memory invalid models were executed. No process exit/kill, crash,
+fault injection, selected-file corruption/tamper, namespace replacement/retarget
+or races, missing selected files, wrong-key, failed native I/O/locks/unmap/Sync,
+short writes, disk-full/permission failures, hot recovery, interrupted
+publication/rekey, manual tags, or aggregate suite was executed. This is focused
+component evidence, not crash-safety or independent production release approval.
+
+Pinned offline environment:
+  GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off GOFLAGS=''
+  GOCACHE=$PWD/../go-cache GOPATH=$PWD/../go-path
+  Go=../toolchains/go1.27.2/bin/go
+  CGO_ENABLED=0 for guard and ordinary tests; separate CGO_ENABLED=1 race run.
+
+Final commands and actual output:
+UTC 2026-10-10T14:25:11Z
+go version go1.27.2 linux/amd64
+$ CGO_ENABLED=0 go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
+$ CGO_ENABLED=0 go test ./migration/postgres -run ^TestImportReview -count=1 -v
+=== RUN   TestImportReviewIndependentPKBitsAndCanonicalHash
+--- PASS: TestImportReviewIndependentPKBitsAndCanonicalHash (0.01s)
+=== RUN   TestImportReviewDuplicateBatchIsAtomic
+--- PASS: TestImportReviewDuplicateBatchIsAtomic (0.00s)
+=== RUN   TestImportReviewQuarantineCommittedResume
+--- PASS: TestImportReviewQuarantineCommittedResume (0.02s)
+=== RUN   TestImportReviewPreflightAndCancellationBeforeCreation
+--- PASS: TestImportReviewPreflightAndCancellationBeforeCreation (0.00s)
+=== RUN   TestImportReviewNativeIndexesAndReadyState
+--- PASS: TestImportReviewNativeIndexesAndReadyState (0.09s)
+=== RUN   TestImportReviewIndexFailureRetainsDataPending
+=== RUN   TestImportReviewIndexFailureRetainsDataPending/hnsw
+=== RUN   TestImportReviewIndexFailureRetainsDataPending/ivfflat
+--- PASS: TestImportReviewIndexFailureRetainsDataPending (0.01s)
+    --- PASS: TestImportReviewIndexFailureRetainsDataPending/hnsw (0.01s)
+    --- PASS: TestImportReviewIndexFailureRetainsDataPending/ivfflat (0.01s)
+=== RUN   TestImportReviewMetadataModelsAndExplicitManifest
+--- PASS: TestImportReviewMetadataModelsAndExplicitManifest (0.00s)
+=== RUN   TestImportReviewNeverAdoptsUnrelatedNativeDestination
+--- PASS: TestImportReviewNeverAdoptsUnrelatedNativeDestination (0.00s)
+=== RUN   TestImportReviewCSVCursorAndBoundValues
+--- PASS: TestImportReviewCSVCursorAndBoundValues (0.01s)
+=== RUN   TestImportReviewSchemaErrorsNeverQuarantined
+=== RUN   TestImportReviewSchemaErrorsNeverQuarantined/unknown
+=== RUN   TestImportReviewSchemaErrorsNeverQuarantined/duplicate
+=== RUN   TestImportReviewSchemaErrorsNeverQuarantined/missing
+--- PASS: TestImportReviewSchemaErrorsNeverQuarantined (0.00s)
+    --- PASS: TestImportReviewSchemaErrorsNeverQuarantined/unknown (0.00s)
+    --- PASS: TestImportReviewSchemaErrorsNeverQuarantined/duplicate (0.00s)
+    --- PASS: TestImportReviewSchemaErrorsNeverQuarantined/missing (0.00s)
+=== RUN   TestImportReviewExpectedRowsNeverFalseComplete
+--- PASS: TestImportReviewExpectedRowsNeverFalseComplete (0.00s)
+=== RUN   TestImportReviewDryRunKeyBudgetAndAscendingStream
+--- PASS: TestImportReviewDryRunKeyBudgetAndAscendingStream (1.96s)
+=== RUN   TestImportReviewEmptyAndAllRejectedCompletion
+=== RUN   TestImportReviewEmptyAndAllRejectedCompletion/empty_csv_false
+=== RUN   TestImportReviewEmptyAndAllRejectedCompletion/empty_csv_true
+=== RUN   TestImportReviewEmptyAndAllRejectedCompletion/all_rejected
+--- PASS: TestImportReviewEmptyAndAllRejectedCompletion (0.02s)
+    --- PASS: TestImportReviewEmptyAndAllRejectedCompletion/empty_csv_false (0.00s)
+    --- PASS: TestImportReviewEmptyAndAllRejectedCompletion/empty_csv_true (0.00s)
+    --- PASS: TestImportReviewEmptyAndAllRejectedCompletion/all_rejected (0.01s)
+=== RUN   TestImportReviewDecodedByteBoundAndPendingCursor
+=== RUN   TestImportReviewDecodedByteBoundAndPendingCursor/oversized_decoded_record
+=== RUN   TestImportReviewDecodedByteBoundAndPendingCursor/carry_at_complete_boundary
+--- PASS: TestImportReviewDecodedByteBoundAndPendingCursor (0.39s)
+    --- PASS: TestImportReviewDecodedByteBoundAndPendingCursor/oversized_decoded_record (0.05s)
+    --- PASS: TestImportReviewDecodedByteBoundAndPendingCursor/carry_at_complete_boundary (0.34s)
+=== RUN   TestImportReviewNativeIndexIdentityMemoryModels
+=== RUN   TestImportReviewNativeIndexIdentityMemoryModels/hnsw
+=== RUN   TestImportReviewNativeIndexIdentityMemoryModels/ivfflat
+--- PASS: TestImportReviewNativeIndexIdentityMemoryModels (0.00s)
+    --- PASS: TestImportReviewNativeIndexIdentityMemoryModels/hnsw (0.00s)
+    --- PASS: TestImportReviewNativeIndexIdentityMemoryModels/ivfflat (0.00s)
+=== RUN   TestImportReviewMissingPKSetExcludesLaterAcceptedRow
+--- PASS: TestImportReviewMissingPKSetExcludesLaterAcceptedRow (0.01s)
+=== RUN   TestImportReviewPartialIndexProgressIsResumable
+--- PASS: TestImportReviewPartialIndexProgressIsResumable (0.02s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	2.573s
+$ CGO_ENABLED=0 go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
+$ CGO_ENABLED=1 go test -race ./migration/postgres -run ^TestImportReview -count=1 -v
+=== RUN   TestImportReviewIndependentPKBitsAndCanonicalHash
+--- PASS: TestImportReviewIndependentPKBitsAndCanonicalHash (0.05s)
+=== RUN   TestImportReviewDuplicateBatchIsAtomic
+--- PASS: TestImportReviewDuplicateBatchIsAtomic (0.03s)
+=== RUN   TestImportReviewQuarantineCommittedResume
+--- PASS: TestImportReviewQuarantineCommittedResume (0.07s)
+=== RUN   TestImportReviewPreflightAndCancellationBeforeCreation
+--- PASS: TestImportReviewPreflightAndCancellationBeforeCreation (0.02s)
+=== RUN   TestImportReviewNativeIndexesAndReadyState
+--- PASS: TestImportReviewNativeIndexesAndReadyState (0.58s)
+=== RUN   TestImportReviewIndexFailureRetainsDataPending
+=== RUN   TestImportReviewIndexFailureRetainsDataPending/hnsw
+=== RUN   TestImportReviewIndexFailureRetainsDataPending/ivfflat
+--- PASS: TestImportReviewIndexFailureRetainsDataPending (0.32s)
+    --- PASS: TestImportReviewIndexFailureRetainsDataPending/hnsw (0.27s)
+    --- PASS: TestImportReviewIndexFailureRetainsDataPending/ivfflat (0.05s)
+=== RUN   TestImportReviewMetadataModelsAndExplicitManifest
+--- PASS: TestImportReviewMetadataModelsAndExplicitManifest (0.01s)
+=== RUN   TestImportReviewNeverAdoptsUnrelatedNativeDestination
+--- PASS: TestImportReviewNeverAdoptsUnrelatedNativeDestination (0.00s)
+=== RUN   TestImportReviewCSVCursorAndBoundValues
+--- PASS: TestImportReviewCSVCursorAndBoundValues (0.05s)
+=== RUN   TestImportReviewSchemaErrorsNeverQuarantined
+=== RUN   TestImportReviewSchemaErrorsNeverQuarantined/missing
+=== RUN   TestImportReviewSchemaErrorsNeverQuarantined/unknown
+=== RUN   TestImportReviewSchemaErrorsNeverQuarantined/duplicate
+--- PASS: TestImportReviewSchemaErrorsNeverQuarantined (0.02s)
+    --- PASS: TestImportReviewSchemaErrorsNeverQuarantined/missing (0.01s)
+    --- PASS: TestImportReviewSchemaErrorsNeverQuarantined/unknown (0.01s)
+    --- PASS: TestImportReviewSchemaErrorsNeverQuarantined/duplicate (0.00s)
+=== RUN   TestImportReviewExpectedRowsNeverFalseComplete
+--- PASS: TestImportReviewExpectedRowsNeverFalseComplete (0.03s)
+=== RUN   TestImportReviewDryRunKeyBudgetAndAscendingStream
+--- PASS: TestImportReviewDryRunKeyBudgetAndAscendingStream (9.87s)
+=== RUN   TestImportReviewEmptyAndAllRejectedCompletion
+=== RUN   TestImportReviewEmptyAndAllRejectedCompletion/empty_csv_false
+=== RUN   TestImportReviewEmptyAndAllRejectedCompletion/empty_csv_true
+=== RUN   TestImportReviewEmptyAndAllRejectedCompletion/all_rejected
+--- PASS: TestImportReviewEmptyAndAllRejectedCompletion (0.15s)
+    --- PASS: TestImportReviewEmptyAndAllRejectedCompletion/empty_csv_false (0.04s)
+    --- PASS: TestImportReviewEmptyAndAllRejectedCompletion/empty_csv_true (0.04s)
+    --- PASS: TestImportReviewEmptyAndAllRejectedCompletion/all_rejected (0.07s)
+=== RUN   TestImportReviewDecodedByteBoundAndPendingCursor
+=== RUN   TestImportReviewDecodedByteBoundAndPendingCursor/oversized_decoded_record
+=== RUN   TestImportReviewDecodedByteBoundAndPendingCursor/carry_at_complete_boundary
+--- PASS: TestImportReviewDecodedByteBoundAndPendingCursor (5.20s)
+    --- PASS: TestImportReviewDecodedByteBoundAndPendingCursor/oversized_decoded_record (0.72s)
+    --- PASS: TestImportReviewDecodedByteBoundAndPendingCursor/carry_at_complete_boundary (4.47s)
+=== RUN   TestImportReviewNativeIndexIdentityMemoryModels
+=== RUN   TestImportReviewNativeIndexIdentityMemoryModels/hnsw
+=== RUN   TestImportReviewNativeIndexIdentityMemoryModels/ivfflat
+--- PASS: TestImportReviewNativeIndexIdentityMemoryModels (0.00s)
+    --- PASS: TestImportReviewNativeIndexIdentityMemoryModels/hnsw (0.00s)
+    --- PASS: TestImportReviewNativeIndexIdentityMemoryModels/ivfflat (0.00s)
+=== RUN   TestImportReviewMissingPKSetExcludesLaterAcceptedRow
+--- PASS: TestImportReviewMissingPKSetExcludesLaterAcceptedRow (0.04s)
+=== RUN   TestImportReviewPartialIndexProgressIsResumable
+--- PASS: TestImportReviewPartialIndexProgressIsResumable (0.07s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	17.543s
+Reviewed-file SHA-256 values:
+ffb1e933e8b4b8abf1107d5ee9ff29872332796698e7a92b3ff2613fec8d8fa8  migration/postgres/import.go
+5a72662a8a45d66b242c10261e9b1bd4b36a6bdd722ba2f68e53b078ab7f0731  migration/postgres/import_indexes.go
+ffdddc67bea2dad4d61011afcb91aa28920b6621198ca9bc7f060b69e5503310  migration/postgres/import_manifest.go
+e61b8076016b2bfc0f067959c96aff7d5e95cc6a8e349c6d1b466c6f00ff1a39  migration/postgres/import_records.go
+424cfe564d147525a49e5959d169040288c07ae5ade72d74c3c139369a3c7518  migration/postgres/import_store.go
+573511247886875561e152bbd749042de2ee68fb1bfcf9715b8e159e333276f4  migration/postgres/import_verify.go
+cece137d2c3ce87fb50733efa0e5eb880bd240f11cb7515cbb5a4bf12a549007  migration/postgres/import_review_test.go
+Reviewed importer production and reviewer test hashes unchanged across both final runs.

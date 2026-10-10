@@ -1,0 +1,42 @@
+M9 checkpoint C FINAL isolated offline native import component verification
+UTC: 2026-10-10T14:33:57Z
+Frozen Git tree: 964ecebd1c9b3c479c440f815b2435394ff03326
+Archive: ../import-verify; excludes D/S2/Windows-encrypted future edits; immutable source archive.
+Environment: GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off GOFLAGS=-buildvcs=false; writable caches outside archive.
+go version go1.27.2 linux/amd64
+Scope: reviewed named importer/parser/CLI tests, ordinary intact files and normal committed stop/reopen; pure-memory malformed records/state. No aggregate, disk faults, tamper, crash/recovery, or namespace experiments.
+$ sha256sum --quiet -c ../import-frozen-all-sha256.txt
+$ CGO_ENABLED=0 go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
+$ CGO_ENABLED=0 go test ./migration/postgres ./cmd/gosqlite -run "^(TestImport|TestMigrateImport)" -count=3
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	16.639s
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.155s
+$ CGO_ENABLED=0 go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
+$ CGO_ENABLED=1 go test -race ./migration/postgres ./cmd/gosqlite -run "^(TestImport|TestMigrateImport)" -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	22.104s
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	1.090s
+$ CGO_ENABLED=0 go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
+$ CGO_ENABLED=0 go test ./cmd/gosqlite -run "^(TestMigrateInspectAndDryRun|TestMigrateReportDoesNotOverwrite|TestMigrateConverter)" -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.074s
+$ CGO_ENABLED=0 go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
+$ CGO_ENABLED=0 go test ./migration/postgres -run "^(TestRealArrayFiniteBinary32|TestConvertGoldenArtifacts|TestInspectCompleteFixture)$" -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	0.029s
+$ CGO_ENABLED=0 go vet ./migration/postgres ./cmd/gosqlite ./examples/pgembedding-import
+$ CGO_ENABLED=0 go build ./migration/postgres ./cmd/gosqlite ./examples/pgembedding-import
+$ CGO_ENABLED=0 go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
+$ CGO_ENABLED=0 go run ./examples/pgembedding-import > ../m9c-frozen-example.json
+$ sha256sum --quiet -c ../import-frozen-all-sha256.txt
+Frozen archive hashes unchanged after all component operations.
+Earlier candidate notes: a distance-fixture rank assertion was corrected for mathematically tied collinear max/subnormal cosine directions; every case and original per-PK 1e-12*max(1,abs(reference)) tolerance retained, with actual local tie ordering and reference order beyond numeric tie bands checked. Concurrent unfinished sparse/D source windows caused transient shared-tree compilation blocks; final frozen-source acceptance above excludes those unrelated edits.
+FINAL FOCUSED COMPONENT PASS; whole-tree aggregate/release gates remain lead-owned.
+
+Later-source note: this full-pass log identifies the pre-CSV-clone tree above.
+The final text-backing ownership delta and its pure-memory regression are accepted
+against immutable tree 3f83ee9453319a71b0db3c78a098a7855a2986ff in
+m9-import-final-delta.txt; do not mistake the earlier tree for final delta evidence.
+The original unappended full log is retained outside the repository as
+../m9c-frozen-components-before-csv-clone.txt.

@@ -1,0 +1,20 @@
+Exact Library-restored SPARSE checkpoint focused validation; full source unit/race/oracle evidence separately scoped.
+2026-10-10T14:39:01Z
+582d3963074984cb01ab1e250112be13a4c89b51
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	0.029s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.009s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	1.935s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.045s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/sparse-exact	0.005s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	1.322s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	1.057s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	8.542s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.197s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/sparse-exact	1.050s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	0.700s
+all modules verified
+2026-10-10T14:39:39Z
+SPARSE LIBRARY RESTORE FOCUSED CHECKS PASS

@@ -12,13 +12,24 @@ import (
 	"github.com/ms-xiaosnow/gosqlite/migration/postgres"
 )
 
-// The inspector deliberately has no database handle or execution path. Later
-// apply/resume modes must remain separate, explicit commands.
+// Inspection and conversion remain read-only. Local import is a separate
+// dispatch path whose writes require explicit --apply.
 func runMigrate(ctx context.Context, args []string, out io.Writer) error {
 	if len(args) == 0 || args[0] != "pgembedding" {
 		return fmt.Errorf("usage: gosqlite migrate pgembedding inspect --catalog <catalog.json> [--format json|markdown]; inspection is always read-only")
 	}
 	args = args[1:]
+	if len(args) > 0 && (args[0] == "import" || args[0] == "verify") {
+		return runMigrateImport(ctx, args[1:], out, args[0] == "verify")
+	}
+	if len(args) > 0 && args[0] != "inspect" && args[0] != "convert" {
+		for _, arg := range args {
+			name := strings.SplitN(arg, "=", 2)[0]
+			if name == "--input" || name == "--manifest" || name == "--apply" || name == "--resume" {
+				return runMigrateImport(ctx, args, out, false)
+			}
+		}
+	}
 	if len(args) > 0 && args[0] == "convert" {
 		return runMigrateConvert(ctx, args[1:], out)
 	}

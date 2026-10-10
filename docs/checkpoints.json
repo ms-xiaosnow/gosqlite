@@ -212,7 +212,7 @@
     "library_version": 0,
     "verified": "Guarded remote commit/ref readback and exact local mirror; full-history bundle, byte-identical Library readback, clean clone/fsck and original goal hash verified2026-10-10T14:28:32Z. Exact frozen source full unit/vet/build/race/oracle/crossbuild/module/source manifest passed exit0 at14:25:15Z. Exact restored focused internal/sql/sqlite/driver/example CGO0 unit/vet, CGO1 race, Half official-oracle suite, full production build, modules and clean tree passed exit0 at2026-10-10T14:29:22Z; not a second full restored all-package suite.",
     "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38059695568",
-    "remote_ci_status": "IN_PROGRESS, observed2026-10-10T14:28:57Z.",
+    "remote_ci_status": "COMPLETED SUCCESS for exact SHA, updated2026-10-10T14:36:47Z, observed14:38:28Z.",
     "open_gates": "Sparse SQL and all extended ANN, remaining migration/SQL/recovery/native-platform code and restricted/independent acceptance remain open. Half reranking does not restore omitted candidates."
   },
   {
@@ -224,9 +224,23 @@
     "bundle_bytes": 1403803,
     "library_file_id": "libfile_5116f6134f6c8191b54957ce92feccfa",
     "library_version": 0,
-    "verified": "Guarded remote commit/ref readback, exact local mirror, full-history bundle, byte-identical Library readback, clean clone/fsck and original goal hash verified2026-10-10T14:33:27Z. First ref-update transport response was lost; two unchanged-head reads preceded one expected-SHA guarded retry. Component/review checks and frozen full CGO0 unit/vet/build passed; full aggregate race/oracle is running. Exact Library-restored vfs/walindex/encstore/pager and named shared SQLite/driver/example CGO0 unit and CGO1 race, full vet/build, four cross-builds, module verification and clean tree passed exit0 at2026-10-10T14:34:55Z; focused evidence is not a full restored all-package/oracle rerun.",
+    "verified": "Guarded remote commit/ref readback, exact local mirror, full-history bundle, byte-identical Library readback, clean clone/fsck and original goal hash verified2026-10-10T14:33:27Z. First ref-update transport response was lost; two unchanged-head reads preceded one expected-SHA guarded retry. Component/review checks and frozen full CGO0 unit/vet/build passed; Frozen full aggregate CGO0 unit/vet/build, separate CGO1 race, complete pinned SQLite oracle, four cross-builds, modules/no-CGO closure and unchanged full source/fixture inventories passed exit0 at2026-10-10T14:44:18Z. Exact Library-restored vfs/walindex/encstore/pager and named shared SQLite/driver/example CGO0 unit and CGO1 race, full vet/build, four cross-builds, module verification and clean tree passed exit0 at2026-10-10T14:34:55Z; focused evidence is not a full restored all-package/oracle rerun.",
     "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38060037671",
-    "remote_ci_status": "IN_PROGRESS, observed2026-10-10T14:33:28Z.",
+    "remote_ci_status": "COMPLETED SUCCESS for exact SHA, updated2026-10-10T14:43:19Z, observed14:44:40Z.",
     "open_gates": "Native Darwin/Windows runtime NOT_RUN; default Windows cross-vet has disclosed mapping warning. Non-Linux encrypted coordination and failed-open retirement retry remain code gaps; physical and independent security/crypto/legal/soak acceptance remains open."
+  },
+  {
+    "stage": "M9 G typed SPARSEVEC SQL and support-bounded exact search",
+    "remote_commit": "582d3963074984cb01ab1e250112be13a4c89b51",
+    "local_commit": "582d3963074984cb01ab1e250112be13a4c89b51",
+    "tree": "b0137ebe14d49f27a2ca7441edf5e121f0cb3be4",
+    "bundle_sha256": "e0d53c60337826ff956e8dce94619499253b4e25e3d9bbd6e365d4d01932430a",
+    "bundle_bytes": 1416013,
+    "library_file_id": "libfile_6dabc286f7b88191bbb4a5e19a9fcae7",
+    "library_version": 0,
+    "verified": "Guarded remote readback/exact mirror, full-history bundle, byte-identical Library readback, clean clone/fsck and original goal hash verified2026-10-10T14:39:00Z. Scoped frozen source unit/race/oracle/vet/full-build/four-crossbuild/module/unchanged-file checks passed14:35:25Z. Exact restored sparse-focused unit/race/oracle plus full vet/build/modules and clean tree passed exit0 at14:39:39Z. Neither focused run is a new full all-package/oracle aggregate.",
+    "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38060366944",
+    "remote_ci_status": "IN_PROGRESS, observed2026-10-10T14:39:02Z.",
+    "open_gates": "All extended ANN, remaining migration/broad SQL/native encrypted/recovery code; restricted physical and independent release gates remain open."
   }
 ]

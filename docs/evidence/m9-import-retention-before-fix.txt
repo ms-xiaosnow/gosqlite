@@ -1,0 +1,7 @@
+Expected pure-memory regression failure on the earlier un-cloned CSV parser; final correction passes in m9-import-final-delta.txt.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+--- FAIL: TestImportRecordsCSVTextDoesNotRetainNumericRecord (0.12s)
+    import_records_test.go:541: tiny selected text retained large CSV numeric record backing: heap growth 3412304, bound 421892
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/migration/postgres	0.133s
+FAIL
