@@ -15,10 +15,15 @@ import (
 	sqlast "github.com/ms-xiaosnow/gosqlite/internal/sql"
 )
 
-// QueryPlan describes the actual source access path. SEARCH means covering
-// posting B-tree ranges followed by individual source-table rowid seeks. Every
-// candidate still evaluates the original WHERE. EXPLAIN does not execute it.
+// QueryPlan describes the actual source access path. SEARCH names the real
+// method: covering posting ranges or lazy ANN traversal. Every candidate still
+// evaluates the original WHERE. EXPLAIN does not execute either search.
 type QueryPlan struct {
+	ANNOpclass                                  string
+	ANNGeneration                               int64
+	ANNEFSearch, ANNMaxEFSearch, ANNEffectiveEF int
+	ANNProbes, ANNMaxProbes, ANNEffectiveProbes int
+	ANNStopReason, ANNFallback                  string
 	// Vector ranking is separate from source access: a heap is never an index.
 	VectorMetric        vector.MetricKind
 	VectorColumn        string
@@ -45,7 +50,23 @@ type QueryPlan struct {
 // Candidates is the distinct rowid set before original-WHERE verification.
 // BaseRowFetches counts actual source rows read; ReturnedRows excludes OFFSET.
 // FrequencyLookups counts planning probes and also applies to EXPLAIN.
+// ANN counters count logical shadow-record operations and metric calls, not
+// physical page I/O. They include every abandoned/widened search. Exact base
+// rescores are separate from graph distance evaluations. PeakBytes is logical
+// conservative retained-memory accounting, not an allocator/RSS measurement.
 type QueryStats struct {
+	ANNStateReads          int64
+	ANNNodeReads           int64
+	ANNEdgeReads           int64
+	ANNVisited             int64
+	ANNDistanceEvaluations int64
+	ANNIdentityLookups     int64
+	ANNCentroidScores      int64
+	ANNListsOpened         int64
+	ANNMemberKeysRead      int64
+	ANNIterations          int64
+	ANNExactRescores       int64
+	ANNPeakBytes           int64
 	// These count only the recognized exact vector ranking stage. NULL ranks
 	// are separate; components charge its query once and scored candidates.
 	VectorRankedRows     int64
@@ -74,13 +95,17 @@ func (p QueryPlan) Detail() string {
 	var detail string
 	if p.Access != "SEARCH" {
 		detail = fmt.Sprintf("%s %s; reason=%s", p.Access, p.Table, p.Reason)
-	} else {
+	} else if p.Method == "hnsw" || p.Method == "ivfflat" {
+		detail = fmt.Sprintf("SEARCH %s USING %s %s v%d; fields=%s; original_where_recheck=%t; content_rowid_seek=true; approximate_recall=true", p.Table, strings.Join(p.Indexes, ","), p.Method, p.MethodVersion, strings.Join(p.Fields, ","), p.Recheck)
+	} else if p.Method == "grams13" {
 		detail = fmt.Sprintf("SEARCH %s USING %s %s v%d; fields=%s; namespace=%s; grams=%v; estimated_candidates=%d; original_where_recheck=true; covering_posting_ranges=true; content_rowid_seek=true", p.Table, strings.Join(p.Indexes, ","), p.Method, p.MethodVersion, strings.Join(p.Fields, ","), p.Namespace, p.GramLengths, p.EstimatedCandidates)
+	} else {
+		detail = fmt.Sprintf("SEARCH %s USING %s %s v%d; fields=%s; original_where_recheck=%t; reason=%s", p.Table, strings.Join(p.Indexes, ","), p.Method, p.MethodVersion, strings.Join(p.Fields, ","), p.Recheck, p.Reason)
 	}
 	if p.VectorRanking != "" {
 		detail += fmt.Sprintf("; vector_ranking=%s; vector_metric=%s; vector_field=%s; dimensions=%d; retained_limit_plus_offset=%d; exact=%t; distance_order=ASC,rowid_ASC; nulls=FIRST", p.VectorRanking, p.VectorMetric, p.VectorColumn, p.VectorDimensions, p.VectorTopK, p.VectorExact)
 	}
-	return detail
+	return detail + p.annDetail()
 }
 
 type gramLookup struct {

@@ -39,3 +39,16 @@ M5 native route: named grams13 index plus physical field → snapshot-bound cano
 The independently written extension/vector package remains a pure mathematical/codec layer: immutable float32 values, strict text/binary validation, float64-compensated distances and bounded exact candidate scanning. It owns no database or ANN index. The sqlite layer now adds VECTOR(n) enforcement, canonical BLOB mutation and actual SQL/API plans; no ANN is implied.
 
 M6 native route: typed column/closed metric identity → one snapshot → bounded source scan → bound business predicate → strict vector decoding → compensated exact score → bounded Top-K. SQL recognized distance ranking independently wraps the existing SCAN/grams source plan in a bounded LIMIT+OFFSET heap; NULL-first order and fallback sorter semantics are preserved. Typed values validate on reference and canonicalize only on writes. Hybrid text/vector lists share a read Tx before pure-Go RRF. See ADR0008 and vector.md.
+
+## Persistent ANN layer
+
+`extension/vector/ann` is a file-free deterministic graph algorithm over explicit
+snapshot Reader and atomic-statement Writer ports. `sqlite/ann_storage.go` resolves
+node/state/live identities through ordinary B-tree keys; query/open paths never
+load an entire graph. Source data, graph deltas, tombstones, mapping and generation
+commit together through the existing pager. `ann_query.go` performs cumulative
+bounded widening, base identity/WHERE/vector rechecks and exact rescoring; the
+planner exposes approximate recall separately from exact distance. Native exact
+remains default; supported SQL may select ANN with NOT INDEXED as exact override.
+The standalone full consistency checker is intentionally distinct from lazy
+querying. See ADR0009 and ann.md. IVFFlat is not implemented in this slice.

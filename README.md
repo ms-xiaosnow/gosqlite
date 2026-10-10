@@ -1,6 +1,6 @@
 # gosqlite
 
-A native Go database kernel targeting tested subsets of SQLite 3.54.0 files and SQL. Current development milestone: M6 dense VECTOR(n), exact SQL/native KNN and same-snapshot text/vector hybrid ranking. It is not production-ready. No CGO, SQLite subprocess, C ABI, or remote SQL engine is used in production.
+A native Go database kernel targeting tested subsets of SQLite 3.54.0 files and SQL. Current development milestone: first M7 persistent HNSW slice, alongside exact typed-vector KNN and same-snapshot text/vector hybrid ranking. It is not production-ready. No CGO, SQLite subprocess, C ABI, or remote SQL engine is used in production.
 
 ## Try the implemented SQL path
 
@@ -58,7 +58,7 @@ SQLITE_ORACLE=/absolute/path/to/verified/sqlite3 ./scripts/test-oracle.sh
 
 See [progress](docs/progress.md), [compatibility](docs/compatibility.md), [architecture](docs/architecture.md), [sources](docs/upstream.md), and [manual verification](docs/manual-verification.md). The unchanged [original goal](goal.md) remains the contract. [Restart protocol](docs/restart.md) and checkpoint records preserve durable development history.
 
-Qualified crash recovery, HNSW/IVFFlat, independent authenticated encryption and pg_embedding migration remain unfinished milestones. Full SQLite/PostgreSQL semantics, SEE file compatibility and production security are not claimed.
+Qualified crash recovery, IVFFlat, independent authenticated encrypted storage and pg_embedding migration remain unfinished milestones. Full SQLite/PostgreSQL semantics, SEE file compatibility and production security are not claimed.
 
 
 ## Explicit exclusive WAL
@@ -109,3 +109,12 @@ CGO_ENABLED=0 go run ./cmd/gosqlite query disposable-hybrid.db "SELECT id,embedd
 ```
 
 VECTOR(n) mutations validate finite float32 dimensions and persist versioned BLOB values. SQL exposes all four dense distance operators, conversion/dimension/norm functions and bounded exact Top-K for recognized queries. Native DB/Tx.VectorSearch provides exact filtered search and actual plans/counters. Vector and NullVector support database/sql. The example combines text/vector rankings in one snapshot and preserves raw measures plus RRF contributions. This is exact retrieval, with HNSW/IVFFlat still unimplemented. See [vector APIs, SQL boundaries and limits](docs/vector.md).
+
+## Persistent HNSW (experimental)
+
+```sh
+CGO_ENABLED=0 go run ./examples/ann NEW_DISPOSABLE_DB
+CGO_ENABLED=0 go run ./benchmarks/ann -rows 2048 -dims 12 -queries 48 -seed 20261010
+```
+
+Native VectorSearch defaults exact; Mode:sqlite.VectorModeApproximate opts into a matching persistent HNSW index. Eligible SQL distance ORDER BY/LIMIT can automatically choose approximate HNSW once installed; use NOT INDEXED for exact SQL. Plans expose method, approximate recall, graph work, source rescoring, widening and fallback. Transactional insert/update/tombstone/delete/reindex, old grams-file upgrade and ordinary official SQLite interop are tested. The first persistent benchmark met recall@10=1.0 on its fixed dataset but was slower than exact scan; see [ANN behavior and measured limits](docs/ann.md). IVFFlat is not implemented yet.

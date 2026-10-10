@@ -1,0 +1,97 @@
+M7 HNSW focused ordinary implementation evidence; 2026-10-10 UTC
+No physical fault, crash, forced-exit, hot-recovery or damaged-database workflows executed.
+CGO_ENABLED=0 go test -count=1 -v ./extension/vector/ann
+=== RUN   TestConfigCanonicalAndClosedIdentity
+--- PASS: TestConfigCanonicalAndClosedIdentity (0.00s)
+=== RUN   TestAdjacencyValidationAndRoundtrip
+--- PASS: TestAdjacencyValidationAndRoundtrip (0.00s)
+=== RUN   TestDeterministicMultilayerAndSignedTies
+--- PASS: TestDeterministicMultilayerAndSignedTies (0.06s)
+=== RUN   TestTombstonesTraverseAndRowidReuse
+--- PASS: TestTombstonesTraverseAndRowidReuse (0.00s)
+=== RUN   TestAllMetricsAndCosineZeroPolicy
+=== RUN   TestAllMetricsAndCosineZeroPolicy/l2
+=== RUN   TestAllMetricsAndCosineZeroPolicy/l1
+=== RUN   TestAllMetricsAndCosineZeroPolicy/cosine
+=== RUN   TestAllMetricsAndCosineZeroPolicy/negative_inner_product
+--- PASS: TestAllMetricsAndCosineZeroPolicy (0.00s)
+    --- PASS: TestAllMetricsAndCosineZeroPolicy/l2 (0.00s)
+    --- PASS: TestAllMetricsAndCosineZeroPolicy/l1 (0.00s)
+    --- PASS: TestAllMetricsAndCosineZeroPolicy/cosine (0.00s)
+    --- PASS: TestAllMetricsAndCosineZeroPolicy/negative_inner_product (0.00s)
+=== RUN   TestLimitsCancellationAndFailedWriteState
+--- PASS: TestLimitsCancellationAndFailedWriteState (0.01s)
+=== RUN   TestMalformedNodesFailClosed
+--- PASS: TestMalformedNodesFailClosed (0.00s)
+=== RUN   TestDefaultRecallAndReducedDistancePath
+    hnsw_test.go:488: seeded independent Gaussian dataset: rows=2048 dims=12 held_out=48 recall@10=0.997917 mean graph distances=557.67 mean node reads=524.73 exact candidate distances=2048 max_level=3
+    hnsw_test.go:491: memory-store algorithm only: recall@1(ef40)=1.000000 recall@100(ef100)=1.000000 mean ef100 distances=929.08 build=1.925223846s logical vector+adjacency bytes=586724; ANN p50=564.761µs p95=2.266265ms; M6 exact k10 p50=442.637µs p95=906.952µs (wall times are observations, not asserted speedup)
+--- PASS: TestDefaultRecallAndReducedDistancePath (2.08s)
+=== RUN   TestConcurrentSnapshotSearch
+--- PASS: TestConcurrentSnapshotSearch (0.05s)
+=== RUN   TestRejectedConstructionPreservesStateAndStore
+--- PASS: TestRejectedConstructionPreservesStateAndStore (0.00s)
+=== RUN   TestUpdateDeleteAndRebuildRecall
+    mutation_test.go:191: after_mutations: live=659 tombstones=169 recall@10=1.000000 mean graph distances=402.28
+    mutation_test.go:191: after_rebuild: live=659 tombstones=0 recall@10=1.000000 mean graph distances=340.56
+--- PASS: TestUpdateDeleteAndRebuildRecall (0.81s)
+=== RUN   FuzzAdjacencyDecode
+=== RUN   FuzzAdjacencyDecode/seed#0
+--- PASS: FuzzAdjacencyDecode (0.00s)
+    --- PASS: FuzzAdjacencyDecode/seed#0 (0.00s)
+=== RUN   FuzzConfigCanonical
+=== RUN   FuzzConfigCanonical/seed#0
+--- PASS: FuzzConfigCanonical (0.00s)
+    --- PASS: FuzzConfigCanonical/seed#0 (0.00s)
+=== RUN   FuzzBoundedGraphOperations
+=== RUN   FuzzBoundedGraphOperations/seed#0
+--- PASS: FuzzBoundedGraphOperations (0.00s)
+    --- PASS: FuzzBoundedGraphOperations/seed#0 (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector/ann	3.010s
+CGO_ENABLED=0 go test ./sqlite -run '^TestANN' -count=1 -v
+=== RUN   TestANNQueryTypedIdentityRecheck
+--- PASS: TestANNQueryTypedIdentityRecheck (0.00s)
+=== RUN   TestANNQueryNativeExactDefaultAndRealSearch
+--- PASS: TestANNQueryNativeExactDefaultAndRealSearch (0.66s)
+=== RUN   TestANNQueryNativeWideningFallbackAndCumulativeBudgets
+--- PASS: TestANNQueryNativeWideningFallbackAndCumulativeBudgets (0.57s)
+=== RUN   TestANNQueryIndexIdentityAndOptions
+--- PASS: TestANNQueryIndexIdentityAndOptions (0.07s)
+=== RUN   TestANNQuerySQLAliasesOffsetsAndExplain
+--- PASS: TestANNQuerySQLAliasesOffsetsAndExplain (0.74s)
+=== RUN   TestANNQuerySQLNullsFallbackShapesAndLazyErrors
+--- PASS: TestANNQuerySQLNullsFallbackShapesAndLazyErrors (0.16s)
+=== RUN   TestANNQueryAllMetricsAndSignedTies
+--- PASS: TestANNQueryAllMetricsAndSignedTies (0.02s)
+=== RUN   TestANNQueryFallbackComponentsAndRuntimeFailure
+--- PASS: TestANNQueryFallbackComponentsAndRuntimeFailure (0.14s)
+=== RUN   TestANNStorageHNSWLifecycleAndReopen
+--- PASS: TestANNStorageHNSWLifecycleAndReopen (0.86s)
+=== RUN   TestANNStorageLimitsAndStatementRollback
+--- PASS: TestANNStorageLimitsAndStatementRollback (0.01s)
+=== RUN   TestANNStorageFailedBuildAndCosineConstraint
+--- PASS: TestANNStorageFailedBuildAndCosineConstraint (0.00s)
+=== RUN   TestANNStorageConfigSQLAndOptionalFamily
+--- PASS: TestANNStorageConfigSQLAndOptionalFamily (0.02s)
+=== RUN   TestANNStorageConstructionQuotaAtomic
+--- PASS: TestANNStorageConstructionQuotaAtomic (0.00s)
+=== RUN   TestANNStorageNormalSharedWALSnapshot
+--- PASS: TestANNStorageNormalSharedWALSnapshot (0.01s)
+=== RUN   TestANNStorageEmptyTombstoneQuotaAndVectorBits
+--- PASS: TestANNStorageEmptyTombstoneQuotaAndVectorBits (0.02s)
+=== RUN   TestANNStorageFailedReindexPreservesPriorStatement
+--- PASS: TestANNStorageFailedReindexPreservesPriorStatement (0.15s)
+=== RUN   TestANNStorageAllMetricsMultipleIndexes
+--- PASS: TestANNStorageAllMetricsMultipleIndexes (0.02s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	3.470s
+CGO_ENABLED=0 go vet ./sqlite ./extension/vector/ann
+CGO_ENABLED=1 go test -race ./sqlite -run '^TestANN' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	21.036s
+FOCUSED_HNSW_GATES_PASSED
+Post-review fix: cap ANN retained reservation to min(requested K+OFFSET, validated live count). No quotas loosened; exact default unchanged.
+CGO_ENABLED=0 go test ./sqlite -run '^TestANN' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	3.313s
+CGO_ENABLED=0 go vet ./sqlite ./extension/vector/ann
+POST_REVIEW_FOCUSED_GATES_PASSED

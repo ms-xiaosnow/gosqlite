@@ -12,3 +12,16 @@ Production Unicode normalization/casefold dependency for grams13, explicitly per
 ## pgvector v0.8.7 published test fixtures
 
 Public semantic reference pinned to commit f37c13f68b57d2c3472b2214fbcff699d6d34876 at https://github.com/pgvector/pgvector. The unmodified test/sql/vector_type.sql and test/expected/vector_type.out are retained under testdata/pgvector-v0.8.7 with hashes and an independently extracted golden subset. The upstream notice credits portions Copyright (c) 1996–2026 PostgreSQL Global Development Group and portions Copyright (c) 1994 The Regents of the University of California; the exact PostgreSQL-style license is retained in third_party/pgvector-LICENSE. Production vector code is independently written Go; no pgvector C implementation is copied, compiled or invoked. This informational provenance/license check is not the independent M10 legal audit.
+
+## golang.org/x/crypto v0.58.0 and golang.org/x/sys v0.49.0
+
+Experimental memory-only authenticated-record primitives use official Go Authors
+Argon2id from x/crypto at commit8fdf07b3114278fb3b78c1cf1814e08bd851eb4c.
+Its actual package closure imports blake2b and x/sys/cpu; x/sys is pinned to
+commitb6b8557e8e2974925aec7a136ba0e323eedc5f43. Both are BSD-3-Clause; exact
+notices retained in third_party/golang.org-x-crypto-LICENSE and
+third_party/golang.org-x-sys-LICENSE. Official proxy downloads were independently
+SHA256-hashed and verified through Go's checksum database; go.mod/go.sum pin
+versions. No CgoFiles exist in the imported closure. Other optional dependencies
+in upstream go.mod are not imported into this project. This informational
+provenance/license check is not independent legal or cryptographic acceptance.

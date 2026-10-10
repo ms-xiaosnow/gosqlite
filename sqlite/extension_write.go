@@ -12,6 +12,7 @@ import (
 
 	"github.com/ms-xiaosnow/gosqlite/extension/grams13"
 	"github.com/ms-xiaosnow/gosqlite/extension/registry"
+	"github.com/ms-xiaosnow/gosqlite/extension/vector/ann"
 	"github.com/ms-xiaosnow/gosqlite/internal/btree"
 	sqlast "github.com/ms-xiaosnow/gosqlite/internal/sql"
 )
@@ -140,19 +141,36 @@ func (t *Tx) createMethodIndex(ctx context.Context, c *writeCatalog, name, table
 	if len(columns) == 0 || len(columns) > 256 {
 		return fmt.Errorf("%w: extension index requires 1..256 fields", ErrUnsupported)
 	}
-	method, ok := t.db.methods.Lookup(methodName, version)
-	if !ok {
-		return fmt.Errorf("%w: unregistered index method %s version %d", ErrUnsupported, methodName, version)
-	}
 	if len(canonical) > 16384 {
 		return ErrMemoryLimit
 	}
-	instance, err := method.Configure(canonical)
-	if err != nil {
-		return err
-	}
-	if instance == nil || string(instance.Canonical()) != string(canonical) {
-		return fmt.Errorf("%w: noncanonical method configuration", ErrUnsupported)
+	var instance registry.Index
+	var annConfig *ann.Config
+	var err error
+	if methodName == ann.HNSW {
+		if version != ann.MethodVersion {
+			return fmt.Errorf("%w: ANN method version", ErrUnsupported)
+		}
+		cfg, parseErr := ann.ParseConfig(canonical)
+		if parseErr != nil {
+			return parseErr
+		}
+		if cfg.Method != methodName {
+			return ann.ErrConfig
+		}
+		annConfig = &cfg
+	} else {
+		method, ok := t.db.methods.Lookup(methodName, version)
+		if !ok {
+			return fmt.Errorf("%w: unregistered index method %s version %d", ErrUnsupported, methodName, version)
+		}
+		instance, err = method.Configure(canonical)
+		if err != nil {
+			return err
+		}
+		if instance == nil || string(instance.Canonical()) != string(canonical) {
+			return fmt.Errorf("%w: noncanonical method configuration", ErrUnsupported)
+		}
 	}
 	var fields []extensionField
 	seen := map[int]bool{}
@@ -170,17 +188,31 @@ func (t *Tx) createMethodIndex(ctx context.Context, c *writeCatalog, name, table
 		seen[ordinal] = true
 		fields = append(fields, extensionField{int64(len(fields) + 1), tab.columns[ordinal].Name, ordinal})
 	}
+	if annConfig != nil {
+		if len(fields) != 1 {
+			return fmt.Errorf("%w: ANN requires one vector field", ErrUnsupported)
+		}
+		dims, ok := sqlast.VectorDimensions(tab.columns[fields[0].ordinal].Type)
+		if !ok || dims != annConfig.Dimensions {
+			return fmt.Errorf("%w: ANN vector dimensions", ErrMismatch)
+		}
+	}
 	if len(c.extensions.indexes) >= 1024 {
 		return ErrMemoryLimit
 	}
 	if err = t.initializeExtensionStorage(ctx, c); err != nil {
 		return err
 	}
+	if annConfig != nil {
+		if err = t.initializeANNStorage(ctx, c); err != nil {
+			return err
+		}
+	}
 	source, ok := c.extensions.entries[fold(tab.name)]
 	if !ok {
 		return extensionCorrupt("source schema missing")
 	}
-	x := &extensionIndex{name: name, sourceTable: tab.name, sourceHash: extensionHash(source.SQL), method: methodName, methodVersion: version, generation: 1, schemaCookie: t.reader.Header().SchemaCookie, canonical: append([]byte(nil), canonical...), instance: instance, fields: fields, catalog: c.extensions}
+	x := &extensionIndex{name: name, sourceTable: tab.name, sourceHash: extensionHash(source.SQL), method: methodName, methodVersion: version, generation: 1, schemaCookie: t.reader.Header().SchemaCookie, canonical: append([]byte(nil), canonical...), instance: instance, ann: annConfig, fields: fields, catalog: c.extensions}
 	x.id, err = t.insertExtensionRow(ctx, c, extensionCatalogName, x.values(1))
 	if err != nil {
 		return err
@@ -222,6 +254,14 @@ func (t *Tx) ensureExtensionGuards(ctx context.Context, x *extensionIndex) error
 	return nil
 }
 func (t *Tx) buildExtension(ctx context.Context, c *writeCatalog, x *extensionIndex, tab *writeTable) error {
+	if x.ann != nil {
+		if err := t.validateANNField(x, tab); err != nil {
+			return err
+		}
+		if err := newANNWriteStore(t, c, x).putState(ctx, ann.NewState()); err != nil {
+			return err
+		}
+	}
 	cur, err := btree.NewCursor(ctx, t.reader, tab.root)
 	if err != nil {
 		return err
@@ -311,6 +351,9 @@ func extensionKeyPrefix(x *extensionIndex, f extensionField, k registry.Key) []a
 	return []any{x.id, f.id, k.Namespace, int64(k.Length), k.Text}
 }
 func (t *Tx) applyExtensionDelta(ctx context.Context, c *writeCatalog, x *extensionIndex, oldID int64, old []any, newID int64, next []any) error {
+	if x.ann != nil {
+		return t.applyANNDelta(ctx, c, x, oldID, old, newID, next)
+	}
 	for _, f := range x.fields {
 		var oldValue, newValue any
 		if old != nil {
@@ -501,6 +544,14 @@ func (t *Tx) reindexExtension(ctx context.Context, c *writeCatalog, name string)
 	}
 	if err := t.ensureExtensionGuards(ctx, x); err != nil {
 		return err
+	}
+	if x.ann != nil {
+		if err := t.validateANNField(x, tab); err != nil {
+			return err
+		}
+		if err := t.clearANNRows(ctx, c, x); err != nil {
+			return err
+		}
 	}
 	if err := t.clearExtensionRows(ctx, c, x, extensionPostingsName, extensionPostingsLookup, 6); err != nil {
 		return err

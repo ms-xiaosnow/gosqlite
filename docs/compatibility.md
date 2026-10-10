@@ -22,8 +22,9 @@ Behavior baseline: official SQLite 3.54.0. M2 implements a deliberately bounded 
 | grams13 / indexed LIKE | conditional ordinary implementation | legal persistent posting/frequency trees, registry, transactional deltas/reindex, actual LIKE/MATCH candidate plans, diagnostics, external-write invalidation; restricted recovery unverified |
 | similarity / threshold / top-K | conditional ordinary implementation | SQL Dice/Jaccard/Levenshtein, native exact posting-union or scan search, business WHERE, diagnostics and same-snapshot text/vector Go RRF |
 | dense vectors / exact KNN | conditional ordinary implementation | VECTOR(n), strict versioned BLOB writes, native exact search, four distance operators/nine functions, bounded SQL Top-K, driver and ordinary SQLite interop |
-| HNSW / IVFFlat | unsupported | M7 not started |
-| encryption / rekey | unsupported | M8 not started; no SEE file compatibility |
+| HNSW | conditional ordinary first slice | real persisted lazy graph, transactional tombstones/reindex, filtered widening/exact fallback, native explicit approximate and eligible SQL planner; measured recall with slower small-data latency |
+| IVFFlat | unsupported | required M7 implementation remains open; probes reject |
+| encrypted database / rekey | unsupported | M8 memory-only authenticated-record prerequisite exists; database/storage/WAL/rekey/backup code absent; no SEE file compatibility |
 | Neon migration / extended vectors | unsupported | M9 not started |
 | release audits / native OS evidence | unsupported | M10 not started; cross-build success is not native-runtime evidence |
 
@@ -61,3 +62,5 @@ M5 SQL ngram_similarity(a,b,n,metric), bigram_similarity(a,b), and levenshtein(a
 M6 prerequisite vector arithmetic deliberately uses float64 compensated accumulation over finite float32 inputs instead of pgvector's float32/FMA-dependent accumulation. Cosine with zero norm errors, rather than returning NaN or silently skipping rows. Published pgvector v0.8.7 fixtures and independent exact mathematics are references; PostgreSQL/pgvector has not been executed. The independent GSV BLOB is not PostgreSQL binary COPY/wire format. See vector-primitives.md and the fixture manifest.
 
 M6 supports VECTOR(n) dimensions1..16,000, native GSV BLOB canonical mutation, valid external SQLite TEXT/BLOB interpretation, four dense operators and nine conversion/metric functions. A narrow one-ASC-key finite-LIMIT shape uses bounded exact heap ranking; other shapes keep the existing general sorter. SQL NULL-first order differs intentionally from native NULL-candidate exclusion. No pgvector vector equality, PostgreSQL expression grammar, binary COPY/wire or ANN compatibility is claimed. Operators share SQLite's bitwise precedence tier. See vector.md for exact APIs, quotas, plans and external-value behavior. The hybrid example uses one read transaction for text and vector lists.
+
+M7 HNSW supports dimensions1..2000, four matching metric/opclass pairs, immutable construction config and bounded queries. SQL ANN is automatic only for supported NOT NULL vector shapes; NOT INDEXED remains exact. Native default is exact. Tombstones retain immutable vectors; rebuild compacts. Cosine zero source norms reject instead of silently excluding. No PostgreSQL index binary format or identical graph topology is claimed. See ann.md for actual APIs, first persistent performance results and remaining IVFFlat work.

@@ -100,3 +100,48 @@ CGO_ENABLED=0 go run ./examples/vector /new/disposable/hybrid.db
 Tests exercise valid SQLite files, normal transactions and type validation. Official SQL can legally put a wrong-dimension TEXT in VECTOR(n), which SQLite treats as affinity only; testing native rejection is ordinary SQL compatibility, not corruption of SQLite page bytes or physical recovery. Invalid vector mutation inputs fail before publication. No physical fault/tamper/recovery workflow is executed. Complete commands/results are in evidence/m6-driver-oracle-example.txt, m6-review.md and m6-aggregate.txt.
 
 The M5 Library-restored test session lost executor transport before its final result was collected; that uncollected result was not counted. All files/toolchain/bundle remained present. A retained-log rerun completed exit0 with ordinary gates and pinned oracle passing; see evidence/m5-library-restore-recheck.txt. CI also passed for its exact checkpoint. This infrastructure interruption is not a database crash-test result and does not qualify recovery.
+
+## M7 first HNSW ordinary verification
+
+```sh
+./scripts/check.sh
+SQLITE_ORACLE=/absolute/path/to/verified/sqlite3 ./scripts/test-oracle.sh
+CGO_ENABLED=1 SQLITE_ORACLE=/absolute/path/to/verified/sqlite3 go test -race -tags oracle ./internal/testkit -run TestOracleHNSW -count=1
+CGO_ENABLED=0 go test ./extension/vector/ann ./sqlite -run 'HNSW|ANN' -count=1
+CGO_ENABLED=0 go run ./examples/ann /new/disposable/ann.db
+CGO_ENABLED=0 go run ./benchmarks/ann -rows 2048 -dims 12 -queries 48 -seed 20261010
+```
+
+The six-way oracle matrix and pre-ANN grams fixture upgrade use valid SQL,
+normal transactions/close/reopen/checkpoint and official integrity_check. No
+physical crash/tamper/recovery is involved. Persistent benchmark data is
+synthetic and seeded; metrics and slower observed latency are preserved in
+evidence/m7-hnsw-persistent-benchmark.json. The source fixture is copied before
+write and checked by SHA256. ANN format/source-negative checks use memory models
+or normal legal SQL, not damaged disk images. Full M7 still requires IVFFlat code.
+Physical durability and independent release gates remain BLOCKED/NOT_RUN.
+
+M6 Library restore completed all ordinary checks and pinned oracle, exit0 at
+2026-10-10T11:43:34Z; evidence/m6-library-restore-recheck.txt. Remote CI passed
+for the exact M6 checkpoint. These results do not qualify physical recovery.
+
+## M8 memory-only prerequisite verification
+
+```sh
+CGO_ENABLED=0 go test -count=1 ./encryption
+CGO_ENABLED=1 go test -race -count=1 ./encryption
+CGO_ENABLED=0 go vet ./encryption
+CGO_ENABLED=0 go test -tags purego -count=1 ./encryption
+CGO_ENABLED=0 go test -count=1 golang.org/x/crypto/argon2 -run '^TestArgon2$'
+CGO_ENABLED=0 go test ./encryption -run '^$' -fuzz '^FuzzHeaderCodec$' -fuzztime=10s -parallel=2
+CGO_ENABLED=0 go test ./encryption -run '^$' -fuzz '^FuzzRecordFraming$' -fuzztime=10s -parallel=2
+CGO_ENABLED=0 go test ./encryption -run '^$' -fuzz '^FuzzAuthenticatedRecord$' -fuzztime=10s -parallel=2
+```
+
+All are actual executed permitted memory/standard-vector gates; final command
+results/hashes in evidence/m8-primitives.txt. Fuzz campaigns total1400866
+executions. Password package tests use production minimum64MiB/3passes; the
+separate dependency command runs its own RFC standard vectors. No database
+file I/O or physical tamper/crash/recovery workflow exists in the tested package.
+Encrypted storage/rekey/backup integration remains required unimplemented code;
+these results are not an independent cryptographic audit or M8 acceptance.

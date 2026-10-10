@@ -96,5 +96,18 @@
     "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38047806226",
     "remote_ci_status": "PASSED for exact SHA, observed 2026-10-10T11:24:01Z; ordinary-only",
     "open_gates": "M5 database vector/text fusion and M6 SQL/persistence are required code gaps; broader recovery/platform implementation, restricted physical durability and independent release gates remain open"
+  },
+  {
+    "stage": "M6 ordinary typed vectors/exact KNN and M5 same-snapshot hybrid integration",
+    "remote_commit": "14865c9798b62583323c4285fd064ecfea67c62c",
+    "local_commit": "14865c9798b62583323c4285fd064ecfea67c62c",
+    "tree": "810a5cdf8915efbf06cfcc7f11c000368b57f914",
+    "bundle_sha256": "fb059c141fbbaf4808141d8d29f3359c346e1f2eee0425d738ff827af4b8b371",
+    "library_file_id": "libfile_82095838b3a88191b185d2fa1daf0ec6",
+    "library_version": 0,
+    "verified": "Guarded remote ref and commit readback; exact local mirror; full-history bundle verify; Library byte-identical readback; clean restore/fsck; restored scripts/check.sh ordinary unit/vet/build/race and complete pinned SQLite3.54 oracle passed, retained exit0 at2026-10-10T11:43:34Z",
+    "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38048914433",
+    "remote_ci_status": "PASSED for exact SHA, observed 2026-10-10T11:41:14Z; ordinary-only",
+    "open_gates": "HNSW/IVFFlat, authenticated encrypted storage, migration and broader recovery/platform implementations remain required code; restricted physical durability and independent release gates remain open"
   }
 ]

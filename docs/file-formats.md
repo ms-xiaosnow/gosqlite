@@ -2,7 +2,7 @@
 
 M2 reads and writes the tested rowid-table and BINARY ASC secondary-index subset of SQLite format 3, according to the [official specification](https://www.sqlite.org/fileformat2.html), with tested subsets recorded in compatibility.md. Future extension data must occupy legal transactional SQLite structures. Unknown feature bits, container versions, encodings, and index versions must be rejected instead of guessed.
 
-Encrypted target: independent authenticated container, distinct from SQLite plaintext and SEE. No encrypted format is currently frozen or supported. Every format change requires an ADR, preserved snapshot, explicit migration and round-trip verification.
+Encrypted target: independent authenticated container, distinct from SQLite plaintext and SEE. A memory-only experimental record codec now exists, but no encrypted database format is frozen or supported. Every format change requires an ADR, preserved snapshot, explicit migration and round-trip verification.
 
 ## M2 plaintext writes
 
@@ -36,3 +36,32 @@ Exact source-table guard triggers mark indices dirty under official SQLite DML; 
 ## M6 dense-vector value codec and SQL storage
 
 The pure mathematical vector package encodes one value as12+4×dimension bytes: GSV\x00 magic; version1; float-format1; byte-order1 (big-endian); zero flags; uint32 dimension; big-endian IEEE754 float32 bit patterns. Dimensions are1..16,000 and every component must be finite. Signed zero/subnormal bits are preserved. Unknown encoding versions/flags, incorrect exact length and nonfinite components reject. There is no checksum/authentication and no PostgreSQL wire compatibility. Native VECTOR(n) INSERT/UPDATE now validates declared dimensions and canonicalizes to this BLOB inside the same statement/transaction as ordinary rows and extension indices. The legal VECTOR(n) declaration is stored in sqlite_schema. Valid externally written SQLite TEXT/BLOB is interpreted with strict dimension checks; raw read storage class is preserved until native rewrite. See vector-primitives.md and the pinned fixture manifest.
+
+## M7 optional ANN family version1
+
+The original seven grams schemas are unchanged. The optional complete eleven-
+object ANN family consists of state/nodes/live/centroids/members tables and six
+lookup B-trees. Absent family is legal for older grams-only files; partial or
+unrecognized owned objects reject. First HNSW creation initializes the family
+transactionally. Catalog config binds method/version, dimensions, metric/opclass,
+seed, construction policy and limits with strict canonical bytes. State tracks
+entry, top level, next immutable identity, live/tombstone counts. Each node stores
+original GSV bytes and strict versioned adjacency; live source-rowid mapping is
+separate. Physical table rowids are not content rowids or graph identities.
+Centroids/members remain empty in HNSW and are checked accordingly.
+
+No custom SQLite page type is introduced. Ordinary official SQLite can preserve
+these structures and execute their source invalidation guards, but cannot query
+HNSW itself. Normal creation/mutation/rebuild/rollback/reopen/checkpoint and actual
+pre-ANN file upgrade are tested. Interrupted publication/recovery and future
+format migration are not qualified. Reindex keeps the immutable configuration;
+future IVF support must preserve HNSW canonical serialization exactly.
+
+## M8 experimental memory-only records
+
+The encryption package defines an experimental512-byte GSQLENC1 bootstrap and
+24-byte authenticated-record header plus AES256GCM ciphertext/tag. This is not
+a supported encrypted database container: root manifest, complete file layout,
+WAL directory/commit authority, backup/rekey/publication remain unimplemented.
+See encryption-primitives.md for exact scope and source-format offsets. No
+existing plaintext database is transformed or encrypted by this package.

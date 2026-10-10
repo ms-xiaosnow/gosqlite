@@ -1,0 +1,67 @@
+Sat Oct 10 11:35:21 UTC 2026
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.033s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.614s
+?   	github.com/ms-xiaosnow/gosqlite/examples/grams	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/readonly	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/similarity	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/vector	0.154s
+?   	github.com/ms-xiaosnow/gosqlite/examples/wal	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/write	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/extension/grams13	1.054s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/registry	0.063s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/similarity	2.135s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	0.311s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	11.292s
+?   	github.com/ms-xiaosnow/gosqlite/internal/buildinfo	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/journal	0.036s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.188s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/record	0.008s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.091s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/wal	0.693s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	0.126s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	42.864s
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	1.084s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	2.788s
+?   	github.com/ms-xiaosnow/gosqlite/examples/grams	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/readonly	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/similarity	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/vector	1.674s
+?   	github.com/ms-xiaosnow/gosqlite/examples/wal	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/write	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/extension/grams13	4.504s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/registry	1.296s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/similarity	9.923s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	2.427s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	42.529s
+?   	github.com/ms-xiaosnow/gosqlite/internal/buildinfo	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/journal	1.160s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.652s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/record	1.038s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	1.219s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/wal	5.916s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	2.464s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	252.636s
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.096s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.632s
+?   	github.com/ms-xiaosnow/gosqlite/examples/grams	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/readonly	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/similarity	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/vector	0.217s
+?   	github.com/ms-xiaosnow/gosqlite/examples/wal	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/write	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/extension/grams13	1.415s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/registry	0.112s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/similarity	2.589s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	0.319s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	17.428s
+?   	github.com/ms-xiaosnow/gosqlite/internal/buildinfo	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/journal	0.045s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.422s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/record	0.007s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.308s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	141.097s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/wal	0.570s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	0.121s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	61.254s
+M6_LIBRARY_RESTORE_ORDINARY_PASSED
+Sat Oct 10 11:43:34 UTC 2026

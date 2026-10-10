@@ -69,6 +69,9 @@ func (d *DB) checkExtensionIndex(ctx context.Context, reader btree.PageReader, n
 	if !x.usable {
 		return fmt.Errorf("%w: %s", ErrReindexRequired, x.fallback)
 	}
+	if x.ann != nil {
+		return d.checkANNIndex(ctx, reader, x)
+	}
 	source := c.entries[fold(x.sourceTable)]
 	parsed, err := sqlast.Parse(source.SQL)
 	if err != nil {

@@ -12,22 +12,31 @@ import (
 	sqlast "github.com/ms-xiaosnow/gosqlite/internal/sql"
 )
 
-// VectorSearchOptions selects exact dense Top-K over one VECTOR(n) column.
+// VectorSearchOptions selects dense Top-K over one VECTOR(n) column.
+// The default Mode is exact. Approximate mode uses a matching persistent ANN
+// index and exact base-row rescoring; exact distances do not imply exact recall.
 // Empty Metric means L2; only builtin MetricKind values are accepted. Where is
 // one supported SQL expression evaluated before candidate vector decoding and
 // scoring. Args follow Query binding rules. Limit is required; zero validates
 // query/options without reading source rows. A zero Limits uses the bounded
 // defaults; other limits must be complete. All fetched rows, including filtered
-// and NULL rows, count against MaxCandidates. No ANN index is used.
+// and NULL rows, count against MaxCandidates, including an abandoned ANN
+// attempt before an exact fallback. MaxComponents also charges graph distances.
 type VectorSearchOptions struct {
-	Metric vector.MetricKind
-	Limit  int
-	Where  string
-	Args   []any
-	Limits vector.SearchLimits
+	Mode                  VectorSearchMode
+	Index                 string
+	EFSearch, MaxEFSearch int
+	// Probes are reserved for IVFFlat and currently return unsupported.
+	Probes, MaxProbes int
+	ANNLimits         ANNWorkLimits
+	Metric            vector.MetricKind
+	Limit             int
+	Where             string
+	Args              []any
+	Limits            vector.SearchLimits
 }
 
-// VectorPlan identifies an exact full scan, never an ANN or a vector index.
+// VectorPlan identifies the actual completed access and recall mode.
 // Native search excludes NULL vector candidates. SQL ORDER BY instead keeps
 // SQLite's NULL-first ascending ordering.
 type VectorPlan struct {
@@ -40,12 +49,14 @@ type VectorPlan struct {
 }
 
 func (p VectorPlan) Detail() string {
-	return fmt.Sprintf("%s %s; vector_field=%s; vector_metric=%s; dimensions=%d; limit=%d; exact=%t; distance_order=ASC,rowid_ASC; null_candidates=excluded; reason=%s", p.Access, p.Table, p.Field, p.Metric, p.Dimensions, p.Limit, p.Exact, p.Reason)
+	return fmt.Sprintf("%s %s; vector_field=%s; vector_metric=%s; dimensions=%d; limit=%d; exact=%t; distance_order=ASC,rowid_ASC; null_candidates=excluded; reason=%s", p.Access, p.Table, p.Field, p.Metric, p.Dimensions, p.Limit, p.Exact, p.Reason) + fmt.Sprintf("; method=%s; indexes=%v", p.Method, p.Indexes) + p.annDetail()
 }
 
 // VectorStats reports actual source/ranking work, not B-tree page I/O.
 // ScoredComponents charges the validated query once and every scored candidate.
-// Where evaluation and scalar projection work are outside this ranking counter.
+// ANNDistanceEvaluations * Dimensions reports additional graph components.
+// Both are charged against Limits.MaxComponents. Where evaluation and scalar
+// projection work are outside this ranking counter.
 type VectorStats struct {
 	QueryStats
 	FilteredRows     int64
@@ -152,6 +163,10 @@ func vectorQueryValue(ctx context.Context, query any) (any, error) {
 }
 
 func (d *DB) vectorSearch(ctx context.Context, reader btree.PageReader, tableName, fieldName string, query any, options VectorSearchOptions) (VectorResult, error) {
+	options, err := normalizeVectorANNOptions(options)
+	if err != nil {
+		return VectorResult{}, err
+	}
 	limits, err := vectorLimits(options.Limits)
 	if err != nil {
 		return VectorResult{}, err
@@ -219,6 +234,15 @@ func (d *DB) vectorSearch(ctx context.Context, reader btree.PageReader, tableNam
 		result.Plan.Access, result.Plan.Reason = "EMPTY", "zero limit; query validated without source reads"
 		return result, nil
 	}
+	if options.Mode == VectorModeApproximate {
+		done, err := d.vectorSearchANN(ctx, reader, tab, ordinal, q, options, limits, filter, &result)
+		if err != nil {
+			return VectorResult{}, err
+		}
+		if done {
+			return result, nil
+		}
+	}
 	// Reserve result/query memory, then bound duplicate-row identity storage.
 	// This conservative retained-memory accounting never silently truncates rows.
 	reserve := int64(options.Limit)*128 + int64(dims)*4
@@ -235,6 +259,13 @@ func (d *DB) vectorSearch(ctx context.Context, reader btree.PageReader, tableNam
 	}
 	defer src.Close()
 	valuesHelper := &writeTable{table: tab}
+	remaining := limits
+	remaining.MaxCandidates -= int(result.Stats.BaseRowFetches)
+	usedComponents := uint64(result.Stats.ScoredComponents) + uint64(result.Stats.ANNDistanceEvaluations)*uint64(dims)
+	if remaining.MaxCandidates < 1 || usedComponents > limits.MaxComponents {
+		return VectorResult{}, fmt.Errorf("%w: cumulative vector work", vector.ErrLimit)
+	}
+	remaining.MaxComponents = limits.MaxComponents - usedComponents + uint64(dims)
 	scanned, err := vector.Scan(ctx, q, func(ctx context.Context) (vector.Row, bool, error) {
 		id, raw, err := src.Next()
 		if err == io.EOF {
@@ -276,14 +307,14 @@ func (d *DB) vectorSearch(ctx context.Context, reader btree.PageReader, tableNam
 			result.Stats.NullRows++
 		}
 		return vector.Row{RowID: id, Vector: candidate, Null: null}, true, nil
-	}, vector.SearchOptions{Metric: metric, Limit: options.Limit, Limits: limits})
+	}, vector.SearchOptions{Metric: metric, Limit: options.Limit, Limits: remaining})
 	closeErr := src.Close()
 	if err = errors.Join(err, closeErr); err != nil {
 		return VectorResult{}, err
 	}
 	result.Hits = scanned.Hits
-	result.Stats.ScoredRows = int64(scanned.Stats.Scored)
-	result.Stats.ScoredComponents += result.Stats.ScoredRows * int64(dims)
+	result.Stats.ScoredRows += int64(scanned.Stats.Scored)
+	result.Stats.ScoredComponents += int64(scanned.Stats.Scored) * int64(dims)
 	result.Stats.ReturnedRows = int64(len(result.Hits))
 	return result, nil
 }

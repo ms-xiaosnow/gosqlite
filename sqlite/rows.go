@@ -180,157 +180,170 @@ func (r *Rows) fetch() (resultRow, int64, error) {
 		if err != nil {
 			return resultRow{}, 0, err
 		}
-		if r.table != nil {
-			r.queryStats.BaseRowFetches++
-			if r.vectorRank != nil && r.queryStats.BaseRowFetches > int64(r.vectorRank.limits.MaxCandidates) {
-				return resultRow{}, 0, fmt.Errorf("%w: vector source candidates", vector.ErrLimit)
-			}
+		row, cost, keep, err := r.evaluateSourceRow(rowid, values)
+		if err != nil {
+			return resultRow{}, 0, err
 		}
-		rawCost := valuesSize(values)
-		if r.table != nil {
-			if len(values) > len(r.table.columns) {
-				return resultRow{}, 0, fmt.Errorf("%w: record has too many columns", ErrCorrupt)
-			}
-			for len(values) < len(r.table.columns) {
-				c := r.table.columns[len(values)]
-				var v any
-				if c.Default != nil {
-					if !isConstantDefault(c.Default) {
-						return resultRow{}, 0, fmt.Errorf("%w: missing column has a non-literal default", ErrUnsupported)
-					}
-					v, err = sqlast.Eval(c.Default, &sqlast.EvalContext{Context: r.ctx})
-					if err != nil {
-						return resultRow{}, 0, err
-					}
-					v, err = storedColumnValue(v, c.Type)
-					if err != nil {
-						return resultRow{}, 0, err
-					}
+		if keep {
+			return row, cost, nil
+		}
+	}
+}
+
+// evaluateSourceRow is shared by scans and ANN base-row rechecks. WHERE runs
+// before vector decoding/scoring; aliases and projection retain one pipeline.
+func (r *Rows) evaluateSourceRow(rowid int64, values []any) (resultRow, int64, bool, error) {
+	var err error
+	if r.table != nil {
+		r.queryStats.BaseRowFetches++
+		if r.vectorRank != nil && r.queryStats.BaseRowFetches > int64(r.vectorRank.limits.MaxCandidates) {
+			return resultRow{}, 0, false, fmt.Errorf("%w: vector source candidates", vector.ErrLimit)
+		}
+	}
+	rawCost := valuesSize(values)
+	if r.table != nil {
+		if len(values) > len(r.table.columns) {
+			return resultRow{}, 0, false, fmt.Errorf("%w: record has too many columns", ErrCorrupt)
+		}
+		for len(values) < len(r.table.columns) {
+			c := r.table.columns[len(values)]
+			var v any
+			if c.Default != nil {
+				if !isConstantDefault(c.Default) {
+					return resultRow{}, 0, false, fmt.Errorf("%w: missing column has a non-literal default", ErrUnsupported)
 				}
-				values = append(values, v)
+				v, err = sqlast.Eval(c.Default, &sqlast.EvalContext{Context: r.ctx})
+				if err != nil {
+					return resultRow{}, 0, false, err
+				}
+				v, err = storedColumnValue(v, c.Type)
+				if err != nil {
+					return resultRow{}, 0, false, err
+				}
 			}
-			if r.table.ipk >= 0 {
-				values[r.table.ipk] = rowid
-			}
-			for i, c := range r.table.columns {
-				if affinity(c.Type) == "REAL" {
-					if n, ok := values[i].(int64); ok {
-						values[i] = float64(n)
-					}
+			values = append(values, v)
+		}
+		if r.table.ipk >= 0 {
+			values[r.table.ipk] = rowid
+		}
+		for i, c := range r.table.columns {
+			if affinity(c.Type) == "REAL" {
+				if n, ok := values[i].(int64); ok {
+					values[i] = float64(n)
 				}
 			}
 		}
-		ec := &sqlast.EvalContext{Context: r.ctx, Params: r.params, Functions: r.functions}
-		ec.Resolver = func(q, name string) (any, error) {
-			i, err := r.table.column(q, name)
-			if err != nil {
-				return nil, err
-			}
-			if i < 0 {
-				return rowid, nil
-			}
-			return columnValue(values[i], r.table.columns[i].Type)
+	}
+	ec := &sqlast.EvalContext{Context: r.ctx, Params: r.params, Functions: r.functions}
+	ec.Resolver = func(q, name string) (any, error) {
+		i, err := r.table.column(q, name)
+		if err != nil {
+			return nil, err
 		}
-		ec.Affinity = func(q, name string) string {
-			i, err := r.table.column(q, name)
-			if err != nil {
-				return ""
-			}
-			if i < 0 {
-				return "INTEGER"
-			}
-			return affinity(r.table.columns[i].Type)
+		if i < 0 {
+			return rowid, nil
 		}
-		// WHERE accepts result aliases only when no physical column shadows
-		// them. Their expressions were already bound against the source.
-		physicalResolver, physicalAffinity := ec.Resolver, ec.Affinity
+		return columnValue(values[i], r.table.columns[i].Type)
+	}
+	ec.Affinity = func(q, name string) string {
+		i, err := r.table.column(q, name)
+		if err != nil {
+			return ""
+		}
+		if i < 0 {
+			return "INTEGER"
+		}
+		return affinity(r.table.columns[i].Type)
+	}
+	// WHERE accepts result aliases only when no physical column shadows
+	// them. Their expressions were already bound against the source.
+	physicalResolver, physicalAffinity := ec.Resolver, ec.Affinity
+	ec.Resolver = func(q, name string) (any, error) {
+		value, err := physicalResolver(q, name)
+		if err == nil || q != "" {
+			return value, err
+		}
+		if i, ok := r.aliases[fold(name)]; ok {
+			return sqlast.Eval(r.exprs[i], &sqlast.EvalContext{Context: r.ctx, Params: r.params, Resolver: physicalResolver, Affinity: physicalAffinity, Functions: r.functions})
+		}
+		return nil, err
+	}
+	ec.Affinity = func(q, name string) string {
+		if _, err := r.table.column(q, name); err == nil {
+			return physicalAffinity(q, name)
+		}
+		if q == "" {
+			if i, ok := r.aliases[fold(name)]; ok {
+				if c, ok := r.exprs[i].(*sqlast.Column); ok {
+					return physicalAffinity(c.Table, c.Name)
+				}
+			}
+		}
+		return ""
+	}
+	if r.sel.Where != nil {
+		value, err := sqlast.Eval(r.sel.Where, ec)
+		if err != nil {
+			return resultRow{}, 0, false, err
+		}
+		truth, isNull := sqlast.Truth(value)
+		if isNull || !truth {
+			if r.vectorRank != nil {
+				r.queryStats.VectorFilteredRows++
+			}
+			return resultRow{}, 0, false, nil
+		}
+	}
+	var distance any
+	if r.vectorRank != nil {
+		distance, err = r.vectorRank.score(r, values[r.vectorRank.ordinal])
+		if err != nil {
+			return resultRow{}, 0, false, err
+		}
+	}
+	row := resultRow{values: make([]any, len(r.exprs)), rowid: rowid}
+	for i, e := range r.exprs {
+		if r.vectorRank != nil && r.order[0].column == i {
+			row.values[i] = distance
+			continue
+		}
+		row.values[i], err = sqlast.Eval(e, ec)
+		if err != nil {
+			return resultRow{}, 0, false, err
+		}
+	}
+	if r.vectorRank != nil {
+		row.keys = []any{distance}
+	} else if len(r.order) > 0 {
+		// Only a bare ORDER BY alias takes precedence over source
+		// columns (resolved to a result position by the planner). Nested
+		// expressions bind source columns first, then result aliases.
 		ec.Resolver = func(q, name string) (any, error) {
-			value, err := physicalResolver(q, name)
+			v, err := physicalResolver(q, name)
 			if err == nil || q != "" {
-				return value, err
+				return v, err
 			}
 			if i, ok := r.aliases[fold(name)]; ok {
-				return sqlast.Eval(r.exprs[i], &sqlast.EvalContext{Context: r.ctx, Params: r.params, Resolver: physicalResolver, Affinity: physicalAffinity, Functions: r.functions})
+				return row.values[i], nil
 			}
 			return nil, err
 		}
-		ec.Affinity = func(q, name string) string {
-			if _, err := r.table.column(q, name); err == nil {
-				return physicalAffinity(q, name)
-			}
-			if q == "" {
-				if i, ok := r.aliases[fold(name)]; ok {
-					if c, ok := r.exprs[i].(*sqlast.Column); ok {
-						return physicalAffinity(c.Table, c.Name)
-					}
-				}
-			}
-			return ""
-		}
-		if r.sel.Where != nil {
-			value, err := sqlast.Eval(r.sel.Where, ec)
-			if err != nil {
-				return resultRow{}, 0, err
-			}
-			truth, isNull := sqlast.Truth(value)
-			if isNull || !truth {
-				if r.vectorRank != nil {
-					r.queryStats.VectorFilteredRows++
-				}
-				continue
-			}
-		}
-		var distance any
-		if r.vectorRank != nil {
-			distance, err = r.vectorRank.score(r, values[r.vectorRank.ordinal])
-			if err != nil {
-				return resultRow{}, 0, err
-			}
-		}
-		row := resultRow{values: make([]any, len(r.exprs)), rowid: rowid}
-		for i, e := range r.exprs {
-			if r.vectorRank != nil && r.order[0].column == i {
-				row.values[i] = distance
-				continue
-			}
-			row.values[i], err = sqlast.Eval(e, ec)
-			if err != nil {
-				return resultRow{}, 0, err
-			}
-		}
-		if r.vectorRank != nil {
-			row.keys = []any{distance}
-		} else if len(r.order) > 0 {
-			// Only a bare ORDER BY alias takes precedence over source
-			// columns (resolved to a result position by the planner). Nested
-			// expressions bind source columns first, then result aliases.
-			ec.Resolver = func(q, name string) (any, error) {
-				v, err := physicalResolver(q, name)
-				if err == nil || q != "" {
-					return v, err
-				}
-				if i, ok := r.aliases[fold(name)]; ok {
-					return row.values[i], nil
-				}
-				return nil, err
-			}
 
-			row.keys = make([]any, len(r.order))
-			for i, o := range r.order {
-				if o.column >= 0 {
-					row.keys[i] = row.values[o.column]
-				} else {
-					row.keys[i], err = sqlast.Eval(o.expr, ec)
-					if err != nil {
-						return resultRow{}, 0, err
-					}
+		row.keys = make([]any, len(r.order))
+		for i, o := range r.order {
+			if o.column >= 0 {
+				row.keys[i] = row.values[o.column]
+			} else {
+				row.keys[i], err = sqlast.Eval(o.expr, ec)
+				if err != nil {
+					return resultRow{}, 0, false, err
 				}
 			}
 		}
-		// Charge the original record too: derived substrings can retain its backing
-		// storage. Over-counting is deliberate, so the quota fails conservatively.
-		return row, 192 + 2*(rawCost+valuesSize(row.values)+valuesSize(row.keys)), nil
 	}
+	// Charge the original record too: derived substrings can retain its backing
+	// storage. Over-counting is deliberate, so the quota fails conservatively.
+	return row, 192 + 2*(rawCost+valuesSize(row.values)+valuesSize(row.keys)), true, nil
 }
 
 func valuesSize(values []any) int64 {

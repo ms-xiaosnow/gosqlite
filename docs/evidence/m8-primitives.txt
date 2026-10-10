@@ -1,0 +1,170 @@
+Experimental encryption/ memory-only prerequisite final evidence
+No database path operations, damaged database files, fault/crash/recovery tests, process spawning/termination, or storage integration in the package/tests.
+Date:
+Sat Oct 10 11:55:19 UTC 2026
+go version go1.27.2 linux/amd64
+Working directory:
+/workspace/scratch/5e06a74e5f65/durable-restart/gosqlite
+Source SHA-256:
+355dd1f5a504b270611f448440a88b38caa7cab0f8dddc26d447d1dcd312b821  encryption/doc.go
+7afb22737ab443a5b6dce8bb8062fa928ec9a4c36b882a7f009a091ede4adb27  encryption/errors.go
+ec712e053e32b7c5d5e323f82fcb9eae1b0da1a3e9668215a3790d4a8a3f86c4  encryption/format.go
+55d607b87fd66c1428d35a527166850f10c3e74110103caf451d07f40bf1d9f2  encryption/format_test.go
+6d45dde2da4cb19162c0126fd4f850ff63ccd0f6e49ef93a3e370319e35de266  encryption/kdf.go
+bcc56e630a263954a2f01dc8e22a22fd6030d6eed5a58b75411d3d32d5c4ffea  encryption/key.go
+079dcc578c08ae16ee5a556d9ddd9e77dee8e5d86d0e7ecb58f4154a55442033  encryption/key_test.go
+6f887e2ab32835bec9a7f15b1b7fe828e0e87b723f5bc136364c78e068359957  encryption/record.go
+b76245594792ffbc057a4de2cd016d9c31ad22319a2dd2a41e7095fef9db8c49  encryption/record_test.go
+Production file concatenation SHA-256 (doc/errors/format/kdf/key/record, lexical path order):
+87237237f0801c304e7827fb5d3e1453ac74b76918ea26a9cee671e412b59a55  -
+All encryption Go files concatenation SHA-256 (lexical path order):
+f20084a59bfefe70cfb29bdf4da030aab777d550a80a30d59649c302dd09aa2c  -
+Declared test/fuzz counts:
+20
+3
++ CGO_ENABLED=0 go test -count=1 -v ./encryption
+=== RUN   TestExperimentalHeaderVector
+--- PASS: TestExperimentalHeaderVector (0.00s)
+=== RUN   TestStrictHeaderBounds
+--- PASS: TestStrictHeaderBounds (0.00s)
+=== RUN   TestRecordHeaderAndReaderBounds
+--- PASS: TestRecordHeaderAndReaderBounds (0.00s)
+=== RUN   TestMalformedInputsBounded
+--- PASS: TestMalformedInputsBounded (0.01s)
+=== RUN   TestAES256GCMKnownAnswer
+--- PASS: TestAES256GCMKnownAnswer (0.00s)
+=== RUN   TestHKDFKnownAnswer
+--- PASS: TestHKDFKnownAnswer (0.00s)
+=== RUN   TestArgonProductionCostsAndRawSeparation
+--- PASS: TestArgonProductionCostsAndRawSeparation (0.58s)
+=== RUN   TestPasswordAuthenticationAndSaltBinding
+--- PASS: TestPasswordAuthenticationAndSaltBinding (0.23s)
+=== RUN   TestPostArgonCancellationReturnsNoKey
+--- PASS: TestPostArgonCancellationReturnsNoKey (0.08s)
+=== RUN   TestArgonParametersRejectBeforeProvider
+--- PASS: TestArgonParametersRejectBeforeProvider (0.00s)
+=== RUN   TestProviderReleaseAndRedaction
+=== RUN   TestProviderReleaseAndRedaction/failure_with_material
+=== RUN   TestProviderReleaseAndRedaction/failure_without_material
+=== RUN   TestProviderReleaseAndRedaction/nil_material
+=== RUN   TestProviderReleaseAndRedaction/wrong_mode
+=== RUN   TestProviderReleaseAndRedaction/empty
+=== RUN   TestProviderReleaseAndRedaction/short
+=== RUN   TestProviderReleaseAndRedaction/long
+=== RUN   TestProviderReleaseAndRedaction/huge
+=== RUN   TestProviderReleaseAndRedaction/success
+--- PASS: TestProviderReleaseAndRedaction (0.00s)
+    --- PASS: TestProviderReleaseAndRedaction/failure_with_material (0.00s)
+    --- PASS: TestProviderReleaseAndRedaction/failure_without_material (0.00s)
+    --- PASS: TestProviderReleaseAndRedaction/nil_material (0.00s)
+    --- PASS: TestProviderReleaseAndRedaction/wrong_mode (0.00s)
+    --- PASS: TestProviderReleaseAndRedaction/empty (0.00s)
+    --- PASS: TestProviderReleaseAndRedaction/short (0.00s)
+    --- PASS: TestProviderReleaseAndRedaction/long (0.00s)
+    --- PASS: TestProviderReleaseAndRedaction/huge (0.00s)
+    --- PASS: TestProviderReleaseAndRedaction/success (0.00s)
+=== RUN   TestBudgetCopiesAndCancellation
+--- PASS: TestBudgetCopiesAndCancellation (0.00s)
+=== RUN   TestEpochFreshnessAndEntropyFailure
+--- PASS: TestEpochFreshnessAndEntropyFailure (0.00s)
+=== RUN   TestMemoryRecordsAllRoles
+=== RUN   TestMemoryRecordsAllRoles/1
+=== RUN   TestMemoryRecordsAllRoles/2
+=== RUN   TestMemoryRecordsAllRoles/3
+=== RUN   TestMemoryRecordsAllRoles/4
+--- PASS: TestMemoryRecordsAllRoles (0.00s)
+    --- PASS: TestMemoryRecordsAllRoles/1 (0.00s)
+    --- PASS: TestMemoryRecordsAllRoles/2 (0.00s)
+    --- PASS: TestMemoryRecordsAllRoles/3 (0.00s)
+    --- PASS: TestMemoryRecordsAllRoles/4 (0.00s)
+=== RUN   TestTamperEveryHeaderAndRecordByteInMemory
+--- PASS: TestTamperEveryHeaderAndRecordByteInMemory (0.00s)
+=== RUN   TestWrongKeyAndAuthenticatedSubstitution
+--- PASS: TestWrongKeyAndAuthenticatedSubstitution (0.00s)
+=== RUN   TestRoleSubkeysIndependentlySeparate
+--- PASS: TestRoleSubkeysIndependentlySeparate (0.00s)
+=== RUN   TestWriterFreshIdentityAndNoResume
+--- PASS: TestWriterFreshIdentityAndNoResume (0.00s)
+=== RUN   TestWriterErrorsPoisonCopies
+--- PASS: TestWriterErrorsPoisonCopies (0.00s)
+=== RUN   TestConcurrentHandleCopies
+--- PASS: TestConcurrentHandleCopies (0.00s)
+=== RUN   FuzzHeaderCodec
+=== RUN   FuzzHeaderCodec/seed#0
+=== RUN   FuzzHeaderCodec/seed#1
+=== RUN   FuzzHeaderCodec/seed#2
+--- PASS: FuzzHeaderCodec (0.00s)
+    --- PASS: FuzzHeaderCodec/seed#0 (0.00s)
+    --- PASS: FuzzHeaderCodec/seed#1 (0.00s)
+    --- PASS: FuzzHeaderCodec/seed#2 (0.00s)
+=== RUN   FuzzRecordFraming
+=== RUN   FuzzRecordFraming/seed#0
+=== RUN   FuzzRecordFraming/seed#1
+=== RUN   FuzzRecordFraming/seed#2
+--- PASS: FuzzRecordFraming (0.00s)
+    --- PASS: FuzzRecordFraming/seed#0 (0.00s)
+    --- PASS: FuzzRecordFraming/seed#1 (0.00s)
+    --- PASS: FuzzRecordFraming/seed#2 (0.00s)
+=== RUN   FuzzAuthenticatedRecord
+=== RUN   FuzzAuthenticatedRecord/seed#0
+=== RUN   FuzzAuthenticatedRecord/seed#1
+=== RUN   FuzzAuthenticatedRecord/seed#2
+--- PASS: FuzzAuthenticatedRecord (0.00s)
+    --- PASS: FuzzAuthenticatedRecord/seed#0 (0.00s)
+    --- PASS: FuzzAuthenticatedRecord/seed#1 (0.00s)
+    --- PASS: FuzzAuthenticatedRecord/seed#2 (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/encryption	0.921s
++ CGO_ENABLED=1 go test -race -count=1 ./encryption
+ok  	github.com/ms-xiaosnow/gosqlite/encryption	4.113s
++ CGO_ENABLED=0 go test -tags=purego -count=1 ./encryption
+ok  	github.com/ms-xiaosnow/gosqlite/encryption	0.958s
++ CGO_ENABLED=0 go vet ./encryption
++ CGO_ENABLED=0 go build ./encryption
++ CGO_ENABLED=0 go test -count=1 golang.org/x/crypto/argon2 -run ^TestArgon2$
+ok  	golang.org/x/crypto/argon2	0.005s
++ CGO_ENABLED=0 go list -deps with nonempty CgoFiles filter (expect no output)
++ gofmt and diff whitespace checks
+ALL LISTED GATES PASSED. No extended fuzz campaign, independent cryptographic audit, or storage acceptance evidence claimed.
+Subsequent authorized actual fuzz campaigns (supersede seed-only status above):
+Sat Oct 10 11:55:39 UTC 2026
++ CGO_ENABLED=0 go test ./encryption -run '^$' -fuzz '^FuzzHeaderCodec$' -fuzztime=10s -parallel=2
+fuzz: elapsed: 0s, gathering baseline coverage: 0/3 completed
+fuzz: elapsed: 0s, gathering baseline coverage: 3/3 completed, now fuzzing with 2 workers
+fuzz: elapsed: 3s, execs: 4138 (1379/sec), new interesting: 0 (total: 3)
+fuzz: elapsed: 6s, execs: 285448 (93761/sec), new interesting: 1 (total: 4)
+fuzz: elapsed: 9s, execs: 285448 (0/sec), new interesting: 1 (total: 4)
+fuzz: elapsed: 10s, execs: 431756 (128235/sec), new interesting: 1 (total: 4)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/encryption	10.150s
++ CGO_ENABLED=0 go test ./encryption -run '^$' -fuzz '^FuzzRecordFraming$' -fuzztime=10s -parallel=2
+fuzz: elapsed: 0s, gathering baseline coverage: 0/3 completed
+fuzz: elapsed: 0s, gathering baseline coverage: 3/3 completed, now fuzzing with 2 workers
+fuzz: elapsed: 3s, execs: 140453 (46802/sec), new interesting: 3 (total: 6)
+fuzz: elapsed: 6s, execs: 308539 (56030/sec), new interesting: 3 (total: 6)
+fuzz: elapsed: 9s, execs: 476392 (55957/sec), new interesting: 3 (total: 6)
+fuzz: elapsed: 10s, execs: 534262 (55862/sec), new interesting: 3 (total: 6)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/encryption	10.043s
++ CGO_ENABLED=0 go test ./encryption -run '^$' -fuzz '^FuzzAuthenticatedRecord$' -fuzztime=10s -parallel=2
+fuzz: elapsed: 0s, gathering baseline coverage: 0/3 completed
+fuzz: elapsed: 0s, gathering baseline coverage: 3/3 completed, now fuzzing with 2 workers
+fuzz: elapsed: 3s, execs: 7794 (2596/sec), new interesting: 7 (total: 10)
+fuzz: elapsed: 6s, execs: 327950 (106763/sec), new interesting: 10 (total: 13)
+fuzz: elapsed: 9s, execs: 409391 (27144/sec), new interesting: 12 (total: 15)
+fuzz: elapsed: 10s, execs: 434848 (19447/sec), new interesting: 12 (total: 15)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/encryption	10.321s
+Post-campaign source SHA-256:
+355dd1f5a504b270611f448440a88b38caa7cab0f8dddc26d447d1dcd312b821  encryption/doc.go
+7afb22737ab443a5b6dce8bb8062fa928ec9a4c36b882a7f009a091ede4adb27  encryption/errors.go
+ec712e053e32b7c5d5e323f82fcb9eae1b0da1a3e9668215a3790d4a8a3f86c4  encryption/format.go
+55d607b87fd66c1428d35a527166850f10c3e74110103caf451d07f40bf1d9f2  encryption/format_test.go
+6d45dde2da4cb19162c0126fd4f850ff63ccd0f6e49ef93a3e370319e35de266  encryption/kdf.go
+bcc56e630a263954a2f01dc8e22a22fd6030d6eed5a58b75411d3d32d5c4ffea  encryption/key.go
+079dcc578c08ae16ee5a556d9ddd9e77dee8e5d86d0e7ecb58f4154a55442033  encryption/key_test.go
+6f887e2ab32835bec9a7f15b1b7fe828e0e87b723f5bc136364c78e068359957  encryption/record.go
+b76245594792ffbc057a4de2cd016d9c31ad22319a2dd2a41e7095fef9db8c49  encryption/record_test.go
+All encryption Go files concatenation SHA-256 (lexical path order):
+f20084a59bfefe70cfb29bdf4da030aab777d550a80a30d59649c302dd09aa2c  -
+All three 10-second actual campaigns passed. No independent audit or storage acceptance evidence claimed.

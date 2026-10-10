@@ -11,6 +11,7 @@ import (
 
 	"github.com/ms-xiaosnow/gosqlite/extension/grams13"
 	"github.com/ms-xiaosnow/gosqlite/extension/registry"
+	"github.com/ms-xiaosnow/gosqlite/extension/vector/ann"
 	"github.com/ms-xiaosnow/gosqlite/internal/btree"
 	sqlast "github.com/ms-xiaosnow/gosqlite/internal/sql"
 )
@@ -58,6 +59,7 @@ type extensionIndex struct {
 	generation, documentCount             int64
 	canonical                             []byte
 	instance                              registry.Index
+	ann                                   *ann.Config
 	fields                                []extensionField
 	likeConfig, matchConfig               grams13.Config
 	usable                                bool
@@ -117,6 +119,12 @@ func (d *DB) loadExtensionsEntries(ctx context.Context, reader btree.PageReader,
 		}
 	}
 	specs := extensionSchemas()
+	for _, s := range annSchemas() {
+		if _, exists := c.entries[s.name]; exists {
+			specs = append(specs, annSchemas()...)
+			break
+		}
+	}
 	recognized := map[string]bool{}
 	for _, s := range specs {
 		e, ok := c.entries[s.name]
@@ -171,23 +179,41 @@ func (d *DB) loadExtensionsEntries(ctx context.Context, reader btree.PageReader,
 		}
 		names[fold(strs[0])] = true
 		configHashMismatch := extensionHash(strs[4]) != strs[5]
-		method, ok := d.methods.Lookup(strs[3], int(mv))
-		if !ok {
-			return fmt.Errorf("%w: unregistered index method %s version %d", ErrUnsupported, strs[3], mv)
-		}
-		instance, err := method.Configure([]byte(strs[4]))
-		if err != nil {
-			return fmt.Errorf("%w: index %q configuration: %w", ErrUnsupported, strs[0], err)
-		}
-		if instance == nil || string(instance.Canonical()) != strs[4] {
-			return extensionCorrupt("method returned a different configuration")
-		}
-		x := &extensionIndex{id: id, name: strs[0], sourceTable: strs[1], sourceHash: strs[2], method: strs[3], methodVersion: int(mv), canonical: []byte(strs[4]), instance: instance, generation: generation, documentCount: count, schemaCookie: uint32(cookie), usable: true, catalog: c}
-		if x.method == grams13.MethodName {
-			x.likeConfig, x.matchConfig, err = grams13.ParseIndexConfig(x.canonical)
-			if err != nil {
-				return err
+		var instance registry.Index
+		var annConfig *ann.Config
+		if strs[3] == ann.HNSW {
+			if mv != ann.MethodVersion || c.roots[annStateName] == 0 {
+				return fmt.Errorf("%w: ANN method/storage version", ErrUnsupported)
 			}
+			cfg, err := ann.ParseConfig([]byte(strs[4]))
+			if err != nil {
+				return fmt.Errorf("%w: ANN configuration: %w", ErrUnsupported, err)
+			}
+			if cfg.Method != strs[3] {
+				return extensionCorrupt("ANN configuration method differs")
+			}
+			annConfig = &cfg
+		} else {
+			method, ok := d.methods.Lookup(strs[3], int(mv))
+			if !ok {
+				return fmt.Errorf("%w: unregistered index method %s version %d", ErrUnsupported, strs[3], mv)
+			}
+			var err error
+			instance, err = method.Configure([]byte(strs[4]))
+			if err != nil {
+				return fmt.Errorf("%w: index %q configuration: %w", ErrUnsupported, strs[0], err)
+			}
+			if instance == nil || string(instance.Canonical()) != strs[4] {
+				return extensionCorrupt("method returned a different configuration")
+			}
+		}
+		x := &extensionIndex{id: id, name: strs[0], sourceTable: strs[1], sourceHash: strs[2], method: strs[3], methodVersion: int(mv), canonical: []byte(strs[4]), instance: instance, ann: annConfig, generation: generation, documentCount: count, schemaCookie: uint32(cookie), usable: true, catalog: c}
+		if x.method == grams13.MethodName {
+			like, match, parseErr := grams13.ParseIndexConfig(x.canonical)
+			if parseErr != nil {
+				return parseErr
+			}
+			x.likeConfig, x.matchConfig = like, match
 		}
 		if configHashMismatch {
 			x.usable = false
@@ -247,6 +273,9 @@ func (d *DB) loadExtensionsEntries(ctx context.Context, reader btree.PageReader,
 		return nil, err
 	}
 	for _, x := range c.indexes {
+		if x.ann != nil && len(x.fields) != 1 {
+			return nil, extensionCorrupt("ANN requires one vector field")
+		}
 		if len(x.fields) == 0 {
 			return nil, extensionCorrupt("index has no fields")
 		}
@@ -262,6 +291,12 @@ func (d *DB) loadExtensionsEntries(ctx context.Context, reader btree.PageReader,
 					if f.ordinal >= len(def.Columns) || fold(def.Columns[f.ordinal].Name) != fold(f.name) {
 						x.usable = false
 						x.fallback = "indexed field changed; REINDEX required"
+					} else if x.ann != nil {
+						dims, ok := sqlast.VectorDimensions(def.Columns[f.ordinal].Type)
+						if !ok || dims != x.ann.Dimensions {
+							x.usable = false
+							x.fallback = "indexed vector type changed; REINDEX required"
+						}
 					}
 				}
 			}

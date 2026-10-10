@@ -42,8 +42,8 @@ func (t *Tx) CreateGramsIndex(ctx context.Context, name, table string, columns [
 	return t.CreateMethodIndex(ctx, name, table, columns, grams13.MethodName, grams13.MethodVersion, config)
 }
 
-// CreateMethodIndex builds an immutable registered inverted-index method. The
-// caller-supplied canonical configuration is validated by that method; persistent
+// CreateMethodIndex builds a registered inverted method or a known built-in ANN
+// method. Caller-supplied canonical configuration is validated; persistent
 // metadata never loads code. Registry handlers are trusted Go application code.
 func (d *DB) CreateMethodIndex(ctx context.Context, name, table string, columns []string, method string, version int, canonical []byte) error {
 	return d.extensionWrite(ctx, "create index", func(t *Tx, c *writeCatalog) error {
@@ -175,6 +175,9 @@ func (t *Tx) checkWriteOwnership(ctx context.Context, c *writeCatalog) error {
 	return nil
 }
 func (t *Tx) createSQLMethodIndex(ctx context.Context, c *writeCatalog, s *sqlast.CreateIndex) error {
+	if fold(s.Method) == "hnsw" {
+		return t.createSQLHNSWIndex(ctx, c, s)
+	}
 	if fold(s.Method) != grams13.MethodName {
 		return fmt.Errorf("%w: SQL index method %q; use native CreateMethodIndex for registered custom methods", ErrUnsupported, s.Method)
 	}

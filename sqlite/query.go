@@ -249,6 +249,12 @@ func (d *DB) plan(ctx context.Context, reader btree.PageReader, sel *sqlast.Sele
 		}
 		return nil, err
 	}
+	if err = r.prepareANNVector(reader); err != nil {
+		if r.source != nil {
+			r.source.Close()
+		}
+		return nil, err
+	}
 	if sel.Explain {
 		r.explainDetail = r.queryPlan.Detail()
 		r.columns = []string{"id", "parent", "notused", "detail"}

@@ -127,3 +127,53 @@ Retrieved2026-10-10 from the official pgvector GitHub repository, tag v0.8.7, ve
 Source: https://github.com/pgvector/pgvector/tree/f37c13f68b57d2c3472b2214fbcff699d6d34876. Retained fixture metadata and deliberate differences are in testdata/pgvector-v0.8.7/manifest.json and README.md. Exact upstream license is retained, including its copyright year range. The first guessed fixture path test/sql/vector.sql returned404; official directory listing located vector_type.sql. No older version was silently substituted. No private SEE source is accessed.
 
 The specified Neon migration page and its .md variant returned fetch errors during prerequisite research. The official sunset announcement and old pg_embedding repository were readable. M9 must reverify the requested current migration chapter and snapshot date; these partial references do not establish full guide conformance.
+
+## M7 public ANN algorithm references
+
+Public pgvector v0.8.7, exact commit
+`f37c13f68b57d2c3472b2214fbcff699d6d34876`, was read for documented HNSW/IVF
+parameters and algorithm context. Official files fetched from that immutable
+commit on2026-10-10: hnsw.h, hnswbuild.c, hnswutils.c, hnswscan.c, ivfflat.h,
+ivfflat.c, ivfkmeans.c, ivfbuild.c, ivfscan.c and sql/vector.sql. No C implementation
+is compiled/copied/invoked by production. Exact independently computed SHA256:
+
+```text
+c57af43d484ac0406bee00a7092f655f53c4b14f05f76c3a289baa34bdaf9647  src/hnsw.h
+7f2564af813a06775a22e89d106a1e83ff1e951ea834fb16f93a35ab399f57fa  src/hnswbuild.c
+52913cfdb915cd564712431e9ab67c28898a0a041414500fa67ba7818518f641  src/hnswutils.c
+fd1dd993f51b05eed167c7ce12eb11ad3ad9a951af70ad7d99b321e18bc6180d  src/hnswscan.c
+be00dd3383cc4921fa3e252c16b7bf1f6e418f32b8c8b08f2a0070cb76af399b  src/ivfflat.h
+652309192fdd909048371ed24f5026ae0ebd1eecf253ca6512820ce114ea71e0  src/ivfflat.c
+cf17de636966ee4af897d439b7fcc3893b56c5ff7a5e60146b78657f849061a6  src/ivfkmeans.c
+f355fcee013b330ce98f54f28b73643bc14a76aff91afb332bc2eb6ae7a292a0  src/ivfbuild.c
+4699881a03878a569d819b60fcddeaf108f34d5c027eddbdfe82a4991245f0e2  src/ivfscan.c
+a4ceca5931cb614b40bec09ce6994a57058513d9af612c15b1458a338134609d  sql/vector.sql
+```
+
+Primary source: https://github.com/pgvector/pgvector/tree/f37c13f68b57d2c3472b2214fbcff699d6d34876
+The PostgreSQL-style license already retained for public fixtures applies to
+these references. Native topology, tombstones, finite float64 arithmetic and
+storage are local contracts, not bit-for-bit upstream compatibility. No running
+PostgreSQL/pgvector performance or recall comparison was performed.
+
+## M8 memory-primitive dependencies
+
+Verified2026-10-10 using Go1.27.2 official proxy+checksum database, then independent
+ZIP hashes. No automatic toolchain switching, private crypto source or credentials.
+
+- x/crypto v0.58.0, timestamp2026-10-09T16:24:17Z, official origin
+  https://go.googlesource.com/crypto at8fdf07b3114278fb3b78c1cf1814e08bd851eb4c.
+  Module h1:`COkYLr4k7nDI4r6QtMML2AfzeIswWHAJthLS6K/M/54=`;
+  go.mod h1:`Xh+kl5A+M0gMiWDytH2Hhr5Z7WbNCpv/eB/EFgfSk+w=`.
+  ZIP SHA256:`b0a45594cda20ddb4264d84aeff9b588b8570bf6a2833c51a0b821734a298d95`.
+- x/sys v0.49.0, timestamp2026-10-06T18:35:47Z, official origin
+  https://go.googlesource.com/sys atb6b8557e8e2974925aec7a136ba0e323eedc5f43.
+  Module h1:`XbzkgYJHdqh/8m2Uu0W/dQv8nktxx4BFHp1M0gROTXA=`;
+  go.mod h1:`hNLxWAXmnKAxqDtdwIYC4bM9oQPEecfsnNMuSxOs3og=`.
+  ZIP SHA256:`e73a06591ca0d7016ce3ccb45c36a8ed7128468aecc1a357f94d815c760c6b31`.
+- Both retained BSD3 licenses SHA256:
+  `911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad`.
+
+Actual extra import closure: x/crypto/argon2, x/crypto/blake2b and x/sys/cpu; all
+CgoFiles empty. The cryptographic package remains unintegrated with database
+storage. Known-answer/reference tests do not constitute an independent audit.

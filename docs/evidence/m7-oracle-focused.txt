@@ -1,0 +1,18 @@
+=== RUN   TestOracleHNSWStorageInterop
+=== RUN   TestOracleHNSWStorageInterop/page512/sharedfalse
+=== RUN   TestOracleHNSWStorageInterop/page512/sharedtrue
+=== RUN   TestOracleHNSWStorageInterop/page4096/sharedfalse
+=== RUN   TestOracleHNSWStorageInterop/page4096/sharedtrue
+=== RUN   TestOracleHNSWStorageInterop/page65536/sharedfalse
+=== RUN   TestOracleHNSWStorageInterop/page65536/sharedtrue
+--- PASS: TestOracleHNSWStorageInterop (10.27s)
+    --- PASS: TestOracleHNSWStorageInterop/page512/sharedfalse (1.04s)
+    --- PASS: TestOracleHNSWStorageInterop/page512/sharedtrue (1.66s)
+    --- PASS: TestOracleHNSWStorageInterop/page4096/sharedfalse (1.01s)
+    --- PASS: TestOracleHNSWStorageInterop/page4096/sharedtrue (0.97s)
+    --- PASS: TestOracleHNSWStorageInterop/page65536/sharedfalse (3.07s)
+    --- PASS: TestOracleHNSWStorageInterop/page65536/sharedtrue (2.50s)
+=== RUN   TestOracleHNSWLegacyGramsUpgrade
+--- PASS: TestOracleHNSWLegacyGramsUpgrade (0.03s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	10.299s

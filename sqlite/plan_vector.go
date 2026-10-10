@@ -10,9 +10,11 @@ import (
 	sqlast "github.com/ms-xiaosnow/gosqlite/internal/sql"
 )
 
-// vectorRank is only the bounded ranking stage. Source access remains the
-// existing SCAN or safe business-predicate index plan. It is not an ANN index.
+// vectorRank owns bounded ranking and optional ANN candidate selection.
+// The heap is never an index; QueryPlan reports the actual source method.
 type vectorRank struct {
+	ann                 *annCandidateQuery
+	expected            *vector.Vector
 	ordinal, dimensions int
 	query               any
 	metric              vector.MetricKind
@@ -128,10 +130,19 @@ func (r *Rows) prepareVectorRank() error {
 
 func (v *vectorRank) score(r *Rows, value any) (any, error) {
 	if value == nil {
+		if v.expected != nil {
+			return nil, extensionCorrupt("live ANN node refers to NULL source vector")
+		}
 		r.queryStats.VectorNullRows++
 		return nil, nil
 	}
-	candidate, _, err := decodeVectorColumn(value, v.dimensions)
+	var candidate vector.Vector
+	var err error
+	if v.expected != nil {
+		candidate, err = decodeANNVector(value, v.dimensions, *v.expected)
+	} else {
+		candidate, _, err = decodeVectorColumn(value, v.dimensions)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -155,7 +166,8 @@ func (v *vectorRank) score(r *Rows, value any) (any, error) {
 		v.prepared = true
 		r.queryStats.VectorRankComponents = int64(q.Dims())
 	}
-	if uint64(v.dimensions) > v.limits.MaxComponents-uint64(r.queryStats.VectorRankComponents) {
+	used := uint64(r.queryStats.VectorRankComponents) + uint64(r.queryStats.ANNDistanceEvaluations)*uint64(v.dimensions)
+	if used > v.limits.MaxComponents || uint64(v.dimensions) > v.limits.MaxComponents-used {
 		return nil, fmt.Errorf("%w: vector components", vector.ErrLimit)
 	}
 	distance, err := v.metric.Distance(candidate, v.parsed)
@@ -164,6 +176,9 @@ func (v *vectorRank) score(r *Rows, value any) (any, error) {
 	}
 	if err = r.ctx.Err(); err != nil {
 		return nil, err
+	}
+	if v.expected != nil {
+		r.queryStats.ANNExactRescores++
 	}
 	r.queryStats.VectorRankedRows++
 	r.queryStats.VectorRankComponents += int64(v.dimensions)
@@ -206,6 +221,9 @@ func (h *vectorRowHeap) Pop() any {
 }
 
 func (r *Rows) materializeVector() error {
+	if r.vectorRank.ann != nil {
+		return r.materializeANNVector()
+	}
 	retained := vectorRowHeap{}
 	var used int64
 	for {
