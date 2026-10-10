@@ -16,6 +16,7 @@ type orderExpr struct {
 	expr   sqlast.Expr
 	column int
 	desc   bool
+	nulls  sqlast.NullOrder
 }
 type resultRow struct {
 	values, keys []any
@@ -275,16 +276,23 @@ func (r *Rows) evaluateSourceRow(rowid int64, values []any) (resultRow, int64, b
 		}
 		if q == "" {
 			if i, ok := r.aliases[fold(name)]; ok {
-				if c, ok := r.exprs[i].(*sqlast.Column); ok {
-					return physicalAffinity(c.Table, c.Name)
-				}
+				return sqlast.ExpressionAffinity(r.exprs[i], physicalAffinity)
 			}
 		}
 		return ""
 	}
+	ec.ConstantColumn = func(q, name string) bool {
+		if _, err := r.table.column(q, name); err == nil || q != "" {
+			return false
+		}
+		if i, ok := r.aliases[fold(name)]; ok {
+			return sqlast.ConstantExpression(r.exprs[i], &sqlast.EvalContext{Functions: r.functions})
+		}
+		return false
+	}
 	ec.DeclaredType = func(q, name string) string {
-		if typ := physicalType(q, name); typ != "" {
-			return typ
+		if _, err := r.table.column(q, name); err == nil {
+			return physicalType(q, name)
 		}
 		if q == "" {
 			if i, ok := r.aliases[fold(name)]; ok {
@@ -402,6 +410,10 @@ func (r *Rows) materialize() error {
 			compareErr = r.ctx.Err()
 		}
 		for k, o := range r.order {
+			a, b := r.sorted[i].keys[k], r.sorted[j].keys[k]
+			if o.nulls != sqlast.NullsDefault && (a == nil) != (b == nil) {
+				return (a == nil) == (o.nulls == sqlast.NullsFirst)
+			}
 			cmp, err := sqlast.Compare(r.sorted[i].keys[k], r.sorted[j].keys[k])
 			if err != nil && compareErr == nil {
 				compareErr = err

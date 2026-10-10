@@ -203,9 +203,10 @@ func (p *parser) optionalAlias() (string, error) {
 }
 func (p *parser) selectStmt() (*Select, error) {
 	s := &Select{}
-	if p.is("DISTINCT") || p.is("ALL") {
+	if p.is("DISTINCT") {
 		return nil, p.unsupported("SELECT " + p.peek().Text)
 	}
+	p.take("ALL")
 	for {
 		start := p.peek().Start
 		var e Expr
@@ -274,7 +275,17 @@ func (p *parser) selectStmt() (*Select, error) {
 			if !desc {
 				p.take("ASC")
 			}
-			s.OrderBy = append(s.OrderBy, OrderTerm{Expr: e, Desc: desc})
+			nulls := NullsDefault
+			if p.take("NULLS") {
+				if p.take("FIRST") {
+					nulls = NullsFirst
+				} else if p.take("LAST") {
+					nulls = NullsLast
+				} else {
+					return nil, p.syntax("expected FIRST or LAST")
+				}
+			}
+			s.OrderBy = append(s.OrderBy, OrderTerm{Expr: e, Desc: desc, Nulls: nulls})
 			if !p.take(",") {
 				break
 			}
@@ -738,6 +749,10 @@ func (p *parser) expression(min int) (Expr, error) {
 			v = 1
 		}
 		left = &Literal{Value: v, Boolean: true}
+	case t.Kind == Identifier && !t.Quoted && EqualName(t.Text, "CASE"):
+		left, err = p.caseExpr()
+	case t.Kind == Identifier && !t.Quoted && EqualName(t.Text, "CAST"):
+		left, err = p.castExpr()
 	case t.Kind == Identifier:
 		if !t.Quoted && reserved(upperName(t.Text)) {
 			return nil, p.unsupported("expression " + t.Text)
@@ -792,9 +807,11 @@ func (p *parser) expression(min int) (Expr, error) {
 			break
 		}
 		neg := false
-		if op == "NOT" && p.pos+1 < len(p.tokens) && p.tokens[p.pos+1].Kind == Identifier && !p.tokens[p.pos+1].Quoted && EqualName(p.tokens[p.pos+1].Text, "LIKE") {
-			op = "LIKE"
-			neg = true
+		if op == "NOT" && p.pos+1 < len(p.tokens) && p.tokens[p.pos+1].Kind == Identifier && !p.tokens[p.pos+1].Quoted {
+			next := upperName(p.tokens[p.pos+1].Text)
+			if next == "LIKE" || next == "BETWEEN" || next == "IN" {
+				op, neg = next, true
+			}
 		}
 		prec := precedence(op)
 		if prec == 0 || prec < min {
@@ -803,6 +820,56 @@ func (p *parser) expression(min int) (Expr, error) {
 		p.next()
 		if neg {
 			p.next()
+		}
+		if op == "IN" {
+			in := &InList{Expr: left, Not: neg}
+			if err = p.need("("); err != nil {
+				return nil, err
+			}
+			if !p.take(")") {
+				for {
+					e, eerr := p.expression(0)
+					if eerr != nil {
+						return nil, eerr
+					}
+					in.Values = append(in.Values, e)
+					if !p.take(",") {
+						break
+					}
+				}
+				if err = p.need(")"); err != nil {
+					return nil, err
+				}
+			}
+			left = in
+			if err = p.checkExpr(left); err != nil {
+				return nil, err
+			}
+			if len(in.Values) == 0 && !containsCall(in.Expr) {
+				// SQLite folds a function-free empty IN before name binding,
+				// so even an unresolved column disappears. Function-bearing
+				// operands still need validation, but are not evaluated.
+				left = &Literal{Value: boolean(in.Not)}
+			}
+			continue
+		}
+		if op == "BETWEEN" {
+			lower, eerr := p.expression(3)
+			if eerr != nil {
+				return nil, eerr
+			}
+			if err = p.need("AND"); err != nil {
+				return nil, err
+			}
+			upper, eerr := p.expression(prec + 1)
+			if eerr != nil {
+				return nil, eerr
+			}
+			left = &Between{Expr: left, Lower: lower, Upper: upper, Not: neg}
+			if err = p.checkExpr(left); err != nil {
+				return nil, err
+			}
+			continue
 		}
 		if op == "ISNULL" || op == "NOTNULL" {
 			name := "IS"
@@ -846,7 +913,7 @@ func precedence(op string) int {
 		return 1
 	case "AND":
 		return 2
-	case "=", "==", "!=", "<>", "IS", "LIKE", "ISNULL", "NOTNULL":
+	case "=", "==", "!=", "<>", "IS", "LIKE", "BETWEEN", "IN", "ISNULL", "NOTNULL":
 		return 4
 	case "<", ">", "<=", ">=":
 		return 5
@@ -916,34 +983,6 @@ func numberLiteral(raw string) (any, error) {
 	return v, nil
 }
 
-// Walk visits each expression before its children, stopping at the first error.
-// It supports statement-wide name/function validation before reading any rows.
-func Walk(e Expr, visit func(Expr) error) error {
-	if e == nil {
-		return nil
-	}
-	if err := visit(e); err != nil {
-		return err
-	}
-	var children []Expr
-	switch x := e.(type) {
-	case *Unary:
-		children = []Expr{x.Expr}
-	case *Binary:
-		children = []Expr{x.Left, x.Right}
-	case *Like:
-		children = []Expr{x.Expr, x.Pattern, x.Escape}
-	case *Call:
-		children = x.Args
-	}
-	for _, child := range children {
-		if err := Walk(child, visit); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 func (p *parser) checkExpr(e Expr) error {
 	if p.heights == nil {
 		p.heights = map[Expr]int{}
@@ -961,21 +1000,7 @@ func (p *parser) checkExpr(e Expr) error {
 			d = h + 1
 		}
 	}
-	switch x := e.(type) {
-	case *Unary:
-		child(x.Expr)
-	case *Binary:
-		child(x.Left)
-		child(x.Right)
-	case *Like:
-		child(x.Expr)
-		child(x.Pattern)
-		child(x.Escape)
-	case *Call:
-		for _, a := range x.Args {
-			child(a)
-		}
-	}
+	_ = VisitChildren(e, func(c Expr) error { child(c); return nil })
 	if d > maxExpressionDepth {
 		return p.unsupported("expression tree depth exceeds 128")
 	}

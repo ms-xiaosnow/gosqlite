@@ -1,0 +1,107 @@
+S2 expression prerequisite source review, 2026-10-10 UTC
+
+Scope: native Go CASE, CAST, BETWEEN/NOT BETWEEN, scalar IN/NOT IN lists,
+SELECT ALL and NULLS FIRST/LAST. No disk format, publication, lock, rekey,
+namespace or external-production-SQL changes; no staging/commit/publication.
+
+Pre-edit baseline: immutable ../sparse-verify snapshot reported by parent,
+Git tree 57b02e0fa1f99f4c6a4f470c7741624cce1ba977. Earlier concurrent work is
+preserved. Owned-file hashes identify this slice's final bytes, not unrelated
+worktree changes or a clean repository.
+
+Read goal.md in full, docs/compatibility.md, docs/test-scope-audit.md, and the
+binder/stream/budget/S2 sections of ../sql-expansion-design.md. Official source
+references reviewed in ../toolchains/sqlite-src-3540000:
+- src/parse.y: operator precedence, CASE/CAST/IN/BETWEEN grammar, empty-IN
+  simplification, typename spans and ID fallback.
+- src/expr.c: expression affinity and simple/searched CASE evaluation.
+- src/vdbemem.c: sqlite3VdbeMemCast, integerification, numeric forcing and
+  sqlite3RealSameAsInt's asymmetric 51-bit bounds.
+- src/build.c: declared-type affinity.
+Production uses no official subprocess, C ABI or third-party SQL evaluator.
+
+All new/edited tests were source-audited before execution. Scalar tests only
+parse/evaluate in memory; allocation assertions use a wide input list, never
+filesystem corruption. SQLite tests use reviewVectorDB/Exec/Query, audited
+normal temp-path open/CREATE/CRUD/read/close helpers. Driver tests use one
+ordinary temporary database, prepared statements and a normal rollback.
+Official testkit tests use confOracle, confCLI, writeExec/writeSame/writeIntegrity:
+version+source identity verification, normal CLI completion, ordinary SQL and
+PRAGMA integrity_check. No process kill or CommandContext. Read-context
+cancellation occurs during scalar/list or Rows iteration, never commit I/O.
+No wrong-key disk, missing-selected-file, namespace mutation/retarget/race,
+crash/process-exit/hot-recovery, native lock/Sync/unmap/short-write failure,
+interrupted publication/rekey, or physical tamper tests were added or run.
+The mandatory go run ./internal/testscope passed before each test group.
+Existing internal/sql tests are memory-only; their whole oracle-tagged suite
+was retained and run. New fuzz seeds ran as ordinary deterministic seeds;
+no extended fuzz campaign is claimed.
+
+Walkers/planners reviewed:
+- Parser parameter numbering, max depth/height/token limits, DDL/default walker.
+- VisitChildren/Walk/Rewrite and query validation, boolean fallback binding.
+- Query ordinal/alias handling; Expr affinity in WHERE aliases.
+- Native INSERT/UPDATE/DELETE validation and eval contexts; writable CREATE
+  constant defaults; missing-record-field default restrictions.
+- Typed expression identity and vector/half/bit/sparse dispatch.
+- Ordinary equality safety/extraction, grams predicate/constant traversal,
+  vector heap and ANN shape eligibility. No new candidate pushdown was added.
+- General stable sorter, NULL direction independence and MaxSortBytes.
+- SQL/driver parameter ownership, read cancellation and resource closure.
+
+Validation correction: a broadened CAST oracle exposed that explicit empty
+CAST typenames use NUMERIC, whereas absent column declarations use BLOB.
+Fixed CAST-specific affinity and preserved source typename spans/dequoting.
+The retained final oracle evidence includes this case; earlier failing output
+is not claimed as a passing result. Boundary review also checks empty-IN's
+function/name-validation behavior, including LIKE's function-backed grammar.
+
+Environment for commands:
+GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off
+GOCACHE=/tmp/gosqlite-s2-gocache
+GOMODCACHE=$PWD/../toolchains/cache/pkg/mod
+GO=$PWD/../toolchains/go1.27.2/bin/go (go1.27.2 linux/amd64)
+SQLITE_ORACLE=$PWD/../toolchains/sqlite-build-3540000/sqlite3
+CGO_ENABLED=0 for production/unit/oracle/vet/build, separately CGO_ENABLED=1
+only for Go race tooling. No dependency download occurred.
+
+Commands and individual results are in sibling s2-expressions evidence logs.
+Full relational S2 and all independent/restricted M10 acceptance remain unrun
+and unimplemented as appropriate; focused evidence is not full acceptance.
+
+Independent review correction, 2026-10-10 14:47 UTC:
+- Reviewer reproduced SQLite's error for 1 IN(1,2,abs(INT64_MIN)), while the
+  first slice incorrectly returned the earlier match. Pinned expr.c
+  sqlite3FindInIndex/sqlite3InRhsIsConstant select whole-RHS construction for
+  >2 constant terms. The corrected evaluator retains a match but evaluates
+  all constant RHS values, with lhs errors deferred behind RHS errors, while
+  <=2/dynamic lists retain short-circuit. Constant-expression classification
+  accounts for parameters, known pure functions, custom overrides and bound
+  constant aliases without mutating ASTs or materializing RHS value buffers.
+- Reviewer found a physical typeless column could inherit a colliding typed
+  result alias's representation tag. rows.go now tests physical slot existence,
+  not nonempty declared-type text, before permitting alias type fallback.
+- New targeted regressions cover those cases, constant/physical aliases,
+  deterministic-function overrides and eager RHS error precedence. Independent
+  expression_review_test.go files in internal/sql and sqlite were read in full
+  before execution: only scalar memory work and normal intact SQL/rollback.
+  They remain separately owned by the independent reviewer.
+
+- Additional concrete parser correction: CAST admits STRICT and contextual
+  WINDOW/OVER/FILTER as typename identifiers, matching pinned SQLite's lexer
+  handling without broadening the repository's general reserved-word grammar.
+
+- The independent complete 151-name typename grammar matrix also found seven
+  overaccepted SQLite keywords: ADD, DEFERRABLE, ISNULL, NATURAL, NOTHING,
+  NOTNULL and TO. A CAST-specific rejection preserves the broader parser's
+  existing grammar. All 151 names are independently checked against the pinned
+  ordinary :memory: oracle, including the four contextual-name corrections.
+
+Final source-read pass also covered the reviewer's oracle/driver files:
+internal/sql/expression_review_oracle_test.go and driver/expression_review_test.go.
+The independent seeded nested/long-decimal matrices and 151-keyword grammar
+check use only pure SELECT on :memory: with pinned identity and normal process
+completion. The driver test uses normal prepared binds and intact close/reopen.
+The final evidence rerun occurs after this audit and a fresh mandatory guard.
+CAST typename acceptance is now a separate pinned no-ID-fallback set, independent
+of reserved(), including normal-build EXCEPT/INTERSECT/UNION exclusions.

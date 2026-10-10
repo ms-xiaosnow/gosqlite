@@ -1,0 +1,141 @@
+S2 expression prerequisites after all concrete independent-review fixes; intact SQL and memory-only tests.
+go version go1.27.2 linux/amd64
+Ordinary test source-reference guard PASS; behavioral review is still required.
+CGO_ENABLED=0 go test ./internal/sql ./sqlite ./driver -run Test(SQL|Driver)?Expression(Features|Review) -count=1 -v
+=== RUN   TestExpressionFeaturesValues
+=== RUN   TestExpressionFeaturesValues/CASE_WHEN_NULL_THEN_1_WHEN_0_THEN_2_WHEN_'1x'_THEN_3_ELSE_4_END
+=== RUN   TestExpressionFeaturesValues/CASE_2_WHEN_'2'_THEN_1_WHEN_2_THEN_'yes'_ELSE_3_END
+=== RUN   TestExpressionFeaturesValues/CASE_NULL_WHEN_NULL_THEN_1_END
+=== RUN   TestExpressionFeaturesValues/CASE_WHEN_0_THEN_abs(-9223372036854775808)_ELSE_7_END
+=== RUN   TestExpressionFeaturesValues/CASE_1_WHEN_1_THEN_7_WHEN_abs(-9223372036854775808)_THEN_0_END
+=== RUN   TestExpressionFeaturesValues/CAST('123e+5'_AS_INTEGER)
+=== RUN   TestExpressionFeaturesValues/CAST('123e+5'_AS_NUMERIC)
+=== RUN   TestExpressionFeaturesValues/CAST('123e+5'_AS_REAL)
+=== RUN   TestExpressionFeaturesValues/CAST('9223372036854775808'_AS_INTEGER)
+=== RUN   TestExpressionFeaturesValues/CAST('-9223372036854775809'_AS_INTEGER)
+=== RUN   TestExpressionFeaturesValues/CAST('abc'_AS_NUMERIC)
+=== RUN   TestExpressionFeaturesValues/CAST(1.0_AS_NUMERIC)
+=== RUN   TestExpressionFeaturesValues/CAST('1.5'_AS_"")
+=== RUN   TestExpressionFeaturesValues/CAST('1.5'_AS)
+=== RUN   TestExpressionFeaturesValues/CAST('1.5'_AS_"x"_INT)
+=== RUN   TestExpressionFeaturesValues/CAST('1.5'_AS_weird_/*INT*/_BLOB)
+=== RUN   TestExpressionFeaturesValues/CAST('2251799813685248.0'_AS_NUMERIC)
+=== RUN   TestExpressionFeaturesValues/CAST('-2251799813685248.0'_AS_NUMERIC)
+=== RUN   TestExpressionFeaturesValues/CAST(X'610062FF'_AS_TEXT)
+=== RUN   TestExpressionFeaturesValues/CAST('abc'_AS_BLOB)
+=== RUN   TestExpressionFeaturesValues/CAST('[1,2]'_AS_VECTOR(2))
+=== RUN   TestExpressionFeaturesValues/CAST('1.5'_AS_FLOATING_POINT)
+=== RUN   TestExpressionFeaturesValues/2_BETWEEN_1_AND_3
+=== RUN   TestExpressionFeaturesValues/2_NOT_BETWEEN_1_AND_3
+=== RUN   TestExpressionFeaturesValues/2_BETWEEN_NULL_AND_1
+=== RUN   TestExpressionFeaturesValues/2_NOT_BETWEEN_NULL_AND_1
+=== RUN   TestExpressionFeaturesValues/2_BETWEEN_NULL_AND_3
+=== RUN   TestExpressionFeaturesValues/NULL_BETWEEN_0_AND_1
+=== RUN   TestExpressionFeaturesValues/1_BETWEEN_0=0_AND_2
+=== RUN   TestExpressionFeaturesValues/1_BETWEEN_0_AND_0=0
+=== RUN   TestExpressionFeaturesValues/NOT_1_BETWEEN_0_AND_2
+=== RUN   TestExpressionFeaturesValues/1_BETWEEN_0_AND_2_AND_0
+=== RUN   TestExpressionFeaturesValues/absent_IN_()
+=== RUN   TestExpressionFeaturesValues/NULL_IN_()
+=== RUN   TestExpressionFeaturesValues/NULL_NOT_IN_()
+=== RUN   TestExpressionFeaturesValues/abs(-9223372036854775808)_IN_()
+=== RUN   TestExpressionFeaturesValues/1_IN_(2,NULL)
+=== RUN   TestExpressionFeaturesValues/1_NOT_IN_(2,NULL)
+=== RUN   TestExpressionFeaturesValues/1_IN_(NULL,1)
+=== RUN   TestExpressionFeaturesValues/1_IN_('1',2)
+=== RUN   TestExpressionFeaturesValues/NULL_IN_(1,2)
+=== RUN   TestExpressionFeaturesValues/2_IN_(1,2)_BETWEEN_0_AND_2
+=== RUN   TestExpressionFeaturesValues/CAST(12_AS_NUMERIC)_=_'12'
+=== RUN   TestExpressionFeaturesValues/12_IN_(CAST('12'_AS_TEXT))
+--- PASS: TestExpressionFeaturesValues (0.00s)
+    --- PASS: TestExpressionFeaturesValues/CASE_WHEN_NULL_THEN_1_WHEN_0_THEN_2_WHEN_'1x'_THEN_3_ELSE_4_END (0.00s)
+    --- PASS: TestExpressionFeaturesValues/CASE_2_WHEN_'2'_THEN_1_WHEN_2_THEN_'yes'_ELSE_3_END (0.00s)
+    --- PASS: TestExpressionFeaturesValues/CASE_NULL_WHEN_NULL_THEN_1_END (0.00s)
+    --- PASS: TestExpressionFeaturesValues/CASE_WHEN_0_THEN_abs(-9223372036854775808)_ELSE_7_END (0.00s)
+    --- PASS: TestExpressionFeaturesValues/CASE_1_WHEN_1_THEN_7_WHEN_abs(-9223372036854775808)_THEN_0_END (0.00s)
+    --- PASS: TestExpressionFeaturesValues/CAST('123e+5'_AS_INTEGER) (0.00s)
+    --- PASS: TestExpressionFeaturesValues/CAST('123e+5'_AS_NUMERIC) (0.00s)
+    --- PASS: TestExpressionFeaturesValues/CAST('123e+5'_AS_REAL) (0.00s)
+    --- PASS: TestExpressionFeaturesValues/CAST('9223372036854775808'_AS_INTEGER) (0.00s)
+    --- PASS: TestExpressionFeaturesValues/CAST('-9223372036854775809'_AS_INTEGER) (0.00s)
+    --- PASS: TestExpressionFeaturesValues/CAST('abc'_AS_NUMERIC) (0.00s)
+    --- PASS: TestExpressionFeaturesValues/CAST(1.0_AS_NUMERIC) (0.00s)
+    --- PASS: TestExpressionFeaturesValues/CAST('1.5'_AS_"") (0.00s)
+    --- PASS: TestExpressionFeaturesValues/CAST('1.5'_AS) (0.00s)
+    --- PASS: TestExpressionFeaturesValues/CAST('1.5'_AS_"x"_INT) (0.00s)
+    --- PASS: TestExpressionFeaturesValues/CAST('1.5'_AS_weird_/*INT*/_BLOB) (0.00s)
+    --- PASS: TestExpressionFeaturesValues/CAST('2251799813685248.0'_AS_NUMERIC) (0.00s)
+    --- PASS: TestExpressionFeaturesValues/CAST('-2251799813685248.0'_AS_NUMERIC) (0.00s)
+    --- PASS: TestExpressionFeaturesValues/CAST(X'610062FF'_AS_TEXT) (0.00s)
+    --- PASS: TestExpressionFeaturesValues/CAST('abc'_AS_BLOB) (0.00s)
+    --- PASS: TestExpressionFeaturesValues/CAST('[1,2]'_AS_VECTOR(2)) (0.00s)
+    --- PASS: TestExpressionFeaturesValues/CAST('1.5'_AS_FLOATING_POINT) (0.00s)
+    --- PASS: TestExpressionFeaturesValues/2_BETWEEN_1_AND_3 (0.00s)
+    --- PASS: TestExpressionFeaturesValues/2_NOT_BETWEEN_1_AND_3 (0.00s)
+    --- PASS: TestExpressionFeaturesValues/2_BETWEEN_NULL_AND_1 (0.00s)
+    --- PASS: TestExpressionFeaturesValues/2_NOT_BETWEEN_NULL_AND_1 (0.00s)
+    --- PASS: TestExpressionFeaturesValues/2_BETWEEN_NULL_AND_3 (0.00s)
+    --- PASS: TestExpressionFeaturesValues/NULL_BETWEEN_0_AND_1 (0.00s)
+    --- PASS: TestExpressionFeaturesValues/1_BETWEEN_0=0_AND_2 (0.00s)
+    --- PASS: TestExpressionFeaturesValues/1_BETWEEN_0_AND_0=0 (0.00s)
+    --- PASS: TestExpressionFeaturesValues/NOT_1_BETWEEN_0_AND_2 (0.00s)
+    --- PASS: TestExpressionFeaturesValues/1_BETWEEN_0_AND_2_AND_0 (0.00s)
+    --- PASS: TestExpressionFeaturesValues/absent_IN_() (0.00s)
+    --- PASS: TestExpressionFeaturesValues/NULL_IN_() (0.00s)
+    --- PASS: TestExpressionFeaturesValues/NULL_NOT_IN_() (0.00s)
+    --- PASS: TestExpressionFeaturesValues/abs(-9223372036854775808)_IN_() (0.00s)
+    --- PASS: TestExpressionFeaturesValues/1_IN_(2,NULL) (0.00s)
+    --- PASS: TestExpressionFeaturesValues/1_NOT_IN_(2,NULL) (0.00s)
+    --- PASS: TestExpressionFeaturesValues/1_IN_(NULL,1) (0.00s)
+    --- PASS: TestExpressionFeaturesValues/1_IN_('1',2) (0.00s)
+    --- PASS: TestExpressionFeaturesValues/NULL_IN_(1,2) (0.00s)
+    --- PASS: TestExpressionFeaturesValues/2_IN_(1,2)_BETWEEN_0_AND_2 (0.00s)
+    --- PASS: TestExpressionFeaturesValues/CAST(12_AS_NUMERIC)_=_'12' (0.00s)
+    --- PASS: TestExpressionFeaturesValues/12_IN_(CAST('12'_AS_TEXT)) (0.00s)
+=== RUN   TestExpressionFeaturesEvaluationAndCancellation
+--- PASS: TestExpressionFeaturesEvaluationAndCancellation (0.00s)
+=== RUN   TestExpressionFeaturesParserAndWalkers
+--- PASS: TestExpressionFeaturesParserAndWalkers (0.00s)
+=== RUN   TestExpressionFeaturesResourceBounds
+--- PASS: TestExpressionFeaturesResourceBounds (0.07s)
+=== RUN   TestExpressionFeaturesTypedExternalTextIdentity
+--- PASS: TestExpressionFeaturesTypedExternalTextIdentity (0.00s)
+=== RUN   TestExpressionFeaturesConstantInEvaluation
+--- PASS: TestExpressionFeaturesConstantInEvaluation (0.00s)
+=== RUN   TestExpressionReviewConstantInErrors
+--- PASS: TestExpressionReviewConstantInErrors (0.00s)
+=== RUN   TestExpressionReviewCastContextualTypenames
+--- PASS: TestExpressionReviewCastContextualTypenames (0.00s)
+=== RUN   TestExpressionReviewCaseBetweenEvaluationOrder
+--- PASS: TestExpressionReviewCaseBetweenEvaluationOrder (0.00s)
+=== RUN   TestExpressionReviewImmutableRewriteAllChildren
+--- PASS: TestExpressionReviewImmutableRewriteAllChildren (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.095s
+=== RUN   TestSQLExpressionFeaturesDMLBindingDefaults
+--- PASS: TestSQLExpressionFeaturesDMLBindingDefaults (0.00s)
+=== RUN   TestSQLExpressionFeaturesNullOrdering
+--- PASS: TestSQLExpressionFeaturesNullOrdering (0.00s)
+=== RUN   TestSQLExpressionFeaturesVectorStorageIdentity
+--- PASS: TestSQLExpressionFeaturesVectorStorageIdentity (0.00s)
+=== RUN   TestSQLExpressionFeaturesConstantInAliases
+--- PASS: TestSQLExpressionFeaturesConstantInAliases (0.00s)
+=== RUN   TestExpressionReviewPhysicalUntypedAliasIdentity
+--- PASS: TestExpressionReviewPhysicalUntypedAliasIdentity (0.00s)
+=== RUN   TestExpressionReviewBoundTreeIsolation
+--- PASS: TestExpressionReviewBoundTreeIsolation (0.00s)
+=== RUN   TestExpressionReviewStatementUndoAndDefaults
+--- PASS: TestExpressionReviewStatementUndoAndDefaults (0.00s)
+=== RUN   TestExpressionReviewRepresentationAliasFamilies
+--- PASS: TestExpressionReviewRepresentationAliasFamilies (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.021s
+=== RUN   TestDriverExpressionFeaturesPreparedTransactions
+--- PASS: TestDriverExpressionFeaturesPreparedTransactions (0.00s)
+=== RUN   TestDriverExpressionReviewBindOwnershipReopen
+--- PASS: TestDriverExpressionReviewBindOwnershipReopen (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.008s
+CGO_ENABLED=0 go vet ./internal/sql ./sqlite ./driver
+CGO_ENABLED=0 go build ./internal/sql ./sqlite ./driver
+CGO0 focused unit/vet/build PASS

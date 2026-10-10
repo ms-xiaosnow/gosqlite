@@ -42,9 +42,21 @@ type ResultColumn struct {
 	Alias string
 	Text  string // Exact source expression, excluding any alias.
 }
+
+// NullOrder is independent of sort direction. Default uses SQLite's
+// NULL-smallest order (first for ASC, last for DESC).
+type NullOrder uint8
+
+const (
+	NullsDefault NullOrder = iota
+	NullsFirst
+	NullsLast
+)
+
 type OrderTerm struct {
-	Expr Expr
-	Desc bool
+	Expr  Expr
+	Desc  bool
+	Nulls NullOrder
 }
 
 type CreateTable struct {
@@ -165,6 +177,40 @@ type Like struct {
 
 func (*Like) expr() {}
 
+// Case preserves lazy selection and the single evaluation of a simple CASE
+// operand. A nil Base denotes searched CASE; a nil Else yields SQL NULL.
+type Case struct {
+	Base Expr
+	Arms []CaseArm
+	Else Expr
+}
+type CaseArm struct{ When, Then Expr }
+
+func (*Case) expr() {}
+
+// Cast uses ordinary SQLite declared-type affinity, never a vector converter.
+type Cast struct {
+	Expr Expr
+	Type string
+}
+
+func (*Cast) expr() {}
+
+type Between struct {
+	Expr, Lower, Upper Expr
+	Not                bool
+}
+
+func (*Between) expr() {}
+
+type InList struct {
+	Expr   Expr
+	Values []Expr
+	Not    bool
+}
+
+func (*InList) expr() {}
+
 type Call struct {
 	Name string
 	Args []Expr
@@ -199,6 +245,14 @@ func ExprName(e Expr) string {
 		return ExprName(x.Left) + " " + x.Op + " " + ExprName(x.Right)
 	case *Like:
 		return ExprName(x.Expr) + " LIKE " + ExprName(x.Pattern)
+	case *Case:
+		return "CASE ... END"
+	case *Cast:
+		return "CAST(" + ExprName(x.Expr) + " AS " + x.Type + ")"
+	case *Between:
+		return ExprName(x.Expr) + " BETWEEN " + ExprName(x.Lower) + " AND " + ExprName(x.Upper)
+	case *InList:
+		return ExprName(x.Expr) + " IN (...)"
 	case *Call:
 		return x.Name + "(...)"
 	default:

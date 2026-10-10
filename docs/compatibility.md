@@ -9,7 +9,7 @@ Behavior baseline: official SQLite 3.54.0. M2 implements a deliberately bounded 
 | Rowid B-trees | partial | leaf/interior, signed rowids, overflow, streaming, schema root1 including schema overflow |
 | Ordinary secondary indices | partial | create/maintain nonunique BINARY ASC keys; actual rowid/IPK equality and leading-prefix equality SELECT seeks with residual recheck; unsupported shapes scan; no general range/covering/order optimization |
 | Native file locking | partial | managed role-specific file/mapping ownership, Linux OFD shared/reserved/pending/exclusive byte-range locks; Darwin managed process-fcntl and Windows/amd64 checked LockFileEx/mapping backends implemented; only Linux ordinary runtime verified |
-| SELECT | partial | one rowid table or no FROM; projection, *, WHERE, parameters, ORDER BY, LIMIT/OFFSET; aliases and rowid/IPK semantics |
+| SELECT | partial | one rowid table or no FROM; projection, *, WHERE, parameters, SELECT ALL, ORDER BY with NULLS FIRST/LAST, LIMIT/OFFSET; aliases and rowid/IPK semantics |
 | Expressions | partial | NULL3VL, comparisons/affinity, arithmetic/bitwise/concat, ASCII-insensitive rune LIKE with ESCAPE, tested scalar builtins |
 | Schema interpretation | partial | declared types INTEGER/INT/REAL/TEXT/BLOB/NUMERIC, strict VECTOR(n)/BIT(n)/HALFVEC(n)/SPARSEVEC(n), or typeless; supported INTEGER PRIMARY KEY, NOT NULL and literal DEFAULT enforced on writes; non-INTEGER PK metadata read-only |
 | database/sql | partial | Connector, prepared reads/writes, named/positional binds, transactions, cancellation, streaming rows and resource closure |
@@ -164,3 +164,15 @@ boundaries and canonical hashes. Index readiness requires actual native trained
 HNSW/IVF identity/consistency; pending builds retain accepted data. This does not
 prove original bits lost by a low-precision export, arbitrary source schema or
 server semantics, ANN recall, or abrupt-interruption recovery. See import-pgembedding.md.
+
+Scalar prerequisites include explicit CASE/CAST/BETWEEN/IN-list nodes, immutable
+boolean binding and structural walkers. Simple CASE and BETWEEN evaluate their
+shared operand once; CASE branches remain lazy. Constant IN lists with more than
+two RHS items preserve SQLite's whole-set evaluation/error behavior, whereas
+short or dynamic lists use its short-circuit rules. Empty-IN binding and affinity
+are matched to the pinned source. CAST keyword classification and conversions are
+validated against SQLite3.54; unsupported COLLATE/subquery/relation semantics do
+not become supported by parsing these nodes. Typeless physical columns retain
+name-resolution precedence over colliding typed result aliases. Explicit NULL
+ordering conservatively disables specialized rank access when needed for correct
+order. Full query-wide nested budgets and relational binding remain code gaps.

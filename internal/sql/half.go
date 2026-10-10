@@ -118,6 +118,24 @@ func VectorExpressionRepresentation(e Expr, declared func(string, string) string
 		if x.Op == "+" {
 			return VectorExpressionRepresentation(x.Expr, declared)
 		}
+	case *Cast:
+		// TEXT/BLOB casts retain type evidence but use only SQLite storage
+		// conversion. Private encodings are never decoded or reinterpreted.
+		if a := castAffinity(x.Type); a == "TEXT" || a == "BLOB" {
+			return VectorExpressionRepresentation(x.Expr, declared)
+		}
+	case *Case:
+		kind := VectorExpressionRepresentation(x.Else, declared)
+		for _, arm := range x.Arms {
+			k := VectorExpressionRepresentation(arm.Then, declared)
+			if k != "" {
+				if kind != "" && kind != k {
+					return "mixed"
+				}
+				kind = k
+			}
+		}
+		return kind
 	case *Call:
 		switch FoldName(x.Name) {
 		case "halfvec", "halfvec_from_vector":

@@ -202,19 +202,19 @@ func (d *DB) plan(ctx context.Context, reader btree.PageReader, sel *sqlast.Sele
 			if ordinal <= 0 || ordinal > int64(len(r.exprs)) {
 				return nil, fmt.Errorf("ORDER BY position outside result column range")
 			}
-			r.order = append(r.order, orderExpr{column: int(ordinal) - 1, desc: o.Desc})
+			r.order = append(r.order, orderExpr{column: int(ordinal) - 1, desc: o.Desc, nulls: o.Nulls})
 			continue
 		}
 		if c, ok := o.Expr.(*sqlast.Column); ok && c.Table == "" {
 			if resultIndex, found := r.aliases[fold(c.Name)]; found {
-				r.order = append(r.order, orderExpr{column: resultIndex, desc: o.Desc})
+				r.order = append(r.order, orderExpr{column: resultIndex, desc: o.Desc, nulls: o.Nulls})
 				continue
 			}
 		}
 		if err := validate(o.Expr, t, r.aliases); err != nil {
 			return nil, err
 		}
-		r.order = append(r.order, orderExpr{expr: o.Expr, column: -1, desc: o.Desc})
+		r.order = append(r.order, orderExpr{expr: o.Expr, column: -1, desc: o.Desc, nulls: o.Nulls})
 	}
 	if sel.Limit != nil {
 		if err := validate(sel.Limit, nil, nil); err != nil {
@@ -323,50 +323,30 @@ func limitValue(ctx context.Context, expr sqlast.Expr, params []any) (int64, err
 }
 
 func validate(e sqlast.Expr, t *table, aliases map[string]int) error {
-	if e == nil {
-		return nil
-	}
-	switch x := e.(type) {
-	case *sqlast.Literal, *sqlast.Parameter:
-		return nil
-	case *sqlast.Column:
-		if x.Table == "" && aliases != nil {
-			if _, ok := aliases[fold(x.Name)]; ok {
+	return sqlast.Walk(e, func(e sqlast.Expr) error {
+		switch x := e.(type) {
+		case *sqlast.Literal, *sqlast.Parameter, *sqlast.Unary, *sqlast.Binary, *sqlast.Like, *sqlast.Case, *sqlast.Cast, *sqlast.Between, *sqlast.InList:
+			return nil
+		case *sqlast.Column:
+			if x.Table == "" && aliases != nil {
+				if _, ok := aliases[fold(x.Name)]; ok {
+					return nil
+				}
+			}
+			_, err := t.column(x.Table, x.Name)
+			return err
+		case *sqlast.Call:
+			if fold(x.Name) == "grams13_match" {
+				if len(x.Args) != 3 {
+					return fmt.Errorf("wrong number of arguments to grams13_match()")
+				}
 				return nil
 			}
+			return sqlast.ValidateFunction(x.Name, len(x.Args))
+		default:
+			return fmt.Errorf("%w: expression context", ErrUnsupported)
 		}
-		_, err := t.column(x.Table, x.Name)
-		return err
-	case *sqlast.Unary:
-		return validate(x.Expr, t, aliases)
-	case *sqlast.Binary:
-		if err := validate(x.Left, t, aliases); err != nil {
-			return err
-		}
-		return validate(x.Right, t, aliases)
-	case *sqlast.Like:
-		for _, e := range []sqlast.Expr{x.Expr, x.Pattern, x.Escape} {
-			if err := validate(e, t, aliases); err != nil {
-				return err
-			}
-		}
-		return nil
-	case *sqlast.Call:
-		for _, arg := range x.Args {
-			if err := validate(arg, t, aliases); err != nil {
-				return err
-			}
-		}
-		if fold(x.Name) == "grams13_match" {
-			if len(x.Args) != 3 {
-				return fmt.Errorf("wrong number of arguments to grams13_match()")
-			}
-			return nil
-		}
-		return sqlast.ValidateFunction(x.Name, len(x.Args))
-	default:
-		return fmt.Errorf("%w: expression context", ErrUnsupported)
-	}
+	})
 }
 
 func columnLabel(t *table, c *sqlast.Column) string {
@@ -389,9 +369,8 @@ func bindBooleans(e sqlast.Expr, t *table) sqlast.Expr {
 	if t == nil || e == nil {
 		return e
 	}
-	switch x := e.(type) {
-	case *sqlast.Literal:
-		if x.Boolean {
+	return sqlast.Rewrite(e, func(e sqlast.Expr) sqlast.Expr {
+		if x, ok := e.(*sqlast.Literal); ok && x.Boolean {
 			name := "false"
 			if x.Value == int64(1) {
 				name = "true"
@@ -400,21 +379,8 @@ func bindBooleans(e sqlast.Expr, t *table) sqlast.Expr {
 				return &sqlast.Column{Name: name}
 			}
 		}
-	case *sqlast.Unary:
-		x.Expr = bindBooleans(x.Expr, t)
-	case *sqlast.Binary:
-		x.Left = bindBooleans(x.Left, t)
-		x.Right = bindBooleans(x.Right, t)
-	case *sqlast.Like:
-		x.Expr = bindBooleans(x.Expr, t)
-		x.Pattern = bindBooleans(x.Pattern, t)
-		x.Escape = bindBooleans(x.Escape, t)
-	case *sqlast.Call:
-		for i := range x.Args {
-			x.Args[i] = bindBooleans(x.Args[i], t)
-		}
-	}
-	return e
+		return e
+	})
 }
 
 func isConstantDefault(e sqlast.Expr) bool {

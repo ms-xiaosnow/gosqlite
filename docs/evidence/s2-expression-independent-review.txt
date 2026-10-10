@@ -1,0 +1,307 @@
+S2 expression prerequisite: independent review, 2026-10-10 UTC
+
+Outcome
+-------
+Three concrete defect groups were independently found, reported to the parent
+and implementation owner, corrected by the implementation owner, and verified
+by retained independent regressions. No unresolved defect was identified in
+this reviewed prerequisite slice. This is NOT full S2 or repository acceptance.
+No stage, commit, publication, aggregate gate or restricted physical test ran.
+
+Initial source identity
+-----------------------
+All entries in the initial docs/evidence/s2-expressions-source-sha256.txt passed
+sha256sum -c before testing. The final production files changed only through
+the implementation owner's coordinated fixes below. Exact final reviewed
+production and independently owned test hashes are appended to this record.
+The frozen-code recheck verifies these production hashes before and after the
+independent tests. Other migration/native-Windows work was neither edited nor
+claimed accepted; no compile interference blocked these selected packages.
+
+Sources and review coverage
+---------------------------
+Read goal.md broad SQL/extension/compatibility requirements; the S2 binder,
+expression and shared-budget design in ../sql-expansion-design.md;
+docs/sql-expressions.md; prior native vector/half/bit/sparse contracts;
+docs/test-scope-audit.md; source paths and the initial owner evidence/hash list.
+Reviewed parser precedence, parameter allocation, SQL/token/depth limits,
+VisitChildren/Walk/Rewrite, constant-default validation, boolean fallback binding,
+scalar affinity/CAST conversion, lazy CASE, BETWEEN's single lhs evaluation,
+IN's NULL/empty/constant-RHS behavior, query aliases, DML statement undo,
+NULL ordering, bounded ranking eligibility, conservative ordinary/grams
+planning and representation metadata through new trees.
+
+Primary references:
+- https://www.sqlite.org/lang_expr.html
+- https://www.sqlite.org/datatype3.html
+- Pinned official ../toolchains/sqlite-src-3540000/src/expr.c: CASE code,
+  sqlite3FindInIndex, sqlite3ExprCodeIN and affinity.
+- Pinned src/parse.y: precedence, typetoken/typename, ID fallback.
+- Pinned tool/mkkeywordhash.c: complete keyword names/token identities.
+- Pinned test/cast.test: storage conversions, prefix/saturation, NUMERIC class.
+The test-only official executable verified version 3.54.0 and source ID
+2026-10-09 15:46:58 be8d059e9a49089ab2dce5ed26dd87aaf598fdc5fbe0b107c0dd758464bcd5e3.
+No production SQL is delegated externally.
+
+Finding 1: constant IN-list error suppression (fixed)
+---------------------------------------------------
+SELECT 1 IN (1,2,abs(-9223372036854775808)) returned 1 natively, whereas
+the pinned oracle raises integer overflow. NOT IN returned 0 rather than
+raising; a searched CASE using the same IN condition also suppressed the error.
+SQLite chooses a fully evaluated constant RHS for more than two entries, while
+two-item/dynamic lists can short-circuit. The owner added bounded streaming
+constant classification, retained-match evaluation and RHS error precedence,
+including parameter and constant-alias treatment. No RHS set was allocated.
+Independent TestExpressionReviewConstantInErrors now passes and also preserves
+the two-item short-circuit and unselected CASE-arm cases. The owner's tests
+add dynamic columns, function overrides, parameters, alias shadowing and RHS
+versus lhs error priority. Pre-fix reproduction: ../expression-review-second.txt.
+
+Finding 2: typeless physical-column alias representation collision (fixed)
+------------------------------------------------------------------------
+For e(id INTEGER PRIMARY KEY,x,h HALFVEC(3)), with physical x containing valid
+dense text '[3,0,-4]', this query incorrectly acquired the alias's HALF identity:
+SELECT CASE WHEN 1 THEN h END AS x FROM e WHERE vector_dims(x)=3.
+The value resolver chose physical x, but DeclaredType treated its empty
+declaration as failed lookup and fell back to the result alias. CAST-wrapped
+aliases and nested ORDER BY reproduced the same error. This is an existing
+alias-metadata integration defect exposed by the new expression trees.
+The owner now checks successful physical-slot resolution independently of the
+returned declaration string. TestExpressionReviewPhysicalUntypedAliasIdentity
+passes all three reproductions. Independent representation-family tests also
+cover alias identity for GSV/GSH/GSB/GSS and rejection of mixed CASE aliases.
+Pre-fix reproduction: ../expression-review-second.txt.
+
+Finding 3: CAST typename keyword classification (fixed)
+------------------------------------------------------
+The initial code rejected valid unquoted STRICT, WINDOW, OVER and FILTER
+typenames. It also accepted seven invalid unquoted names: ADD, DEFERRABLE,
+ISNULL, NATURAL, NOTHING, NOTNULL, TO. Each was verified against the pinned
+official parser. A complete 151-name acceptance matrix established the exact
+remaining deltas. The owner replaced reliance on the broader query reserved()
+set with the pinned CAST-specific no-ID-fallback set. General query grammar is
+unchanged. Quoted versions remain legal identifiers.
+TestExpressionReviewCastContextualTypenames and
+TestExpressionReviewOracleCastKeywordGrammar now pass.
+Pre-fix evidence: ../expression-review-cast.txt and
+../expression-review-keywords.txt.
+
+Independent evidence and fixture correction
+------------------------------------------
+New tests are in internal/sql/expression_review_test.go,
+internal/sql/expression_review_oracle_test.go,
+sqlite/expression_review_test.go and driver/expression_review_test.go.
+The oracle-only file supplements the requested ordinary review file because
+the existing pinned differential helper is behind the oracle build tag.
+
+TestExpressionReviewOracleNested: 3,124 independently generated nested and
+unparenthesized-precedence scalar comparisons.
+TestExpressionReviewOracleCastTextPrefixes: 2,404 cases, including 800 bounded
+decimal strings with up to 80 digits, decimal/exponent/trailing-text prefixes
+under INTEGER/NUMERIC/REAL, plus contextual typename cases.
+TestExpressionReviewOracleCastKeywordGrammar: 151 keyword/identifier names.
+The owner differential matrices were independently rerun: 6,425 scalar feature
+cases and 1,300 affinity cases, in addition to the independent matrices above.
+
+The first exploratory corpus included unparenthesized OR inside the lower
+BETWEEN operand. The official parser rejected those 16 SQL fixtures; they were
+removed from the valid-SQL differential corpus, preserving the OR suffix and
+IN combinations. That initial fixture failure is not counted as a code defect
+or a successful comparison. No long-decimal conversion mismatch was found.
+
+Other retained regression evidence covers CASE/BETWEEN evaluation order,
+between-arm cancellation, immutable Rewrite and walker stop propagation,
+independent boolean binding against two schemas, statement undo plus normal
+rollback, parenthesized CASE/CAST/IN defaults, all four representation aliases,
+copied prepared BLOB parameters, hidden empty-IN parameter numbering and normal
+database/sql close/reopen. Existing focused tests verify parser/token/depth
+bounds, allocation behavior, NULL ordering and sorter memory limits.
+
+Execution scope and commands
+----------------------------
+Every selected test body and its invoked helpers was source-audited before
+execution. The mandatory go run ./internal/testscope passed before each group.
+The scalar oracle helpers verify the exact official identity, use :memory:,
+wait for normal completion and never signal/kill processes. Keyword probes are
+fixed SELECT statements only. Native/driver fixtures use ordinary intact
+temporary CREATE/INSERT/SELECT/UPDATE, statement undo, ROLLBACK, close/reopen.
+Read cancellation and custom callback tests operate only in memory/read paths.
+No crash/process-exit, corruption/tamper/wrong-key, missing-selected-file,
+namespace mutation/race, failed native I/O/lock/unmap/Sync/short-write or
+interrupted publication/rekey workflow was run or introduced.
+
+Environment:
+GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off
+GOCACHE=/tmp/gosqlite-expression-review-cache
+GOMODCACHE=$PWD/../toolchains/cache/pkg/mod
+GO=$PWD/../toolchains/go1.27.2/bin/go
+SQLITE_ORACLE=$PWD/../toolchains/sqlite-build-3540000/sqlite3
+CGO_ENABLED=0 for production/unit/oracle checks; CGO_ENABLED=1 only for the
+separate race-tooling run. No dependency download was used.
+
+CGO0 focused run:
+go run ./internal/testscope
+go test -tags oracle ./internal/sql ./sqlite ./driver -run '^(TestExpressionReview|TestExpressionFeatures|TestSQLExpressionFeatures|TestDriverExpression|TestDiffSQLiteExpressionFeatures|TestDiffSQLiteExpressionFeatureAffinity)' -count=1 -v
+
+Separate CGO1 race run:
+go run ./internal/testscope
+go test -race ./internal/sql ./sqlite ./driver -run '^(TestExpressionReview|TestExpressionFeatures|TestSQLExpressionFeatures|TestDriverExpression)' -count=1 -v
+
+Byte-stable final independent recheck, CGO0:
+sha256sum -c ../expression-review-final-production-sha256.txt
+go run ./internal/testscope
+go test -tags oracle ./internal/sql ./sqlite ./driver -run '^(TestExpressionReview|TestDriverExpressionReview)' -count=1 -v
+sha256sum -c ../expression-review-final-production-sha256.txt
+
+All three commands completed exit 0. Raw final logs are retained at
+../expression-review-final-cgo0.txt, ../expression-review-final-race.txt and
+../expression-review-frozen-recheck.txt; selected complete named-test evidence
+and hashes follow below.
+
+Remaining required implementation and verification
+--------------------------------------------------
+Scoped relational slots/binder, JOIN, subqueries, COLLATE, aggregation and
+shared parent/nested retained/transient budgets remain required code. General
+schema qualification, function-kind/determinism registry and PRAGMA registry
+also remain outside this prerequisite. The constant-IN helper does not claim
+to supply that general registry or full statement-level expression factoring.
+No full project acceptance, unrestricted SQLite compatibility, restricted
+physical-durability/native-platform security audit or M10 completion is claimed.
+
+Final frozen-code and named-test output
+--------------------------------------
+Final frozen-code recheck, CGO0
+internal/sql/ast.go: OK
+internal/sql/eval.go: OK
+internal/sql/eval_expressions.go: OK
+internal/sql/parse_expressions.go: OK
+internal/sql/expression_tree.go: OK
+internal/sql/half.go: OK
+internal/sql/parser.go: OK
+sqlite/query.go: OK
+sqlite/rows.go: OK
+sqlite/plan_vector.go: OK
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestExpressionReviewOracleNested
+    expression_review_oracle_test.go:65: 3124 scalar/LIKE cases matched official SQLite
+--- PASS: TestExpressionReviewOracleNested (0.60s)
+=== RUN   TestExpressionReviewOracleCastTextPrefixes
+    expression_review_oracle_test.go:88: 2404 scalar/LIKE cases matched official SQLite
+--- PASS: TestExpressionReviewOracleCastTextPrefixes (0.08s)
+=== RUN   TestExpressionReviewOracleCastKeywordGrammar
+    expression_review_oracle_test.go:109: checked 151 CAST typename keyword acceptance cases
+--- PASS: TestExpressionReviewOracleCastKeywordGrammar (0.63s)
+=== RUN   TestExpressionReviewConstantInErrors
+--- PASS: TestExpressionReviewConstantInErrors (0.00s)
+=== RUN   TestExpressionReviewCastContextualTypenames
+--- PASS: TestExpressionReviewCastContextualTypenames (0.00s)
+=== RUN   TestExpressionReviewCaseBetweenEvaluationOrder
+--- PASS: TestExpressionReviewCaseBetweenEvaluationOrder (0.00s)
+=== RUN   TestExpressionReviewImmutableRewriteAllChildren
+--- PASS: TestExpressionReviewImmutableRewriteAllChildren (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	1.317s
+=== RUN   TestExpressionReviewPhysicalUntypedAliasIdentity
+--- PASS: TestExpressionReviewPhysicalUntypedAliasIdentity (0.00s)
+=== RUN   TestExpressionReviewBoundTreeIsolation
+--- PASS: TestExpressionReviewBoundTreeIsolation (0.00s)
+=== RUN   TestExpressionReviewStatementUndoAndDefaults
+--- PASS: TestExpressionReviewStatementUndoAndDefaults (0.00s)
+=== RUN   TestExpressionReviewRepresentationAliasFamilies
+--- PASS: TestExpressionReviewRepresentationAliasFamilies (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.013s
+=== RUN   TestDriverExpressionReviewBindOwnershipReopen
+--- PASS: TestDriverExpressionReviewBindOwnershipReopen (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.012s
+internal/sql/ast.go: OK
+internal/sql/eval.go: OK
+internal/sql/eval_expressions.go: OK
+internal/sql/parse_expressions.go: OK
+internal/sql/expression_tree.go: OK
+internal/sql/half.go: OK
+internal/sql/parser.go: OK
+sqlite/query.go: OK
+sqlite/rows.go: OK
+sqlite/plan_vector.go: OK
+
+CGO0 owner-plus-independent selected results
+Ordinary test source-reference guard PASS; behavioral review is still required.
+    expression_features_oracle_test.go:36: 6425 scalar/LIKE cases matched official SQLite
+--- PASS: TestDiffSQLiteExpressionFeatures (0.29s)
+    expression_features_oracle_test.go:65: 1300 scalar/LIKE cases matched official SQLite
+--- PASS: TestDiffSQLiteExpressionFeatureAffinity (0.06s)
+--- PASS: TestExpressionFeaturesValues (0.00s)
+--- PASS: TestExpressionFeaturesEvaluationAndCancellation (0.00s)
+--- PASS: TestExpressionFeaturesParserAndWalkers (0.00s)
+--- PASS: TestExpressionFeaturesResourceBounds (0.09s)
+--- PASS: TestExpressionFeaturesTypedExternalTextIdentity (0.00s)
+--- PASS: TestExpressionFeaturesConstantInEvaluation (0.00s)
+    expression_review_oracle_test.go:65: 3124 scalar/LIKE cases matched official SQLite
+--- PASS: TestExpressionReviewOracleNested (0.63s)
+    expression_review_oracle_test.go:88: 2404 scalar/LIKE cases matched official SQLite
+--- PASS: TestExpressionReviewOracleCastTextPrefixes (0.09s)
+    expression_review_oracle_test.go:109: checked 151 CAST typename keyword acceptance cases
+--- PASS: TestExpressionReviewOracleCastKeywordGrammar (0.60s)
+--- PASS: TestExpressionReviewConstantInErrors (0.00s)
+--- PASS: TestExpressionReviewCastContextualTypenames (0.00s)
+--- PASS: TestExpressionReviewCaseBetweenEvaluationOrder (0.00s)
+--- PASS: TestExpressionReviewImmutableRewriteAllChildren (0.01s)
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	1.775s
+--- PASS: TestSQLExpressionFeaturesDMLBindingDefaults (0.01s)
+--- PASS: TestSQLExpressionFeaturesNullOrdering (0.00s)
+--- PASS: TestSQLExpressionFeaturesVectorStorageIdentity (0.00s)
+--- PASS: TestSQLExpressionFeaturesConstantInAliases (0.00s)
+--- PASS: TestExpressionReviewPhysicalUntypedAliasIdentity (0.00s)
+--- PASS: TestExpressionReviewBoundTreeIsolation (0.00s)
+--- PASS: TestExpressionReviewStatementUndoAndDefaults (0.00s)
+--- PASS: TestExpressionReviewRepresentationAliasFamilies (0.00s)
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.036s
+--- PASS: TestDriverExpressionFeaturesPreparedTransactions (0.00s)
+--- PASS: TestDriverExpressionReviewBindOwnershipReopen (0.00s)
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.011s
+
+Separate CGO1 race selected results
+Ordinary test source-reference guard PASS; behavioral review is still required.
+--- PASS: TestExpressionFeaturesValues (0.01s)
+--- PASS: TestExpressionFeaturesEvaluationAndCancellation (0.00s)
+--- PASS: TestExpressionFeaturesParserAndWalkers (0.00s)
+--- PASS: TestExpressionFeaturesResourceBounds (0.13s)
+--- PASS: TestExpressionFeaturesTypedExternalTextIdentity (0.00s)
+--- PASS: TestExpressionFeaturesConstantInEvaluation (0.00s)
+--- PASS: TestExpressionReviewConstantInErrors (0.00s)
+--- PASS: TestExpressionReviewCastContextualTypenames (0.00s)
+--- PASS: TestExpressionReviewCaseBetweenEvaluationOrder (0.00s)
+--- PASS: TestExpressionReviewImmutableRewriteAllChildren (0.00s)
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	1.178s
+--- PASS: TestSQLExpressionFeaturesDMLBindingDefaults (0.01s)
+--- PASS: TestSQLExpressionFeaturesNullOrdering (0.01s)
+--- PASS: TestSQLExpressionFeaturesVectorStorageIdentity (0.01s)
+--- PASS: TestSQLExpressionFeaturesConstantInAliases (0.01s)
+--- PASS: TestExpressionReviewPhysicalUntypedAliasIdentity (0.01s)
+--- PASS: TestExpressionReviewBoundTreeIsolation (0.00s)
+--- PASS: TestExpressionReviewStatementUndoAndDefaults (0.01s)
+--- PASS: TestExpressionReviewRepresentationAliasFamilies (0.01s)
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	1.101s
+--- PASS: TestDriverExpressionFeaturesPreparedTransactions (0.01s)
+--- PASS: TestDriverExpressionReviewBindOwnershipReopen (0.01s)
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.045s
+
+Final reviewed production SHA-256
+e0f1047c7cb5fa6b5fe7fae1698c7fbe6ceafdeeaac27f663531ffaa4e56d9ce  internal/sql/ast.go
+453e18d092427a08eefa04766bd9ef54d261836790eb4dbba9989aba69f7abdc  internal/sql/eval.go
+7da18cb7931869cd78344f32e3f59796a5acf68d96565aaea1a73941b19ccf4a  internal/sql/eval_expressions.go
+a79f4505add7485b7142d9ca99a2d5ecf9a22b5c32751d490dac5e6e153d753b  internal/sql/parse_expressions.go
+afb5ac062b54ba4103e915193651f9d4f47c282bcd5488a192bff009a4be3e05  internal/sql/expression_tree.go
+4e3a0a9dbcb918f61a4e6ff2acdeb2fffc6f40eedfcdcf03180a05b41eb6f399  internal/sql/half.go
+fe66ade6f9da7dbd9ebb4a44d8660bd65268304253236574b7d2f50f8135b55b  internal/sql/parser.go
+1f3dbec69ebce7dac51a39a13ddcae267ce8848b561af923317dac7a712b9597  sqlite/query.go
+e9cada52715f3f5f357966f8e15057f6cfbb5d1ab9c5942b023ba43ab39be13d  sqlite/rows.go
+189c8d7541bf1e59dd1d8b32843ee9b65553576b16bad6437a4a1d6ddb994765  sqlite/plan_vector.go
+
+Independently owned test SHA-256
+541033c6efe39dce5d46fa957327a98a45957e95c106fb1a93812c905a3dff84  internal/sql/expression_review_test.go
+98c06c30d9c021c798ab913c6590a5720e7b62a790ee42cc6804e4f58cce07e0  internal/sql/expression_review_oracle_test.go
+0a662d32d06934787089c67412c286feeb6bdc3f553e6080770f0df5502e8f9b  sqlite/expression_review_test.go
+91221fe564802e9da4a4c2d5c493b749311c47ea1b4ed9b984a24cedfcbed312  driver/expression_review_test.go

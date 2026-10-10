@@ -1,0 +1,6 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+CGO_ENABLED=1 go test -race ./internal/sql ./sqlite ./driver -run Test(SQL|Driver)?Expression(Features|Review) -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	1.292s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	1.117s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.070s
+Separate CGO1 race tooling PASS

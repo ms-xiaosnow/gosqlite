@@ -85,7 +85,7 @@ func vectorConstant(e sqlast.Expr) bool {
 // bind. Aliases/ordinals have already been bound by plan. Secondary keys, DESC,
 // arbitrary expression contexts and unlimited sorts keep their original path.
 func (r *Rows) prepareVectorRank() error {
-	if r.table == nil || len(r.order) != 1 || r.order[0].desc || r.limit < 0 {
+	if r.table == nil || len(r.order) != 1 || r.order[0].desc || r.order[0].nulls == sqlast.NullsLast || r.limit < 0 {
 		return nil
 	}
 	key := r.order[0].expr

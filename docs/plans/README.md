@@ -28,7 +28,9 @@ remain code work; unsupported is a safe interim behavior, not removal from goal.
 - Ordinary rowid and leading BINARY ASC equality seeks now exist. Extend to
   inequalities, covering access, reverse/order use and statistics only with
   proven residual/error semantics, reduced work and truthful diagnostics.
-- Introduce scoped immutable binding and composable bounded pull operators before
+- CASE/CAST/BETWEEN/IN-list scalar nodes, SELECT ALL and explicit NULL ordering
+  now exist with immutable boolean binding. Introduce the full scoped relational
+  binding model and composable bounded pull operators before
   JOIN, grouping/aggregates, subqueries, compound SELECT, CTE and windows. All
   operators share one statement snapshot and resource budget.
 - Unify mutation outcomes before general constraints, conflict policies, UPSERT,
@@ -88,3 +90,10 @@ cleanup when mapping retirement fails. Keep DMS/main locks until every view is
 retired, never evict live ownership, and expose a deliberate retry. Current
 fail-closed resource retention can last for the process lifetime; ordinary tests
 and memory state models do not qualify real unmap/close failures.
+
+A later source review found plain Windows metadata probes outside this ownership
+model: generic os.Stat/Lstat/SameFile can internally create handles with discarded
+close outcomes, and native VFS probes do not retain unresolved closes. Fix the
+whole live metadata path with managed/bounded probes; standard cross-build and
+memory-ledger tests did not cover it. This is a code gap, not only a native-test
+availability gap. No data-loss or ordinary-lock-failure claim has been established.

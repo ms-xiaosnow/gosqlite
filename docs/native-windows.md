@@ -164,3 +164,21 @@ native call, and the original view base and owner remain explicitly retained.
 The diagnostic is recorded rather than hidden with type-punning, fabricated
 slice headers, analyzer suppression, or disabled default-vet claims. Native
 execution is still required to validate this unsafe/native boundary.
+
+## Source-review correction: exceptional metadata probes
+
+A later source review on2026-10-10 identified an ownership gap not covered by
+previous portable tests/cross-builds. Common VFS/pager/WAL-index os.Lstat/Stat plus
+os.SameFile paths can cause Go1.27.2 os/types_windows.go:loadFileId to open a raw
+metadata handle and discard its deferred CloseHandle result. Native VFS path
+validation also opens metadata probes and returns close errors without retaining
+an unresolved probe record. These handles are outside the stated managed-close
+accounting. Earlier evidence remains factual, but does not establish all-probe
+exceptional retirement or bounded cleanup.
+
+Windows byte locks are per handle: closing a metadata alias does not itself
+release another handle's locks. No data loss or ordinary locking failure has been
+proven, and no native close/fault experiment was executed. Required corrective
+code is managed/bounded metadata probes across the plain VFS/pager/WAL-index
+call chain, followed by portable laws and separately unrun native qualification.
+The encrypted Windows backend is receiving its own equivalent fix before release.

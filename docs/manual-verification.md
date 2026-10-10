@@ -332,3 +332,15 @@ Semantic cosine-zero/index-budget failures preserve pending state and are not
 physical fault injection. Tests write only synthetic sources and new databases.
 Reports distinguish supplied-export fidelity, exact-distance reference checks,
 actual ANN recall measurements, and acceptance gates that remain NOT_RUN.
+
+## S2 expression prerequisite verification
+
+Final source snapshot db470d2ec208a690202253db840620b219a6abdc isolates existing
+published core plus reviewed expression changes. Tests compare pure scalar and
+ordinary intact-file SQLite3.54 behavior, including original failing IN error,
+alias identity and CAST keyword cases. Official CLI is a test-only oracle; no
+production delegation exists. Guarded ordinary suites exclude manual namespace/
+recovery tags. Logs separately record owner cases, independent review and later
+lead full aggregate; their totals are not independent certifications or full
+SQLite coverage. No physical/native error injection or external DB migration is
+executed. Broad relational S2 and other unsupported SQL remain implementation work.

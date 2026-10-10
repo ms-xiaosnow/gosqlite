@@ -342,3 +342,34 @@ full guarded CGO0 unit/vet/build, CGO1 race, pinned SQLite oracle, four cross-bu
 module/no-CGO and unchanged full-source/fixture checks passed exit0 at
 2026-10-10T14:44:18Z. See native-shared-aggregate.txt. This excludes newer sparse,
 importer, expression and Windows-encrypted code; native runtime remains Linux.
+
+### S2 scalar prerequisites: CASE/CAST/BETWEEN/IN and NULL ordering
+- Delivered: explicit bounded AST/parser/evaluator nodes, lazy CASE/single-value
+  BETWEEN, SQLite CAST affinity/storage-class conversion, IN-list empty/NULL/
+  comparison rules, SELECT ALL and NULLS FIRST/LAST. Shared walkers and immutable
+  boolean binding traverse new trees; source labels and parameter numbering stay
+  stable. This is scalar preparation, not the full relational S2 architecture.
+- Independent review found/fixed three groups: eager error evaluation of constant
+  IN RHS sets longer than2; typeless physical-column identity shadowed by typed
+  aliases; and CAST typename contextual/forbidden keyword classification. All
+  failing regressions are preserved in separate evidence. Typed dense/half/bit/
+  sparse identity through CASE and supported TEXT/BLOB casts is tested; no private
+  codec is reinterpreted as another representation or silently decoded by CAST.
+- Final source compares18,413 scalar values and151 keyword acceptance cases with
+  pinned SQLite, plus28 ordinary rollback/shared-WAL queries and integrity checks.
+  Focused CGO0 unit/vet/build, separate CGO1 race, native/driver/DDL/default/undo/
+  binding/resource/cancellation tests pass. Independent review added5,528 value
+  comparisons and151 keyword cases within those scoped totals.
+- Evidence: sql-expressions.md and s2-expressions-*/s2-expression-independent-review.
+  Lead full aggregate uses immutable treedb470d2ec208a690202253db840620b219a6abdc,
+  including published sparse/importer but excluding later D templates, Windows
+  encrypted coordination, plain metadata repair and typed ANN. Terminal aggregate
+  results are tracked separately, never inferred from focused evidence.
+- Required code remains: full scoped relational binder, composable pull operators,
+  shared nested query budgets, COLLATE, JOIN/subqueries/aggregates/CTEs/windows,
+  broader constraints/DDL and planner/storage work. Restricted physical and
+  independent/native release gates stay open.
+
+S2 isolated full CGO0 unit/vet/build has passed by15:01:56Z; full race/oracle
+phases remain running. See s2-expressions-lead-unit.txt. No terminal aggregate
+or restored/remote result is inferred before observation.

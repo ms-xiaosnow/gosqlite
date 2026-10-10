@@ -240,7 +240,21 @@
     "library_version": 0,
     "verified": "Guarded remote readback/exact mirror, full-history bundle, byte-identical Library readback, clean clone/fsck and original goal hash verified2026-10-10T14:39:00Z. Scoped frozen source unit/race/oracle/vet/full-build/four-crossbuild/module/unchanged-file checks passed14:35:25Z. Exact restored sparse-focused unit/race/oracle plus full vet/build/modules and clean tree passed exit0 at14:39:39Z. Neither focused run is a new full all-package/oracle aggregate.",
     "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38060366944",
-    "remote_ci_status": "IN_PROGRESS, observed2026-10-10T14:39:02Z.",
+    "remote_ci_status": "COMPLETED SUCCESS for exact SHA, updated2026-10-10T14:44:36Z, observed14:47:01Z.",
     "open_gates": "All extended ANN, remaining migration/broad SQL/native encrypted/recovery code; restricted physical and independent release gates remain open."
+  },
+  {
+    "stage": "M9 C resumable native CSV/NDJSON import and verification",
+    "remote_commit": "fa2c5d3b756c519c4b3df67d471f1b552689d35c",
+    "local_commit": "fa2c5d3b756c519c4b3df67d471f1b552689d35c",
+    "tree": "2a7f311b1e29e1f053e9cafc0dd312c403dfa8ee",
+    "bundle_sha256": "e9d9f379d7276264f92f59502552a150c67169c3e5e0e809c22b433171f8afdf",
+    "bundle_bytes": 1487742,
+    "library_file_id": "libfile_f617bdc0f7bc819183ac67af6758e2f0",
+    "library_version": 0,
+    "verified": "Guarded remote readback, exact mirror, full-history bundle, byte-identical Library readback, clean clone/fsck and original goal hash verified2026-10-10T14:47:17Z. Final isolated C component/review unit/race/parser/vet/build/example and complete immutable hashes passed; full production vet/build/four crossbuild/module/source checks passed14:44:04Z. Exact restored importer/CLI unit/race, full vet/build, synthetic example/module and clean tree passed exit0 at14:48:04Z. Focused scopes are not full restored all-package/oracle evidence.",
+    "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38060963458",
+    "remote_ci_status": "COMPLETED SUCCESS for exact SHA, updated2026-10-10T14:57:37Z, observed2026-10-10T15:00:27Z.",
+    "open_gates": "Server schema/dependency behavior, transition tooling/full-table migration and extended ANN/broad SQL/recovery/native-platform code remain; crash/physical and independent acceptance gates stay open."
   }
 ]

@@ -1,0 +1,263 @@
+Exact Library-restored C checkpoint importer/CLI focused checks; distinct from full all-package validation.
+2026-10-10T14:47:17Z
+fa2c5d3b756c519c4b3df67d471f1b552689d35c
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	2.511s
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.039s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	18.698s
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	1.274s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+[
+  {
+    "Format": "csv",
+    "Input": "/tmp/gosqlite-pgembedding-851042679/source.csv",
+    "Manifest": "/tmp/gosqlite-pgembedding-851042679/csv-manifest.json",
+    "Database": "/tmp/gosqlite-pgembedding-851042679/csv.db",
+    "DryRun": {
+      "format_version": 1,
+      "status": "dry_run_validated",
+      "dry_run": true,
+      "source_records": 64,
+      "accepted": 64,
+      "rejected": 0,
+      "cursor_offset": 2284,
+      "committed_batches": 0,
+      "source_sha256": "342132fca3c12d2fe2db52d87465f579221b280b9bf5d91ffc390ff1172c5fa2",
+      "canonical_sha256": "0d205ed7f5d3b19df1b1fb70d3329b87e34e559ca4a0a9d52885597de91db6fd",
+      "decimal_fidelity": "roundtrip_binary32",
+      "vectors": [
+        {
+          "field": "embedding",
+          "nulls": 0,
+          "non_nulls": 64,
+          "zero_norms": 0,
+          "min_norm": 1.401298464324817e-45,
+          "max_norm": 42.744735708192714
+        }
+      ],
+      "rejected_pks": [],
+      "missing_pks": null,
+      "rejections_without_pk": 0,
+      "exact_distances": "not_run; separate from data fidelity",
+      "ann_recall": "not_run; separate from data fidelity"
+    },
+    "Paused": {
+      "format_version": 1,
+      "status": "paused_committed",
+      "dry_run": false,
+      "source_records": 8,
+      "accepted": 8,
+      "rejected": 0,
+      "cursor_offset": 304,
+      "committed_batches": 1,
+      "source_sha256": "342132fca3c12d2fe2db52d87465f579221b280b9bf5d91ffc390ff1172c5fa2",
+      "canonical_sha256": "323ac0387c7e2ff2df5ed643ca4661aad9234d9fa34d7d7a48691e5ac5fc69af",
+      "decimal_fidelity": "roundtrip_binary32",
+      "vectors": [
+        {
+          "field": "embedding",
+          "nulls": 0,
+          "non_nulls": 0,
+          "zero_norms": 0,
+          "min_norm": 0,
+          "max_norm": 0
+        }
+      ],
+      "rejected_pks": [],
+      "missing_pks": null,
+      "rejections_without_pk": 0,
+      "exact_distances": "not_run; separate from data fidelity",
+      "ann_recall": "not_run; separate from data fidelity"
+    },
+    "Complete": {
+      "format_version": 1,
+      "status": "complete_verified",
+      "dry_run": false,
+      "source_records": 64,
+      "accepted": 64,
+      "rejected": 0,
+      "cursor_offset": 2284,
+      "committed_batches": 5,
+      "source_sha256": "342132fca3c12d2fe2db52d87465f579221b280b9bf5d91ffc390ff1172c5fa2",
+      "canonical_sha256": "0d205ed7f5d3b19df1b1fb70d3329b87e34e559ca4a0a9d52885597de91db6fd",
+      "database_canonical_sha256": "0d205ed7f5d3b19df1b1fb70d3329b87e34e559ca4a0a9d52885597de91db6fd",
+      "decimal_fidelity": "roundtrip_binary32",
+      "vectors": [
+        {
+          "field": "embedding",
+          "nulls": 0,
+          "non_nulls": 64,
+          "zero_norms": 0,
+          "min_norm": 1.401298464324817e-45,
+          "max_norm": 42.744735708192714
+        }
+      ],
+      "rejected_pks": [],
+      "missing_pks": [],
+      "rejections_without_pk": 0,
+      "exact_distances": "not_run; separate from data fidelity",
+      "ann_recall": "not_run; separate from data fidelity"
+    },
+    "Verified": {
+      "format_version": 1,
+      "status": "complete_verified",
+      "dry_run": false,
+      "source_records": 64,
+      "accepted": 64,
+      "rejected": 0,
+      "cursor_offset": 2284,
+      "committed_batches": 5,
+      "source_sha256": "342132fca3c12d2fe2db52d87465f579221b280b9bf5d91ffc390ff1172c5fa2",
+      "canonical_sha256": "0d205ed7f5d3b19df1b1fb70d3329b87e34e559ca4a0a9d52885597de91db6fd",
+      "database_canonical_sha256": "0d205ed7f5d3b19df1b1fb70d3329b87e34e559ca4a0a9d52885597de91db6fd",
+      "decimal_fidelity": "roundtrip_binary32",
+      "vectors": [
+        {
+          "field": "embedding",
+          "nulls": 0,
+          "non_nulls": 64,
+          "zero_norms": 0,
+          "min_norm": 1.401298464324817e-45,
+          "max_norm": 42.744735708192714
+        }
+      ],
+      "rejected_pks": [],
+      "missing_pks": [],
+      "rejections_without_pk": 0,
+      "exact_distances": "not_run; separate from data fidelity",
+      "ann_recall": "not_run; separate from data fidelity"
+    },
+    "HNSWRecallAt4": 1,
+    "IVFRecallAt4": 1,
+    "HNSWPlan": "SEARCH items; vector_field=embedding; vector_metric=l2; dimensions=2; limit=4; exact=false; distance_order=ASC,rowid_ASC; null_candidates=excluded; reason=lazy HNSW traversal with original WHERE and exact base-row rescoring; method=hnsw; indexes=[items_hnsw]; ann_opclass=vector_l2_ops; ann_generation=1; ef_search=64; max_ef_search=1000; effective_ef=64; lists=0; probes=0; max_probes=0; effective_probes=0; training_state=; ann_stop=eligible_limit_satisfied; ann_fallback=",
+    "IVFPlan": "SEARCH items; vector_field=embedding; vector_metric=l2; dimensions=2; limit=4; exact=false; distance_order=ASC,rowid_ASC; null_candidates=excluded; reason=lazy IVFFlat selected-list ranges with original WHERE and exact base-row rescoring; method=ivfflat; indexes=[items_ivf]; ann_opclass=vector_l2_ops; ann_generation=1; ef_search=0; max_ef_search=0; effective_ef=0; lists=4; probes=1; max_probes=1; effective_probes=1; training_state=ready; ann_stop=eligible_limit_satisfied; ann_fallback="
+  },
+  {
+    "Format": "ndjson",
+    "Input": "/tmp/gosqlite-pgembedding-851042679/source.ndjson",
+    "Manifest": "/tmp/gosqlite-pgembedding-851042679/ndjson-manifest.json",
+    "Database": "/tmp/gosqlite-pgembedding-851042679/ndjson.db",
+    "DryRun": {
+      "format_version": 1,
+      "status": "dry_run_validated",
+      "dry_run": true,
+      "source_records": 64,
+      "accepted": 64,
+      "rejected": 0,
+      "cursor_offset": 3992,
+      "committed_batches": 0,
+      "source_sha256": "d676e64e4b811d4ce49071955f25b527fd829d896434ec50d149d8993ec2bd69",
+      "canonical_sha256": "0d205ed7f5d3b19df1b1fb70d3329b87e34e559ca4a0a9d52885597de91db6fd",
+      "decimal_fidelity": "roundtrip_binary32",
+      "vectors": [
+        {
+          "field": "embedding",
+          "nulls": 0,
+          "non_nulls": 64,
+          "zero_norms": 0,
+          "min_norm": 1.401298464324817e-45,
+          "max_norm": 42.744735708192714
+        }
+      ],
+      "rejected_pks": [],
+      "missing_pks": null,
+      "rejections_without_pk": 0,
+      "exact_distances": "not_run; separate from data fidelity",
+      "ann_recall": "not_run; separate from data fidelity"
+    },
+    "Paused": {
+      "format_version": 1,
+      "status": "paused_committed",
+      "dry_run": false,
+      "source_records": 8,
+      "accepted": 8,
+      "rejected": 0,
+      "cursor_offset": 500,
+      "committed_batches": 1,
+      "source_sha256": "d676e64e4b811d4ce49071955f25b527fd829d896434ec50d149d8993ec2bd69",
+      "canonical_sha256": "323ac0387c7e2ff2df5ed643ca4661aad9234d9fa34d7d7a48691e5ac5fc69af",
+      "decimal_fidelity": "roundtrip_binary32",
+      "vectors": [
+        {
+          "field": "embedding",
+          "nulls": 0,
+          "non_nulls": 0,
+          "zero_norms": 0,
+          "min_norm": 0,
+          "max_norm": 0
+        }
+      ],
+      "rejected_pks": [],
+      "missing_pks": null,
+      "rejections_without_pk": 0,
+      "exact_distances": "not_run; separate from data fidelity",
+      "ann_recall": "not_run; separate from data fidelity"
+    },
+    "Complete": {
+      "format_version": 1,
+      "status": "complete_verified",
+      "dry_run": false,
+      "source_records": 64,
+      "accepted": 64,
+      "rejected": 0,
+      "cursor_offset": 3992,
+      "committed_batches": 5,
+      "source_sha256": "d676e64e4b811d4ce49071955f25b527fd829d896434ec50d149d8993ec2bd69",
+      "canonical_sha256": "0d205ed7f5d3b19df1b1fb70d3329b87e34e559ca4a0a9d52885597de91db6fd",
+      "database_canonical_sha256": "0d205ed7f5d3b19df1b1fb70d3329b87e34e559ca4a0a9d52885597de91db6fd",
+      "decimal_fidelity": "roundtrip_binary32",
+      "vectors": [
+        {
+          "field": "embedding",
+          "nulls": 0,
+          "non_nulls": 64,
+          "zero_norms": 0,
+          "min_norm": 1.401298464324817e-45,
+          "max_norm": 42.744735708192714
+        }
+      ],
+      "rejected_pks": [],
+      "missing_pks": [],
+      "rejections_without_pk": 0,
+      "exact_distances": "not_run; separate from data fidelity",
+      "ann_recall": "not_run; separate from data fidelity"
+    },
+    "Verified": {
+      "format_version": 1,
+      "status": "complete_verified",
+      "dry_run": false,
+      "source_records": 64,
+      "accepted": 64,
+      "rejected": 0,
+      "cursor_offset": 3992,
+      "committed_batches": 5,
+      "source_sha256": "d676e64e4b811d4ce49071955f25b527fd829d896434ec50d149d8993ec2bd69",
+      "canonical_sha256": "0d205ed7f5d3b19df1b1fb70d3329b87e34e559ca4a0a9d52885597de91db6fd",
+      "database_canonical_sha256": "0d205ed7f5d3b19df1b1fb70d3329b87e34e559ca4a0a9d52885597de91db6fd",
+      "decimal_fidelity": "roundtrip_binary32",
+      "vectors": [
+        {
+          "field": "embedding",
+          "nulls": 0,
+          "non_nulls": 64,
+          "zero_norms": 0,
+          "min_norm": 1.401298464324817e-45,
+          "max_norm": 42.744735708192714
+        }
+      ],
+      "rejected_pks": [],
+      "missing_pks": [],
+      "rejections_without_pk": 0,
+      "exact_distances": "not_run; separate from data fidelity",
+      "ann_recall": "not_run; separate from data fidelity"
+    },
+    "HNSWRecallAt4": 1,
+    "IVFRecallAt4": 1,
+    "HNSWPlan": "SEARCH items; vector_field=embedding; vector_metric=l2; dimensions=2; limit=4; exact=false; distance_order=ASC,rowid_ASC; null_candidates=excluded; reason=lazy HNSW traversal with original WHERE and exact base-row rescoring; method=hnsw; indexes=[items_hnsw]; ann_opclass=vector_l2_ops; ann_generation=1; ef_search=64; max_ef_search=1000; effective_ef=64; lists=0; probes=0; max_probes=0; effective_probes=0; training_state=; ann_stop=eligible_limit_satisfied; ann_fallback=",
+    "IVFPlan": "SEARCH items; vector_field=embedding; vector_metric=l2; dimensions=2; limit=4; exact=false; distance_order=ASC,rowid_ASC; null_candidates=excluded; reason=lazy IVFFlat selected-list ranges with original WHERE and exact base-row rescoring; method=ivfflat; indexes=[items_ivf]; ann_opclass=vector_l2_ops; ann_generation=1; ef_search=0; max_ef_search=0; effective_ef=0; lists=4; probes=1; max_probes=1; effective_probes=1; training_state=ready; ann_stop=eligible_limit_satisfied; ann_fallback="
+  }
+]
+all modules verified
+2026-10-10T14:48:04Z
+IMPORT LIBRARY RESTORE FOCUSED CHECKS PASS

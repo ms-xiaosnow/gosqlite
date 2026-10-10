@@ -21,6 +21,10 @@ type EvalContext struct {
 	Params   []any
 	Resolver func(table, name string) (any, error)
 	Affinity func(table, name string) string
+	// ConstantColumn reports a bound constant result alias, never a physical
+	// column whose current row value happens to be known. Used by IN-list
+	// evaluation to preserve SQLite's constant-RHS error behavior.
+	ConstantColumn func(table, name string) bool
 	// DeclaredType preserves representation identity separately from SQL affinity.
 	// Derived aliases may return a closed vector/halfvec/bit/mixed kind tag.
 	DeclaredType func(table, name string) string
@@ -30,6 +34,11 @@ type EvalContext struct {
 func Eval(e Expr, ctx *EvalContext) (any, error) {
 	if ctx == nil {
 		ctx = &EvalContext{}
+	}
+	if ctx.Context != nil {
+		if err := ctx.Context.Err(); err != nil {
+			return nil, err
+		}
 	}
 	switch x := e.(type) {
 	case *Literal:
@@ -234,6 +243,18 @@ func Eval(e Expr, ctx *EvalContext) (any, error) {
 			matched = !matched
 		}
 		return boolean(matched), nil
+	case *Case:
+		return evalCase(x, ctx)
+	case *Cast:
+		v, err := Eval(x.Expr, ctx)
+		if err != nil {
+			return nil, err
+		}
+		return castValue(v, x.Type), nil
+	case *Between:
+		return evalBetween(x, ctx)
+	case *InList:
+		return evalInList(x, ctx)
 	case *Call:
 		name := FoldName(x.Name)
 		if name == "coalesce" || name == "ifnull" {
@@ -586,10 +607,11 @@ func ApplyAffinity(v any, declared string) (any, error) {
 }
 func comparisonAffinity(ae, be Expr, a, b any, ctx *EvalContext) (any, any, error) {
 	affinity := func(e Expr) string {
-		if c, ok := e.(*Column); ok && ctx.Affinity != nil {
-			return AffinityType(ctx.Affinity(c.Table, c.Name))
+		a := ExpressionAffinity(e, ctx.Affinity)
+		if a == "" {
+			return ""
 		}
-		return ""
+		return AffinityType(a)
 	}
 	aa, ba := affinity(ae), affinity(be)
 	num := func(s string) bool { return s == "INTEGER" || s == "REAL" || s == "NUMERIC" }

@@ -1,0 +1,11 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+CGO_ENABLED=0 SQLITE_ORACLE=pinned-3540000 go test -tags oracle ./internal/testkit -run ^TestOracleExpressionFeatures -count=1 -v
+=== RUN   TestOracleExpressionFeaturesQueries
+=== RUN   TestOracleExpressionFeaturesQueries/false
+=== RUN   TestOracleExpressionFeaturesQueries/true
+--- PASS: TestOracleExpressionFeaturesQueries (0.09s)
+    --- PASS: TestOracleExpressionFeaturesQueries/false (0.04s)
+    --- PASS: TestOracleExpressionFeaturesQueries/true (0.04s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	0.091s
+Ordinary database oracle PASS
