@@ -52,6 +52,7 @@ var (
 // leases, including unreachable poisoned children. Global retention prevents an
 // os.File finalizer from releasing unresolved native locks or directory pins.
 type managedFile struct {
+	managedOwnership
 	mu                     sync.Mutex
 	raw                    *os.File
 	path                   string
@@ -267,11 +268,11 @@ func encryptedWinValidateOpened(f *managedFile) (*managedFile, error) {
 		err = encryptedWinLocal(windows.Handle(f.raw.Fd()))
 	}
 	if err != nil {
-		return nil, errors.Join(err, f.Close())
+		return f, err
 	}
 	return f, nil
 }
-func openDirectory(path string) (*managedFile, error) {
+func nativeOpenDirectory(path string) (*managedFile, error) {
 	if err := supported(); err != nil {
 		return nil, err
 	}
@@ -293,7 +294,9 @@ func openDirectory(path string) (*managedFile, error) {
 	return encryptedWinValidateOpened(encryptedWinAdopt(h, path, true, false, nil))
 }
 func encryptedWinOpenAt(dir *managedFile, name string, flags int, root, metadata, rename bool) (*managedFile, error) {
-	return encryptedWinOpenAtPolicy(dir, name, flags, root, metadata, rename, false)
+	return scopedNativeOpen(dir, func() (*managedFile, error) {
+		return encryptedWinOpenAtPolicy(dir, name, flags, root, metadata, rename, false)
+	})
 }
 func encryptedWinOpenAtPolicy(dir *managedFile, name string, flags int, root, metadata, rename, retained bool) (*managedFile, error) {
 	directory := name == "."
@@ -382,26 +385,8 @@ func encryptedWinOpenAtPolicy(dir *managedFile, name string, flags int, root, me
 	dir.mu.Unlock()
 	return encryptedWinValidateOpened(f)
 }
-func openFileAt(dir *managedFile, name string, flags int) (*managedFile, error) {
-	return encryptedWinOpenAt(dir, name, flags, false, false, false)
-}
-func openRootFileAt(dir *managedFile, name string, flags int) (*managedFile, error) {
-	return encryptedWinOpenAt(dir, name, flags, true, false, false)
-}
-func openFile(path string, flags int) (*managedFile, error) {
-	d, err := openDirectory(filepath.Dir(path))
-	if err != nil {
-		return nil, err
-	}
-	f, err := openFileAt(d, filepath.Base(path), flags)
-	closeErr := d.Close()
-	if err != nil {
-		return nil, encryptedWinJoin(err, closeErr)
-	}
-	if closeErr != nil {
-		return nil, errors.Join(closeErr, f.Close())
-	}
-	return f, nil
+func nativeOpenFileAt(dir *managedFile, name string, flags int, root bool) (*managedFile, error) {
+	return encryptedWinOpenAtPolicy(dir, name, flags, root, false, false, false)
 }
 func validateFile(info os.FileInfo) error {
 	if !info.Mode().IsRegular() {
@@ -439,7 +424,7 @@ func platformDirectoryCheck(f *managedFile, path string, _ os.FileInfo) error {
 		err = ErrChanged
 	}
 	f.mu.Unlock()
-	return errors.Join(err, probe.Close())
+	return closeResult(probe, err)
 }
 
 func platformFileCheck(f *managedFile, path string, info os.FileInfo) error {
@@ -479,14 +464,16 @@ func stableFileAt(dir *managedFile, name string, f *managedFile, info os.FileInf
 		}
 	}
 	f.mu.Unlock()
-	return errors.Join(err, probe.Close())
+	return closeResult(probe, err)
 }
 
 // A child can continue using its pinned parent after the parent's public
 // lease closes. The child count and actual handle are checked under one mutex;
 // the public closed bit is never temporarily cleared.
 func encryptedWinMetadataAt(dir *managedFile, name string) (*managedFile, error) {
-	return encryptedWinOpenAtPolicy(dir, name, os.O_RDONLY, false, true, false, true)
+	return scopedNativeOpen(dir, func() (*managedFile, error) {
+		return encryptedWinOpenAtPolicy(dir, name, os.O_RDONLY, false, true, false, true)
+	})
 }
 func lockFile(f *managedFile, readOnly bool) error {
 	return rangeLock(f, lifecycleByte, readOnly, false)
@@ -526,7 +513,7 @@ func renameAbsent(old, new string) error {
 	if err != nil {
 		return err
 	}
-	return errors.Join(renameFileAt(d, filepath.Base(old), filepath.Base(new), true), d.Close())
+	return closeResult(d, renameFileAt(d, filepath.Base(old), filepath.Base(new), true))
 }
 func renameFileAt(dir *managedFile, old, new string, absent bool) error {
 	if old == new {
@@ -549,11 +536,11 @@ func renameFileAt(dir *managedFile, old, new string, absent bool) error {
 		err = stableFileAt(dir, old, source, info)
 	}
 	if err != nil {
-		return errors.Join(err, source.Close())
+		return closeResult(source, err)
 	}
 	name, err := windows.UTF16FromString(new)
 	if err != nil {
-		return errors.Join(err, source.Close())
+		return closeResult(source, err)
 	}
 	ri := encryptedWinRename{bytes: uint32((len(name) - 1) * 2)}
 	copy(ri.name[:], name)
@@ -577,10 +564,10 @@ func renameFileAt(dir *managedFile, old, new string, absent bool) error {
 			if dest.id != source.id {
 				err = ErrChanged
 			}
-			err = errors.Join(err, dest.Close())
+			err = closeResult(dest, err)
 		}
 	}
-	return errors.Join(encryptedWinError("rename encrypted relative", new, err), source.Close())
+	return closeResult(source, encryptedWinError("rename encrypted relative", new, err))
 }
 
 func replaceFile(old, new string) error {
@@ -591,7 +578,7 @@ func replaceFile(old, new string) error {
 	if err != nil {
 		return err
 	}
-	return errors.Join(renameFileAt(d, filepath.Base(old), filepath.Base(new), false), d.Close())
+	return closeResult(d, renameFileAt(d, filepath.Base(old), filepath.Base(new), false))
 }
 
 // Preserve os.IsNotExist/IsExist classification when cleanup itself succeeded;
@@ -625,7 +612,7 @@ func canonicalPath(path string) (string, error) {
 	d.mu.Lock()
 	parent, err := encryptedWinFinalPath(windows.Handle(d.raw.Fd()))
 	d.mu.Unlock()
-	err = encryptedWinJoin(err, d.Close())
+	err = closeResult(d, err)
 	if err != nil {
 		return "", err
 	}
@@ -642,11 +629,11 @@ func platformPathInfo(path string) (os.FileInfo, error) {
 	}
 	f, err := encryptedWinMetadataAt(d, filepath.Base(path))
 	if err != nil {
-		return nil, encryptedWinJoin(err, d.Close())
+		return nil, closeResult(d, err)
 	}
 	info, err := f.Stat()
-	err = encryptedWinJoin(err, f.Close())
-	err = encryptedWinJoin(err, d.Close())
+	err = closeResult(f, err)
+	err = closeResult(d, err)
 	if err != nil {
 		return nil, err
 	}

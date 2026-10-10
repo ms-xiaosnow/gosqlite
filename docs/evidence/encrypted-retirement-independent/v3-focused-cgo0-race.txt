@@ -1,0 +1,25 @@
++ for cgo in 0 1
++ export CGO_ENABLED=0
++ CGO_ENABLED=0
++ ../toolchains/go1.27.2/bin/go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ raceflag=
++ '[' 0 = 1 ']'
++ ../toolchains/go1.27.2/bin/go test -count=1 ./internal/encstore ./internal/pager ./sqlite ./driver -run '^(TestEncryptedCleanupMemory.*|TestEncryptedManagedStatusMemory.*|TestEncryptedSessionCloseMemory.*|TestExactByteLocksMemory.*|TestProcessByteLocksMemory.*|TestEncryptedHandleLifetimeMemory.*|TestSnapshotManifestCanonicalMemory|TestWALFormatFrozenMemoryVectors|TestSharedLayoutFrozenMemoryModeAndProtocol|TestEncryptedCleanupOrdinaryAllModesCloseAndProviders|TestEncryptionOrdinaryLifecycleAndCopies|TestEncryptedPagerWALFinalDirtySegments|TestEncryptionPasswordNormalReopen|TestEncryptionSharedCloseBusyAndPasswordRefresh|TestEncryptedConnectorOrdinaryLifecycle|TestEncryptedSharedConnectorIndependentPoolSnapshots)$'
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	0.062s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.027s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.605s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.017s
++ for cgo in 0 1
++ export CGO_ENABLED=1
++ CGO_ENABLED=1
++ ../toolchains/go1.27.2/bin/go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ raceflag=
++ '[' 1 = 1 ']'
++ raceflag=-race
++ ../toolchains/go1.27.2/bin/go test -race -count=1 ./internal/encstore ./internal/pager ./sqlite ./driver -run '^(TestEncryptedCleanupMemory.*|TestEncryptedManagedStatusMemory.*|TestEncryptedSessionCloseMemory.*|TestExactByteLocksMemory.*|TestProcessByteLocksMemory.*|TestEncryptedHandleLifetimeMemory.*|TestSnapshotManifestCanonicalMemory|TestWALFormatFrozenMemoryVectors|TestSharedLayoutFrozenMemoryModeAndProtocol|TestEncryptedCleanupOrdinaryAllModesCloseAndProviders|TestEncryptionOrdinaryLifecycleAndCopies|TestEncryptedPagerWALFinalDirtySegments|TestEncryptionPasswordNormalReopen|TestEncryptionSharedCloseBusyAndPasswordRefresh|TestEncryptedConnectorOrdinaryLifecycle|TestEncryptedSharedConnectorIndependentPoolSnapshots)$'
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	1.366s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.075s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	3.932s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.112s

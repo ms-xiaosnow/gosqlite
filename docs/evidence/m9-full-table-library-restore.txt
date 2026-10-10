@@ -1,0 +1,21 @@
+Exact Library-restored full-table checkpoint; future encrypted/Boolean/range code excluded.
+Audited synthetic review generator/CLI, unchanged importer intact fixtures only. No external database/server/SQL or restricted physical scenarios.
+883999c35b29ed31b4c4e0e3d66712b4a8ed996c
+2026-10-10T18:48:49Z
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	3.486s
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.102s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/migration-full-table	0.025s
+?   	github.com/ms-xiaosnow/gosqlite/examples/migration-transition	[no test files]
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	35.879s
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	1.667s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/migration-full-table	1.162s
+?   	github.com/ms-xiaosnow/gosqlite/examples/migration-transition	[no test files]
+cross-build linux/arm64 PASS
+cross-build darwin/arm64 PASS
+cross-build windows/amd64 PASS
+cross-build windows/arm64 PASS
+all modules verified
+2026-10-10T18:50:23Z
+EXACT FULL-TABLE LIBRARY RESTORE CHECKS PASS

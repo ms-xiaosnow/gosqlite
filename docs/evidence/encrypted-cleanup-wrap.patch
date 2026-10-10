@@ -1,0 +1,19 @@
+--- a/sqlite/sqlite.go
++++ b/sqlite/sqlite.go
+@@ -73,6 +73,7 @@
+ 	if err == nil {
+ 		return nil
+ 	}
++	err = classifyEncryptedCleanup(err)
+ 	var unsupported *sqlast.ErrUnsupported
+ 	if errors.Is(err, record.ErrCorrupt) || errors.Is(err, ann.ErrCorrupt) || errors.Is(err, encryption.ErrFormat) || errors.Is(err, encryption.ErrIdentity) {
+ 		err = fmt.Errorf("%w: %w", ErrCorrupt, err)
+@@ -365,6 +366,8 @@
+ // Open iterators subsequently report ErrClosed. Repeated calls are idempotent
+ // after retirement. Native WALShared Close may return ErrCloseCleanupPending;
+ // call Close again or RetryCloseCleanup to retry its retained managed owners.
++// Encrypted Close may instead return ErrEncryptedCleanupPending; call Close
++// again or RetryEncryptedCleanup to retry that connection's retained owners.
+ // Rows/transaction invalidation occurs only on the first call.
+ func (d *DB) Close() error {
+ 	d.mu.Lock()

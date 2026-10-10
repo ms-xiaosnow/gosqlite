@@ -115,11 +115,16 @@ func encryptedDarwinDropParent(parent *managedFile) error {
 		return nil
 	}
 	if parent.children <= 0 {
-		return ErrPoisoned
+		return managedRetirementError(parent, ErrPoisoned)
 	}
 	parent.children--
 	if parent.closed {
-		return parent.closeHeld()
+		if err := parent.closeHeld(); err != nil {
+			return managedRetirementError(parent, err)
+		}
+	}
+	if parent.retirementCompleteHeld() {
+		managedRetirementComplete(parent)
 	}
 	return nil
 }
@@ -164,10 +169,6 @@ func encryptedDarwinOpenHeld(parent *managedFile, path, name string, flags int, 
 				if !darwinfile.Process.Reuse(d.record) {
 					continue
 				}
-				if _, e := d.raw.Seek(0, io.SeekStart); e != nil {
-					cleanup := darwinfile.Process.Retire(d.record)
-					return nil, errors.Join(e, encryptedDarwinError(cleanup))
-				}
 				f := &managedFile{descriptor: d}
 				d.idle = false
 				d.lease = f
@@ -178,13 +179,16 @@ func encryptedDarwinOpenHeld(parent *managedFile, path, name string, flags int, 
 					parent.children++
 					d.parent = parent
 					if e := encryptedDarwinDropParent(previous); e != nil {
-						f.closed = true
-						return nil, errors.Join(e, f.closeHeld())
+						return f, e
 					}
 				}
+				// Reuse already acquired a new lease. Return that owner on every
+				// validation failure so the common boundary can register it first.
+				if _, e := d.raw.Seek(0, io.SeekStart); e != nil {
+					return f, e
+				}
 				if e := encryptedDarwinInspect(d); e != nil {
-					f.closed = true
-					return nil, errors.Join(e, f.closeHeld())
+					return f, e
 				}
 				return f, nil
 			}
@@ -206,13 +210,22 @@ func encryptedDarwinOpenHeld(parent *managedFile, path, name string, flags int, 
 	}
 	var st unix.Stat_t
 	if e = encryptedDarwinStat(fd, &st); e != nil {
+		retired := false
 		cleanup := darwinfile.Process.Quarantine(func() error { return unix.Close(fd) }, func(err error) error {
 			if err == nil {
-				return encryptedDarwinDropParent(parent)
+				err = encryptedDarwinDropParent(parent)
+				retired = err == nil
+				return err
 			}
 			return nil
 		})
-		return nil, errors.Join(ErrPoisoned, e, cleanup)
+		failure := errors.Join(ErrPoisoned, e, cleanup)
+		if !retired {
+			// The process registry owns this unidentifiable resource. This
+			// terminal marker never exposes or retries the numeric descriptor.
+			failure = nativeOwnershipPending(failure)
+		}
+		return nil, failure
 	}
 	id := encryptedDarwinID(&st)
 	n := encryptedDarwinNodes[id]
@@ -227,8 +240,8 @@ func encryptedDarwinOpenHeld(parent *managedFile, path, name string, flags int, 
 	n.locks.attach(&f.locks)
 	d.record, e = darwinfile.Process.Register(id, d.raw.Close, func(err error) error {
 		if err != nil {
-			d.lease.closeErr = encryptedDarwinError(err)
-			return nil
+			d.lease.closeErr = managedTerminalRetirementError(d.lease, encryptedDarwinError(err))
+			return d.lease.closeErr
 		}
 		d.raw = nil
 		delete(n.descriptors, d)
@@ -239,23 +252,25 @@ func encryptedDarwinOpenHeld(parent *managedFile, path, name string, flags int, 
 			d.lease.closeErr = err
 		}
 		d.parent = nil
+		if err == nil && d.lease.retirementCompleteHeld() {
+			managedRetirementComplete(d.lease)
+		}
 		return err
 	})
 	if e == nil {
 		e = encryptedDarwinInspect(d)
 	}
 	if e != nil {
-		f.closed = true
-		return nil, errors.Join(e, f.closeHeld())
+		return f, e
 	}
 	return f, nil
 }
-func openDirectory(path string) (*managedFile, error) {
+func nativeOpenDirectory(path string) (*managedFile, error) {
 	darwinfile.Process.Lock()
 	defer darwinfile.Process.Unlock()
 	return encryptedDarwinOpenHeld(nil, path, "", os.O_RDONLY, true)
 }
-func openFileAt(dir *managedFile, name string, flags int) (*managedFile, error) {
+func nativeOpenFileAt(dir *managedFile, name string, flags int, _ bool) (*managedFile, error) {
 	directory := name == "." && flags == os.O_RDONLY
 	if !directory {
 		if e := encryptedDarwinComponent(name); e != nil {
@@ -270,24 +285,6 @@ func openFileAt(dir *managedFile, name string, flags int) (*managedFile, error) 
 		return nil, e
 	}
 	return encryptedDarwinOpenHeld(dir, filepath.Join(dir.descriptor.path, name), name, flags, directory)
-}
-func openRootFileAt(dir *managedFile, name string, flags int) (*managedFile, error) {
-	return openFileAt(dir, name, flags)
-}
-func openFile(path string, flags int) (*managedFile, error) {
-	d, e := openDirectory(filepath.Dir(path))
-	if e != nil {
-		return nil, e
-	}
-	f, e := openFileAt(d, filepath.Base(path), flags)
-	e = errors.Join(e, d.Close())
-	if e != nil {
-		if f != nil {
-			e = errors.Join(e, f.Close())
-		}
-		return nil, e
-	}
-	return f, nil
 }
 func validateLinks(f *managedFile) error {
 	f.mu.Lock()
@@ -432,7 +429,7 @@ func renameFileAt(dir *managedFile, old, new string, absent bool) (resultErr err
 	if e != nil {
 		return e
 	}
-	defer func() { resultErr = errors.Join(resultErr, source.Close()) }()
+	defer func() { resultErr = closeResult(source, resultErr) }()
 	source.mu.Lock()
 	defer source.mu.Unlock()
 	darwinfile.Process.Lock()
@@ -473,7 +470,7 @@ func encryptedDarwinRename(old, new string, absent bool) error {
 	if e != nil {
 		return e
 	}
-	return errors.Join(renameFileAt(d, filepath.Base(old), filepath.Base(new), absent), d.Close())
+	return closeResult(d, renameFileAt(d, filepath.Base(old), filepath.Base(new), absent))
 }
 func renameAbsent(old, new string) error { return encryptedDarwinRename(old, new, true) }
 func replaceFile(old, new string) error  { return encryptedDarwinRename(old, new, false) }

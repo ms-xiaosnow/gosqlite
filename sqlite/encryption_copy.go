@@ -100,7 +100,7 @@ func (d *DB) ExportPlaintext(ctx context.Context, destination string) (FileInfo,
 // RestoreEncrypted authenticates a complete portable archive and validates its
 // supported logical page ownership before creating an absent destination with
 // fresh target database/epoch/file identities. The archive is never modified.
-func RestoreEncrypted(ctx context.Context, archivePath, destination string, source, target EncryptionOptions) (EncryptionInfo, error) {
+func RestoreEncrypted(ctx context.Context, archivePath, destination string, source, target EncryptionOptions) (_ EncryptionInfo, resultErr error) {
 	if err := checkContext(ctx); err != nil {
 		return EncryptionInfo{}, wrap("encrypted restore", err)
 	}
@@ -114,7 +114,7 @@ func RestoreEncrypted(ctx context.Context, archivePath, destination string, sour
 	if err != nil {
 		return EncryptionInfo{}, wrap("encrypted restore", err)
 	}
-	defer a.Close()
+	defer func() { resultErr = wrap("encrypted restore close", a.CloseWithError(resultErr)) }()
 	validator, err := copyValidator()
 	if err != nil {
 		return EncryptionInfo{}, wrap("encrypted restore", err)

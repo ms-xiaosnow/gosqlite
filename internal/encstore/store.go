@@ -28,6 +28,8 @@ type selection struct {
 
 type Store struct {
 	selection
+	cleanup            *cleanupGroup
+	closed             bool
 	writerIDs          uint64
 	ns                 *namespace
 	path               string
@@ -60,7 +62,7 @@ func rejectPlainSidecars(path string) error {
 	return nil
 }
 
-func acquire(path string, readOnly, create bool, mode Mode) (*Store, bool, error) {
+func acquire(path string, readOnly, create bool, mode Mode) (_ *Store, _ bool, resultErr error) {
 	if err := supported(); err != nil {
 		return nil, false, err
 	}
@@ -93,19 +95,14 @@ func acquire(path string, readOnly, create bool, mode Mode) (*Store, bool, error
 	kept := false
 	defer func() {
 		if !kept {
-			_ = ns.dir.Close()
+			resultErr = ns.group.closeAll(resultErr)
 		}
 	}()
 	f, info, err := ns.checked(path+".gse-lock", flags)
 	if err != nil {
 		return nil, false, err
 	}
-	ok := false
-	defer func() {
-		if !ok {
-			_ = f.Close()
-		}
-	}()
+	ns.group.protect(f)
 	if info.Size() != 0 {
 		return nil, false, ErrUnsupported
 	}
@@ -130,12 +127,11 @@ func acquire(path string, readOnly, create bool, mode Mode) (*Store, bool, error
 	if err = ns.check(); err != nil {
 		return nil, false, err
 	}
-	ok = true
 	kept = true
-	return &Store{path: path, readOnly: readOnly, lock: f, lockInfo: info, ns: ns, lifecycleExclusive: !readOnly && (mode != WALShared || absent)}, absent, nil
+	return &Store{path: path, readOnly: readOnly, lock: f, lockInfo: info, ns: ns, cleanup: ns.group, lifecycleExclusive: !readOnly && (mode != WALShared || absent)}, absent, nil
 }
 
-func Open(ctx context.Context, path string, o Options, readOnly, create bool, initial []byte) (*Store, error) {
+func Open(ctx context.Context, path string, o Options, readOnly, create bool, initial []byte) (_ *Store, resultErr error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
@@ -180,7 +176,7 @@ func Open(ctx context.Context, path string, o Options, readOnly, create bool, in
 	ok := false
 	defer func() {
 		if !ok {
-			_ = s.Close()
+			resultErr = s.CloseWithError(resultErr)
 		}
 	}()
 	if absent {
@@ -253,6 +249,9 @@ func (s *Store) Geometry() Geometry {
 }
 func (s *Store) DatabaseID() [16]byte { return s.header.Epoch.DatabaseID }
 func (s *Store) Check() error {
+	if s.closed {
+		return encryption.ErrClosed
+	}
 	if s.poisoned != nil {
 		return s.poisoned
 	}
@@ -269,10 +268,8 @@ func (s *Store) Check() error {
 		return s.checkSelected()
 	}
 	if s.root == nil {
-		if _, err := platformPathInfo(s.path); !os.IsNotExist(err) {
-			return ErrChanged
-		}
-		return nil
+		_, err := platformPathInfo(s.path)
+		return s.checkAbsentRootResult(err)
 	}
 	if err := s.ns.stable(s.root, s.path, s.rootInfo); err != nil {
 		return err
@@ -285,6 +282,21 @@ func (s *Store) Check() error {
 		return encryption.ErrAuthentication
 	}
 	return s.ns.stable(s.base.file, s.base.path, s.base.info)
+}
+
+// An absent-root probe can itself own an unresolved managed Windows probe.
+// Only an actually present path is ErrChanged; never replace its error token.
+func (s *Store) checkAbsentRootResult(err error) error {
+	if os.IsNotExist(err) {
+		return nil
+	}
+	if err == nil {
+		return ErrChanged
+	}
+	if s.ns != nil {
+		return s.ns.group.remember(err)
+	}
+	return err
 }
 func (s *Store) ReadPage(ctx context.Context, n uint32) ([]byte, error) {
 	if err := s.Check(); err != nil {
@@ -327,24 +339,38 @@ func syncDirectory(path string) error {
 	if err != nil {
 		return err
 	}
-	return errors.Join(f.Sync(), f.Close())
+	return closeResult(f, f.Sync())
 }
-func (s *Store) Close() error {
-	var err error
-	err = s.closeSelection()
+func (s *Store) Close() error { return s.CloseWithError(nil) }
+
+// Logical closure erases crypto readers and master material once. The cleanup
+// scope owns every native lease independently, including discarded temporaries.
+func (s *Store) CloseWithError(cause error) error {
+	if s.closed {
+		if s.cleanup != nil {
+			return s.cleanup.retry()
+		}
+		return nil
+	}
+	s.closed = true
+	cause = errors.Join(cause, s.poisoned)
+	if s.cleanup != nil {
+		cause = s.cleanup.remember(cause)
+	}
+	err := s.closeSelection()
 	if s.master != nil {
 		err = errors.Join(err, s.master.Close())
 		s.master = nil
 	}
-	if s.lock != nil {
-		err = errors.Join(err, s.lock.Close())
-		s.lock = nil
+	s.opts = Options{}
+	s.lock, s.lockInfo, s.ns = nil, nil, nil
+	if s.cleanup == nil {
+		return errors.Join(cause, err)
 	}
-	if s.ns != nil {
-		err = errors.Join(err, s.ns.dir.Close())
-		s.ns = nil
-	}
-	return errors.Join(s.poisoned, err)
+	return s.cleanup.closeAll(errors.Join(cause, err))
+}
+func (s *Store) RetirementComplete() bool {
+	return s.closed && (s.cleanup == nil || s.cleanup.complete())
 }
 
 type Info struct {

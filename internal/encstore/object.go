@@ -38,8 +38,7 @@ func checkedFile(path string, flags int) (*managedFile, os.FileInfo, error) {
 		err = platformFileCheck(f, path, st)
 	}
 	if err != nil {
-		_ = f.Close()
-		return nil, nil, err
+		return nil, nil, closeResult(f, err)
 	}
 	return f, st, nil
 }
@@ -54,13 +53,13 @@ func stableFile(f *managedFile, path string, info os.FileInfo) error {
 	if err = validateLinks(f); err != nil {
 		return err
 	}
-	return platformFileCheck(f, path, info)
+	return f.owner.remember(platformFileCheck(f, path, info))
 }
 func readExact(f io.ReaderAt, size int, off int64) ([]byte, error) {
 	b := make([]byte, size)
 	n, err := f.ReadAt(b, off)
 	if err != nil || n != len(b) {
-		return nil, encryption.ErrFormat
+		return nil, errors.Join(encryption.ErrFormat, err)
 	}
 	return b, nil
 }
@@ -75,11 +74,22 @@ func writeBytes(w io.Writer, b []byte) error {
 	return nil
 }
 func idString(id [32]byte) string { return hex.EncodeToString(id[:]) }
-func (o *object) close() error {
+func (o *object) close() error    { return o.closeWithError(nil) }
+func (o *object) closeWithError(cause error) error {
 	if o == nil {
-		return nil
+		return cause
 	}
-	return errors.Join(o.reader.Close(), o.file.Close())
+	var err error
+	if o.reader != nil {
+		err = o.reader.Close()
+		o.reader = nil
+	}
+	if o.file != nil {
+		err = closeResult(o.file, errors.Join(cause, err))
+		cause = nil
+		o.file = nil
+	}
+	return errors.Join(cause, err)
 }
 func (o *object) geometry() Geometry {
 	return Geometry{o.header.Descriptor.PageSize, o.header.Descriptor.PageCount}
@@ -117,7 +127,7 @@ func (o *object) readPage(ctx context.Context, n uint32) ([]byte, error) {
 // openObject authenticates the complete bounded object before returning any
 // logical page to a pager. Expected child identity/descriptor/hash come only
 // from an authenticated manifest. An archive itself is an authentication root.
-func openObject(ctx context.Context, path string, master *encryption.MasterKey, limits encryption.Limits, expected encryption.FileIdentity, desc *encryption.FileDescriptor, hash *[32]byte, p1 *[32]byte, spaces ...*namespace) (*object, error) {
+func openObject(ctx context.Context, path string, master *encryption.MasterKey, limits encryption.Limits, expected encryption.FileIdentity, desc *encryption.FileDescriptor, hash *[32]byte, p1 *[32]byte, spaces ...*namespace) (_ *object, resultErr error) {
 	ns := chooseNamespace(spaces)
 	f, info, err := ns.checked(path, os.O_RDONLY)
 	if err != nil {
@@ -127,10 +137,7 @@ func openObject(ctx context.Context, path string, master *encryption.MasterKey, 
 	ok := false
 	defer func() {
 		if !ok {
-			if o.reader != nil {
-				_ = o.reader.Close()
-			}
-			_ = f.Close()
+			resultErr = o.closeWithError(resultErr)
 		}
 	}()
 	raw, err := readExact(f, encryption.HeaderSize, 0)
@@ -223,7 +230,7 @@ func openObject(ctx context.Context, path string, master *encryption.MasterKey, 
 
 // writeObject streams bounded page buffers. A new primitive writer supplies a
 // fresh identity for every attempt; existing physical files are never resumed.
-func writeObject(ctx context.Context, pathForID func([32]byte) string, master *encryption.MasterKey, limits encryption.Limits, desc encryption.FileDescriptor, src PageSource, spaces ...*namespace) (*object, error) {
+func writeObject(ctx context.Context, pathForID func([32]byte) string, master *encryption.MasterKey, limits encryption.Limits, desc encryption.FileDescriptor, src PageSource, spaces ...*namespace) (_ *object, resultErr error) {
 	ns := chooseNamespace(spaces)
 	if err := desc.Validate(limits); err != nil {
 		return nil, err
@@ -255,7 +262,7 @@ func writeObject(ctx context.Context, pathForID func([32]byte) string, master *e
 	closed := false
 	defer func() {
 		if !closed {
-			_ = f.Close()
+			resultErr = closeResult(f, resultErr)
 		}
 	}()
 	digest := sha256.New()

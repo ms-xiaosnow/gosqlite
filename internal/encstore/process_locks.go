@@ -7,9 +7,10 @@ import "errors"
 // the callback is native only in the Darwin adapter, and synthetic in tests.
 type processByteOwner struct{ held [3]uint8 }
 type processByteLocks struct {
-	owners   map[*processByteOwner]struct{}
-	kernel   [3]uint8
-	poisoned error
+	owners        map[*processByteOwner]struct{}
+	kernel        [3]uint8
+	poisoned      error
+	cleanupCauses [3]error
 }
 
 func (l *processByteLocks) attach(o *processByteOwner) {
@@ -19,8 +20,11 @@ func (l *processByteLocks) attach(o *processByteOwner) {
 	l.owners[o] = struct{}{}
 }
 func (l *processByteLocks) poison(err error) error {
-	l.poisoned = errors.Join(l.poisoned, ErrPoisoned, err)
-	return l.poisoned
+	if l.poisoned == nil {
+		l.poisoned = errors.Join(ErrPoisoned, err)
+		return l.poisoned
+	}
+	return errors.Join(l.poisoned, l.cleanupCauses[0], l.cleanupCauses[1], l.cleanupCauses[2], err)
 }
 func (l *processByteLocks) any() bool { return l.kernel != [3]uint8{} }
 func (l *processByteLocks) change(o *processByteOwner, offset int64, shared, unlock bool, call byteLockCall) error {
@@ -63,6 +67,9 @@ func (l *processByteLocks) transition(o *processByteOwner, offset int64, shared,
 		if err := call(offset, aggregate == 1, aggregate == 0); err != nil {
 			if !unlock && errors.Is(err, ErrBusy) {
 				return err
+			}
+			if unlock && l.cleanupCauses[offset] == nil {
+				l.cleanupCauses[offset] = err
 			}
 			return l.poison(err)
 		}

@@ -1,0 +1,8 @@
+Implementation collaborator's source review, 2026-10-10. This is not the independent review.
+1. Native step results could carry another scope's parent-retirement token. Corrected: stepLocked adopts it and each stage checks new dependencies before protector retirement.
+2. Delayed Darwin close failure after idle-lease transfer could disappear. Corrected: callbackCause/callbackTerminal atomic state, scope health/acquisition/stage synchronization, and explicit managedTerminalRetirementError propagation from the native retirement hook.
+3. Terminal flag could publish before its diagnostic. Corrected: health/acquisition explicitly reject terminal state even with nil cause.
+4. A later callback token could be overwritten by pending clearing. Corrected: live completion uses CompareAndSwap with the token observed before the attempt.
+5. Normal nil-result deferred parent closure must remain registered without poison. Corrected common closeResource distinction; per-OS descriptor-free status/deferred-parent laws added.
+Native lock-order review: scope -> managed lease -> Darwin process gate; native parent callbacks use atomic helpers only; Windows metadata wrapper enters scope before parent.mu; Darwin rename defers release native gate/file mutex before common Close. Admission status-pruning releases registry gate first and uses TryLock.
+Final exact candidate source hashes are recorded in encrypted-cleanup-source-sha256.txt, whose isolated sqlite.go excludes concurrent SQL Query edits.

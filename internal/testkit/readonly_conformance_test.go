@@ -409,6 +409,8 @@ func TestOracleOrdinaryFreshFixtures(t *testing.T) {
 	path := confFresh(t)
 	defer confUnchanged(t, path)()
 	confRun(t, path, []confCase{
+		// This implemented JOIN was formerly asserted to be unsupported.
+		{name: "self_join_on", query: "SELECT e.id FROM edge e JOIN edge f ON e.id=f.id"},
 		{name: "empty_star", query: "SELECT * FROM empty_table", emptyColumns: []string{"id", "value"}},
 		{name: "empty_sorted", query: "SELECT value AS label FROM empty_table ORDER BY label", emptyColumns: []string{"label"}},
 		{name: "mixed_storage_classes", query: "SELECT id, n, t, r, b, typeof(n), typeof(t), typeof(r), typeof(b) FROM edge ORDER BY id"},
@@ -453,7 +455,7 @@ func TestOracleErrorsAndResources(t *testing.T) {
 			}
 		})
 	}
-	for _, q := range []string{"SELECT DISTINCT id FROM edge", "SELECT id FROM edge UNION SELECT id FROM edge", "SELECT count(*) FROM edge", "SELECT e.id FROM edge e JOIN edge f ON e.id=f.id", "SELECT id FROM edge; SELECT 1", "PRAGMA user_version", "WITH x AS (SELECT 1) SELECT * FROM x"} {
+	for _, q := range []string{"SELECT DISTINCT id FROM edge", "SELECT id FROM edge UNION SELECT id FROM edge", "SELECT count(*) FROM edge", "SELECT e.id FROM edge e JOIN edge f USING(id)", "SELECT id FROM edge; SELECT 1", "PRAGMA user_version", "WITH x AS (SELECT 1) SELECT * FROM x"} {
 		t.Run("unsupported/"+q, func(t *testing.T) {
 			r, err := db.Query(context.Background(), q)
 			if r != nil {

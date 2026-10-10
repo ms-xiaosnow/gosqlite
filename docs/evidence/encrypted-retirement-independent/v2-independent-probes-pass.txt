@@ -1,0 +1,11 @@
++ ../toolchains/go1.27.2/bin/go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ ../toolchains/go1.27.2/bin/go test -count=1 -v ./internal/pager ./internal/encstore -run '^TestIndependentEncrypted(BusyClosePreservesOptions|ReapAdmissionDoesNotWaitOnStatus)$'
+=== RUN   TestIndependentEncryptedBusyClosePreservesOptions
+--- PASS: TestIndependentEncryptedBusyClosePreservesOptions (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.003s
+=== RUN   TestIndependentEncryptedReapAdmissionDoesNotWaitOnStatus
+--- PASS: TestIndependentEncryptedReapAdmissionDoesNotWaitOnStatus (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	0.003s

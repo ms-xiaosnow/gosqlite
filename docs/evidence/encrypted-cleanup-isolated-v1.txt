@@ -1,0 +1,64 @@
+Encrypted cleanup isolated candidate v1, base 69008bf658611318154a112178913c693b679a2b
+Sat Oct 10 18:36:32 UTC 2026
+go version go1.27.2 linux/amd64
+Production: CGO_ENABLED=0 GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off, shared ../go-cache ../go-path; pinned official SQLite oracle available but these selected tests do not invoke it.
+Behavioral audit: all new negative laws use memory-only owners/callbacks. Real database/sql disposal uses synthetic driver connections, no descriptors. Selected native tests use intact correct-key ordinary create/write/read/rollback/BUSY/checkpoint/rekey/backup/restore/export/import/close/reopen. No native failure/corruption/wrong-key/namespace/crash/recovery/interrupted-publication workflows.
+go run ./internal/testscope && go test ./internal/encstore ./internal/pager ./sqlite ./driver -run '^(TestEncryptedCleanupMemory.*|TestEncryptedManagedStatusMemory.*|TestEncryptedSessionCloseMemory.*|TestEncryptedCleanupOrdinaryAllModesCloseAndProviders|TestExactByteLocksMemory.*|TestProcessByteLocksMemory.*|TestSnapshotManifestCanonicalMemory|TestWALFormatFrozenMemoryVectors|TestSharedLayoutFrozenMemoryModeAndProtocol|TestEncryptionOrdinaryLifecycleAndCopies|TestEncryptedPagerWALFinalDirtySegments|TestEncryptionPasswordNormalReopen|TestEncryptionSharedCloseBusyAndPasswordRefresh|TestEncryptedConnectorOrdinaryLifecycle|TestEncryptedSharedConnectorIndependentPoolSnapshots)$' -count=1
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	0.039s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.011s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.584s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.018s
+Same source behavioral audit; race instrumentation only, CGO_ENABLED=1 does not alter production dependency.
+go run ./internal/testscope && CGO_ENABLED=1 go test -race ./internal/encstore ./internal/pager ./sqlite ./driver -run '^(TestEncryptedCleanupMemory.*|TestEncryptedManagedStatusMemory.*|TestEncryptedSessionCloseMemory.*|TestEncryptedCleanupOrdinaryAllModesCloseAndProviders|TestExactByteLocksMemory.*|TestProcessByteLocksMemory.*|TestSnapshotManifestCanonicalMemory|TestWALFormatFrozenMemoryVectors|TestSharedLayoutFrozenMemoryModeAndProtocol|TestEncryptionOrdinaryLifecycleAndCopies|TestEncryptedPagerWALFinalDirtySegments|TestEncryptionPasswordNormalReopen|TestEncryptionSharedCloseBusyAndPasswordRefresh|TestEncryptedConnectorOrdinaryLifecycle|TestEncryptedSharedConnectorIndependentPoolSnapshots)$' -count=1
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	1.202s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.049s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	3.442s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.084s
+CGO_ENABLED=0 go vet ./internal/encstore ./internal/pager ./sqlite ./driver
+CGO_ENABLED=0 go build ./internal/encstore ./internal/pager ./sqlite ./driver
+CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build ./internal/encstore ./internal/pager ./sqlite ./driver (compile only; runtime NOT_RUN)
+GOOS=linux GOARCH=arm64 go test -c ./internal/encstore (compile only; binary never executed)
+GOOS=linux GOARCH=arm64 go test -c ./internal/pager (compile only; binary never executed)
+CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build ./internal/encstore ./internal/pager ./sqlite ./driver (compile only; runtime NOT_RUN)
+GOOS=darwin GOARCH=arm64 go test -c ./internal/encstore (compile only; binary never executed)
+GOOS=darwin GOARCH=arm64 go test -c ./internal/pager (compile only; binary never executed)
+CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build ./internal/encstore ./internal/pager ./sqlite ./driver (compile only; runtime NOT_RUN)
+GOOS=darwin GOARCH=amd64 go test -c ./internal/encstore (compile only; binary never executed)
+GOOS=darwin GOARCH=amd64 go test -c ./internal/pager (compile only; binary never executed)
+CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build ./internal/encstore ./internal/pager ./sqlite ./driver (compile only; runtime NOT_RUN)
+GOOS=windows GOARCH=amd64 go test -c ./internal/encstore (compile only; binary never executed)
+GOOS=windows GOARCH=amd64 go test -c ./internal/pager (compile only; binary never executed)
+docs/encrypted-cleanup.md: OK
+internal/encstore/backup.go: OK
+internal/encstore/cleanup.go: OK
+internal/encstore/cleanup_test.go: OK
+internal/encstore/exact_locks.go: OK
+internal/encstore/file_darwin.go: OK
+internal/encstore/file_default.go: OK
+internal/encstore/file_windows.go: OK
+internal/encstore/managed_open.go: OK
+internal/encstore/managed_status_darwin_test.go: OK
+internal/encstore/managed_status_default_test.go: OK
+internal/encstore/managed_status_windows_test.go: OK
+internal/encstore/namespace.go: OK
+internal/encstore/object.go: OK
+internal/encstore/platform_darwin.go: OK
+internal/encstore/platform_linux.go: OK
+internal/encstore/platform_other.go: OK
+internal/encstore/platform_windows.go: OK
+internal/encstore/process_locks.go: OK
+internal/encstore/publish.go: OK
+internal/encstore/shared.go: OK
+internal/encstore/store.go: OK
+internal/encstore/wal_object.go: OK
+internal/pager/encrypted_close.go: OK
+internal/pager/encrypted_close_test.go: OK
+internal/pager/encrypted_copy.go: OK
+internal/pager/encrypted_session.go: OK
+sqlite/encrypted_cleanup.go: OK
+sqlite/encrypted_cleanup_internal_test.go: OK
+sqlite/encrypted_cleanup_test.go: OK
+sqlite/encryption_copy.go: OK
+sqlite/sqlite.go: OK

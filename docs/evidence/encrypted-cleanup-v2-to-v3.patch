@@ -1,0 +1,14 @@
+--- v2/sqlite/encrypted_cleanup.go
++++ v3/sqlite/encrypted_cleanup.go
+@@ -6,8 +6,9 @@
+ )
+ 
+ // ErrEncryptedCleanupPending marks an immutable historical token for retained
+-// encrypted managed ownership. It also matches ErrPoisoned and uses CodeIOErr.
+-// A close diagnostic without this marker can describe a fully consumed owner.
++// encrypted managed ownership. Errors carrying a cleanup token also match
++// ErrPoisoned and use CodeIOErr; the bare sentinel alone does not. A close
++// diagnostic without this marker can describe a fully consumed owner.
+ var ErrEncryptedCleanupPending = encstore.ErrCleanupPending
+ 
+ // RetryEncryptedCleanup synchronously attempts all distinct encrypted cleanup

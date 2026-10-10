@@ -78,5 +78,7 @@ unmanaged same-inode closes remain outside that protection. Shared-WAL failed
 Open ownership has bounded retention and explicit retry; terminal uncertainty
 can exhaust admission until process exit. No cleanup error authorizes repeated
 raw OS close. Native WALShared successful Close and driver disposal now have a
-separate bounded ownership correction. Rollback, exclusive WAL and encrypted
-lifecycle gaps remain, so whole-public-lifecycle safety is not established.
+separate bounded ownership correction. Encrypted acquisition/selection/copy/session retirement now has bounded scope
+ownership and explicit discovery/retry, with native exceptional branches still
+unexecuted. Rollback Reader/Tx and exclusive-WAL lifecycle gaps remain, so
+whole-public-lifecycle safety is not established.

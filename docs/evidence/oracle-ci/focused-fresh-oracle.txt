@@ -1,0 +1,92 @@
+Behavioral source/helper audit rechecked: docs/evidence/oracle-ci/behavioral-audit.md
+Exact final builder output used. Only the two corrected ordinary test bodies are selected.
+go version go1.27.2 linux/amd64
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestOracleOrdinaryFreshFixtures
+=== RUN   TestOracleOrdinaryFreshFixtures/self_join_on
+    readonly_conformance_test.go:286: SQL: SELECT e.id FROM edge e JOIN edge f ON e.id=f.id
+=== RUN   TestOracleOrdinaryFreshFixtures/empty_star
+    readonly_conformance_test.go:286: SQL: SELECT * FROM empty_table
+=== RUN   TestOracleOrdinaryFreshFixtures/empty_sorted
+    readonly_conformance_test.go:286: SQL: SELECT value AS label FROM empty_table ORDER BY label
+=== RUN   TestOracleOrdinaryFreshFixtures/mixed_storage_classes
+    readonly_conformance_test.go:286: SQL: SELECT id, n, t, r, b, typeof(n), typeof(t), typeof(r), typeof(b) FROM edge ORDER BY id
+=== RUN   TestOracleOrdinaryFreshFixtures/storage_class_sort
+    readonly_conformance_test.go:286: SQL: SELECT n, b FROM edge ORDER BY n, b
+=== RUN   TestOracleOrdinaryFreshFixtures/numeric_compare
+    readonly_conformance_test.go:286: SQL: SELECT id, n='1', n=1, n=t, t=1, t=1.0, r='1' FROM edge ORDER BY id
+=== RUN   TestOracleOrdinaryFreshFixtures/unary_removes_affinity
+    readonly_conformance_test.go:286: SQL: SELECT id, +n='1', +t=1, +r='1' FROM edge ORDER BY id
+=== RUN   TestOracleOrdinaryFreshFixtures/alias_in_order_expression
+    readonly_conformance_test.go:286: SQL: SELECT -id AS id FROM edge ORDER BY id+0
+=== RUN   TestOracleOrdinaryFreshFixtures/alias_simple_order
+    readonly_conformance_test.go:286: SQL: SELECT -id AS id FROM edge ORDER BY id
+=== RUN   TestOracleOrdinaryFreshFixtures/alias_nonconflicting_order
+    readonly_conformance_test.go:286: SQL: SELECT -id AS negative FROM edge ORDER BY negative+0
+=== RUN   TestOracleOrdinaryFreshFixtures/where_alias
+    readonly_conformance_test.go:286: SQL: SELECT id+1 AS plus_one FROM edge WHERE plus_one=2
+=== RUN   TestOracleOrdinaryFreshFixtures/where_alias_shadow
+    readonly_conformance_test.go:286: SQL: SELECT id+1 AS n FROM edge WHERE n=1 ORDER BY id
+=== RUN   TestOracleOrdinaryFreshFixtures/boolean_column_shadow
+    readonly_conformance_test.go:286: SQL: SELECT TRUE,false,TRUE IS TRUE,false IS FALSE FROM boolean_shadow
+=== RUN   TestOracleOrdinaryFreshFixtures/rowid_shadow
+    readonly_conformance_test.go:286: SQL: SELECT id,rowid,_rowid_,oid FROM shadow
+=== RUN   TestOracleOrdinaryFreshFixtures/alter_added_defaults
+    readonly_conformance_test.go:286: SQL: SELECT *,typeof(numeric_default),typeof(real_default) FROM changed ORDER BY id
+=== RUN   TestOracleOrdinaryFreshFixtures/embedded_nul_text
+    readonly_conformance_test.go:286: SQL: SELECT hex(t),length(t),t LIKE 'ab',t LIKE 'ab%' FROM nul_text
+--- PASS: TestOracleOrdinaryFreshFixtures (0.05s)
+    --- PASS: TestOracleOrdinaryFreshFixtures/self_join_on (0.00s)
+    --- PASS: TestOracleOrdinaryFreshFixtures/empty_star (0.00s)
+    --- PASS: TestOracleOrdinaryFreshFixtures/empty_sorted (0.00s)
+    --- PASS: TestOracleOrdinaryFreshFixtures/mixed_storage_classes (0.00s)
+    --- PASS: TestOracleOrdinaryFreshFixtures/storage_class_sort (0.01s)
+    --- PASS: TestOracleOrdinaryFreshFixtures/numeric_compare (0.00s)
+    --- PASS: TestOracleOrdinaryFreshFixtures/unary_removes_affinity (0.00s)
+    --- PASS: TestOracleOrdinaryFreshFixtures/alias_in_order_expression (0.00s)
+    --- PASS: TestOracleOrdinaryFreshFixtures/alias_simple_order (0.00s)
+    --- PASS: TestOracleOrdinaryFreshFixtures/alias_nonconflicting_order (0.00s)
+    --- PASS: TestOracleOrdinaryFreshFixtures/where_alias (0.00s)
+    --- PASS: TestOracleOrdinaryFreshFixtures/where_alias_shadow (0.00s)
+    --- PASS: TestOracleOrdinaryFreshFixtures/boolean_column_shadow (0.00s)
+    --- PASS: TestOracleOrdinaryFreshFixtures/rowid_shadow (0.00s)
+    --- PASS: TestOracleOrdinaryFreshFixtures/alter_added_defaults (0.00s)
+    --- PASS: TestOracleOrdinaryFreshFixtures/embedded_nul_text (0.00s)
+=== RUN   TestOracleErrorsAndResources
+=== RUN   TestOracleErrorsAndResources/SELECT_missing_FROM_empty_table
+=== RUN   TestOracleErrorsAndResources/SELECT_id_FROM_empty_table_WHERE_missing=0
+=== RUN   TestOracleErrorsAndResources/SELECT_id_FROM_empty_table_ORDER_BY_missing
+=== RUN   TestOracleErrorsAndResources/SELECT_abs()_FROM_empty_table
+=== RUN   TestOracleErrorsAndResources/SELECT_missing_function(id)_FROM_empty_table
+=== RUN   TestOracleErrorsAndResources/SELECT_1_LIMIT_NULL
+=== RUN   TestOracleErrorsAndResources/SELECT_1_LIMIT_1.5
+=== RUN   TestOracleErrorsAndResources/SELECT_1_ORDER_BY_2
+=== RUN   TestOracleErrorsAndResources/SELECT_abs(-9223372036854775808)
+=== RUN   TestOracleErrorsAndResources/SELECT_-0x8000000000000000
+=== RUN   TestOracleErrorsAndResources/unsupported/SELECT_DISTINCT_id_FROM_edge
+=== RUN   TestOracleErrorsAndResources/unsupported/SELECT_id_FROM_edge_UNION_SELECT_id_FROM_edge
+=== RUN   TestOracleErrorsAndResources/unsupported/SELECT_count(*)_FROM_edge
+=== RUN   TestOracleErrorsAndResources/unsupported/SELECT_e.id_FROM_edge_e_JOIN_edge_f_USING(id)
+=== RUN   TestOracleErrorsAndResources/unsupported/SELECT_id_FROM_edge;_SELECT_1
+=== RUN   TestOracleErrorsAndResources/unsupported/PRAGMA_user_version
+=== RUN   TestOracleErrorsAndResources/unsupported/WITH_x_AS_(SELECT_1)_SELECT_*_FROM_x
+--- PASS: TestOracleErrorsAndResources (0.03s)
+    --- PASS: TestOracleErrorsAndResources/SELECT_missing_FROM_empty_table (0.00s)
+    --- PASS: TestOracleErrorsAndResources/SELECT_id_FROM_empty_table_WHERE_missing=0 (0.00s)
+    --- PASS: TestOracleErrorsAndResources/SELECT_id_FROM_empty_table_ORDER_BY_missing (0.00s)
+    --- PASS: TestOracleErrorsAndResources/SELECT_abs()_FROM_empty_table (0.00s)
+    --- PASS: TestOracleErrorsAndResources/SELECT_missing_function(id)_FROM_empty_table (0.00s)
+    --- PASS: TestOracleErrorsAndResources/SELECT_1_LIMIT_NULL (0.00s)
+    --- PASS: TestOracleErrorsAndResources/SELECT_1_LIMIT_1.5 (0.00s)
+    --- PASS: TestOracleErrorsAndResources/SELECT_1_ORDER_BY_2 (0.00s)
+    --- PASS: TestOracleErrorsAndResources/SELECT_abs(-9223372036854775808) (0.00s)
+    --- PASS: TestOracleErrorsAndResources/SELECT_-0x8000000000000000 (0.00s)
+    --- PASS: TestOracleErrorsAndResources/unsupported/SELECT_DISTINCT_id_FROM_edge (0.00s)
+    --- PASS: TestOracleErrorsAndResources/unsupported/SELECT_id_FROM_edge_UNION_SELECT_id_FROM_edge (0.00s)
+    --- PASS: TestOracleErrorsAndResources/unsupported/SELECT_count(*)_FROM_edge (0.00s)
+    --- PASS: TestOracleErrorsAndResources/unsupported/SELECT_e.id_FROM_edge_e_JOIN_edge_f_USING(id) (0.00s)
+    --- PASS: TestOracleErrorsAndResources/unsupported/SELECT_id_FROM_edge;_SELECT_1 (0.00s)
+    --- PASS: TestOracleErrorsAndResources/unsupported/PRAGMA_user_version (0.00s)
+    --- PASS: TestOracleErrorsAndResources/unsupported/WITH_x_AS_(SELECT_1)_SELECT_*_FROM_x (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	0.090s

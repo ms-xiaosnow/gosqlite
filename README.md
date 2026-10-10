@@ -295,3 +295,14 @@ a Close error. At most1024 native shared sessions/in-flight opens/pending closes
 share the new lifetime admission bound; the64 failed-open groups are separate.
 See [scope and lifecycle limits](docs/shared-close-cleanup.md). Terminal ownership
 can remain retained for process lifetime; native failure behavior is NOT_RUN.
+
+## Encrypted cleanup ownership
+
+Encrypted constructors, selected objects, copies and sessions now retain bounded
+managed cleanup obligations separately from DB lifetime. ErrEncryptedCleanupPending,
+PendingEncryptedCleanups and RetryEncryptedCleanup expose explicit discovery and
+retry; logical closure and optional checkpoint happen once. Native terminal close
+uncertainty never authorizes another raw handle close. Admission limits are1024
+opening/live/pending scopes and16384 common managed leases, with lower platform
+limits also applicable. See [encrypted ownership and remaining gates](docs/encrypted-cleanup.md).
+This remains development code with native failure/OS and security acceptance open.

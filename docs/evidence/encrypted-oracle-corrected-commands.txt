@@ -1,0 +1,21 @@
+set -euo pipefail
+cd /workspace/scratch/5e06a74e5f65/durable-restart/encrypted-oracle-corrected-verify
+export PATH="$PWD/../toolchains/go1.27.2/bin:$PATH" GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off GOCACHE="$PWD/../go-cache" GOPATH="$PWD/../go-path" CGO_ENABLED=0 GOFLAGS=-buildvcs=false SQLITE_ORACLE="$PWD/../toolchains/sqlite-build-3540000/sqlite3"
+echo 'Exact source combines durable883999c, reviewed33-path encrypted v3 and23-path ordinary oracle CI correction. Future Boolean/affinity/range/plain Reader changes excluded.'
+echo 'Behavior audit: intact correct-key ordinary read/write/rollback/BUSY/cancel/close/reopen/checkpoint/successful rekey/copies; memory parser/math/ownership laws. No restricted physical/native-fault/namespace/crash/hot-recovery/interrupted-rekey workflow.'
+cat ../encrypted-oracle-corrected-tree.txt
+date -u +%FT%TZ
+go run ./internal/testscope
+go test ./... -count=1 -timeout=30m
+go vet ./...
+go build -trimpath ./...
+echo 'CORRECTED ENCRYPTED/ORACLE FULL CGO0 UNIT/VET/BUILD PASS'; date -u +%FT%TZ
+./scripts/test-oracle.sh
+echo 'CORRECTED ENCRYPTED/ORACLE FULL TAGGED ORACLE PASS'; date -u +%FT%TZ
+go run ./internal/testscope
+CGO_ENABLED=1 go test -race ./... -count=1 -timeout=30m
+for target in linux/arm64 darwin/arm64 darwin/amd64 windows/amd64 windows/arm64; do GOOS=${target%/*} GOARCH=${target#*/} go build ./...; echo "cross-build $target PASS"; done
+go mod verify
+sha256sum -c ../encrypted-oracle-corrected-all-sha256.txt >/dev/null
+date -u +%FT%TZ
+echo 'CORRECTED ENCRYPTED/ORACLE FULL FROZEN AGGREGATE PASS'

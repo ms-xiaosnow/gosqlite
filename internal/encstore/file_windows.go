@@ -125,12 +125,17 @@ func (f *managedFile) releaseChild() error {
 	if childErr := f.dropChild(); childErr != nil {
 		err := f.locks.poison(childErr)
 		f.mu.Unlock()
-		return err
+		return managedRetirementError(f, err)
 	}
 	var parent *managedFile
 	var err error
 	if f.closed {
 		parent, err = f.finishLocked()
+	}
+	if err != nil {
+		err = managedRetirementError(f, err)
+	} else if f.retirementCompleteLocked() {
+		managedRetirementComplete(f)
 	}
 	f.mu.Unlock()
 	if parent != nil {
@@ -138,7 +143,7 @@ func (f *managedFile) releaseChild() error {
 	}
 	return err
 }
-func (f *managedFile) Close() error {
+func (f *managedFile) closeNative() error {
 	if f == nil {
 		return nil
 	}
@@ -150,4 +155,19 @@ func (f *managedFile) Close() error {
 		err = errors.Join(err, parent.releaseChild())
 	}
 	return err
+}
+
+// RetirementComplete requires explicit native retirement, including all exact
+// lock records and directory pins. A closeUnknown tombstone is never complete,
+// even though os.File itself refuses a second Close of its old numeric HANDLE.
+func (f *managedFile) RetirementComplete() bool {
+	if f == nil {
+		return true
+	}
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	return f.retirementCompleteLocked()
+}
+func (f *managedFile) retirementCompleteLocked() bool {
+	return f.closed && f.retired && !f.closeUnknown && f.raw == nil && f.parent == nil && f.children == 0 && f.locks.held == [3]uint8{}
 }

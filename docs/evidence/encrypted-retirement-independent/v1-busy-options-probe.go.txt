@@ -1,0 +1,15 @@
+package pager
+
+import (
+    "errors"
+    "testing"
+    "github.com/ms-xiaosnow/gosqlite/internal/encstore"
+)
+
+// Descriptor-free integration probe: active causes an early return before Store methods.
+func TestIndependentEncryptedBusyClosePreservesOptions(t *testing.T) {
+    s := &EncryptedSession{store: &encstore.Store{}, active: &Tx{}, opts: Options{KeepWALOnClose:true}}
+    if err := s.Close(); !errors.Is(err, ErrBusy) { t.Fatal(err) }
+    if s.closed { t.Fatal("busy close logically closed session") }
+    if !s.opts.KeepWALOnClose { t.Fatal("busy close discarded KeepWALOnClose before logical closure") }
+}

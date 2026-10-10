@@ -1,0 +1,9 @@
++ ../toolchains/go1.27.2/bin/go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ ../toolchains/go1.27.2/bin/go test -count=1 -v ./internal/pager -run '^TestIndependentEncryptedBusyClosePreservesOptions$'
+=== RUN   TestIndependentEncryptedBusyClosePreservesOptions
+    encrypted_independent_probe_test.go:14: busy close discarded KeepWALOnClose before logical closure
+--- FAIL: TestIndependentEncryptedBusyClosePreservesOptions (0.00s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/pager	0.003s
+FAIL

@@ -4,17 +4,18 @@ package encstore
 
 import "os"
 
-func supported() error                       { return ErrUnsupported }
-func openFile(string, int) (*os.File, error) { return nil, ErrUnsupported }
-func validateFile(os.FileInfo) error         { return ErrUnsupported }
-func validateLinks(*os.File) error           { return ErrUnsupported }
-func lockFile(*os.File, bool) error          { return ErrUnsupported }
-func renameAbsent(string, string) error      { return ErrUnsupported }
+func supported() error                  { return ErrUnsupported }
+func validateFile(os.FileInfo) error    { return ErrUnsupported }
+func validateLinks(*managedFile) error  { return ErrUnsupported }
+func lockFile(*managedFile, bool) error { return ErrUnsupported }
+func renameAbsent(string, string) error { return ErrUnsupported }
 
-func openDirectory(string) (*os.File, error) { return nil, ErrUnsupported }
+func nativeOpenDirectory(string) (*managedFile, error) { return nil, ErrUnsupported }
 
-func openFileAt(*os.File, string, int) (*os.File, error)         { return nil, ErrUnsupported }
-func stableFileAt(*os.File, string, *os.File, os.FileInfo) error { return ErrUnsupported }
-func renameFileAt(*os.File, string, string, bool) error          { return ErrUnsupported }
+func nativeOpenFileAt(*managedFile, string, int, bool) (*managedFile, error) {
+	return nil, ErrUnsupported
+}
+func stableFileAt(*managedFile, string, *managedFile, os.FileInfo) error { return ErrUnsupported }
+func renameFileAt(*managedFile, string, string, bool) error              { return ErrUnsupported }
 
-func rangeLock(*os.File, int64, bool, bool) error { return ErrUnsupported }
+func rangeLock(*managedFile, int64, bool, bool) error { return ErrUnsupported }

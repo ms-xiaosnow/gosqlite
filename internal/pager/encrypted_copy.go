@@ -87,8 +87,7 @@ func OpenEncryptedArchive(ctx context.Context, path string, options encstore.Opt
 	}
 	p, err := a.ReadPage(ctx, 1)
 	if err != nil {
-		_ = a.Close()
-		return nil, err
+		return nil, encryptedError(a.CloseWithError(err))
 	}
 	g := a.Geometry()
 	h, err := ParseHeader(p, int64(g.PageSize)*int64(g.PageCount))
@@ -100,8 +99,7 @@ func OpenEncryptedArchive(ctx context.Context, path string, options encstore.Opt
 		err = writableHeader(h)
 	}
 	if err != nil {
-		_ = a.Close()
-		return nil, err
+		return nil, encryptedError(a.CloseWithError(err))
 	}
 	return &EncryptedArchive{archive: a, header: h}, nil
 }
@@ -109,7 +107,8 @@ func (a *EncryptedArchive) Header() Header { return a.header }
 func (a *EncryptedArchive) ReadPage(c context.Context, n uint32) ([]byte, error) {
 	return a.archive.ReadPage(c, n)
 }
-func (a *EncryptedArchive) Close() error { return a.archive.Close() }
+func (a *EncryptedArchive) Close() error                     { return a.archive.Close() }
+func (a *EncryptedArchive) CloseWithError(cause error) error { return a.archive.CloseWithError(cause) }
 func CreateEncryptedSnapshot(ctx context.Context, destination string, target *encstore.Prepared, r SnapshotReader) (encstore.Info, error) {
 	h := r.Header()
 	i, e := encstore.CreateFrom(ctx, destination, target, encstore.Geometry{PageSize: h.PageSize, PageCount: h.PageCount}, r)

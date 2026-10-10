@@ -1,0 +1,103 @@
+Configuring SQLite version 3.54.0
+Host System...x86_64-pc-linux-gnu
+Build System...x86_64-pc-linux-gnu
+Source dir = /workspace/scratch/5e06a74e5f65/durable-restart/ordinary-oracle-ci-build-v2/sqlite-src-3540000
+Build dir  = /workspace/scratch/5e06a74e5f65/durable-restart/ordinary-oracle-ci-build-v2/sqlite-build-3540000
+C compiler... cc  
+C++ compiler... c++  
+Build C compiler...cc
+Checking for stdlib.h...ok
+Checking for sys/types.h...ok
+Checking if -D_FILE_OFFSET_BITS=64 is needed...no
+SQLITE_DEBUG build? no
+Looking for install ... /usr/bin/install
+Checking for int8_t...ok
+Checking for int16_t...ok
+Checking for int32_t...ok
+Checking for int64_t...ok
+Checking for intptr_t...ok
+Checking for uint8_t...ok
+Checking for uint16_t...ok
+Checking for uint32_t...ok
+Checking for uint64_t...ok
+Checking for uintptr_t...ok
+Checking for gmtime_r...ok
+Checking for isnan...ok
+Checking for localtime_r...ok
+Checking for localtime_s...not found
+Checking for usleep...ok
+Checking for utime...ok
+Checking for pread...ok
+Checking for pread64...ok
+Checking for pwrite...ok
+Checking for pwrite64...ok
+Checking libs for fdatasync...none needed
+Checking libs for nanosleep...none needed
+Checking for sys/types.h...(cached) ok
+Checking for sys/stat.h...ok
+Checking for dlfcn.h...ok
+Checking for unistd.h...ok
+Checking for stdlib.h...ok
+Checking for malloc.h...ok
+Checking for memory.h...ok
+Checking for string.h...ok
+Checking for strings.h...ok
+Checking for inttypes.h...ok
+Checking for zlib.h...ok
+Checking libs for deflate...-lz
+Use amalgamation for builds? yes
+Use gcov? no
+test-runner flags: no
+Use #line macros in the amalgamation: no
+Checking whether the C compiler accepts -fsanitize=address...yes
+Checking whether the C compiler accepts -fsanitize=bounds-strict...yes
+
+    NOTE: Tcl is disabled via --disable-tcl. This means that none
+    of the Tcl-based components will be built, including tests
+    and sqlite3_analyzer.
+
+Checking for Tcl to use for code generation... 
+Checking for dirent.h...ok
+Checking for sys/time.h...ok
+Checking for realpath...ok
+Tcl for code generation: jimsh
+Out-of tree build: not checking for EMSDK.
+Statically link tclsqlite3? no
+Statically link CLI shell? no
+Checking for AVX2 flags for vec1... -mavx2 -mfma
+Checking whether the C compiler accepts -rpath /usr/local/lib...no
+Checking whether the C compiler accepts -Wl,-rpath,/usr/local/lib...yes
+Support threadsafe operation? Checking for libs...
+Checking libs for pthread_create...none needed
+Checking libs for pthread_mutexattr_init...none needed
+Checking libs for dlopen...none needed
+Loadable extension support enabled. 
+Checking libs for ceil...-lm
+Enabling math SQL functions
+ICU support is disabled.
+Checking for line-editing capability...
+Readline support explicitly disabled with --disable-readline
+Line-editing support for the sqlite3 shell: none
+Build shared library? no
+Build static library? yes
+Feature flags...
+  - fts3
+  + fts4
+  + fts5
+  + geopoly
+  + rtree
+  + session
+  - update-limit
+  - memsys5
+  - memsys3
+  - scanstatus
+  - column-metadata
+  + dbpage
+  + dbstat
+  + carray
+  + json
+Library feature flags: -DSQLITE_ENABLE_CARRAY -DSQLITE_ENABLE_DBPAGE_VTAB -DSQLITE_ENABLE_DBSTAT_VTAB -DSQLITE_ENABLE_FTS4 -DSQLITE_ENABLE_FTS5 -DSQLITE_ENABLE_GEOPOLY -DSQLITE_ENABLE_MATH_FUNCTIONS -DSQLITE_ENABLE_PERCENTILE -DSQLITE_ENABLE_PREUPDATE_HOOK -DSQLITE_ENABLE_RTREE -DSQLITE_ENABLE_SESSION -DSQLITE_HAVE_ZLIB=1 -DSQLITE_THREADSAFE=1
+Shell options: -DSQLITE_DQS=0 -DSQLITE_ENABLE_BYTECODE_VTAB -DSQLITE_ENABLE_DBPAGE_VTAB -DSQLITE_ENABLE_DBSTAT_VTAB -DSQLITE_ENABLE_EXPLAIN_COMMENTS -DSQLITE_ENABLE_FTS4 -DSQLITE_ENABLE_OFFSET_SQL_FUNC -DSQLITE_ENABLE_PERCENTILE -DSQLITE_ENABLE_RTREE -DSQLITE_ENABLE_STMTVTAB -DSQLITE_ENABLE_UNKNOWN_SQL_FUNCTION -DSQLITE_HAVE_ZLIB=1 -DSQLITE_STRICT_SUBTYPE=1
+Created Makefile from ../sqlite-src-3540000/Makefile.in
+Created sqlite3.pc from ../sqlite-src-3540000/sqlite3.pc.in
+Created sqlite_cfg.h

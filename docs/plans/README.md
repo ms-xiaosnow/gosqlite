@@ -14,8 +14,9 @@ remain code work; unsupported is a safe interim behavior, not removal from goal.
   native policy and target-runtime evidence; default Windows cross-vet has one
   disclosed unsafe-pointer mapping warning. No physical durability claim follows.
 - Linux encrypted immutable shared selections and one writer now exist, with
-  pinned copy/checkpoint and quiescent rekey. Implement non-Linux encrypted
-  ownership/coordination; the plain native ports do not supply that code.
+  pinned copy/checkpoint and quiescent rekey. Native encrypted Windows/Darwin
+  ownership/coordination now exists; Windows shared rekey and Darwin Unicode
+  inventory remain explicit code gaps, with native runtime qualification open.
 - Retained encrypted history has no garbage collection or external freshness
   guarantee. Keep these limitations distinct from independent security review.
 
@@ -95,8 +96,10 @@ Shared-session failed-open cleanup now uses 64 bounded strongly retained groups
 and a deliberate RetryOpenCleanup route. Nested owners retire before index/DMS,
 WAL and main protection. A separate native WALShared successful-close increment
 now covers public DB.Close retry and driver disposal with1024 live+pending
-reservations and explicit discovery/retry. Other storage modes and constructors
-still need their own bounded ownership corrections; neither slice covers them. Terminal retention may last for process lifetime. Ordinary
+reservations and explicit discovery/retry. Encrypted constructor/selection/copy/session ownership now has its own bounded
+managed scope and dedicated discovery/retry API. Plain rollback Reader/Tx and
+exclusive-WAL ownership still require their own corrections; these scopes are
+not silently treated as covered. Terminal retention may last for process lifetime. Ordinary
 and memory checks do not qualify real unmap/close failures.
 
 A later source review found plain Windows metadata probes outside this ownership

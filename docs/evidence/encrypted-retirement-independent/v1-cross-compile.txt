@@ -1,0 +1,52 @@
++ for pair in linux/arm64 darwin/amd64 darwin/arm64 windows/amd64
++ export GOOS=linux GOARCH=arm64
++ GOOS=linux
++ GOARCH=arm64
++ ../toolchains/go1.27.2/bin/go build ./...
++ for pkg in internal/encstore internal/pager sqlite driver
++ ../toolchains/go1.27.2/bin/go test -c -o ../encrypted-retirement-review-builds/v1-linux-arm64-encstore.test ./internal/encstore
++ for pkg in internal/encstore internal/pager sqlite driver
++ ../toolchains/go1.27.2/bin/go test -c -o ../encrypted-retirement-review-builds/v1-linux-arm64-pager.test ./internal/pager
++ for pkg in internal/encstore internal/pager sqlite driver
++ ../toolchains/go1.27.2/bin/go test -c -o ../encrypted-retirement-review-builds/v1-linux-arm64-sqlite.test ./sqlite
++ for pkg in internal/encstore internal/pager sqlite driver
++ ../toolchains/go1.27.2/bin/go test -c -o ../encrypted-retirement-review-builds/v1-linux-arm64-driver.test ./driver
++ for pair in linux/arm64 darwin/amd64 darwin/arm64 windows/amd64
++ export GOOS=darwin GOARCH=amd64
++ GOOS=darwin
++ GOARCH=amd64
++ ../toolchains/go1.27.2/bin/go build ./...
++ for pkg in internal/encstore internal/pager sqlite driver
++ ../toolchains/go1.27.2/bin/go test -c -o ../encrypted-retirement-review-builds/v1-darwin-amd64-encstore.test ./internal/encstore
++ for pkg in internal/encstore internal/pager sqlite driver
++ ../toolchains/go1.27.2/bin/go test -c -o ../encrypted-retirement-review-builds/v1-darwin-amd64-pager.test ./internal/pager
++ for pkg in internal/encstore internal/pager sqlite driver
++ ../toolchains/go1.27.2/bin/go test -c -o ../encrypted-retirement-review-builds/v1-darwin-amd64-sqlite.test ./sqlite
++ for pkg in internal/encstore internal/pager sqlite driver
++ ../toolchains/go1.27.2/bin/go test -c -o ../encrypted-retirement-review-builds/v1-darwin-amd64-driver.test ./driver
++ for pair in linux/arm64 darwin/amd64 darwin/arm64 windows/amd64
++ export GOOS=darwin GOARCH=arm64
++ GOOS=darwin
++ GOARCH=arm64
++ ../toolchains/go1.27.2/bin/go build ./...
++ for pkg in internal/encstore internal/pager sqlite driver
++ ../toolchains/go1.27.2/bin/go test -c -o ../encrypted-retirement-review-builds/v1-darwin-arm64-encstore.test ./internal/encstore
++ for pkg in internal/encstore internal/pager sqlite driver
++ ../toolchains/go1.27.2/bin/go test -c -o ../encrypted-retirement-review-builds/v1-darwin-arm64-pager.test ./internal/pager
++ for pkg in internal/encstore internal/pager sqlite driver
++ ../toolchains/go1.27.2/bin/go test -c -o ../encrypted-retirement-review-builds/v1-darwin-arm64-sqlite.test ./sqlite
++ for pkg in internal/encstore internal/pager sqlite driver
++ ../toolchains/go1.27.2/bin/go test -c -o ../encrypted-retirement-review-builds/v1-darwin-arm64-driver.test ./driver
++ for pair in linux/arm64 darwin/amd64 darwin/arm64 windows/amd64
++ export GOOS=windows GOARCH=amd64
++ GOOS=windows
++ GOARCH=amd64
++ ../toolchains/go1.27.2/bin/go build ./...
++ for pkg in internal/encstore internal/pager sqlite driver
++ ../toolchains/go1.27.2/bin/go test -c -o ../encrypted-retirement-review-builds/v1-windows-amd64-encstore.test ./internal/encstore
++ for pkg in internal/encstore internal/pager sqlite driver
++ ../toolchains/go1.27.2/bin/go test -c -o ../encrypted-retirement-review-builds/v1-windows-amd64-pager.test ./internal/pager
++ for pkg in internal/encstore internal/pager sqlite driver
++ ../toolchains/go1.27.2/bin/go test -c -o ../encrypted-retirement-review-builds/v1-windows-amd64-sqlite.test ./sqlite
++ for pkg in internal/encstore internal/pager sqlite driver
++ ../toolchains/go1.27.2/bin/go test -c -o ../encrypted-retirement-review-builds/v1-windows-amd64-driver.test ./driver

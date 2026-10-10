@@ -10,7 +10,7 @@ import (
 
 // WriteBackup creates one self-contained authenticated archive. Existing
 // destinations are never replaced; any partial encrypted output is retained.
-func WriteBackup(ctx context.Context, destination string, target *Prepared, g Geometry, src PageSource) (Info, error) {
+func WriteBackup(ctx context.Context, destination string, target *Prepared, g Geometry, src PageSource) (_ Info, resultErr error) {
 	if target.Options.Mode != Snapshot {
 		return Info{}, ErrUnsupported
 	}
@@ -44,7 +44,7 @@ func WriteBackup(ctx context.Context, destination string, target *Prepared, g Ge
 	if err != nil {
 		return Info{}, err
 	}
-	defer o.close()
+	defer func() { resultErr = o.closeWithError(resultErr) }()
 	if err = syncDirectory(path); err != nil {
 		return Info{}, errors.Join(ErrUncertain, err)
 	}
@@ -52,8 +52,9 @@ func WriteBackup(ctx context.Context, destination string, target *Prepared, g Ge
 }
 
 type Archive struct {
-	obj    *object
-	master *encryption.MasterKey
+	obj     *object
+	master  *encryption.MasterKey
+	cleanup *cleanupGroup
 }
 
 func OpenBackup(ctx context.Context, path string, options Options) (*Archive, error) {
@@ -72,7 +73,7 @@ func OpenBackup(ctx context.Context, path string, options Options) (*Archive, er
 		return nil, err
 	}
 	raw, err := readExact(f, encryption.HeaderSize, 0)
-	err = errors.Join(err, f.Close())
+	err = closeResult(f, err)
 	if err != nil {
 		return nil, err
 	}
@@ -92,17 +93,47 @@ func OpenBackup(ctx context.Context, path string, options Options) (*Archive, er
 		_ = master.Close()
 		return nil, err
 	}
-	return &Archive{obj: o, master: master}, nil
+	return &Archive{obj: o, master: master, cleanup: o.file.owner}, nil
 }
-func (a *Archive) Geometry() Geometry { return a.obj.geometry() }
+func (a *Archive) Geometry() Geometry {
+	if a.obj == nil {
+		return Geometry{}
+	}
+	return a.obj.geometry()
+}
 func (a *Archive) ReadPage(ctx context.Context, n uint32) ([]byte, error) {
+	if a.obj == nil {
+		return nil, encryption.ErrClosed
+	}
 	return a.obj.readPage(ctx, n)
 }
-func (a *Archive) Close() error { return errors.Join(a.obj.close(), a.master.Close()) }
+func (a *Archive) Close() error { return a.CloseWithError(nil) }
+func (a *Archive) CloseWithError(cause error) error {
+	if a.obj == nil && a.cleanup != nil {
+		return a.cleanup.retry()
+	}
+	var err error
+	if a.cleanup != nil {
+		cause = a.cleanup.remember(cause)
+	}
+	if a.obj != nil {
+		err = a.obj.closeWithError(cause)
+		cause = nil
+		a.obj = nil
+	}
+	if a.master != nil {
+		err = errors.Join(err, a.master.Close())
+		a.master = nil
+	}
+	if a.cleanup != nil {
+		return a.cleanup.closeAll(errors.Join(cause, err))
+	}
+	return errors.Join(cause, err)
+}
 
 // CreateFrom makes an absent destination from a validated pinned source. The
 // caller must validate logical SQLite structure before calling this routine.
-func CreateFrom(ctx context.Context, destination string, target *Prepared, g Geometry, src PageSource) (Info, error) {
+func CreateFrom(ctx context.Context, destination string, target *Prepared, g Geometry, src PageSource) (_ Info, resultErr error) {
 	if err := ctx.Err(); err != nil {
 		return Info{}, err
 	}
@@ -121,7 +152,7 @@ func CreateFrom(ctx context.Context, destination string, target *Prepared, g Geo
 	if err != nil {
 		return Info{}, err
 	}
-	defer s.Close()
+	defer func() { resultErr = s.CloseWithError(resultErr) }()
 	if !absent {
 		return Info{}, os.ErrExist
 	}
@@ -135,7 +166,7 @@ func CreateFrom(ctx context.Context, destination string, target *Prepared, g Geo
 // ExportPlaintext is the sole explicit confidentiality-downgrade sink. No
 // staging file is used. A partial target, if any, is deliberately left at the
 // named destination; success requires file and directory Sync.
-func ExportPlaintext(ctx context.Context, destination string, g Geometry, src PageSource) error {
+func ExportPlaintext(ctx context.Context, destination string, g Geometry, src PageSource) (resultErr error) {
 	path, err := canonical(destination)
 	if err != nil {
 		return err
@@ -150,7 +181,7 @@ func ExportPlaintext(ctx context.Context, destination string, g Geometry, src Pa
 	closed := false
 	defer func() {
 		if !closed {
-			_ = f.Close()
+			resultErr = closeResult(f, resultErr)
 		}
 	}()
 	for n := uint32(1); n <= g.PageCount; n++ {

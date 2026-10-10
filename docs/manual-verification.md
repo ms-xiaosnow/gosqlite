@@ -425,3 +425,33 @@ free managed owners/fake sessions; real database/sql disposal models use memory-
 only connections. Ordinary native tests use intact databases and normal locks.
 No injected native close/unmap/lock/Sync failure or physical recovery ran. See
 shared-close-cleanup.md for the1024 lifetime bound and exact remaining code gaps.
+
+## Encrypted retirement and complete ordinary oracle correction
+
+The reviewed encrypted ownership increment has descriptor-free admission,
+retirement/dependency, bounded error-history and public cleanup-token laws,
+plus intact correct-key Linux lifecycle coverage. It does not execute native
+close/unmap/lock/Sync failures. Native Darwin/Windows target binaries are compiled
+only. The exact source and commands are in encrypted-cleanup.md and its
+independent evidence; remaining plaintext Reader/Tx/exclusive-WAL ownership is
+separate implementation work at this checkpoint.
+
+The historical default CI workflow omitted the tagged oracle suite. Its past
+SUCCESS results therefore cover only their stated unit/vet/build/race scope.
+Two full local aggregates retained the obsolete now-supported JOIN rejection;
+both exit-1 results remain in the evidence directory. The corrected assertion
+compares that original JOIN with official SQLite and keeps an unsupported USING
+negative. The new CI oracle job builds the exact official source archive,
+verifies its archive and generated-amalgamation SHA3 hashes and CLI source ID,
+then runs `./scripts/test-oracle.sh` without a package/test-name filter. The
+ordinary reference guard and behavioral audit still precede execution; restricted
+manual tags are never enabled. See ordinary-ci.md for exact commands and pins.
+
+Corrected source `cd80bbc80228e1970f8d7e465799cc674eede3fb` passed complete
+CGO0 unit/vet/build at2026-10-10T19:09:35Z and the complete pinned tagged ordinary
+oracle at19:13:56Z. The complete frozen aggregate passed/exit0 at19:21:45Z,
+including full race (SQLite392.800s), five target builds, module verification and
+unchanged inventory. Hosted CI and exact restored commit results are recorded
+separately when terminal; no result from a different tree is substituted.
+Native platform runtime, restricted physical recovery/failure, independent
+security/cryptography/legal and complete M10 acceptance remain NOT_RUN.

@@ -23,6 +23,7 @@ type EncryptedSession struct {
 	readOnly bool
 	active   *Tx
 	poisoned error
+	closed   bool
 }
 
 func encryptedError(err error) error {
@@ -59,8 +60,7 @@ func OpenEncryptedSession(ctx context.Context, path string, opts Options, cfg en
 	}
 	p, err := st.ReadPage(ctx, 1)
 	if err != nil {
-		_ = st.Close()
-		return nil, encryptedError(err)
+		return nil, encryptedError(st.CloseWithError(err))
 	}
 	g := st.Geometry()
 	h, err := ParseHeader(p, int64(g.PageSize)*int64(g.PageCount))
@@ -72,8 +72,7 @@ func OpenEncryptedSession(ctx context.Context, path string, opts Options, cfg en
 		err = writableHeader(h)
 	}
 	if err != nil {
-		_ = st.Close()
-		return nil, err
+		return nil, encryptedError(st.CloseWithError(err))
 	}
 	return &EncryptedSession{store: st, header: h, opts: opts, readOnly: readOnly}, nil
 }
@@ -87,6 +86,9 @@ func (s *EncryptedSession) DatabaseID() [16]byte {
 	return s.store.DatabaseID()
 }
 func (s *EncryptedSession) checkLocked() error {
+	if s.closed {
+		return ErrClosed
+	}
 	if s.poisoned != nil {
 		return s.poisoned
 	}
@@ -338,22 +340,25 @@ func (s *EncryptedSession) RekeyPrepared(ctx context.Context, target *encstore.P
 		return encryptedError(s.store.Publish(ctx, s.store.Geometry(), r, target))
 	})
 }
-func (s *EncryptedSession) Close() error {
+func (s *EncryptedSession) Close() error { return s.CloseWithError(nil) }
+
+// CloseWithError is the SQL connection's once-only logical-close bridge. It
+// retains storage retirement after database/sql has discarded the connection.
+func (s *EncryptedSession) CloseWithError(cause error) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if s.active != nil {
-		return ErrBusy
-	}
 	if s.store == nil {
-		return s.poisoned
+		return nil
 	}
-	var checkpointErr error
-	if !s.readOnly && !s.opts.KeepWALOnClose && s.poisoned == nil {
-		checkpointErr = encryptedError(s.store.Checkpoint(context.Background()))
+	done, err := retireEncryptedSession(&s.closed, s.active != nil, s.readOnly, s.opts.KeepWALOnClose, s.poisoned, cause, s.store, func() error { return encryptedError(s.store.Checkpoint(context.Background())) })
+	if done {
+		s.store = nil
 	}
-	err := errors.Join(checkpointErr, encryptedError(s.store.Close()))
-	s.store = nil
-	return errors.Join(s.poisoned, err)
+
+	if s.closed {
+		s.opts = Options{}
+	}
+	return err
 }
 
 func (s *EncryptedSession) EncryptionInfo() encstore.Info {

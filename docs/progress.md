@@ -627,3 +627,64 @@ excluded. FK/views/functions/triggers/RLS/partition/custom expression/collation/
 ACL chains/other unsupported dependencies and online/batched cutover are actual
 code gaps. Live PostgreSQL/Neon, source completeness, capacity/privilege checks,
 application cached-OID handling and independent release acceptance remain open.
+
+### Full ordinary oracle coverage correction discovered after JOIN save
+
+The relational8f75ccf CI38076830650 completed SUCCESS18:52:34Z for its actual
+default unit/vet/build/race scope; exact restored focused relational checks also
+passed. The separate full sourcead73b8d race passed (SQLite412.237s), but its
+full tagged oracle failed at the historical TestOracleErrorsAndResources JOIN
+negative, which still expected a now-supported form to return ErrUnsupported.
+The original failure is preserved in relational-lead-final-precorrection.txt
+and exit1. That whole oracle run is FAIL, not a partial or inferred PASS.
+
+The existing workflow did not build the pinned CLI or invoke test-oracle.sh;
+that difference explains why this tagged assertion was absent from CI. A
+separate complete ordinary oracle CI job and an official positive JOIN comparison
+plus truly unsupported USING negative are being added. No restricted manual
+namespace/recovery/native-fault source is enabled. Corrected exact source must
+be rerun before claiming that broader gate.
+
+### Encrypted acquisition/retirement ownership correction
+
+Implemented pre-native admission for1024 opening/live/pending scopes and16384
+common managed leases; native platform bounds also apply. Scope owners retain
+minimal native resources/dependencies and bounded diagnostics, independently of
+Store/DB/Rows lifetime or database/sql discarding Close errors. New public
+ErrEncryptedCleanupPending, RetryEncryptedCleanup and PendingEncryptedCleanups
+provide explicit discovery/retry. Whole retirement preserves child, lifecycle
+and directory barriers; live retry touches only previously requested children.
+Consumed diagnostics differ from unresolved or terminal ownership. No numeric
+terminal handle is retried, no automatic native cleanup is performed, and
+admission consumes only already-published atomic completion proofs.
+
+Logical closure clears owned key-bearing state once, invalidates SQL and
+attempts optional checkpoint once; BUSY before closure preserves options.
+Constructor/probe/inventory/copy errors are adopted before child/protector
+retirement. Darwin delayed retirement and Windows deferred directory pins have
+explicit completion laws. Cipher/format/KDF/provider and lock-byte contracts
+are unchanged. Opaque application error objects can retain arbitrary references,
+so no absolute transitive secret-erasure or total-RSS claim is made.
+
+Independent v3 source manifest25d5541df56656535db32ff1e344e3888869e1e1c84efd49f828b823434a9fa8
+passed scoped unit/race/vet/build and four target builds/test compilation after
+real BUSY-options, nested-error and admission-status defects were fixed. The
+original independent v1 failures remain. Source508732922205872b7a8738b471b236fcf8ecb096
+combines only that33-path correction with durable883999c; its full CGO0
+unit/vet/build passed18:54:55Z and full race passed (SQLite363.426s). Its full
+tagged oracle finished FAIL at the already discovered obsolete JOIN rejection
+(testkit297.585s); the original log and exit1 are preserved. It does not qualify
+the corrected complete gate.
+
+Exact corrected sourcecd80bbc80228e1970f8d7e465799cc674eede3fb additionally
+contains only the reviewed ordinary-oracle CI/test correction; unrelated
+Boolean/affinity/range/plain-Reader work is excluded. Its complete CGO0
+unit/vet/build passed19:09:35Z and complete pinned tagged ordinary oracle passed
+19:13:56Z. The complete frozen aggregate finished PASS/exit0 at19:21:45Z: full race
+(SQLite392.800s), five target cross-builds, modules and unchanged inventory also
+passed. Hosted two-job CI and exact restored commit results will be recorded
+separately when terminal, without relabeling prior snapshots. A supplemental reviewed-source Library archive protects the
+unpublished encrypted patch while that gate runs; it is not a remote milestone
+or final delivery. Plain rollback Reader/Tx/import-source and exclusive-WAL
+ownership remain required code. Native failure/runtime and M3/M8/M10 acceptance
+remain NOT_RUN. See encrypted-cleanup.md and its independent review.

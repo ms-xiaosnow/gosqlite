@@ -1,0 +1,659 @@
++ ../toolchains/go1.27.2/bin/go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ ../toolchains/go1.27.2/bin/go test -race -count=1 -v ./internal/encstore ./internal/pager ./sqlite ./driver -run '^(TestEncryptedCleanupMemory.*|TestEncryptedManagedStatusMemory.*|TestEncryptedSessionCloseMemory.*|TestExactByteLocksMemory.*|TestProcessByteLocksMemory.*|TestEncryptedHandleLifetimeMemory.*|TestSnapshotManifestCanonicalMemory|TestWALFormatFrozenMemoryVectors|TestSharedLayoutFrozenMemoryModeAndProtocol|TestEncryptedCleanupOrdinaryAllModesCloseAndProviders|TestEncryptionOrdinaryLifecycleAndCopies|TestEncryptedPagerWALFinalDirtySegments|TestEncryptionPasswordNormalReopen|TestEncryptionSharedCloseBusyAndPasswordRefresh|TestEncryptedConnectorOrdinaryLifecycle|TestEncryptedSharedConnectorIndependentPoolSnapshots)$'
+=== RUN   TestEncryptedCleanupMemoryStageBarriers
+=== RUN   TestEncryptedCleanupMemoryStageBarriers/0
+=== RUN   TestEncryptedCleanupMemoryStageBarriers/1
+=== RUN   TestEncryptedCleanupMemoryStageBarriers/2
+--- PASS: TestEncryptedCleanupMemoryStageBarriers (0.00s)
+    --- PASS: TestEncryptedCleanupMemoryStageBarriers/0 (0.00s)
+    --- PASS: TestEncryptedCleanupMemoryStageBarriers/1 (0.00s)
+    --- PASS: TestEncryptedCleanupMemoryStageBarriers/2 (0.00s)
+=== RUN   TestEncryptedCleanupMemoryConsumedDiagnosticAndNilIncomplete
+--- PASS: TestEncryptedCleanupMemoryConsumedDiagnosticAndNilIncomplete (0.00s)
+=== RUN   TestEncryptedCleanupMemoryLiveRetryAndHistoricalTokens
+--- PASS: TestEncryptedCleanupMemoryLiveRetryAndHistoricalTokens (0.00s)
+=== RUN   TestEncryptedCleanupMemoryCapacityBeforeAcquisition
+--- PASS: TestEncryptedCleanupMemoryCapacityBeforeAcquisition (0.00s)
+=== RUN   TestEncryptedCleanupMemoryNoDBUnknownConstructor
+--- PASS: TestEncryptedCleanupMemoryNoDBUnknownConstructor (0.00s)
+=== RUN   TestEncryptedCleanupMemoryDependenciesAndCycle
+--- PASS: TestEncryptedCleanupMemoryDependenciesAndCycle (0.00s)
+=== RUN   TestEncryptedCleanupMemoryBoundedDiscoveryAndHistory
+--- PASS: TestEncryptedCleanupMemoryBoundedDiscoveryAndHistory (0.07s)
+=== RUN   TestEncryptedCleanupMemoryConcurrentRetryDeduplicates
+--- PASS: TestEncryptedCleanupMemoryConcurrentRetryDeduplicates (0.00s)
+=== RUN   TestEncryptedCleanupMemorySecretReleaseBeforeRetirement
+--- PASS: TestEncryptedCleanupMemorySecretReleaseBeforeRetirement (0.00s)
+=== RUN   TestEncryptedCleanupMemoryNativeCallbackBarrier
+--- PASS: TestEncryptedCleanupMemoryNativeCallbackBarrier (0.00s)
+=== RUN   TestEncryptedCleanupMemoryAsynchronousTerminalTransfer
+--- PASS: TestEncryptedCleanupMemoryAsynchronousTerminalTransfer (0.00s)
+=== RUN   TestEncryptedCleanupMemoryDeferredParentAndReap
+--- PASS: TestEncryptedCleanupMemoryDeferredParentAndReap (0.00s)
+=== RUN   TestEncryptedCleanupMemoryPoolDiscardedCloseSnapshots
+--- PASS: TestEncryptedCleanupMemoryPoolDiscardedCloseSnapshots (0.00s)
+=== RUN   TestEncryptedCleanupMemoryExactCapacityAndBlockedIndependence
+--- PASS: TestEncryptedCleanupMemoryExactCapacityAndBlockedIndependence (0.13s)
+=== RUN   TestEncryptedCleanupMemoryCompletedResultHasNoHistoricalMarker
+--- PASS: TestEncryptedCleanupMemoryCompletedResultHasNoHistoricalMarker (0.00s)
+=== RUN   TestEncryptedCleanupMemoryProbeErrorsProtectAbsentRoot
+--- PASS: TestEncryptedCleanupMemoryProbeErrorsProtectAbsentRoot (0.00s)
+=== RUN   TestEncryptedCleanupMemoryAdmissionNeverCallsStatus
+--- PASS: TestEncryptedCleanupMemoryAdmissionNeverCallsStatus (0.00s)
+=== RUN   TestEncryptedCleanupMemoryReadExactPreservesCause
+--- PASS: TestEncryptedCleanupMemoryReadExactPreservesCause (0.00s)
+=== RUN   TestEncryptedCleanupMemoryConstructorCauseBlocksChildren
+--- PASS: TestEncryptedCleanupMemoryConstructorCauseBlocksChildren (0.00s)
+=== RUN   TestExactByteLocksMemoryAcquireAndIdempotency
+=== RUN   TestExactByteLocksMemoryAcquireAndIdempotency/byte_0_shared_false
+=== RUN   TestExactByteLocksMemoryAcquireAndIdempotency/byte_0_shared_true
+=== RUN   TestExactByteLocksMemoryAcquireAndIdempotency/byte_1_shared_false
+=== RUN   TestExactByteLocksMemoryAcquireAndIdempotency/byte_1_shared_true
+=== RUN   TestExactByteLocksMemoryAcquireAndIdempotency/byte_2_shared_false
+=== RUN   TestExactByteLocksMemoryAcquireAndIdempotency/byte_2_shared_true
+--- PASS: TestExactByteLocksMemoryAcquireAndIdempotency (0.00s)
+    --- PASS: TestExactByteLocksMemoryAcquireAndIdempotency/byte_0_shared_false (0.00s)
+    --- PASS: TestExactByteLocksMemoryAcquireAndIdempotency/byte_0_shared_true (0.00s)
+    --- PASS: TestExactByteLocksMemoryAcquireAndIdempotency/byte_1_shared_false (0.00s)
+    --- PASS: TestExactByteLocksMemoryAcquireAndIdempotency/byte_1_shared_true (0.00s)
+    --- PASS: TestExactByteLocksMemoryAcquireAndIdempotency/byte_2_shared_false (0.00s)
+    --- PASS: TestExactByteLocksMemoryAcquireAndIdempotency/byte_2_shared_true (0.00s)
+=== RUN   TestExactByteLocksMemorySharedUpgradeRefused
+--- PASS: TestExactByteLocksMemorySharedUpgradeRefused (0.00s)
+=== RUN   TestExactByteLocksMemoryDowngradeStacksBeforeRelease
+--- PASS: TestExactByteLocksMemoryDowngradeStacksBeforeRelease (0.00s)
+=== RUN   TestExactByteLocksMemoryEveryHeldRecordRelease
+--- PASS: TestExactByteLocksMemoryEveryHeldRecordRelease (0.00s)
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[0_0_0]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[1_0_0]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[2_0_0]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[3_0_0]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[0_1_0]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[1_1_0]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[2_1_0]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[3_1_0]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[0_2_0]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[1_2_0]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[2_2_0]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[3_2_0]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[0_3_0]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[1_3_0]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[2_3_0]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[3_3_0]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[0_0_1]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[1_0_1]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[2_0_1]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[3_0_1]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[0_1_1]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[1_1_1]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[2_1_1]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[3_1_1]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[0_2_1]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[1_2_1]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[2_2_1]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[3_2_1]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[0_3_1]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[1_3_1]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[2_3_1]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[3_3_1]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[0_0_2]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[1_0_2]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[2_0_2]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[3_0_2]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[0_1_2]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[1_1_2]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[2_1_2]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[3_1_2]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[0_2_2]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[1_2_2]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[2_2_2]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[3_2_2]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[0_3_2]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[1_3_2]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[2_3_2]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[3_3_2]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[0_0_3]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[1_0_3]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[2_0_3]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[3_0_3]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[0_1_3]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[1_1_3]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[2_1_3]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[3_1_3]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[0_2_3]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[1_2_3]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[2_2_3]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[3_2_3]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[0_3_3]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[1_3_3]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[2_3_3]
+=== RUN   TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[3_3_3]
+--- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder (0.01s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[0_0_0] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[1_0_0] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[2_0_0] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[3_0_0] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[0_1_0] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[1_1_0] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[2_1_0] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[3_1_0] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[0_2_0] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[1_2_0] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[2_2_0] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[3_2_0] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[0_3_0] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[1_3_0] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[2_3_0] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[3_3_0] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[0_0_1] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[1_0_1] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[2_0_1] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[3_0_1] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[0_1_1] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[1_1_1] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[2_1_1] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[3_1_1] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[0_2_1] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[1_2_1] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[2_2_1] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[3_2_1] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[0_3_1] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[1_3_1] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[2_3_1] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[3_3_1] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[0_0_2] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[1_0_2] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[2_0_2] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[3_0_2] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[0_1_2] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[1_1_2] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[2_1_2] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[3_1_2] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[0_2_2] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[1_2_2] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[2_2_2] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[3_2_2] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[0_3_2] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[1_3_2] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[2_3_2] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[3_3_2] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[0_0_3] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[1_0_3] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[2_0_3] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[3_0_3] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[0_1_3] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[1_1_3] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[2_1_3] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[3_1_3] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[0_2_3] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[1_2_3] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[2_2_3] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[3_2_3] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[0_3_3] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[1_3_3] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[2_3_3] (0.00s)
+    --- PASS: TestExactByteLocksMemoryAllHeldCombinationsCloseOrder/[3_3_3] (0.00s)
+=== RUN   TestExactByteLocksMemoryAcquisitionErrorOwnership
+--- PASS: TestExactByteLocksMemoryAcquisitionErrorOwnership (0.00s)
+=== RUN   TestExactByteLocksMemoryDowngradeReleaseErrorRetainsBoth
+--- PASS: TestExactByteLocksMemoryDowngradeReleaseErrorRetainsBoth (0.00s)
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_0_0]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_0_0]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_0_0]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_0_0]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_1_0]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_1_0]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_1_0]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_1_0]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_1_0]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_1_0]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_1_0]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_1_0]_step_3
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_2_0]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_2_0]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_2_0]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_2_0]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_2_0]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_2_0]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_2_0]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_2_0]_step_3
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_3_0]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_3_0]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_3_0]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_3_0]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_3_0]_step_3
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_3_0]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_3_0]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_3_0]_step_3
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_3_0]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_3_0]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_3_0]_step_3
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_3_0]_step_4
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_0_1]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_0_1]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_0_1]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_0_1]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_0_1]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_0_1]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_0_1]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_0_1]_step_3
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_1_1]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_1_1]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_1_1]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_1_1]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_1_1]_step_3
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_1_1]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_1_1]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_1_1]_step_3
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_1_1]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_1_1]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_1_1]_step_3
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_1_1]_step_4
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_2_1]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_2_1]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_2_1]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_2_1]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_2_1]_step_3
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_2_1]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_2_1]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_2_1]_step_3
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_2_1]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_2_1]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_2_1]_step_3
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_2_1]_step_4
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_3_1]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_3_1]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_3_1]_step_3
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_3_1]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_3_1]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_3_1]_step_3
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_3_1]_step_4
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_3_1]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_3_1]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_3_1]_step_3
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_3_1]_step_4
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_3_1]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_3_1]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_3_1]_step_3
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_3_1]_step_4
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_3_1]_step_5
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_0_2]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_0_2]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_0_2]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_0_2]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_0_2]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_0_2]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_0_2]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_0_2]_step_3
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_1_2]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_1_2]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_1_2]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_1_2]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_1_2]_step_3
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_1_2]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_1_2]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_1_2]_step_3
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_1_2]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_1_2]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_1_2]_step_3
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_1_2]_step_4
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_2_2]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_2_2]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_2_2]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_2_2]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_2_2]_step_3
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_2_2]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_2_2]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_2_2]_step_3
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_2_2]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_2_2]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_2_2]_step_3
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_2_2]_step_4
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_3_2]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_3_2]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_3_2]_step_3
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_3_2]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_3_2]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_3_2]_step_3
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_3_2]_step_4
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_3_2]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_3_2]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_3_2]_step_3
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_3_2]_step_4
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_3_2]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_3_2]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_3_2]_step_3
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_3_2]_step_4
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_3_2]_step_5
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_0_3]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_0_3]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_0_3]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_0_3]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_0_3]_step_3
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_0_3]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_0_3]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_0_3]_step_3
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_0_3]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_0_3]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_0_3]_step_3
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_0_3]_step_4
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_1_3]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_1_3]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_1_3]_step_3
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_1_3]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_1_3]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_1_3]_step_3
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_1_3]_step_4
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_1_3]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_1_3]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_1_3]_step_3
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_1_3]_step_4
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_1_3]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_1_3]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_1_3]_step_3
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_1_3]_step_4
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_1_3]_step_5
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_2_3]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_2_3]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_2_3]_step_3
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_2_3]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_2_3]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_2_3]_step_3
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_2_3]_step_4
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_2_3]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_2_3]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_2_3]_step_3
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_2_3]_step_4
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_2_3]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_2_3]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_2_3]_step_3
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_2_3]_step_4
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_2_3]_step_5
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_3_3]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_3_3]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_3_3]_step_3
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_3_3]_step_4
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_3_3]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_3_3]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_3_3]_step_3
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_3_3]_step_4
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_3_3]_step_5
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_3_3]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_3_3]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_3_3]_step_3
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_3_3]_step_4
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_3_3]_step_5
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_3_3]_step_1
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_3_3]_step_2
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_3_3]_step_3
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_3_3]_step_4
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_3_3]_step_5
+=== RUN   TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_3_3]_step_6
+--- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder (0.03s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_0_0]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_0_0]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_0_0]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_0_0]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_1_0]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_1_0]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_1_0]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_1_0]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_1_0]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_1_0]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_1_0]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_1_0]_step_3 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_2_0]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_2_0]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_2_0]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_2_0]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_2_0]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_2_0]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_2_0]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_2_0]_step_3 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_3_0]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_3_0]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_3_0]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_3_0]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_3_0]_step_3 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_3_0]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_3_0]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_3_0]_step_3 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_3_0]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_3_0]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_3_0]_step_3 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_3_0]_step_4 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_0_1]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_0_1]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_0_1]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_0_1]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_0_1]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_0_1]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_0_1]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_0_1]_step_3 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_1_1]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_1_1]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_1_1]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_1_1]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_1_1]_step_3 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_1_1]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_1_1]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_1_1]_step_3 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_1_1]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_1_1]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_1_1]_step_3 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_1_1]_step_4 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_2_1]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_2_1]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_2_1]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_2_1]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_2_1]_step_3 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_2_1]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_2_1]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_2_1]_step_3 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_2_1]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_2_1]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_2_1]_step_3 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_2_1]_step_4 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_3_1]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_3_1]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_3_1]_step_3 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_3_1]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_3_1]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_3_1]_step_3 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_3_1]_step_4 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_3_1]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_3_1]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_3_1]_step_3 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_3_1]_step_4 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_3_1]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_3_1]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_3_1]_step_3 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_3_1]_step_4 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_3_1]_step_5 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_0_2]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_0_2]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_0_2]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_0_2]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_0_2]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_0_2]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_0_2]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_0_2]_step_3 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_1_2]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_1_2]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_1_2]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_1_2]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_1_2]_step_3 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_1_2]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_1_2]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_1_2]_step_3 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_1_2]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_1_2]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_1_2]_step_3 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_1_2]_step_4 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_2_2]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_2_2]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_2_2]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_2_2]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_2_2]_step_3 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_2_2]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_2_2]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_2_2]_step_3 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_2_2]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_2_2]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_2_2]_step_3 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_2_2]_step_4 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_3_2]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_3_2]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_3_2]_step_3 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_3_2]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_3_2]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_3_2]_step_3 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_3_2]_step_4 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_3_2]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_3_2]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_3_2]_step_3 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_3_2]_step_4 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_3_2]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_3_2]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_3_2]_step_3 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_3_2]_step_4 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_3_2]_step_5 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_0_3]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_0_3]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_0_3]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_0_3]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_0_3]_step_3 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_0_3]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_0_3]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_0_3]_step_3 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_0_3]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_0_3]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_0_3]_step_3 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_0_3]_step_4 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_1_3]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_1_3]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_1_3]_step_3 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_1_3]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_1_3]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_1_3]_step_3 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_1_3]_step_4 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_1_3]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_1_3]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_1_3]_step_3 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_1_3]_step_4 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_1_3]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_1_3]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_1_3]_step_3 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_1_3]_step_4 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_1_3]_step_5 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_2_3]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_2_3]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_2_3]_step_3 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_2_3]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_2_3]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_2_3]_step_3 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_2_3]_step_4 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_2_3]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_2_3]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_2_3]_step_3 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_2_3]_step_4 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_2_3]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_2_3]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_2_3]_step_3 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_2_3]_step_4 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_2_3]_step_5 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_3_3]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_3_3]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_3_3]_step_3 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[0_3_3]_step_4 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_3_3]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_3_3]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_3_3]_step_3 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_3_3]_step_4 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[1_3_3]_step_5 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_3_3]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_3_3]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_3_3]_step_3 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_3_3]_step_4 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[2_3_3]_step_5 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_3_3]_step_1 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_3_3]_step_2 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_3_3]_step_3 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_3_3]_step_4 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_3_3]_step_5 (0.00s)
+    --- PASS: TestExactByteLocksMemoryEveryPartialCloseRetriesExactRemainder/[3_3_3]_step_6 (0.00s)
+=== RUN   TestExactByteLocksMemoryDirectReleaseErrorRetry
+--- PASS: TestExactByteLocksMemoryDirectReleaseErrorRetry (0.00s)
+=== RUN   TestExactByteLocksMemoryCleanupAccumulatesPoison
+--- PASS: TestExactByteLocksMemoryCleanupAccumulatesPoison (0.00s)
+=== RUN   TestExactByteLocksMemoryInvalidOffsetAndStackedAcquisition
+--- PASS: TestExactByteLocksMemoryInvalidOffsetAndStackedAcquisition (0.00s)
+=== RUN   TestSnapshotManifestCanonicalMemory
+--- PASS: TestSnapshotManifestCanonicalMemory (0.00s)
+=== RUN   TestEncryptedHandleLifetimeMemoryParentPins
+--- PASS: TestEncryptedHandleLifetimeMemoryParentPins (0.00s)
+=== RUN   TestEncryptedHandleLifetimeMemoryUnresolvedLocks
+--- PASS: TestEncryptedHandleLifetimeMemoryUnresolvedLocks (0.00s)
+=== RUN   TestEncryptedHandleLifetimeMemoryUnknownCloseIsTerminal
+--- PASS: TestEncryptedHandleLifetimeMemoryUnknownCloseIsTerminal (0.00s)
+=== RUN   TestEncryptedManagedStatusMemoryConsumedDiagnostic
+--- PASS: TestEncryptedManagedStatusMemoryConsumedDiagnostic (0.00s)
+=== RUN   TestEncryptedManagedStatusMemoryDirectoryPins
+--- PASS: TestEncryptedManagedStatusMemoryDirectoryPins (0.00s)
+=== RUN   TestProcessByteLocksMemoryOwnersAndAtomicConversion
+--- PASS: TestProcessByteLocksMemoryOwnersAndAtomicConversion (0.00s)
+=== RUN   TestProcessByteLocksMemoryBusyPreservesLedger
+--- PASS: TestProcessByteLocksMemoryBusyPreservesLedger (0.00s)
+=== RUN   TestProcessByteLocksMemoryThreeByteIndependence
+--- PASS: TestProcessByteLocksMemoryThreeByteIndependence (0.00s)
+=== RUN   TestProcessByteLocksMemoryCleanupPoisonAndRetry
+--- PASS: TestProcessByteLocksMemoryCleanupPoisonAndRetry (0.00s)
+=== RUN   TestProcessByteLocksMemoryExhaustiveLocalConflict
+--- PASS: TestProcessByteLocksMemoryExhaustiveLocalConflict (0.00s)
+=== RUN   TestProcessByteLocksMemoryCrossDomainCloseComposition
+--- PASS: TestProcessByteLocksMemoryCrossDomainCloseComposition (0.00s)
+=== RUN   TestProcessByteLocksMemoryEveryHeldArrayAndPartialClose
+--- PASS: TestProcessByteLocksMemoryEveryHeldArrayAndPartialClose (0.00s)
+=== RUN   TestSharedLayoutFrozenMemoryModeAndProtocol
+--- PASS: TestSharedLayoutFrozenMemoryModeAndProtocol (0.00s)
+=== RUN   TestWALFormatFrozenMemoryVectors
+--- PASS: TestWALFormatFrozenMemoryVectors (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	1.298s
+=== RUN   TestEncryptedSessionCloseMemoryOnceAndActiveLease
+--- PASS: TestEncryptedSessionCloseMemoryOnceAndActiveLease (0.00s)
+=== RUN   TestEncryptedSessionCloseMemorySkipCheckpoint
+--- PASS: TestEncryptedSessionCloseMemorySkipCheckpoint (0.00s)
+=== RUN   TestEncryptedSessionCloseMemoryActivePreservesOptions
+--- PASS: TestEncryptedSessionCloseMemoryActivePreservesOptions (0.00s)
+=== RUN   TestEncryptedPagerWALFinalDirtySegments
+--- PASS: TestEncryptedPagerWALFinalDirtySegments (0.04s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.056s
+=== RUN   TestEncryptedCleanupMemoryPublicClassification
+--- PASS: TestEncryptedCleanupMemoryPublicClassification (0.00s)
+=== RUN   TestEncryptedCleanupOrdinaryAllModesCloseAndProviders
+=== RUN   TestEncryptedCleanupOrdinaryAllModesCloseAndProviders/0
+=== RUN   TestEncryptedCleanupOrdinaryAllModesCloseAndProviders/1
+=== RUN   TestEncryptedCleanupOrdinaryAllModesCloseAndProviders/2
+--- PASS: TestEncryptedCleanupOrdinaryAllModesCloseAndProviders (0.06s)
+    --- PASS: TestEncryptedCleanupOrdinaryAllModesCloseAndProviders/0 (0.01s)
+    --- PASS: TestEncryptedCleanupOrdinaryAllModesCloseAndProviders/1 (0.02s)
+    --- PASS: TestEncryptedCleanupOrdinaryAllModesCloseAndProviders/2 (0.03s)
+=== RUN   TestEncryptionSharedCloseBusyAndPasswordRefresh
+--- PASS: TestEncryptionSharedCloseBusyAndPasswordRefresh (1.73s)
+=== RUN   TestEncryptionOrdinaryLifecycleAndCopies
+--- PASS: TestEncryptionOrdinaryLifecycleAndCopies (0.04s)
+=== RUN   TestEncryptionPasswordNormalReopen
+--- PASS: TestEncryptionPasswordNormalReopen (1.13s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	4.101s
+=== RUN   TestEncryptedSharedConnectorIndependentPoolSnapshots
+--- PASS: TestEncryptedSharedConnectorIndependentPoolSnapshots (0.04s)
+=== RUN   TestEncryptedConnectorOrdinaryLifecycle
+--- PASS: TestEncryptedConnectorOrdinaryLifecycle (0.01s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.083s

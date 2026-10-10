@@ -48,7 +48,7 @@ func (s *Store) prepublish(ctx context.Context) error {
 func (s *Store) Publish(ctx context.Context, g Geometry, src PageSource, target *Prepared) error {
 	return s.publishBase(ctx, g, src, target, s.opts.Mode)
 }
-func (s *Store) publishBase(ctx context.Context, g Geometry, src PageSource, target *Prepared, mode Mode) error {
+func (s *Store) publishBase(ctx context.Context, g Geometry, src PageSource, target *Prepared, mode Mode) (resultErr error) {
 	if e := s.prepublish(ctx); e != nil {
 		return e
 	}
@@ -126,7 +126,7 @@ func (s *Store) publishBase(ctx context.Context, g Geometry, src PageSource, tar
 	adopted := false
 	defer func() {
 		if !adopted {
-			obj.close()
+			resultErr = obj.closeWithError(resultErr)
 		}
 	}()
 	if e = s.ns.sync(s.path); e != nil {
@@ -177,7 +177,7 @@ func (s *Store) publishBase(ctx context.Context, g Geometry, src PageSource, tar
 	return s.poisonOwnership(closeErr, true)
 }
 
-func (s *Store) PublishWAL(ctx context.Context, expected [32]byte, g Geometry, pages []uint32, src PageSource) error {
+func (s *Store) PublishWAL(ctx context.Context, expected [32]byte, g Geometry, pages []uint32, src PageSource) (resultErr error) {
 	if e := s.prepublish(ctx); e != nil {
 		return e
 	}
@@ -261,7 +261,7 @@ func (s *Store) PublishWAL(ctx context.Context, expected [32]byte, g Geometry, p
 	adopted := false
 	defer func() {
 		if !adopted {
-			seg.close()
+			resultErr = seg.closeWithError(resultErr)
 		}
 	}()
 	if e = s.ns.sync(s.path); e != nil {
@@ -333,7 +333,7 @@ func (s *Store) publishRoot(ctx context.Context, master *encryption.MasterKey, o
 	if e == nil {
 		e = s.ns.stable(check, pending, info)
 	}
-	e = errors.Join(e, check.Close())
+	e = closeResult(check, e)
 	if e != nil {
 		return e
 	}
@@ -386,8 +386,7 @@ func (s *Store) publishRoot(ctx context.Context, master *encryption.MasterKey, o
 		e = s.ns.stable(root, s.path, ri)
 	}
 	if e != nil {
-		root.Close()
-		return uncertain(e)
+		return uncertain(closeResult(root, e))
 	}
 	if e = s.checkOwner(); e == nil {
 		e = s.checkSelected()
@@ -396,8 +395,7 @@ func (s *Store) publishRoot(ctx context.Context, master *encryption.MasterKey, o
 		e = candidateStable()
 	}
 	if e != nil {
-		root.Close()
-		return uncertain(e)
+		return uncertain(closeResult(root, e))
 	}
 	old := s.root
 	if opts.Mode == WALShared {

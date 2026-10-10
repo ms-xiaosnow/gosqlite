@@ -21,18 +21,22 @@ type segment struct {
 	pages  []uint32
 }
 
-func (s *segment) close() error {
+func (s *segment) close() error { return s.closeWithError(nil) }
+func (s *segment) closeWithError(cause error) error {
 	if s == nil {
-		return nil
+		return cause
 	}
 	var e error
 	if s.reader != nil {
 		e = s.reader.Close()
+		s.reader = nil
 	}
 	if s.file != nil {
-		e = errors.Join(e, s.file.Close())
+		e = closeResult(s.file, errors.Join(cause, e))
+		cause = nil
+		s.file = nil
 	}
-	return e
+	return errors.Join(cause, e)
 }
 func (s *segment) readPage(ctx context.Context, page, ordinal uint32) ([]byte, error) {
 	if e := ctx.Err(); e != nil {
@@ -177,17 +181,15 @@ func (s *Store) openSegment(ctx context.Context, master *encryption.MasterKey, e
 	}
 	seg, e := verifySegment(ctx, f, uint64(i.Size()), master, epoch, o, r, previous)
 	if e != nil {
-		f.Close()
-		return nil, e
+		return nil, closeResult(f, e)
 	}
 	seg.file, seg.info, seg.path, seg.ns = f, i, path, s.ns
 	if e = s.ns.stable(f, path, i); e != nil {
-		seg.close()
-		return nil, e
+		return nil, seg.closeWithError(e)
 	}
 	return seg, nil
 }
-func (s *Store) writeSegment(ctx context.Context, d encryption.FileDescriptor, pages []uint32, src PageSource) (*segment, error) {
+func (s *Store) writeSegment(ctx context.Context, d encryption.FileDescriptor, pages []uint32, src PageSource) (_ *segment, resultErr error) {
 	first, e := src.ReadPage(ctx, 1)
 	if e != nil {
 		return nil, e
@@ -216,7 +218,7 @@ func (s *Store) writeSegment(ctx context.Context, d encryption.FileDescriptor, p
 	closed := false
 	defer func() {
 		if !closed {
-			f.Close()
+			resultErr = closeResult(f, resultErr)
 		}
 	}()
 	digest := sha256.New()

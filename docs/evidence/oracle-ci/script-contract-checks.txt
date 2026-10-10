@@ -1,0 +1,13 @@
+PASS syntax: scripts/build-oracle.sh
+PASS syntax: scripts/test-oracle.sh
+PASS synthetic contract: mandatory oracle environment; calls=[]
+PASS synthetic contract: wrong Go blocks execution; calls=[['go', ['env', 'GOVERSION'], '0', 'local']]
+PASS synthetic contract: relative oracle path rejected; calls=[['go', ['env', 'GOVERSION'], '0', 'local']]
+PASS synthetic contract: missing executable rejected; calls=[['go', ['env', 'GOVERSION'], '0', 'local']]
+PASS synthetic contract: guard failure prevents oracle and tests; calls=[['go', ['env', 'GOVERSION'], '0', 'local'], ['go', ['run', './internal/testscope'], '0', 'local']]
+PASS synthetic contract: wrong SQLite ID prevents tests; calls=[['go', ['env', 'GOVERSION'], '0', 'local'], ['go', ['run', './internal/testscope'], '0', 'local'], ['oracle', ['-batch', '-bail', '-noheader', '-list', ':memory:', 'SELECT sqlite_version(),sqlite_source_id();']]]
+PASS synthetic contract: success invokes exactly complete CGO=0 ordinary oracle; calls=[['go', ['env', 'GOVERSION'], '0', 'local'], ['go', ['run', './internal/testscope'], '0', 'local'], ['oracle', ['-batch', '-bail', '-noheader', '-list', ':memory:', 'SELECT sqlite_version(),sqlite_source_id();']], ['go', ['test', '-count=1', '-timeout=30m', '-tags', 'oracle', './...'], '0', 'local']]
+PASS builder refuses incorrect archive byte count before extraction
+PASS builder refuses existing destination
+PASS workflow source contract: exactly two jobs, pinned Go/oracle, no system installs or manual tags
+Synthetic tool checks validate shell routing only; they are not Go test or hosted CI results.

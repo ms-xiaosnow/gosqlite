@@ -1,0 +1,9 @@
++ ../toolchains/go1.27.2/bin/go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ ../toolchains/go1.27.2/bin/go test -count=1 -v ./internal/encstore -run '^TestIndependentEncryptedReapAdmissionDoesNotWaitOnStatus$'
+=== RUN   TestIndependentEncryptedReapAdmissionDoesNotWaitOnStatus
+    encrypted_independent_probe_test.go:31: unrelated scope admission blocked on a live resource status check
+--- FAIL: TestIndependentEncryptedReapAdmissionDoesNotWaitOnStatus (0.10s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/encstore	0.104s
+FAIL

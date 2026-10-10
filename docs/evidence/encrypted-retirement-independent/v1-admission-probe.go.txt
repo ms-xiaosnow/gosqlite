@@ -1,0 +1,35 @@
+package encstore
+
+import (
+    "testing"
+    "time"
+)
+
+type independentBlockedStatus struct { entered chan struct{}; resume chan struct{} }
+func (*independentBlockedStatus) closeNative() error { return nil }
+func (b *independentBlockedStatus) RetirementComplete() bool { close(b.entered); <-b.resume; return false }
+
+// All resources and callbacks are descriptor-free. A status inspection models
+// waiting for another lease's mutex, without any native I/O or fault injection.
+func TestIndependentEncryptedReapAdmissionDoesNotWaitOnStatus(t *testing.T) {
+    r, g := memoryEncryptedGroup(t)
+    b := &independentBlockedStatus{entered:make(chan struct{}), resume:make(chan struct{})}
+    memoryEncryptedAdd(t,g,b,cleanupChild)
+    g.reap.Store(true)
+    done := make(chan error,1)
+    go func() { _, err := r.reserve(); done <- err }()
+    select {
+    case err := <-done:
+        if err != nil { t.Fatal(err) }
+        return
+    case <-b.entered:
+    }
+    select {
+    case err := <-done:
+        if err != nil { t.Error(err) }
+    case <-time.After(100*time.Millisecond):
+        t.Error("unrelated scope admission blocked on a live resource status check")
+    }
+    close(b.resume)
+    if err := <-done; err != nil { t.Error(err) }
+}

@@ -1,0 +1,12 @@
+PASS syntax: scripts/build-oracle.sh
+PASS syntax: scripts/test-oracle.sh
+PASS synthetic contract: mandatory oracle environment; calls=[]
+PASS synthetic contract: wrong Go blocks execution; calls=[['go', ['env', 'GOVERSION'], '0', 'local']]
+PASS synthetic contract: relative oracle path rejected; calls=[['go', ['env', 'GOVERSION'], '0', 'local']]
+Traceback (most recent call last):
+  File "/workspace/scratch/5e06a74e5f65/durable-restart/ordinary-oracle-ci-work/docs/evidence/oracle-ci/script-contract-checks.py", line 63, in <module>
+    run_case('missing executable rejected', {'SQLITE_ORACLE': str(binary / 'absent')}, False, ['go'])
+  File "/workspace/scratch/5e06a74e5f65/durable-restart/ordinary-oracle-ci-work/docs/evidence/oracle-ci/script-contract-checks.py", line 54, in run_case
+    assert [entry[0] for entry in calls] == expected_calls, (name, calls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ('missing executable rejected', [['go', ['env', 'GOVERSION'], '0', 'local'], ['go', ['run', './internal/testscope'], '0', 'local']])

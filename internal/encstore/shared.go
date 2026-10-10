@@ -19,12 +19,20 @@ func (s *Store) poisonOwnership(err error, uncertain bool) error {
 	if err == nil {
 		return nil
 	}
-	s.poisoned = errors.Join(s.poisoned, ErrPoisoned, err)
-	if uncertain {
-		s.poisoned = errors.Join(ErrUncertain, s.poisoned)
+	if s.ns != nil {
+		err = s.ns.group.remember(err)
 	}
-	return s.poisoned
+	current := errors.Join(ErrPoisoned, err)
+	if uncertain {
+		current = errors.Join(ErrUncertain, current)
+	}
+	if s.poisoned == nil {
+		s.poisoned = current
+		return current
+	}
+	return errors.Join(s.poisoned, current)
 }
+
 func (s *Store) enterGate(shared bool) error {
 	if s.gateOwned {
 		return ErrUnsupported
@@ -80,6 +88,7 @@ func (s *Store) captureRoot() (raw []byte, err error) {
 	keep := false
 	defer func() {
 		if !keep {
+			err = s.ns.group.remember(err)
 			err = errors.Join(err, s.poisonOwnership(f.Close(), false))
 		}
 	}()
@@ -147,6 +156,7 @@ func (s *Store) buildSelection(ctx context.Context, raw []byte) (*Store, error) 
 	}
 	c := &Store{selection: selection{rootBytes: raw, header: h}, ns: s.ns, path: s.path, opts: s.opts, readOnly: s.readOnly, lock: s.lock, lockInfo: s.lockInfo, master: s.master}
 	if e = c.openWALSelection(ctx, m); e != nil {
+		e = s.ns.group.remember(e)
 		return nil, errors.Join(e, s.poisonOwnership(c.closeSelection(), false))
 	}
 	return c, nil
@@ -257,16 +267,17 @@ func (s *Store) checkAuthority() (err error) {
 		return err
 	}
 	if len(s.rootBytes) == 0 {
-		if _, e := platformPathInfo(s.path); !os.IsNotExist(e) {
-			return ErrChanged
-		}
-		return nil
+		_, e := platformPathInfo(s.path)
+		return s.checkAbsentRootResult(e)
 	}
 	f, info, e := s.ns.checked(s.path, os.O_RDONLY)
 	if e != nil {
 		return e
 	}
-	defer func() { err = errors.Join(err, s.poisonOwnership(f.Close(), false)) }()
+	defer func() {
+		err = s.ns.group.remember(err)
+		err = errors.Join(err, s.poisonOwnership(f.Close(), false))
+	}()
 	if e = rootExtent(info.Size(), s.opts); e != nil {
 		return e
 	}

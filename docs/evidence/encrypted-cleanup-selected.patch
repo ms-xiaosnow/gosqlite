@@ -1,0 +1,3765 @@
+--- /dev/null
++++ b/docs/encrypted-cleanup.md
+@@ -0,0 +1,199 @@
++# Encrypted managed ownership and cleanup
++
++Date: 2026-10-10. This is a source-level ownership correction with descriptor-free
++state laws and intact, correct-key Linux lifecycle evidence. Actual native
++teardown failures and native Darwin/Windows runtime qualification are **NOT_RUN**.
++It does not complete M3/M8/M10 or establish production security/durability.
++
++## Managed owner graph
++
++An encrypted root-directory acquisition creates a cleanup scope. Relative opens,
++including metadata, inventory and rename probes, inherit that scope. A Store's
++scope owns its selected root/base/segments and all transient/replacement files,
++the stable `.gse-lock` lifecycle owner, and the pinned namespace directory. The
++scope contains managed resources, role tags, scope dependencies and error causes;
++it has no Store, pager session, DB, options, provider, crypto reader or page-buffer
++field and stores no application cleanup callback. Opaque supplied error values
++can themselves retain arbitrary references, so this is not a transitive bound on
++application data or proof of absolute secret erasure.
++
++Each acquisition reserves a scope/lease slot before invoking its native open.
++Darwin/Windows put the actual physical resource into their existing native
++registry before platform validation; a failed validation returns the acquired
++managed lease plus the error. The common boundary adopts that lease before any
++cleanup or caller validation can discard it. Darwin's unknown-inode quarantine
++is represented by an explicit terminal obligation in the already-reserved scope.
++It does not invent a safe callable native close.
++
++Retirement completion is explicit and independent of diagnostic errors:
++
++- Linux uses a managed wrapper instead of an `os.File` alias. A single Close
++  consumes its `os.File` even when it reports a diagnostic. The actual file is
++  detached before that call; its numeric descriptor is never retried. Directory
++  pins survive until child ownership retires.
++- Darwin releases the lease's exact byte holds under the common process-inode
++  gate. A safely idle regular lease may transfer into the strongly retained
++  native registry. That does not mean physical close happened. Its actual
++  directory pin remains owned until physical retirement. Unreleased holds,
++  dependent directories and terminal native close uncertainty are incomplete.
++  A later failure while draining a previously transferred descriptor atomically
++  marks its surviving scope terminal, preserving lifecycle/directory protection
++  and snapshot visibility. Reuse transfers native parent pins without reopening
++  a closed logical lease.
++- Windows requires explicit `handleLifetime.retired`, an empty raw-handle field,
++  no remaining exact lock record and no parent/child pin. Failed unlock remains
++  represented and can be retried by its managed owner. Indeterminate native
++  close is terminal: no retry invokes the old numeric HANDLE.
++
++A directory's ordinary single-file logical Close can return nil while live
++children retain its actual pin. That normal deferred result is not poison. Whole
++scope retirement, however, cannot treat nil/noncomplete as successful retirement.
++
++## Logical close, staged retirement and secrets
++
++The Store clears its crypto readers, master and owned selection buffers once.
++Native ownership already belongs to the scope, so discarding old selection
++metadata does not discard unresolved resources. Old-selection and temporary
++close failures poison further work and remain in the same ownership graph.
++Whole-scope cleanup runs these barriers:
++
++1. Independently acquired nested scopes carried by errors
++2. Selected, replacement, inventory, capture and other ordinary child owners
++3. The stable lifecycle-lock owner (native byte cleanup remains gate, writer,
++   then lifecycle)
++4. The pinned root directory
++
++A new nested obligation discovered during native retirement is adopted before
++the next stage can proceed. Cyclic/inconsistent dependency graphs fail closed.
++One unresolved child prevents releasing its lifecycle and directory protection.
++A consumed Linux close diagnostic does not falsely block later stages.
++
++EncryptedSession uses the existing DB `CloseWithError` bridge. DB invalidates
++Rows and rolls back its transaction once; all later SQL operations remain closed.
++A direct pager close with an active lease returns BUSY without starting closure
++or clearing its options (including KeepWALOnClose).
++After closure starts, the optional checkpoint is attempted at most once. An
++existing poison, earlier Rows/Tx release error, read-only mode or KeepWALOnClose
++skips it. Repeated Close retries only managed retirement. It does not checkpoint,
++replay a transaction, resolve a path, or invoke a key provider again.
++
++## Constructor and temporary-owner audit
++
++An operation error is adopted before its first cleanup call, not merely joined
++afterwards. Direct child Close also stops behind unresolved independent scope
++dependencies because it can release an already-closed parent pin. Metadata probe
++errors remain errors; an absent-root check reports ErrChanged only for an actual
++present path. ReaderAt causes are retained together with ErrFormat classification.
++
++The following common paths now join cleanup diagnostics and retain ownership
++when no Store, Archive or DB can be returned:
++
++- `acquire`, `Open`, new namespace and checked-file validation
++- Complete-object and segment open/write/verify cleanup
++- Captured roots, authority checks and replacement selection cleanup
++- Base/WAL/root publication candidates and superseded roots/objects
++- Inventory enumeration and member probes; namespace writes/retained copies
++- Portable archive open/write/close, fresh-family creation and plaintext export
++- Pager encrypted session/archive header-validation errors
++- Public restore's archive-close defer
++
++Native metadata and rename constructors are inside the same pre-acquisition
++boundary. A scoped failed constructor cannot lose its retry route merely because
++it returns nil plus an error. Pure crypto Close calls have no native ownership;
++their existing guaranteed-nil idempotent cleanup remains separate.
++
++Explicit plaintext import's rollback-mode source Reader/DB still uses the old
++plaintext ownership contract. Joining that source's cleanup errors would not
++repair its independent missing ownership route, and this slice makes no such
++claim. Other ordinary plaintext Reader/Tx and WALExclusive gaps described in
++[shared-close-cleanup.md](shared-close-cleanup.md) remain outside scope.
++
++## Bounds and concurrency
++
++The process permits at most **1024 opening/live/pending encrypted scopes** and
++**16,384 opening/live/pending common managed leases**. Admission precedes the
++native call; a full bound returns `encryption.ErrLimit` (public
++ErrMemoryLimit/CodeNoMem) without that attempted native acquisition. Every
++relative child is charged, including metadata and constructor failures. Native
++physical budgets remain additional constraints: Darwin's shared registry and
++Windows' private handle ceiling are not replaced by the common logical budget.
++A transferred Darwin lease can cease to be a common lease while its physical
++record remains charged natively and its directory scope remains retained.
++Unknown/terminal resources can consume capacity for process lifetime. No owner
++is evicted and there is no finalizer, background cleanup, or pathname recovery.
++
++The scope mutex serializes acquisition and cleanup. Native lease mutexes and the
++Darwin process gate are below it. Native parent callbacks never acquire a scope
++mutex; they publish atomic completion/error signals. Registry locking covers
++admission, snapshots and dependency-graph updates only, never native work or
++waiting on a scope. Admission can prune explicitly completed, atomically marked
++parent bookkeeping with TryLock and per-entry atomic completion proofs. Native
++callbacks publish those proofs only after checking completion under their existing
++mutex/gate. Admission calls neither RetirementComplete nor Close, traverses no
++callback errors, and does not wait for a blocked scope, lease I/O or status mutex.
++Groups with unconsumed callback failures are left for explicit cleanup. Snapshot clearing uses compare-and-swap so it
++cannot erase a concurrently published native callback token.
++
++Per-scope causes retain the initial diagnostic and the current attempt, without
++accumulating retry history. Native exact-lock ledgers retain their first poison
++and at most one first release failure per each of the three byte positions,
++plus the current returned error. Error-tree discovery visits at most 4096 nodes
++before any retry effects. The fixed limits bound library-owned records, not
++allocations made inside arbitrary error implementations or total process RSS.
++
++## Public API
++
++`sqlite.ErrEncryptedCleanupPending` marks an immutable historical cleanup token.
++Actual pending errors also match ErrPoisoned and use CodeIOErr, even if an
++underlying cause is BUSY. The bare sentinel does not itself imply poison.
++
++- Repeat `db.Close()` to retry that encrypted connection's retirement.
++- `sqlite.RetryEncryptedCleanup(err)` finds all distinct scopes in ordinary
++  wrapped/joined tokens before doing any cleanup. Excessive or cyclic error
++  trees return ErrMemoryLimit/CodeNoMem without cleanup effects and without
++  wrapping the unsafe tree; keep original tokens and retry smaller trees.
++- `sqlite.PendingEncryptedCleanups()` returns a new immutable-token snapshot,
++  including failed constructors and close errors discarded by `database/sql`.
++  Enumeration itself performs no cleanup; live unfailed scopes are excluded.
++
++A token produced while a connection is still live retries only already-requested
++retirement. It cannot close selected live objects or its lifecycle protection.
++Whole-scope retirement becomes eligible only after Store/constructor shutdown.
++Retired groups are no-ops. Pending retry results preserve the owning route and
++original causes. Completed current results suppress adopted historical pending
++markers while preserving their diagnostic causes; old tokens remain historical.
++A diagnostic without the marker can describe consumed ownership. Nil or a token
++from one subsystem is not a universal process leak report or proof a new open
++will succeed. These APIs remain distinct from native plaintext shared-WAL's
++RetryOpenCleanup/RetryCloseCleanup APIs.
++
++## Verification and unchanged storage
++
++Snapshot, WAL and shared-layout frozen memory vectors remain unchanged. The
++patch does not change ciphertext framing, persisted coordination bytes, lock-byte
++protocol, KDF policy or normal provider call counts. Ordinary tests cover all
++three encrypted modes, repeated close/Rows/Tx invalidation, correct-key reopen,
++optional checkpoint BUSY, password refresh counts, rekey and archive/restore/
++import/export, and the real database/sql pool's intact operations.
++Descriptor-free tests cover native status, stage barriers, nil/noncomplete and
++consumed-error distinctions, live retries, exact capacity, noDB quarantine,
++nested/cyclic dependencies, delayed native callbacks, immutable snapshots,
++5000 retries, secrets before retirement, concurrent deduplication, blocked-scope
++and blocked-status admission independence, original read causes, constructor
++error adoption before child close, active-session option preservation, and discarded Close under zero-idle and ErrBadConn pool disposal.
++The latter uses the real standard library over memory-only owners, not failed
++native I/O.
++
++The exact owned source manifest, isolated verification and independent review are
++recorded alongside this document under evidence/encrypted-cleanup-*. The isolated
++base is `69008bf658611318154a112178913c693b679a2b`; sqlite.go contains only this
++slice's classification and Close GoDoc hunks, excluding concurrent SQL Query changes.
++Those same two isolated hunks also apply to the later durable SQL base
++`8f75ccf927b8dc0048d43c65736bdc3ad6fee20c`.
++
++No actual failed native I/O/close/unmap/lock/Sync, file corruption/tamper/wrong
++key, missing selected file, namespace replacement, disk-full/permission failure,
++crash/kill/process exit/hot recovery or interrupted publication/rekey was run or
++moved elsewhere. Darwin/Windows target tests are compiled only. Their native
++runtime, physical-failure qualification, cryptographic/security/legal review and
++full milestone acceptance remain **NOT_RUN**.
+--- a/internal/encstore/backup.go
++++ b/internal/encstore/backup.go
+@@ -10,7 +10,7 @@
+ 
+ // WriteBackup creates one self-contained authenticated archive. Existing
+ // destinations are never replaced; any partial encrypted output is retained.
+-func WriteBackup(ctx context.Context, destination string, target *Prepared, g Geometry, src PageSource) (Info, error) {
++func WriteBackup(ctx context.Context, destination string, target *Prepared, g Geometry, src PageSource) (_ Info, resultErr error) {
+ 	if target.Options.Mode != Snapshot {
+ 		return Info{}, ErrUnsupported
+ 	}
+@@ -44,7 +44,7 @@
+ 	if err != nil {
+ 		return Info{}, err
+ 	}
+-	defer o.close()
++	defer func() { resultErr = o.closeWithError(resultErr) }()
+ 	if err = syncDirectory(path); err != nil {
+ 		return Info{}, errors.Join(ErrUncertain, err)
+ 	}
+@@ -52,8 +52,9 @@
+ }
+ 
+ type Archive struct {
+-	obj    *object
+-	master *encryption.MasterKey
++	obj     *object
++	master  *encryption.MasterKey
++	cleanup *cleanupGroup
+ }
+ 
+ func OpenBackup(ctx context.Context, path string, options Options) (*Archive, error) {
+@@ -72,7 +73,7 @@
+ 		return nil, err
+ 	}
+ 	raw, err := readExact(f, encryption.HeaderSize, 0)
+-	err = errors.Join(err, f.Close())
++	err = closeResult(f, err)
+ 	if err != nil {
+ 		return nil, err
+ 	}
+@@ -92,17 +93,47 @@
+ 		_ = master.Close()
+ 		return nil, err
+ 	}
+-	return &Archive{obj: o, master: master}, nil
+-}
+-func (a *Archive) Geometry() Geometry { return a.obj.geometry() }
++	return &Archive{obj: o, master: master, cleanup: o.file.owner}, nil
++}
++func (a *Archive) Geometry() Geometry {
++	if a.obj == nil {
++		return Geometry{}
++	}
++	return a.obj.geometry()
++}
+ func (a *Archive) ReadPage(ctx context.Context, n uint32) ([]byte, error) {
++	if a.obj == nil {
++		return nil, encryption.ErrClosed
++	}
+ 	return a.obj.readPage(ctx, n)
+ }
+-func (a *Archive) Close() error { return errors.Join(a.obj.close(), a.master.Close()) }
++func (a *Archive) Close() error { return a.CloseWithError(nil) }
++func (a *Archive) CloseWithError(cause error) error {
++	if a.obj == nil && a.cleanup != nil {
++		return a.cleanup.retry()
++	}
++	var err error
++	if a.cleanup != nil {
++		cause = a.cleanup.remember(cause)
++	}
++	if a.obj != nil {
++		err = a.obj.closeWithError(cause)
++		cause = nil
++		a.obj = nil
++	}
++	if a.master != nil {
++		err = errors.Join(err, a.master.Close())
++		a.master = nil
++	}
++	if a.cleanup != nil {
++		return a.cleanup.closeAll(errors.Join(cause, err))
++	}
++	return errors.Join(cause, err)
++}
+ 
+ // CreateFrom makes an absent destination from a validated pinned source. The
+ // caller must validate logical SQLite structure before calling this routine.
+-func CreateFrom(ctx context.Context, destination string, target *Prepared, g Geometry, src PageSource) (Info, error) {
++func CreateFrom(ctx context.Context, destination string, target *Prepared, g Geometry, src PageSource) (_ Info, resultErr error) {
+ 	if err := ctx.Err(); err != nil {
+ 		return Info{}, err
+ 	}
+@@ -121,7 +152,7 @@
+ 	if err != nil {
+ 		return Info{}, err
+ 	}
+-	defer s.Close()
++	defer func() { resultErr = s.CloseWithError(resultErr) }()
+ 	if !absent {
+ 		return Info{}, os.ErrExist
+ 	}
+@@ -135,7 +166,7 @@
+ // ExportPlaintext is the sole explicit confidentiality-downgrade sink. No
+ // staging file is used. A partial target, if any, is deliberately left at the
+ // named destination; success requires file and directory Sync.
+-func ExportPlaintext(ctx context.Context, destination string, g Geometry, src PageSource) error {
++func ExportPlaintext(ctx context.Context, destination string, g Geometry, src PageSource) (resultErr error) {
+ 	path, err := canonical(destination)
+ 	if err != nil {
+ 		return err
+@@ -150,7 +181,7 @@
+ 	closed := false
+ 	defer func() {
+ 		if !closed {
+-			_ = f.Close()
++			resultErr = closeResult(f, resultErr)
+ 		}
+ 	}()
+ 	for n := uint32(1); n <= g.PageCount; n++ {
+--- /dev/null
++++ b/internal/encstore/cleanup.go
+@@ -0,0 +1,523 @@
++package encstore
++
++import (
++	"errors"
++	"fmt"
++	"sync"
++	"sync/atomic"
++
++	"github.com/ms-xiaosnow/gosqlite/encryption"
++)
++
++// The registry bounds both successful live owners and abandoned cleanup. A slot
++// is reserved before acquisition, never after a resource has been obtained.
++const maxEncryptedScopes = 1024
++const maxEncryptedLeases = 16384
++const maxEncryptedCleanupNodes = 4096
++
++var ErrCleanupPending = errors.New("encrypted cleanup pending")
++var encryptedCleanups = cleanupRegistry{scopeLimit: maxEncryptedScopes, leaseLimit: maxEncryptedLeases}
++
++type cleanupResource interface {
++	closeNative() error
++	RetirementComplete() bool
++}
++type managedOwnership struct {
++	owner *cleanupGroup
++	entry *cleanupEntry
++}
++type cleanupRole uint8
++
++const (
++	cleanupChild cleanupRole = iota
++	cleanupLifecycle
++	cleanupDirectory
++)
++
++type cleanupEntry struct {
++	resource  cleanupResource
++	role      cleanupRole
++	requested bool
++	completed atomic.Bool // explicit native callback proof, never an admission-time status call
++}
++type cleanupRegistry struct {
++	mu                             sync.Mutex
++	scopeLimit, leaseLimit, leases int
++	groups                         map[*cleanupGroup]struct{}
++}
++type cleanupGroup struct {
++	mu       sync.Mutex
++	registry *cleanupRegistry
++	files    map[cleanupResource]*cleanupEntry
++	// Dependency edges are changed only under mu and registry.mu. No registry
++	// mutex is held while a managed resource or another group is operated on.
++	dependencies     map[*cleanupGroup]struct{}
++	terminal         bool
++	closing, done    bool
++	cause            error // first failure only; retries never append to retained history
++	pending          atomic.Pointer[cleanupError]
++	reap             atomic.Bool
++	callbackCause    atomic.Pointer[cleanupCallback]
++	callbackTerminal atomic.Bool
++}
++
++type cleanupCallback struct{ cause error }
++
++func (g *cleanupGroup) syncCallbacksLocked() {
++	if g.callbackTerminal.Swap(false) {
++		g.terminal = true
++	}
++	if c := g.callbackCause.Swap(nil); c != nil {
++		err := g.rememberLocked(c.cause)
++		g.failureLocked(err)
++	}
++}
++func (r *cleanupRegistry) reserve() (*cleanupGroup, error) {
++	r.reapCompleted()
++	r.mu.Lock()
++	defer r.mu.Unlock()
++	if len(r.groups) >= r.scopeLimit {
++		return nil, fmt.Errorf("%w: encrypted ownership scope capacity", encryption.ErrLimit)
++	}
++	if r.groups == nil {
++		r.groups = make(map[*cleanupGroup]struct{})
++	}
++	g := &cleanupGroup{registry: r, files: make(map[cleanupResource]*cleanupEntry), dependencies: make(map[*cleanupGroup]struct{})}
++	r.groups[g] = struct{}{}
++	return g, nil
++}
++
++// Reaping consumes already-published completion proofs only. It never calls
++// resource status, native cleanup, or error callbacks. TryLock also prevents
++// admission waiting for a group undergoing native retirement.
++func (r *cleanupRegistry) reapCompleted() {
++	r.mu.Lock()
++	var candidates []*cleanupGroup
++	for g := range r.groups {
++		if g.reap.Load() {
++			candidates = append(candidates, g)
++		}
++	}
++	r.mu.Unlock()
++	for _, g := range candidates {
++		if !g.mu.TryLock() {
++			continue
++		}
++		if g.callbackTerminal.Load() || g.callbackCause.Load() != nil {
++			g.mu.Unlock()
++			continue
++		}
++		g.reap.Store(false)
++		for resource, entry := range g.files {
++			if entry.completed.Load() {
++				g.dropLocked(resource)
++			}
++		}
++		g.releaseLocked()
++		g.mu.Unlock()
++	}
++}
++func (g *cleanupGroup) pruneLocked() {
++	for resource := range g.files {
++		if resource.RetirementComplete() {
++			g.dropLocked(resource)
++		}
++	}
++}
++func (r *cleanupRegistry) reserveLease() error {
++	r.mu.Lock()
++	defer r.mu.Unlock()
++	if r.leases >= r.leaseLimit {
++		return fmt.Errorf("%w: encrypted managed lease capacity", encryption.ErrLimit)
++	}
++	r.leases++
++	return nil
++}
++func (r *cleanupRegistry) releaseLease() { r.mu.Lock(); r.leases--; r.mu.Unlock() }
++func (g *cleanupGroup) releaseLocked() {
++	if len(g.files) != 0 || len(g.dependencies) != 0 || g.terminal {
++		return
++	}
++	g.done = true
++	g.cause = nil
++	g.pending.Store(nil)
++	g.registry.mu.Lock()
++	delete(g.registry.groups, g)
++	g.registry.mu.Unlock()
++}
++func (g *cleanupGroup) addLocked(r cleanupResource, role cleanupRole) {
++	e := &cleanupEntry{resource: r, role: role}
++	g.files[r] = e
++	if f, ok := r.(*managedFile); ok {
++		f.entry = e
++	}
++}
++func (g *cleanupGroup) dropLocked(r cleanupResource) {
++	delete(g.files, r)
++	g.registry.releaseLease()
++}
++func (g *cleanupGroup) failureLocked(err error) {
++	if err != nil && g.cause == nil {
++		g.cause = errors.Join(ErrPoisoned, cleanupDiagnostic(err))
++	}
++}
++func (g *cleanupGroup) tokenLocked(err error) error {
++	if g.done {
++		return err
++	}
++	g.failureLocked(err)
++	e := &cleanupError{group: g, cause: errors.Join(g.cause, cleanupDiagnostic(err))}
++	g.pending.Store(e)
++	return e
++}
++func (g *cleanupGroup) stepLocked(e *cleanupEntry) error {
++	if g.terminal || len(g.dependencies) != 0 {
++		return errors.Join(ErrPoisoned, g.cause)
++	}
++	if e.resource.RetirementComplete() {
++		g.dropLocked(e.resource)
++		return nil
++	}
++	err := g.rememberLocked(e.resource.closeNative())
++	g.syncCallbacksLocked()
++	if e.resource.RetirementComplete() {
++		g.dropLocked(e.resource)
++		return err
++	}
++	if err == nil {
++		err = ErrPoisoned
++	}
++	return err
++}
++
++// A lower native constructor can own an indeterminate descriptor before it can
++// supply a managed lease. Its native registry retains the resource. This marker
++// gives the enclosing pre-reserved scope a terminal barrier, never a raw retry.
++type nativeOwnershipError struct{ cause error }
++
++func (e *nativeOwnershipError) Error() string { return e.cause.Error() }
++func (e *nativeOwnershipError) Unwrap() error { return e.cause }
++func nativeOwnershipPending(err error) error {
++	return &nativeOwnershipError{cause: errors.Join(ErrPoisoned, err)}
++}
++
++// Adopted tokens become diagnostics inside the owning scope. Their immutable
++// historical marker must not make a newly completed result appear pending.
++// Is/As preserve original causes; traversal does not rediscover adopted owners.
++type cleanupDiagnosticError struct{ cause error }
++
++func (e *cleanupDiagnosticError) Error() string { return e.cause.Error() }
++func (e *cleanupDiagnosticError) Is(target error) bool {
++	return target != ErrCleanupPending && errors.Is(e.cause, target)
++}
++func (e *cleanupDiagnosticError) As(target any) bool { return errors.As(e.cause, target) }
++func cleanupDiagnostic(err error) error {
++	if err == nil {
++		return nil
++	}
++	return &cleanupDiagnosticError{cause: err}
++}
++
++type cleanupError struct {
++	group *cleanupGroup
++	cause error
++}
++
++func (e *cleanupError) Error() string   { return fmt.Sprintf("%v: %v", ErrCleanupPending, e.cause) }
++func (e *cleanupError) Unwrap() []error { return []error{ErrCleanupPending, ErrPoisoned, e.cause} }
++
++// Discovery has no cleanup effects, handles every joined token, and refuses
++// excessive/cyclic caller error trees without wrapping the unsafe tree again.
++func cleanupGroups(input error) ([]*cleanupGroup, error) {
++	stack := []error{input}
++	seen := make(map[*cleanupGroup]bool)
++	var out []*cleanupGroup
++	count := 0
++	limit := func() ([]*cleanupGroup, error) {
++		return nil, fmt.Errorf("%w: encrypted cleanup error tree exceeds %d nodes; retain tokens and retry smaller trees", encryption.ErrLimit, maxEncryptedCleanupNodes)
++	}
++	for len(stack) != 0 {
++		if count >= maxEncryptedCleanupNodes {
++			return limit()
++		}
++		count++
++		e := stack[len(stack)-1]
++		stack = stack[:len(stack)-1]
++		switch e := e.(type) {
++		case *cleanupError:
++			if e != nil && !seen[e.group] {
++				seen[e.group] = true
++				out = append(out, e.group)
++			}
++		case interface{ Unwrap() []error }:
++			children := e.Unwrap()
++			if len(children) > maxEncryptedCleanupNodes-count-len(stack) {
++				return limit()
++			}
++			for i := len(children) - 1; i >= 0; i-- {
++				stack = append(stack, children[i])
++			}
++		case interface{ Unwrap() error }:
++			stack = append(stack, e.Unwrap())
++		}
++	}
++	return out, nil
++}
++
++// rememberLocked preserves dependency ownership before enclosing protection is
++// eligible to retire. The registry gate makes cycle checking and edge insertion
++// atomic; a cycle becomes a terminal barrier and never starts recursive cleanup.
++func (g *cleanupGroup) rememberLocked(err error) error {
++	groups, e := cleanupGroups(err)
++	if e != nil {
++		g.terminal = true
++		g.failureLocked(e)
++		return e
++	}
++	g.registry.mu.Lock()
++	defer g.registry.mu.Unlock()
++	for _, other := range groups {
++		if other == g {
++			continue
++		}
++		stack := []*cleanupGroup{other}
++		seen := map[*cleanupGroup]bool{}
++		cyclic := false
++		for len(stack) > 0 {
++			p := stack[len(stack)-1]
++			stack = stack[:len(stack)-1]
++			if p == g {
++				cyclic = true
++				break
++			}
++			if seen[p] {
++				continue
++			}
++			seen[p] = true
++			for dep := range p.dependencies {
++				stack = append(stack, dep)
++			}
++		}
++		if cyclic {
++			g.terminal = true
++			g.failureLocked(errors.New("encrypted cleanup dependency cycle"))
++		}
++		g.dependencies[other] = struct{}{}
++		g.failureLocked(err)
++	}
++	return err
++}
++func (g *cleanupGroup) remember(err error) error {
++	if err == nil {
++		return nil
++	}
++	g.mu.Lock()
++	defer g.mu.Unlock()
++	return g.rememberLocked(err)
++}
++func (g *cleanupGroup) protect(r cleanupResource) {
++	g.mu.Lock()
++	defer g.mu.Unlock()
++	if e := g.files[r]; e != nil {
++		e.role = cleanupLifecycle
++	}
++}
++func (g *cleanupGroup) health() error {
++	g.mu.Lock()
++	defer g.mu.Unlock()
++	g.syncCallbacksLocked()
++	if g.closing || g.done {
++		return encryption.ErrClosed
++	}
++	if pending := g.pending.Load(); pending != nil {
++		return pending
++	}
++	if g.terminal {
++		return errors.Join(ErrPoisoned, g.cause)
++	}
++	return g.cause
++}
++func (g *cleanupGroup) closeResource(r cleanupResource) error {
++	g.mu.Lock()
++	defer g.mu.Unlock()
++	if g.done {
++		return nil
++	}
++	e := g.files[r]
++	if e == nil {
++		return nil
++	}
++	e.requested = true
++	g.syncCallbacksLocked()
++	if g.terminal || len(g.dependencies) != 0 {
++		return g.tokenLocked(g.cause)
++	}
++	if e.role == cleanupLifecycle {
++		for _, child := range g.files {
++			if child.role == cleanupChild && !child.resource.RetirementComplete() {
++				return g.tokenLocked(ErrPoisoned)
++			}
++		}
++	}
++	err := g.rememberLocked(r.closeNative())
++	g.syncCallbacksLocked()
++	g.pruneLocked()
++	if _, pending := g.files[r]; pending {
++		// A directory can be logically closed while a normally live child pins it.
++		// Such a deferred parent is not a failure and has no standalone retry need.
++		if err != nil {
++			return g.tokenLocked(err)
++		}
++	} else if err != nil {
++		g.failureLocked(err)
++	}
++	if len(g.dependencies) != 0 || g.terminal {
++		return g.tokenLocked(err)
++	}
++	if len(g.files) == 0 && len(g.dependencies) == 0 && !g.terminal {
++		g.releaseLocked()
++	}
++	return err
++}
++func (f *managedFile) Close() error {
++	if f == nil {
++		return nil
++	}
++	if f.owner == nil {
++		return f.closeNative()
++	} // native construction before adoption
++	return f.owner.closeResource(f)
++}
++
++// closeResult adopts an operation's independent dependencies before the native
++// close can release a child pin or its already-logically-closed parent.
++func closeResult(f *managedFile, cause error) error {
++	if f == nil {
++		return cause
++	}
++	if f.owner != nil {
++		cause = f.owner.remember(cause)
++	}
++	closeErr := f.Close()
++	if closeErr == nil {
++		return cause
++	}
++	if cause == nil {
++		return closeErr
++	}
++	return errors.Join(cause, closeErr)
++}
++func (g *cleanupGroup) complete() bool { g.mu.Lock(); defer g.mu.Unlock(); return g.done }
++func (g *cleanupGroup) retireLocked() error {
++	observedPending := g.pending.Load()
++	g.syncCallbacksLocked()
++	if g.done {
++		return nil
++	}
++	if g.terminal {
++		return g.tokenLocked(ErrPoisoned)
++	}
++	var errs []error
++	for dep := range g.dependencies {
++		err := dep.retry()
++		if err != nil {
++			errs = append(errs, err)
++		}
++		if dep.complete() {
++			g.registry.mu.Lock()
++			delete(g.dependencies, dep)
++			g.registry.mu.Unlock()
++		}
++	}
++	if len(g.dependencies) != 0 {
++		return g.tokenLocked(errors.Join(errs...))
++	}
++	for role := cleanupChild; role <= cleanupDirectory; role++ {
++		pending := false
++		for _, e := range g.files {
++			if e.role != role {
++				continue
++			}
++			if !g.closing && !e.requested {
++				continue
++			}
++			if !g.closing && role == cleanupDirectory {
++				live := false
++				for _, child := range g.files {
++					if child.role != cleanupDirectory && !child.requested {
++						live = true
++						break
++					}
++				}
++				if live {
++					continue
++				}
++			}
++			e.requested = true
++			err := g.stepLocked(e)
++			if err != nil {
++				errs = append(errs, err)
++			}
++			if _, ok := g.files[e.resource]; ok {
++				pending = true
++			}
++		}
++		g.syncCallbacksLocked()
++		if pending || len(g.dependencies) != 0 || g.terminal {
++			return g.tokenLocked(errors.Join(errs...))
++		}
++		// A live-scope token must never retire unrequested selected objects, its
++		// lifecycle lease, or its directory merely because one temporary failed.
++	}
++	err := errors.Join(errs...)
++	if len(g.files) == 0 {
++		g.releaseLocked()
++	} else {
++		g.pending.CompareAndSwap(observedPending, nil)
++	}
++	return err
++}
++func (g *cleanupGroup) retry() error { g.mu.Lock(); defer g.mu.Unlock(); return g.retireLocked() }
++func (g *cleanupGroup) closeAll(cause error) error {
++	g.mu.Lock()
++	defer g.mu.Unlock()
++	if g.done {
++		return cause
++	}
++	cause = g.rememberLocked(cause)
++	if !g.closing {
++		g.cause = errors.Join(cleanupDiagnostic(cause), g.cause)
++	}
++	g.closing = true
++	initial := g.cause
++	err := g.retireLocked()
++	if g.done {
++		return errors.Join(cleanupDiagnostic(cause), initial, cleanupDiagnostic(err))
++	}
++	return g.tokenLocked(errors.Join(cause, err))
++}
++func RetryCleanup(err error) error {
++	groups, e := cleanupGroups(err)
++	if e != nil {
++		return e
++	}
++	var errs []error
++	for _, g := range groups {
++		if e := g.retry(); e != nil {
++			errs = append(errs, e)
++		}
++	}
++	return errors.Join(errs...)
++}
++func PendingCleanups() []error { return encryptedCleanups.snapshot() }
++func (r *cleanupRegistry) snapshot() []error {
++	r.mu.Lock()
++	defer r.mu.Unlock()
++	var out []error
++	for g := range r.groups {
++		if e := g.pending.Load(); e != nil {
++			out = append(out, e)
++		}
++	}
++	return out
++}
+--- /dev/null
++++ b/internal/encstore/cleanup_test.go
+@@ -0,0 +1,710 @@
++package encstore
++
++import (
++	"context"
++	"database/sql"
++	driver "database/sql/driver"
++	"errors"
++	"fmt"
++	"strings"
++	"sync"
++	"testing"
++	"time"
++
++	"github.com/ms-xiaosnow/gosqlite/encryption"
++)
++
++// These owners contain only memory. Negative callbacks never wrap real files,
++// descriptors, native locks, providers, or filesystem operations.
++type memoryEncryptedOwner struct {
++	calls int
++	done  bool
++	call  func(*memoryEncryptedOwner) error
++}
++
++func (o *memoryEncryptedOwner) closeNative() error {
++	o.calls++
++	if o.call != nil {
++		return o.call(o)
++	}
++	o.done = true
++	return nil
++}
++func (o *memoryEncryptedOwner) RetirementComplete() bool { return o.done }
++func memoryEncryptedGroup(t *testing.T) (*cleanupRegistry, *cleanupGroup) {
++	t.Helper()
++	r := &cleanupRegistry{scopeLimit: 1024, leaseLimit: 16384}
++	g, e := r.reserve()
++	if e != nil {
++		t.Fatal(e)
++	}
++	return r, g
++}
++func memoryEncryptedAdd(t *testing.T, g *cleanupGroup, o cleanupResource, role cleanupRole) {
++	t.Helper()
++	if e := g.registry.reserveLease(); e != nil {
++		t.Fatal(e)
++	}
++	g.addLocked(o, role)
++}
++func TestEncryptedCleanupMemoryStageBarriers(t *testing.T) {
++	for _, barrier := range []cleanupRole{cleanupChild, cleanupLifecycle, cleanupDirectory} {
++		t.Run(fmt.Sprint(barrier), func(t *testing.T) {
++			r, g := memoryEncryptedGroup(t)
++			cause := errors.New("memory retained close")
++			var owners [3]*memoryEncryptedOwner
++			for role := cleanupChild; role <= cleanupDirectory; role++ {
++				role := role
++				owners[role] = &memoryEncryptedOwner{call: func(o *memoryEncryptedOwner) error {
++					if role == barrier && o.calls == 1 {
++						return cause
++					}
++					o.done = true
++					return nil
++				}}
++				memoryEncryptedAdd(t, g, owners[role], role)
++			}
++			e := g.closeAll(nil)
++			if !errors.Is(e, ErrCleanupPending) || !errors.Is(e, cause) {
++				t.Fatal(e)
++			}
++			for role := barrier + 1; role <= cleanupDirectory; role++ {
++				if owners[role].calls != 0 {
++					t.Fatal("protector retired early", role)
++				}
++			}
++			if e = RetryCleanup(e); e != nil {
++				t.Fatal(e)
++			}
++			if !g.done || len(r.groups) != 0 || r.leases != 0 {
++				t.Fatal("reservation leaked")
++			}
++		})
++	}
++}
++func TestEncryptedCleanupMemoryConsumedDiagnosticAndNilIncomplete(t *testing.T) {
++	for _, consumed := range []bool{false, true} {
++		r, g := memoryEncryptedGroup(t)
++		cause := errors.New("memory consumed diagnostic")
++		child := &memoryEncryptedOwner{call: func(o *memoryEncryptedOwner) error {
++			o.done = consumed
++			if consumed {
++				return cause
++			}
++			return nil
++		}}
++		lock := &memoryEncryptedOwner{}
++		memoryEncryptedAdd(t, g, child, cleanupChild)
++		memoryEncryptedAdd(t, g, lock, cleanupLifecycle)
++		e := g.closeAll(nil)
++		if consumed {
++			if !errors.Is(e, cause) || errors.Is(e, ErrCleanupPending) || lock.calls != 1 || r.leases != 0 {
++				t.Fatal(e)
++			}
++		} else {
++			if !errors.Is(e, ErrCleanupPending) || lock.calls != 0 {
++				t.Fatal(e)
++			}
++			child.done = true
++			if e = g.retry(); e != nil {
++				t.Fatal(e)
++			}
++		}
++	}
++}
++func TestEncryptedCleanupMemoryLiveRetryAndHistoricalTokens(t *testing.T) {
++	r, g := memoryEncryptedGroup(t)
++	cause := errors.New("memory temporary retained")
++	temporary := &memoryEncryptedOwner{call: func(o *memoryEncryptedOwner) error {
++		if o.calls == 1 {
++			return cause
++		}
++		o.done = true
++		return nil
++	}}
++	selected, lock, dir := &memoryEncryptedOwner{}, &memoryEncryptedOwner{}, &memoryEncryptedOwner{}
++	memoryEncryptedAdd(t, g, temporary, cleanupChild)
++	memoryEncryptedAdd(t, g, selected, cleanupChild)
++	memoryEncryptedAdd(t, g, lock, cleanupLifecycle)
++	memoryEncryptedAdd(t, g, dir, cleanupDirectory)
++	e := g.closeResource(temporary)
++	if !errors.Is(e, ErrCleanupPending) {
++		t.Fatal(e)
++	}
++	if x := RetryCleanup(e); x != nil {
++		t.Fatal(x)
++	}
++	if selected.calls != 0 || lock.calls != 0 || dir.calls != 0 || g.done || r.leases != 3 {
++		t.Fatal("live retry closed selected protection")
++	}
++	if !errors.Is(e, ErrCleanupPending) {
++		t.Fatal("historical token mutated")
++	}
++	if e = g.closeAll(nil); !errors.Is(e, cause) {
++		t.Fatal("first cause lost", e)
++	}
++	if !g.done || r.leases != 0 {
++		t.Fatal("retirement incomplete")
++	}
++}
++func TestEncryptedCleanupMemoryCapacityBeforeAcquisition(t *testing.T) {
++	r := &cleanupRegistry{scopeLimit: 2, leaseLimit: 1}
++	g, e := r.reserve()
++	if e != nil {
++		t.Fatal(e)
++	}
++	h, e := r.reserve()
++	if e != nil {
++		t.Fatal(e)
++	}
++	if _, e = r.reserve(); !errors.Is(e, encryption.ErrLimit) {
++		t.Fatal(e)
++	}
++	memoryEncryptedAdd(t, g, &memoryEncryptedOwner{}, cleanupChild)
++	calls := 0
++	_, e = h.acquireLocked(cleanupChild, func() (*managedFile, error) { calls++; return nil, nil })
++	if !errors.Is(e, encryption.ErrLimit) || calls != 0 {
++		t.Fatal("acquired beyond reservation", e, calls)
++	}
++	if e = g.closeAll(nil); e != nil {
++		t.Fatal(e)
++	}
++	_, e = h.acquireLocked(cleanupChild, func() (*managedFile, error) { calls++; return nil, errors.New("memory preacquisition rejection") })
++	if e == nil || calls != 1 || r.leases != 0 {
++		t.Fatal(e, calls, r.leases)
++	}
++	if e = h.closeAll(nil); e != nil {
++		t.Fatal(e)
++	}
++}
++func TestEncryptedCleanupMemoryNoDBUnknownConstructor(t *testing.T) {
++	r, g := memoryEncryptedGroup(t)
++	cause := errors.New("memory quarantined native owner")
++	_, e := g.acquireLocked(cleanupChild, func() (*managedFile, error) { return nil, nativeOwnershipPending(cause) })
++	if !errors.Is(e, ErrCleanupPending) || r.leases != 1 || len(r.groups) != 1 {
++		t.Fatal(e)
++	}
++	for i := 0; i < 100; i++ {
++		if e = RetryCleanup(e); !errors.Is(e, ErrCleanupPending) {
++			t.Fatal(e)
++		}
++	}
++	if r.leases != 1 || !g.terminal {
++		t.Fatal("unknown native number was freed")
++	}
++}
++func TestEncryptedCleanupMemoryDependenciesAndCycle(t *testing.T) {
++	r, g := memoryEncryptedGroup(t)
++	h, e := r.reserve()
++	if e != nil {
++		t.Fatal(e)
++	}
++	cause := errors.New("memory nested pending")
++	leaf := &memoryEncryptedOwner{call: func(o *memoryEncryptedOwner) error {
++		if o.calls < 3 {
++			return cause
++		}
++		o.done = true
++		return nil
++	}}
++	protector := &memoryEncryptedOwner{}
++	memoryEncryptedAdd(t, h, leaf, cleanupChild)
++	memoryEncryptedAdd(t, g, protector, cleanupLifecycle)
++	nested := h.closeAll(nil)
++	e = g.closeAll(nested)
++	if !errors.Is(e, ErrCleanupPending) || protector.calls != 0 {
++		t.Fatal(e)
++	}
++	if e = RetryCleanup(e); e != nil {
++		t.Fatal(e)
++	}
++	if protector.calls != 1 || !g.done || !h.done || r.leases != 0 {
++		t.Fatal("nested retirement not ordered")
++	}
++	r, g = memoryEncryptedGroup(t)
++	h, _ = r.reserve()
++	g.remember(&cleanupError{group: h, cause: cause})
++	h.remember(&cleanupError{group: g, cause: cause})
++	if !h.terminal {
++		t.Fatal("cycle not rejected")
++	}
++	if e = g.closeAll(nil); !errors.Is(e, ErrCleanupPending) {
++		t.Fatal(e)
++	}
++}
++
++type memoryEncryptedWrap struct{ next error }
++
++func (e *memoryEncryptedWrap) Error() string { return "memory wrapper" }
++func (e *memoryEncryptedWrap) Unwrap() error { return e.next }
++func TestEncryptedCleanupMemoryBoundedDiscoveryAndHistory(t *testing.T) {
++	_, g := memoryEncryptedGroup(t)
++	cause := errors.New("first failure")
++	o := &memoryEncryptedOwner{call: func(o *memoryEncryptedOwner) error { return fmt.Errorf("current failure %d", o.calls) }}
++	memoryEncryptedAdd(t, g, o, cleanupChild)
++	token := g.closeAll(cause)
++	for i := 0; i < 5000; i++ {
++		token = RetryCleanup(token)
++		if len(token.Error()) > 500 {
++			t.Fatal("history accumulated", len(token.Error()))
++		}
++	}
++	if !errors.Is(token, cause) {
++		t.Fatal("original cause lost")
++	}
++	calls := o.calls
++	var chain error = g.pending.Load()
++	for i := 0; i < 4095; i++ {
++		chain = &memoryEncryptedWrap{next: chain}
++	}
++	if _, e := cleanupGroups(chain); e != nil {
++		t.Fatal("exact boundary rejected", e)
++	}
++	chain = &memoryEncryptedWrap{next: chain}
++	if e := RetryCleanup(chain); !errors.Is(e, encryption.ErrLimit) || o.calls != calls {
++		t.Fatal("refusal performed cleanup", e)
++	}
++	cycle := &memoryEncryptedWrap{}
++	cycle.next = cycle
++	if e := RetryCleanup(cycle); !errors.Is(e, encryption.ErrLimit) || o.calls != calls {
++		t.Fatal(e)
++	}
++	o.done = true
++	if e := RetryCleanup(token); e != nil {
++		t.Fatal(e)
++	}
++}
++func TestEncryptedCleanupMemoryConcurrentRetryDeduplicates(t *testing.T) {
++	r, g := memoryEncryptedGroup(t)
++	o := &memoryEncryptedOwner{call: func(o *memoryEncryptedOwner) error {
++		if o.calls == 1 {
++			return errors.New("memory retry")
++		}
++		o.done = true
++		return nil
++	}}
++	memoryEncryptedAdd(t, g, o, cleanupChild)
++	token := g.closeAll(nil)
++	var wg sync.WaitGroup
++	for i := 0; i < 30; i++ {
++		wg.Add(1)
++		go func() {
++			defer wg.Done()
++			if e := RetryCleanup(errors.Join(token, token)); e != nil {
++				t.Error(e)
++			}
++		}()
++	}
++	wg.Wait()
++	if o.calls != 2 || r.leases != 0 || len(r.groups) != 0 {
++		t.Fatal("duplicate/concurrent retry")
++	}
++}
++func TestEncryptedCleanupMemorySecretReleaseBeforeRetirement(t *testing.T) {
++	_, g := memoryEncryptedGroup(t)
++	o := &memoryEncryptedOwner{call: func(*memoryEncryptedOwner) error { return errors.New("memory retained native owner") }}
++	memoryEncryptedAdd(t, g, o, cleanupChild)
++	m := reviewMemoryMaster(t)
++	raw := []byte("memory secret root evidence")
++	s := &Store{cleanup: g, master: m, selection: selection{rootBytes: raw}, opts: Options{KeyProvider: reviewMemoryProvider(make([]byte, 32))}}
++	if e := s.Close(); !errors.Is(e, ErrCleanupPending) {
++		t.Fatal(e)
++	}
++	if s.master != nil || s.opts.KeyProvider != nil || s.rootBytes != nil || strings.Trim(string(raw), "\x00") != "" {
++		t.Fatal("logical secrets retained")
++	}
++	if _, e := m.Epoch(); !errors.Is(e, encryption.ErrClosed) {
++		t.Fatal("master not closed", e)
++	}
++	if e := s.Check(); !errors.Is(e, encryption.ErrClosed) {
++		t.Fatal(e)
++	}
++	o.done = true
++	if e := s.Close(); e != nil {
++		t.Fatal(e)
++	}
++}
++
++func TestEncryptedCleanupMemoryNativeCallbackBarrier(t *testing.T) {
++	r, g := memoryEncryptedGroup(t)
++	h, e := r.reserve()
++	if e != nil {
++		t.Fatal(e)
++	}
++	nested := &memoryEncryptedOwner{call: func(o *memoryEncryptedOwner) error {
++		if o.calls == 1 {
++			return errors.New("memory nested native")
++		}
++		o.done = true
++		return nil
++	}}
++	memoryEncryptedAdd(t, h, nested, cleanupChild)
++	leaf := &memoryEncryptedOwner{call: func(o *memoryEncryptedOwner) error { o.done = true; return h.closeAll(nil) }}
++	lock := &memoryEncryptedOwner{}
++	memoryEncryptedAdd(t, g, leaf, cleanupChild)
++	memoryEncryptedAdd(t, g, lock, cleanupLifecycle)
++	token := g.closeAll(nil)
++	if !errors.Is(token, ErrCleanupPending) || lock.calls != 0 {
++		t.Fatal("native-returned dependency bypassed", token)
++	}
++	if e = RetryCleanup(token); e != nil {
++		t.Fatal(e)
++	}
++	if lock.calls != 1 || !g.done || !h.done {
++		t.Fatal("native dependency not retained")
++	}
++}
++func TestEncryptedCleanupMemoryAsynchronousTerminalTransfer(t *testing.T) {
++	_, g := memoryEncryptedGroup(t)
++	lock, dir := &memoryEncryptedOwner{}, &memoryEncryptedOwner{}
++	memoryEncryptedAdd(t, g, lock, cleanupLifecycle)
++	memoryEncryptedAdd(t, g, dir, cleanupDirectory)
++	// Represents a lease previously transferred to a native process registry.
++	// Only atomic common callback helpers are called, never managed native Close.
++	transferred := &managedFile{managedOwnership: managedOwnership{owner: g}}
++	token := managedTerminalRetirementError(transferred, errors.New("memory delayed terminal native close"))
++	if !errors.Is(g.health(), ErrPoisoned) {
++		t.Fatal("delayed terminal not visible to operation")
++	}
++	calls := 0
++	if _, e := g.acquireLocked(cleanupChild, func() (*managedFile, error) { calls++; return nil, nil }); !errors.Is(e, ErrPoisoned) || calls != 0 {
++		t.Fatal("terminal scope acquired", e)
++	}
++	if e := RetryCleanup(token); !errors.Is(e, ErrCleanupPending) {
++		t.Fatal(e)
++	}
++	if e := g.closeAll(nil); !errors.Is(e, ErrCleanupPending) || lock.calls != 0 || dir.calls != 0 {
++		t.Fatal("terminal transfer released protectors", e)
++	}
++}
++func TestEncryptedCleanupMemoryDeferredParentAndReap(t *testing.T) {
++	r, g := memoryEncryptedGroup(t)
++	parent := &memoryEncryptedOwner{call: func(*memoryEncryptedOwner) error { return nil }}
++	child := &memoryEncryptedOwner{}
++	memoryEncryptedAdd(t, g, parent, cleanupDirectory)
++	memoryEncryptedAdd(t, g, child, cleanupChild)
++	if e := g.closeResource(parent); e != nil || g.pending.Load() != nil {
++		t.Fatal("normal parent pin poisoned", e)
++	}
++	if e := g.closeResource(child); e != nil {
++		t.Fatal(e)
++	}
++	parent.done = true
++	g.files[parent].completed.Store(true)
++	g.reap.Store(true)
++	h, e := r.reserve()
++	if e != nil {
++		t.Fatal(e)
++	}
++	if !g.done || r.leases != 0 {
++		t.Fatal("completed parent bookkeeping leaked")
++	}
++	if e = h.closeAll(nil); e != nil {
++		t.Fatal(e)
++	}
++}
++
++type memoryEncryptedConnector struct {
++	registry *cleanupRegistry
++	groups   []*cleanupGroup
++	reset    bool
++}
++
++func (c *memoryEncryptedConnector) Connect(context.Context) (driver.Conn, error) {
++	g, e := c.registry.reserve()
++	if e != nil {
++		return nil, e
++	}
++	first := len(c.groups) == 0
++	c.groups = append(c.groups, g)
++	o := &memoryEncryptedOwner{call: func(o *memoryEncryptedOwner) error {
++		if first && o.calls == 1 {
++			return errors.New("memory pool close retained")
++		}
++		o.done = true
++		return nil
++	}}
++	if e = c.registry.reserveLease(); e != nil {
++		return nil, e
++	}
++	g.addLocked(o, cleanupChild)
++	return &memoryEncryptedConn{group: g, reset: first && c.reset}, nil
++}
++func (*memoryEncryptedConnector) Driver() driver.Driver { return memoryEncryptedDriver{} }
++
++type memoryEncryptedDriver struct{}
++
++func (memoryEncryptedDriver) Open(string) (driver.Conn, error) {
++	return nil, errors.New("memory connector only")
++}
++
++type memoryEncryptedConn struct {
++	group *cleanupGroup
++	reset bool
++}
++
++func (*memoryEncryptedConn) Prepare(string) (driver.Stmt, error) {
++	return nil, errors.New("memory no statements")
++}
++func (c *memoryEncryptedConn) Close() error { return c.group.closeAll(nil) }
++func (*memoryEncryptedConn) Begin() (driver.Tx, error) {
++	return nil, errors.New("memory no transactions")
++}
++func (*memoryEncryptedConn) Ping(context.Context) error { return nil }
++func (c *memoryEncryptedConn) ResetSession(context.Context) error {
++	if c.reset {
++		return driver.ErrBadConn
++	}
++	return nil
++}
++func TestEncryptedCleanupMemoryPoolDiscardedCloseSnapshots(t *testing.T) {
++	for _, reset := range []bool{false, true} {
++		r := &cleanupRegistry{scopeLimit: 1024, leaseLimit: 16384}
++		connector := &memoryEncryptedConnector{registry: r, reset: reset}
++		pool := sql.OpenDB(connector)
++		pool.SetMaxOpenConns(1)
++		if !reset {
++			pool.SetMaxIdleConns(0)
++		}
++		if e := pool.Ping(); e != nil {
++			t.Fatal(e)
++		}
++		if reset {
++			if e := pool.Ping(); e != nil {
++				t.Fatal(e)
++			}
++		}
++		if e := pool.Close(); e != nil {
++			t.Fatal(e)
++		}
++		tokens := r.snapshot()
++		if len(tokens) != 1 {
++			t.Fatal("discarded close route lost", len(tokens))
++		}
++		token := tokens[0]
++		tokens[0] = nil
++		if len(r.snapshot()) != 1 {
++			t.Fatal("snapshot mutation changed registry")
++		}
++		if e := RetryCleanup(token); e != nil {
++			t.Fatal(e)
++		}
++		if len(r.snapshot()) != 0 || len(r.groups) != 0 || r.leases != 0 {
++			t.Fatal("pool cleanup incomplete")
++		}
++	}
++}
++func TestEncryptedCleanupMemoryExactCapacityAndBlockedIndependence(t *testing.T) {
++	r := &cleanupRegistry{scopeLimit: maxEncryptedScopes, leaseLimit: maxEncryptedLeases}
++	var groups []*cleanupGroup
++	for i := 0; i < maxEncryptedScopes; i++ {
++		g, e := r.reserve()
++		if e != nil {
++			t.Fatal(i, e)
++		}
++		groups = append(groups, g)
++	}
++	if _, e := r.reserve(); !errors.Is(e, encryption.ErrLimit) {
++		t.Fatal(e)
++	}
++	if len(r.snapshot()) != 0 {
++		t.Fatal("live reservations exposed as pending")
++	}
++	for _, g := range groups {
++		if e := g.closeAll(nil); e != nil {
++			t.Fatal(e)
++		}
++	}
++	g, e := r.reserve()
++	if e != nil {
++		t.Fatal(e)
++	}
++	for i := 0; i < maxEncryptedLeases; i++ {
++		memoryEncryptedAdd(t, g, &memoryEncryptedOwner{}, cleanupChild)
++	}
++	calls := 0
++	if _, e := g.acquireLocked(cleanupChild, func() (*managedFile, error) { calls++; return nil, nil }); !errors.Is(e, encryption.ErrLimit) || calls != 0 {
++		t.Fatal(e)
++	}
++	if e = g.closeAll(nil); e != nil {
++		t.Fatal(e)
++	}
++	g, e = r.reserve()
++	if e != nil {
++		t.Fatal(e)
++	}
++	entered, resume := make(chan struct{}), make(chan struct{})
++	owner := &memoryEncryptedOwner{call: func(o *memoryEncryptedOwner) error { close(entered); <-resume; o.done = true; return nil }}
++	memoryEncryptedAdd(t, g, owner, cleanupChild)
++	done := make(chan error, 1)
++	go func() { done <- g.closeAll(nil) }()
++	<-entered
++	g.reap.Store(true)
++	independent := make(chan error, 1)
++	go func() {
++		h, e := r.reserve()
++		if e == nil {
++			_ = r.snapshot()
++			e = h.closeAll(nil)
++		}
++		independent <- e
++	}()
++	select {
++	case e := <-independent:
++		if e != nil {
++			t.Error(e)
++		}
++	case <-time.After(time.Second):
++		t.Error("blocked group prevented admission/snapshot")
++	}
++	close(resume)
++	if e := <-done; e != nil {
++		t.Fatal(e)
++	}
++}
++func TestEncryptedCleanupMemoryCompletedResultHasNoHistoricalMarker(t *testing.T) {
++	_, g := memoryEncryptedGroup(t)
++	cause := errors.New("memory first operation")
++	o := &memoryEncryptedOwner{call: func(o *memoryEncryptedOwner) error {
++		if o.calls == 1 {
++			return cause
++		}
++		o.done = true
++		return nil
++	}}
++	memoryEncryptedAdd(t, g, o, cleanupChild)
++	old := g.closeResource(o)
++	if !errors.Is(old, ErrCleanupPending) {
++		t.Fatal(old)
++	}
++	current := g.closeAll(old)
++	if !g.done || errors.Is(current, ErrCleanupPending) || !errors.Is(current, cause) {
++		t.Fatal("completed result retained marker or lost cause", current)
++	}
++	if !errors.Is(old, ErrCleanupPending) {
++		t.Fatal("historical token changed")
++	}
++}
++func TestEncryptedCleanupMemoryProbeErrorsProtectAbsentRoot(t *testing.T) {
++	r, g := memoryEncryptedGroup(t)
++	h, e := r.reserve()
++	if e != nil {
++		t.Fatal(e)
++	}
++	original := errors.New("memory metadata probe failure")
++	probe := &memoryEncryptedOwner{call: func(o *memoryEncryptedOwner) error {
++		if o.calls < 3 {
++			return original
++		}
++		o.done = true
++		return nil
++	}}
++	lock, dir := &memoryEncryptedOwner{}, &memoryEncryptedOwner{}
++	memoryEncryptedAdd(t, h, probe, cleanupChild)
++	memoryEncryptedAdd(t, g, lock, cleanupLifecycle)
++	memoryEncryptedAdd(t, g, dir, cleanupDirectory)
++	token := h.closeAll(nil)
++	store := &Store{ns: &namespace{group: g}, cleanup: g}
++	e = store.checkAbsentRootResult(token)
++	if !errors.Is(e, original) || !errors.Is(e, ErrCleanupPending) || len(g.dependencies) != 1 {
++		t.Fatal("metadata probe error discarded", e)
++	}
++	if e = g.closeResource(dir); !errors.Is(e, ErrCleanupPending) || dir.calls != 0 {
++		t.Fatal("directory retired before independent probe", e)
++	}
++	if e = store.Close(); !errors.Is(e, ErrCleanupPending) || lock.calls != 0 || dir.calls != 0 {
++		t.Fatal("probe dependency lost before lifecycle", e)
++	}
++	if e = store.Close(); e != nil || lock.calls != 1 || dir.calls != 1 {
++		t.Fatal(e)
++	}
++	if e = store.checkAbsentRootResult(nil); !errors.Is(e, ErrChanged) {
++		t.Fatal("present root not changed", e)
++	}
++}
++
++// This owner's status is deliberately unavailable while admission runs. It is
++// descriptor-free and the channel does not stand in for a real native failure.
++type memoryEncryptedBlockedStatus struct {
++	status <-chan struct{}
++}
++
++func (o *memoryEncryptedBlockedStatus) RetirementComplete() bool { <-o.status; return true }
++func (*memoryEncryptedBlockedStatus) closeNative() error         { return nil }
++
++func TestEncryptedCleanupMemoryAdmissionNeverCallsStatus(t *testing.T) {
++	r, g := memoryEncryptedGroup(t)
++	resume := make(chan struct{})
++	blocked := &memoryEncryptedBlockedStatus{status: resume}
++	memoryEncryptedAdd(t, g, blocked, cleanupChild)
++	completed := &memoryEncryptedOwner{done: true}
++	memoryEncryptedAdd(t, g, completed, cleanupDirectory)
++	g.files[completed].completed.Store(true)
++	g.reap.Store(true)
++	done := make(chan error, 1)
++	go func() {
++		h, err := r.reserve()
++		if err == nil {
++			err = h.closeAll(nil)
++		}
++		done <- err
++	}()
++	select {
++	case err := <-done:
++		if err != nil {
++			t.Error(err)
++		}
++		if len(g.files) != 1 || r.leases != 1 {
++			t.Error("published completion was not reclaimed")
++		}
++	case <-time.After(time.Second):
++		t.Error("admission called an unrelated resource status")
++	}
++	close(resume)
++	if err := g.closeAll(nil); err != nil {
++		t.Fatal(err)
++	}
++}
++
++type memoryEncryptedReaderAt func([]byte, int64) (int, error)
++
++func (r memoryEncryptedReaderAt) ReadAt(p []byte, off int64) (int, error) { return r(p, off) }
++func TestEncryptedCleanupMemoryReadExactPreservesCause(t *testing.T) {
++	cause := errors.New("memory read cause")
++	_, err := readExact(memoryEncryptedReaderAt(func([]byte, int64) (int, error) { return 0, cause }), 8, 0)
++	if !errors.Is(err, encryption.ErrFormat) || !errors.Is(err, cause) {
++		t.Fatal(err)
++	}
++}
++func TestEncryptedCleanupMemoryConstructorCauseBlocksChildren(t *testing.T) {
++	r, g := memoryEncryptedGroup(t)
++	dep, err := r.reserve()
++	if err != nil {
++		t.Fatal(err)
++	}
++	cause := errors.New("memory independent constructor cause")
++	probe := &memoryEncryptedOwner{call: func(o *memoryEncryptedOwner) error {
++		if o.calls < 3 {
++			return cause
++		}
++		o.done = true
++		return nil
++	}}
++	child, lock, dir := &memoryEncryptedOwner{}, &memoryEncryptedOwner{}, &memoryEncryptedOwner{}
++	memoryEncryptedAdd(t, dep, probe, cleanupChild)
++	memoryEncryptedAdd(t, g, child, cleanupChild)
++	memoryEncryptedAdd(t, g, lock, cleanupLifecycle)
++	memoryEncryptedAdd(t, g, dir, cleanupDirectory)
++	token := dep.closeAll(nil)
++	g.remember(token)
++	if err = g.closeResource(child); !errors.Is(err, ErrCleanupPending) || child.calls != 0 {
++		t.Fatal("direct child close crossed independent dependency", err)
++	}
++	store := &Store{cleanup: g}
++	if err = store.CloseWithError(token); !errors.Is(err, cause) || child.calls != 0 || lock.calls != 0 || dir.calls != 0 {
++		t.Fatal("failed constructor cause did not guard all stages", err)
++	}
++	if err = store.Close(); err != nil || !g.done || child.calls != 1 || lock.calls != 1 || dir.calls != 1 {
++		t.Fatal(err)
++	}
++}
+--- a/internal/encstore/exact_locks.go
++++ b/internal/encstore/exact_locks.go
+@@ -9,14 +9,18 @@
+ // Every bit denotes one successful acquisition of this exact one-byte interval.
+ // The caller serializes access. Linux never uses this ledger or its policy.
+ type exactByteLocks struct {
+-	held     [3]uint8 // 1 shared, 2 exclusive, 3 shared layered over exclusive
+-	poisoned error
++	held          [3]uint8 // 1 shared, 2 exclusive, 3 shared layered over exclusive
++	poisoned      error
++	cleanupCauses [3]error
+ }
+ type byteLockCall func(offset int64, shared, unlock bool) error
+ 
+ func (l *exactByteLocks) poison(err error) error {
+-	l.poisoned = errors.Join(l.poisoned, ErrPoisoned, err)
+-	return l.poisoned
++	if l.poisoned == nil {
++		l.poisoned = errors.Join(ErrPoisoned, err)
++		return l.poisoned
++	}
++	return errors.Join(l.poisoned, l.cleanupCauses[0], l.cleanupCauses[1], l.cleanupCauses[2], err)
+ }
+ func (l *exactByteLocks) change(offset int64, shared, unlock bool, call byteLockCall) error {
+ 	if l.poisoned != nil {
+@@ -55,6 +59,9 @@
+ 		// Microsoft specifies that the first unlock of this stacked interval
+ 		// releases exclusive, leaving the newly acquired shared lock in place.
+ 		if err := call(offset, false, true); err != nil {
++			if l.cleanupCauses[offset] == nil {
++				l.cleanupCauses[offset] = err
++			}
+ 			return l.poison(err)
+ 		}
+ 		l.held[offset] = 1
+@@ -64,6 +71,9 @@
+ func (l *exactByteLocks) release(offset int64, call byteLockCall) error {
+ 	for l.held[offset] != 0 {
+ 		if err := call(offset, false, true); err != nil {
++			if l.cleanupCauses[offset] == nil {
++				l.cleanupCauses[offset] = err
++			}
+ 			return l.poison(err)
+ 		}
+ 		if l.held[offset] == 3 {
+--- a/internal/encstore/file_darwin.go
++++ b/internal/encstore/file_darwin.go
+@@ -15,6 +15,7 @@
+ // directory pins and lock ledgers use darwinfile.Process's shared lifecycle
+ // gate. Data I/O uses the lease mutex, never the process-wide gate.
+ type managedFile struct {
++	managedOwnership
+ 	mu              sync.Mutex
+ 	descriptor      *encryptedDarwinDescriptor
+ 	closed          bool
+@@ -164,7 +165,7 @@
+ 	}
+ 	return encryptedDarwinError(darwinfile.Process.Retire(d.record))
+ }
+-func (f *managedFile) Close() error {
++func (f *managedFile) closeNative() error {
+ 	if f == nil {
+ 		return nil
+ 	}
+@@ -175,3 +176,34 @@
+ 	f.closed = true
+ 	return f.closeHeld()
+ }
++
++// RetirementComplete is a managed-lease fact, not an interpretation of Close's
++// diagnostic. A safely idle regular descriptor may belong to the process
++// registry, but directory pins, unreleased holds and terminal close uncertainty
++// remain this scope's obligations.
++func (f *managedFile) RetirementComplete() bool {
++	if f == nil {
++		return true
++	}
++	f.mu.Lock()
++	defer f.mu.Unlock()
++	darwinfile.Process.Lock()
++	defer darwinfile.Process.Unlock()
++	return f.retirementCompleteHeld()
++}
++func (f *managedFile) retirementCompleteHeld() bool {
++	if !f.closed || f.closeErr != nil || f.children != 0 || f.locks.held != [3]uint8{} {
++		return false
++	}
++	d := f.descriptor
++	if d == nil {
++		return true
++	}
++	if d.lease != f {
++		return true
++	}
++	if d.raw == nil {
++		return d.parent == nil
++	}
++	return !d.directory && d.idle
++}
+--- a/internal/encstore/file_default.go
++++ b/internal/encstore/file_default.go
+@@ -3,14 +3,160 @@
+ package encstore
+ 
+ import (
+-	"github.com/ms-xiaosnow/gosqlite/encryption"
++	"errors"
+ 	"os"
+ 	"path/filepath"
++	"sync"
++
++	"github.com/ms-xiaosnow/gosqlite/encryption"
+ )
+ 
+-// Keep Linux's existing descriptor-local OFD implementation and I/O unchanged.
+-// Other backends remain fail-closed until their full lifetime layer exists.
+-type managedFile = os.File
++// managedFile owns a single os.File lease. Linux Close consumes that lease even
++// when it reports a diagnostic; no path ever retries its numeric descriptor.
++// Other operating systems using this type remain fail-closed at native open.
++type managedFile struct {
++	managedOwnership
++	mu               sync.Mutex
++	raw              *os.File
++	parent           *managedFile
++	directory        bool
++	children         int
++	closed, consumed bool
++	closeErr         error
++}
++
++func (f *managedFile) checkLocked(retained bool) error {
++	if f == nil || f.raw == nil || f.consumed || f.closed && !(retained && f.directory && f.children > 0) {
++		return encryption.ErrClosed
++	}
++	return nil
++}
++func (f *managedFile) Read(b []byte) (int, error) {
++	f.mu.Lock()
++	defer f.mu.Unlock()
++	if err := f.checkLocked(false); err != nil {
++		return 0, err
++	}
++	return f.raw.Read(b)
++}
++func (f *managedFile) ReadAt(b []byte, off int64) (int, error) {
++	f.mu.Lock()
++	defer f.mu.Unlock()
++	if err := f.checkLocked(false); err != nil {
++		return 0, err
++	}
++	return f.raw.ReadAt(b, off)
++}
++func (f *managedFile) Write(b []byte) (int, error) {
++	f.mu.Lock()
++	defer f.mu.Unlock()
++	if err := f.checkLocked(false); err != nil {
++		return 0, err
++	}
++	return f.raw.Write(b)
++}
++func (f *managedFile) WriteAt(b []byte, off int64) (int, error) {
++	f.mu.Lock()
++	defer f.mu.Unlock()
++	if err := f.checkLocked(false); err != nil {
++		return 0, err
++	}
++	return f.raw.WriteAt(b, off)
++}
++func (f *managedFile) Stat() (os.FileInfo, error) {
++	f.mu.Lock()
++	defer f.mu.Unlock()
++	if err := f.checkLocked(false); err != nil {
++		return nil, err
++	}
++	return f.raw.Stat()
++}
++func (f *managedFile) ReadDir(n int) ([]os.DirEntry, error) {
++	f.mu.Lock()
++	defer f.mu.Unlock()
++	if err := f.checkLocked(false); err != nil {
++		return nil, err
++	}
++	if !f.directory {
++		return nil, ErrUnsupported
++	}
++	return f.raw.ReadDir(n)
++}
++func (f *managedFile) Sync() error {
++	f.mu.Lock()
++	defer f.mu.Unlock()
++	if err := f.checkLocked(false); err != nil {
++		return err
++	}
++	return f.raw.Sync()
++}
++
++// finishLocked detaches the actual os.File before its one consumed close call.
++// Child pins delay directory closure; releasing a pin never reopens a lease.
++func (f *managedFile) finishLocked() (*managedFile, error) {
++	if f.consumed {
++		return nil, f.closeErr
++	}
++	if f.children != 0 {
++		return nil, nil
++	}
++	if f.raw == nil {
++		return nil, ErrPoisoned
++	}
++	raw := f.raw
++	f.raw = nil
++	f.consumed = true
++	f.closeErr = raw.Close()
++	parent := f.parent
++	f.parent = nil
++	return parent, f.closeErr
++}
++func (f *managedFile) releaseChild() error {
++	f.mu.Lock()
++	if f.children <= 0 {
++		f.mu.Unlock()
++		return managedRetirementError(f, ErrPoisoned)
++	}
++	f.children--
++	var parent *managedFile
++	var err error
++	if f.closed {
++		parent, err = f.finishLocked()
++	}
++	// Linux consumes the lease even with a close diagnostic.
++	if f.retirementCompleteLocked() {
++		managedRetirementComplete(f)
++	}
++	f.mu.Unlock()
++	if parent != nil {
++		err = errors.Join(err, parent.releaseChild())
++	}
++	return err
++}
++func (f *managedFile) closeNative() error {
++	if f == nil {
++		return nil
++	}
++	f.mu.Lock()
++	f.closed = true
++	parent, err := f.finishLocked()
++	f.mu.Unlock()
++	if parent != nil {
++		err = errors.Join(err, parent.releaseChild())
++	}
++	return err
++}
++func (f *managedFile) RetirementComplete() bool {
++	if f == nil {
++		return true
++	}
++	f.mu.Lock()
++	defer f.mu.Unlock()
++	return f.retirementCompleteLocked()
++}
++func (f *managedFile) retirementCompleteLocked() bool {
++	return f.closed && f.consumed && f.raw == nil && f.parent == nil && f.children == 0
++}
+ 
+ func canonicalPath(path string) (string, error) {
+ 	p, err := filepath.Abs(path)
+@@ -33,7 +179,12 @@
+ func platformFamilyEntry(name, base string) (bool, error) { return familyEntry(name, base) }
+ func platformOperation(encryption.Operation, Mode) error  { return supported() }
+ func platformPreflight(string) error                      { return supported() }
+-func platformFileCheck(_ *managedFile, path string, info os.FileInfo) error {
++func platformFileCheck(f *managedFile, path string, info os.FileInfo) error {
++	f.mu.Lock()
++	defer f.mu.Unlock()
++	if err := f.checkLocked(false); err != nil {
++		return err
++	}
+ 	named, err := os.Lstat(path)
+ 	if err != nil {
+ 		return err
+@@ -43,7 +194,12 @@
+ 	}
+ 	return nil
+ }
+-func platformDirectoryCheck(_ *managedFile, path string, info os.FileInfo) error {
++func platformDirectoryCheck(f *managedFile, path string, info os.FileInfo) error {
++	f.mu.Lock()
++	defer f.mu.Unlock()
++	if err := f.checkLocked(false); err != nil {
++		return err
++	}
+ 	named, err := os.Lstat(path)
+ 	if err != nil {
+ 		return err
+@@ -53,8 +209,4 @@
+ 	}
+ 	return nil
+ }
+-func openRootFileAt(dir *managedFile, name string, flags int) (*managedFile, error) {
+-	return openFileAt(dir, name, flags)
+-}
+-
+ func replaceFile(old, new string) error { return os.Rename(old, new) }
+--- a/internal/encstore/file_windows.go
++++ b/internal/encstore/file_windows.go
+@@ -125,12 +125,17 @@
+ 	if childErr := f.dropChild(); childErr != nil {
+ 		err := f.locks.poison(childErr)
+ 		f.mu.Unlock()
+-		return err
++		return managedRetirementError(f, err)
+ 	}
+ 	var parent *managedFile
+ 	var err error
+ 	if f.closed {
+ 		parent, err = f.finishLocked()
++	}
++	if err != nil {
++		err = managedRetirementError(f, err)
++	} else if f.retirementCompleteLocked() {
++		managedRetirementComplete(f)
+ 	}
+ 	f.mu.Unlock()
+ 	if parent != nil {
+@@ -138,7 +143,7 @@
+ 	}
+ 	return err
+ }
+-func (f *managedFile) Close() error {
++func (f *managedFile) closeNative() error {
+ 	if f == nil {
+ 		return nil
+ 	}
+@@ -151,3 +156,18 @@
+ 	}
+ 	return err
+ }
++
++// RetirementComplete requires explicit native retirement, including all exact
++// lock records and directory pins. A closeUnknown tombstone is never complete,
++// even though os.File itself refuses a second Close of its old numeric HANDLE.
++func (f *managedFile) RetirementComplete() bool {
++	if f == nil {
++		return true
++	}
++	f.mu.Lock()
++	defer f.mu.Unlock()
++	return f.retirementCompleteLocked()
++}
++func (f *managedFile) retirementCompleteLocked() bool {
++	return f.closed && f.retired && !f.closeUnknown && f.raw == nil && f.parent == nil && f.children == 0 && f.locks.held == [3]uint8{}
++}
+--- a/internal/encstore/inventory.go
++++ b/internal/encstore/inventory.go
+@@ -85,6 +85,9 @@
+ 		return 0, err
+ 	}
+ 	defer func() {
++		// Independent metadata probes can carry their own scope. Adopt that
++		// dependency before retiring enumeration or enclosing protection.
++		resultErr = f.owner.remember(resultErr)
+ 		if closeErr := f.Close(); closeErr != nil {
+ 			total = 0
+ 			resultErr = errors.Join(resultErr, closeErr)
+@@ -183,6 +186,9 @@
+ 		if _, e := platformPathInfo(path + ".gse-lock"); os.IsNotExist(e) {
+ 			additions++
+ 		} else if e != nil {
++			if ns != nil {
++				return ns.group.remember(e)
++			}
+ 			return e
+ 		}
+ 	}
+--- /dev/null
++++ b/internal/encstore/managed_open.go
+@@ -0,0 +1,122 @@
++package encstore
++
++import (
++	"errors"
++	"path/filepath"
++
++	"github.com/ms-xiaosnow/gosqlite/encryption"
++)
++
++// managedRetirementError is safe in a native parent-retirement callback. It
++// never takes a group mutex (which may already be held), calls cleanup, or opens
++// a resource. The parent scope already strongly owns this managed lease.
++func managedRetirementError(parent *managedFile, err error) error {
++	if err == nil || parent == nil || parent.owner == nil {
++		return err
++	}
++	parent.owner.callbackCause.CompareAndSwap(nil, &cleanupCallback{cause: err})
++	e := &cleanupError{group: parent.owner, cause: errors.Join(ErrPoisoned, err)}
++	parent.owner.pending.Store(e)
++	return e
++}
++func managedTerminalRetirementError(parent *managedFile, err error) error {
++	if parent != nil && parent.owner != nil && err != nil {
++		parent.owner.callbackTerminal.Store(true)
++	}
++	return managedRetirementError(parent, err)
++}
++func managedRetirementComplete(parent *managedFile) {
++	if parent != nil && parent.owner != nil && parent.entry != nil {
++		parent.entry.completed.Store(true)
++		parent.owner.reap.Store(true)
++	}
++}
++func (g *cleanupGroup) acquireLocked(role cleanupRole, call func() (*managedFile, error)) (*managedFile, error) {
++	g.syncCallbacksLocked()
++	if g.done || g.closing {
++		return nil, encryption.ErrClosed
++	}
++	if g.terminal {
++		return nil, errors.Join(ErrPoisoned, g.cause)
++	}
++	if g.cause != nil {
++		return nil, g.cause
++	}
++	if err := g.registry.reserveLease(); err != nil {
++		return nil, err
++	}
++	f, err := call()
++	if f != nil {
++		f.owner = g
++		g.addLocked(f, role)
++		g.syncCallbacksLocked()
++		if err == nil && (g.cause != nil || g.terminal) {
++			err = errors.Join(ErrPoisoned, g.cause)
++		}
++		if err == nil {
++			return f, nil
++		}
++		g.rememberLocked(err)
++		entry := g.files[f]
++		entry.requested = true
++		closeErr := g.stepLocked(entry)
++		if _, retained := g.files[f]; retained {
++			return nil, g.tokenLocked(errors.Join(err, closeErr))
++		}
++		return nil, errors.Join(err, closeErr)
++	}
++	var unknown *nativeOwnershipError
++	if errors.As(err, &unknown) {
++		// The native registry owns the quarantined/tombstoned resource. Its reserved
++		// common lease is intentionally never freed without a completion proof.
++		g.terminal = true
++		return nil, g.tokenLocked(err)
++	}
++	g.registry.releaseLease()
++	return nil, g.rememberLocked(err)
++}
++func scopedNativeOpen(parent *managedFile, call func() (*managedFile, error)) (*managedFile, error) {
++	if parent == nil || parent.owner == nil {
++		return nil, ErrUnsupported
++	}
++	g := parent.owner
++	g.mu.Lock()
++	defer g.mu.Unlock()
++	return g.acquireLocked(cleanupChild, call)
++}
++func openDirectory(path string) (*managedFile, error) {
++	g, err := encryptedCleanups.reserve()
++	if err != nil {
++		return nil, err
++	}
++	g.mu.Lock()
++	f, err := g.acquireLocked(cleanupDirectory, func() (*managedFile, error) { return nativeOpenDirectory(path) })
++	if err != nil {
++		g.releaseLocked()
++	}
++	g.mu.Unlock()
++	if err != nil {
++		return nil, g.closeAll(err)
++	}
++	return f, nil
++}
++func openFileAt(dir *managedFile, name string, flags int) (*managedFile, error) {
++	return scopedNativeOpen(dir, func() (*managedFile, error) { return nativeOpenFileAt(dir, name, flags, false) })
++}
++func openRootFileAt(dir *managedFile, name string, flags int) (*managedFile, error) {
++	return scopedNativeOpen(dir, func() (*managedFile, error) { return nativeOpenFileAt(dir, name, flags, true) })
++}
++func openFile(path string, flags int) (*managedFile, error) {
++	d, err := openDirectory(filepath.Dir(path))
++	if err != nil {
++		return nil, err
++	}
++	f, err := openFileAt(d, filepath.Base(path), flags)
++	if err != nil {
++		return nil, d.owner.closeAll(err)
++	}
++	if err = d.Close(); err != nil {
++		return nil, d.owner.closeAll(err)
++	}
++	return f, nil
++}
+--- /dev/null
++++ b/internal/encstore/managed_status_darwin_test.go
+@@ -0,0 +1,62 @@
++//go:build darwin
++
++package encstore
++
++import (
++	"errors"
++	"os"
++	"testing"
++)
++
++// Compile-only on Linux. These are descriptor-free status laws; the zero
++// os.File is a pointer sentinel and no method or native callback is invoked.
++func TestDarwinEncryptedManagedStatusMemory(t *testing.T) {
++	d := &encryptedDarwinDescriptor{raw: &os.File{}, idle: true}
++	f := &managedFile{closed: true, descriptor: d}
++	d.lease = f
++	if !f.RetirementComplete() {
++		t.Fatal("safe idle regular lease not transferred to process registry")
++	}
++	f.closeErr = errors.New("memory terminal close uncertainty")
++	if f.RetirementComplete() {
++		t.Fatal("terminal close diagnostic treated as complete")
++	}
++	f.closeErr = nil
++	f.locks.held[0] = 1
++	if f.RetirementComplete() {
++		t.Fatal("unreleased exact hold treated as complete")
++	}
++	f.locks.held[0] = 0
++	d.directory = true
++	f.children = 1
++	if f.RetirementComplete() {
++		t.Fatal("dependent directory treated as complete")
++	}
++	f.children = 0
++	if f.RetirementComplete() {
++		t.Fatal("idle directory treated as physical retirement")
++	}
++	d.raw = nil
++	d.parent = &managedFile{}
++	if f.RetirementComplete() {
++		t.Fatal("retained parent pin treated as complete")
++	}
++	d.parent = nil
++	if !f.RetirementComplete() {
++		t.Fatal("retired descriptor and pins retained")
++	}
++}
++
++func TestDarwinEncryptedManagedStatusMemoryDeferredDirectoryClose(t *testing.T) {
++	// The directory's child pin exits closeHeld before lock or raw-file work.
++	// raw is only an address sentinel, never an acquired native descriptor.
++	d := &encryptedDarwinDescriptor{raw: &os.File{}, directory: true}
++	f := &managedFile{descriptor: d, children: 1}
++	d.lease = f
++	if err := f.closeNative(); err != nil {
++		t.Fatal("ordinary logical parent close", err)
++	}
++	if !f.closed || f.RetirementComplete() || d.raw == nil {
++		t.Fatal("nil deferred close confused logical closure with retirement")
++	}
++}
+--- /dev/null
++++ b/internal/encstore/managed_status_default_test.go
+@@ -0,0 +1,45 @@
++//go:build !darwin && !(windows && amd64)
++
++package encstore
++
++import (
++	"errors"
++	"testing"
++)
++
++// Descriptor-free state checks. No native failure is installed or executed.
++func TestEncryptedManagedStatusMemoryConsumedDiagnostic(t *testing.T) {
++	cause := errors.New("memory consumed close diagnostic")
++	f := &managedFile{closed: true, consumed: true, closeErr: cause}
++	if !f.RetirementComplete() {
++		t.Fatal("consumed os.File lease retained because Close reported an error")
++	}
++	if err := f.closeNative(); !errors.Is(err, cause) {
++		t.Fatal("consumed close lost its historical diagnostic", err)
++	}
++	if !f.RetirementComplete() {
++		t.Fatal("repeated close resurrected consumed ownership")
++	}
++}
++
++func TestEncryptedManagedStatusMemoryDirectoryPins(t *testing.T) {
++	f := &managedFile{directory: true, closed: true, children: 1}
++	if f.RetirementComplete() {
++		t.Fatal("retained directory pin reported complete")
++	}
++	if err := f.closeNative(); err != nil {
++		t.Fatal(err)
++	}
++	if f.RetirementComplete() {
++		t.Fatal("nil deferred close result inferred completion")
++	}
++	f.children = 0
++	f.consumed = true
++	if !f.RetirementComplete() {
++		t.Fatal("explicitly consumed directory not complete")
++	}
++	f.parent = &managedFile{}
++	if f.RetirementComplete() {
++		t.Fatal("retained parent route discarded")
++	}
++}
+--- /dev/null
++++ b/internal/encstore/managed_status_windows_test.go
+@@ -0,0 +1,53 @@
++//go:build windows && amd64
++
++package encstore
++
++import (
++	"errors"
++	"os"
++	"testing"
++)
++
++// Compile-only on Linux. No HANDLE, native close, or lock call is used.
++func TestWindowsEncryptedManagedStatusMemory(t *testing.T) {
++	f := &managedFile{handleLifetime: handleLifetime{closed: true}}
++	if f.RetirementComplete() {
++		t.Fatal("nil raw field inferred retirement without explicit state")
++	}
++	f.retired = true
++	f.locks.poisoned = errors.New("memory historical diagnostic")
++	if !f.RetirementComplete() {
++		t.Fatal("historical diagnostic hid explicit consumed ownership")
++	}
++	f.closeUnknown = true
++	if f.RetirementComplete() {
++		t.Fatal("unknown close state treated as complete")
++	}
++	f.closeUnknown = false
++	f.children = 1
++	if f.RetirementComplete() {
++		t.Fatal("directory pin treated as retired")
++	}
++	f.children = 0
++	f.locks.held[1] = 2
++	if f.RetirementComplete() {
++		t.Fatal("unreleased exact lock treated as retired")
++	}
++	f.locks.held[1] = 0
++	f.parent = &managedFile{}
++	if f.RetirementComplete() {
++		t.Fatal("retained parent route discarded")
++	}
++}
++
++func TestWindowsEncryptedManagedStatusMemoryDeferredDirectoryClose(t *testing.T) {
++	// handleLifetime exits on the child pin before invoking either callback.
++	// The zero os.File is only an address sentinel, never a native HANDLE.
++	f := &managedFile{raw: &os.File{}, directory: true, handleLifetime: handleLifetime{children: 1}}
++	if err := f.closeNative(); err != nil {
++		t.Fatal("ordinary logical parent close", err)
++	}
++	if !f.closed || f.RetirementComplete() || f.raw == nil {
++		t.Fatal("nil deferred close confused logical closure with retirement")
++	}
++}
+--- a/internal/encstore/namespace.go
++++ b/internal/encstore/namespace.go
+@@ -2,7 +2,6 @@
+ 
+ import (
+ 	"bytes"
+-	"errors"
+ 	"os"
+ 	"path/filepath"
+ )
+@@ -11,10 +10,11 @@
+ // identity/freshness oracle; initial path selection and hostile OS actors remain
+ // outside the cooperative lease and descriptor checks.
+ type namespace struct {
+-	dir  *managedFile
+-	info os.FileInfo
+-	path string
+-	root string
++	group *cleanupGroup
++	dir   *managedFile
++	info  os.FileInfo
++	path  string
++	root  string
+ }
+ 
+ func newNamespace(path string) (*namespace, error) {
+@@ -25,16 +25,18 @@
+ 	}
+ 	i, e := f.Stat()
+ 	if e != nil {
+-		f.Close()
+-		return nil, e
++		return nil, f.owner.closeAll(e)
+ 	}
+-	return &namespace{dir: f, info: i, path: d, root: filepath.Base(path)}, nil
++	return &namespace{group: f.owner, dir: f, info: i, path: d, root: filepath.Base(path)}, nil
+ }
+ func (n *namespace) check() error {
+ 	if n == nil {
+ 		return nil
+ 	}
+-	return platformDirectoryCheck(n.dir, n.path, n.info)
++	if e := n.group.health(); e != nil {
++		return e
++	}
++	return n.group.remember(platformDirectoryCheck(n.dir, n.path, n.info))
+ }
+ func (n *namespace) name(path string) (string, error) {
+ 	if filepath.Dir(path) != n.path {
+@@ -42,7 +44,10 @@
+ 	}
+ 	return filepath.Base(path), nil
+ }
+-func (n *namespace) checked(path string, flags int) (*managedFile, os.FileInfo, error) {
++func (n *namespace) checked(path string, flags int) (_ *managedFile, _ os.FileInfo, resultErr error) {
++	if n != nil {
++		defer func() { resultErr = n.group.remember(resultErr) }()
++	}
+ 	if n == nil {
+ 		return checkedFile(path, flags)
+ 	}
+@@ -70,8 +75,7 @@
+ 		e = stableFileAt(n.dir, name, f, i)
+ 	}
+ 	if e != nil {
+-		f.Close()
+-		return nil, nil, e
++		return nil, nil, closeResult(f, e)
+ 	}
+ 	return f, i, nil
+ }
+@@ -83,7 +87,7 @@
+ 	if e != nil {
+ 		return e
+ 	}
+-	return stableFileAt(n.dir, name, f, i)
++	return n.group.remember(stableFileAt(n.dir, name, f, i))
+ }
+ func (n *namespace) sync(path string) error {
+ 	if n == nil {
+@@ -92,7 +96,7 @@
+ 	if e := n.check(); e != nil {
+ 		return e
+ 	}
+-	return n.dir.Sync()
++	return n.group.remember(n.dir.Sync())
+ }
+ func (n *namespace) write(path string, b []byte) error {
+ 	f, _, e := n.checked(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL)
+@@ -103,9 +107,9 @@
+ 	if e == nil {
+ 		e = f.Sync()
+ 	}
+-	return errors.Join(e, f.Close())
++	return closeResult(f, e)
+ }
+-func (n *namespace) retain(path string, b []byte) error {
++func (n *namespace) retain(path string, b []byte) (resultErr error) {
+ 	e := n.write(path, b)
+ 	if !os.IsExist(e) {
+ 		return e
+@@ -114,7 +118,7 @@
+ 	if e != nil {
+ 		return e
+ 	}
+-	defer f.Close()
++	defer func() { resultErr = closeResult(f, resultErr) }()
+ 	if i.Size() != int64(len(b)) {
+ 		return ErrChanged
+ 	}
+@@ -142,7 +146,7 @@
+ 	if e != nil {
+ 		return e
+ 	}
+-	return renameFileAt(n.dir, a, b, absent)
++	return n.group.remember(renameFileAt(n.dir, a, b, absent))
+ }
+ func chooseNamespace(ns []*namespace) *namespace {
+ 	if len(ns) > 0 {
+--- a/internal/encstore/object.go
++++ b/internal/encstore/object.go
+@@ -38,8 +38,7 @@
+ 		err = platformFileCheck(f, path, st)
+ 	}
+ 	if err != nil {
+-		_ = f.Close()
+-		return nil, nil, err
++		return nil, nil, closeResult(f, err)
+ 	}
+ 	return f, st, nil
+ }
+@@ -54,13 +53,13 @@
+ 	if err = validateLinks(f); err != nil {
+ 		return err
+ 	}
+-	return platformFileCheck(f, path, info)
++	return f.owner.remember(platformFileCheck(f, path, info))
+ }
+ func readExact(f io.ReaderAt, size int, off int64) ([]byte, error) {
+ 	b := make([]byte, size)
+ 	n, err := f.ReadAt(b, off)
+ 	if err != nil || n != len(b) {
+-		return nil, encryption.ErrFormat
++		return nil, errors.Join(encryption.ErrFormat, err)
+ 	}
+ 	return b, nil
+ }
+@@ -75,11 +74,22 @@
+ 	return nil
+ }
+ func idString(id [32]byte) string { return hex.EncodeToString(id[:]) }
+-func (o *object) close() error {
++func (o *object) close() error    { return o.closeWithError(nil) }
++func (o *object) closeWithError(cause error) error {
+ 	if o == nil {
+-		return nil
+-	}
+-	return errors.Join(o.reader.Close(), o.file.Close())
++		return cause
++	}
++	var err error
++	if o.reader != nil {
++		err = o.reader.Close()
++		o.reader = nil
++	}
++	if o.file != nil {
++		err = closeResult(o.file, errors.Join(cause, err))
++		cause = nil
++		o.file = nil
++	}
++	return errors.Join(cause, err)
+ }
+ func (o *object) geometry() Geometry {
+ 	return Geometry{o.header.Descriptor.PageSize, o.header.Descriptor.PageCount}
+@@ -117,7 +127,7 @@
+ // openObject authenticates the complete bounded object before returning any
+ // logical page to a pager. Expected child identity/descriptor/hash come only
+ // from an authenticated manifest. An archive itself is an authentication root.
+-func openObject(ctx context.Context, path string, master *encryption.MasterKey, limits encryption.Limits, expected encryption.FileIdentity, desc *encryption.FileDescriptor, hash *[32]byte, p1 *[32]byte, spaces ...*namespace) (*object, error) {
++func openObject(ctx context.Context, path string, master *encryption.MasterKey, limits encryption.Limits, expected encryption.FileIdentity, desc *encryption.FileDescriptor, hash *[32]byte, p1 *[32]byte, spaces ...*namespace) (_ *object, resultErr error) {
+ 	ns := chooseNamespace(spaces)
+ 	f, info, err := ns.checked(path, os.O_RDONLY)
+ 	if err != nil {
+@@ -127,10 +137,7 @@
+ 	ok := false
+ 	defer func() {
+ 		if !ok {
+-			if o.reader != nil {
+-				_ = o.reader.Close()
+-			}
+-			_ = f.Close()
++			resultErr = o.closeWithError(resultErr)
+ 		}
+ 	}()
+ 	raw, err := readExact(f, encryption.HeaderSize, 0)
+@@ -223,7 +230,7 @@
+ 
+ // writeObject streams bounded page buffers. A new primitive writer supplies a
+ // fresh identity for every attempt; existing physical files are never resumed.
+-func writeObject(ctx context.Context, pathForID func([32]byte) string, master *encryption.MasterKey, limits encryption.Limits, desc encryption.FileDescriptor, src PageSource, spaces ...*namespace) (*object, error) {
++func writeObject(ctx context.Context, pathForID func([32]byte) string, master *encryption.MasterKey, limits encryption.Limits, desc encryption.FileDescriptor, src PageSource, spaces ...*namespace) (_ *object, resultErr error) {
+ 	ns := chooseNamespace(spaces)
+ 	if err := desc.Validate(limits); err != nil {
+ 		return nil, err
+@@ -255,7 +262,7 @@
+ 	closed := false
+ 	defer func() {
+ 		if !closed {
+-			_ = f.Close()
++			resultErr = closeResult(f, resultErr)
+ 		}
+ 	}()
+ 	digest := sha256.New()
+--- a/internal/encstore/platform_darwin.go
++++ b/internal/encstore/platform_darwin.go
+@@ -115,11 +115,16 @@
+ 		return nil
+ 	}
+ 	if parent.children <= 0 {
+-		return ErrPoisoned
++		return managedRetirementError(parent, ErrPoisoned)
+ 	}
+ 	parent.children--
+ 	if parent.closed {
+-		return parent.closeHeld()
++		if err := parent.closeHeld(); err != nil {
++			return managedRetirementError(parent, err)
++		}
++	}
++	if parent.retirementCompleteHeld() {
++		managedRetirementComplete(parent)
+ 	}
+ 	return nil
+ }
+@@ -164,10 +169,6 @@
+ 				if !darwinfile.Process.Reuse(d.record) {
+ 					continue
+ 				}
+-				if _, e := d.raw.Seek(0, io.SeekStart); e != nil {
+-					cleanup := darwinfile.Process.Retire(d.record)
+-					return nil, errors.Join(e, encryptedDarwinError(cleanup))
+-				}
+ 				f := &managedFile{descriptor: d}
+ 				d.idle = false
+ 				d.lease = f
+@@ -178,13 +179,16 @@
+ 					parent.children++
+ 					d.parent = parent
+ 					if e := encryptedDarwinDropParent(previous); e != nil {
+-						f.closed = true
+-						return nil, errors.Join(e, f.closeHeld())
++						return f, e
+ 					}
+ 				}
++				// Reuse already acquired a new lease. Return that owner on every
++				// validation failure so the common boundary can register it first.
++				if _, e := d.raw.Seek(0, io.SeekStart); e != nil {
++					return f, e
++				}
+ 				if e := encryptedDarwinInspect(d); e != nil {
+-					f.closed = true
+-					return nil, errors.Join(e, f.closeHeld())
++					return f, e
+ 				}
+ 				return f, nil
+ 			}
+@@ -206,13 +210,22 @@
+ 	}
+ 	var st unix.Stat_t
+ 	if e = encryptedDarwinStat(fd, &st); e != nil {
++		retired := false
+ 		cleanup := darwinfile.Process.Quarantine(func() error { return unix.Close(fd) }, func(err error) error {
+ 			if err == nil {
+-				return encryptedDarwinDropParent(parent)
++				err = encryptedDarwinDropParent(parent)
++				retired = err == nil
++				return err
+ 			}
+ 			return nil
+ 		})
+-		return nil, errors.Join(ErrPoisoned, e, cleanup)
++		failure := errors.Join(ErrPoisoned, e, cleanup)
++		if !retired {
++			// The process registry owns this unidentifiable resource. This
++			// terminal marker never exposes or retries the numeric descriptor.
++			failure = nativeOwnershipPending(failure)
++		}
++		return nil, failure
+ 	}
+ 	id := encryptedDarwinID(&st)
+ 	n := encryptedDarwinNodes[id]
+@@ -227,8 +240,8 @@
+ 	n.locks.attach(&f.locks)
+ 	d.record, e = darwinfile.Process.Register(id, d.raw.Close, func(err error) error {
+ 		if err != nil {
+-			d.lease.closeErr = encryptedDarwinError(err)
+-			return nil
++			d.lease.closeErr = managedTerminalRetirementError(d.lease, encryptedDarwinError(err))
++			return d.lease.closeErr
+ 		}
+ 		d.raw = nil
+ 		delete(n.descriptors, d)
+@@ -239,23 +252,25 @@
+ 			d.lease.closeErr = err
+ 		}
+ 		d.parent = nil
++		if err == nil && d.lease.retirementCompleteHeld() {
++			managedRetirementComplete(d.lease)
++		}
+ 		return err
+ 	})
+ 	if e == nil {
+ 		e = encryptedDarwinInspect(d)
+ 	}
+ 	if e != nil {
+-		f.closed = true
+-		return nil, errors.Join(e, f.closeHeld())
++		return f, e
+ 	}
+ 	return f, nil
+ }
+-func openDirectory(path string) (*managedFile, error) {
++func nativeOpenDirectory(path string) (*managedFile, error) {
+ 	darwinfile.Process.Lock()
+ 	defer darwinfile.Process.Unlock()
+ 	return encryptedDarwinOpenHeld(nil, path, "", os.O_RDONLY, true)
+ }
+-func openFileAt(dir *managedFile, name string, flags int) (*managedFile, error) {
++func nativeOpenFileAt(dir *managedFile, name string, flags int, _ bool) (*managedFile, error) {
+ 	directory := name == "." && flags == os.O_RDONLY
+ 	if !directory {
+ 		if e := encryptedDarwinComponent(name); e != nil {
+@@ -270,24 +285,6 @@
+ 		return nil, e
+ 	}
+ 	return encryptedDarwinOpenHeld(dir, filepath.Join(dir.descriptor.path, name), name, flags, directory)
+-}
+-func openRootFileAt(dir *managedFile, name string, flags int) (*managedFile, error) {
+-	return openFileAt(dir, name, flags)
+-}
+-func openFile(path string, flags int) (*managedFile, error) {
+-	d, e := openDirectory(filepath.Dir(path))
+-	if e != nil {
+-		return nil, e
+-	}
+-	f, e := openFileAt(d, filepath.Base(path), flags)
+-	e = errors.Join(e, d.Close())
+-	if e != nil {
+-		if f != nil {
+-			e = errors.Join(e, f.Close())
+-		}
+-		return nil, e
+-	}
+-	return f, nil
+ }
+ func validateLinks(f *managedFile) error {
+ 	f.mu.Lock()
+@@ -432,7 +429,7 @@
+ 	if e != nil {
+ 		return e
+ 	}
+-	defer func() { resultErr = errors.Join(resultErr, source.Close()) }()
++	defer func() { resultErr = closeResult(source, resultErr) }()
+ 	source.mu.Lock()
+ 	defer source.mu.Unlock()
+ 	darwinfile.Process.Lock()
+@@ -473,7 +470,7 @@
+ 	if e != nil {
+ 		return e
+ 	}
+-	return errors.Join(renameFileAt(d, filepath.Base(old), filepath.Base(new), absent), d.Close())
++	return closeResult(d, renameFileAt(d, filepath.Base(old), filepath.Base(new), absent))
+ }
+ func renameAbsent(old, new string) error { return encryptedDarwinRename(old, new, true) }
+ func replaceFile(old, new string) error  { return encryptedDarwinRename(old, new, false) }
+--- a/internal/encstore/platform_linux.go
++++ b/internal/encstore/platform_linux.go
+@@ -4,25 +4,26 @@
+ 
+ import (
+ 	"errors"
++	"os"
++
+ 	"golang.org/x/sys/unix"
+-	"os"
+ )
+ 
+ func supported() error { return nil }
+-func openFile(path string, flags int) (*os.File, error) {
+-	return os.OpenFile(path, flags|unix.O_NOFOLLOW|unix.O_CLOEXEC|unix.O_NONBLOCK, 0600)
+-}
+ func validateFile(info os.FileInfo) error {
+ 	if !info.Mode().IsRegular() {
+ 		return ErrUnsupported
+ 	}
+-	// os.FileInfo.Sys is syscall.Stat_t; use an independent no-follow stat via
+-	// descriptor in checkedFile instead of asserting x/sys's distinct Stat_t.
+ 	return nil
+ }
+-func validateLinks(f *os.File) error {
++func validateLinks(f *managedFile) error {
++	f.mu.Lock()
++	defer f.mu.Unlock()
++	if err := f.checkLocked(false); err != nil {
++		return err
++	}
+ 	var st unix.Stat_t
+-	if err := unix.Fstat(int(f.Fd()), &st); err != nil {
++	if err := unix.Fstat(int(f.raw.Fd()), &st); err != nil {
+ 		return err
+ 	}
+ 	if st.Nlink != 1 {
+@@ -30,8 +31,13 @@
+ 	}
+ 	return nil
+ }
+-func lockFile(f *os.File, readOnly bool) error { return rangeLock(f, 0, readOnly, false) }
+-func rangeLock(f *os.File, offset int64, shared, unlock bool) error {
++func lockFile(f *managedFile, readOnly bool) error { return rangeLock(f, 0, readOnly, false) }
++func rangeLock(f *managedFile, offset int64, shared, unlock bool) error {
++	f.mu.Lock()
++	defer f.mu.Unlock()
++	if err := f.checkLocked(false); err != nil {
++		return err
++	}
+ 	typ := int16(unix.F_WRLCK)
+ 	if shared {
+ 		typ = unix.F_RDLCK
+@@ -40,7 +46,7 @@
+ 		typ = unix.F_UNLCK
+ 	}
+ 	l := unix.Flock_t{Type: typ, Whence: 0, Start: offset, Len: 1}
+-	err := unix.FcntlFlock(f.Fd(), unix.F_OFD_SETLK, &l)
++	err := unix.FcntlFlock(f.raw.Fd(), unix.F_OFD_SETLK, &l)
+ 	if errors.Is(err, unix.EAGAIN) || errors.Is(err, unix.EACCES) {
+ 		return ErrBusy
+ 	}
+@@ -50,37 +56,73 @@
+ 	return unix.Renameat2(unix.AT_FDCWD, old, unix.AT_FDCWD, new, unix.RENAME_NOREPLACE)
+ }
+ 
+-func openDirectory(path string) (*os.File, error) {
+-	return os.OpenFile(path, os.O_RDONLY|unix.O_DIRECTORY|unix.O_NOFOLLOW|unix.O_CLOEXEC|unix.O_NONBLOCK, 0)
++func nativeOpenDirectory(path string) (*managedFile, error) {
++	raw, err := os.OpenFile(path, os.O_RDONLY|unix.O_DIRECTORY|unix.O_NOFOLLOW|unix.O_CLOEXEC|unix.O_NONBLOCK, 0)
++	if err != nil {
++		return nil, err
++	}
++	return &managedFile{raw: raw, directory: true}, nil
+ }
+ 
+-func openFileAt(dir *os.File, name string, flags int) (*os.File, error) {
+-	fd, e := unix.Openat(int(dir.Fd()), name, flags|unix.O_NOFOLLOW|unix.O_CLOEXEC|unix.O_NONBLOCK, 0600)
+-	if e != nil {
+-		return nil, e
++func nativeOpenFileAt(dir *managedFile, name string, flags int, _ bool) (*managedFile, error) {
++	dir.mu.Lock()
++	defer dir.mu.Unlock()
++	if err := dir.checkLocked(false); err != nil {
++		return nil, err
+ 	}
+-	return os.NewFile(uintptr(fd), name), nil
++	if !dir.directory {
++		return nil, ErrUnsupported
++	}
++	fd, err := unix.Openat(int(dir.raw.Fd()), name, flags|unix.O_NOFOLLOW|unix.O_CLOEXEC|unix.O_NONBLOCK, 0600)
++	if err != nil {
++		return nil, err
++	}
++	dir.children++
++	return &managedFile{raw: os.NewFile(uintptr(fd), name), parent: dir, directory: name == "." && flags == os.O_RDONLY}, nil
+ }
+-func stableFileAt(dir *os.File, name string, f *os.File, info os.FileInfo) error {
+-	now, e := f.Stat()
+-	if e != nil {
+-		return e
++func stableFileAt(dir *managedFile, name string, f *managedFile, info os.FileInfo) error {
++	// Native operations hold the actual leases, never an unprotected Fd value.
++	// The child-before-parent order matches close's detached pin release.
++	f.mu.Lock()
++	defer f.mu.Unlock()
++	if err := f.checkLocked(false); err != nil {
++		return err
++	}
++	if dir == f {
++		return ErrUnsupported
++	}
++	dir.mu.Lock()
++	defer dir.mu.Unlock()
++	if err := dir.checkLocked(true); err != nil {
++		return err
++	}
++	now, err := f.raw.Stat()
++	if err != nil {
++		return err
+ 	}
+ 	var named, held unix.Stat_t
+-	if e = unix.Fstatat(int(dir.Fd()), name, &named, unix.AT_SYMLINK_NOFOLLOW); e != nil {
+-		return e
++	if err = unix.Fstatat(int(dir.raw.Fd()), name, &named, unix.AT_SYMLINK_NOFOLLOW); err != nil {
++		return err
+ 	}
+-	if e = unix.Fstat(int(f.Fd()), &held); e != nil {
+-		return e
++	if err = unix.Fstat(int(f.raw.Fd()), &held); err != nil {
++		return err
+ 	}
+ 	if named.Mode&unix.S_IFMT != unix.S_IFREG || named.Dev != held.Dev || named.Ino != held.Ino || !os.SameFile(info, now) || now.Size() != info.Size() || !now.ModTime().Equal(info.ModTime()) {
+ 		return ErrChanged
+ 	}
+-	return validateLinks(f)
++	if held.Nlink != 1 {
++		return ErrUnsupported
++	}
++	return nil
+ }
+-func renameFileAt(dir *os.File, old, new string, absent bool) error {
++func renameFileAt(dir *managedFile, old, new string, absent bool) error {
++	dir.mu.Lock()
++	defer dir.mu.Unlock()
++	if err := dir.checkLocked(false); err != nil {
++		return err
++	}
+ 	if absent {
+-		return unix.Renameat2(int(dir.Fd()), old, int(dir.Fd()), new, unix.RENAME_NOREPLACE)
++		return unix.Renameat2(int(dir.raw.Fd()), old, int(dir.raw.Fd()), new, unix.RENAME_NOREPLACE)
+ 	}
+-	return unix.Renameat(int(dir.Fd()), old, int(dir.Fd()), new)
++	return unix.Renameat(int(dir.raw.Fd()), old, int(dir.raw.Fd()), new)
+ }
+--- a/internal/encstore/platform_other.go
++++ b/internal/encstore/platform_other.go
+@@ -4,17 +4,18 @@
+ 
+ import "os"
+ 
+-func supported() error                       { return ErrUnsupported }
+-func openFile(string, int) (*os.File, error) { return nil, ErrUnsupported }
+-func validateFile(os.FileInfo) error         { return ErrUnsupported }
+-func validateLinks(*os.File) error           { return ErrUnsupported }
+-func lockFile(*os.File, bool) error          { return ErrUnsupported }
+-func renameAbsent(string, string) error      { return ErrUnsupported }
++func supported() error                  { return ErrUnsupported }
++func validateFile(os.FileInfo) error    { return ErrUnsupported }
++func validateLinks(*managedFile) error  { return ErrUnsupported }
++func lockFile(*managedFile, bool) error { return ErrUnsupported }
++func renameAbsent(string, string) error { return ErrUnsupported }
+ 
+-func openDirectory(string) (*os.File, error) { return nil, ErrUnsupported }
++func nativeOpenDirectory(string) (*managedFile, error) { return nil, ErrUnsupported }
+ 
+-func openFileAt(*os.File, string, int) (*os.File, error)         { return nil, ErrUnsupported }
+-func stableFileAt(*os.File, string, *os.File, os.FileInfo) error { return ErrUnsupported }
+-func renameFileAt(*os.File, string, string, bool) error          { return ErrUnsupported }
++func nativeOpenFileAt(*managedFile, string, int, bool) (*managedFile, error) {
++	return nil, ErrUnsupported
++}
++func stableFileAt(*managedFile, string, *managedFile, os.FileInfo) error { return ErrUnsupported }
++func renameFileAt(*managedFile, string, string, bool) error              { return ErrUnsupported }
+ 
+-func rangeLock(*os.File, int64, bool, bool) error { return ErrUnsupported }
++func rangeLock(*managedFile, int64, bool, bool) error { return ErrUnsupported }
+--- a/internal/encstore/platform_windows.go
++++ b/internal/encstore/platform_windows.go
+@@ -52,6 +52,7 @@
+ // leases, including unreachable poisoned children. Global retention prevents an
+ // os.File finalizer from releasing unresolved native locks or directory pins.
+ type managedFile struct {
++	managedOwnership
+ 	mu                     sync.Mutex
+ 	raw                    *os.File
+ 	path                   string
+@@ -267,11 +268,11 @@
+ 		err = encryptedWinLocal(windows.Handle(f.raw.Fd()))
+ 	}
+ 	if err != nil {
+-		return nil, errors.Join(err, f.Close())
++		return f, err
+ 	}
+ 	return f, nil
+ }
+-func openDirectory(path string) (*managedFile, error) {
++func nativeOpenDirectory(path string) (*managedFile, error) {
+ 	if err := supported(); err != nil {
+ 		return nil, err
+ 	}
+@@ -293,7 +294,9 @@
+ 	return encryptedWinValidateOpened(encryptedWinAdopt(h, path, true, false, nil))
+ }
+ func encryptedWinOpenAt(dir *managedFile, name string, flags int, root, metadata, rename bool) (*managedFile, error) {
+-	return encryptedWinOpenAtPolicy(dir, name, flags, root, metadata, rename, false)
++	return scopedNativeOpen(dir, func() (*managedFile, error) {
++		return encryptedWinOpenAtPolicy(dir, name, flags, root, metadata, rename, false)
++	})
+ }
+ func encryptedWinOpenAtPolicy(dir *managedFile, name string, flags int, root, metadata, rename, retained bool) (*managedFile, error) {
+ 	directory := name == "."
+@@ -382,26 +385,8 @@
+ 	dir.mu.Unlock()
+ 	return encryptedWinValidateOpened(f)
+ }
+-func openFileAt(dir *managedFile, name string, flags int) (*managedFile, error) {
+-	return encryptedWinOpenAt(dir, name, flags, false, false, false)
+-}
+-func openRootFileAt(dir *managedFile, name string, flags int) (*managedFile, error) {
+-	return encryptedWinOpenAt(dir, name, flags, true, false, false)
+-}
+-func openFile(path string, flags int) (*managedFile, error) {
+-	d, err := openDirectory(filepath.Dir(path))
+-	if err != nil {
+-		return nil, err
+-	}
+-	f, err := openFileAt(d, filepath.Base(path), flags)
+-	closeErr := d.Close()
+-	if err != nil {
+-		return nil, encryptedWinJoin(err, closeErr)
+-	}
+-	if closeErr != nil {
+-		return nil, errors.Join(closeErr, f.Close())
+-	}
+-	return f, nil
++func nativeOpenFileAt(dir *managedFile, name string, flags int, root bool) (*managedFile, error) {
++	return encryptedWinOpenAtPolicy(dir, name, flags, root, false, false, false)
+ }
+ func validateFile(info os.FileInfo) error {
+ 	if !info.Mode().IsRegular() {
+@@ -439,7 +424,7 @@
+ 		err = ErrChanged
+ 	}
+ 	f.mu.Unlock()
+-	return errors.Join(err, probe.Close())
++	return closeResult(probe, err)
+ }
+ 
+ func platformFileCheck(f *managedFile, path string, info os.FileInfo) error {
+@@ -479,14 +464,16 @@
+ 		}
+ 	}
+ 	f.mu.Unlock()
+-	return errors.Join(err, probe.Close())
++	return closeResult(probe, err)
+ }
+ 
+ // A child can continue using its pinned parent after the parent's public
+ // lease closes. The child count and actual handle are checked under one mutex;
+ // the public closed bit is never temporarily cleared.
+ func encryptedWinMetadataAt(dir *managedFile, name string) (*managedFile, error) {
+-	return encryptedWinOpenAtPolicy(dir, name, os.O_RDONLY, false, true, false, true)
++	return scopedNativeOpen(dir, func() (*managedFile, error) {
++		return encryptedWinOpenAtPolicy(dir, name, os.O_RDONLY, false, true, false, true)
++	})
+ }
+ func lockFile(f *managedFile, readOnly bool) error {
+ 	return rangeLock(f, lifecycleByte, readOnly, false)
+@@ -526,7 +513,7 @@
+ 	if err != nil {
+ 		return err
+ 	}
+-	return errors.Join(renameFileAt(d, filepath.Base(old), filepath.Base(new), true), d.Close())
++	return closeResult(d, renameFileAt(d, filepath.Base(old), filepath.Base(new), true))
+ }
+ func renameFileAt(dir *managedFile, old, new string, absent bool) error {
+ 	if old == new {
+@@ -549,11 +536,11 @@
+ 		err = stableFileAt(dir, old, source, info)
+ 	}
+ 	if err != nil {
+-		return errors.Join(err, source.Close())
++		return closeResult(source, err)
+ 	}
+ 	name, err := windows.UTF16FromString(new)
+ 	if err != nil {
+-		return errors.Join(err, source.Close())
++		return closeResult(source, err)
+ 	}
+ 	ri := encryptedWinRename{bytes: uint32((len(name) - 1) * 2)}
+ 	copy(ri.name[:], name)
+@@ -577,10 +564,10 @@
+ 			if dest.id != source.id {
+ 				err = ErrChanged
+ 			}
+-			err = errors.Join(err, dest.Close())
+-		}
+-	}
+-	return errors.Join(encryptedWinError("rename encrypted relative", new, err), source.Close())
++			err = closeResult(dest, err)
++		}
++	}
++	return closeResult(source, encryptedWinError("rename encrypted relative", new, err))
+ }
+ 
+ func replaceFile(old, new string) error {
+@@ -591,7 +578,7 @@
+ 	if err != nil {
+ 		return err
+ 	}
+-	return errors.Join(renameFileAt(d, filepath.Base(old), filepath.Base(new), false), d.Close())
++	return closeResult(d, renameFileAt(d, filepath.Base(old), filepath.Base(new), false))
+ }
+ 
+ // Preserve os.IsNotExist/IsExist classification when cleanup itself succeeded;
+@@ -625,7 +612,7 @@
+ 	d.mu.Lock()
+ 	parent, err := encryptedWinFinalPath(windows.Handle(d.raw.Fd()))
+ 	d.mu.Unlock()
+-	err = encryptedWinJoin(err, d.Close())
++	err = closeResult(d, err)
+ 	if err != nil {
+ 		return "", err
+ 	}
+@@ -642,11 +629,11 @@
+ 	}
+ 	f, err := encryptedWinMetadataAt(d, filepath.Base(path))
+ 	if err != nil {
+-		return nil, encryptedWinJoin(err, d.Close())
++		return nil, closeResult(d, err)
+ 	}
+ 	info, err := f.Stat()
+-	err = encryptedWinJoin(err, f.Close())
+-	err = encryptedWinJoin(err, d.Close())
++	err = closeResult(f, err)
++	err = closeResult(d, err)
+ 	if err != nil {
+ 		return nil, err
+ 	}
+--- a/internal/encstore/process_locks.go
++++ b/internal/encstore/process_locks.go
+@@ -7,9 +7,10 @@
+ // the callback is native only in the Darwin adapter, and synthetic in tests.
+ type processByteOwner struct{ held [3]uint8 }
+ type processByteLocks struct {
+-	owners   map[*processByteOwner]struct{}
+-	kernel   [3]uint8
+-	poisoned error
++	owners        map[*processByteOwner]struct{}
++	kernel        [3]uint8
++	poisoned      error
++	cleanupCauses [3]error
+ }
+ 
+ func (l *processByteLocks) attach(o *processByteOwner) {
+@@ -19,8 +20,11 @@
+ 	l.owners[o] = struct{}{}
+ }
+ func (l *processByteLocks) poison(err error) error {
+-	l.poisoned = errors.Join(l.poisoned, ErrPoisoned, err)
+-	return l.poisoned
++	if l.poisoned == nil {
++		l.poisoned = errors.Join(ErrPoisoned, err)
++		return l.poisoned
++	}
++	return errors.Join(l.poisoned, l.cleanupCauses[0], l.cleanupCauses[1], l.cleanupCauses[2], err)
+ }
+ func (l *processByteLocks) any() bool { return l.kernel != [3]uint8{} }
+ func (l *processByteLocks) change(o *processByteOwner, offset int64, shared, unlock bool, call byteLockCall) error {
+@@ -64,6 +68,9 @@
+ 			if !unlock && errors.Is(err, ErrBusy) {
+ 				return err
+ 			}
++			if unlock && l.cleanupCauses[offset] == nil {
++				l.cleanupCauses[offset] = err
++			}
+ 			return l.poison(err)
+ 		}
+ 		l.kernel[offset] = aggregate
+--- a/internal/encstore/publish.go
++++ b/internal/encstore/publish.go
+@@ -48,7 +48,7 @@
+ func (s *Store) Publish(ctx context.Context, g Geometry, src PageSource, target *Prepared) error {
+ 	return s.publishBase(ctx, g, src, target, s.opts.Mode)
+ }
+-func (s *Store) publishBase(ctx context.Context, g Geometry, src PageSource, target *Prepared, mode Mode) error {
++func (s *Store) publishBase(ctx context.Context, g Geometry, src PageSource, target *Prepared, mode Mode) (resultErr error) {
+ 	if e := s.prepublish(ctx); e != nil {
+ 		return e
+ 	}
+@@ -126,7 +126,7 @@
+ 	adopted := false
+ 	defer func() {
+ 		if !adopted {
+-			obj.close()
++			resultErr = obj.closeWithError(resultErr)
+ 		}
+ 	}()
+ 	if e = s.ns.sync(s.path); e != nil {
+@@ -177,7 +177,7 @@
+ 	return s.poisonOwnership(closeErr, true)
+ }
+ 
+-func (s *Store) PublishWAL(ctx context.Context, expected [32]byte, g Geometry, pages []uint32, src PageSource) error {
++func (s *Store) PublishWAL(ctx context.Context, expected [32]byte, g Geometry, pages []uint32, src PageSource) (resultErr error) {
+ 	if e := s.prepublish(ctx); e != nil {
+ 		return e
+ 	}
+@@ -261,7 +261,7 @@
+ 	adopted := false
+ 	defer func() {
+ 		if !adopted {
+-			seg.close()
++			resultErr = seg.closeWithError(resultErr)
+ 		}
+ 	}()
+ 	if e = s.ns.sync(s.path); e != nil {
+@@ -333,7 +333,7 @@
+ 	if e == nil {
+ 		e = s.ns.stable(check, pending, info)
+ 	}
+-	e = errors.Join(e, check.Close())
++	e = closeResult(check, e)
+ 	if e != nil {
+ 		return e
+ 	}
+@@ -386,8 +386,7 @@
+ 		e = s.ns.stable(root, s.path, ri)
+ 	}
+ 	if e != nil {
+-		root.Close()
+-		return uncertain(e)
++		return uncertain(closeResult(root, e))
+ 	}
+ 	if e = s.checkOwner(); e == nil {
+ 		e = s.checkSelected()
+@@ -396,8 +395,7 @@
+ 		e = candidateStable()
+ 	}
+ 	if e != nil {
+-		root.Close()
+-		return uncertain(e)
++		return uncertain(closeResult(root, e))
+ 	}
+ 	old := s.root
+ 	if opts.Mode == WALShared {
+--- a/internal/encstore/shared.go
++++ b/internal/encstore/shared.go
+@@ -19,12 +19,20 @@
+ 	if err == nil {
+ 		return nil
+ 	}
+-	s.poisoned = errors.Join(s.poisoned, ErrPoisoned, err)
++	if s.ns != nil {
++		err = s.ns.group.remember(err)
++	}
++	current := errors.Join(ErrPoisoned, err)
+ 	if uncertain {
+-		s.poisoned = errors.Join(ErrUncertain, s.poisoned)
+-	}
+-	return s.poisoned
+-}
++		current = errors.Join(ErrUncertain, current)
++	}
++	if s.poisoned == nil {
++		s.poisoned = current
++		return current
++	}
++	return errors.Join(s.poisoned, current)
++}
++
+ func (s *Store) enterGate(shared bool) error {
+ 	if s.gateOwned {
+ 		return ErrUnsupported
+@@ -80,6 +88,7 @@
+ 	keep := false
+ 	defer func() {
+ 		if !keep {
++			err = s.ns.group.remember(err)
+ 			err = errors.Join(err, s.poisonOwnership(f.Close(), false))
+ 		}
+ 	}()
+@@ -147,6 +156,7 @@
+ 	}
+ 	c := &Store{selection: selection{rootBytes: raw, header: h}, ns: s.ns, path: s.path, opts: s.opts, readOnly: s.readOnly, lock: s.lock, lockInfo: s.lockInfo, master: s.master}
+ 	if e = c.openWALSelection(ctx, m); e != nil {
++		e = s.ns.group.remember(e)
+ 		return nil, errors.Join(e, s.poisonOwnership(c.closeSelection(), false))
+ 	}
+ 	return c, nil
+@@ -257,16 +267,17 @@
+ 		return err
+ 	}
+ 	if len(s.rootBytes) == 0 {
+-		if _, e := platformPathInfo(s.path); !os.IsNotExist(e) {
+-			return ErrChanged
+-		}
+-		return nil
++		_, e := platformPathInfo(s.path)
++		return s.checkAbsentRootResult(e)
+ 	}
+ 	f, info, e := s.ns.checked(s.path, os.O_RDONLY)
+ 	if e != nil {
+ 		return e
+ 	}
+-	defer func() { err = errors.Join(err, s.poisonOwnership(f.Close(), false)) }()
++	defer func() {
++		err = s.ns.group.remember(err)
++		err = errors.Join(err, s.poisonOwnership(f.Close(), false))
++	}()
+ 	if e = rootExtent(info.Size(), s.opts); e != nil {
+ 		return e
+ 	}
+--- a/internal/encstore/store.go
++++ b/internal/encstore/store.go
+@@ -28,6 +28,8 @@
+ 
+ type Store struct {
+ 	selection
++	cleanup            *cleanupGroup
++	closed             bool
+ 	writerIDs          uint64
+ 	ns                 *namespace
+ 	path               string
+@@ -60,7 +62,7 @@
+ 	return nil
+ }
+ 
+-func acquire(path string, readOnly, create bool, mode Mode) (*Store, bool, error) {
++func acquire(path string, readOnly, create bool, mode Mode) (_ *Store, _ bool, resultErr error) {
+ 	if err := supported(); err != nil {
+ 		return nil, false, err
+ 	}
+@@ -93,19 +95,14 @@
+ 	kept := false
+ 	defer func() {
+ 		if !kept {
+-			_ = ns.dir.Close()
++			resultErr = ns.group.closeAll(resultErr)
+ 		}
+ 	}()
+ 	f, info, err := ns.checked(path+".gse-lock", flags)
+ 	if err != nil {
+ 		return nil, false, err
+ 	}
+-	ok := false
+-	defer func() {
+-		if !ok {
+-			_ = f.Close()
+-		}
+-	}()
++	ns.group.protect(f)
+ 	if info.Size() != 0 {
+ 		return nil, false, ErrUnsupported
+ 	}
+@@ -130,12 +127,11 @@
+ 	if err = ns.check(); err != nil {
+ 		return nil, false, err
+ 	}
+-	ok = true
+ 	kept = true
+-	return &Store{path: path, readOnly: readOnly, lock: f, lockInfo: info, ns: ns, lifecycleExclusive: !readOnly && (mode != WALShared || absent)}, absent, nil
+-}
+-
+-func Open(ctx context.Context, path string, o Options, readOnly, create bool, initial []byte) (*Store, error) {
++	return &Store{path: path, readOnly: readOnly, lock: f, lockInfo: info, ns: ns, cleanup: ns.group, lifecycleExclusive: !readOnly && (mode != WALShared || absent)}, absent, nil
++}
++
++func Open(ctx context.Context, path string, o Options, readOnly, create bool, initial []byte) (_ *Store, resultErr error) {
+ 	if err := ctx.Err(); err != nil {
+ 		return nil, err
+ 	}
+@@ -180,7 +176,7 @@
+ 	ok := false
+ 	defer func() {
+ 		if !ok {
+-			_ = s.Close()
++			resultErr = s.CloseWithError(resultErr)
+ 		}
+ 	}()
+ 	if absent {
+@@ -253,6 +249,9 @@
+ }
+ func (s *Store) DatabaseID() [16]byte { return s.header.Epoch.DatabaseID }
+ func (s *Store) Check() error {
++	if s.closed {
++		return encryption.ErrClosed
++	}
+ 	if s.poisoned != nil {
+ 		return s.poisoned
+ 	}
+@@ -269,10 +268,8 @@
+ 		return s.checkSelected()
+ 	}
+ 	if s.root == nil {
+-		if _, err := platformPathInfo(s.path); !os.IsNotExist(err) {
+-			return ErrChanged
+-		}
+-		return nil
++		_, err := platformPathInfo(s.path)
++		return s.checkAbsentRootResult(err)
+ 	}
+ 	if err := s.ns.stable(s.root, s.path, s.rootInfo); err != nil {
+ 		return err
+@@ -285,6 +282,21 @@
+ 		return encryption.ErrAuthentication
+ 	}
+ 	return s.ns.stable(s.base.file, s.base.path, s.base.info)
++}
++
++// An absent-root probe can itself own an unresolved managed Windows probe.
++// Only an actually present path is ErrChanged; never replace its error token.
++func (s *Store) checkAbsentRootResult(err error) error {
++	if os.IsNotExist(err) {
++		return nil
++	}
++	if err == nil {
++		return ErrChanged
++	}
++	if s.ns != nil {
++		return s.ns.group.remember(err)
++	}
++	return err
+ }
+ func (s *Store) ReadPage(ctx context.Context, n uint32) ([]byte, error) {
+ 	if err := s.Check(); err != nil {
+@@ -327,24 +339,38 @@
+ 	if err != nil {
+ 		return err
+ 	}
+-	return errors.Join(f.Sync(), f.Close())
+-}
+-func (s *Store) Close() error {
+-	var err error
+-	err = s.closeSelection()
++	return closeResult(f, f.Sync())
++}
++func (s *Store) Close() error { return s.CloseWithError(nil) }
++
++// Logical closure erases crypto readers and master material once. The cleanup
++// scope owns every native lease independently, including discarded temporaries.
++func (s *Store) CloseWithError(cause error) error {
++	if s.closed {
++		if s.cleanup != nil {
++			return s.cleanup.retry()
++		}
++		return nil
++	}
++	s.closed = true
++	cause = errors.Join(cause, s.poisoned)
++	if s.cleanup != nil {
++		cause = s.cleanup.remember(cause)
++	}
++	err := s.closeSelection()
+ 	if s.master != nil {
+ 		err = errors.Join(err, s.master.Close())
+ 		s.master = nil
+ 	}
+-	if s.lock != nil {
+-		err = errors.Join(err, s.lock.Close())
+-		s.lock = nil
+-	}
+-	if s.ns != nil {
+-		err = errors.Join(err, s.ns.dir.Close())
+-		s.ns = nil
+-	}
+-	return errors.Join(s.poisoned, err)
++	s.opts = Options{}
++	s.lock, s.lockInfo, s.ns = nil, nil, nil
++	if s.cleanup == nil {
++		return errors.Join(cause, err)
++	}
++	return s.cleanup.closeAll(errors.Join(cause, err))
++}
++func (s *Store) RetirementComplete() bool {
++	return s.closed && (s.cleanup == nil || s.cleanup.complete())
+ }
+ 
+ type Info struct {
+--- a/internal/encstore/wal_object.go
++++ b/internal/encstore/wal_object.go
+@@ -21,18 +21,22 @@
+ 	pages  []uint32
+ }
+ 
+-func (s *segment) close() error {
++func (s *segment) close() error { return s.closeWithError(nil) }
++func (s *segment) closeWithError(cause error) error {
+ 	if s == nil {
+-		return nil
++		return cause
+ 	}
+ 	var e error
+ 	if s.reader != nil {
+ 		e = s.reader.Close()
++		s.reader = nil
+ 	}
+ 	if s.file != nil {
+-		e = errors.Join(e, s.file.Close())
+-	}
+-	return e
++		e = closeResult(s.file, errors.Join(cause, e))
++		cause = nil
++		s.file = nil
++	}
++	return errors.Join(cause, e)
+ }
+ func (s *segment) readPage(ctx context.Context, page, ordinal uint32) ([]byte, error) {
+ 	if e := ctx.Err(); e != nil {
+@@ -177,17 +181,15 @@
+ 	}
+ 	seg, e := verifySegment(ctx, f, uint64(i.Size()), master, epoch, o, r, previous)
+ 	if e != nil {
+-		f.Close()
+-		return nil, e
++		return nil, closeResult(f, e)
+ 	}
+ 	seg.file, seg.info, seg.path, seg.ns = f, i, path, s.ns
+ 	if e = s.ns.stable(f, path, i); e != nil {
+-		seg.close()
+-		return nil, e
++		return nil, seg.closeWithError(e)
+ 	}
+ 	return seg, nil
+ }
+-func (s *Store) writeSegment(ctx context.Context, d encryption.FileDescriptor, pages []uint32, src PageSource) (*segment, error) {
++func (s *Store) writeSegment(ctx context.Context, d encryption.FileDescriptor, pages []uint32, src PageSource) (_ *segment, resultErr error) {
+ 	first, e := src.ReadPage(ctx, 1)
+ 	if e != nil {
+ 		return nil, e
+@@ -216,7 +218,7 @@
+ 	closed := false
+ 	defer func() {
+ 		if !closed {
+-			f.Close()
++			resultErr = closeResult(f, resultErr)
+ 		}
+ 	}()
+ 	digest := sha256.New()
+--- /dev/null
++++ b/internal/pager/encrypted_close.go
+@@ -0,0 +1,25 @@
++package pager
++
++import "errors"
++
++// Only the actual encrypted Store implements this in production. Tests exercise
++// orchestration with descriptor-free owners, without injecting native failures.
++type encryptedRetirementOwner interface {
++	CloseWithError(error) error
++	RetirementComplete() bool
++}
++
++func retireEncryptedSession(closed *bool, active, readOnly, keepWAL bool, poisoned, cause error, owner encryptedRetirementOwner, checkpoint func() error) (bool, error) {
++	if active {
++		return false, ErrBusy
++	}
++	var checkpointErr error
++	if !*closed {
++		*closed = true
++		if !readOnly && !keepWAL && poisoned == nil && cause == nil {
++			checkpointErr = checkpoint()
++		}
++	}
++	err := encryptedError(owner.CloseWithError(errors.Join(cause, poisoned, checkpointErr)))
++	return owner.RetirementComplete(), err
++}
+--- /dev/null
++++ b/internal/pager/encrypted_close_test.go
+@@ -0,0 +1,74 @@
++package pager
++
++import (
++	"errors"
++	"github.com/ms-xiaosnow/gosqlite/internal/encstore"
++	"testing"
++)
++
++type memoryEncryptedRetirement struct {
++	calls    int
++	done     bool
++	cause    error
++	received error
++}
++
++func (m *memoryEncryptedRetirement) CloseWithError(e error) error {
++	m.calls++
++	if m.calls == 1 {
++		m.received = e
++		return errors.Join(encstore.ErrCleanupPending, encstore.ErrPoisoned, m.cause)
++	}
++	m.done = true
++	return nil
++}
++func (m *memoryEncryptedRetirement) RetirementComplete() bool { return m.done }
++func TestEncryptedSessionCloseMemoryOnceAndActiveLease(t *testing.T) {
++	closed := false
++	calls := 0
++	checkpoint := func() error { calls++; return ErrBusy }
++	owner := &memoryEncryptedRetirement{cause: errors.New("memory retained owner")}
++	if _, e := retireEncryptedSession(&closed, true, false, false, nil, nil, owner, checkpoint); !errors.Is(e, ErrBusy) || closed || owner.calls != 0 || calls != 0 {
++		t.Fatal(e)
++	}
++	done, e := retireEncryptedSession(&closed, false, false, false, nil, nil, owner, checkpoint)
++	if done || !closed || !errors.Is(e, encstore.ErrCleanupPending) || !errors.Is(e, ErrPoisoned) || !errors.Is(owner.received, ErrBusy) || calls != 1 {
++		t.Fatal(e)
++	}
++	done, e = retireEncryptedSession(&closed, false, false, false, nil, nil, owner, checkpoint)
++	if !done || e != nil || calls != 1 || owner.calls != 2 {
++		t.Fatal("repeated checkpoint or lost retirement", e)
++	}
++}
++func TestEncryptedSessionCloseMemorySkipCheckpoint(t *testing.T) {
++	for _, which := range []string{"read-only", "keep", "poison", "release-error"} {
++		closed := false
++		owner := &memoryEncryptedRetirement{}
++		var poison, cause error
++		if which == "poison" {
++			poison = ErrPoisoned
++		}
++		if which == "release-error" {
++			cause = errors.New("memory Rows release")
++		}
++		_, e := retireEncryptedSession(&closed, false, which == "read-only", which == "keep", poison, cause, owner, func() error { t.Fatal("checkpoint ran", which); return nil })
++		if !closed || !errors.Is(e, encstore.ErrCleanupPending) {
++			t.Fatal(e)
++		}
++		if cause != nil && !errors.Is(owner.received, cause) {
++			t.Fatal("release cause discarded")
++		}
++	}
++}
++func TestEncryptedSessionCloseMemoryActivePreservesOptions(t *testing.T) {
++	opts := Options{PageSize: 512, KeepWALOnClose: true, MaxDirtyPages: 17}
++	// Empty Store has no native owners. The active-lease path must not touch it.
++	s := &EncryptedSession{store: &encstore.Store{}, active: &Tx{}, opts: opts}
++	if e := s.Close(); !errors.Is(e, ErrBusy) || s.closed || s.opts != opts || s.store == nil {
++		t.Fatal("active BUSY changed session options", e, s.opts)
++	}
++	s.active = nil
++	if e := s.Close(); e != nil || !s.closed || s.store != nil {
++		t.Fatal("lease-free close failed", e)
++	}
++}
+--- a/internal/pager/encrypted_copy.go
++++ b/internal/pager/encrypted_copy.go
+@@ -87,8 +87,7 @@
+ 	}
+ 	p, err := a.ReadPage(ctx, 1)
+ 	if err != nil {
+-		_ = a.Close()
+-		return nil, err
++		return nil, encryptedError(a.CloseWithError(err))
+ 	}
+ 	g := a.Geometry()
+ 	h, err := ParseHeader(p, int64(g.PageSize)*int64(g.PageCount))
+@@ -100,8 +99,7 @@
+ 		err = writableHeader(h)
+ 	}
+ 	if err != nil {
+-		_ = a.Close()
+-		return nil, err
++		return nil, encryptedError(a.CloseWithError(err))
+ 	}
+ 	return &EncryptedArchive{archive: a, header: h}, nil
+ }
+@@ -109,7 +107,8 @@
+ func (a *EncryptedArchive) ReadPage(c context.Context, n uint32) ([]byte, error) {
+ 	return a.archive.ReadPage(c, n)
+ }
+-func (a *EncryptedArchive) Close() error { return a.archive.Close() }
++func (a *EncryptedArchive) Close() error                     { return a.archive.Close() }
++func (a *EncryptedArchive) CloseWithError(cause error) error { return a.archive.CloseWithError(cause) }
+ func CreateEncryptedSnapshot(ctx context.Context, destination string, target *encstore.Prepared, r SnapshotReader) (encstore.Info, error) {
+ 	h := r.Header()
+ 	i, e := encstore.CreateFrom(ctx, destination, target, encstore.Geometry{PageSize: h.PageSize, PageCount: h.PageCount}, r)
+--- a/internal/pager/encrypted_session.go
++++ b/internal/pager/encrypted_session.go
+@@ -23,6 +23,7 @@
+ 	readOnly bool
+ 	active   *Tx
+ 	poisoned error
++	closed   bool
+ }
+ 
+ func encryptedError(err error) error {
+@@ -59,8 +60,7 @@
+ 	}
+ 	p, err := st.ReadPage(ctx, 1)
+ 	if err != nil {
+-		_ = st.Close()
+-		return nil, encryptedError(err)
++		return nil, encryptedError(st.CloseWithError(err))
+ 	}
+ 	g := st.Geometry()
+ 	h, err := ParseHeader(p, int64(g.PageSize)*int64(g.PageCount))
+@@ -72,8 +72,7 @@
+ 		err = writableHeader(h)
+ 	}
+ 	if err != nil {
+-		_ = st.Close()
+-		return nil, err
++		return nil, encryptedError(st.CloseWithError(err))
+ 	}
+ 	return &EncryptedSession{store: st, header: h, opts: opts, readOnly: readOnly}, nil
+ }
+@@ -87,6 +86,9 @@
+ 	return s.store.DatabaseID()
+ }
+ func (s *EncryptedSession) checkLocked() error {
++	if s.closed {
++		return ErrClosed
++	}
+ 	if s.poisoned != nil {
+ 		return s.poisoned
+ 	}
+@@ -338,22 +340,25 @@
+ 		return encryptedError(s.store.Publish(ctx, s.store.Geometry(), r, target))
+ 	})
+ }
+-func (s *EncryptedSession) Close() error {
+-	s.mu.Lock()
+-	defer s.mu.Unlock()
+-	if s.active != nil {
+-		return ErrBusy
+-	}
++func (s *EncryptedSession) Close() error { return s.CloseWithError(nil) }
++
++// CloseWithError is the SQL connection's once-only logical-close bridge. It
++// retains storage retirement after database/sql has discarded the connection.
++func (s *EncryptedSession) CloseWithError(cause error) error {
++	s.mu.Lock()
++	defer s.mu.Unlock()
+ 	if s.store == nil {
+-		return s.poisoned
+-	}
+-	var checkpointErr error
+-	if !s.readOnly && !s.opts.KeepWALOnClose && s.poisoned == nil {
+-		checkpointErr = encryptedError(s.store.Checkpoint(context.Background()))
+-	}
+-	err := errors.Join(checkpointErr, encryptedError(s.store.Close()))
+-	s.store = nil
+-	return errors.Join(s.poisoned, err)
++		return nil
++	}
++	done, err := retireEncryptedSession(&s.closed, s.active != nil, s.readOnly, s.opts.KeepWALOnClose, s.poisoned, cause, s.store, func() error { return encryptedError(s.store.Checkpoint(context.Background())) })
++	if done {
++		s.store = nil
++	}
++
++	if s.closed {
++		s.opts = Options{}
++	}
++	return err
+ }
+ 
+ func (s *EncryptedSession) EncryptionInfo() encstore.Info {
+--- /dev/null
++++ b/sqlite/encrypted_cleanup.go
+@@ -0,0 +1,48 @@
++package sqlite
++
++import (
++	"errors"
++	"github.com/ms-xiaosnow/gosqlite/internal/encstore"
++)
++
++// ErrEncryptedCleanupPending marks an immutable historical token for retained
++// encrypted managed ownership. Errors carrying a cleanup token also match
++// ErrPoisoned and use CodeIOErr; the bare sentinel alone does not. A close
++// diagnostic without this marker can describe a fully consumed owner.
++var ErrEncryptedCleanupPending = encstore.ErrCleanupPending
++
++// RetryEncryptedCleanup synchronously attempts all distinct encrypted cleanup
++// scopes in wrapped/joined errors. Discovery precedes effects and is limited to
++// 4096 error nodes. Oversized/cyclic trees return ErrMemoryLimit; keep original
++// tokens and retry smaller trees. Old tokens remain historical after completion.
++//
++// A token from a live connection retires only already-close-requested temporary
++// owners. It never closes selected live files, checkpoints, reacquires keys,
++// reopens paths, replays transactions, or retries a numeric native handle. A
++// whole-scope close preserves child -> lifecycle -> directory dependency order.
++// A terminal native state may remain pending indefinitely. Completed scopes and
++// errors without tokens are no-ops, not proof that every subsystem is clean.
++func RetryEncryptedCleanup(err error) error {
++	return wrap("encrypted cleanup", classifyEncryptedCleanup(encstore.RetryCleanup(err)))
++}
++
++// PendingEncryptedCleanups returns a new snapshot of encrypted pending tokens,
++// including failed constructors and errors discarded by database/sql. It performs
++// no cleanup. The process admits at most 1024 opening/live/pending scopes and
++// 16384 common managed leases before native acquisition; the platform's physical
++// limits also apply. Resources are never evicted, finalized, or swept by retry.
++// Source-only exceptional-state corrections are not native failure qualification.
++func PendingEncryptedCleanups() []error {
++	tokens := encstore.PendingCleanups()
++	for i, token := range tokens {
++		tokens[i] = wrap("encrypted cleanup", classifyEncryptedCleanup(token))
++	}
++	return tokens
++}
++
++func classifyEncryptedCleanup(err error) error {
++	if errors.Is(err, encstore.ErrPoisoned) {
++		return errors.Join(ErrPoisoned, err)
++	}
++	return err
++}
+--- /dev/null
++++ b/sqlite/encrypted_cleanup_internal_test.go
+@@ -0,0 +1,26 @@
++package sqlite
++
++import (
++	"errors"
++	"github.com/ms-xiaosnow/gosqlite/internal/encstore"
++	"testing"
++)
++
++func TestEncryptedCleanupMemoryPublicClassification(t *testing.T) {
++	original := errors.New("memory original cause")
++	e := wrap("open", errors.Join(encstore.ErrCleanupPending, encstore.ErrPoisoned, ErrBusy, original))
++	var detail *Error
++	if !errors.Is(e, ErrEncryptedCleanupPending) || !errors.Is(e, ErrPoisoned) || !errors.Is(e, original) || !errors.As(e, &detail) || detail.Code != CodeIOErr {
++		t.Fatal(e)
++	}
++	e = wrap("test", ErrEncryptedCleanupPending)
++	if errors.Is(e, ErrPoisoned) {
++		t.Fatal("bare marker inferred poison")
++	}
++	if e = RetryEncryptedCleanup(nil); e != nil {
++		t.Fatal(e)
++	}
++	if e = RetryEncryptedCleanup(errors.New("ordinary error")); e != nil {
++		t.Fatal(e)
++	}
++}
+--- /dev/null
++++ b/sqlite/encrypted_cleanup_test.go
+@@ -0,0 +1,70 @@
++package sqlite_test
++
++import (
++	"context"
++	"errors"
++	"fmt"
++	"path/filepath"
++	"reflect"
++	"testing"
++
++	"github.com/ms-xiaosnow/gosqlite/encryption"
++	"github.com/ms-xiaosnow/gosqlite/sqlite"
++)
++
++// Only intact correct-key files and ordinary close/rollback/reopen are used.
++func TestEncryptedCleanupOrdinaryAllModesCloseAndProviders(t *testing.T) {
++	for _, mode := range []sqlite.EncryptionMode{sqlite.EncryptionSnapshot, sqlite.EncryptionWAL, sqlite.EncryptionWALShared} {
++		t.Run(fmt.Sprint(mode), func(t *testing.T) {
++			cfg := encryptionOptions(t, encryption.RawKey256)
++			cfg.Mode = mode
++			p := cfg.KeyProvider.(*encryptionTestProvider)
++			path := filepath.Join(t.TempDir(), "normal.gse")
++			db, e := sqlite.Open(path, sqlite.Options{Encryption: &cfg, PageSize: 512})
++			if e != nil {
++				t.Fatal(e)
++			}
++			encryptedExec(t, db, "CREATE TABLE t(id INTEGER PRIMARY KEY)")
++			encryptedExec(t, db, "INSERT INTO t VALUES(1)")
++			tx, e := db.Begin(context.Background())
++			if e != nil {
++				t.Fatal(e)
++			}
++			if _, e = tx.Exec(context.Background(), "INSERT INTO t VALUES(2)"); e != nil {
++				t.Fatal(e)
++			}
++			rows, e := tx.Query(context.Background(), "SELECT id FROM t ORDER BY id")
++			if e != nil {
++				t.Fatal(e)
++			}
++			if e = db.Close(); e != nil {
++				t.Fatal(e)
++			}
++			if e = db.Close(); e != nil {
++				t.Fatal(e)
++			}
++			if !errors.Is(rows.Err(), sqlite.ErrClosed) {
++				t.Fatal(rows.Err())
++			}
++			if p.acquires.Load() != 1 || p.releases.Load() != 1 {
++				t.Fatal("close reacquired provider", p.acquires.Load(), p.releases.Load())
++			}
++			db, e = sqlite.Open(path, sqlite.Options{Encryption: &cfg, ReadOnly: true})
++			if e != nil {
++				t.Fatal(e)
++			}
++			if got := query(t, db, "SELECT id FROM t"); !reflect.DeepEqual(got, [][]any{{int64(1)}}) {
++				t.Fatal(got)
++			}
++			if e = db.Close(); e != nil {
++				t.Fatal(e)
++			}
++			if p.acquires.Load() != 2 || p.releases.Load() != 2 {
++				t.Fatal("reopen provider count")
++			}
++			if len(sqlite.PendingEncryptedCleanups()) != 0 {
++				t.Fatal("normal path retained pending ownership")
++			}
++		})
++	}
++}
+--- a/sqlite/encryption_copy.go
++++ b/sqlite/encryption_copy.go
+@@ -100,7 +100,7 @@
+ // RestoreEncrypted authenticates a complete portable archive and validates its
+ // supported logical page ownership before creating an absent destination with
+ // fresh target database/epoch/file identities. The archive is never modified.
+-func RestoreEncrypted(ctx context.Context, archivePath, destination string, source, target EncryptionOptions) (EncryptionInfo, error) {
++func RestoreEncrypted(ctx context.Context, archivePath, destination string, source, target EncryptionOptions) (_ EncryptionInfo, resultErr error) {
+ 	if err := checkContext(ctx); err != nil {
+ 		return EncryptionInfo{}, wrap("encrypted restore", err)
+ 	}
+@@ -114,7 +114,7 @@
+ 	if err != nil {
+ 		return EncryptionInfo{}, wrap("encrypted restore", err)
+ 	}
+-	defer a.Close()
++	defer func() { resultErr = wrap("encrypted restore close", a.CloseWithError(resultErr)) }()
+ 	validator, err := copyValidator()
+ 	if err != nil {
+ 		return EncryptionInfo{}, wrap("encrypted restore", err)
+--- a/sqlite/sqlite.go
++++ b/sqlite/sqlite.go
+@@ -73,6 +73,7 @@
+ 	if err == nil {
+ 		return nil
+ 	}
++	err = classifyEncryptedCleanup(err)
+ 	var unsupported *sqlast.ErrUnsupported
+ 	if errors.Is(err, record.ErrCorrupt) || errors.Is(err, ann.ErrCorrupt) || errors.Is(err, encryption.ErrFormat) || errors.Is(err, encryption.ErrIdentity) {
+ 		err = fmt.Errorf("%w: %w", ErrCorrupt, err)
+@@ -365,6 +366,8 @@
+ // Open iterators subsequently report ErrClosed. Repeated calls are idempotent
+ // after retirement. Native WALShared Close may return ErrCloseCleanupPending;
+ // call Close again or RetryCloseCleanup to retry its retained managed owners.
++// Encrypted Close may instead return ErrEncryptedCleanupPending; call Close
++// again or RetryEncryptedCleanup to retry that connection's retained owners.
+ // Rows/transaction invalidation occurs only on the first call.
+ func (d *DB) Close() error {
+ 	d.mu.Lock()

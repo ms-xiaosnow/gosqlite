@@ -4,25 +4,26 @@ package encstore
 
 import (
 	"errors"
-	"golang.org/x/sys/unix"
 	"os"
+
+	"golang.org/x/sys/unix"
 )
 
 func supported() error { return nil }
-func openFile(path string, flags int) (*os.File, error) {
-	return os.OpenFile(path, flags|unix.O_NOFOLLOW|unix.O_CLOEXEC|unix.O_NONBLOCK, 0600)
-}
 func validateFile(info os.FileInfo) error {
 	if !info.Mode().IsRegular() {
 		return ErrUnsupported
 	}
-	// os.FileInfo.Sys is syscall.Stat_t; use an independent no-follow stat via
-	// descriptor in checkedFile instead of asserting x/sys's distinct Stat_t.
 	return nil
 }
-func validateLinks(f *os.File) error {
+func validateLinks(f *managedFile) error {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if err := f.checkLocked(false); err != nil {
+		return err
+	}
 	var st unix.Stat_t
-	if err := unix.Fstat(int(f.Fd()), &st); err != nil {
+	if err := unix.Fstat(int(f.raw.Fd()), &st); err != nil {
 		return err
 	}
 	if st.Nlink != 1 {
@@ -30,8 +31,13 @@ func validateLinks(f *os.File) error {
 	}
 	return nil
 }
-func lockFile(f *os.File, readOnly bool) error { return rangeLock(f, 0, readOnly, false) }
-func rangeLock(f *os.File, offset int64, shared, unlock bool) error {
+func lockFile(f *managedFile, readOnly bool) error { return rangeLock(f, 0, readOnly, false) }
+func rangeLock(f *managedFile, offset int64, shared, unlock bool) error {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if err := f.checkLocked(false); err != nil {
+		return err
+	}
 	typ := int16(unix.F_WRLCK)
 	if shared {
 		typ = unix.F_RDLCK
@@ -40,7 +46,7 @@ func rangeLock(f *os.File, offset int64, shared, unlock bool) error {
 		typ = unix.F_UNLCK
 	}
 	l := unix.Flock_t{Type: typ, Whence: 0, Start: offset, Len: 1}
-	err := unix.FcntlFlock(f.Fd(), unix.F_OFD_SETLK, &l)
+	err := unix.FcntlFlock(f.raw.Fd(), unix.F_OFD_SETLK, &l)
 	if errors.Is(err, unix.EAGAIN) || errors.Is(err, unix.EACCES) {
 		return ErrBusy
 	}
@@ -50,37 +56,73 @@ func renameAbsent(old, new string) error {
 	return unix.Renameat2(unix.AT_FDCWD, old, unix.AT_FDCWD, new, unix.RENAME_NOREPLACE)
 }
 
-func openDirectory(path string) (*os.File, error) {
-	return os.OpenFile(path, os.O_RDONLY|unix.O_DIRECTORY|unix.O_NOFOLLOW|unix.O_CLOEXEC|unix.O_NONBLOCK, 0)
+func nativeOpenDirectory(path string) (*managedFile, error) {
+	raw, err := os.OpenFile(path, os.O_RDONLY|unix.O_DIRECTORY|unix.O_NOFOLLOW|unix.O_CLOEXEC|unix.O_NONBLOCK, 0)
+	if err != nil {
+		return nil, err
+	}
+	return &managedFile{raw: raw, directory: true}, nil
 }
 
-func openFileAt(dir *os.File, name string, flags int) (*os.File, error) {
-	fd, e := unix.Openat(int(dir.Fd()), name, flags|unix.O_NOFOLLOW|unix.O_CLOEXEC|unix.O_NONBLOCK, 0600)
-	if e != nil {
-		return nil, e
+func nativeOpenFileAt(dir *managedFile, name string, flags int, _ bool) (*managedFile, error) {
+	dir.mu.Lock()
+	defer dir.mu.Unlock()
+	if err := dir.checkLocked(false); err != nil {
+		return nil, err
 	}
-	return os.NewFile(uintptr(fd), name), nil
+	if !dir.directory {
+		return nil, ErrUnsupported
+	}
+	fd, err := unix.Openat(int(dir.raw.Fd()), name, flags|unix.O_NOFOLLOW|unix.O_CLOEXEC|unix.O_NONBLOCK, 0600)
+	if err != nil {
+		return nil, err
+	}
+	dir.children++
+	return &managedFile{raw: os.NewFile(uintptr(fd), name), parent: dir, directory: name == "." && flags == os.O_RDONLY}, nil
 }
-func stableFileAt(dir *os.File, name string, f *os.File, info os.FileInfo) error {
-	now, e := f.Stat()
-	if e != nil {
-		return e
+func stableFileAt(dir *managedFile, name string, f *managedFile, info os.FileInfo) error {
+	// Native operations hold the actual leases, never an unprotected Fd value.
+	// The child-before-parent order matches close's detached pin release.
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if err := f.checkLocked(false); err != nil {
+		return err
+	}
+	if dir == f {
+		return ErrUnsupported
+	}
+	dir.mu.Lock()
+	defer dir.mu.Unlock()
+	if err := dir.checkLocked(true); err != nil {
+		return err
+	}
+	now, err := f.raw.Stat()
+	if err != nil {
+		return err
 	}
 	var named, held unix.Stat_t
-	if e = unix.Fstatat(int(dir.Fd()), name, &named, unix.AT_SYMLINK_NOFOLLOW); e != nil {
-		return e
+	if err = unix.Fstatat(int(dir.raw.Fd()), name, &named, unix.AT_SYMLINK_NOFOLLOW); err != nil {
+		return err
 	}
-	if e = unix.Fstat(int(f.Fd()), &held); e != nil {
-		return e
+	if err = unix.Fstat(int(f.raw.Fd()), &held); err != nil {
+		return err
 	}
 	if named.Mode&unix.S_IFMT != unix.S_IFREG || named.Dev != held.Dev || named.Ino != held.Ino || !os.SameFile(info, now) || now.Size() != info.Size() || !now.ModTime().Equal(info.ModTime()) {
 		return ErrChanged
 	}
-	return validateLinks(f)
-}
-func renameFileAt(dir *os.File, old, new string, absent bool) error {
-	if absent {
-		return unix.Renameat2(int(dir.Fd()), old, int(dir.Fd()), new, unix.RENAME_NOREPLACE)
+	if held.Nlink != 1 {
+		return ErrUnsupported
 	}
-	return unix.Renameat(int(dir.Fd()), old, int(dir.Fd()), new)
+	return nil
+}
+func renameFileAt(dir *managedFile, old, new string, absent bool) error {
+	dir.mu.Lock()
+	defer dir.mu.Unlock()
+	if err := dir.checkLocked(false); err != nil {
+		return err
+	}
+	if absent {
+		return unix.Renameat2(int(dir.raw.Fd()), old, int(dir.raw.Fd()), new, unix.RENAME_NOREPLACE)
+	}
+	return unix.Renameat(int(dir.raw.Fd()), old, int(dir.raw.Fd()), new)
 }

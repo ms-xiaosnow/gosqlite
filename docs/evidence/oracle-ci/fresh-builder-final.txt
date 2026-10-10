@@ -1,0 +1,2 @@
+SQLite source archive SHA3-256: a5c29342ca185abcda332448fbb27c536661245be27e20199b46c49099b0e15e OK
+./scripts/build-oracle.sh: line 55: syntax error near unexpected token `then'

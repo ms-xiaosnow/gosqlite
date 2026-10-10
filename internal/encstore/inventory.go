@@ -85,6 +85,9 @@ func inventory(ctx context.Context, path string, maxBytes uint64, maxEntries uin
 		return 0, err
 	}
 	defer func() {
+		// Independent metadata probes can carry their own scope. Adopt that
+		// dependency before retiring enumeration or enclosing protection.
+		resultErr = f.owner.remember(resultErr)
 		if closeErr := f.Close(); closeErr != nil {
 			total = 0
 			resultErr = errors.Join(resultErr, closeErr)
@@ -183,6 +186,9 @@ func plannedBudget(ctx context.Context, path string, ns *namespace, o Options, n
 		if _, e := platformPathInfo(path + ".gse-lock"); os.IsNotExist(e) {
 			additions++
 		} else if e != nil {
+			if ns != nil {
+				return ns.group.remember(e)
+			}
 			return e
 		}
 	}

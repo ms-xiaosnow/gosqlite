@@ -1,0 +1,85 @@
+Immutable encrypted cleanup v2; base69008bf, 33 paths, manifest1468aaf9.
+Sat Oct 10 18:47:54 UTC 2026
+docs/encrypted-cleanup.md: OK
+internal/encstore/backup.go: OK
+internal/encstore/cleanup.go: OK
+internal/encstore/cleanup_test.go: OK
+internal/encstore/exact_locks.go: OK
+internal/encstore/file_darwin.go: OK
+internal/encstore/file_default.go: OK
+internal/encstore/file_windows.go: OK
+internal/encstore/inventory.go: OK
+internal/encstore/managed_open.go: OK
+internal/encstore/managed_status_darwin_test.go: OK
+internal/encstore/managed_status_default_test.go: OK
+internal/encstore/managed_status_windows_test.go: OK
+internal/encstore/namespace.go: OK
+internal/encstore/object.go: OK
+internal/encstore/platform_darwin.go: OK
+internal/encstore/platform_linux.go: OK
+internal/encstore/platform_other.go: OK
+internal/encstore/platform_windows.go: OK
+internal/encstore/process_locks.go: OK
+internal/encstore/publish.go: OK
+internal/encstore/shared.go: OK
+internal/encstore/store.go: OK
+internal/encstore/wal_object.go: OK
+internal/pager/encrypted_close.go: OK
+internal/pager/encrypted_close_test.go: OK
+internal/pager/encrypted_copy.go: OK
+internal/pager/encrypted_session.go: OK
+sqlite/encrypted_cleanup.go: OK
+sqlite/encrypted_cleanup_internal_test.go: OK
+sqlite/encrypted_cleanup_test.go: OK
+sqlite/encryption_copy.go: OK
+sqlite/sqlite.go: OK
+Ordinary test source-reference guard PASS; behavioral review is still required.
+Behavior audit PASS: selected memory laws use descriptor-free owners, bounded channels and ReaderAt callbacks only. Active session BUSY test returns before native work. Selected vectors are memory-only. Selected ordinary lifecycle/copy/provider tests use correct keys, intact files, normal cooperating locks and operations. No prohibited native negative paths selected.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	0.061s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.017s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.496s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.015s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+Same behavior audit applies to the identical selected suite under race instrumentation; CGO=1 is tooling-only.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	1.225s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.061s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	3.247s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.064s
+Compile only: linux/arm64
+Compile only: darwin/arm64
+Compile only: darwin/amd64
+Compile only: windows/amd64
+docs/encrypted-cleanup.md: OK
+internal/encstore/backup.go: OK
+internal/encstore/cleanup.go: OK
+internal/encstore/cleanup_test.go: OK
+internal/encstore/exact_locks.go: OK
+internal/encstore/file_darwin.go: OK
+internal/encstore/file_default.go: OK
+internal/encstore/file_windows.go: OK
+internal/encstore/inventory.go: OK
+internal/encstore/managed_open.go: OK
+internal/encstore/managed_status_darwin_test.go: OK
+internal/encstore/managed_status_default_test.go: OK
+internal/encstore/managed_status_windows_test.go: OK
+internal/encstore/namespace.go: OK
+internal/encstore/object.go: OK
+internal/encstore/platform_darwin.go: OK
+internal/encstore/platform_linux.go: OK
+internal/encstore/platform_other.go: OK
+internal/encstore/platform_windows.go: OK
+internal/encstore/process_locks.go: OK
+internal/encstore/publish.go: OK
+internal/encstore/shared.go: OK
+internal/encstore/store.go: OK
+internal/encstore/wal_object.go: OK
+internal/pager/encrypted_close.go: OK
+internal/pager/encrypted_close_test.go: OK
+internal/pager/encrypted_copy.go: OK
+internal/pager/encrypted_session.go: OK
+sqlite/encrypted_cleanup.go: OK
+sqlite/encrypted_cleanup_internal_test.go: OK
+sqlite/encrypted_cleanup_test.go: OK
+sqlite/encryption_copy.go: OK
+sqlite/sqlite.go: OK
+PASS: isolated focused execution, race, vet, build, cross-build and target test compilation. No cross-target binary was run.

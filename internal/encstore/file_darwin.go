@@ -15,6 +15,7 @@ import (
 // directory pins and lock ledgers use darwinfile.Process's shared lifecycle
 // gate. Data I/O uses the lease mutex, never the process-wide gate.
 type managedFile struct {
+	managedOwnership
 	mu              sync.Mutex
 	descriptor      *encryptedDarwinDescriptor
 	closed          bool
@@ -164,7 +165,7 @@ func (f *managedFile) closeHeld() error {
 	}
 	return encryptedDarwinError(darwinfile.Process.Retire(d.record))
 }
-func (f *managedFile) Close() error {
+func (f *managedFile) closeNative() error {
 	if f == nil {
 		return nil
 	}
@@ -174,4 +175,35 @@ func (f *managedFile) Close() error {
 	defer darwinfile.Process.Unlock()
 	f.closed = true
 	return f.closeHeld()
+}
+
+// RetirementComplete is a managed-lease fact, not an interpretation of Close's
+// diagnostic. A safely idle regular descriptor may belong to the process
+// registry, but directory pins, unreleased holds and terminal close uncertainty
+// remain this scope's obligations.
+func (f *managedFile) RetirementComplete() bool {
+	if f == nil {
+		return true
+	}
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	darwinfile.Process.Lock()
+	defer darwinfile.Process.Unlock()
+	return f.retirementCompleteHeld()
+}
+func (f *managedFile) retirementCompleteHeld() bool {
+	if !f.closed || f.closeErr != nil || f.children != 0 || f.locks.held != [3]uint8{} {
+		return false
+	}
+	d := f.descriptor
+	if d == nil {
+		return true
+	}
+	if d.lease != f {
+		return true
+	}
+	if d.raw == nil {
+		return d.parent == nil
+	}
+	return !d.directory && d.idle
 }

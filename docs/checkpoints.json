@@ -350,9 +350,23 @@
     "bundle_bytes": 2033099,
     "library_file_id": "libfile_d72bde8f367481918ef0dbbef97d828c",
     "library_version": 0,
-    "verified": "Expected-SHA main readback/exact local mirror2026-10-10T18:42:07Z; full-history bundle byte-identical Library readback, clean clone/fsck and original goal hash18:42:31Z. Exact restored scoped native/driver unit and separate race, full vet/build, pinned relational oracle0.792s, three crossbuilds, modules and clean tree passed18:43:09Z. Independent27-path review passed seven suites/604 comparisons. Lead first full suite failed an obsolete now-supported JOIN negative fixture; preserved assertions with unsupported USING and added positive result, independently reviewed. Final28-path sourcead73b8d6425cd86d1c15caccb0f858048df63ef9 full CGO0 unit/vet/build passed18:39:10Z, remaining full race/oracle currently running.",
+    "verified": "Expected-SHA main readback/exact local mirror2026-10-10T18:42:07Z; full-history bundle byte-identical Library readback, clean clone/fsck and original goal hash18:42:31Z. Exact restored scoped native/driver unit and separate race, full vet/build, pinned relational oracle0.792s, three crossbuilds, modules and clean tree passed18:43:09Z. Independent27-path review passed seven suites/604 comparisons. Lead first full suite failed an obsolete now-supported JOIN negative fixture; preserved assertions with unsupported USING and added positive result, independently reviewed. Final28-path sourcead73b8d6425cd86d1c15caccb0f858048df63ef9 full CGO0 unit/vet/build passed18:39:10Z, remaining full race/oracle currently running. Full sourcead73b8d normal race passed (SQLite412.237s), but full tagged oracle failed TestOracleErrorsAndResources because its historical JOIN negative still expected ErrUnsupported. Log/exit1 preserved; no full oracle PASS or subsequent crossbuild stage inferred. A positive official comparison plus true unsupported USING negative and explicit oracle CI coverage correction is in progress.",
     "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38076830650",
-    "remote_ci_status": "IN_PROGRESS for exact SHA, observed2026-10-10T18:42:21Z; no terminal result inferred.",
+    "remote_ci_status": "COMPLETED SUCCESS for exact SHA, updated2026-10-10T18:52:34Z, observed18:53:19Z. This historical workflow runs default unit/vet/build/race only, not tagged oracle.",
     "open_gates": "Inherited eager AND/OR predicate error divergence remains actual SQL gap. USING/NATURAL/RIGHT/FULL/derived sources/forward ON/subqueries/aggregates/CTE/compound/windows and join index probes remain code work. Work/memory caps are conservative engine accounting, not RSS bounds; trusted callbacks/application copies outside. Physical recovery/native OS/independent M10 gates remain NOT_RUN."
+  },
+  {
+    "stage": "M9 bounded PG16 full-table copy/swap review generator",
+    "remote_commit": "883999c35b29ed31b4c4e0e3d66712b4a8ed996c",
+    "local_commit": "883999c35b29ed31b4c4e0e3d66712b4a8ed996c",
+    "tree": "666ba6e401e0e33e59536f80326e0188a76c0576",
+    "bundle_sha256": "e75c154a5b8cb2f50cc600b183bd47fc16b14e20bad7728d9206b19ad2bb5106",
+    "bundle_bytes": 2169841,
+    "library_file_id": "libfile_5316fa54e6a48191a58584daf40e9a66",
+    "library_version": 0,
+    "verified": "Expected-SHA main readback and exact local mirror2026-10-10T18:48:07Z; full-history bundle byte-identical Library readback, clean clone/fsck/original goal18:48:49Z. Corrected33-path overlay independently verified850 files and passed scoped unit/race/vet/build/14 artifacts after eight real findings were fixed. Combined current relational+full-table source0d65b3618e47ade6e958627c7ab26869b8fcfa0b passed full migration/CLI/example package unit/race, all-tree vet/build, byte-identical standalone CLI/example, four crossbuilds, modules/unchanged inventory18:44:44Z. Exact restored same integration suite passed18:50:23Z. No source/target server opened or generated SQL executed.",
+    "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38077225523",
+    "remote_ci_status": "COMPLETED SUCCESS for exact SHA, updated2026-10-10T19:00:52Z, observed19:02:08Z. Historical default unit/vet/build/race job only; broader tagged-oracle correction is separate.",
+    "open_gates": "Offline PG16 bounded all-column copy/swap review profile only, with fully commented mutations and unresolved human gates. FK/views/functions/triggers/RLS/partition/custom expressions/collations/ACL chains/other dependency families and online/batched swap remain required code. Live PostgreSQL/Neon, privilege/capacity/source completeness/application OID and release qualification NOT_RUN."
   }
 ]

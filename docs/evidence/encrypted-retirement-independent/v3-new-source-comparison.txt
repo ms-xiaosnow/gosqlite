@@ -1,0 +1,14 @@
+NEW GO SOURCES
+internal/encstore/cleanup.go
+internal/encstore/cleanup_test.go
+internal/encstore/managed_open.go
+internal/encstore/managed_status_darwin_test.go
+internal/encstore/managed_status_default_test.go
+internal/encstore/managed_status_windows_test.go
+internal/pager/encrypted_close.go
+internal/pager/encrypted_close_test.go
+sqlite/encrypted_cleanup.go
+sqlite/encrypted_cleanup_internal_test.go
+sqlite/encrypted_cleanup_test.go
+UNOWNED_NEW_GO_COUNT 0
+

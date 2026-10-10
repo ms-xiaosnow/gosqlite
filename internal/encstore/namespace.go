@@ -2,7 +2,6 @@ package encstore
 
 import (
 	"bytes"
-	"errors"
 	"os"
 	"path/filepath"
 )
@@ -11,10 +10,11 @@ import (
 // identity/freshness oracle; initial path selection and hostile OS actors remain
 // outside the cooperative lease and descriptor checks.
 type namespace struct {
-	dir  *managedFile
-	info os.FileInfo
-	path string
-	root string
+	group *cleanupGroup
+	dir   *managedFile
+	info  os.FileInfo
+	path  string
+	root  string
 }
 
 func newNamespace(path string) (*namespace, error) {
@@ -25,16 +25,18 @@ func newNamespace(path string) (*namespace, error) {
 	}
 	i, e := f.Stat()
 	if e != nil {
-		f.Close()
-		return nil, e
+		return nil, f.owner.closeAll(e)
 	}
-	return &namespace{dir: f, info: i, path: d, root: filepath.Base(path)}, nil
+	return &namespace{group: f.owner, dir: f, info: i, path: d, root: filepath.Base(path)}, nil
 }
 func (n *namespace) check() error {
 	if n == nil {
 		return nil
 	}
-	return platformDirectoryCheck(n.dir, n.path, n.info)
+	if e := n.group.health(); e != nil {
+		return e
+	}
+	return n.group.remember(platformDirectoryCheck(n.dir, n.path, n.info))
 }
 func (n *namespace) name(path string) (string, error) {
 	if filepath.Dir(path) != n.path {
@@ -42,7 +44,10 @@ func (n *namespace) name(path string) (string, error) {
 	}
 	return filepath.Base(path), nil
 }
-func (n *namespace) checked(path string, flags int) (*managedFile, os.FileInfo, error) {
+func (n *namespace) checked(path string, flags int) (_ *managedFile, _ os.FileInfo, resultErr error) {
+	if n != nil {
+		defer func() { resultErr = n.group.remember(resultErr) }()
+	}
 	if n == nil {
 		return checkedFile(path, flags)
 	}
@@ -70,8 +75,7 @@ func (n *namespace) checked(path string, flags int) (*managedFile, os.FileInfo, 
 		e = stableFileAt(n.dir, name, f, i)
 	}
 	if e != nil {
-		f.Close()
-		return nil, nil, e
+		return nil, nil, closeResult(f, e)
 	}
 	return f, i, nil
 }
@@ -83,7 +87,7 @@ func (n *namespace) stable(f *managedFile, path string, i os.FileInfo) error {
 	if e != nil {
 		return e
 	}
-	return stableFileAt(n.dir, name, f, i)
+	return n.group.remember(stableFileAt(n.dir, name, f, i))
 }
 func (n *namespace) sync(path string) error {
 	if n == nil {
@@ -92,7 +96,7 @@ func (n *namespace) sync(path string) error {
 	if e := n.check(); e != nil {
 		return e
 	}
-	return n.dir.Sync()
+	return n.group.remember(n.dir.Sync())
 }
 func (n *namespace) write(path string, b []byte) error {
 	f, _, e := n.checked(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL)
@@ -103,9 +107,9 @@ func (n *namespace) write(path string, b []byte) error {
 	if e == nil {
 		e = f.Sync()
 	}
-	return errors.Join(e, f.Close())
+	return closeResult(f, e)
 }
-func (n *namespace) retain(path string, b []byte) error {
+func (n *namespace) retain(path string, b []byte) (resultErr error) {
 	e := n.write(path, b)
 	if !os.IsExist(e) {
 		return e
@@ -114,7 +118,7 @@ func (n *namespace) retain(path string, b []byte) error {
 	if e != nil {
 		return e
 	}
-	defer f.Close()
+	defer func() { resultErr = closeResult(f, resultErr) }()
 	if i.Size() != int64(len(b)) {
 		return ErrChanged
 	}
@@ -142,7 +146,7 @@ func (n *namespace) rename(old, new string, absent bool) error {
 	if e != nil {
 		return e
 	}
-	return renameFileAt(n.dir, a, b, absent)
+	return n.group.remember(renameFileAt(n.dir, a, b, absent))
 }
 func chooseNamespace(ns []*namespace) *namespace {
 	if len(ns) > 0 {

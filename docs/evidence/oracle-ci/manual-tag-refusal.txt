@@ -1,0 +1,4 @@
+Source guard negative check only; no Go tests selected or run.
+manual test tags are forbidden in ordinary checks
+exit status 1
+Actual exit status: 1; expected: 1

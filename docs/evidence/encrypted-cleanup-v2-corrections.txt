@@ -1,0 +1,35 @@
+Independent review v1 findings and v2 corrections (2026-10-10)
+
+The immutable v1 source and its initial PASS/FAIL evidence are preserved. The
+independent reviewer found two failing descriptor-free laws and source-only
+nested-probe adoption gaps. No actual native negative behavior was executed.
+
+1. EncryptedSession CloseWithError erased options on active-lease BUSY. The
+   options now clear only once logical closure starts; a direct session memory
+   test verifies KeepWALOnClose and the active lease survive BUSY.
+2. Store absent-root checks discarded platformPathInfo errors; Windows errors
+   may own independent metadata scopes. Non-nil errors now survive and are
+   adopted before cleanup. inventory and plannedBudget also adopt probe errors.
+3. Store/Open/CreateFrom, object/segment/archive constructors, write/copy/restore
+   defers, and platform probe/rename wrappers now adopt original operation causes
+   before closing any native resource. Direct Close and native constructor-error
+   cleanup stop behind unresolved dependencies, including child resources whose
+   completion could auto-retire an already-logically-closed directory.
+4. Registry admission previously called blocking RetirementComplete after a
+   successful group TryLock. It now consumes only per-entry atomic completion
+   proofs published by explicit native cleanup under the native mutex/gate.
+   It performs no resource status call, native cleanup, or callback traversal.
+   A descriptor-free owner with blocked status proves unrelated admission does
+   not wait; the previously published completed entry is reclaimed independently.
+5. readExact now preserves a supplied ReaderAt cause alongside ErrFormat. This
+   narrow diagnostic correction has a descriptor-free ReaderAt callback law.
+
+Scope limits remain 1024 opening/live/pending scopes and 16384 managed leases.
+Per-OS terminal/deferred rules, byte layout, cipher vectors, provider calls, and
+manual/native-negative NOT_RUN gates remain as documented. Completion callbacks
+never call a scope mutex or native cleanup. Reaper completion has no new callback
+or generic status interface and cannot invoke a test/resource implementation.
+
+Mixed-tree pre-freeze focused CGO=0 suite passed after the required testscope
+source guard and behavior audit. The immutable v2 evidence records separate
+verification; independent review is required before publication.

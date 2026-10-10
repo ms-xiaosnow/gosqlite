@@ -5,6 +5,7 @@ permissions:
 jobs:
   ordinary:
     runs-on: ubuntu-latest
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -12,4 +13,19 @@ jobs:
           go-version: '1.27.2'
           cache: false
       - run: ./scripts/check.sh
-# Restricted crash/fault/process-exit tests are not part of this workflow.
+  oracle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.27.2'
+          cache: false
+      - name: Build and verify pinned official SQLite oracle
+        run: ./scripts/build-oracle.sh "$RUNNER_TEMP/sqlite-oracle"
+      - name: Run complete guarded ordinary oracle suite
+        env:
+          SQLITE_ORACLE: ${{ runner.temp }}/sqlite-oracle/sqlite-build-3540000/sqlite3
+        run: ./scripts/test-oracle.sh
+# Restricted crash/fault/process-exit tests are not part of either job.
