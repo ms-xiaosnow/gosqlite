@@ -4,7 +4,7 @@ This file records checks that require a separately approved native environment o
 
 ## Current state
 
-M0 ordinary unit/build/vet/race checks are executable here. Database crash/fault/process-exit workflow execution is prohibited by the current platform boundary; it must not be renamed, obscured, moved to remote CI, or executed elsewhere as a workaround. Such test source may be reviewed and documented; its results remain BLOCKED / NOT_RUN until independently supplied authorized evidence is available.
+M0/M1 ordinary unit/build/vet/race, memory-only fuzz and opt-in official-oracle checks are executable here. Database crash/fault/process-exit workflow execution is prohibited by the current platform boundary; it must not be renamed, obscured, moved to remote CI, or executed elsewhere as a workaround. Such test source may be reviewed and documented; its results remain BLOCKED / NOT_RUN until independently supplied authorized evidence is available.
 
 Later milestones will add exact ordinary manual commands for implemented crash/recovery, cross-process lock, native OS, security and legal gates. Do not execute a placeholder command or claim a nonexistent test passed.
 

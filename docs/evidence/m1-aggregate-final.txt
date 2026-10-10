@@ -1,0 +1,37 @@
+Final M1 aggregate verification: Linux/amd64, Go1.27.2, 2026-10-10 UTC
+go version go1.27.2 linux/amd64
+CGO_ENABLED=0 go test ./... -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.009s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.047s
+?   	github.com/ms-xiaosnow/gosqlite/examples/readonly	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	0.054s
+?   	github.com/ms-xiaosnow/gosqlite/internal/buildinfo	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.054s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/record	0.007s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.043s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.064s
+CGO_ENABLED=0 go vet ./...
+CGO_ENABLED=0 go build -trimpath ./...
+CGO_ENABLED=1 go test -race ./... -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	1.031s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.080s
+?   	github.com/ms-xiaosnow/gosqlite/examples/readonly	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	1.204s
+?   	github.com/ms-xiaosnow/gosqlite/internal/buildinfo	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.096s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/record	1.025s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	1.088s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	1.274s
+SQLITE_ORACLE=<verified3.54.0> CGO_ENABLED=0 go test -tags oracle ./... -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.016s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.025s
+?   	github.com/ms-xiaosnow/gosqlite/examples/readonly	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	0.053s
+?   	github.com/ms-xiaosnow/gosqlite/internal/buildinfo	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.029s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/record	0.028s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.169s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	1.176s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.087s
+CGO_ENABLED=1 go test -race -tags oracle ./internal/testkit -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	4.439s

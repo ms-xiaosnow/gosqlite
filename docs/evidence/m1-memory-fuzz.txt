@@ -1,0 +1,29 @@
+go test ./internal/record -run '^$' -fuzz '^FuzzVarint$' -fuzztime=5s -parallel=2
+fuzz: elapsed: 0s, gathering baseline coverage: 0/16 completed
+fuzz: elapsed: 0s, gathering baseline coverage: 16/16 completed, now fuzzing with 2 workers
+fuzz: elapsed: 3s, execs: 167858 (55947/sec), new interesting: 2 (total: 18)
+fuzz: elapsed: 5s, execs: 288654 (59139/sec), new interesting: 2 (total: 18)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/record	5.048s
+go test ./internal/record -run '^$' -fuzz '^FuzzRecordDecode$' -fuzztime=5s -parallel=2
+fuzz: elapsed: 0s, gathering baseline coverage: 0/14 completed
+fuzz: elapsed: 0s, gathering baseline coverage: 14/14 completed, now fuzzing with 2 workers
+fuzz: elapsed: 3s, execs: 107917 (35693/sec), new interesting: 40 (total: 54)
+fuzz: elapsed: 6s, execs: 107917 (0/sec), new interesting: 40 (total: 54)
+fuzz: elapsed: 6s, execs: 107917 (0/sec), new interesting: 40 (total: 54)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/record	6.013s
+go test ./internal/record -run '^$' -fuzz '^FuzzRecordRoundTrip$' -fuzztime=5s -parallel=2
+fuzz: elapsed: 0s, gathering baseline coverage: 0/4 completed
+fuzz: elapsed: 0s, gathering baseline coverage: 4/4 completed, now fuzzing with 2 workers
+fuzz: elapsed: 3s, execs: 137230 (45742/sec), new interesting: 4 (total: 8)
+fuzz: elapsed: 5s, execs: 231154 (45324/sec), new interesting: 4 (total: 8)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/record	5.076s
+go test ./internal/pager -run '^$' -fuzz '^FuzzParseHeader$' -fuzztime=5s -parallel=2
+fuzz: elapsed: 0s, gathering baseline coverage: 0/11 completed
+fuzz: elapsed: 0s, gathering baseline coverage: 11/11 completed, now fuzzing with 2 workers
+fuzz: elapsed: 3s, execs: 180722 (60233/sec), new interesting: 17 (total: 28)
+fuzz: elapsed: 5s, execs: 286648 (51555/sec), new interesting: 18 (total: 29)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	5.061s

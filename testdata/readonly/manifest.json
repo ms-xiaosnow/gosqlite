@@ -1,0 +1,33 @@
+{
+  "oracle": "3.54.0 2026-10-09 15:46:58 be8d059e9a49089ab2dce5ed26dd87aaf598fdc5fbe0b107c0dd758464bcd5e3 (64-bit)",
+  "files": {
+    "page512.db": {
+      "sha256": "737fb6403a1ccba56404ba55f2531510881b3207a6f8c4062783850ffc23d571",
+      "bytes": 646144,
+      "integrity_check": "ok"
+    },
+    "page4096.db": {
+      "sha256": "6b822f68ed1fa2d7c7a9d9211a89a1c0fb08e70de1eb2fe50c44ae164dd258e9",
+      "bytes": 659456,
+      "integrity_check": "ok"
+    },
+    "page65536.db": {
+      "sha256": "e0aa2d57493afbed7a57a1da805919f65846ebcdc896423f97ed336532052c77",
+      "bytes": 983040,
+      "integrity_check": "ok"
+    },
+    "schema512.db": {
+      "sha256": "d42c2118b49f99452515298fed09b439017e1fe3923214033b481f30f9bd36c5",
+      "bytes": 56320,
+      "integrity_check": "ok"
+    },
+    "schema.json": {
+      "sha256": "40f7061aa8cfede8f6cb170241643e1be4b89b045cf75dbce7ccf92b7ff10ffe",
+      "rows": 81
+    },
+    "samples.json": {
+      "sha256": "ce22e9bb3db7c2cc19cbc0f400bd6fd929d66c22fd2977b83b3b942c756c6189",
+      "rows": 1028
+    }
+  }
+}

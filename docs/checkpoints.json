@@ -8,5 +8,17 @@
     "library_file_id": "libfile_66bb6a432a108191b80a5d2bfa6f031d",
     "library_version": 0,
     "verified": "Remote ref/trees/blobs and exact commit reconstruction; complete-history git bundle verify; persisted Library readback identical; clean clone/fsck; original goal SHA-256 unchanged"
+  },
+  {
+    "stage": "M0 verified baseline",
+    "remote_commit": "7742337875980eaa1fb78a7a6e6f2bd4c00d9114",
+    "local_commit": "7742337875980eaa1fb78a7a6e6f2bd4c00d9114",
+    "tree": "cfcd1449ec6ad928b9b0b4f5192d45be9f8e62e1",
+    "bundle_sha256": "42d2ae88b9ea1ec38f958148ffff0039404245a5f4bc365566bf1c1506a3c505",
+    "library_file_id": "libfile_8ee2f50bd80481918a23166069cfe655",
+    "library_version": 0,
+    "verified": "Guarded remote ref update and readback; exact local commit mirror; complete-history bundle verify; clean clone/fsck and scripts/check.sh; persisted Library bytes read back identical",
+    "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38040601986",
+    "remote_ci_status": "PASSED for exact checkpoint SHA; observed 2026-10-10T09:14:25Z"
   }
 ]

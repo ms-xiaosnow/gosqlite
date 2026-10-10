@@ -1,0 +1,40 @@
+M1 aggregate verification: Linux/amd64, Go1.27.2, 2026-10-10 UTC
+go version go1.27.2 linux/amd64
+CGO_ENABLED=0 go test ./... -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.008s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.017s
+?   	github.com/ms-xiaosnow/gosqlite/examples/readonly	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	0.038s
+?   	github.com/ms-xiaosnow/gosqlite/internal/buildinfo	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.017s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/record	0.009s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.010s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.067s
+CGO_ENABLED=0 go vet ./...
+CGO_ENABLED=0 go build -trimpath ./...
+CGO_ENABLED=1 go test -race ./... -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	1.024s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.054s
+?   	github.com/ms-xiaosnow/gosqlite/examples/readonly	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	1.186s
+?   	github.com/ms-xiaosnow/gosqlite/internal/buildinfo	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.133s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/record	1.042s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	1.032s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	1.251s
+SQLITE_ORACLE=<verified3.54.0> CGO_ENABLED=0 go test -tags oracle ./... -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.016s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.021s
+?   	github.com/ms-xiaosnow/gosqlite/examples/readonly	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	0.038s
+?   	github.com/ms-xiaosnow/gosqlite/internal/buildinfo	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.024s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/record	0.007s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.054s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	1.510s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.068s
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build ./...
+CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build ./...
+CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build ./...
+CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build ./...
+Cross-builds do not verify native runtime on other platforms.

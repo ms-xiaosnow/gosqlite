@@ -85,3 +85,13 @@ The first attempt to collect post-build CLI evidence occurred just before linkin
 Captured results: `evidence/toolchain-verification.txt`, `evidence/SHA256SUMS`, `evidence/sqlite-compile-options.txt`, `evidence/sqlite-configure.log`, `evidence/sqlite-build.log`.
 
 For project execution use `GOTOOLCHAIN=local` and `CGO_ENABLED=0` to avoid automatic toolchain switching or accidental CGO production dependencies. Race verification is a separate platform-dependent gate; it was not run here.
+
+## M1 behavior references used
+
+The native record/B-tree implementation follows the official file format and the pinned public source's payload and varint rules. Scalar conversion/formatting was independently implemented from observable3.54.0 behavior, with util.c and printf.c used as public-domain references; no C lookup tables are copied. Exact official-oracle results fix numeric rounding boundaries in Go tests.
+
+- https://www.sqlite.org/fileformat2.html
+- https://www.sqlite.org/lockingv3.html
+- https://www.sqlite.org/lang_expr.html
+- https://www.sqlite.org/datatype3.html
+
