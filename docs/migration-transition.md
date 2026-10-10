@@ -56,7 +56,7 @@ contents together are capped at 8 MiB; `MaxBytes` may lower this limit. At most
 256 explicit index mappings are accepted. The JSON envelope adds bounded
 metadata and JSON escaping overhead beyond the artifact-content limit.
 
-The two supported approaches are:
+The two original approaches (unchanged APIs and artifact layouts) are:
 
 1. `RetainArrayCast` (`retain_real_array_cast`): retain the real[] column and
    build expression indexes over an explicit, schema-qualified vector(n) cast.
@@ -66,10 +66,13 @@ The two supported approaches are:
    application readers to that column. The source real[] column remains intact.
 
 The second approach is deliberately narrower than the historical Neon
-full-table-copy recipe. Full-table recreation, grants/default/constraint copying,
-dependency rebinding and table replacement remain unsupported. The generator
-never renames or drops source columns/tables, invents dual-write triggers, or
-silently treats a retained but stale array as a rollback guarantee.
+full-table-copy recipe. These original approaches never rename/drop source
+columns/tables or invent dual-write triggers. A separate identity-bound supplement
+API and explicit CLI route now implement a bounded PostgreSQL 16 whole-table
+copy/swap, supported default/constraint/index/ACL/sequence recreation, and concrete
+gates for other dependents. See [the full-table guide](migration-full-table.md)
+for its different phases and retained-backup/sequence effects. Neither approach
+treats stale retained data as a rollback guarantee.
 
 `TransitionSingle` (`single_transaction`) holds one offline transaction across
 extension transition, shadow copy, ordinary indexes and validation. Phase 60

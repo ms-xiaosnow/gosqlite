@@ -594,3 +594,36 @@ errors for predicates SQLite folds/short-circuits; documented counterexamples
 are not passing equivalence claims. No physical recovery, native non-Linux or
 independent release acceptance follows. See relational-sql.md and the complete
 relational-independent review evidence.
+
+### M9 bounded full-table migration review generator
+
+Implemented a distinct versioned PG16 whole-table copy/swap evidence contract and
+CLI route: typed all-column creation/copy/comparison, retained backup/name swap,
+recreation of supported immediate PK/UNIQUE/scalar CHECK/default/B-tree/ANN/owner/
+ACL/comment contracts, and explicit same-sequence ownership transfer. Exact
+row-type/TOAST/namespace/legacy support-row dependency identities and database-wide
+event-trigger coverage are required. Unknown/unsupported facts block every
+mutation proposal. Every mutation stays commented and no external SQL was run.
+Existing catalog v1/retained-array/shadow API and golden bytes remain unchanged.
+
+Independent review found eight semantic/gating issues despite the initial test
+PASS, including integer-minimum cast precedence, archive constraint collision,
+missing mandatory identity edges, actual PG16 PK/UNIQUE connoinherit semantics,
+pinned float_ops and event-trigger inventory. All were fixed and independently
+retested against the corrected33-path immutable overlay SHA256
+ecd01b2650c9eb54e013fb7e2c40ef15aa72c4056071d62a3c8ddbb9af1349dc.
+The review independently verified850 files against its baseline/owned paths and
+passed unit/race/vet/build, exported-API probes and14-artifact comparisons.
+Initial findings/logs remain retained; source documentation is not a PG executable
+oracle. See migration-full-table.md and m9-full-table-independent-review.md.
+
+Lead integration source0d65b3618e47ade6e958627c7ab26869b8fcfa0b combines only
+those33 migration paths with durable relational8f75ccf. Exact commands/results are
+in m9-full-table-lead-checks.txt. Full migration/CLI/example package unit/race,
+whole-tree vet/build, standalone example/CLI byte parity, four crossbuilds,
+modules and unchanged inventory passed18:44:44Z, exit0.
+Native recovery/platform/Boolean work remains
+excluded. FK/views/functions/triggers/RLS/partition/custom expression/collation/
+ACL chains/other unsupported dependencies and online/batched cutover are actual
+code gaps. Live PostgreSQL/Neon, source completeness, capacity/privilege checks,
+application cached-OID handling and independent release acceptance remain open.

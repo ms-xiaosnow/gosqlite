@@ -11,8 +11,8 @@ import (
 )
 
 // TransitionApproach deliberately names the narrower typed-copy implementation.
-// A full-table copy (including constraints, grants and dependent objects) is not
-// implemented. Neither approach removes or renames the source real[] column.
+// These original approaches retain the source column. The separately versioned
+// GenerateFullTableTransition API supports a bounded whole-table copy/swap.
 type TransitionApproach string
 
 const (
@@ -114,6 +114,10 @@ type transitionIndexModel struct {
 // file-writing API. Blocked inputs still receive diagnosis and preflight, but
 // receive no proposed mutation statements. All human approval gates stay open.
 func GenerateTransition(ctx context.Context, c CatalogSnapshot, o TransitionOptions) (TransitionBundle, error) {
+	return generateTransition(ctx, c, o, nil)
+}
+
+func generateTransition(ctx context.Context, c CatalogSnapshot, o TransitionOptions, finish func(*transitionModel) (TransitionBundle, error)) (TransitionBundle, error) {
 	var empty TransitionBundle
 	if ctx == nil {
 		return empty, fmt.Errorf("transition: nil context")
@@ -220,7 +224,7 @@ func GenerateTransition(ctx context.Context, c CatalogSnapshot, o TransitionOpti
 		m.block("server_version_unsupported", "Catalog/query reference covers PostgreSQL 12 through 18 only; inspect other server versions separately.")
 	}
 	for _, cr := range inspection.Columns {
-		if cr.RelationOID == o.RelationOID && cr.AttNum == o.AttNum && cr.Status != "safe" {
+		if cr.RelationOID == o.RelationOID && cr.AttNum == o.AttNum && cr.Status != "safe" && !(finish != nil && fullTableColumnEligible(inspection, cr.Object)) {
 			m.block("source_column_not_eligible", "Resolve the selected column's inspector findings and obtain a fresh exhaustive immutable-export profile before regenerating.")
 		}
 	}
@@ -276,7 +280,7 @@ func GenerateTransition(ctx context.Context, c CatalogSnapshot, o TransitionOpti
 	for _, x := range o.Indexes {
 		idx, exists := sourceIndexes[x.SourceIndexOID]
 		ir := irs[x.SourceIndexOID]
-		if !exists || idx.TableOID != m.table.OID || len(idx.Keys) != 1 || idx.Keys[0] != o.AttNum || !ir.IdentityVerified || ir.Status != "safe" {
+		if !exists || idx.TableOID != m.table.OID || len(idx.Keys) != 1 || idx.Keys[0] != o.AttNum || !ir.IdentityVerified || ir.Status != "safe" && !(finish != nil && fullTableColumnEligible(inspection, ir.Column) && fullTableIndexEligible(inspection, ir.Object)) {
 			m.block("index_mapping_unsupported", "Every proposed index must map to a safe, positively identified source index on the selected column.")
 			continue
 		}
@@ -327,6 +331,9 @@ func GenerateTransition(ctx context.Context, c CatalogSnapshot, o TransitionOpti
 		Options TransitionOptions
 	}{inspection.CatalogSHA256, o})
 	m.r.PlanSHA256 = sqlHash(string(identity))
+	if finish != nil {
+		return finish(&m)
+	}
 	return m.render(ctx)
 }
 

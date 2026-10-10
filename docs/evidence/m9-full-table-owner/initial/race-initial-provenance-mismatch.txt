@@ -1,0 +1,13 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	2.936s
+--- FAIL: TestMigrateFullTableReviewOnly (0.20s)
+    migrate_full_table_test.go:38: golden mismatch manifest.json
+    migrate_full_table_test.go:38: golden mismatch report.json
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.262s
+--- FAIL: TestFullTableExampleGolden (0.10s)
+    main_test.go:32: golden mismatch manifest.json
+    main_test.go:32: golden mismatch report.json
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/examples/migration-full-table	0.108s
+FAIL

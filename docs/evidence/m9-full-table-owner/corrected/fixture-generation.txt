@@ -1,0 +1,5 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestFullTableRegenerateReviewFixtures
+--- PASS: TestFullTableRegenerateReviewFixtures (0.02s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	0.024s

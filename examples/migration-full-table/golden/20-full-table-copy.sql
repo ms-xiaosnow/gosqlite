@@ -1,0 +1,25 @@
+-- REVIEW ONLY. NOT AN EXECUTABLE MIGRATION. All approvals remain unresolved.
+-- Remove no comment prefixes until an operator has reviewed each phase and gate.
+-- GATES: full_table_acl_and_roles, target_capabilities, maintenance_window. Continue the SAME transaction from phase 10. All readers/writers and sequence consumers are externally quiescent.
+-- SET LOCAL ROLE "owner";
+-- SET LOCAL default_tablespace = 'pg_default';
+-- CREATE TABLE "public"."documents_copy" (
+--  "id" "pg_catalog"."int4" NOT NULL,
+--  "flags" "pg_catalog"."int4" NOT NULL,
+--  "embedding" "public"."vector"(3),
+--  "ordinary_samples" pg_catalog.float4[],
+--  "title" "pg_catalog"."text" COLLATE pg_catalog."default" NOT NULL
+-- ) USING heap TABLESPACE "pg_default";
+-- ALTER TABLE "public"."documents_copy" ALTER COLUMN "id" SET STORAGE PLAIN;
+-- ALTER TABLE "public"."documents_copy" ALTER COLUMN "id" SET STATISTICS -1;
+-- ALTER TABLE "public"."documents_copy" ALTER COLUMN "flags" SET STORAGE PLAIN;
+-- ALTER TABLE "public"."documents_copy" ALTER COLUMN "flags" SET STATISTICS -1;
+-- ALTER TABLE "public"."documents_copy" ALTER COLUMN "embedding" SET STORAGE EXTENDED;
+-- ALTER TABLE "public"."documents_copy" ALTER COLUMN "embedding" SET STATISTICS -1;
+-- ALTER TABLE "public"."documents_copy" ALTER COLUMN "ordinary_samples" SET STORAGE EXTENDED;
+-- ALTER TABLE "public"."documents_copy" ALTER COLUMN "ordinary_samples" SET STATISTICS -1;
+-- ALTER TABLE "public"."documents_copy" ALTER COLUMN "title" SET STORAGE EXTENDED;
+-- ALTER TABLE "public"."documents_copy" ALTER COLUMN "title" SET STATISTICS -1;
+-- INSERT INTO "public"."documents_copy" ("id", "flags", "embedding", "ordinary_samples", "title")
+-- SELECT src."id", src."flags", src."embedding"::"public"."vector"(3), src."ordinary_samples", src."title" FROM ONLY "public"."documents" AS src;
+-- No defaults are evaluated during copy. Do not proceed to phase 40 until every phase-30 count/value/key check passes.

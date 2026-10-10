@@ -1,0 +1,6 @@
+-- REVIEW ONLY. NOT AN EXECUTABLE MIGRATION. All approvals remain unresolved.
+-- Remove no comment prefixes until an operator has reviewed each phase and gate.
+-- Before the reviewed phase-60 COMMIT, database ROLLBACK on the SAME transaction/connection reverses transactional table/extension/index/ownership changes.
+-- ROLLBACK;
+-- No sequence nextval/setval/restart is used by this plan. Independent sequence use is not rolled back; all consumers must remain quiescent.
+-- After COMMIT, the backup is a retained pre-cutover snapshot, not a current replica or automatic reverse migration. Pause writers, reconcile every new row/column/key and review dependent OIDs before any reverse swap or old-extension restore. Old hnsw availability must be re-established separately. No cleanup or reverse DDL is generated.

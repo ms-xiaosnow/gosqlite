@@ -36,9 +36,13 @@ substitution are outside this CLI contract. Context is checked before reading,
 during generation and before report creation. Arbitrary filesystem stalls cannot
 be interrupted by context alone.
 
-The core currently supports retained-array/cast and typed shadow-column copies.
-It does not implement complete typed-table/dependency recreation, online migration,
-automatic privilege changes, old-service restore or live PostgreSQL validation.
+Without the new flag, the core retains the original retained-array/cast and typed
+shadow-column APIs and output unchanged. The explicit `--full-table-evidence`
+route reads `FullTableOptions` plus a strict identity-bound PG16 supplement and
+generates a bounded whole-table copy/swap with supported dependency recreation.
+See [the full-table guide](migration-full-table.md) for runnable synthetic examples,
+all fields/limits and the preservation/gating matrix. No online migration, actual
+privilege change, old-service restore or live PostgreSQL validation is performed.
 See migration-transition.md for exact phase and rollback boundaries. Source review
 corrected identifier capture in float32 verification and refuses known inherited
 source parents. A catalog's missing inventory cannot be treated as proof that no

@@ -60,7 +60,7 @@ SQLITE_ORACLE=/absolute/path/to/verified/sqlite3 ./scripts/test-oracle.sh
 
 See [progress](docs/progress.md), [compatibility](docs/compatibility.md), [architecture](docs/architecture.md), [sources](docs/upstream.md), and [manual verification](docs/manual-verification.md). The unchanged [original goal](goal.md) remains the contract. [Restart protocol](docs/restart.md) and checkpoint records preserve durable development history.
 
-Qualified crash recovery, Windows shared rekey and Darwin Unicode inventory, broader SQL and full-table/online pg_embedding transition work remain unfinished implementation work. Full SQLite/PostgreSQL semantics, SEE file compatibility and production security are not claimed.
+Qualified crash recovery, Windows shared rekey and Darwin Unicode inventory, broader SQL and online/dependency-complete pg_embedding transition work remain unfinished implementation work. Full SQLite/PostgreSQL semantics, SEE file compatibility and production security are not claimed.
 
 
 ## Explicit exclusive WAL
@@ -179,7 +179,9 @@ including NULL/width/range checks. See [converter boundaries](docs/migration-con
 and the runnable examples/migrate-pgembedding. Bounded native CSV/NDJSON import
 and offline review-only transition bundles are separate implemented workflows;
 see [import](docs/import-pgembedding.md) and [transition CLI](docs/migration-transition-cli.md).
-Full-table recreation, online cutover and live PostgreSQL qualification remain open.
+A bounded review-only PG16 full-table copy/swap generator now exists; see
+[whole-table scope](docs/migration-full-table.md). Online cutover, unsupported
+dependency families and live PostgreSQL qualification remain open.
 
 ## Half-precision vectors
 

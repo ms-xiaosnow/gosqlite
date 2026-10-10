@@ -1,0 +1,46 @@
+-- REVIEW ONLY. NOT AN EXECUTABLE MIGRATION. All approvals remain unresolved.
+-- Remove no comment prefixes until an operator has reviewed each phase and gate.
+-- GATES: full_table_rebinding, full_table_acl_and_roles, data_and_training. SAME transaction after copy checks pass. All application sessions/cached OIDs must be retired before COMMIT.
+-- ALTER INDEX "public"."documents_pkey" RENAME TO "documents_backup_pkey";
+-- ALTER INDEX "public"."documents_flags_key" RENAME TO "documents_backup_flags_key";
+-- ALTER INDEX "public"."documents_flags_idx" RENAME TO "documents_backup_flags_idx";
+-- ALTER TABLE "public"."documents" RENAME TO "documents_backup";
+-- ALTER TABLE "public"."documents_copy" RENAME TO "documents";
+-- ALTER TABLE "public"."documents" ADD CONSTRAINT "documents_pkey" PRIMARY KEY ("id") USING INDEX TABLESPACE "pg_default" NOT DEFERRABLE;
+-- ALTER TABLE "public"."documents" ADD CONSTRAINT "documents_flags_key" UNIQUE ("flags") USING INDEX TABLESPACE "pg_default" NOT DEFERRABLE;
+-- ALTER TABLE "public"."documents" ADD CONSTRAINT "documents_flags_check" CHECK ("flags" OPERATOR(pg_catalog.>=) E'0'::"pg_catalog"."int4") NO INHERIT;
+-- COMMENT ON CONSTRAINT "documents_flags_check" ON "public"."documents" IS E'Nonnegative flags.';
+-- CREATE INDEX "documents_flags_idx" ON "public"."documents" USING btree ("flags" "pg_catalog"."int4_ops" DESC NULLS FIRST) TABLESPACE "pg_default";
+-- GATES: data_and_training, target_capabilities, privileges_capacity_locks. Use populated, validated data.
+-- Verify intended retuning/IVF training/list/probe choices; no default option substitution.
+-- CREATE INDEX "documents_vector_l2" ON "public"."documents" USING hnsw ("embedding" "public"."vector_l2_ops") WITH (m=16, ef_construction=64);
+-- CREATE INDEX "documents_vector_cosine" ON "public"."documents" USING hnsw ("embedding" "public"."vector_cosine_ops") WITH (m=16, ef_construction=64);
+-- CREATE INDEX "documents_vector_l1" ON "public"."documents" USING hnsw ("embedding" "public"."vector_l1_ops") WITH (m=16, ef_construction=64);
+-- ALTER TABLE "public"."documents" ALTER COLUMN "id" SET DEFAULT pg_catalog.nextval(E'"public"."documents_id_seq"'::pg_catalog.regclass);
+-- ALTER TABLE "public"."documents" ALTER COLUMN "flags" SET DEFAULT E'0'::"pg_catalog"."int4";
+-- ALTER TABLE "public"."documents" ALTER COLUMN "title" SET DEFAULT E'untitled'::"pg_catalog"."text";
+-- ALTER TABLE "public"."documents_backup" ALTER COLUMN "id" DROP DEFAULT;
+-- ALTER SEQUENCE "public"."documents_id_seq" OWNED BY "public"."documents"."id";
+-- ALTER TABLE "public"."documents" OWNER TO "owner";
+-- ALTER TABLE "public"."documents" REPLICA IDENTITY DEFAULT;
+-- REVOKE ALL PRIVILEGES ON TABLE "public"."documents" FROM PUBLIC;
+-- REVOKE ALL PRIVILEGES ON TABLE "public"."documents" FROM "owner";
+-- REVOKE ALL PRIVILEGES ON TABLE "public"."documents" FROM "reader";
+-- REVOKE ALL PRIVILEGES ON TABLE "public"."documents" FROM "writer";
+-- GRANT DELETE ON TABLE "public"."documents" TO "owner";
+-- GRANT INSERT ON TABLE "public"."documents" TO "owner";
+-- GRANT REFERENCES ON TABLE "public"."documents" TO "owner";
+-- GRANT SELECT ON TABLE "public"."documents" TO "owner";
+-- GRANT TRIGGER ON TABLE "public"."documents" TO "owner";
+-- GRANT TRUNCATE ON TABLE "public"."documents" TO "owner";
+-- GRANT UPDATE ON TABLE "public"."documents" TO "owner";
+-- GRANT SELECT ON TABLE "public"."documents" TO "reader" WITH GRANT OPTION;
+-- GRANT UPDATE ("title") ON TABLE "public"."documents" TO "writer";
+-- COMMENT ON TABLE "public"."documents" IS E'Synthetic full-table fixture.';
+-- COMMENT ON INDEX "public"."documents_vector_l2" IS E'Synthetic index.';
+-- COMMENT ON INDEX "public"."documents_vector_cosine" IS E'Synthetic index.';
+-- COMMENT ON INDEX "public"."documents_vector_l1" IS E'Synthetic index.';
+-- COMMENT ON INDEX "public"."documents_pkey" IS E'Synthetic index.';
+-- COMMENT ON INDEX "public"."documents_flags_key" IS E'Synthetic index.';
+-- COMMENT ON INDEX "public"."documents_flags_idx" IS E'Synthetic index.';
+-- The retained backup keeps its source data and ordinary indexes. Constraint-backed archive index renames also rename their owning constraints. Its owned-sequence defaults are deliberately removed and ownership moved to the new table; it is an archive, not a live writer. No DROP TABLE, CASCADE, sequence reset or cleanup is generated.

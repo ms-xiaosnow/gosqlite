@@ -1,0 +1,65 @@
+{
+  "transition": {
+    "relation_oid": 30000,
+    "attnum": 3,
+    "dimensions": 3,
+    "approach": "full_table_copy_swap",
+    "mode": "single_transaction",
+    "vector_schema": "public",
+    "target_version": "0.8.7",
+    "shadow_column": "",
+    "state_schema": "",
+    "state_table": "",
+    "batch_size": 0,
+    "concurrent_indexes": false,
+    "indexes": [
+      {
+        "source_index_oid": 30100,
+        "name": "documents_vector_l2",
+        "method": "hnsw",
+        "m": 16,
+        "ef_construction": 64,
+        "ef_search": 64,
+        "lists": 0,
+        "probes": 0
+      },
+      {
+        "source_index_oid": 30101,
+        "name": "documents_vector_cosine",
+        "method": "hnsw",
+        "m": 16,
+        "ef_construction": 64,
+        "ef_search": 64,
+        "lists": 0,
+        "probes": 0
+      },
+      {
+        "source_index_oid": 30102,
+        "name": "documents_vector_l1",
+        "method": "hnsw",
+        "m": 16,
+        "ef_construction": 64,
+        "ef_search": 64,
+        "lists": 0,
+        "probes": 0
+      }
+    ],
+    "max_bytes": 8388608
+  },
+  "copy_table": "documents_copy",
+  "backup_table": "documents_backup",
+  "archive_names": [
+    {
+      "index_oid": 30200,
+      "name": "documents_backup_pkey"
+    },
+    {
+      "index_oid": 30201,
+      "name": "documents_backup_flags_key"
+    },
+    {
+      "index_oid": 30202,
+      "name": "documents_backup_flags_idx"
+    }
+  ]
+}

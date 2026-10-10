@@ -1,0 +1,2 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+Focused pure-Go vet/build PASS.

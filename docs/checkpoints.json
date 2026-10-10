@@ -340,5 +340,19 @@
     "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38075132617",
     "remote_ci_status": "COMPLETED SUCCESS for exact SHA, updated2026-10-10T18:24:50Z, observed18:25:32Z.",
     "open_gates": "1024 live/in-flight/pending native shared-WAL admission is an explicit new availability limit, separate from64 failed-open groups. Rollback Reader/Tx, exclusive-WAL, encrypted Store/copy and other constructor ownership gaps remain code work. Native failure/runtime and full M3/M10 acceptance remain NOT_RUN."
+  },
+  {
+    "stage": "Scoped bounded relational INNER/CROSS/LEFT JOIN execution",
+    "remote_commit": "8f75ccf927b8dc0048d43c65736bdc3ad6fee20c",
+    "local_commit": "8f75ccf927b8dc0048d43c65736bdc3ad6fee20c",
+    "tree": "75cc257914631d6298509a62c12182ae80776bae",
+    "bundle_sha256": "0bb7fe10ed1ed34bff4447605d857d3708e7bf2efb1745140916a2bf68d62a04",
+    "bundle_bytes": 2033099,
+    "library_file_id": "libfile_d72bde8f367481918ef0dbbef97d828c",
+    "library_version": 0,
+    "verified": "Expected-SHA main readback/exact local mirror2026-10-10T18:42:07Z; full-history bundle byte-identical Library readback, clean clone/fsck and original goal hash18:42:31Z. Exact restored scoped native/driver unit and separate race, full vet/build, pinned relational oracle0.792s, three crossbuilds, modules and clean tree passed18:43:09Z. Independent27-path review passed seven suites/604 comparisons. Lead first full suite failed an obsolete now-supported JOIN negative fixture; preserved assertions with unsupported USING and added positive result, independently reviewed. Final28-path sourcead73b8d6425cd86d1c15caccb0f858048df63ef9 full CGO0 unit/vet/build passed18:39:10Z, remaining full race/oracle currently running.",
+    "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38076830650",
+    "remote_ci_status": "IN_PROGRESS for exact SHA, observed2026-10-10T18:42:21Z; no terminal result inferred.",
+    "open_gates": "Inherited eager AND/OR predicate error divergence remains actual SQL gap. USING/NATURAL/RIGHT/FULL/derived sources/forward ON/subqueries/aggregates/CTE/compound/windows and join index probes remain code work. Work/memory caps are conservative engine accounting, not RSS bounds; trusted callbacks/application copies outside. Physical recovery/native OS/independent M10 gates remain NOT_RUN."
   }
 ]

@@ -1,0 +1,158 @@
+go version go1.27.2 linux/amd64
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestFullTableCopySwapAndContracts
+--- PASS: TestFullTableCopySwapAndContracts (0.02s)
+=== RUN   TestFullTableEvidenceGates
+=== RUN   TestFullTableEvidenceGates/hash
+=== RUN   TestFullTableEvidenceGates/version
+=== RUN   TestFullTableEvidenceGates/coverage
+=== RUN   TestFullTableEvidenceGates/column
+=== RUN   TestFullTableEvidenceGates/default_sql
+=== RUN   TestFullTableEvidenceGates/check_sql
+=== RUN   TestFullTableEvidenceGates/converted_check
+=== RUN   TestFullTableEvidenceGates/deferrable
+=== RUN   TestFullTableEvidenceGates/fk
+=== RUN   TestFullTableEvidenceGates/index_missing
+=== RUN   TestFullTableEvidenceGates/index_shape
+=== RUN   TestFullTableEvidenceGates/sequence_owner
+=== RUN   TestFullTableEvidenceGates/sequence_absence
+=== RUN   TestFullTableEvidenceGates/acl_grantor
+=== RUN   TestFullTableEvidenceGates/archive_collision
+=== RUN   TestFullTableEvidenceGates/view
+=== RUN   TestFullTableEvidenceGates/missing_edge
+=== RUN   TestFullTableEvidenceGates/toast
+=== RUN   TestFullTableEvidenceGates/family
+=== RUN   TestFullTableEvidenceGates/missing_family
+=== RUN   TestFullTableEvidenceGates/publication
+--- PASS: TestFullTableEvidenceGates (0.12s)
+    --- PASS: TestFullTableEvidenceGates/hash (0.01s)
+    --- PASS: TestFullTableEvidenceGates/version (0.01s)
+    --- PASS: TestFullTableEvidenceGates/coverage (0.01s)
+    --- PASS: TestFullTableEvidenceGates/column (0.01s)
+    --- PASS: TestFullTableEvidenceGates/default_sql (0.01s)
+    --- PASS: TestFullTableEvidenceGates/check_sql (0.01s)
+    --- PASS: TestFullTableEvidenceGates/converted_check (0.01s)
+    --- PASS: TestFullTableEvidenceGates/deferrable (0.01s)
+    --- PASS: TestFullTableEvidenceGates/fk (0.00s)
+    --- PASS: TestFullTableEvidenceGates/index_missing (0.01s)
+    --- PASS: TestFullTableEvidenceGates/index_shape (0.00s)
+    --- PASS: TestFullTableEvidenceGates/sequence_owner (0.01s)
+    --- PASS: TestFullTableEvidenceGates/sequence_absence (0.01s)
+    --- PASS: TestFullTableEvidenceGates/acl_grantor (0.01s)
+    --- PASS: TestFullTableEvidenceGates/archive_collision (0.01s)
+    --- PASS: TestFullTableEvidenceGates/view (0.00s)
+    --- PASS: TestFullTableEvidenceGates/missing_edge (0.00s)
+    --- PASS: TestFullTableEvidenceGates/toast (0.01s)
+    --- PASS: TestFullTableEvidenceGates/family (0.00s)
+    --- PASS: TestFullTableEvidenceGates/missing_family (0.01s)
+    --- PASS: TestFullTableEvidenceGates/publication (0.00s)
+=== RUN   TestFullTableStrictJSONOptionsAndLimits
+--- PASS: TestFullTableStrictJSONOptionsAndLimits (0.01s)
+=== RUN   TestFullTableLiteralAndIdentifierBoundary
+--- PASS: TestFullTableLiteralAndIdentifierBoundary (0.01s)
+=== RUN   TestFullTableGoldenFixture
+--- PASS: TestFullTableGoldenFixture (0.01s)
+=== RUN   TestFullTableTypedLiteralProfiles
+--- PASS: TestFullTableTypedLiteralProfiles (0.00s)
+=== RUN   TestTransitionOptionsStrictBoundedDecode
+--- PASS: TestTransitionOptionsStrictBoundedDecode (0.00s)
+=== RUN   TestTransitionReviewCorrelatedColumnIdentity
+=== RUN   TestTransitionReviewCorrelatedColumnIdentity/retain_real_array_cast/x
+=== RUN   TestTransitionReviewCorrelatedColumnIdentity/retain_real_array_cast/n
+=== RUN   TestTransitionReviewCorrelatedColumnIdentity/retain_real_array_cast/a
+=== RUN   TestTransitionReviewCorrelatedColumnIdentity/retain_real_array_cast/b
+=== RUN   TestTransitionReviewCorrelatedColumnIdentity/retain_real_array_cast/value"quoted
+=== RUN   TestTransitionReviewCorrelatedColumnIdentity/typed_copy_shadow_column/x
+=== RUN   TestTransitionReviewCorrelatedColumnIdentity/typed_copy_shadow_column/n
+=== RUN   TestTransitionReviewCorrelatedColumnIdentity/typed_copy_shadow_column/a
+=== RUN   TestTransitionReviewCorrelatedColumnIdentity/typed_copy_shadow_column/b
+=== RUN   TestTransitionReviewCorrelatedColumnIdentity/typed_copy_shadow_column/value"quoted
+--- PASS: TestTransitionReviewCorrelatedColumnIdentity (0.01s)
+    --- PASS: TestTransitionReviewCorrelatedColumnIdentity/retain_real_array_cast/x (0.00s)
+    --- PASS: TestTransitionReviewCorrelatedColumnIdentity/retain_real_array_cast/n (0.00s)
+    --- PASS: TestTransitionReviewCorrelatedColumnIdentity/retain_real_array_cast/a (0.00s)
+    --- PASS: TestTransitionReviewCorrelatedColumnIdentity/retain_real_array_cast/b (0.00s)
+    --- PASS: TestTransitionReviewCorrelatedColumnIdentity/retain_real_array_cast/value"quoted (0.00s)
+    --- PASS: TestTransitionReviewCorrelatedColumnIdentity/typed_copy_shadow_column/x (0.00s)
+    --- PASS: TestTransitionReviewCorrelatedColumnIdentity/typed_copy_shadow_column/n (0.00s)
+    --- PASS: TestTransitionReviewCorrelatedColumnIdentity/typed_copy_shadow_column/a (0.00s)
+    --- PASS: TestTransitionReviewCorrelatedColumnIdentity/typed_copy_shadow_column/b (0.00s)
+    --- PASS: TestTransitionReviewCorrelatedColumnIdentity/typed_copy_shadow_column/value"quoted (0.00s)
+=== RUN   TestTransitionReviewInheritanceParentBlocked
+--- PASS: TestTransitionReviewInheritanceParentBlocked (0.00s)
+=== RUN   TestTransitionReviewCompleteGoldenManifest
+=== RUN   TestTransitionReviewCompleteGoldenManifest/retain-single
+=== RUN   TestTransitionReviewCompleteGoldenManifest/shadow-batches
+--- PASS: TestTransitionReviewCompleteGoldenManifest (0.01s)
+    --- PASS: TestTransitionReviewCompleteGoldenManifest/retain-single (0.00s)
+    --- PASS: TestTransitionReviewCompleteGoldenManifest/shadow-batches (0.00s)
+=== RUN   TestTransitionReviewBatchStateAndRollbackContracts
+--- PASS: TestTransitionReviewBatchStateAndRollbackContracts (0.00s)
+=== RUN   TestTransitionReviewUnsafeEvidenceAndCoverage
+--- PASS: TestTransitionReviewUnsafeEvidenceAndCoverage (0.00s)
+=== RUN   TestTransitionReviewPinnedCapabilitiesAndIdentifierBounds
+--- PASS: TestTransitionReviewPinnedCapabilitiesAndIdentifierBounds (0.01s)
+=== RUN   TestTransitionModesAndCommentBoundary
+=== RUN   TestTransitionModesAndCommentBoundary/retain_real_array_cast/single_transaction
+=== RUN   TestTransitionModesAndCommentBoundary/retain_real_array_cast/multi_transaction
+=== RUN   TestTransitionModesAndCommentBoundary/typed_copy_shadow_column/single_transaction
+=== RUN   TestTransitionModesAndCommentBoundary/typed_copy_shadow_column/multi_transaction
+--- PASS: TestTransitionModesAndCommentBoundary (0.01s)
+    --- PASS: TestTransitionModesAndCommentBoundary/retain_real_array_cast/single_transaction (0.00s)
+    --- PASS: TestTransitionModesAndCommentBoundary/retain_real_array_cast/multi_transaction (0.00s)
+    --- PASS: TestTransitionModesAndCommentBoundary/typed_copy_shadow_column/single_transaction (0.00s)
+    --- PASS: TestTransitionModesAndCommentBoundary/typed_copy_shadow_column/multi_transaction (0.00s)
+=== RUN   TestTransitionDeterminismAndGoldenPhases
+=== RUN   TestTransitionDeterminismAndGoldenPhases/shadow-batches
+=== RUN   TestTransitionDeterminismAndGoldenPhases/retain-single
+--- PASS: TestTransitionDeterminismAndGoldenPhases (0.01s)
+    --- PASS: TestTransitionDeterminismAndGoldenPhases/shadow-batches (0.00s)
+    --- PASS: TestTransitionDeterminismAndGoldenPhases/retain-single (0.01s)
+=== RUN   TestTransitionBatchAtomicCursorAndNullRows
+--- PASS: TestTransitionBatchAtomicCursorAndNullRows (0.00s)
+=== RUN   TestTransitionMetricMethodsAndTransactionBoundaries
+--- PASS: TestTransitionMetricMethodsAndTransactionBoundaries (0.00s)
+=== RUN   TestTransitionBlockedCatalogFacts
+=== RUN   TestTransitionBlockedCatalogFacts/profile
+=== RUN   TestTransitionBlockedCatalogFacts/coverage
+=== RUN   TestTransitionBlockedCatalogFacts/unknown_target
+=== RUN   TestTransitionBlockedCatalogFacts/missing_target
+=== RUN   TestTransitionBlockedCatalogFacts/unmapped_index
+=== RUN   TestTransitionBlockedCatalogFacts/old_defaults
+=== RUN   TestTransitionBlockedCatalogFacts/new_dependency
+=== RUN   TestTransitionBlockedCatalogFacts/forged_member
+=== RUN   TestTransitionBlockedCatalogFacts/shadow_collision
+=== RUN   TestTransitionBlockedCatalogFacts/target_index_collision
+=== RUN   TestTransitionBlockedCatalogFacts/state_collision
+=== RUN   TestTransitionBlockedCatalogFacts/source_owner
+--- PASS: TestTransitionBlockedCatalogFacts (0.02s)
+    --- PASS: TestTransitionBlockedCatalogFacts/profile (0.00s)
+    --- PASS: TestTransitionBlockedCatalogFacts/coverage (0.00s)
+    --- PASS: TestTransitionBlockedCatalogFacts/unknown_target (0.00s)
+    --- PASS: TestTransitionBlockedCatalogFacts/missing_target (0.00s)
+    --- PASS: TestTransitionBlockedCatalogFacts/unmapped_index (0.00s)
+    --- PASS: TestTransitionBlockedCatalogFacts/old_defaults (0.00s)
+    --- PASS: TestTransitionBlockedCatalogFacts/new_dependency (0.00s)
+    --- PASS: TestTransitionBlockedCatalogFacts/forged_member (0.00s)
+    --- PASS: TestTransitionBlockedCatalogFacts/shadow_collision (0.00s)
+    --- PASS: TestTransitionBlockedCatalogFacts/target_index_collision (0.00s)
+    --- PASS: TestTransitionBlockedCatalogFacts/state_collision (0.00s)
+    --- PASS: TestTransitionBlockedCatalogFacts/source_owner (0.00s)
+=== RUN   TestTransitionSchemaAndDependencyDrift
+--- PASS: TestTransitionSchemaAndDependencyDrift (0.00s)
+=== RUN   TestTransitionQuotedIdentifiersAndEvidenceIsolation
+--- PASS: TestTransitionQuotedIdentifiersAndEvidenceIsolation (0.00s)
+=== RUN   TestTransitionLimitsCancellationAndBadOptions
+--- PASS: TestTransitionLimitsCancellationAndBadOptions (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	0.276s
+=== RUN   TestMigrateFullTableReviewOnly
+--- PASS: TestMigrateFullTableReviewOnly (0.03s)
+=== RUN   TestMigrateTransitionReviewOnlyArtifacts
+--- PASS: TestMigrateTransitionReviewOnlyArtifacts (0.01s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.041s
+=== RUN   TestFullTableExampleGolden
+--- PASS: TestFullTableExampleGolden (0.01s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/examples/migration-full-table	0.014s

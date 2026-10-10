@@ -1,0 +1,1396 @@
+{
+  "namespaces": [
+    {
+      "oid": 2200,
+      "name": "public"
+    },
+    {
+      "oid": 20002,
+      "name": "legacy"
+    }
+  ],
+  "legacy_families": [
+    {
+      "oid": 20400,
+      "schema": "legacy",
+      "name": "ann_l2_ops",
+      "method_oid": 20001,
+      "opclass_oid": 20300,
+      "amop_oid": 20500,
+      "amproc_oid": 20600,
+      "strategy": 1,
+      "support": 1,
+      "left_oid": 1021,
+      "right_oid": 1021,
+      "operator_oid": 20200,
+      "function_oid": 20100,
+      "sort_family_oid": 1970,
+      "sort_family_schema": "pg_catalog",
+      "sort_family_name": "float_ops",
+      "sort_method_oid": 403
+    },
+    {
+      "oid": 20401,
+      "schema": "legacy",
+      "name": "ann_cos_ops",
+      "method_oid": 20001,
+      "opclass_oid": 20301,
+      "amop_oid": 20501,
+      "amproc_oid": 20601,
+      "strategy": 1,
+      "support": 1,
+      "left_oid": 1021,
+      "right_oid": 1021,
+      "operator_oid": 20201,
+      "function_oid": 20101,
+      "sort_family_oid": 1970,
+      "sort_family_schema": "pg_catalog",
+      "sort_family_name": "float_ops",
+      "sort_method_oid": 403
+    },
+    {
+      "oid": 20402,
+      "schema": "legacy",
+      "name": "ann_manhattan_ops",
+      "method_oid": 20001,
+      "opclass_oid": 20302,
+      "amop_oid": 20502,
+      "amproc_oid": 20602,
+      "strategy": 1,
+      "support": 1,
+      "left_oid": 1021,
+      "right_oid": 1021,
+      "operator_oid": 20202,
+      "function_oid": 20102,
+      "sort_family_oid": 1970,
+      "sort_family_schema": "pg_catalog",
+      "sort_family_name": "float_ops",
+      "sort_method_oid": 403
+    }
+  ],
+  "deparse_search_path": "pg_catalog",
+  "standard_conforming_strings": true,
+  "format_version": 1,
+  "collector": "gosqlite-pg16-full-table-v1",
+  "catalog_sha256": "9a28597fd6836c6f790a17e33b851d921be04ea78f36da145850255e9c982cf7",
+  "extracted_at": "2026-10-10T00:00:00Z",
+  "server_version_num": 160004,
+  "source_profile": "pg_embedding-0.3.6@5d48508aeaeb86b9e9c630468ada7a124b905795",
+  "target_profile": "pgvector-0.8.7@f37c13f68b57d2c3472b2214fbcff699d6d34876",
+  "coverage": [
+    {
+      "category": "table_properties",
+      "complete": true,
+      "reason": "Synthetic exhaustive evidence only; no live capture."
+    },
+    {
+      "category": "column_properties",
+      "complete": true,
+      "reason": "Synthetic exhaustive evidence only; no live capture."
+    },
+    {
+      "category": "defaults",
+      "complete": true,
+      "reason": "Synthetic exhaustive evidence only; no live capture."
+    },
+    {
+      "category": "constraints",
+      "complete": true,
+      "reason": "Synthetic exhaustive evidence only; no live capture."
+    },
+    {
+      "category": "indexes",
+      "complete": true,
+      "reason": "Synthetic exhaustive evidence only; no live capture."
+    },
+    {
+      "category": "sequences",
+      "complete": true,
+      "reason": "Synthetic exhaustive evidence only; no live capture."
+    },
+    {
+      "category": "roles",
+      "complete": true,
+      "reason": "Synthetic exhaustive evidence only; no live capture."
+    },
+    {
+      "category": "privileges",
+      "complete": true,
+      "reason": "Synthetic exhaustive evidence only; no live capture."
+    },
+    {
+      "category": "creation_privileges",
+      "complete": true,
+      "reason": "Synthetic exhaustive evidence only; no live capture."
+    },
+    {
+      "category": "dependencies",
+      "complete": true,
+      "reason": "Synthetic exhaustive evidence only; no live capture."
+    },
+    {
+      "category": "triggers",
+      "complete": true,
+      "reason": "Synthetic exhaustive evidence only; no live capture."
+    },
+    {
+      "category": "rules",
+      "complete": true,
+      "reason": "Synthetic exhaustive evidence only; no live capture."
+    },
+    {
+      "category": "views",
+      "complete": true,
+      "reason": "Synthetic exhaustive evidence only; no live capture."
+    },
+    {
+      "category": "functions",
+      "complete": true,
+      "reason": "Synthetic exhaustive evidence only; no live capture."
+    },
+    {
+      "category": "policies",
+      "complete": true,
+      "reason": "Synthetic exhaustive evidence only; no live capture."
+    },
+    {
+      "category": "publications",
+      "complete": true,
+      "reason": "Synthetic exhaustive evidence only; no live capture."
+    },
+    {
+      "category": "security_labels",
+      "complete": true,
+      "reason": "Synthetic exhaustive evidence only; no live capture."
+    },
+    {
+      "category": "inheritance",
+      "complete": true,
+      "reason": "Synthetic exhaustive evidence only; no live capture."
+    },
+    {
+      "category": "statistics",
+      "complete": true,
+      "reason": "Synthetic exhaustive evidence only; no live capture."
+    },
+    {
+      "category": "comments",
+      "complete": true,
+      "reason": "Synthetic exhaustive evidence only; no live capture."
+    },
+    {
+      "category": "internal_storage",
+      "complete": true,
+      "reason": "Synthetic exhaustive evidence only; no live capture."
+    },
+    {
+      "category": "legacy_operator_families",
+      "complete": true,
+      "reason": "Synthetic exhaustive evidence only; no live capture."
+    },
+    {
+      "category": "namespaces",
+      "complete": true,
+      "reason": "Synthetic exhaustive evidence only; no live capture."
+    },
+    {
+      "category": "event_triggers",
+      "complete": true,
+      "reason": "Synthetic exhaustive evidence only; no live capture."
+    }
+  ],
+  "table": {
+    "toast_relation_oid": 30400,
+    "toast_index_oid": 30401,
+    "toast_owner_oid": 10,
+    "toast_options": [],
+    "relation_oid": 30000,
+    "schema": "public",
+    "name": "documents",
+    "namespace_oid": 2200,
+    "owner_oid": 10,
+    "row_type_oid": 30001,
+    "row_array_type_oid": 30002,
+    "access_method_oid": 2,
+    "access_method": "heap",
+    "tablespace_oid": 1663,
+    "tablespace": "pg_default",
+    "force_rls": false,
+    "replica_identity": "d",
+    "options": [],
+    "comment": "Synthetic full-table fixture."
+  },
+  "roles": [
+    {
+      "oid": 10,
+      "name": "owner"
+    },
+    {
+      "oid": 20,
+      "name": "reader"
+    },
+    {
+      "oid": 21,
+      "name": "writer"
+    }
+  ],
+  "columns": [
+    {
+      "attnum": 1,
+      "collation_oid": 0,
+      "collation_schema": "",
+      "collation_name": "",
+      "storage": "p",
+      "compression": "",
+      "statistics": -1,
+      "options": [],
+      "comment": ""
+    },
+    {
+      "attnum": 2,
+      "collation_oid": 0,
+      "collation_schema": "",
+      "collation_name": "",
+      "storage": "p",
+      "compression": "",
+      "statistics": -1,
+      "options": [],
+      "comment": ""
+    },
+    {
+      "attnum": 3,
+      "collation_oid": 0,
+      "collation_schema": "",
+      "collation_name": "",
+      "storage": "x",
+      "compression": "",
+      "statistics": -1,
+      "options": [],
+      "comment": ""
+    },
+    {
+      "attnum": 4,
+      "collation_oid": 0,
+      "collation_schema": "",
+      "collation_name": "",
+      "storage": "x",
+      "compression": "",
+      "statistics": -1,
+      "options": [],
+      "comment": ""
+    },
+    {
+      "attnum": 5,
+      "collation_oid": 100,
+      "collation_schema": "pg_catalog",
+      "collation_name": "default",
+      "storage": "x",
+      "compression": "",
+      "statistics": -1,
+      "options": [],
+      "comment": ""
+    }
+  ],
+  "defaults": [
+    {
+      "oid": 32000,
+      "attnum": 1,
+      "expression": "nextval('public.documents_id_seq'::regclass)",
+      "sequence_oid": 30300
+    },
+    {
+      "oid": 32001,
+      "attnum": 2,
+      "expression": "0",
+      "sequence_oid": 0
+    },
+    {
+      "oid": 32002,
+      "attnum": 5,
+      "expression": "'untitled'::text",
+      "sequence_oid": 0
+    }
+  ],
+  "constraints": [
+    {
+      "oid": 31000,
+      "name": "documents_pkey",
+      "kind": "p",
+      "columns": [
+        1
+      ],
+      "index_oid": 30200,
+      "validated": true,
+      "deferrable": false,
+      "initially_deferred": false,
+      "no_inherit": true,
+      "expression": "",
+      "comment": ""
+    },
+    {
+      "oid": 31001,
+      "name": "documents_flags_key",
+      "kind": "u",
+      "columns": [
+        2
+      ],
+      "index_oid": 30201,
+      "validated": true,
+      "deferrable": false,
+      "initially_deferred": false,
+      "no_inherit": true,
+      "expression": "",
+      "comment": ""
+    },
+    {
+      "oid": 31002,
+      "name": "documents_flags_check",
+      "kind": "c",
+      "columns": [
+        2
+      ],
+      "index_oid": 0,
+      "validated": true,
+      "deferrable": false,
+      "initially_deferred": false,
+      "no_inherit": true,
+      "expression": "(flags \u003e= 0)",
+      "comment": "Nonnegative flags."
+    }
+  ],
+  "indexes": [
+    {
+      "immediate": true,
+      "live": true,
+      "oid": 30100,
+      "unique": false,
+      "primary": false,
+      "constraint_oid": 0,
+      "nulls_not_distinct": false,
+      "keys": [
+        {
+          "attnum": 3,
+          "descending": false,
+          "nulls_first": false
+        }
+      ],
+      "included": [],
+      "tablespace_oid": 1663,
+      "tablespace": "pg_default",
+      "replica_identity": false,
+      "clustered": false,
+      "comment": "Synthetic index."
+    },
+    {
+      "immediate": true,
+      "live": true,
+      "oid": 30101,
+      "unique": false,
+      "primary": false,
+      "constraint_oid": 0,
+      "nulls_not_distinct": false,
+      "keys": [
+        {
+          "attnum": 3,
+          "descending": false,
+          "nulls_first": false
+        }
+      ],
+      "included": [],
+      "tablespace_oid": 1663,
+      "tablespace": "pg_default",
+      "replica_identity": false,
+      "clustered": false,
+      "comment": "Synthetic index."
+    },
+    {
+      "immediate": true,
+      "live": true,
+      "oid": 30102,
+      "unique": false,
+      "primary": false,
+      "constraint_oid": 0,
+      "nulls_not_distinct": false,
+      "keys": [
+        {
+          "attnum": 3,
+          "descending": false,
+          "nulls_first": false
+        }
+      ],
+      "included": [],
+      "tablespace_oid": 1663,
+      "tablespace": "pg_default",
+      "replica_identity": false,
+      "clustered": false,
+      "comment": "Synthetic index."
+    },
+    {
+      "immediate": true,
+      "live": true,
+      "oid": 30200,
+      "unique": true,
+      "primary": true,
+      "constraint_oid": 31000,
+      "nulls_not_distinct": false,
+      "keys": [
+        {
+          "attnum": 1,
+          "descending": false,
+          "nulls_first": false
+        }
+      ],
+      "included": [],
+      "tablespace_oid": 1663,
+      "tablespace": "pg_default",
+      "replica_identity": false,
+      "clustered": false,
+      "comment": "Synthetic index."
+    },
+    {
+      "immediate": true,
+      "live": true,
+      "oid": 30201,
+      "unique": true,
+      "primary": false,
+      "constraint_oid": 31001,
+      "nulls_not_distinct": false,
+      "keys": [
+        {
+          "attnum": 2,
+          "descending": false,
+          "nulls_first": false
+        }
+      ],
+      "included": [],
+      "tablespace_oid": 1663,
+      "tablespace": "pg_default",
+      "replica_identity": false,
+      "clustered": false,
+      "comment": "Synthetic index."
+    },
+    {
+      "immediate": true,
+      "live": true,
+      "oid": 30202,
+      "unique": false,
+      "primary": false,
+      "constraint_oid": 0,
+      "nulls_not_distinct": false,
+      "keys": [
+        {
+          "attnum": 2,
+          "descending": true,
+          "nulls_first": true
+        }
+      ],
+      "included": [],
+      "tablespace_oid": 1663,
+      "tablespace": "pg_default",
+      "replica_identity": false,
+      "clustered": false,
+      "comment": "Synthetic index."
+    }
+  ],
+  "sequences": [
+    {
+      "oid": 30300,
+      "schema": "public",
+      "name": "documents_id_seq",
+      "owner_oid": 10,
+      "owned_attnum": 1,
+      "dependency_type": "a"
+    }
+  ],
+  "privileges": [
+    {
+      "grantor_oid": 10,
+      "grantee_oid": 10,
+      "attnum": 0,
+      "privilege": "SELECT",
+      "grant_option": false
+    },
+    {
+      "grantor_oid": 10,
+      "grantee_oid": 10,
+      "attnum": 0,
+      "privilege": "INSERT",
+      "grant_option": false
+    },
+    {
+      "grantor_oid": 10,
+      "grantee_oid": 10,
+      "attnum": 0,
+      "privilege": "UPDATE",
+      "grant_option": false
+    },
+    {
+      "grantor_oid": 10,
+      "grantee_oid": 10,
+      "attnum": 0,
+      "privilege": "DELETE",
+      "grant_option": false
+    },
+    {
+      "grantor_oid": 10,
+      "grantee_oid": 10,
+      "attnum": 0,
+      "privilege": "TRUNCATE",
+      "grant_option": false
+    },
+    {
+      "grantor_oid": 10,
+      "grantee_oid": 10,
+      "attnum": 0,
+      "privilege": "REFERENCES",
+      "grant_option": false
+    },
+    {
+      "grantor_oid": 10,
+      "grantee_oid": 10,
+      "attnum": 0,
+      "privilege": "TRIGGER",
+      "grant_option": false
+    },
+    {
+      "grantor_oid": 10,
+      "grantee_oid": 20,
+      "attnum": 0,
+      "privilege": "SELECT",
+      "grant_option": true
+    },
+    {
+      "grantor_oid": 10,
+      "grantee_oid": 21,
+      "attnum": 5,
+      "privilege": "UPDATE",
+      "grant_option": false
+    }
+  ],
+  "creation_privileges": [
+    {
+      "grantor_oid": 10,
+      "grantee_oid": 20,
+      "attnum": 0,
+      "privilege": "SELECT",
+      "grant_option": false
+    }
+  ],
+  "dependencies": [
+    {
+      "class": "pg_class",
+      "oid": 30100,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_class",
+      "referenced_oid": 30000,
+      "referenced_sub_id": 3,
+      "kind": "index",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_class",
+      "oid": 30101,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_class",
+      "referenced_oid": 30000,
+      "referenced_sub_id": 3,
+      "kind": "index",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_class",
+      "oid": 30102,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_class",
+      "referenced_oid": 30000,
+      "referenced_sub_id": 3,
+      "kind": "index",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_class",
+      "oid": 30200,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_constraint",
+      "referenced_oid": 31000,
+      "referenced_sub_id": 0,
+      "kind": "index",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_class",
+      "oid": 30201,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_constraint",
+      "referenced_oid": 31001,
+      "referenced_sub_id": 0,
+      "kind": "index",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_class",
+      "oid": 30202,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_class",
+      "referenced_oid": 30000,
+      "referenced_sub_id": 2,
+      "kind": "index",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_constraint",
+      "oid": 31000,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_class",
+      "referenced_oid": 30000,
+      "referenced_sub_id": 1,
+      "kind": "constraint",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_constraint",
+      "oid": 31001,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_class",
+      "referenced_oid": 30000,
+      "referenced_sub_id": 2,
+      "kind": "constraint",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_constraint",
+      "oid": 31002,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_class",
+      "referenced_oid": 30000,
+      "referenced_sub_id": 2,
+      "kind": "constraint",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_attrdef",
+      "oid": 32000,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_class",
+      "referenced_oid": 30000,
+      "referenced_sub_id": 1,
+      "kind": "default",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_attrdef",
+      "oid": 32000,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_class",
+      "referenced_oid": 30300,
+      "referenced_sub_id": 0,
+      "kind": "default",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_attrdef",
+      "oid": 32001,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_class",
+      "referenced_oid": 30000,
+      "referenced_sub_id": 2,
+      "kind": "default",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_attrdef",
+      "oid": 32002,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_class",
+      "referenced_oid": 30000,
+      "referenced_sub_id": 5,
+      "kind": "default",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_class",
+      "oid": 30400,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_class",
+      "referenced_oid": 30000,
+      "referenced_sub_id": 0,
+      "kind": "internal_storage",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_class",
+      "oid": 30401,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_class",
+      "referenced_oid": 30400,
+      "referenced_sub_id": 1,
+      "kind": "internal_storage",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_class",
+      "oid": 30401,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_class",
+      "referenced_oid": 30400,
+      "referenced_sub_id": 2,
+      "kind": "internal_storage",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_class",
+      "oid": 30300,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_class",
+      "referenced_oid": 30000,
+      "referenced_sub_id": 1,
+      "kind": "sequence",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_type",
+      "oid": 30001,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_class",
+      "referenced_oid": 30000,
+      "referenced_sub_id": 0,
+      "kind": "row_type",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_type",
+      "oid": 30002,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_type",
+      "referenced_oid": 30001,
+      "referenced_sub_id": 0,
+      "kind": "row_type",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_opfamily",
+      "oid": 20400,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_extension",
+      "referenced_oid": 20000,
+      "referenced_sub_id": 0,
+      "kind": "extension_member",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_opclass",
+      "oid": 20300,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_opfamily",
+      "referenced_oid": 20400,
+      "referenced_sub_id": 0,
+      "kind": "operator_family",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_amop",
+      "oid": 20500,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_opclass",
+      "referenced_oid": 20300,
+      "referenced_sub_id": 0,
+      "kind": "operator_family",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_amop",
+      "oid": 20500,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_operator",
+      "referenced_oid": 20200,
+      "referenced_sub_id": 0,
+      "kind": "operator_family",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_amproc",
+      "oid": 20600,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_opclass",
+      "referenced_oid": 20300,
+      "referenced_sub_id": 0,
+      "kind": "operator_family",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_amproc",
+      "oid": 20600,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_proc",
+      "referenced_oid": 20100,
+      "referenced_sub_id": 0,
+      "kind": "operator_family",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_opfamily",
+      "oid": 20401,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_extension",
+      "referenced_oid": 20000,
+      "referenced_sub_id": 0,
+      "kind": "extension_member",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_opclass",
+      "oid": 20301,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_opfamily",
+      "referenced_oid": 20401,
+      "referenced_sub_id": 0,
+      "kind": "operator_family",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_amop",
+      "oid": 20501,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_opclass",
+      "referenced_oid": 20301,
+      "referenced_sub_id": 0,
+      "kind": "operator_family",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_amop",
+      "oid": 20501,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_operator",
+      "referenced_oid": 20201,
+      "referenced_sub_id": 0,
+      "kind": "operator_family",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_amproc",
+      "oid": 20601,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_opclass",
+      "referenced_oid": 20301,
+      "referenced_sub_id": 0,
+      "kind": "operator_family",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_amproc",
+      "oid": 20601,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_proc",
+      "referenced_oid": 20101,
+      "referenced_sub_id": 0,
+      "kind": "operator_family",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_opfamily",
+      "oid": 20402,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_extension",
+      "referenced_oid": 20000,
+      "referenced_sub_id": 0,
+      "kind": "extension_member",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_opclass",
+      "oid": 20302,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_opfamily",
+      "referenced_oid": 20402,
+      "referenced_sub_id": 0,
+      "kind": "operator_family",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_amop",
+      "oid": 20502,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_opclass",
+      "referenced_oid": 20302,
+      "referenced_sub_id": 0,
+      "kind": "operator_family",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_amop",
+      "oid": 20502,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_operator",
+      "referenced_oid": 20202,
+      "referenced_sub_id": 0,
+      "kind": "operator_family",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_amproc",
+      "oid": 20602,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_opclass",
+      "referenced_oid": 20302,
+      "referenced_sub_id": 0,
+      "kind": "operator_family",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_amproc",
+      "oid": 20602,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_proc",
+      "referenced_oid": 20102,
+      "referenced_sub_id": 0,
+      "kind": "operator_family",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_class",
+      "oid": 30000,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_namespace",
+      "referenced_oid": 2200,
+      "referenced_sub_id": 0,
+      "kind": "namespace",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_class",
+      "oid": 30300,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_namespace",
+      "referenced_oid": 2200,
+      "referenced_sub_id": 0,
+      "kind": "namespace",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_extension",
+      "oid": 20000,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_namespace",
+      "referenced_oid": 20002,
+      "referenced_sub_id": 0,
+      "kind": "namespace",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_am",
+      "oid": 20001,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_extension",
+      "referenced_oid": 20000,
+      "referenced_sub_id": 0,
+      "kind": "extension_member",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_am",
+      "oid": 20001,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_proc",
+      "referenced_oid": 20010,
+      "referenced_sub_id": 0,
+      "kind": "legacy_implementation",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_proc",
+      "oid": 20010,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_extension",
+      "referenced_oid": 20000,
+      "referenced_sub_id": 0,
+      "kind": "extension_member",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_proc",
+      "oid": 20010,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_namespace",
+      "referenced_oid": 20002,
+      "referenced_sub_id": 0,
+      "kind": "namespace",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_proc",
+      "oid": 20100,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_extension",
+      "referenced_oid": 20000,
+      "referenced_sub_id": 0,
+      "kind": "extension_member",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_proc",
+      "oid": 20100,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_namespace",
+      "referenced_oid": 20002,
+      "referenced_sub_id": 0,
+      "kind": "namespace",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_proc",
+      "oid": 20101,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_extension",
+      "referenced_oid": 20000,
+      "referenced_sub_id": 0,
+      "kind": "extension_member",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_proc",
+      "oid": 20101,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_namespace",
+      "referenced_oid": 20002,
+      "referenced_sub_id": 0,
+      "kind": "namespace",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_proc",
+      "oid": 20102,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_extension",
+      "referenced_oid": 20000,
+      "referenced_sub_id": 0,
+      "kind": "extension_member",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_proc",
+      "oid": 20102,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_namespace",
+      "referenced_oid": 20002,
+      "referenced_sub_id": 0,
+      "kind": "namespace",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_operator",
+      "oid": 20200,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_extension",
+      "referenced_oid": 20000,
+      "referenced_sub_id": 0,
+      "kind": "extension_member",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_operator",
+      "oid": 20200,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_namespace",
+      "referenced_oid": 20002,
+      "referenced_sub_id": 0,
+      "kind": "namespace",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_operator",
+      "oid": 20200,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_proc",
+      "referenced_oid": 20100,
+      "referenced_sub_id": 0,
+      "kind": "legacy_implementation",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_operator",
+      "oid": 20201,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_extension",
+      "referenced_oid": 20000,
+      "referenced_sub_id": 0,
+      "kind": "extension_member",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_operator",
+      "oid": 20201,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_namespace",
+      "referenced_oid": 20002,
+      "referenced_sub_id": 0,
+      "kind": "namespace",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_operator",
+      "oid": 20201,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_proc",
+      "referenced_oid": 20101,
+      "referenced_sub_id": 0,
+      "kind": "legacy_implementation",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_operator",
+      "oid": 20202,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_extension",
+      "referenced_oid": 20000,
+      "referenced_sub_id": 0,
+      "kind": "extension_member",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_operator",
+      "oid": 20202,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_namespace",
+      "referenced_oid": 20002,
+      "referenced_sub_id": 0,
+      "kind": "namespace",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_operator",
+      "oid": 20202,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_proc",
+      "referenced_oid": 20102,
+      "referenced_sub_id": 0,
+      "kind": "legacy_implementation",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_opclass",
+      "oid": 20300,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_extension",
+      "referenced_oid": 20000,
+      "referenced_sub_id": 0,
+      "kind": "extension_member",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_opclass",
+      "oid": 20300,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_namespace",
+      "referenced_oid": 20002,
+      "referenced_sub_id": 0,
+      "kind": "namespace",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_opclass",
+      "oid": 20301,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_extension",
+      "referenced_oid": 20000,
+      "referenced_sub_id": 0,
+      "kind": "extension_member",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_opclass",
+      "oid": 20301,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_namespace",
+      "referenced_oid": 20002,
+      "referenced_sub_id": 0,
+      "kind": "namespace",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_opclass",
+      "oid": 20302,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_extension",
+      "referenced_oid": 20000,
+      "referenced_sub_id": 0,
+      "kind": "extension_member",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_opclass",
+      "oid": 20302,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_namespace",
+      "referenced_oid": 20002,
+      "referenced_sub_id": 0,
+      "kind": "namespace",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_opfamily",
+      "oid": 20400,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_namespace",
+      "referenced_oid": 20002,
+      "referenced_sub_id": 0,
+      "kind": "namespace",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_opfamily",
+      "oid": 20400,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_am",
+      "referenced_oid": 20001,
+      "referenced_sub_id": 0,
+      "kind": "operator_family",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_opfamily",
+      "oid": 20401,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_namespace",
+      "referenced_oid": 20002,
+      "referenced_sub_id": 0,
+      "kind": "namespace",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_opfamily",
+      "oid": 20401,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_am",
+      "referenced_oid": 20001,
+      "referenced_sub_id": 0,
+      "kind": "operator_family",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_opfamily",
+      "oid": 20402,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_namespace",
+      "referenced_oid": 20002,
+      "referenced_sub_id": 0,
+      "kind": "namespace",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_opfamily",
+      "oid": 20402,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_am",
+      "referenced_oid": 20001,
+      "referenced_sub_id": 0,
+      "kind": "operator_family",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_class",
+      "oid": 30100,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_opclass",
+      "referenced_oid": 20300,
+      "referenced_sub_id": 0,
+      "kind": "index",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_class",
+      "oid": 30101,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_opclass",
+      "referenced_oid": 20301,
+      "referenced_sub_id": 0,
+      "kind": "index",
+      "definition": "Evidence only."
+    },
+    {
+      "class": "pg_class",
+      "oid": 30102,
+      "sub_id": 0,
+      "identity": "Synthetic explicit object address",
+      "referenced_class": "pg_opclass",
+      "referenced_oid": 20302,
+      "referenced_sub_id": 0,
+      "kind": "index",
+      "definition": "Evidence only."
+    }
+  ],
+  "unsupported_objects": []
+}

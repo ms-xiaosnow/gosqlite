@@ -13,7 +13,9 @@ import (
 // memory; this pass cannot reclaim it. Every collection element is charged
 // before traversal. Bytes are a conservative upper bound on encoding/json's
 // canonical output, so custom limits may reject a near-limit compact input.
-func budgetCatalog(c CatalogSnapshot, l Limits) error {
+func budgetCatalog(c CatalogSnapshot, l Limits) error { return budgetValue(c, l) }
+
+func budgetValue(c any, l Limits) error {
 	bytesLeft, nodesLeft := int64(l.MaxBytes), int64(l.MaxTokens)
 	charge := func(n int64) error {
 		if n < 0 || n > bytesLeft {

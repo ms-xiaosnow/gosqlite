@@ -1,0 +1,21 @@
+Exact Library-restored relational checkpoint, scoped memory/intact ordinary tests; manual native/physical gates excluded.
+8f75ccf927b8dc0048d43c65736bdc3ad6fee20c
+2026-10-10T18:42:31Z
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	0.008s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.003s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.049s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.042s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	1.023s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	1.031s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	1.187s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.172s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	0.792s
+cross-build linux/arm64 PASS
+cross-build darwin/arm64 PASS
+cross-build windows/amd64 PASS
+all modules verified
+2026-10-10T18:43:09Z
+EXACT RELATIONAL LIBRARY RESTORE CHECKS PASS

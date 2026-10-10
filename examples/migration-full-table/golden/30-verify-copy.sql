@@ -1,0 +1,15 @@
+-- REVIEW ONLY. NOT AN EXECUTABLE MIGRATION. All approvals remain unresolved.
+-- Remove no comment prefixes until an operator has reviewed each phase and gate.
+-- GATE: data_and_training. SAME transaction. Expected exhaustive source rows: 4. No query result is automatically approved.
+-- SELECT pg_catalog.count(*) AS copy_rows,pg_catalog.count(DISTINCT "id") AS unique_copy_keys FROM ONLY "public"."documents_copy";
+-- SELECT pg_catalog.count(*) FILTER (WHERE src."id" IS NULL) AS extra_keys,
+--  pg_catalog.count(*) FILTER (WHERE dst."id" IS NULL) AS missing_keys,
+--  pg_catalog.count(*) FILTER (WHERE pg_catalog.int4send(src."id") IS DISTINCT FROM pg_catalog.int4send(dst."id")) AS "column_1_binary_mismatches",
+--  pg_catalog.count(*) FILTER (WHERE pg_catalog.int4send(src."flags") IS DISTINCT FROM pg_catalog.int4send(dst."flags")) AS "column_2_binary_mismatches",
+--  pg_catalog.count(*) FILTER (WHERE pg_catalog.array_send(src."embedding") IS DISTINCT FROM pg_catalog.array_send((dst."embedding")::pg_catalog.float4[])) AS "column_3_binary_mismatches",
+--  pg_catalog.count(*) FILTER (WHERE pg_catalog.array_send(src."ordinary_samples") IS DISTINCT FROM pg_catalog.array_send(dst."ordinary_samples")) AS "column_4_binary_mismatches",
+--  pg_catalog.count(*) FILTER (WHERE pg_catalog.textsend(src."title") IS DISTINCT FROM pg_catalog.textsend(dst."title")) AS "column_5_binary_mismatches"
+-- FROM ONLY "public"."documents" AS src FULL JOIN ONLY "public"."documents_copy" AS dst ON src."id"=dst."id";
+-- SELECT pg_catalog.count(*) AS dimension_mismatches FROM ONLY "public"."documents_copy" WHERE "embedding" IS NOT NULL AND "public"."vector_dims"("embedding") IS DISTINCT FROM 3;
+-- Require source count = copy count = distinct copy keys = expected count, zero missing/extra keys and zero per-column/dimension mismatches. Array binary comparison retains dimensions, lower bounds, NULL elements and finite32 component bits. Original ordinary arrays are not interpreted as vectors.
+-- Compare captured exact distance/norm/business fixtures and separately measure ANN recall after indexes are built. No live PostgreSQL result is included.

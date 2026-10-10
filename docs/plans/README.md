@@ -55,7 +55,9 @@ remain code work; unsupported is a safe interim behavior, not removal from goal.
   identity or bind contracts; no
   global operator replacement or automatic source-error coercion.
 - Review-only retained-array/shadow-column transition templates and CLI now exist.
-  Implement full-table/dependency recreation and supported online workflows,
+  A bounded PG16 whole-table copy/swap generator now recreates supported simple
+  columns/defaults/constraints/indexes/ACLs/sequences in fully commented review
+  artifacts. Implement remaining dependency families and supported online workflows,
   then qualify actual PostgreSQL/Neon operation separately from local import.
   Both old embedding and modern pgvector own a database-wide hnsw access
   method, so naïve side-by-side installation is invalid. Old m100/efconstruction16

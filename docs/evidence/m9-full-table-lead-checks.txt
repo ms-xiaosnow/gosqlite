@@ -1,0 +1,21 @@
+Frozen33-path migration delta on durable8f75; future encrypted/Boolean/range code excluded.
+Audited synthetic review generator/CLI, unchanged importer intact fixtures only. No external database/server/SQL or restricted physical scenarios.
+0d65b3618e47ade6e958627c7ab26869b8fcfa0b
+2026-10-10T18:43:28Z
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	4.751s
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.212s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/migration-full-table	0.047s
+?   	github.com/ms-xiaosnow/gosqlite/examples/migration-transition	[no test files]
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	25.419s
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	1.653s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/migration-full-table	1.163s
+?   	github.com/ms-xiaosnow/gosqlite/examples/migration-transition	[no test files]
+cross-build linux/arm64 PASS
+cross-build darwin/arm64 PASS
+cross-build windows/amd64 PASS
+cross-build windows/arm64 PASS
+all modules verified
+2026-10-10T18:44:44Z
+FROZEN FULL-TABLE INTEGRATION CHECKS PASS

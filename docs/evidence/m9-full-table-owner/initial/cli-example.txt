@@ -1,0 +1,2 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+Standalone example and CLI output byte-identical PASS; no database opened or SQL executed.

@@ -20,6 +20,7 @@ func runMigrateTransition(ctx context.Context, args []string, out io.Writer) err
 	flags.SetOutput(io.Discard)
 	catalogPath := flags.String("catalog", "", "offline catalog JSON")
 	optionsPath := flags.String("options", "", "strict bounded transition options JSON")
+	evidencePath := flags.String("full-table-evidence", "", "identity-bound PG16 full-table supplement; requires full-table options")
 	report := flags.String("report", "", "new review-bundle JSON file; never overwrite")
 	seen := map[string]bool{}
 	for _, a := range args {
@@ -53,11 +54,28 @@ func runMigrateTransition(ctx context.Context, args []string, out io.Writer) err
 	if err != nil {
 		return err
 	}
-	o, decodeErr := postgres.DecodeTransitionOptions(f)
-	if err = errors.Join(decodeErr, f.Close()); err != nil {
-		return err
+	var bundle postgres.TransitionBundle
+	if *evidencePath == "" {
+		o, decodeErr := postgres.DecodeTransitionOptions(f)
+		if err = errors.Join(decodeErr, f.Close()); err != nil {
+			return err
+		}
+		bundle, err = postgres.GenerateTransition(ctx, c, o)
+	} else {
+		o, decodeErr := postgres.DecodeFullTableOptions(f)
+		if err = errors.Join(decodeErr, f.Close()); err != nil {
+			return err
+		}
+		f, err = os.Open(*evidencePath)
+		if err != nil {
+			return err
+		}
+		evidence, decodeErr := postgres.DecodeFullTableEvidence(f)
+		if err = errors.Join(decodeErr, f.Close()); err != nil {
+			return err
+		}
+		bundle, err = postgres.GenerateFullTableTransition(ctx, c, o, evidence)
 	}
-	bundle, err := postgres.GenerateTransition(ctx, c, o)
 	if err != nil {
 		return err
 	}

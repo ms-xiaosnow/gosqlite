@@ -1,0 +1,4 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	3.632s
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	1.302s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/migration-full-table	1.140s
