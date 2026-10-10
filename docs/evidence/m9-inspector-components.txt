@@ -1,0 +1,415 @@
+M9 checkpoint A ordinary focused verification; no PostgreSQL execution or restricted workflows
+2026-10-10T12:52:38Z
+go version go1.27.2 linux/amd64
+CGO_ENABLED=0 go test -count=1 ./migration/postgres ./cmd/gosqlite
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	0.064s
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.024s
+CGO_ENABLED=1 go test -race -count=1 ./migration/postgres ./cmd/gosqlite
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	1.516s
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	1.146s
+CGO_ENABLED=0 go vet ./migration/postgres ./cmd/gosqlite
+CGO_ENABLED=0 go build ./migration/postgres ./cmd/gosqlite
+CGO_ENABLED=0 GOMAXPROCS=2 go test ./migration/postgres -run ^$ -fuzz ^FuzzRealArray$ -fuzztime=3s -parallel=2
+fuzz: elapsed: 0s, gathering baseline coverage: 0/4 completed
+fuzz: elapsed: 0s, gathering baseline coverage: 4/4 completed, now fuzzing with 2 workers
+fuzz: elapsed: 3s, execs: 62076 (20687/sec), new interesting: 48 (total: 52)
+fuzz: elapsed: 4s, execs: 62076 (0/sec), new interesting: 48 (total: 52)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	4.026s
+CGO_ENABLED=0 GOMAXPROCS=2 go test ./migration/postgres -run ^$ -fuzz ^FuzzCatalogJSON$ -fuzztime=3s -parallel=2
+fuzz: elapsed: 0s, gathering baseline coverage: 0/2 completed
+fuzz: elapsed: 0s, gathering baseline coverage: 2/2 completed, now fuzzing with 2 workers
+fuzz: elapsed: 3s, execs: 194 (65/sec), new interesting: 1 (total: 3)
+fuzz: elapsed: 4s, execs: 194 (0/sec), new interesting: 1 (total: 3)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	4.057s
+CGO_ENABLED=0 go run ./cmd/gosqlite migrate pgembedding --catalog testdata/pgembedding-0.3.6/catalog.json --dry-run
+{
+  "format_version": 1,
+  "source_profile": "pg_embedding-0.3.6@5d48508aeaeb86b9e9c630468ada7a124b905795",
+  "target_profile": "pgvector-0.8.7@f37c13f68b57d2c3472b2214fbcff699d6d34876",
+  "catalog_sha256": "1be5a47ee343cc46c62d6b7d68a34cb51e42d1bb6290a7e8c3f8d9781e5568c2",
+  "catalog_hash_kind": "canonical_json_v1",
+  "source_bytes_sha256": "491b6b48133fd337ac189baf8e2877b2e366dfd5832daffb3dd4e805dc0e8b48",
+  "extracted_at": "2026-10-10T00:00:00Z",
+  "status": "review_required",
+  "scope": {
+    "schemas": [
+      "public"
+    ],
+    "coverage": [
+      {
+        "category": "columns",
+        "complete": true,
+        "reason": "Synthetic complete fixture, not a live PostgreSQL capture."
+      },
+      {
+        "category": "dependencies",
+        "complete": true,
+        "reason": "Synthetic complete fixture, not a live PostgreSQL capture."
+      },
+      {
+        "category": "extension_membership",
+        "complete": true,
+        "reason": "Synthetic complete fixture, not a live PostgreSQL capture."
+      },
+      {
+        "category": "indexes",
+        "complete": true,
+        "reason": "Synthetic complete fixture, not a live PostgreSQL capture."
+      },
+      {
+        "category": "policies",
+        "complete": true,
+        "reason": "Synthetic complete fixture, not a live PostgreSQL capture."
+      },
+      {
+        "category": "relations",
+        "complete": true,
+        "reason": "Synthetic complete fixture, not a live PostgreSQL capture."
+      },
+      {
+        "category": "types",
+        "complete": true,
+        "reason": "Synthetic complete fixture, not a live PostgreSQL capture."
+      }
+    ]
+  },
+  "columns": [
+    {
+      "object": "\"public\".\"documents\".\"embedding\"",
+      "relation_oid": 30000,
+      "attnum": 3,
+      "classification": "legacy_vector",
+      "selected": true,
+      "dimensions": 3,
+      "status": "safe",
+      "validation": "exhaustive"
+    },
+    {
+      "object": "\"public\".\"documents\".\"ordinary_samples\"",
+      "relation_oid": 30000,
+      "attnum": 4,
+      "classification": "unrelated_real_array_candidate",
+      "selected": false,
+      "dimensions": 0,
+      "status": "safe",
+      "validation": "not_run"
+    }
+  ],
+  "indexes": [
+    {
+      "object": "\"public\".\"custom nearest\"",
+      "oid": 30100,
+      "column": "\"public\".\"documents\".\"embedding\"",
+      "status": "safe",
+      "identity_verified": true,
+      "legacy": {
+        "dims": 3,
+        "m": 16,
+        "efconstruction": 64,
+        "efsearch": 64
+      },
+      "proposed_target": {
+        "dimensions": 3,
+        "m": 16,
+        "ef_construction": 64,
+        "opclass": "vector_l2_ops",
+        "metric": "l2"
+      },
+      "query_ef_search": 64
+    },
+    {
+      "object": "\"public\".\"documents_cosine\"",
+      "oid": 30101,
+      "column": "\"public\".\"documents\".\"embedding\"",
+      "status": "safe",
+      "identity_verified": true,
+      "legacy": {
+        "dims": 3,
+        "m": 16,
+        "efconstruction": 64,
+        "efsearch": 64
+      },
+      "proposed_target": {
+        "dimensions": 3,
+        "m": 16,
+        "ef_construction": 64,
+        "opclass": "vector_cosine_ops",
+        "metric": "cosine"
+      },
+      "query_ef_search": 64
+    },
+    {
+      "object": "\"public\".\"documents_manhattan\"",
+      "oid": 30102,
+      "column": "\"public\".\"documents\".\"embedding\"",
+      "status": "safe",
+      "identity_verified": true,
+      "legacy": {
+        "dims": 3,
+        "m": 16,
+        "efconstruction": 64,
+        "efsearch": 64
+      },
+      "proposed_target": {
+        "dimensions": 3,
+        "m": 16,
+        "ef_construction": 64,
+        "opclass": "vector_l1_ops",
+        "metric": "l1"
+      },
+      "query_ef_search": 64
+    }
+  ],
+  "findings": [
+    {
+      "severity": "warning",
+      "code": "efsearch_scope_change",
+      "object": "\"public\".\"custom nearest\"",
+      "message": "Legacy per-index efsearch becomes an explicit PostgreSQL session/transaction setting or local VectorSearchOptions.EFSearch, never a CREATE INDEX option."
+    },
+    {
+      "severity": "warning",
+      "code": "efsearch_scope_change",
+      "object": "\"public\".\"documents_cosine\"",
+      "message": "Legacy per-index efsearch becomes an explicit PostgreSQL session/transaction setting or local VectorSearchOptions.EFSearch, never a CREATE INDEX option."
+    },
+    {
+      "severity": "warning",
+      "code": "efsearch_scope_change",
+      "object": "\"public\".\"documents_manhattan\"",
+      "message": "Legacy per-index efsearch becomes an explicit PostgreSQL session/transaction setting or local VectorSearchOptions.EFSearch, never a CREATE INDEX option."
+    },
+    {
+      "severity": "warning",
+      "code": "hnsw_access_method_collision",
+      "object": "access_method.hnsw",
+      "message": "Both pinned extensions own database-wide hnsw. A side-by-side unmodified extension installation is not a valid in-place migration plan."
+    },
+    {
+      "severity": "warning",
+      "code": "application_sql_inventory_incomplete",
+      "object": "scope",
+      "message": "Catalog inspection cannot discover arbitrary application or dynamic SQL; supplied SQL corpus is not yet converted by this inspector."
+    },
+    {
+      "severity": "warning",
+      "code": "current_neon_chapter_absent",
+      "object": "source",
+      "message": "Current Neon target page was retrieved on 2026-10-10; its requested migration chapter is absent. The official historical 2024-01-23 chapter is a separate reference, not current-page conformance."
+    },
+    {
+      "severity": "warning",
+      "code": "numeric_semantics_difference",
+      "object": "source",
+      "message": "Legacy distances return architecture-sensitive float32; local metrics use compensated float64, and cosine rejects zero norms. Exact result-bit equality is not claimed."
+    }
+  ],
+  "approval_points": [
+    "Retain source arrays and immutable export; retuning index parameters requires explicit review and new recall measurements.",
+    "Review maintenance-window or separate-database strategy for the database-wide hnsw access-method collision.",
+    "Review target installation/version, privileges, dependency inventory and application query changes before PostgreSQL execution."
+  ]
+}
+FINAL FROZEN A TREE CHECK: includes primary-key identity metadata, current-facts hashing, aggregate programmatic budgets and final cancellation/identity propagation
+2026-10-10T12:54:39Z
+CGO_ENABLED=0 go test -count=1 ./migration/postgres ./cmd/gosqlite
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	0.108s
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.048s
+CGO_ENABLED=1 go test -race -count=1 ./migration/postgres ./cmd/gosqlite
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	1.549s
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	1.130s
+CGO_ENABLED=0 go vet ./migration/postgres ./cmd/gosqlite
+CGO_ENABLED=0 go build ./migration/postgres ./cmd/gosqlite
+CGO_ENABLED=0 go run ./cmd/gosqlite migrate pgembedding --catalog testdata/pgembedding-0.3.6/catalog.json --dry-run
+{
+  "format_version": 1,
+  "source_profile": "pg_embedding-0.3.6@5d48508aeaeb86b9e9c630468ada7a124b905795",
+  "target_profile": "pgvector-0.8.7@f37c13f68b57d2c3472b2214fbcff699d6d34876",
+  "catalog_sha256": "bdb6e93d8e95112231c892ad5a6653ca72ccd66297efa99446ac0f2610b8f804",
+  "catalog_hash_kind": "canonical_json_v1",
+  "source_bytes_sha256": "71b9009a84cd30fb9b92cc16dd618805e62ec85d268ca2e13904f2c5588b8a9c",
+  "extracted_at": "2026-10-10T00:00:00Z",
+  "status": "review_required",
+  "scope": {
+    "schemas": [
+      "public"
+    ],
+    "coverage": [
+      {
+        "category": "columns",
+        "complete": true,
+        "reason": "Synthetic complete fixture, not a live PostgreSQL capture."
+      },
+      {
+        "category": "dependencies",
+        "complete": true,
+        "reason": "Synthetic complete fixture, not a live PostgreSQL capture."
+      },
+      {
+        "category": "extension_membership",
+        "complete": true,
+        "reason": "Synthetic complete fixture, not a live PostgreSQL capture."
+      },
+      {
+        "category": "indexes",
+        "complete": true,
+        "reason": "Synthetic complete fixture, not a live PostgreSQL capture."
+      },
+      {
+        "category": "policies",
+        "complete": true,
+        "reason": "Synthetic complete fixture, not a live PostgreSQL capture."
+      },
+      {
+        "category": "relations",
+        "complete": true,
+        "reason": "Synthetic complete fixture, not a live PostgreSQL capture."
+      },
+      {
+        "category": "types",
+        "complete": true,
+        "reason": "Synthetic complete fixture, not a live PostgreSQL capture."
+      }
+    ]
+  },
+  "columns": [
+    {
+      "object": "\"public\".\"documents\".\"embedding\"",
+      "relation_oid": 30000,
+      "attnum": 3,
+      "classification": "legacy_vector",
+      "selected": true,
+      "dimensions": 3,
+      "status": "safe",
+      "validation": "exhaustive"
+    },
+    {
+      "object": "\"public\".\"documents\".\"ordinary_samples\"",
+      "relation_oid": 30000,
+      "attnum": 4,
+      "classification": "unrelated_real_array_candidate",
+      "selected": false,
+      "dimensions": 0,
+      "status": "safe",
+      "validation": "not_run"
+    }
+  ],
+  "indexes": [
+    {
+      "object": "\"public\".\"custom nearest\"",
+      "oid": 30100,
+      "column": "\"public\".\"documents\".\"embedding\"",
+      "status": "safe",
+      "identity_verified": true,
+      "legacy": {
+        "dims": 3,
+        "m": 16,
+        "efconstruction": 64,
+        "efsearch": 64
+      },
+      "proposed_target": {
+        "dimensions": 3,
+        "m": 16,
+        "ef_construction": 64,
+        "opclass": "vector_l2_ops",
+        "metric": "l2"
+      },
+      "query_ef_search": 64
+    },
+    {
+      "object": "\"public\".\"documents_cosine\"",
+      "oid": 30101,
+      "column": "\"public\".\"documents\".\"embedding\"",
+      "status": "safe",
+      "identity_verified": true,
+      "legacy": {
+        "dims": 3,
+        "m": 16,
+        "efconstruction": 64,
+        "efsearch": 64
+      },
+      "proposed_target": {
+        "dimensions": 3,
+        "m": 16,
+        "ef_construction": 64,
+        "opclass": "vector_cosine_ops",
+        "metric": "cosine"
+      },
+      "query_ef_search": 64
+    },
+    {
+      "object": "\"public\".\"documents_manhattan\"",
+      "oid": 30102,
+      "column": "\"public\".\"documents\".\"embedding\"",
+      "status": "safe",
+      "identity_verified": true,
+      "legacy": {
+        "dims": 3,
+        "m": 16,
+        "efconstruction": 64,
+        "efsearch": 64
+      },
+      "proposed_target": {
+        "dimensions": 3,
+        "m": 16,
+        "ef_construction": 64,
+        "opclass": "vector_l1_ops",
+        "metric": "l1"
+      },
+      "query_ef_search": 64
+    }
+  ],
+  "findings": [
+    {
+      "severity": "warning",
+      "code": "efsearch_scope_change",
+      "object": "\"public\".\"custom nearest\"",
+      "message": "Legacy per-index efsearch becomes an explicit PostgreSQL session/transaction setting or local VectorSearchOptions.EFSearch, never a CREATE INDEX option."
+    },
+    {
+      "severity": "warning",
+      "code": "efsearch_scope_change",
+      "object": "\"public\".\"documents_cosine\"",
+      "message": "Legacy per-index efsearch becomes an explicit PostgreSQL session/transaction setting or local VectorSearchOptions.EFSearch, never a CREATE INDEX option."
+    },
+    {
+      "severity": "warning",
+      "code": "efsearch_scope_change",
+      "object": "\"public\".\"documents_manhattan\"",
+      "message": "Legacy per-index efsearch becomes an explicit PostgreSQL session/transaction setting or local VectorSearchOptions.EFSearch, never a CREATE INDEX option."
+    },
+    {
+      "severity": "warning",
+      "code": "hnsw_access_method_collision",
+      "object": "access_method.hnsw",
+      "message": "Both pinned extensions own database-wide hnsw. A side-by-side unmodified extension installation is not a valid in-place migration plan."
+    },
+    {
+      "severity": "warning",
+      "code": "application_sql_inventory_incomplete",
+      "object": "scope",
+      "message": "Catalog inspection cannot discover arbitrary application or dynamic SQL; supplied SQL corpus is not yet converted by this inspector."
+    },
+    {
+      "severity": "warning",
+      "code": "current_neon_chapter_absent",
+      "object": "source",
+      "message": "Current Neon target page was retrieved on 2026-10-10; its requested migration chapter is absent. The official historical 2024-01-23 chapter is a separate reference, not current-page conformance."
+    },
+    {
+      "severity": "warning",
+      "code": "numeric_semantics_difference",
+      "object": "source",
+      "message": "Legacy distances return architecture-sensitive float32; local metrics use compensated float64, and cosine rejects zero norms. Exact result-bit equality is not claimed."
+    }
+  ],
+  "approval_points": [
+    "Retain source arrays and immutable export; retuning index parameters requires explicit review and new recall measurements.",
+    "Review maintenance-window or separate-database strategy for the database-wide hnsw access-method collision.",
+    "Review target installation/version, privileges, dependency inventory and application query changes before PostgreSQL execution."
+  ]
+}
+git diff --check: assigned paths
+Source checkpoint A is frozen; no PostgreSQL execution and no restricted workflow ran.

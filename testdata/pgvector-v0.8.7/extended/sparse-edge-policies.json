@@ -1,0 +1,17 @@
+{
+  "source": "https://github.com/pgvector/pgvector/blob/f37c13f68b57d2c3472b2214fbcff699d6d34876/src/sparsevec.c",
+  "source_sha256": "4f46c54765ceeea9ac192384ce9f4ad67d981d4d755d8dfc737551191d60c84b",
+  "basis": "Source inspection of sparsevec_in and CheckIndex; not a PostgreSQL runtime result. Published underflow/ordinary-duplicate fixtures are separately retained in sparsevec.out.",
+  "cases": [
+    {"input":"{1:0,1:1}/1", "upstream":"{1:1}/1", "local":"{1:1}/1"},
+    {"input":"{1:0,1:-0}/1", "upstream":"{}/1", "local":"{}/1"},
+    {"input":"{1:1,1:-1}/1", "upstream_error":"duplicate retained index", "local_error":"ErrSparseIndex"},
+    {"input":"{0:0}/1", "upstream":"{}/1", "local_error":"ErrSparseIndex"},
+    {"input":"{-1:0}/1", "upstream":"{}/1", "local_error":"ErrSparseIndex"},
+    {"input":"{2:0}/1", "upstream":"{}/1", "local_error":"ErrSparseIndex"},
+    {"input":"{2147483648:0}/1", "upstream":"{}/1", "local_error":"ErrSparseIndex"},
+    {"input":"{1:1e-46}/1", "upstream_error":"binary32 underflow to zero", "local_error":"ErrSparseUnderflow"},
+    {"input":"{1:-1e-46}/1", "upstream_error":"binary32 underflow to zero", "local_error":"ErrSparseUnderflow"},
+    {"input":"{1:1e-45}/1", "upstream":"{1:1e-45}/1", "local":"{1:1e-45}/1"}
+  ]
+}

@@ -1,0 +1,45 @@
+=== RUN   TestOrdinaryIndexIndependentRangePageEvidence
+    plan_index_internal_test.go:88: independent PageReader: prefix=3 reads/2 keys vs full index=84 reads/1600 keys
+--- PASS: TestOrdinaryIndexIndependentRangePageEvidence (0.13s)
+=== RUN   TestOrdinaryIndexTotalPredicateProof
+--- PASS: TestOrdinaryIndexTotalPredicateProof (0.00s)
+=== RUN   TestGramsIndexedLike12800Combinations
+    plan_grams_test.go:128: 100 queries x128 texts =12,800 exact membership comparisons; SEARCH=100 SCAN=0 nonempty_SEARCH=39
+--- PASS: TestGramsIndexedLike12800Combinations (12.47s)
+=== RUN   TestGramsOneTwoThreeRuneSearchAndExplain
+--- PASS: TestGramsOneTwoThreeRuneSearchAndExplain (13.44s)
+=== RUN   TestGramsUnicodeEscapeNULLNULAndBooleanSafety
+--- PASS: TestGramsUnicodeEscapeNULLNULAndBooleanSafety (14.62s)
+=== RUN   TestGramsHighFrequencyFallbackAndLimits
+--- PASS: TestGramsHighFrequencyFallbackAndLimits (23.84s)
+=== RUN   TestGramsConfiguredMatchSnapshotAndCandidates
+--- PASS: TestGramsConfiguredMatchSnapshotAndCandidates (0.71s)
+=== RUN   TestOrdinaryIndexStorageClassesAndAffinities
+    plan_index_test.go:69: 240 storage-class/affinity equality and IS probes matched independently forced scans
+--- PASS: TestOrdinaryIndexStorageClassesAndAffinities (0.49s)
+=== RUN   TestOrdinaryIndexRowIDAndShadowedNames
+--- PASS: TestOrdinaryIndexRowIDAndShadowedNames (0.11s)
+=== RUN   TestOrdinaryIndexPrefixWorkAndDeterministicLimit
+    plan_index_test.go:133: tail="" matching keys=20 range page reads=3 source fetches=20 forced-scan fetches=1800
+    plan_index_test.go:133: tail=" LIMIT 7 OFFSET 3" matching keys=20 range page reads=3 source fetches=10 forced-scan fetches=900
+    plan_index_test.go:133: tail=" ORDER BY tie LIMIT 7 OFFSET 3" matching keys=20 range page reads=3 source fetches=20 forced-scan fetches=1800
+    plan_index_test.go:133: tail=" ORDER BY tie DESC LIMIT 7 OFFSET 3" matching keys=20 range page reads=3 source fetches=20 forced-scan fetches=1800
+    plan_index_test.go:133: tail=" ORDER BY suffix,id LIMIT 7 OFFSET 3" matching keys=20 range page reads=3 source fetches=20 forced-scan fetches=1800
+    plan_index_test.go:133: tail=" ORDER BY id DESC LIMIT 7 OFFSET 3" matching keys=20 range page reads=3 source fetches=20 forced-scan fetches=1800
+--- PASS: TestOrdinaryIndexPrefixWorkAndDeterministicLimit (0.26s)
+=== RUN   TestOrdinaryIndexBudgetsCancellationAndResidualErrors
+--- PASS: TestOrdinaryIndexBudgetsCancellationAndResidualErrors (0.06s)
+=== RUN   TestOrdinaryIndexTransactionsRollbackReopenAndSnapshot
+=== RUN   TestOrdinaryIndexTransactionsRollbackReopenAndSnapshot/sharedfalse
+=== RUN   TestOrdinaryIndexTransactionsRollbackReopenAndSnapshot/sharedtrue
+--- PASS: TestOrdinaryIndexTransactionsRollbackReopenAndSnapshot (0.02s)
+    --- PASS: TestOrdinaryIndexTransactionsRollbackReopenAndSnapshot/sharedfalse (0.00s)
+    --- PASS: TestOrdinaryIndexTransactionsRollbackReopenAndSnapshot/sharedtrue (0.01s)
+=== RUN   TestOrdinaryIndexGramsANNPrecedenceAndExactVector
+--- PASS: TestOrdinaryIndexGramsANNPrecedenceAndExactVector (2.63s)
+=== RUN   TestOrdinaryIndexConcurrentQueries
+--- PASS: TestOrdinaryIndexConcurrentQueries (0.03s)
+=== RUN   TestOrdinaryIndexSlotBindingAndUnsupportedShapes
+--- PASS: TestOrdinaryIndexSlotBindingAndUnsupportedShapes (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	68.816s

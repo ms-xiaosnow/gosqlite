@@ -13,7 +13,30 @@ type EncryptionMode uint8
 
 // EncryptionSnapshot writes a full immutable authenticated snapshot per changed
 // transaction. It is intentionally not native SQLite WAL or SEE ciphertext.
-const EncryptionSnapshot EncryptionMode = 0
+const (
+	EncryptionSnapshot EncryptionMode = 0
+	// EncryptionWAL writes immutable final-dirty-page transaction segments. It
+	// currently holds a lifetime-exclusive writer lease; readers cannot coexist.
+	EncryptionWAL EncryptionMode = 1
+)
+
+// EncryptionWALLimits separately bounds active replay and peak storage-adapter
+// resources; transaction and retained-history quotas remain additive. Zero
+// fields select documented defaults.
+type EncryptionWALLimits struct {
+	MaxSegments       uint32
+	MaxFrames         uint64
+	MaxSegmentFrames  uint32
+	MaxSegmentBytes   uint64
+	MaxBytes          uint64
+	MaxRootBytes      uint32
+	MaxOverlayPages   uint32
+	MaxMemoryBytes    uint64
+	MaxOpenFiles      uint32
+	MaxScanBytes      uint64
+	MaxOperationBytes uint64
+	MaxReplaySteps    uint64
+}
 
 // EncryptionOptions selects experimental encrypted storage explicitly. Raw keys
 // and passwords are borrowed from a code-configured provider, never a DSN/SQL
@@ -27,13 +50,14 @@ type EncryptionOptions struct {
 	DerivationBudget *encryption.DerivationBudget
 	Limits           encryption.Limits
 	Mode             EncryptionMode
+	WALLimits        EncryptionWALLimits
 	// Retained ciphertext and abandoned candidates are charged before publication.
 	// Defaults: 256 successful generations, 1 GiB family bytes, 16384 directory entries.
 	// Backup/restore to a fresh family resets generation history without deleting it.
 	MaxGenerations   uint64
 	MaxRetainedBytes uint64
-	// MaxDirectoryEntries limits scan work, including unrelated names. A commit
-	// may add entries; later writes refuse if the next inventory exceeds this cap.
+	// MaxDirectoryEntries limits scanned entries, including unrelated names.
+	// Publication also reserves its own known upcoming entries.
 	MaxDirectoryEntries uint32
 }
 
@@ -41,20 +65,25 @@ func (EncryptionOptions) Format(s fmt.State, verb rune) {
 	_, _ = s.Write([]byte("sqlite.EncryptionOptions{redacted}"))
 }
 func (o EncryptionOptions) storageOptions() encstore.Options {
-	return encstore.Options{KeyProvider: o.KeyProvider, CredentialKind: o.CredentialKind, CreateKDF: o.CreateKDF, KDFPolicy: o.KDFPolicy, DerivationBudget: o.DerivationBudget, Limits: o.Limits, MaxGenerations: o.MaxGenerations, MaxRetainedBytes: o.MaxRetainedBytes, MaxDirectoryEntries: o.MaxDirectoryEntries}
+	return encstore.Options{Mode: encstore.Mode(o.Mode), WALLimits: encstore.WALLimits(o.WALLimits), KeyProvider: o.KeyProvider, CredentialKind: o.CredentialKind, CreateKDF: o.CreateKDF, KDFPolicy: o.KDFPolicy, DerivationBudget: o.DerivationBudget, Limits: o.Limits, MaxGenerations: o.MaxGenerations, MaxRetainedBytes: o.MaxRetainedBytes, MaxDirectoryEntries: o.MaxDirectoryEntries}
 }
 func (o EncryptionOptions) validate() error {
-	if o.Mode != EncryptionSnapshot {
+	if o.Mode != EncryptionSnapshot && o.Mode != EncryptionWAL {
 		return ErrUnsupported
 	}
 	return o.storageOptions().Validate()
 }
 
-// EncryptionInfo describes a fully authenticated physical snapshot. It does not
+// EncryptionInfo describes a fully authenticated selected logical head. It does not
 // assert a global SQL/index integrity audit or protection against whole-snapshot
 // rollback. RetainsHistory means prior ciphertext remains on disk and remains
 // decryptable with its prior credential; no secure deletion is performed.
 type EncryptionInfo struct {
+	Mode                EncryptionMode
+	StorageLayout       uint16
+	WALSegments         uint32
+	WALFrames, WALBytes uint64
+	HeadCommitID        [32]byte
 	PageSize, PageCount uint32
 	DatabaseID          [16]byte
 	CommitSequence      uint64
@@ -62,7 +91,7 @@ type EncryptionInfo struct {
 }
 
 func encryptionInfo(i encstore.Info) EncryptionInfo {
-	return EncryptionInfo{PageSize: i.PageSize, PageCount: i.PageCount, DatabaseID: i.DatabaseID, CommitSequence: i.CommitSequence, RetainsHistory: i.RetainsHistory}
+	return EncryptionInfo{Mode: EncryptionMode(i.Mode), StorageLayout: i.StorageLayout, WALSegments: i.WALSegments, WALFrames: i.WALFrames, WALBytes: i.WALBytes, HeadCommitID: i.HeadCommitID, PageSize: i.PageSize, PageCount: i.PageCount, DatabaseID: i.DatabaseID, CommitSequence: i.CommitSequence, RetainsHistory: i.RetainsHistory}
 }
 func (d *DB) encryptedSession() (*pager.EncryptedSession, error) {
 	if d.closed {
@@ -105,6 +134,9 @@ func (d *DB) Rekey(ctx context.Context, target EncryptionOptions) error {
 	}
 	d.mu.Lock()
 	s, err := d.encryptedSession()
+	if err == nil && target.Mode != d.opts.Encryption.Mode {
+		err = ErrUnsupported
+	}
 	if err == nil && d.opts.ReadOnly {
 		err = ErrReadOnly
 	}
@@ -142,4 +174,45 @@ func (d *DB) Rekey(ctx context.Context, target EncryptionOptions) error {
 	cfg := target
 	d.opts.Encryption = &cfg
 	return nil
+}
+
+// UpgradeEncryptedWAL explicitly materializes a snapshot family into layout 2.
+// It requires a writable quiescent connection and preserves old ciphertext.
+// Reopen with EncryptionWAL; mode selection never silently changes on Open.
+func (d *DB) UpgradeEncryptedWAL(ctx context.Context) error {
+	if err := checkContext(ctx); err != nil {
+		return wrap("upgrade encrypted WAL", err)
+	}
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	s, err := d.encryptedSession()
+	if err != nil {
+		return wrap("upgrade encrypted WAL", err)
+	}
+	if d.opts.ReadOnly {
+		return wrap("upgrade encrypted WAL", ErrReadOnly)
+	}
+	if d.tx != nil || len(d.rows) != 0 {
+		return wrap("upgrade encrypted WAL", ErrBusy)
+	}
+	if d.opts.Encryption.Mode != EncryptionSnapshot {
+		return wrap("upgrade encrypted WAL", ErrUnsupported)
+	}
+	if err = d.validateEncryptedCopyLocked(ctx, s); err != nil {
+		return wrap("upgrade encrypted WAL", err)
+	}
+	if err = s.UpgradeWAL(ctx); err != nil {
+		return wrap("upgrade encrypted WAL", err)
+	}
+	cfg := *d.opts.Encryption
+	cfg.Mode = EncryptionWAL
+	d.opts.Encryption = &cfg
+	return nil
+}
+
+func (o EncryptionOptions) validateArchive() error {
+	if o.Mode != EncryptionSnapshot {
+		return ErrUnsupported
+	}
+	return o.validate()
 }

@@ -1,0 +1,70 @@
+2026-10-10T13:09:29Z
+Final new regression/example supplement; full aggregate may have enumerated earlier package list.
+CGO_ENABLED=0 go test ./extension/vector ./examples/encrypted-wal ./migration/postgres ./cmd/gosqlite -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	0.503s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-wal	0.029s
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	0.081s
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.033s
+CGO_ENABLED=1 go test -race ./extension/vector ./examples/encrypted-wal -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	5.988s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-wal	1.064s
+Created, changed, queried, and authenticated an encrypted WAL head (3 segments).
+Normally closed and reopened with the same key; the committed segments remain selected.
+Checkpointed and reopened read-only: zero selected segments, same data, retained ciphertext history.
+The key stayed in memory; disposable files will now be removed (not securely erased).
+# pg_embedding inspection
+
+Status: review\_required
+
+Source profile: pg\_embedding-0.3.6@5d48508aeaeb86b9e9c630468ada7a124b905795
+
+Target reference: pgvector-0.8.7@f37c13f68b57d2c3472b2214fbcff699d6d34876
+
+Catalog SHA-256: bdb6e93d8e95112231c892ad5a6653ca72ccd66297efa99446ac0f2610b8f804
+
+## Columns
+- "public"."documents"."embedding": legacy\_vector; selected=true; dimensions=3; safe; validation=exhaustive
+- "public"."documents"."ordinary\_samples": unrelated\_real\_array\_candidate; selected=false; dimensions=0; safe; validation=not\_run
+
+## Indexes
+- "public"."custom nearest": safe; identity verified=true; old m=16, efconstruction=64, efsearch=64
+- "public"."documents\_cosine": safe; identity verified=true; old m=16, efconstruction=64, efsearch=64
+- "public"."documents\_manhattan": safe; identity verified=true; old m=16, efconstruction=64, efsearch=64
+
+## Findings
+- warning / efsearch\_scope\_change / "public"."custom nearest": Legacy per-index efsearch becomes an explicit PostgreSQL session/transaction setting or local VectorSearchOptions.EFSearch, never a CREATE INDEX option.
+- warning / efsearch\_scope\_change / "public"."documents\_cosine": Legacy per-index efsearch becomes an explicit PostgreSQL session/transaction setting or local VectorSearchOptions.EFSearch, never a CREATE INDEX option.
+- warning / efsearch\_scope\_change / "public"."documents\_manhattan": Legacy per-index efsearch becomes an explicit PostgreSQL session/transaction setting or local VectorSearchOptions.EFSearch, never a CREATE INDEX option.
+- warning / hnsw\_access\_method\_collision / access\_method.hnsw: Both pinned extensions own database-wide hnsw. A side-by-side unmodified extension installation is not a valid in-place migration plan.
+- warning / application\_sql\_inventory\_incomplete / scope: Catalog inspection cannot discover arbitrary application or dynamic SQL; supplied SQL corpus is not yet converted by this inspector.
+- warning / current\_neon\_chapter\_absent / source: Current Neon target page was retrieved on 2026-10-10; its requested migration chapter is absent. The official historical 2024-01-23 chapter is a separate reference, not current-page conformance.
+- warning / numeric\_semantics\_difference / source: Legacy distances return architecture-sensitive float32; local metrics use compensated float64, and cosine rejects zero norms. Exact result-bit equality is not claimed.
+
+## Approval points
+- Retain source arrays and immutable export; retuning index parameters requires explicit review and new recall measurements.
+- Review maintenance-window or separate-database strategy for the database-wide hnsw access-method collision.
+- Review target installation/version, privileges, dependency inventory and application query changes before PostgreSQL execution.
+2eb16d98eb3fa8bcac783b577a03c96485af6468bf8bb08c2208de97d749c097  ../m8b-cli-a
+2eb16d98eb3fa8bcac783b577a03c96485af6468bf8bb08c2208de97d749c097  ../m8b-cli-b
+../m8b-cli-a: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), statically linked, Go BuildID=Fk05g-9BWs3uiwPiQaGL/aNlqpIsg1vqLVaRZgHdm/cDR_YEifb_rmnfMTxS21/U_Arxl35vZErIOUsroFb, BuildID[sha1]=f1ce2abed5390c8d60c70fa1cd1e57406d882632, with debug_info, not stripped
+gosqlite 0.0.0-dev; Go 1.27.2; SQLite behavior baseline 3.54.0
+../m8b-cli-a: go1.27.2
+	path	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite
+	mod	github.com/ms-xiaosnow/gosqlite	v0.0.0-20261010123858-bd6b19c9e88b+dirty	
+	dep	golang.org/x/crypto	v0.58.0	h1:COkYLr4k7nDI4r6QtMML2AfzeIswWHAJthLS6K/M/54=
+	dep	golang.org/x/sys	v0.49.0	h1:XbzkgYJHdqh/8m2Uu0W/dQv8nktxx4BFHp1M0gROTXA=
+	dep	golang.org/x/text	v0.43.0	h1:1QivrlhwAsnMOcqgOdl9my7s9OyZl8O5/UGUTJVXoWc=
+	build	-buildmode=exe
+	build	-compiler=gc
+	build	-trimpath=true
+	build	CGO_ENABLED=0
+	build	GOARCH=amd64
+	build	GOOS=linux
+	build	GOAMD64=v1
+	build	vcs=git
+	build	vcs.revision=bd6b19c9e88b7729fa0db953b6e280cd15ced239
+	build	vcs.time=2026-10-10T12:38:58Z
+	build	vcs.modified=true
+Build VCS identity is the prepublication dirty tree, not a claim of a future commit identity.
+2026-10-10T13:09:39Z
+SUPPLEMENT PASS

@@ -16,7 +16,7 @@ import (
 )
 
 // QueryPlan describes the actual source access path. SEARCH names the real
-// method: covering posting ranges or lazy ANN traversal. Every candidate still
+// method: ordinary key/rowid seeks, covering posting ranges, or lazy ANN traversal. Every candidate still
 // evaluates the original WHERE. EXPLAIN does not execute either search.
 type QueryPlan struct {
 	ANNOpclass                                  string
@@ -64,6 +64,12 @@ type QueryPlan struct {
 // are logical records/keys/probes, never total shadow I/O or B-tree page I/O.
 // PeakBytes is conservative retained-memory accounting, not allocator/RSS use.
 type QueryStats struct {
+	// Ordinary B-tree work only: returned prefix keys, actual range-page reads
+	// (including seek probes), and base rowid seek attempts. Schema reads and
+	// grams/ANN probes are excluded. Abandoned budgeted range work is retained.
+	IndexKeysRead          int64
+	IndexPageReads         int64
+	RowIDSeeks             int64
 	ANNStateReads          int64
 	ANNNodeReads           int64
 	ANNEdgeReads           int64
@@ -107,6 +113,10 @@ func (p QueryPlan) Detail() string {
 		detail = fmt.Sprintf("%s %s; reason=%s", p.Access, p.Table, p.Reason)
 	} else if p.Method == "hnsw" || p.Method == "ivfflat" {
 		detail = fmt.Sprintf("SEARCH %s USING %s %s v%d; fields=%s; original_where_recheck=%t; content_rowid_seek=true; approximate_recall=true", p.Table, strings.Join(p.Indexes, ","), p.Method, p.MethodVersion, strings.Join(p.Fields, ","), p.Recheck)
+	} else if p.Method == "rowid" {
+		detail = fmt.Sprintf("SEARCH %s USING INTEGER PRIMARY KEY (rowid=?); original_where_recheck=true; content_rowid_seek=true; reason=%s", p.Table, p.Reason)
+	} else if p.Method == "btree" {
+		detail = fmt.Sprintf("SEARCH %s USING INDEX %s; method=btree; equality_prefix=%s; original_where_recheck=true; content_rowid_seek=true; covering=false; order_satisfied=false; estimated_candidates=%d; reason=%s", p.Table, strings.Join(p.Indexes, ","), strings.Join(p.Fields, ","), p.EstimatedCandidates, p.Reason)
 	} else if p.Method == "grams13" {
 		detail = fmt.Sprintf("SEARCH %s USING %s %s v%d; fields=%s; namespace=%s; grams=%v; estimated_candidates=%d; original_where_recheck=true; covering_posting_ranges=true; content_rowid_seek=true", p.Table, strings.Join(p.Indexes, ","), p.Method, p.MethodVersion, strings.Join(p.Fields, ","), p.Namespace, p.GramLengths, p.EstimatedCandidates)
 	} else {

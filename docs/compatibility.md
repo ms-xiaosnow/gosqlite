@@ -7,7 +7,7 @@ Behavior baseline: official SQLite 3.54.0. M2 implements a deliberately bounded 
 | Native Go builds | verified | Go 1.27.2, CGO_ENABLED=0; no production SQLite subprocess or C dependency |
 | SQLite header/records | partial | format3, UTF-8, rollback-mode header; page sizes 512/4096/65536 exercised; integer widths/REAL/NULL/TEXT/BLOB |
 | Rowid B-trees | partial | leaf/interior, signed rowids, overflow, streaming, schema root1 including schema overflow |
-| Ordinary secondary indices | partial | create/traverse/seek/maintain nonunique BINARY ASC keys; index pages interoperate with official SQLite; SELECT index optimization unsupported |
+| Ordinary secondary indices | partial | create/maintain nonunique BINARY ASC keys; actual rowid/IPK equality and leading-prefix equality SELECT seeks with residual recheck; unsupported shapes scan; no general range/covering/order optimization |
 | Native file locking | partial | Linux OFD shared/reserved/pending/exclusive byte-range locks; non-Linux Open fails explicitly |
 | SELECT | partial | one rowid table or no FROM; projection, *, WHERE, parameters, ORDER BY, LIMIT/OFFSET; aliases and rowid/IPK semantics |
 | Expressions | partial | NULL3VL, comparisons/affinity, arithmetic/bitwise/concat, ASCII-insensitive rune LIKE with ESCAPE, tested scalar builtins |
@@ -25,8 +25,9 @@ Behavior baseline: official SQLite 3.54.0. M2 implements a deliberately bounded 
 | HNSW | conditional ordinary first slice | real persisted lazy graph, transactional tombstones/reindex, filtered widening/exact fallback, native explicit approximate and eligible SQL planner; measured recall with slower small-data latency |
 | IVFFlat | conditional ordinary implementation | deterministic bounded training, fixed-centroid transactional membership, real selected-list reads, exact rescoring/fallback and diagnostics; no universal recall/speedup claim |
 | encrypted snapshot / rekey / backup | experimental ordinary slice | authenticated root/base, Linux stable locks, full snapshot publication, correct-key rekey/backup/restore and plaintext import/export; retained history and namespace/freshness limitations |
-| encrypted WAL | unsupported required code | snapshot publication is an intermediate slice, not encrypted WAL or shared writer/readers |
-| Neon migration / extended vectors | unsupported | M9 not started |
+| encrypted WAL | experimental ordinary slice | immutable authenticated final-dirty-page segments, bounded complete-head replay, checkpoint/rekey/copy and explicit snapshot upgrade; concurrent encrypted writer/readers remain required code |
+| pg_embedding migration inspector | partial | bounded local catalog/real-array inspection and deterministic identity-aware reports; converter/import/transition templates remain required code; no live PostgreSQL execution |
+| extended vector values | partial memory primitives | distinct half/bit/sparse codecs, metrics, conversions, nullable adapters, subvector/quantization; SQL/storage/ANN integration remains required code |
 | release audits / native OS evidence | unsupported | M10 not started; cross-build success is not native-runtime evidence |
 
 Unimplemented SQL/PRAGMAs return explicit errors. JOIN, aggregate/grouping, subqueries, CTEs, window functions, DISTINCT, UNION, scalar COLLATE (CREATE INDEX COLLATE BINARY is accepted), CASE, IN/BETWEEN, general views/triggers, STRICT, WITHOUT ROWID, autovacuum, UTF-16 and unlisted schema grammar remain unsupported. Some storage mechanisms can safely coexist in a read-only file without their SQL being executable.
@@ -68,4 +69,18 @@ M7 HNSW supports dimensions1..2000, four matching metric/opclass pairs, immutabl
 
 IVFFlat supports dense dimensions up to2000, L2/cosine/negative-IP, bounded minhash training and fixed centroids until REINDEX. Too few trainable rows persist untrained state; DML does not silently retrain. Cosine zero norms reject; IP zero source values remain members and zero queries work. Probes count selected centroid ranges; all-list requests truthfully SCAN. Cumulative centroid/member/source work is retained through fallback. First matching catalog index can mask a later trained index; native Index selects explicitly. See ann.md.
 
-Encrypted files use an independent GSQLENC1 container, not SQLite plaintext or SEE. The experimental snapshot mode locks writers exclusively for connection lifetime; read-only connections may share. Native WAL options reject. Commit/rekey retain old ciphertext; key rotation is not historical revocation or secure deletion. MaxGenerations/MaxRetainedBytes/MaxDirectoryEntries bound publication inventory/work, not automatic garbage collection. Whole valid-family replacement or historic replay under reused credentials is not prevented without external identity/freshness. Canonical parent paths are not continuously pinned directory namespaces. Plaintext import currently accepts only rollback mode and a single-link source. See encryption-storage.md and security.md.
+Encrypted files use an independent GSQLENC1 container, not SQLite plaintext or SEE. Both experimental snapshot and dirty-segment WAL modes lock writers exclusively for connection lifetime; read-only connections may share. Native WAL options reject. Commit/rekey retain old ciphertext; key rotation is not historical revocation or secure deletion. MaxGenerations/MaxRetainedBytes/MaxDirectoryEntries bound publication inventory/work, not automatic garbage collection. Whole valid-family replacement or historic replay under reused credentials is not prevented without external identity/freshness. Linux live family operations use pinned parent-directory descriptors with relative opens/publication and identity checks; initial path resolution and hostile namespace protection remain limited. Plaintext import currently accepts only rollback mode and a single-link source. See encryption-storage.md and security.md.
+
+Ordinary equality planning is conservative: ANN/grams plans retain precedence,
+NOT INDEXED forces scans, candidate rowids are sorted before source seeks, and
+error-capable residual predicates keep the prior scan path. BINARY ASC nonunique
+leading equality is supported; inequality ranges, reverse scans, covering reads,
+ORDER BY elimination and general collations remain unimplemented. See ordinary-index.md.
+
+Extended values preserve dense GSVv1 and use distinct GSH/GSB/GSS encodings, not
+PostgreSQL binary wire/COPY. Half conversion is explicit and may lose precision;
+sparse dimensions can reach 1e9 while work scales with at most 16000 nonzeros.
+Bit zero/zero Jaccard is 1 per the pinned reference. Finite float64 accumulation
+and stricter malformed sparse-zero-index validation intentionally differ from
+some upstream outputs. Published fixtures are source evidence, not a running
+PostgreSQL comparison. No extended SQL type or extended ANN index is enabled yet.

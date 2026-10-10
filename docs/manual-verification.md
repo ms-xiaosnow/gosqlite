@@ -181,8 +181,9 @@ standalone catalog validator had zero default connection quotas. The shared
 normalization fix and unchanged test rerun are retained separately in
 m8-snapshot-initial-default-limit-failure.txt and m8-snapshot-oracle-focused.txt.
 
-Snapshot-only encrypted storage/rekey/backup now exists. Encrypted WAL and its
-concurrent snapshots remain required code, not merely unrun tests. Wrong-key or
+At this historical snapshot checkpoint, encrypted WAL and concurrent snapshots
+remained required code. The later dirty-WAL increment below implements segments;
+simultaneous encrypted writer/readers remain required code, not merely unrun tests. Wrong-key or
 tampered-on-disk checks, interrupted root/rekey publication, crash/forced-exit,
 physical I/O faults and hot recovery remain BLOCKED/NOT_RUN. Do not run them here
 or move them elsewhere to bypass restrictions. Full M8 and production acceptance
@@ -191,3 +192,37 @@ also require independent cryptographic/security review and native platform proof
 M7 HNSW Library restore completed full ordinary unit/vet/build/race and pinned
 oracle exit0 at2026-10-10T12:12:46Z; exact-SHA CI passed. See
 m7-library-restore-recheck.txt and checkpoints.json. This does not qualify recovery.
+
+## Ordinary B-tree, encrypted dirty-WAL and M9 prerequisite verification
+
+Only intact-file/correct-key ordinary operations and bounded pure-memory negative
+cases are included. Commands and exact outcomes are retained per component and
+aggregate under evidence/; an inventory entry is not an assertion that an absent
+result passed.
+
+```sh
+CGO_ENABLED=0 go test ./... -count=1
+CGO_ENABLED=0 go vet ./...
+CGO_ENABLED=0 go build -trimpath ./...
+CGO_ENABLED=1 go test -race ./... -count=1
+CGO_ENABLED=0 SQLITE_ORACLE=/absolute/path/to/verified/sqlite3 go test -tags oracle ./... -count=1
+CGO_ENABLED=1 SQLITE_ORACLE=/absolute/path/to/verified/sqlite3 go test -race -tags oracle ./internal/testkit -run '^TestOracleEncryptedWALCompleteHead$' -count=1
+CGO_ENABLED=0 go run ./examples/encrypted-wal
+```
+
+The WAL test explicitly exports plaintext for the official SQLite oracle; SQLite
+never reads or implements the encrypted container. Retained-head normal reopen,
+checkpoint, rekey and complete-head backup/restore/import/export are successful
+ordinary workflows. Memory-only root/segment mutations do not alter disk files.
+Neither sparse publication nor marker absence qualifies physical crash safety.
+
+The migration inspector reads local synthetic fixtures and public reference
+source. It does not connect to PostgreSQL or execute the catalog-export SQL.
+Extended half/bit/sparse tests are pure-memory math/codec checks, not SQL/ANN
+integration. Their published upstream outputs are not live pgvector execution.
+
+Previous snapshot Library restore passed complete ordinary gates and pinned oracle
+exit0 at2026-10-10T12:55:04Z; CI38052742168 succeeded for exact bd6b19c9e88b7729fa0db953b6e280cd15ced239.
+See m8-library-restore-recheck.txt. Restricted physical recovery/security gates
+remain BLOCKED/NOT_RUN; simultaneous encrypted writer/readers and other missing
+code remain implementation work.

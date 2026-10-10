@@ -34,6 +34,9 @@ func (d *DB) validateCopy(ctx context.Context, r pager.SnapshotReader) error {
 	return btree.CheckOwnership(ctx, r, roots, free)
 }
 func (d *DB) validateEncryptedCopyLocked(ctx context.Context, s *pager.EncryptedSession) error {
+	if err := s.CopyBudget(); err != nil {
+		return err
+	}
 	r, err := s.Reader(ctx)
 	if err != nil {
 		return err
@@ -60,7 +63,7 @@ func (d *DB) BackupEncrypted(ctx context.Context, destination string, target Enc
 	if err := checkContext(ctx); err != nil {
 		return EncryptionInfo{}, wrap("encrypted backup", err)
 	}
-	if err := target.validate(); err != nil {
+	if err := target.validateArchive(); err != nil {
 		return EncryptionInfo{}, wrap("encrypted backup", err)
 	}
 	// Target credentials are acquired before taking engine mutexes.
@@ -118,7 +121,7 @@ func RestoreEncrypted(ctx context.Context, archivePath, destination string, sour
 	if err := checkContext(ctx); err != nil {
 		return EncryptionInfo{}, wrap("encrypted restore", err)
 	}
-	if err := source.validate(); err != nil {
+	if err := source.validateArchive(); err != nil {
 		return EncryptionInfo{}, wrap("encrypted restore", err)
 	}
 	if err := target.validate(); err != nil {
@@ -148,7 +151,7 @@ func RestoreEncrypted(ctx context.Context, archivePath, destination string, sour
 // ImportEncrypted copies a supported ordinary rollback-mode SQLite snapshot to
 // a different absent encrypted destination. It never modifies/deletes the
 // plaintext source or erases existing plaintext copies. Native WAL imports are
-// deliberately unsupported in this first snapshot-only integration.
+// deliberately unsupported for this copy path.
 func ImportEncrypted(ctx context.Context, sourcePath, destination string, plain Options, target EncryptionOptions) (EncryptionInfo, error) {
 	if err := checkContext(ctx); err != nil {
 		return EncryptionInfo{}, wrap("encrypted import", err)

@@ -11,6 +11,9 @@ import (
 // WriteBackup creates one self-contained authenticated archive. Existing
 // destinations are never replaced; any partial encrypted output is retained.
 func WriteBackup(ctx context.Context, destination string, target *Prepared, g Geometry, src PageSource) (Info, error) {
+	if target.Options.Mode != Snapshot {
+		return Info{}, ErrUnsupported
+	}
 	path, err := canonical(destination)
 	if err != nil {
 		return Info{}, err
@@ -29,6 +32,14 @@ func WriteBackup(ctx context.Context, destination string, target *Prepared, g Ge
 	if _, err = charge(0, objectSize(g), maxBytes); err != nil {
 		return Info{}, err
 	}
+	l, err := target.Options.WALLimits.normalized()
+	if err != nil {
+		return Info{}, err
+	}
+	if target.writerIDs >= encryption.MaxFilesPerMaster || (target.writerIDs+1)*128 > l.MaxMemoryBytes {
+		return Info{}, encryption.ErrLimit
+	}
+	target.writerIDs++
 	o, err := writeObject(ctx, func([32]byte) string { return path }, target.Master, target.Options.Limits, d, src)
 	if err != nil {
 		return Info{}, err
@@ -46,6 +57,9 @@ type Archive struct {
 }
 
 func OpenBackup(ctx context.Context, path string, options Options) (*Archive, error) {
+	if options.Mode != Snapshot {
+		return nil, ErrUnsupported
+	}
 	if err := options.Validate(); err != nil {
 		return nil, err
 	}

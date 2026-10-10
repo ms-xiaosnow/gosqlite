@@ -1,0 +1,16 @@
+Sat Oct 10 13:01:08 UTC 2026
+=== RUN   TestOracleEncryptedWALCompleteHead
+=== RUN   TestOracleEncryptedWALCompleteHead/512
+    encrypted_wal_conformance_test.go:79: page size=512 logical pages=574 committed segments=1 frames=164 bytes=92112
+=== RUN   TestOracleEncryptedWALCompleteHead/4096
+    encrypted_wal_conformance_test.go:79: page size=4096 logical pages=80 committed segments=1 frames=48 bytes=199648
+=== RUN   TestOracleEncryptedWALCompleteHead/65536
+    encrypted_wal_conformance_test.go:79: page size=65536 logical pages=21 committed segments=1 frames=19 bytes=1246948
+--- PASS: TestOracleEncryptedWALCompleteHead (17.87s)
+    --- PASS: TestOracleEncryptedWALCompleteHead/512 (5.02s)
+    --- PASS: TestOracleEncryptedWALCompleteHead/4096 (3.89s)
+    --- PASS: TestOracleEncryptedWALCompleteHead/65536 (8.95s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	17.880s
+Sat Oct 10 13:01:26 UTC 2026
+exit=0

@@ -3,10 +3,8 @@ package encstore
 import (
 	"bytes"
 	"context"
-	"crypto/rand"
 	"crypto/sha256"
 	"errors"
-	"math"
 	"os"
 	"path/filepath"
 
@@ -17,18 +15,24 @@ import (
 // retained throughout its lifetime. Historical encrypted objects/roots are
 // retained, never automatically selected or garbage-collected.
 type Store struct {
-	path      string
-	opts      Options
-	readOnly  bool
-	lock      *os.File
-	lockInfo  os.FileInfo
-	root      *os.File
-	rootInfo  os.FileInfo
-	rootBytes []byte
-	header    encryption.Header
-	master    *encryption.MasterKey
-	base      *object
-	poisoned  error
+	writerIDs   uint64
+	ns          *namespace
+	wal         *walManifest
+	segments    []*segment
+	overlay     []location
+	baseCeiling uint32
+	path        string
+	opts        Options
+	readOnly    bool
+	lock        *os.File
+	lockInfo    os.FileInfo
+	root        *os.File
+	rootInfo    os.FileInfo
+	rootBytes   []byte
+	header      encryption.Header
+	master      *encryption.MasterKey
+	base        *object
+	poisoned    error
 }
 
 func canonical(path string) (string, error) {
@@ -89,7 +93,17 @@ func acquire(path string, readOnly, create bool) (*Store, bool, error) {
 	if err = rejectPlainSidecars(path); err != nil {
 		return nil, false, err
 	}
-	f, info, err := checkedFile(path+".gse-lock", flags)
+	ns, err := newNamespace(path)
+	if err != nil {
+		return nil, false, err
+	}
+	kept := false
+	defer func() {
+		if !kept {
+			_ = ns.dir.Close()
+		}
+	}()
+	f, info, err := ns.checked(path+".gse-lock", flags)
 	if err != nil {
 		return nil, false, err
 	}
@@ -105,7 +119,7 @@ func acquire(path string, readOnly, create bool) (*Store, bool, error) {
 	if err = lockFile(f, readOnly); err != nil {
 		return nil, false, err
 	}
-	if err = stableFile(f, path+".gse-lock", info); err != nil {
+	if err = ns.stable(f, path+".gse-lock", info); err != nil {
 		return nil, false, err
 	}
 	// Recheck the root only after acquiring the stable lease.
@@ -120,8 +134,12 @@ func acquire(path string, readOnly, create bool) (*Store, bool, error) {
 	if err = rejectPlainSidecars(path); err != nil {
 		return nil, false, err
 	}
+	if err = ns.check(); err != nil {
+		return nil, false, err
+	}
 	ok = true
-	return &Store{path: path, readOnly: readOnly, lock: f, lockInfo: info}, absent, nil
+	kept = true
+	return &Store{path: path, readOnly: readOnly, lock: f, lockInfo: info, ns: ns}, absent, nil
 }
 
 func Open(ctx context.Context, path string, o Options, readOnly, create bool, initial []byte) (*Store, error) {
@@ -180,16 +198,16 @@ func Open(ctx context.Context, path string, o Options, readOnly, create bool, in
 			return nil, err
 		}
 	} else {
-		f, info, e := checkedFile(s.path, os.O_RDONLY)
+		f, info, e := s.ns.checked(s.path, os.O_RDONLY)
 		if e != nil {
 			return nil, e
 		}
 		s.root = f
 		s.rootInfo = info
-		if info.Size() != rootSize {
-			return nil, encryption.ErrFormat
+		if e = rootExtent(info.Size(), o); e != nil {
+			return nil, e
 		}
-		raw, e := readExact(f, rootSize, 0)
+		raw, e := readExact(f, int(info.Size()), 0)
 		if e != nil {
 			return nil, e
 		}
@@ -205,24 +223,11 @@ func Open(ctx context.Context, path string, o Options, readOnly, create bool, in
 			return nil, e
 		}
 		s.master = m
-		manifest, e := openRoot(raw, m, o.Limits)
-		if e != nil {
-			return nil, e
-		}
-		desc := h.Descriptor
-		desc.Role = encryption.FileBase
-		desc.RecordCount = uint64(desc.PageCount) + 2
-		if manifest.BaseBytes != objectSize(Geometry{desc.PageSize, desc.PageCount}) {
-			return nil, encryption.ErrFormat
-		}
-		expected := encryption.FileIdentity{DatabaseID: h.Epoch.DatabaseID, EpochID: h.Epoch.EpochID, FileID: manifest.BaseID, Role: encryption.FileBase}
-		obj, e := openObject(ctx, s.basePath(manifest.BaseID), m, o.Limits, expected, &desc, &manifest.BaseHash, &manifest.PageOneHash)
-		if e != nil {
-			return nil, e
-		}
-		s.base = obj
 		s.header = h
 		s.rootBytes = raw
+		if e = s.openSelection(ctx); e != nil {
+			return nil, e
+		}
 	}
 	if err = s.Check(); err != nil {
 		return nil, err
@@ -261,7 +266,10 @@ func (s *Store) Check() error {
 	if s.lock == nil {
 		return encryption.ErrClosed
 	}
-	if err := stableFile(s.lock, s.path+".gse-lock", s.lockInfo); err != nil {
+	if err := s.ns.check(); err != nil {
+		return err
+	}
+	if err := s.ns.stable(s.lock, s.path+".gse-lock", s.lockInfo); err != nil {
 		return err
 	}
 	if s.root == nil {
@@ -270,21 +278,33 @@ func (s *Store) Check() error {
 		}
 		return nil
 	}
-	if err := stableFile(s.root, s.path, s.rootInfo); err != nil {
+	if err := s.ns.stable(s.root, s.path, s.rootInfo); err != nil {
 		return err
 	}
-	raw, err := readExact(s.root, rootSize, 0)
+	raw, err := readExact(s.root, len(s.rootBytes), 0)
 	if err != nil {
 		return err
 	}
 	if !bytes.Equal(raw, s.rootBytes) {
 		return encryption.ErrAuthentication
 	}
-	return stableFile(s.base.file, s.base.path, s.base.info)
+	return s.ns.stable(s.base.file, s.base.path, s.base.info)
 }
 func (s *Store) ReadPage(ctx context.Context, n uint32) ([]byte, error) {
 	if err := s.Check(); err != nil {
 		return nil, err
+	}
+	if n == 0 || n > s.Geometry().PageCount {
+		return nil, encryption.ErrIdentity
+	}
+	if s.wal != nil {
+		loc := s.overlay[n]
+		if loc.source != 0 {
+			return s.segments[loc.source-1].readPage(ctx, n, loc.ordinal)
+		}
+		if n > s.baseCeiling {
+			return nil, encryption.ErrFormat
+		}
 	}
 	return s.base.readPage(ctx, n)
 }
@@ -292,12 +312,15 @@ func (s *Store) Verify(ctx context.Context) error {
 	if err := s.Check(); err != nil {
 		return err
 	}
+	if s.wal != nil {
+		return s.verifyWAL(ctx)
+	}
 	m, err := openRoot(s.rootBytes, s.master, s.opts.Limits)
 	if err != nil {
 		return err
 	}
 	desc := s.base.header.Descriptor
-	o, err := openObject(ctx, s.base.path, s.master, s.opts.Limits, s.base.header.Identity(), &desc, &m.BaseHash, &m.PageOneHash)
+	o, err := openObject(ctx, s.base.path, s.master, s.opts.Limits, s.base.header.Identity(), &desc, &m.BaseHash, &m.PageOneHash, s.ns)
 	if err != nil {
 		return err
 	}
@@ -310,198 +333,14 @@ func syncDirectory(path string) error {
 	}
 	return errors.Join(f.Sync(), f.Close())
 }
-func writeSmall(path string, raw []byte) error {
-	f, _, err := checkedFile(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL)
-	if err != nil {
-		return err
-	}
-	err = writeBytes(f, raw)
-	if err == nil {
-		err = f.Sync()
-	}
-	return errors.Join(err, f.Close())
-}
-func retain(path string, raw []byte) error {
-	err := writeSmall(path, raw)
-	if !os.IsExist(err) {
-		return err
-	}
-	f, info, e := checkedFile(path, os.O_RDONLY)
-	if e != nil {
-		return e
-	}
-	defer f.Close()
-	if info.Size() != int64(len(raw)) {
-		return ErrChanged
-	}
-	b, e := readExact(f, len(raw), 0)
-	if e != nil {
-		return e
-	}
-	if !bytes.Equal(b, raw) {
-		return ErrChanged
-	}
-	return nil
-}
-
-// Publish creates and verifies new immutable objects before replacing the only
-// authoritative root. Errors after the rename attempt poison this session and
-// preserve both generations. No crash/fault durability qualification is implied.
-func (s *Store) Publish(ctx context.Context, g Geometry, src PageSource, target *Prepared) error {
-	if s.readOnly {
-		return ErrReadOnly
-	}
-	if err := s.Check(); err != nil {
-		return err
-	}
-	if err := ctx.Err(); err != nil {
-		return err
-	}
-	master, opts := s.master, s.opts
-	if target != nil {
-		master, opts = target.Master, target.Options
-	}
-	if master == nil {
-		return encryption.ErrClosed
-	}
-	geometryDescriptor := encryption.FileDescriptor{Role: encryption.FileBase, PageSize: g.PageSize, PageCount: g.PageCount, RecordCount: uint64(g.PageCount) + 2}
-	if err := geometryDescriptor.Validate(opts.Limits); err != nil {
-		return err
-	}
-	seq := s.header.Descriptor.CommitSequence
-	if seq == math.MaxUint64 {
-		return encryption.ErrLimit
-	}
-	seq++
-	if err := publicationBudget(ctx, s.path, opts, g, seq, s.root != nil); err != nil {
-		return err
-	}
-	var txid, parent [32]byte
-	if _, err := rand.Read(txid[:]); err != nil {
-		return encryption.ErrRandomness
-	}
-	if s.root != nil {
-		parent = sha256.Sum256(s.rootBytes)
-	}
-	desc := encryption.FileDescriptor{Role: encryption.FileBase, PageSize: g.PageSize, PageCount: g.PageCount, RecordCount: uint64(g.PageCount) + 2, CommitSequence: seq, TransactionID: txid, ParentCommitID: parent}
-	obj, err := writeObject(ctx, s.basePath, master, opts.Limits, desc, src)
-	if err != nil {
-		return err
-	}
-	adopted := false
-	defer func() {
-		if !adopted {
-			_ = obj.close()
-		}
-	}()
-	if err = syncDirectory(s.path); err != nil {
-		return err
-	}
-	m := manifest{BaseID: obj.header.FileID, BaseBytes: objectSize(g), BaseHash: obj.hash, PageOneHash: obj.pageOneHash}
-	desc.Role = encryption.FileRoot
-	desc.RecordCount = 1
-	w, err := encryption.NewFileWriter(master, desc, opts.Limits)
-	if err != nil {
-		return err
-	}
-	defer w.Close()
-	h, err := w.Header()
-	if err != nil {
-		return err
-	}
-	raw, err := encryption.EncodeHeader(h, opts.Limits)
-	if err != nil {
-		return err
-	}
-	record, err := w.Seal(encryption.RecordMetadata, 0, 0, m.encode())
-	if err != nil {
-		return err
-	}
-	raw = append(raw, record...)
-	if err = w.Finish(); err != nil {
-		return err
-	}
-	pending := s.path + ".gse-" + idString(h.FileID) + ".pending"
-	if err = writeSmall(pending, raw); err != nil {
-		return err
-	}
-	check, info, err := checkedFile(pending, os.O_RDONLY)
-	if err != nil {
-		return err
-	}
-	verified, err := readExact(check, rootSize, 0)
-	if err == nil && info.Size() != rootSize {
-		err = encryption.ErrFormat
-	}
-	if err == nil && !bytes.Equal(verified, raw) {
-		err = ErrChanged
-	}
-	if err == nil {
-		_, err = openRoot(verified, master, opts.Limits)
-	}
-	err = errors.Join(err, check.Close())
-	if err != nil {
-		return err
-	}
-	if s.root != nil {
-		if err = retain(s.path+".gse-"+idString(s.header.FileID)+".retained", s.rootBytes); err != nil {
-			return err
-		}
-		if err = syncDirectory(s.path); err != nil {
-			return err
-		}
-	}
-	if err = s.Check(); err != nil {
-		return err
-	}
-	if err = ctx.Err(); err != nil {
-		return err
-	}
-	uncertain := func(e error) error { s.poisoned = errors.Join(ErrUncertain, e); return s.poisoned }
-	// From this point cancellation cannot abandon a namespace publication.
-	if s.root == nil {
-		err = renameAbsent(pending, s.path)
-	} else {
-		err = os.Rename(pending, s.path)
-	}
-	if err != nil {
-		return uncertain(err)
-	}
-	if err = syncDirectory(s.path); err != nil {
-		return uncertain(err)
-	}
-	root, rootInfo, err := checkedFile(s.path, os.O_RDONLY)
-	if err != nil {
-		return uncertain(err)
-	}
-	final, err := readExact(root, rootSize, 0)
-	if err != nil || rootInfo.Size() != rootSize || !bytes.Equal(final, raw) {
-		_ = root.Close()
-		if err == nil {
-			err = ErrChanged
-		}
-		return uncertain(err)
-	}
-	oldRoot, oldBase, oldMaster := s.root, s.base, s.master
-	s.root, s.rootInfo, s.rootBytes, s.header, s.base, s.master, s.opts = root, rootInfo, raw, h, obj, master, opts
-	adopted = true
-	if target != nil {
-		target.Master = nil
-	}
-	// Closing read-only obsolete descriptors does not undo a durable commit.
-	if oldRoot != nil {
-		_ = oldRoot.Close()
-	}
-	if oldBase != nil {
-		_ = oldBase.close()
-	}
-	if oldMaster != nil && oldMaster != master {
-		_ = oldMaster.Close()
-	}
-	return nil
-}
 func (s *Store) Close() error {
 	var err error
+	for _, seg := range s.segments {
+		err = errors.Join(err, seg.close())
+	}
+	s.segments = nil
+	s.overlay = nil
+	s.wal = nil
 	if s.root != nil {
 		err = errors.Join(err, s.root.Close())
 		s.root = nil
@@ -518,10 +357,19 @@ func (s *Store) Close() error {
 		err = errors.Join(err, s.lock.Close())
 		s.lock = nil
 	}
+	if s.ns != nil {
+		err = errors.Join(err, s.ns.dir.Close())
+		s.ns = nil
+	}
 	return errors.Join(s.poisoned, err)
 }
 
 type Info struct {
+	Mode                Mode
+	StorageLayout       uint16
+	WALSegments         uint32
+	WALFrames, WALBytes uint64
+	HeadCommitID        [32]byte
 	PageSize, PageCount uint32
 	DatabaseID          [16]byte
 	CommitSequence      uint64
@@ -529,5 +377,15 @@ type Info struct {
 }
 
 func (s *Store) Info() Info {
-	return Info{PageSize: s.header.Descriptor.PageSize, PageCount: s.header.Descriptor.PageCount, DatabaseID: s.header.Epoch.DatabaseID, CommitSequence: s.header.Descriptor.CommitSequence, RetainsHistory: true}
+	i := Info{Mode: s.opts.Mode, StorageLayout: 1, PageSize: s.header.Descriptor.PageSize, PageCount: s.header.Descriptor.PageCount, DatabaseID: s.header.Epoch.DatabaseID, CommitSequence: s.header.Descriptor.CommitSequence, RetainsHistory: true}
+	if s.wal != nil {
+		i.StorageLayout = 2
+		i.WALSegments = uint32(len(s.segments))
+		i.WALFrames = s.wal.Frames
+		i.WALBytes = s.wal.Bytes
+		i.HeadCommitID = s.wal.Head
+	} else {
+		i.HeadCommitID = sha256.Sum256(s.rootBytes)
+	}
+	return i
 }

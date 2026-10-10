@@ -1,0 +1,25 @@
++ CGO_ENABLED=0
++ go test -tags oracle ./internal/testkit -run '^TestOracleOrdinaryIndex' -count=1 -v
+=== RUN   TestOracleOrdinaryIndexSelect
+=== RUN   TestOracleOrdinaryIndexSelect/page512/sharedfalse
+=== RUN   TestOracleOrdinaryIndexSelect/page512/sharedtrue
+=== RUN   TestOracleOrdinaryIndexSelect/page4096/sharedfalse
+=== RUN   TestOracleOrdinaryIndexSelect/page4096/sharedtrue
+=== RUN   TestOracleOrdinaryIndexSelect/page65536/sharedfalse
+=== RUN   TestOracleOrdinaryIndexSelect/page65536/sharedtrue
+--- PASS: TestOracleOrdinaryIndexSelect (2.37s)
+    --- PASS: TestOracleOrdinaryIndexSelect/page512/sharedfalse (0.16s)
+    --- PASS: TestOracleOrdinaryIndexSelect/page512/sharedtrue (0.28s)
+    --- PASS: TestOracleOrdinaryIndexSelect/page4096/sharedfalse (0.27s)
+    --- PASS: TestOracleOrdinaryIndexSelect/page4096/sharedtrue (0.23s)
+    --- PASS: TestOracleOrdinaryIndexSelect/page65536/sharedfalse (0.43s)
+    --- PASS: TestOracleOrdinaryIndexSelect/page65536/sharedtrue (0.99s)
+=== RUN   TestOracleOrdinaryIndexIgnoresUnsupportedPeer
+--- PASS: TestOracleOrdinaryIndexIgnoresUnsupportedPeer (0.01s)
+=== RUN   TestOracleOrdinaryIndexNumericAndOverflowKeys
+--- PASS: TestOracleOrdinaryIndexNumericAndOverflowKeys (0.21s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	2.597s
++ CGO_ENABLED=1
++ go test -race -tags oracle ./internal/testkit -run '^TestOracleOrdinaryIndex' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	4.523s

@@ -1,0 +1,2073 @@
+{
+  "parse": [
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT '[1,2,3]'::halfvec;",
+      "kind": "halfvec",
+      "input": "[1,2,3]",
+      "dimensions": null,
+      "output": "[1,2,3]",
+      "error": null
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT '[-1,-2,-3]'::halfvec;",
+      "kind": "halfvec",
+      "input": "[-1,-2,-3]",
+      "dimensions": null,
+      "output": "[-1,-2,-3]",
+      "error": null
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT '[1.,2.,3.]'::halfvec;",
+      "kind": "halfvec",
+      "input": "[1.,2.,3.]",
+      "dimensions": null,
+      "output": "[1,2,3]",
+      "error": null
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT ' [ 1,  2 ,    3  ] '::halfvec;",
+      "kind": "halfvec",
+      "input": " [ 1,  2 ,    3  ] ",
+      "dimensions": null,
+      "output": "[1,2,3]",
+      "error": null
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT '[1.23456]'::halfvec;",
+      "kind": "halfvec",
+      "input": "[1.23456]",
+      "dimensions": null,
+      "output": "[1.234375]",
+      "error": null
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT '[hello,1]'::halfvec;",
+      "kind": "halfvec",
+      "input": "[hello,1]",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  invalid input syntax for type halfvec: \"[hello,1]\""
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT '[NaN,1]'::halfvec;",
+      "kind": "halfvec",
+      "input": "[NaN,1]",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  NaN not allowed in halfvec"
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT '[Infinity,1]'::halfvec;",
+      "kind": "halfvec",
+      "input": "[Infinity,1]",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  infinite value not allowed in halfvec"
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT '[-Infinity,1]'::halfvec;",
+      "kind": "halfvec",
+      "input": "[-Infinity,1]",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  infinite value not allowed in halfvec"
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT '[65519,-65519]'::halfvec;",
+      "kind": "halfvec",
+      "input": "[65519,-65519]",
+      "dimensions": null,
+      "output": "[65504,-65504]",
+      "error": null
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT '[65520,-65520]'::halfvec;",
+      "kind": "halfvec",
+      "input": "[65520,-65520]",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  \"65520\" is out of range for type halfvec"
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT '[1e-8,-1e-8]'::halfvec;",
+      "kind": "halfvec",
+      "input": "[1e-8,-1e-8]",
+      "dimensions": null,
+      "output": "[0,-0]",
+      "error": null
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT '[4e38,1]'::halfvec;",
+      "kind": "halfvec",
+      "input": "[4e38,1]",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  \"4e38\" is out of range for type halfvec"
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT '[1e-46,1]'::halfvec;",
+      "kind": "halfvec",
+      "input": "[1e-46,1]",
+      "dimensions": null,
+      "output": "[0,1]",
+      "error": null
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT '[1,2,3'::halfvec;",
+      "kind": "halfvec",
+      "input": "[1,2,3",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  invalid input syntax for type halfvec: \"[1,2,3\""
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT '[1,2,3]9'::halfvec;",
+      "kind": "halfvec",
+      "input": "[1,2,3]9",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  invalid input syntax for type halfvec: \"[1,2,3]9\""
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT '1,2,3'::halfvec;",
+      "kind": "halfvec",
+      "input": "1,2,3",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  invalid input syntax for type halfvec: \"1,2,3\""
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT ''::halfvec;",
+      "kind": "halfvec",
+      "input": "",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  invalid input syntax for type halfvec: \"\""
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT '['::halfvec;",
+      "kind": "halfvec",
+      "input": "[",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  invalid input syntax for type halfvec: \"[\""
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT '[ '::halfvec;",
+      "kind": "halfvec",
+      "input": "[ ",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  invalid input syntax for type halfvec: \"[ \""
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT '[,'::halfvec;",
+      "kind": "halfvec",
+      "input": "[,",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  invalid input syntax for type halfvec: \"[,\""
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT '[]'::halfvec;",
+      "kind": "halfvec",
+      "input": "[]",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  halfvec must have at least 1 dimension"
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT '[ ]'::halfvec;",
+      "kind": "halfvec",
+      "input": "[ ]",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  halfvec must have at least 1 dimension"
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT '[,]'::halfvec;",
+      "kind": "halfvec",
+      "input": "[,]",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  invalid input syntax for type halfvec: \"[,]\""
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT '[1,]'::halfvec;",
+      "kind": "halfvec",
+      "input": "[1,]",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  invalid input syntax for type halfvec: \"[1,]\""
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT '[1a]'::halfvec;",
+      "kind": "halfvec",
+      "input": "[1a]",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  invalid input syntax for type halfvec: \"[1a]\""
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT '[1,,3]'::halfvec;",
+      "kind": "halfvec",
+      "input": "[1,,3]",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  invalid input syntax for type halfvec: \"[1,,3]\""
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT '[1, ,3]'::halfvec;",
+      "kind": "halfvec",
+      "input": "[1, ,3]",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  invalid input syntax for type halfvec: \"[1, ,3]\""
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT '[1,2,3]'::halfvec(3);",
+      "kind": "halfvec",
+      "input": "[1,2,3]",
+      "dimensions": 3,
+      "output": "[1,2,3]",
+      "error": null
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT '[1,2,3]'::halfvec(2);",
+      "kind": "halfvec",
+      "input": "[1,2,3]",
+      "dimensions": 2,
+      "output": null,
+      "error": "ERROR:  expected 2 dimensions, not 3"
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT '[1,2,3]'::halfvec(0);",
+      "kind": "halfvec",
+      "input": "[1,2,3]",
+      "dimensions": 0,
+      "output": null,
+      "error": "ERROR:  dimensions for type halfvec must be at least 1"
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT '[1,2,3]'::halfvec(16001);",
+      "kind": "halfvec",
+      "input": "[1,2,3]",
+      "dimensions": 16001,
+      "output": null,
+      "error": "ERROR:  dimensions for type halfvec cannot exceed 16000"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{1:1.5,3:3.5}/5'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{1:1.5,3:3.5}/5",
+      "dimensions": null,
+      "output": "{1:1.5,3:3.5}/5",
+      "error": null
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{1:-2,3:-4}/5'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{1:-2,3:-4}/5",
+      "dimensions": null,
+      "output": "{1:-2,3:-4}/5",
+      "error": null
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{1:2.,3:4.}/5'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{1:2.,3:4.}/5",
+      "dimensions": null,
+      "output": "{1:2,3:4}/5",
+      "error": null
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT ' { 1 : 1.5 ,  3  :  3.5  } / 5 '::sparsevec;",
+      "kind": "sparsevec",
+      "input": " { 1 : 1.5 ,  3  :  3.5  } / 5 ",
+      "dimensions": null,
+      "output": "{1:1.5,3:3.5}/5",
+      "error": null
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{1:1.23456}/1'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{1:1.23456}/1",
+      "dimensions": null,
+      "output": "{1:1.23456}/1",
+      "error": null
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{1:hello,2:1}/2'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{1:hello,2:1}/2",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  invalid input syntax for type sparsevec: \"{1:hello,2:1}/2\""
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{1:NaN,2:1}/2'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{1:NaN,2:1}/2",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  NaN not allowed in sparsevec"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{1:Infinity,2:1}/2'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{1:Infinity,2:1}/2",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  infinite value not allowed in sparsevec"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{1:-Infinity,2:1}/2'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{1:-Infinity,2:1}/2",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  infinite value not allowed in sparsevec"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{1:1.5e38,2:-1.5e38}/2'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{1:1.5e38,2:-1.5e38}/2",
+      "dimensions": null,
+      "output": "{1:1.5e+38,2:-1.5e+38}/2",
+      "error": null
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{1:1.5e+38,2:-1.5e+38}/2'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{1:1.5e+38,2:-1.5e+38}/2",
+      "dimensions": null,
+      "output": "{1:1.5e+38,2:-1.5e+38}/2",
+      "error": null
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{1:1.5e-38,2:-1.5e-38}/2'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{1:1.5e-38,2:-1.5e-38}/2",
+      "dimensions": null,
+      "output": "{1:1.5e-38,2:-1.5e-38}/2",
+      "error": null
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{1:4e38,2:1}/2'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{1:4e38,2:1}/2",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  \"4e38\" is out of range for type sparsevec"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{1:-4e38,2:1}/2'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{1:-4e38,2:1}/2",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  \"-4e38\" is out of range for type sparsevec"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{1:1e-46,2:1}/2'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{1:1e-46,2:1}/2",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  \"1e-46\" is out of range for type sparsevec"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{1:-1e-46,2:1}/2'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{1:-1e-46,2:1}/2",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  \"-1e-46\" is out of range for type sparsevec"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT ''::sparsevec;",
+      "kind": "sparsevec",
+      "input": "",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  invalid input syntax for type sparsevec: \"\""
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  invalid input syntax for type sparsevec: \"{\""
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{ '::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{ ",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  invalid input syntax for type sparsevec: \"{ \""
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{:'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{:",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  invalid input syntax for type sparsevec: \"{:\""
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{,'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{,",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  invalid input syntax for type sparsevec: \"{,\""
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{}'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{}",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  invalid input syntax for type sparsevec: \"{}\""
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{}/'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{}/",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  invalid input syntax for type sparsevec: \"{}/\""
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{}/1'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{}/1",
+      "dimensions": null,
+      "output": "{}/1",
+      "error": null
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{}/1a'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{}/1a",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  invalid input syntax for type sparsevec: \"{}/1a\""
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{ }/1'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{ }/1",
+      "dimensions": null,
+      "output": "{}/1",
+      "error": null
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{:}/1'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{:}/1",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  invalid input syntax for type sparsevec: \"{:}/1\""
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{,}/1'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{,}/1",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  invalid input syntax for type sparsevec: \"{,}/1\""
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{1,}/1'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{1,}/1",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  invalid input syntax for type sparsevec: \"{1,}/1\""
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{:1}/1'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{:1}/1",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  invalid input syntax for type sparsevec: \"{:1}/1\""
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{1:}/1'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{1:}/1",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  invalid input syntax for type sparsevec: \"{1:}/1\""
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{1a:1}/1'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{1a:1}/1",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  invalid input syntax for type sparsevec: \"{1a:1}/1\""
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{1:1a}/1'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{1:1a}/1",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  invalid input syntax for type sparsevec: \"{1:1a}/1\""
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{1:1,}/1'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{1:1,}/1",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  invalid input syntax for type sparsevec: \"{1:1,}/1\""
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{1:0,2:1,3:0}/3'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{1:0,2:1,3:0}/3",
+      "dimensions": null,
+      "output": "{2:1}/3",
+      "error": null
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{2:1,1:1}/2'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{2:1,1:1}/2",
+      "dimensions": null,
+      "output": "{1:1,2:1}/2",
+      "error": null
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{1:1,1:1}/2'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{1:1,1:1}/2",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  sparsevec indices must not contain duplicates"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{1:1,2:1,1:1}/2'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{1:1,2:1,1:1}/2",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  sparsevec indices must not contain duplicates"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{}/5'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{}/5",
+      "dimensions": null,
+      "output": "{}/5",
+      "error": null
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{}/-1'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{}/-1",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  sparsevec must have at least 1 dimension"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{}/1000000000'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{}/1000000000",
+      "dimensions": null,
+      "output": "{}/1000000000",
+      "error": null
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{}/1000000001'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{}/1000000001",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  sparsevec cannot have more than 1000000000 dimensions"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{}/2147483648'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{}/2147483648",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  sparsevec cannot have more than 1000000000 dimensions"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{}/-2147483649'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{}/-2147483649",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  sparsevec must have at least 1 dimension"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{}/9223372036854775808'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{}/9223372036854775808",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  sparsevec cannot have more than 1000000000 dimensions"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{}/-9223372036854775809'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{}/-9223372036854775809",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  sparsevec must have at least 1 dimension"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{2147483647:1}/1'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{2147483647:1}/1",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  sparsevec index out of bounds"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{2147483648:1}/1'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{2147483648:1}/1",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  sparsevec index out of bounds"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{-2147483648:1}/1'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{-2147483648:1}/1",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  sparsevec index out of bounds"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{-2147483649:1}/1'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{-2147483649:1}/1",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  sparsevec index out of bounds"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{0:1}/1'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{0:1}/1",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  sparsevec index out of bounds"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{2:1}/1'::sparsevec;",
+      "kind": "sparsevec",
+      "input": "{2:1}/1",
+      "dimensions": null,
+      "output": null,
+      "error": "ERROR:  sparsevec index out of bounds"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{}/3'::sparsevec(3);",
+      "kind": "sparsevec",
+      "input": "{}/3",
+      "dimensions": 3,
+      "output": "{}/3",
+      "error": null
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{}/3'::sparsevec(2);",
+      "kind": "sparsevec",
+      "input": "{}/3",
+      "dimensions": 2,
+      "output": null,
+      "error": "ERROR:  expected 2 dimensions, not 3"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{}/3'::sparsevec(0);",
+      "kind": "sparsevec",
+      "input": "{}/3",
+      "dimensions": 0,
+      "output": null,
+      "error": "ERROR:  dimensions for type sparsevec must be at least 1"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{}/3'::sparsevec(1000000001);",
+      "kind": "sparsevec",
+      "input": "{}/3",
+      "dimensions": 1000000001,
+      "output": null,
+      "error": "ERROR:  dimensions for type sparsevec cannot exceed 1000000000"
+    }
+  ],
+  "metrics": [
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT l2_norm('[3,4]'::halfvec);",
+      "kind": "halfvec",
+      "operation": "norm",
+      "a": "[3,4]",
+      "b": null,
+      "output": "5",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT l2_norm('[0,1]'::halfvec);",
+      "kind": "halfvec",
+      "operation": "norm",
+      "a": "[0,1]",
+      "b": null,
+      "output": "1",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT l2_norm('[0,0]'::halfvec);",
+      "kind": "halfvec",
+      "operation": "norm",
+      "a": "[0,0]",
+      "b": null,
+      "output": "0",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT l2_norm('[2]'::halfvec);",
+      "kind": "halfvec",
+      "operation": "norm",
+      "a": "[2]",
+      "b": null,
+      "output": "2",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT l2_distance('[0,0]'::halfvec, '[3,4]');",
+      "kind": "halfvec",
+      "operation": "l2_distance",
+      "a": "[0,0]",
+      "b": "[3,4]",
+      "output": "5",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT l2_distance('[0,0]'::halfvec, '[0,1]');",
+      "kind": "halfvec",
+      "operation": "l2_distance",
+      "a": "[0,0]",
+      "b": "[0,1]",
+      "output": "1",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT l2_distance('[1,2]'::halfvec, '[3]');",
+      "kind": "halfvec",
+      "operation": "l2_distance",
+      "a": "[1,2]",
+      "b": "[3]",
+      "output": null,
+      "error": "ERROR:  different halfvec dimensions 2 and 1",
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT l2_distance('[1,1,1,1,1,1,1,1,1]'::halfvec, '[1,1,1,1,1,1,1,4,5]');",
+      "kind": "halfvec",
+      "operation": "l2_distance",
+      "a": "[1,1,1,1,1,1,1,1,1]",
+      "b": "[1,1,1,1,1,1,1,4,5]",
+      "output": "5",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT '[0,0]'::halfvec <-> '[3,4]';",
+      "kind": "halfvec",
+      "operation": "l2_distance",
+      "a": "[0,0]",
+      "b": "[3,4]",
+      "output": "5",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT inner_product('[1,2]'::halfvec, '[3,4]');",
+      "kind": "halfvec",
+      "operation": "inner_product",
+      "a": "[1,2]",
+      "b": "[3,4]",
+      "output": "11",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT inner_product('[1,2]'::halfvec, '[3]');",
+      "kind": "halfvec",
+      "operation": "inner_product",
+      "a": "[1,2]",
+      "b": "[3]",
+      "output": null,
+      "error": "ERROR:  different halfvec dimensions 2 and 1",
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT inner_product('[65504]'::halfvec, '[65504]');",
+      "kind": "halfvec",
+      "operation": "inner_product",
+      "a": "[65504]",
+      "b": "[65504]",
+      "output": "4290774016",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT inner_product('[1,1,1,1,1,1,1,1,1]'::halfvec, '[1,2,3,4,5,6,7,8,9]');",
+      "kind": "halfvec",
+      "operation": "inner_product",
+      "a": "[1,1,1,1,1,1,1,1,1]",
+      "b": "[1,2,3,4,5,6,7,8,9]",
+      "output": "45",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT '[1,2]'::halfvec <#> '[3,4]';",
+      "kind": "halfvec",
+      "operation": "negative_inner_product",
+      "a": "[1,2]",
+      "b": "[3,4]",
+      "output": "-11",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT cosine_distance('[1,2]'::halfvec, '[2,4]');",
+      "kind": "halfvec",
+      "operation": "cosine_distance",
+      "a": "[1,2]",
+      "b": "[2,4]",
+      "output": "0",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT cosine_distance('[1,2]'::halfvec, '[0,0]');",
+      "kind": "halfvec",
+      "operation": "cosine_distance",
+      "a": "[1,2]",
+      "b": "[0,0]",
+      "output": "NaN",
+      "error": null,
+      "policy": "zero_norm_error"
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT cosine_distance('[1,1]'::halfvec, '[1,1]');",
+      "kind": "halfvec",
+      "operation": "cosine_distance",
+      "a": "[1,1]",
+      "b": "[1,1]",
+      "output": "0",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT cosine_distance('[1,0]'::halfvec, '[0,2]');",
+      "kind": "halfvec",
+      "operation": "cosine_distance",
+      "a": "[1,0]",
+      "b": "[0,2]",
+      "output": "1",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT cosine_distance('[1,1]'::halfvec, '[-1,-1]');",
+      "kind": "halfvec",
+      "operation": "cosine_distance",
+      "a": "[1,1]",
+      "b": "[-1,-1]",
+      "output": "2",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT cosine_distance('[1,2]'::halfvec, '[3]');",
+      "kind": "halfvec",
+      "operation": "cosine_distance",
+      "a": "[1,2]",
+      "b": "[3]",
+      "output": null,
+      "error": "ERROR:  different halfvec dimensions 2 and 1",
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT cosine_distance('[1,1]'::halfvec, '[1.1,1.1]');",
+      "kind": "halfvec",
+      "operation": "cosine_distance",
+      "a": "[1,1]",
+      "b": "[1.1,1.1]",
+      "output": "0",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT cosine_distance('[1,1]'::halfvec, '[-1.1,-1.1]');",
+      "kind": "halfvec",
+      "operation": "cosine_distance",
+      "a": "[1,1]",
+      "b": "[-1.1,-1.1]",
+      "output": "2",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT cosine_distance('[1,2,3,4,5,6,7,8,9]'::halfvec, '[1,2,3,4,5,6,7,8,9]');",
+      "kind": "halfvec",
+      "operation": "cosine_distance",
+      "a": "[1,2,3,4,5,6,7,8,9]",
+      "b": "[1,2,3,4,5,6,7,8,9]",
+      "output": "0",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT cosine_distance('[1,2,3,4,5,6,7,8,9]'::halfvec, '[-1,-2,-3,-4,-5,-6,-7,-8,-9]');",
+      "kind": "halfvec",
+      "operation": "cosine_distance",
+      "a": "[1,2,3,4,5,6,7,8,9]",
+      "b": "[-1,-2,-3,-4,-5,-6,-7,-8,-9]",
+      "output": "2",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT '[1,2]'::halfvec <=> '[2,4]';",
+      "kind": "halfvec",
+      "operation": "cosine_distance",
+      "a": "[1,2]",
+      "b": "[2,4]",
+      "output": "0",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT l1_distance('[0,0]'::halfvec, '[3,4]');",
+      "kind": "halfvec",
+      "operation": "l1_distance",
+      "a": "[0,0]",
+      "b": "[3,4]",
+      "output": "7",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT l1_distance('[0,0]'::halfvec, '[0,1]');",
+      "kind": "halfvec",
+      "operation": "l1_distance",
+      "a": "[0,0]",
+      "b": "[0,1]",
+      "output": "1",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT l1_distance('[1,2]'::halfvec, '[3]');",
+      "kind": "halfvec",
+      "operation": "l1_distance",
+      "a": "[1,2]",
+      "b": "[3]",
+      "output": null,
+      "error": "ERROR:  different halfvec dimensions 2 and 1",
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT l1_distance('[1,2,3,4,5,6,7,8,9]'::halfvec, '[1,2,3,4,5,6,7,8,9]');",
+      "kind": "halfvec",
+      "operation": "l1_distance",
+      "a": "[1,2,3,4,5,6,7,8,9]",
+      "b": "[1,2,3,4,5,6,7,8,9]",
+      "output": "0",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT l1_distance('[1,2,3,4,5,6,7,8,9]'::halfvec, '[0,3,2,5,4,7,6,9,8]');",
+      "kind": "halfvec",
+      "operation": "l1_distance",
+      "a": "[1,2,3,4,5,6,7,8,9]",
+      "b": "[0,3,2,5,4,7,6,9,8]",
+      "output": "9",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT '[0,0]'::halfvec <+> '[3,4]';",
+      "kind": "halfvec",
+      "operation": "l1_distance",
+      "a": "[0,0]",
+      "b": "[3,4]",
+      "output": "7",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT l2_norm('{1:3,2:4}/2'::sparsevec);",
+      "kind": "sparsevec",
+      "operation": "norm",
+      "a": "{1:3,2:4}/2",
+      "b": null,
+      "output": "5",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT l2_norm('{2:1}/2'::sparsevec);",
+      "kind": "sparsevec",
+      "operation": "norm",
+      "a": "{2:1}/2",
+      "b": null,
+      "output": "1",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT l2_norm('{}/2'::sparsevec);",
+      "kind": "sparsevec",
+      "operation": "norm",
+      "a": "{}/2",
+      "b": null,
+      "output": "0",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT l2_norm('{1:2}/1'::sparsevec);",
+      "kind": "sparsevec",
+      "operation": "norm",
+      "a": "{1:2}/1",
+      "b": null,
+      "output": "2",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT l2_distance('{}/2'::sparsevec, '{1:3,2:4}/2');",
+      "kind": "sparsevec",
+      "operation": "l2_distance",
+      "a": "{}/2",
+      "b": "{1:3,2:4}/2",
+      "output": "5",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT l2_distance('{1:3}/2'::sparsevec, '{2:4}/2');",
+      "kind": "sparsevec",
+      "operation": "l2_distance",
+      "a": "{1:3}/2",
+      "b": "{2:4}/2",
+      "output": "5",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT l2_distance('{2:4}/2'::sparsevec, '{1:3}/2');",
+      "kind": "sparsevec",
+      "operation": "l2_distance",
+      "a": "{2:4}/2",
+      "b": "{1:3}/2",
+      "output": "5",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT l2_distance('{1:3,2:4}/2'::sparsevec, '{}/2');",
+      "kind": "sparsevec",
+      "operation": "l2_distance",
+      "a": "{1:3,2:4}/2",
+      "b": "{}/2",
+      "output": "5",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT l2_distance('{}/2'::sparsevec, '{2:1}/2');",
+      "kind": "sparsevec",
+      "operation": "l2_distance",
+      "a": "{}/2",
+      "b": "{2:1}/2",
+      "output": "1",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{}/2'::sparsevec <-> '{1:3,2:4}/2';",
+      "kind": "sparsevec",
+      "operation": "l2_distance",
+      "a": "{}/2",
+      "b": "{1:3,2:4}/2",
+      "output": "5",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT inner_product('{1:1,2:2}/2'::sparsevec, '{1:2,2:4}/2');",
+      "kind": "sparsevec",
+      "operation": "inner_product",
+      "a": "{1:1,2:2}/2",
+      "b": "{1:2,2:4}/2",
+      "output": "10",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT inner_product('{1:1,2:2}/2'::sparsevec, '{1:3}/1');",
+      "kind": "sparsevec",
+      "operation": "inner_product",
+      "a": "{1:1,2:2}/2",
+      "b": "{1:3}/1",
+      "output": null,
+      "error": "ERROR:  different sparsevec dimensions 2 and 1",
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT inner_product('{1:1,3:3}/4'::sparsevec, '{2:2,4:4}/4');",
+      "kind": "sparsevec",
+      "operation": "inner_product",
+      "a": "{1:1,3:3}/4",
+      "b": "{2:2,4:4}/4",
+      "output": "0",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT inner_product('{2:2,4:4}/4'::sparsevec, '{1:1,3:3}/4');",
+      "kind": "sparsevec",
+      "operation": "inner_product",
+      "a": "{2:2,4:4}/4",
+      "b": "{1:1,3:3}/4",
+      "output": "0",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT inner_product('{1:1,3:3,5:5}/5'::sparsevec, '{2:4,3:6,4:8}/5');",
+      "kind": "sparsevec",
+      "operation": "inner_product",
+      "a": "{1:1,3:3,5:5}/5",
+      "b": "{2:4,3:6,4:8}/5",
+      "output": "18",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT inner_product('{1:1}/2'::sparsevec, '{}/2');",
+      "kind": "sparsevec",
+      "operation": "inner_product",
+      "a": "{1:1}/2",
+      "b": "{}/2",
+      "output": "0",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT inner_product('{}/2'::sparsevec, '{1:1}/2');",
+      "kind": "sparsevec",
+      "operation": "inner_product",
+      "a": "{}/2",
+      "b": "{1:1}/2",
+      "output": "0",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT inner_product('{1:3e38}/1'::sparsevec, '{1:3e38}/1');",
+      "kind": "sparsevec",
+      "operation": "inner_product",
+      "a": "{1:3e38}/1",
+      "b": "{1:3e38}/1",
+      "output": "Infinity",
+      "error": null,
+      "policy": "finite64"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT inner_product('{1:1,3:3,5:5}/5'::sparsevec, '{2:4,3:6,4:8}/5');",
+      "kind": "sparsevec",
+      "operation": "inner_product",
+      "a": "{1:1,3:3,5:5}/5",
+      "b": "{2:4,3:6,4:8}/5",
+      "output": "18",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{1:1,2:2}/2'::sparsevec <#> '{1:3,2:4}/2';",
+      "kind": "sparsevec",
+      "operation": "negative_inner_product",
+      "a": "{1:1,2:2}/2",
+      "b": "{1:3,2:4}/2",
+      "output": "-11",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT cosine_distance('{1:1,2:2}/2'::sparsevec, '{1:2,2:4}/2');",
+      "kind": "sparsevec",
+      "operation": "cosine_distance",
+      "a": "{1:1,2:2}/2",
+      "b": "{1:2,2:4}/2",
+      "output": "0",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT cosine_distance('{1:1,2:2}/2'::sparsevec, '{}/2');",
+      "kind": "sparsevec",
+      "operation": "cosine_distance",
+      "a": "{1:1,2:2}/2",
+      "b": "{}/2",
+      "output": "NaN",
+      "error": null,
+      "policy": "zero_norm_error"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT cosine_distance('{1:1,2:1}/2'::sparsevec, '{1:1,2:1}/2');",
+      "kind": "sparsevec",
+      "operation": "cosine_distance",
+      "a": "{1:1,2:1}/2",
+      "b": "{1:1,2:1}/2",
+      "output": "0",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT cosine_distance('{1:1}/2'::sparsevec, '{2:2}/2');",
+      "kind": "sparsevec",
+      "operation": "cosine_distance",
+      "a": "{1:1}/2",
+      "b": "{2:2}/2",
+      "output": "1",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT cosine_distance('{1:1,2:1}/2'::sparsevec, '{1:-1,2:-1}/2');",
+      "kind": "sparsevec",
+      "operation": "cosine_distance",
+      "a": "{1:1,2:1}/2",
+      "b": "{1:-1,2:-1}/2",
+      "output": "2",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT cosine_distance('{1:2}/2'::sparsevec, '{2:2}/2');",
+      "kind": "sparsevec",
+      "operation": "cosine_distance",
+      "a": "{1:2}/2",
+      "b": "{2:2}/2",
+      "output": "1",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT cosine_distance('{2:2}/2'::sparsevec, '{1:2}/2');",
+      "kind": "sparsevec",
+      "operation": "cosine_distance",
+      "a": "{2:2}/2",
+      "b": "{1:2}/2",
+      "output": "1",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT cosine_distance('{1:1,2:2}/2'::sparsevec, '{1:3}/1');",
+      "kind": "sparsevec",
+      "operation": "cosine_distance",
+      "a": "{1:1,2:2}/2",
+      "b": "{1:3}/1",
+      "output": null,
+      "error": "ERROR:  different sparsevec dimensions 2 and 1",
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT cosine_distance('{1:1,2:1}/2'::sparsevec, '{1:1.1,2:1.1}/2');",
+      "kind": "sparsevec",
+      "operation": "cosine_distance",
+      "a": "{1:1,2:1}/2",
+      "b": "{1:1.1,2:1.1}/2",
+      "output": "0",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT cosine_distance('{1:1,2:1}/2'::sparsevec, '{1:-1.1,2:-1.1}/2');",
+      "kind": "sparsevec",
+      "operation": "cosine_distance",
+      "a": "{1:1,2:1}/2",
+      "b": "{1:-1.1,2:-1.1}/2",
+      "output": "2",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT cosine_distance('{1:3e38}/1'::sparsevec, '{1:3e38}/1');",
+      "kind": "sparsevec",
+      "operation": "cosine_distance",
+      "a": "{1:3e38}/1",
+      "b": "{1:3e38}/1",
+      "output": "NaN",
+      "error": null,
+      "policy": "finite64_cosine"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT cosine_distance('{}/1'::sparsevec, '{}/1');",
+      "kind": "sparsevec",
+      "operation": "cosine_distance",
+      "a": "{}/1",
+      "b": "{}/1",
+      "output": "NaN",
+      "error": null,
+      "policy": "zero_norm_error"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{1:1,2:2}/2'::sparsevec <=> '{1:2,2:4}/2';",
+      "kind": "sparsevec",
+      "operation": "cosine_distance",
+      "a": "{1:1,2:2}/2",
+      "b": "{1:2,2:4}/2",
+      "output": "0",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT l1_distance('{}/2'::sparsevec, '{1:3,2:4}/2');",
+      "kind": "sparsevec",
+      "operation": "l1_distance",
+      "a": "{}/2",
+      "b": "{1:3,2:4}/2",
+      "output": "7",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT l1_distance('{}/2'::sparsevec, '{2:1}/2');",
+      "kind": "sparsevec",
+      "operation": "l1_distance",
+      "a": "{}/2",
+      "b": "{2:1}/2",
+      "output": "1",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT l1_distance('{1:1,2:2}/2'::sparsevec, '{1:3}/1');",
+      "kind": "sparsevec",
+      "operation": "l1_distance",
+      "a": "{1:1,2:2}/2",
+      "b": "{1:3}/1",
+      "output": null,
+      "error": "ERROR:  different sparsevec dimensions 2 and 1",
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT l1_distance('{1:3e38}/1'::sparsevec, '{1:-3e38}/1');",
+      "kind": "sparsevec",
+      "operation": "l1_distance",
+      "a": "{1:3e38}/1",
+      "b": "{1:-3e38}/1",
+      "output": "Infinity",
+      "error": null,
+      "policy": "finite64_l1"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT l1_distance('{1:1,3:3,5:5,7:7}/8'::sparsevec, '{2:2,4:4,6:6,8:8}/8');",
+      "kind": "sparsevec",
+      "operation": "l1_distance",
+      "a": "{1:1,3:3,5:5,7:7}/8",
+      "b": "{2:2,4:4,6:6,8:8}/8",
+      "output": "36",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT l1_distance('{1:1,3:3,5:5,7:7,9:9}/9'::sparsevec, '{2:2,4:4,6:6,8:8}/9');",
+      "kind": "sparsevec",
+      "operation": "l1_distance",
+      "a": "{1:1,3:3,5:5,7:7,9:9}/9",
+      "b": "{2:2,4:4,6:6,8:8}/9",
+      "output": "45",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/sparsevec.out",
+      "statement": "SELECT '{}/2'::sparsevec <+> '{1:3,2:4}/2';",
+      "kind": "sparsevec",
+      "operation": "l1_distance",
+      "a": "{}/2",
+      "b": "{1:3,2:4}/2",
+      "output": "7",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/bit.out",
+      "statement": "SELECT hamming_distance('111', '111');",
+      "kind": "bit",
+      "operation": "hamming_distance",
+      "a": "111",
+      "b": "111",
+      "output": "0",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/bit.out",
+      "statement": "SELECT hamming_distance('111', '110');",
+      "kind": "bit",
+      "operation": "hamming_distance",
+      "a": "111",
+      "b": "110",
+      "output": "1",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/bit.out",
+      "statement": "SELECT hamming_distance('111', '100');",
+      "kind": "bit",
+      "operation": "hamming_distance",
+      "a": "111",
+      "b": "100",
+      "output": "2",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/bit.out",
+      "statement": "SELECT hamming_distance('111', '000');",
+      "kind": "bit",
+      "operation": "hamming_distance",
+      "a": "111",
+      "b": "000",
+      "output": "3",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/bit.out",
+      "statement": "SELECT hamming_distance('10101010101010101010', '01010101010101010101');",
+      "kind": "bit",
+      "operation": "hamming_distance",
+      "a": "10101010101010101010",
+      "b": "01010101010101010101",
+      "output": "20",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/bit.out",
+      "statement": "SELECT hamming_distance('101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101', '101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101');",
+      "kind": "bit",
+      "operation": "hamming_distance",
+      "a": "101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101",
+      "b": "101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101",
+      "output": "0",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/bit.out",
+      "statement": "SELECT hamming_distance('101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101', '010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010');",
+      "kind": "bit",
+      "operation": "hamming_distance",
+      "a": "101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101",
+      "b": "010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010",
+      "output": "513",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/bit.out",
+      "statement": "SELECT hamming_distance('110000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011', '100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001');",
+      "kind": "bit",
+      "operation": "hamming_distance",
+      "a": "110000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011",
+      "b": "100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001",
+      "output": "2",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/bit.out",
+      "statement": "SELECT hamming_distance('', '');",
+      "kind": "bit",
+      "operation": "hamming_distance",
+      "a": "",
+      "b": "",
+      "output": "0",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/bit.out",
+      "statement": "SELECT hamming_distance('111', '00');",
+      "kind": "bit",
+      "operation": "hamming_distance",
+      "a": "111",
+      "b": "00",
+      "output": null,
+      "error": "ERROR:  different bit lengths 3 and 2",
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/bit.out",
+      "statement": "SELECT jaccard_distance('1111', '1111');",
+      "kind": "bit",
+      "operation": "jaccard_distance",
+      "a": "1111",
+      "b": "1111",
+      "output": "0",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/bit.out",
+      "statement": "SELECT jaccard_distance('1111', '1110');",
+      "kind": "bit",
+      "operation": "jaccard_distance",
+      "a": "1111",
+      "b": "1110",
+      "output": "0.25",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/bit.out",
+      "statement": "SELECT jaccard_distance('1111', '1100');",
+      "kind": "bit",
+      "operation": "jaccard_distance",
+      "a": "1111",
+      "b": "1100",
+      "output": "0.5",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/bit.out",
+      "statement": "SELECT jaccard_distance('1111', '1000');",
+      "kind": "bit",
+      "operation": "jaccard_distance",
+      "a": "1111",
+      "b": "1000",
+      "output": "0.75",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/bit.out",
+      "statement": "SELECT jaccard_distance('1111', '0000');",
+      "kind": "bit",
+      "operation": "jaccard_distance",
+      "a": "1111",
+      "b": "0000",
+      "output": "1",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/bit.out",
+      "statement": "SELECT jaccard_distance('1100', '1000');",
+      "kind": "bit",
+      "operation": "jaccard_distance",
+      "a": "1100",
+      "b": "1000",
+      "output": "0.5",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/bit.out",
+      "statement": "SELECT jaccard_distance('10101010101010101010', '01010101010101010101');",
+      "kind": "bit",
+      "operation": "jaccard_distance",
+      "a": "10101010101010101010",
+      "b": "01010101010101010101",
+      "output": "1",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/bit.out",
+      "statement": "SELECT jaccard_distance('101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101', '101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101');",
+      "kind": "bit",
+      "operation": "jaccard_distance",
+      "a": "101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101",
+      "b": "101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101",
+      "output": "0",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/bit.out",
+      "statement": "SELECT jaccard_distance('101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101', '010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010');",
+      "kind": "bit",
+      "operation": "jaccard_distance",
+      "a": "101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101",
+      "b": "010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010",
+      "output": "1",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/bit.out",
+      "statement": "SELECT jaccard_distance('110000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011', '100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001');",
+      "kind": "bit",
+      "operation": "jaccard_distance",
+      "a": "110000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011",
+      "b": "100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001",
+      "output": "0.5",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/bit.out",
+      "statement": "SELECT jaccard_distance('', '');",
+      "kind": "bit",
+      "operation": "jaccard_distance",
+      "a": "",
+      "b": "",
+      "output": "1",
+      "error": null,
+      "policy": "tolerance"
+    },
+    {
+      "source": "extended/bit.out",
+      "statement": "SELECT jaccard_distance('1111', '000');",
+      "kind": "bit",
+      "operation": "jaccard_distance",
+      "a": "1111",
+      "b": "000",
+      "output": null,
+      "error": "ERROR:  different bit lengths 4 and 3",
+      "policy": "tolerance"
+    }
+  ],
+  "quantize": [
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT binary_quantize('[1,0,-1]'::halfvec);",
+      "kind": "halfvec",
+      "input": "[1,0,-1]",
+      "output": "100",
+      "error": null
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT binary_quantize('[0,0.1,-0.2,-0.3,0.4,0.5,0.6,-0.7,0.8,-0.9,1]'::halfvec);",
+      "kind": "halfvec",
+      "input": "[0,0.1,-0.2,-0.3,0.4,0.5,0.6,-0.7,0.8,-0.9,1]",
+      "output": "01001110101",
+      "error": null
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT binary_quantize('[1,2,3,-4,5,6,-7,8,1,-2,-3,4,5,-6,7,8,-1,2,3]'::halfvec);",
+      "kind": "halfvec",
+      "input": "[1,2,3,-4,5,6,-7,8,1,-2,-3,4,5,-6,7,8,-1,2,3]",
+      "output": "1110110110011011011",
+      "error": null
+    },
+    {
+      "source": "vector_type.out",
+      "statement": "SELECT binary_quantize('[1,0,-1]'::vector);",
+      "kind": "vector",
+      "input": "[1,0,-1]",
+      "output": "100",
+      "error": null
+    },
+    {
+      "source": "vector_type.out",
+      "statement": "SELECT binary_quantize('[0,0.1,-0.2,-0.3,0.4,0.5,0.6,-0.7,0.8,-0.9,1]'::vector);",
+      "kind": "vector",
+      "input": "[0,0.1,-0.2,-0.3,0.4,0.5,0.6,-0.7,0.8,-0.9,1]",
+      "output": "01001110101",
+      "error": null
+    },
+    {
+      "source": "vector_type.out",
+      "statement": "SELECT binary_quantize('[1,2,3,-4,5,6,-7,8,1,-2,-3,4,5,-6,7,8,-1,2,3]'::vector);",
+      "kind": "vector",
+      "input": "[1,2,3,-4,5,6,-7,8,1,-2,-3,4,5,-6,7,8,-1,2,3]",
+      "output": "1110110110011011011",
+      "error": null
+    }
+  ],
+  "subvector": [
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT subvector('[1,2,3,4,5]'::halfvec, 1, 3);",
+      "kind": "halfvec",
+      "input": "[1,2,3,4,5]",
+      "start": 1,
+      "count": 3,
+      "output": "[1,2,3]",
+      "error": null
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT subvector('[1,2,3,4,5]'::halfvec, 3, 2);",
+      "kind": "halfvec",
+      "input": "[1,2,3,4,5]",
+      "start": 3,
+      "count": 2,
+      "output": "[3,4]",
+      "error": null
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT subvector('[1,2,3,4,5]'::halfvec, -1, 3);",
+      "kind": "halfvec",
+      "input": "[1,2,3,4,5]",
+      "start": -1,
+      "count": 3,
+      "output": "[1]",
+      "error": null
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT subvector('[1,2,3,4,5]'::halfvec, 3, 9);",
+      "kind": "halfvec",
+      "input": "[1,2,3,4,5]",
+      "start": 3,
+      "count": 9,
+      "output": "[3,4,5]",
+      "error": null
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT subvector('[1,2,3,4,5]'::halfvec, 1, 0);",
+      "kind": "halfvec",
+      "input": "[1,2,3,4,5]",
+      "start": 1,
+      "count": 0,
+      "output": null,
+      "error": "ERROR:  halfvec must have at least 1 dimension"
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT subvector('[1,2,3,4,5]'::halfvec, 3, -1);",
+      "kind": "halfvec",
+      "input": "[1,2,3,4,5]",
+      "start": 3,
+      "count": -1,
+      "output": null,
+      "error": "ERROR:  halfvec must have at least 1 dimension"
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT subvector('[1,2,3,4,5]'::halfvec, -1, 2);",
+      "kind": "halfvec",
+      "input": "[1,2,3,4,5]",
+      "start": -1,
+      "count": 2,
+      "output": null,
+      "error": "ERROR:  halfvec must have at least 1 dimension"
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT subvector('[1,2,3,4,5]'::halfvec, 2147483647, 10);",
+      "kind": "halfvec",
+      "input": "[1,2,3,4,5]",
+      "start": 2147483647,
+      "count": 10,
+      "output": null,
+      "error": "ERROR:  halfvec must have at least 1 dimension"
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT subvector('[1,2,3,4,5]'::halfvec, 3, 2147483647);",
+      "kind": "halfvec",
+      "input": "[1,2,3,4,5]",
+      "start": 3,
+      "count": 2147483647,
+      "output": "[3,4,5]",
+      "error": null
+    },
+    {
+      "source": "extended/halfvec.out",
+      "statement": "SELECT subvector('[1,2,3,4,5]'::halfvec, -2147483644, 2147483647);",
+      "kind": "halfvec",
+      "input": "[1,2,3,4,5]",
+      "start": -2147483644,
+      "count": 2147483647,
+      "output": "[1,2]",
+      "error": null
+    },
+    {
+      "source": "vector_type.out",
+      "statement": "SELECT subvector('[1,2,3,4,5]'::vector, 1, 3);",
+      "kind": "vector",
+      "input": "[1,2,3,4,5]",
+      "start": 1,
+      "count": 3,
+      "output": "[1,2,3]",
+      "error": null
+    },
+    {
+      "source": "vector_type.out",
+      "statement": "SELECT subvector('[1,2,3,4,5]'::vector, 3, 2);",
+      "kind": "vector",
+      "input": "[1,2,3,4,5]",
+      "start": 3,
+      "count": 2,
+      "output": "[3,4]",
+      "error": null
+    },
+    {
+      "source": "vector_type.out",
+      "statement": "SELECT subvector('[1,2,3,4,5]'::vector, -1, 3);",
+      "kind": "vector",
+      "input": "[1,2,3,4,5]",
+      "start": -1,
+      "count": 3,
+      "output": "[1]",
+      "error": null
+    },
+    {
+      "source": "vector_type.out",
+      "statement": "SELECT subvector('[1,2,3,4,5]'::vector, 3, 9);",
+      "kind": "vector",
+      "input": "[1,2,3,4,5]",
+      "start": 3,
+      "count": 9,
+      "output": "[3,4,5]",
+      "error": null
+    },
+    {
+      "source": "vector_type.out",
+      "statement": "SELECT subvector('[1,2,3,4,5]'::vector, 1, 0);",
+      "kind": "vector",
+      "input": "[1,2,3,4,5]",
+      "start": 1,
+      "count": 0,
+      "output": null,
+      "error": "ERROR:  vector must have at least 1 dimension"
+    },
+    {
+      "source": "vector_type.out",
+      "statement": "SELECT subvector('[1,2,3,4,5]'::vector, 3, -1);",
+      "kind": "vector",
+      "input": "[1,2,3,4,5]",
+      "start": 3,
+      "count": -1,
+      "output": null,
+      "error": "ERROR:  vector must have at least 1 dimension"
+    },
+    {
+      "source": "vector_type.out",
+      "statement": "SELECT subvector('[1,2,3,4,5]'::vector, -1, 2);",
+      "kind": "vector",
+      "input": "[1,2,3,4,5]",
+      "start": -1,
+      "count": 2,
+      "output": null,
+      "error": "ERROR:  vector must have at least 1 dimension"
+    },
+    {
+      "source": "vector_type.out",
+      "statement": "SELECT subvector('[1,2,3,4,5]'::vector, 2147483647, 10);",
+      "kind": "vector",
+      "input": "[1,2,3,4,5]",
+      "start": 2147483647,
+      "count": 10,
+      "output": null,
+      "error": "ERROR:  vector must have at least 1 dimension"
+    },
+    {
+      "source": "vector_type.out",
+      "statement": "SELECT subvector('[1,2,3,4,5]'::vector, 3, 2147483647);",
+      "kind": "vector",
+      "input": "[1,2,3,4,5]",
+      "start": 3,
+      "count": 2147483647,
+      "output": "[3,4,5]",
+      "error": null
+    },
+    {
+      "source": "vector_type.out",
+      "statement": "SELECT subvector('[1,2,3,4,5]'::vector, -2147483644, 2147483647);",
+      "kind": "vector",
+      "input": "[1,2,3,4,5]",
+      "start": -2147483644,
+      "count": 2147483647,
+      "output": "[1,2]",
+      "error": null
+    }
+  ]
+}

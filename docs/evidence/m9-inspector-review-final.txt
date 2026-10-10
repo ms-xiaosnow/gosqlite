@@ -1,0 +1,13 @@
++ CGO_ENABLED=0
++ go test ./migration/postgres -run '^TestReview' -count=1 -v
+=== RUN   TestReviewRealArrayIndependentBinary32
+--- PASS: TestReviewRealArrayIndependentBinary32 (0.00s)
+=== RUN   TestReviewCatalogStrictnessAndIdentity
+--- PASS: TestReviewCatalogStrictnessAndIdentity (0.01s)
+=== RUN   TestReviewCatalogProgrammaticFiniteAndProvenance
+--- PASS: TestReviewCatalogProgrammaticFiniteAndProvenance (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	0.019s
++ CGO_ENABLED=1
++ go test -race ./migration/postgres -run '^TestReview' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	1.133s

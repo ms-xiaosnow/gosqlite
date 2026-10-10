@@ -16,7 +16,7 @@ Persisted extension indices share the table transaction. Encryption sits below l
 
 Implemented M1 path: cmd/gosqlite query/inspect or database/sql driver → sqlite pull executor → internal/sql expressions/parser + schema interpretation → streaming internal/btree cursor + internal/record decoder → read-only internal/pager and native Linux shared locks. The public sqlite package currently owns the small pull executor rather than creating a placeholder VM package. ORDER BY is separately bounded; ordinary scans stream. The PageReader abstraction decouples traversal from the physical reader for future transaction overlays. See ADR0002 for lock lifetimes, quotas and rejected modes.
 
-Implemented M2 write path: parsed CREATE/INSERT/UPDATE/DELETE → full supported-catalog and page-ownership validation → statement undo snapshot → local table/index B-tree operations → bounded pager dirty overlay and SQLite freelist → native RESERVED/PENDING/EXCLUSIVE locks → standard DELETE rollback journal and database publication. Successful statements remain in an explicit transaction; a rejected statement restores its own overlay without erasing earlier statements. No page spill is used. Ordinary index pages are maintained; M4 uses covering extension posting indices for its supported predicates. General ordinary-index SELECT optimization remains open.
+Implemented M2 write path: parsed CREATE/INSERT/UPDATE/DELETE → full supported-catalog and page-ownership validation → statement undo snapshot → local table/index B-tree operations → bounded pager dirty overlay and SQLite freelist → native RESERVED/PENDING/EXCLUSIVE locks → standard DELETE rollback journal and database publication. Successful statements remain in an explicit transaction; a rejected statement restores its own overlay without erasing earlier statements. No page spill is used. Ordinary index pages are maintained; M4 uses covering extension posting indices for its supported predicates. Eligible rowid and leading BINARY ASC equality SELECT paths now use bounded range/seek planning; general inequalities/covering/order optimization remains open.
 
 Idle connections release snapshots; each query or transaction owns its file handle and locks. Native Commit returning BUSY before physical I/O can be retried after readers close. database/sql invalidates a Tx after any Commit result, so its adapter rolls back after a failed commit. Once commit physical I/O begins, cancellation is deferred until the operation resolves. Any ambiguous physical-I/O result poisons the handle; it cannot be used as a successful commit.
 
@@ -55,4 +55,22 @@ querying. See ADR0009 and ann.md. IVFFlat now shares the optional ANN family wit
 
 ## Experimental encrypted snapshot storage
 
-internal/encstore supplies independent authenticated root/base objects below the logical SQLite pager. internal/pager.EncryptedSession reuses transactional page overlays and statement undo while bypassing plaintext journal/WAL publication. Fresh file identities and fully authenticated object completeness precede page parsing. sqlite owns code KeyProvider configuration and rekey/backup/restore/import/export, and driver.NewConnector snapshots options. This first mode publishes a whole immutable base per changed transaction and retains history. Encrypted WAL and concurrent writer/readers are separate required work. See encryption-storage.md for exact authority/locking, quotas and namespace/security limitations.
+internal/encstore supplies independent authenticated root/base objects below the logical SQLite pager. internal/pager.EncryptedSession reuses transactional page overlays and statement undo while bypassing plaintext journal/WAL publication. Fresh file identities and fully authenticated object completeness precede page parsing. sqlite owns code KeyProvider configuration and rekey/backup/restore/import/export, and driver.NewConnector snapshots options. This first mode publishes a whole immutable base per changed transaction and retains history. The separate dirty-page WAL route follows below; simultaneous encrypted writer/readers remain required code. See encryption-storage.md for exact authority/locking, quotas and namespace/security limitations.
+
+Encrypted WAL route: code-only provider -> authenticated current root -> immutable
+base plus complete ordered dirty-page segment selection -> bounded logical page
+location overlay -> the same native SQL/B-tree engine. Changed commits publish
+final dirty images and a new root; checkpoint/rekey/copy stream the complete head.
+A pinned Linux parent directory contains relative family operations. Lifetime
+exclusive writer leases remain an intermediate concurrency model. See ADR0012.
+
+Ordinary SELECT planning follows ANN and grams before rowid/IPK equality or a
+nonunique BINARY ASC leading equality prefix. Bounded candidate rowids are sorted,
+source rows sought and original predicates rechecked; conservative error-safety
+proofs and resource fallback preserve scan behavior. Plan counters distinguish
+index page-reader calls, matching keys and base-row seeks.
+
+Migration inspection is a standalone bounded local parser/identity checker, not
+a remote database client or a production SQL delegation path. Extended vector
+primitives are immutable values beneath future typed SQL integration; they do
+not silently alter existing dense storage or planner identity.

@@ -53,7 +53,7 @@ func familyEntry(name, base string) (bool, error) {
 		}
 	}
 	switch tail[64:] {
-	case ".base", ".retained", ".pending":
+	case ".base", ".wal", ".retained", ".pending":
 		return true, nil
 	default:
 		return false, ErrUnsupported
@@ -70,9 +70,16 @@ func charge(total, amount, maximum uint64) (uint64, error) {
 // family object, including unreferenced candidates from previous attempts.
 // Unknown family names, links, symlinks and nonregular entries fail closed.
 // A dedicated directory avoids quota refusal caused by unrelated entry counts.
-func inventory(ctx context.Context, path string, maxBytes uint64, maxEntries uint32) (uint64, error) {
+func inventory(ctx context.Context, path string, maxBytes uint64, maxEntries uint32, spaces ...*namespace) (uint64, error) {
+	ns := chooseNamespace(spaces)
 	dir := filepath.Dir(path)
 	f, err := openDirectory(dir)
+	if ns != nil {
+		if f != nil {
+			_ = f.Close()
+		}
+		f, err = openFileAt(ns.dir, ".", os.O_RDONLY)
+	}
 	if err != nil {
 		return 0, err
 	}
@@ -108,7 +115,7 @@ func inventory(ctx context.Context, path string, maxBytes uint64, maxEntries uin
 			if !member {
 				continue
 			}
-			obj, info, e := checkedFile(filepath.Join(dir, entry.Name()), os.O_RDONLY)
+			obj, info, e := ns.checked(filepath.Join(dir, entry.Name()), os.O_RDONLY)
 			if e != nil {
 				return 0, e
 			}
@@ -143,36 +150,52 @@ func inventory(ctx context.Context, path string, maxBytes uint64, maxEntries uin
 	return total, nil
 }
 func publicationBudget(ctx context.Context, path string, o Options, g Geometry, next uint64, hasRoot bool) error {
-	generations, maxBytes, maxEntries, err := o.retentionLimits()
-	if err != nil {
+	if err := basePlanBudget(o, g); err != nil {
 		return err
+	}
+	root := uint64(rootSize)
+	if o.Mode == WAL {
+		root = walRootSize(0)
+	}
+	old := uint64(0)
+	if hasRoot {
+		old = root
+	}
+	return plannedBudget(ctx, path, nil, o, next, objectSize(g), root, old, hasRoot)
+}
+
+// plannedBudget reserves every physical byte plus worst-case upcoming entries.
+// Unrelated concurrent additions remain a bounded scan failure, not an inode quota.
+func plannedBudget(ctx context.Context, path string, ns *namespace, o Options, next, newObject, newRoot, oldRoot uint64, hasRoot bool) error {
+	generations, maxBytes, maxEntries, e := o.retentionLimits()
+	if e != nil {
+		return e
 	}
 	if next > generations {
 		return encryption.ErrLimit
 	}
-	// The brand-new-family preflight runs before acquire creates its lock.
-	// Reserve that known entry so repeating the inventory under the new lease
-	// cannot fail solely because of our own intervening lock creation.
-	if !hasRoot {
+	additions := uint32(2)
+	if hasRoot {
+		additions++
+	} else {
 		if _, e := os.Lstat(path + ".gse-lock"); os.IsNotExist(e) {
-			if maxEntries == 0 {
-				return encryption.ErrLimit
-			}
-			maxEntries--
+			additions++
 		} else if e != nil {
 			return e
 		}
 	}
-	used, err := inventory(ctx, path, maxBytes, maxEntries)
-	if err != nil {
-		return err
+	if maxEntries < additions {
+		return encryption.ErrLimit
 	}
-	// Charge the complete new base and root candidate, and conservatively reserve
-	// a copy of the current root while its old pathname still exists.
-	reserve := objectSize(g) + rootSize
-	if hasRoot {
-		reserve += rootSize
+	used, e := inventory(ctx, path, maxBytes, maxEntries-additions, ns)
+	if e != nil {
+		return e
 	}
-	_, err = charge(used, reserve, maxBytes)
-	return err
+	for _, n := range []uint64{newObject, newRoot, oldRoot} {
+		used, e = charge(used, n, maxBytes)
+		if e != nil {
+			return e
+		}
+	}
+	return nil
 }

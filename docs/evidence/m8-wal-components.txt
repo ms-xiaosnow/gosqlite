@@ -1,0 +1,22 @@
+2026-10-10T13:00:55Z
+go version go1.27.2 linux/amd64
+CGO_ENABLED=0 go vet ./internal/encstore ./internal/pager ./sqlite ./driver
+CGO_ENABLED=0 go test ./internal/encstore ./internal/pager ./sqlite ./driver -run 'Test(SnapshotManifest|InventoryAccounting|ReviewMemory|ReviewWAL|EncryptedPager|Encryption|EncryptedConnector|EncryptedWALConnector|WAL)' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	0.077s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.018s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	1.715s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.048s
+CGO_ENABLED=1 go test -race ./internal/encstore ./internal/pager ./sqlite ./driver -run 'Test(SnapshotManifest|InventoryAccounting|ReviewMemory|ReviewWAL|EncryptedPager|Encryption|EncryptedConnector|EncryptedWALConnector|WAL)' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	1.469s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.093s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	8.949s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.146s
+CGO_ENABLED=0 go test ./internal/encstore -run ^$ -fuzz ^FuzzWALFormatMemory$ -fuzztime=5s -parallel=2
+fuzz: elapsed: 0s, gathering baseline coverage: 0/5 completed
+fuzz: elapsed: 0s, gathering baseline coverage: 5/5 completed, now fuzzing with 2 workers
+fuzz: elapsed: 3s, execs: 9074 (3024/sec), new interesting: 0 (total: 5)
+fuzz: elapsed: 6s, execs: 144089 (45006/sec), new interesting: 1 (total: 6)
+fuzz: elapsed: 6s, execs: 144089 (0/sec), new interesting: 1 (total: 6)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	6.035s
+2026-10-10T13:01:16Z

@@ -1,0 +1,5 @@
+b47e65e3ab19fc9767e2f9f29c6cad632a6ef7a60b82a089a861912cfa558eee  docs/encryption-storage.md
+79eb52dbad050886c45efcd15ef29c796bfb78985d001558f9ca884bf0d9d3b3  docs/decisions/0012-authenticated-wal-segments.md
+6e7205fedd89071ffaa6c14fff66a3281dea63872cd5ab6b77c664b242b7bfbc  examples/encrypted-wal/README.md
+9592a22cc244948cceae8a016d85f0c3c5d2efc47e34100ee181ecf1e8e9283a  examples/encrypted-wal/main.go
+1e96f8b82245bbc12bad0487ed2ac26b082a538125865c84cc9392c0f40cd713  examples/encrypted-wal/main_test.go

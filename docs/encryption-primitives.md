@@ -1,13 +1,13 @@
 # Experimental authenticated-record primitives
 
-The `encryption` package provides **memory-only building blocks**. The first
-experimental M8 storage slice now uses them for immutable authenticated snapshots
+The `encryption` package provides **memory-only building blocks**. The
+experimental M8 storage uses them for authenticated snapshots and dirty-page WAL
 through `sqlite.Options.Encryption`, including rekey, encrypted backup/restore,
 and explicitly named plaintext import/export APIs. See
 [encryption-storage.md](encryption-storage.md) for that integration's actual API,
 root/base format, quotas, lifetime leases and limitations. Nil encryption options
 still select the plaintext engine; native journals/WAL are not encrypted, and
-encrypted snapshot mode rejects native WAL options. There is no encrypted WAL.
+encrypted snapshot mode rejects native WAL options. Explicit EncryptionWAL uses a separate authenticated segment format, not native SQLite WAL.
 
 `NewRekeyEpoch` only generates identity/salt values; `sqlite.DB.Rekey` performs
 the storage rewrite and retains older ciphertext. Full M8 acceptance, SEE file
@@ -102,7 +102,8 @@ identity to detect. Public extent/IDs/KDF costs, access patterns, process memory
 denial of service and hardware/OS compromise remain relevant. The snapshot
 integration avoids plaintext journals, WAL and spill, but plaintext export is an
 explicit downgrade, and rekey does not revoke old credentials' access to retained
-history or securely erase it. Its parent-directory namespace is canonicalized by
-string, not continuously pinned against adversarial mutation. See the storage
+history or securely erase it. Live Linux family operations use a pinned parent-directory descriptor; initial
+resolution and copy helpers remain path-based, with no complete hostile-namespace
+defense or executed namespace-race qualification. See the storage
 document for integration-specific evidence and unexecuted gates. This format is
 experimental, not yet a stable supported encrypted database format.

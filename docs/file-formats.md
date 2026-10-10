@@ -2,7 +2,7 @@
 
 M2 reads and writes the tested rowid-table and BINARY ASC secondary-index subset of SQLite format 3, according to the [official specification](https://www.sqlite.org/fileformat2.html), with tested subsets recorded in compatibility.md. Future extension data must occupy legal transactional SQLite structures. Unknown feature bits, container versions, encodings, and index versions must be rejected instead of guessed.
 
-The experimental encrypted snapshot format is an independent authenticated root/base container, distinct from SQLite plaintext and SEE. It now supports snapshot storage; encrypted WAL and a stable encrypted-format promise remain open. See [encryption-storage.md](encryption-storage.md). Every format change requires an ADR, preserved snapshot, explicit migration and round-trip verification.
+The experimental encrypted snapshot format is an independent authenticated root/base container, distinct from SQLite plaintext and SEE. It supports layout-1 snapshots and explicit layout-2 authenticated dirty-page WAL; a stable encrypted-format promise remains open. See [encryption-storage.md](encryption-storage.md). Every format change requires an ADR, preserved snapshot, explicit migration and round-trip verification.
 
 ## M2 plaintext writes
 
@@ -116,14 +116,26 @@ not change. See [ann.md](ann.md) and the
 [algorithm contract](../extension/vector/ann/README.md) for deterministic
 training, resource bounds, probes, fallback and compatibility limits.
 
-## M8 authenticated records and experimental snapshots
+## M8 authenticated records and experimental storage
 
 The encryption package defines an experimental 512-byte GSQLENC1 bootstrap and
 24-byte authenticated-record header plus AES256GCM ciphertext/tag. The snapshot
 storage layer now uses authenticated root/base objects for database publication,
 rekey, encrypted backup/restore and explicit plaintext import/export. Existing
-plaintext files are not silently transformed. Encrypted WAL, a stable format
-promise and physical crash/security qualification remain open. See
-[encryption-storage.md](encryption-storage.md) for the root/base snapshot format
+plaintext files are not silently transformed. Explicit layout-2 WAL roots select
+an ordered authenticated base/dirty-segment graph; snapshot layout-1 and portable
+archive bytes remain unchanged. A stable format promise and physical crash/security
+qualification remain open. See
+[encryption-storage.md](encryption-storage.md) for root/base/segment formats
 and [encryption-primitives.md](encryption-primitives.md) for record-codec offsets
 and cryptographic scope.
+
+## Extended vector memory codecs
+
+The distinct version-1 GSH/GSB/GSS codecs represent finite binary16 values,
+canonical MSB-first packed bits, and sorted sparse binary32 entries. Existing
+dense GSVv1 is unchanged. These codecs and nullable Go adapters do not yet enable
+SQL column declarations or extended ANN storage. They are not PostgreSQL binary
+COPY/wire and have no authentication/checksum claim. See
+[extended-values.md](../extension/vector/extended-values.md) for exact byte layout,
+limits and deliberate conversion/precision differences.

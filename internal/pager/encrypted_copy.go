@@ -166,3 +166,12 @@ func (r *Reader) ValidatePlaintextCopySource() error {
 	}
 	return validateWritableFile(info)
 }
+
+func (s *EncryptedSession) CopyBudget() error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if err := s.checkLocked(); err != nil {
+		return err
+	}
+	return encryptedError(s.store.CopyBudget())
+}

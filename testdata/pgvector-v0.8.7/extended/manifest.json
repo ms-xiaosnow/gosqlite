@@ -1,0 +1,94 @@
+{
+  "tag": "v0.8.7",
+  "commit": "f37c13f68b57d2c3472b2214fbcff699d6d34876",
+  "retrieved_utc": "2026-10-10",
+  "source_url": "https://github.com/pgvector/pgvector/tree/f37c13f68b57d2c3472b2214fbcff699d6d34876",
+  "execution": "Published expected-output fixtures and source inspection only. PostgreSQL/pgvector was not executed.",
+  "license": "../../../third_party/pgvector-LICENSE",
+  "files": [
+    {
+      "file": "halfvec.out",
+      "upstream": "test/expected/halfvec.out",
+      "bytes": 13924,
+      "sha256": "ab856cc0d5d7095a5732ba5a75a99fb55e102cd473fb55dde347a691781b44e4"
+    },
+    {
+      "file": "halfvec.sql",
+      "upstream": "test/sql/halfvec.sql",
+      "bytes": 6030,
+      "sha256": "08d236799cc48ff41d62e00469942a288e23b5c21cb5117f65a08c505c4a7b57"
+    },
+    {
+      "file": "sparsevec.out",
+      "upstream": "test/expected/sparsevec.out",
+      "bytes": 14658,
+      "sha256": "f5661760feb0dc817f51116f698de156297bfc981142bebada39a0b73d3bd18e"
+    },
+    {
+      "file": "sparsevec.sql",
+      "upstream": "test/sql/sparsevec.sql",
+      "bytes": 5727,
+      "sha256": "6c28e9fbbaeacceb9683fc53391869d0189167464b341135a3e2a67f4e36d08a"
+    },
+    {
+      "file": "bit.out",
+      "upstream": "test/expected/bit.out",
+      "bytes": 8834,
+      "sha256": "99fa76f2e7d19bc2066b114074d107a4260e47f04506ee87f57e258c25da7a59"
+    },
+    {
+      "file": "bit.sql",
+      "upstream": "test/sql/bit.sql",
+      "bytes": 7253,
+      "sha256": "cbbc6ca4fc4f59fc42a72a8a2a463fb0c1e7f5e40918884623bbd0729c235145"
+    }
+  ],
+  "reference_sources": [
+    {
+      "upstream": "src/bitutils.c",
+      "bytes": 5743,
+      "sha256": "59b798f77226ceed8dbb2688001d17000127b45f2c9af7a7b825b0d7ad6ff18b"
+    },
+    {
+      "upstream": "src/bitutils.h",
+      "bytes": 430,
+      "sha256": "379ae17f7b1c10ff323684d7582413dcecfe2151b2c8dd0d5b55b6f5597e40b9"
+    },
+    {
+      "upstream": "src/bitvec.c",
+      "bytes": 1396,
+      "sha256": "150cd99001d3398411dfd31c2e257fdbe07d278f76da136efe9dcf53eca84209"
+    },
+    {
+      "upstream": "src/halfutils.h",
+      "bytes": 3909,
+      "sha256": "cf15f882c6843076e9a14d82b2d4d7c483d69d2acbc497fb23da6cf917c5b298"
+    },
+    {
+      "upstream": "src/halfvec.c",
+      "bytes": 25724,
+      "sha256": "22e86df73b33dcb9ef4e1b5e49d0dfd023128d2d14b2fd77df66cf00acece36a"
+    },
+    {
+      "upstream": "src/halfvec.h",
+      "bytes": 2205,
+      "sha256": "451a53dded6a1e662d2bc9f75d0ecd655a347e0bfda9c7c05f9bc253fd4d7d3b"
+    },
+    {
+      "upstream": "src/sparsevec.c",
+      "bytes": 27618,
+      "sha256": "4f46c54765ceeea9ac192384ce9f4ad67d981d4d755d8dfc737551191d60c84b"
+    },
+    {
+      "upstream": "src/sparsevec.h",
+      "bytes": 1423,
+      "sha256": "89b01077de88c3597e687b04303499c35610b108cc64b05284d38d909dfc67bc"
+    }
+  ],
+  "extracted_counts": {
+    "parse": 88,
+    "metrics": 93,
+    "quantize": 6,
+    "subvector": 20
+  }
+}

@@ -1,0 +1,123 @@
+{
+  "format_version": 1,
+  "kind": "pg_embedding_source_reference_manifest",
+  "source": {
+    "repository": "https://github.com/neondatabase/pg_embedding",
+    "commit": "5d48508aeaeb86b9e9c630468ada7a124b905795",
+    "commit_date": "2023-09-28T14:37:16Z",
+    "extension_name": "embedding",
+    "extension_version": "0.3.6",
+    "version_evidence": "embedding.control default_version",
+    "retrieved_date": "2026-10-10",
+    "retrieval_provenance": "Copied from preexisting public-source reference downloads used for the M9 design; no new downloads during fixture preparation.",
+    "license_spdx": "Apache-2.0",
+    "license_file": "LICENSE",
+    "notice_file": "NOTICE",
+    "notice_details": "Exact upstream NOTICE also includes MIT attribution for the upstream HNSW implementation; that implementation is not bundled here."
+  },
+  "hash_algorithm": "SHA-256",
+  "hash_provenance": "Computed locally over exact file bytes; not an upstream-published checksum or a signature.",
+  "files": [
+    {
+      "path": "embedding--0.3.6.sql",
+      "origin": "upstream_source",
+      "upstream_path": "embedding--0.3.6.sql",
+      "source_url": "https://github.com/neondatabase/pg_embedding/blob/5d48508aeaeb86b9e9c630468ada7a124b905795/embedding--0.3.6.sql",
+      "sha256": "e167cfc2ffe6ac29aa8a6984441725f02a6351adc2c823b3bc0ffe6b470c7e22",
+      "size_bytes": 2241,
+      "modified": false
+    },
+    {
+      "path": "embedding.control",
+      "origin": "upstream_source",
+      "upstream_path": "embedding.control",
+      "source_url": "https://github.com/neondatabase/pg_embedding/blob/5d48508aeaeb86b9e9c630468ada7a124b905795/embedding.control",
+      "sha256": "68ec6fb5703a1fa5bdad19d3a65d4d43a9779364c974cb410c533d41dc6f2c7b",
+      "size_bytes": 144,
+      "modified": false
+    },
+    {
+      "path": "LICENSE",
+      "origin": "upstream_source",
+      "upstream_path": "LICENSE",
+      "source_url": "https://github.com/neondatabase/pg_embedding/blob/5d48508aeaeb86b9e9c630468ada7a124b905795/LICENSE",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "size_bytes": 11358,
+      "modified": false
+    },
+    {
+      "path": "NOTICE",
+      "origin": "upstream_source",
+      "upstream_path": "NOTICE",
+      "source_url": "https://github.com/neondatabase/pg_embedding/blob/5d48508aeaeb86b9e9c630468ada7a124b905795/NOTICE",
+      "sha256": "0cb583690f00b0486d8d807a455a80401b90780a769e1458125252adf7b2cfc3",
+      "size_bytes": 1509,
+      "modified": false
+    }
+  ],
+  "source_references": [
+    {
+      "upstream_path": "embedding.c",
+      "source_url": "https://github.com/neondatabase/pg_embedding/blob/5d48508aeaeb86b9e9c630468ada7a124b905795/embedding.c",
+      "sha256": "e5b6bd0aad810f6b1cd9c0ab8b7908bbe342732c6436166a24d95edc8f76051f",
+      "size_bytes": 28350,
+      "bundled": false,
+      "purpose": "Legacy index-option defaults and registration; referenced only, not bundled."
+    },
+    {
+      "upstream_path": "README.md",
+      "source_url": "https://github.com/neondatabase/pg_embedding/blob/5d48508aeaeb86b9e9c630468ada7a124b905795/README.md",
+      "sha256": "518ebee12242a775984df5ca78f7d0b534808a215e7985141a692cfed250a2a9",
+      "size_bytes": 7620,
+      "bundled": false,
+      "purpose": "Legacy example m=3 and efconstruction=5; referenced only, not bundled."
+    }
+  ],
+  "local_fixture_provenance": {
+    "origin": "locally_authored_synthetic_test_inputs",
+    "applies_to": "Adjacent catalog, query, and data fixtures unless they carry separate explicit provenance.",
+    "live_postgresql_capture": false,
+    "upstream_source": false,
+    "covered_by_upstream_file_hashes": false,
+    "notes": "This source-reference manifest does not assert the existence, contents, or hashes of separately maintained synthetic fixtures. README.md and manifest.json are local documentation."
+  },
+  "validation_scope": {
+    "upstream_files_copied_without_modification": true,
+    "live_postgresql_execution_performed": false,
+    "upstream_sql_executed": false,
+    "upstream_c_or_cpp_bundled": false,
+    "source_compatibility_is_not_execution_evidence": true
+  },
+  "legacy_options": {
+    "defaults": {
+      "m": 100,
+      "efconstruction": 16,
+      "efsearch": 64
+    },
+    "readme_example": {
+      "m": 3,
+      "efconstruction": 5,
+      "efsearch": 5
+    },
+    "modern_target_constraint": "ef_construction >= 2*m",
+    "default_pair_satisfies_modern_target_constraint": false,
+    "readme_example_pair_satisfies_modern_target_constraint": false,
+    "required_finding": "target_option_constraint",
+    "automatic_retuning": false,
+    "target_reference": {
+      "project": "pgvector",
+      "version": "0.8.7",
+      "commit": "f37c13f68b57d2c3472b2214fbcff699d6d34876"
+    }
+  },
+  "neon_documentation": {
+    "requested_url": "https://neon.com/docs/extensions/pgvector#migrate-from-pg_embedding-to-pgvector",
+    "retrieved_date": "2026-10-10",
+    "current_page_retrieved": true,
+    "requested_current_migration_chapter_present": false,
+    "historical_chapter_url": "https://github.com/neondatabase/website/blob/d4c1cf37f79acbf4c02880eddb97dd9a36cb2d20/content/docs/extensions/pg_embedding.md#migrate-from-pg_embedding-to-pgvector",
+    "historical_commit": "d4c1cf37f79acbf4c02880eddb97dd9a36cb2d20",
+    "historical_snapshot_date": "2024-01-23",
+    "evidence_origin": "Prior M9 source-reference research, not a new live-site check during fixture preparation."
+  }
+}

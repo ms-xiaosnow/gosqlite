@@ -49,3 +49,34 @@ func renameAbsent(old, new string) error {
 func openDirectory(path string) (*os.File, error) {
 	return os.OpenFile(path, os.O_RDONLY|unix.O_DIRECTORY|unix.O_NOFOLLOW|unix.O_CLOEXEC|unix.O_NONBLOCK, 0)
 }
+
+func openFileAt(dir *os.File, name string, flags int) (*os.File, error) {
+	fd, e := unix.Openat(int(dir.Fd()), name, flags|unix.O_NOFOLLOW|unix.O_CLOEXEC|unix.O_NONBLOCK, 0600)
+	if e != nil {
+		return nil, e
+	}
+	return os.NewFile(uintptr(fd), name), nil
+}
+func stableFileAt(dir *os.File, name string, f *os.File, info os.FileInfo) error {
+	now, e := f.Stat()
+	if e != nil {
+		return e
+	}
+	var named, held unix.Stat_t
+	if e = unix.Fstatat(int(dir.Fd()), name, &named, unix.AT_SYMLINK_NOFOLLOW); e != nil {
+		return e
+	}
+	if e = unix.Fstat(int(f.Fd()), &held); e != nil {
+		return e
+	}
+	if named.Mode&unix.S_IFMT != unix.S_IFREG || named.Dev != held.Dev || named.Ino != held.Ino || !os.SameFile(info, now) || now.Size() != info.Size() || !now.ModTime().Equal(info.ModTime()) {
+		return ErrChanged
+	}
+	return validateLinks(f)
+}
+func renameFileAt(dir *os.File, old, new string, absent bool) error {
+	if absent {
+		return unix.Renameat2(int(dir.Fd()), old, int(dir.Fd()), new, unix.RENAME_NOREPLACE)
+	}
+	return unix.Renameat(int(dir.Fd()), old, int(dir.Fd()), new)
+}

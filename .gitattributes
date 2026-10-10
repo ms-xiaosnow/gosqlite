@@ -1,2 +1,7 @@
 # Preserve the exact upstream expected-output fixture, including aligned spaces.
 testdata/pgvector-v0.8.7/vector_type.out -whitespace
+# Preserve the separately pinned extended-type upstream expected outputs.
+testdata/pgvector-v0.8.7/extended/*.out -whitespace
+
+# Preserve the trailing field delimiter printed by go version -m.
+docs/evidence/m8-wal-m9-final-supplement.txt -whitespace

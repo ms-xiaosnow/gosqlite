@@ -1,5 +1,5 @@
-// Package encstore implements the experimental immutable encrypted snapshot
-// container. It never writes plaintext SQLite pages or native SQLite sidecars.
+// Package encstore implements experimental immutable encrypted snapshots and
+// authenticated WAL segments. It never writes native SQLite sidecars.
 package encstore
 
 import (
@@ -23,6 +23,8 @@ var (
 // Options is copied by the public connection. Provider and Budget remain
 // explicitly shared application-owned objects, never serialized to disk.
 type Options struct {
+	Mode                Mode
+	WALLimits           WALLimits
 	KeyProvider         encryption.KeyProvider
 	CredentialKind      encryption.CredentialKind
 	CreateKDF           encryption.Argon2Params
@@ -36,6 +38,12 @@ type Options struct {
 
 func (Options) Format(s fmt.State, verb rune) { _, _ = s.Write([]byte("encstore.Options{redacted}")) }
 func (o Options) Validate() error {
+	if o.Mode != Snapshot && o.Mode != WAL {
+		return ErrUnsupported
+	}
+	if _, err := o.WALLimits.normalized(); err != nil {
+		return err
+	}
 	if _, _, _, err := o.retentionLimits(); err != nil {
 		return err
 	}
@@ -77,8 +85,9 @@ type SourceFunc func(context.Context, uint32) ([]byte, error)
 func (f SourceFunc) ReadPage(c context.Context, n uint32) ([]byte, error) { return f(c, n) }
 
 type Prepared struct {
-	Master  *encryption.MasterKey
-	Options Options
+	writerIDs uint64
+	Master    *encryption.MasterKey
+	Options   Options
 }
 
 func Prepare(ctx context.Context, path string, o Options, op encryption.Operation, dbid [16]byte) (*Prepared, error) {

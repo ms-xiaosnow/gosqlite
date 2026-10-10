@@ -1,0 +1,5 @@
+2026-10-10T13:06:11Z
+CGO_ENABLED=1 go test -race -tags oracle ./internal/testkit -run ^TestOracleEncryptedWALCompleteHead$ -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	91.950s
+2026-10-10T13:07:45Z
+ORACLE RACE PASS

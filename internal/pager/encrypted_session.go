@@ -4,13 +4,14 @@ import (
 	"context"
 	"encoding/binary"
 	"errors"
+	"sort"
 	"sync"
 
 	"github.com/ms-xiaosnow/gosqlite/encryption"
 	"github.com/ms-xiaosnow/gosqlite/internal/encstore"
 )
 
-// EncryptedSession uses immutable authenticated full snapshots. Writable
+// EncryptedSession uses immutable authenticated snapshot or WAL storage. Writable
 // connections retain an exclusive lease on a separate stable lock inode;
 // read-only connections share that inode. One local Tx/Reader lease is allowed.
 type EncryptedSession struct {
@@ -40,7 +41,7 @@ func encryptedError(err error) error {
 	}
 }
 func OpenEncryptedSession(ctx context.Context, path string, opts Options, cfg encstore.Options, readOnly bool) (*EncryptedSession, error) {
-	if opts.KeepWALOnClose || opts.WALPowersafeOverwrite {
+	if (opts.KeepWALOnClose && cfg.Mode != encstore.WAL) || opts.WALPowersafeOverwrite {
 		return nil, ErrUnsupported
 	}
 	opts, err := normalizedOptions(opts)
@@ -200,7 +201,33 @@ func (t *Tx) commitEncryptedLocked(ctx context.Context) error {
 		}
 		return s.store.ReadPage(c, n)
 	})
-	err := encryptedError(s.store.Publish(ctx, encstore.Geometry{PageSize: h.PageSize, PageCount: h.PageCount}, src, nil))
+	var publishErr error
+	if s.store.Mode() == encstore.WAL {
+		count := uint64(len(t.dirty))
+		reserved := lockPage(h.PageSize)
+		if reserved > t.originalPages && reserved <= h.PageCount {
+			if _, ok := t.dirty[reserved]; !ok {
+				count++
+			}
+		}
+		if err := s.store.DirtyPagesBudget(count); err != nil {
+			return encryptedError(err)
+		}
+		pages := make([]uint32, 0, int(count))
+		for n := range t.dirty {
+			pages = append(pages, n)
+		}
+		if reserved > t.originalPages && reserved <= h.PageCount {
+			if _, ok := t.dirty[reserved]; !ok {
+				pages = append(pages, reserved)
+			}
+		}
+		sort.Slice(pages, func(i, j int) bool { return pages[i] < pages[j] })
+		publishErr = s.store.PublishWAL(ctx, s.store.HeadCommitID(), encstore.Geometry{PageSize: h.PageSize, PageCount: h.PageCount}, pages, src)
+	} else {
+		publishErr = s.store.Publish(ctx, encstore.Geometry{PageSize: h.PageSize, PageCount: h.PageCount}, src, nil)
+	}
+	err := encryptedError(publishErr)
 	if err != nil {
 		if errors.Is(err, ErrCommitUncertain) {
 			s.poisoned = err
@@ -225,7 +252,11 @@ func (s *EncryptedSession) Checkpoint(ctx context.Context) error {
 	if s.active != nil {
 		return ErrBusy
 	}
-	return ctx.Err()
+	err := encryptedError(s.store.Checkpoint(ctx))
+	if errors.Is(err, ErrCommitUncertain) {
+		s.poisoned = err
+	}
+	return err
 }
 func (s *EncryptedSession) Verify(ctx context.Context) error {
 	s.mu.Lock()
@@ -265,7 +296,11 @@ func (s *EncryptedSession) Close() error {
 	if s.store == nil {
 		return s.poisoned
 	}
-	err := encryptedError(s.store.Close())
+	var checkpointErr error
+	if !s.readOnly && !s.opts.KeepWALOnClose && s.poisoned == nil {
+		checkpointErr = encryptedError(s.store.Checkpoint(context.Background()))
+	}
+	err := errors.Join(checkpointErr, encryptedError(s.store.Close()))
 	s.store = nil
 	return errors.Join(s.poisoned, err)
 }
@@ -277,4 +312,23 @@ func (s *EncryptedSession) EncryptionInfo() encstore.Info {
 		return encstore.Info{}
 	}
 	return s.store.Info()
+}
+
+func (s *EncryptedSession) UpgradeWAL(ctx context.Context) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if err := s.checkLocked(); err != nil {
+		return err
+	}
+	if s.active != nil {
+		return ErrBusy
+	}
+	if s.readOnly {
+		return ErrMisuse
+	}
+	err := encryptedError(s.store.UpgradeWAL(ctx))
+	if errors.Is(err, ErrCommitUncertain) {
+		s.poisoned = err
+	}
+	return err
 }

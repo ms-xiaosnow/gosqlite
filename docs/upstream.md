@@ -179,3 +179,27 @@ x/sys/unix (the latter added by Linux encrypted storage); all CgoFiles empty.
 The same pinned x/sys module is now a direct dependency. Experimental encrypted
 snapshot integration is documented separately. Known-answer/reference tests do
 not constitute an independent audit.
+
+## M9 public migration and extended-value references
+
+The old embedding extension profile is version0.3.6, exact public commit
+5d48508aeaeb86b9e9c630468ada7a124b905795. Exact SQL/control source and Apache2
+LICENSE/NOTICE are retained under testdata/pgembedding-0.3.6 with locally computed
+SHA256/size manifest. The upstream NOTICE includes its HNSW attribution; that
+C/C++ implementation is not bundled or invoked. Adjacent catalog/report fixtures
+are locally authored synthetic data, not server captures.
+
+The current requested Neon page was readable on2026-10-10 but lacked the requested
+migration chapter. The fixture manifest identifies the historical official2024
+chapter and snapshot. No claim is made to have followed a nonexistent current
+chapter or executed the read-only exporter against PostgreSQL. Later migration
+steps must separately verify actual target versions, ownership and privileges.
+
+Half/bit/sparse public SQL/expected fixtures use the same pgvector v0.8.7 commit
+f37c13f68b57d2c3472b2214fbcff699d6d34876. Exact retained bytes/hashes and read-only
+source references are in testdata/pgvector-v0.8.7/extended/manifest.json; the
+previously retained pgvector license applies. Production is independently written
+Go;207 extracted published cases and separate mathematics are tested. PostgreSQL/
+pgvector was not built or run. Sparse malformed-zero-index validation, finite
+float64 versus upstream overflow/NaN, and explicit lossy conversions are recorded
+in extension/vector/extended-values.md. No new production dependency was added.

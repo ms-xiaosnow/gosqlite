@@ -132,13 +132,13 @@ func TestReviewMemorySnapshotSlotGeometry(t *testing.T) {
 
 func TestReviewMemoryInventoryFramingAndOverflow(t *testing.T) {
 	id := strings.Repeat("a", 64)
-	for _, name := range []string{"db", "db.gse-lock", "db.gse-" + id + ".base", "db.gse-" + id + ".pending", "db.gse-" + id + ".retained"} {
+	for _, name := range []string{"db", "db.gse-lock", "db.gse-" + id + ".base", "db.gse-" + id + ".wal", "db.gse-" + id + ".pending", "db.gse-" + id + ".retained"} {
 		member, err := familyEntry(name, "db")
 		if !member || err != nil {
 			t.Fatalf("canonical family entry %q: %v", name, err)
 		}
 	}
-	for _, tail := range []string{"short.base", strings.Repeat("A", 64) + ".base", id + ".wal", id + ".base.extra", "../" + id + ".base"} {
+	for _, tail := range []string{"short.base", strings.Repeat("A", 64) + ".base", id + ".base.extra", "../" + id + ".base"} {
 		if _, err := familyEntry("db.gse-"+tail, "db"); err == nil {
 			t.Fatalf("noncanonical family entry %q accepted", tail)
 		}

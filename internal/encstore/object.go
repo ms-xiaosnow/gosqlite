@@ -12,6 +12,7 @@ import (
 )
 
 type object struct {
+	ns          *namespace
 	file        *os.File
 	info        os.FileInfo
 	path        string
@@ -60,7 +61,7 @@ func stableFile(f *os.File, path string, info os.FileInfo) error {
 	}
 	return validateLinks(f)
 }
-func readExact(f *os.File, size int, off int64) ([]byte, error) {
+func readExact(f io.ReaderAt, size int, off int64) ([]byte, error) {
 	b := make([]byte, size)
 	n, err := f.ReadAt(b, off)
 	if err != nil || n != len(b) {
@@ -96,7 +97,7 @@ func (o *object) readPage(ctx context.Context, n uint32) ([]byte, error) {
 	if n == 0 || n > g.PageCount {
 		return nil, encryption.ErrIdentity
 	}
-	if err := stableFile(o.file, o.path, o.info); err != nil {
+	if err := o.ns.stable(o.file, o.path, o.info); err != nil {
 		return nil, err
 	}
 	b, err := readExact(o.file, int(g.PageSize)+recordOverhead, pageOffset(g, n))
@@ -121,12 +122,13 @@ func (o *object) readPage(ctx context.Context, n uint32) ([]byte, error) {
 // openObject authenticates the complete bounded object before returning any
 // logical page to a pager. Expected child identity/descriptor/hash come only
 // from an authenticated manifest. An archive itself is an authentication root.
-func openObject(ctx context.Context, path string, master *encryption.MasterKey, limits encryption.Limits, expected encryption.FileIdentity, desc *encryption.FileDescriptor, hash *[32]byte, p1 *[32]byte) (*object, error) {
-	f, info, err := checkedFile(path, os.O_RDONLY)
+func openObject(ctx context.Context, path string, master *encryption.MasterKey, limits encryption.Limits, expected encryption.FileIdentity, desc *encryption.FileDescriptor, hash *[32]byte, p1 *[32]byte, spaces ...*namespace) (*object, error) {
+	ns := chooseNamespace(spaces)
+	f, info, err := ns.checked(path, os.O_RDONLY)
 	if err != nil {
 		return nil, err
 	}
-	o := &object{file: f, path: path, info: info}
+	o := &object{file: f, path: path, info: info, ns: ns}
 	ok := false
 	defer func() {
 		if !ok {
@@ -217,7 +219,7 @@ func openObject(ctx context.Context, path string, master *encryption.MasterKey, 
 	if hash != nil && o.hash != *hash {
 		return nil, encryption.ErrAuthentication
 	}
-	if err = stableFile(f, path, info); err != nil {
+	if err = ns.stable(f, path, info); err != nil {
 		return nil, err
 	}
 	ok = true
@@ -226,7 +228,8 @@ func openObject(ctx context.Context, path string, master *encryption.MasterKey, 
 
 // writeObject streams bounded page buffers. A new primitive writer supplies a
 // fresh identity for every attempt; existing physical files are never resumed.
-func writeObject(ctx context.Context, pathForID func([32]byte) string, master *encryption.MasterKey, limits encryption.Limits, desc encryption.FileDescriptor, src PageSource) (*object, error) {
+func writeObject(ctx context.Context, pathForID func([32]byte) string, master *encryption.MasterKey, limits encryption.Limits, desc encryption.FileDescriptor, src PageSource, spaces ...*namespace) (*object, error) {
+	ns := chooseNamespace(spaces)
 	if err := desc.Validate(limits); err != nil {
 		return nil, err
 	}
@@ -250,7 +253,7 @@ func writeObject(ctx context.Context, pathForID func([32]byte) string, master *e
 		return nil, err
 	}
 	path := pathForID(h.FileID)
-	f, _, err := checkedFile(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL)
+	f, _, err := ns.checked(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL)
 	if err != nil {
 		return nil, err
 	}
@@ -329,5 +332,5 @@ func writeObject(ctx context.Context, pathForID func([32]byte) string, master *e
 	}
 	var full [32]byte
 	copy(full[:], digest.Sum(nil))
-	return openObject(ctx, path, master, limits, h.Identity(), &desc, &full, &p1)
+	return openObject(ctx, path, master, limits, h.Identity(), &desc, &full, &p1, ns)
 }

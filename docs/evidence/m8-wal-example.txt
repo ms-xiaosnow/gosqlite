@@ -1,0 +1,85 @@
++ date -u +%Y-%m-%dT%H:%M:%SZ
+2026-10-10T13:05:48Z
++ ../toolchains/go1.27.2/bin/go version
+go version go1.27.2 linux/amd64
++ sha256sum ../toolchains/go1.27.2/bin/go
+548d3c32f83fa81152f543eb1526be7884cfe0526eb5e9ce29d3eca14786e7e0  ../toolchains/go1.27.2/bin/go
++ export GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off GOCACHE=/workspace/scratch/5e06a74e5f65/durable-restart/gosqlite/../go-cache GOPATH=/workspace/scratch/5e06a74e5f65/durable-restart/gosqlite/../go-path
++ GOTOOLCHAIN=local
++ GOPROXY=off
++ GOSUMDB=off
++ GOCACHE=/workspace/scratch/5e06a74e5f65/durable-restart/gosqlite/../go-cache
++ GOPATH=/workspace/scratch/5e06a74e5f65/durable-restart/gosqlite/../go-path
++ CGO_ENABLED=0
++ ../toolchains/go1.27.2/bin/go run ./examples/encrypted-wal
+Created, changed, queried, and authenticated an encrypted WAL head (3 segments).
+Normally closed and reopened with the same key; the committed segments remain selected.
+Checkpointed and reopened read-only: zero selected segments, same data, retained ciphertext history.
+The key stayed in memory; disposable files will now be removed (not securely erased).
++ CGO_ENABLED=0
++ ../toolchains/go1.27.2/bin/go test -count=1 -v ./examples/encrypted-wal
+=== RUN   TestEncryptedWALExample
+--- PASS: TestEncryptedWALExample (0.01s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-wal	0.009s
++ CGO_ENABLED=0
++ ../toolchains/go1.27.2/bin/go vet ./examples/encrypted-wal
++ CGO_ENABLED=0
++ ../toolchains/go1.27.2/bin/go build -o /tmp/gosqlite-m8b-encrypted-wal-example ./examples/encrypted-wal
++ CGO_ENABLED=1
++ ../toolchains/go1.27.2/bin/go test -race -count=1 -v ./examples/encrypted-wal
+=== RUN   TestEncryptedWALExample
+--- PASS: TestEncryptedWALExample (0.02s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-wal	1.031s
++ git diff --check -- docs/encryption-storage.md docs/decisions/0012-authenticated-wal-segments.md examples/encrypted-wal
++ sha256sum docs/encryption-storage.md docs/decisions/0012-authenticated-wal-segments.md examples/encrypted-wal/README.md examples/encrypted-wal/main.go examples/encrypted-wal/main_test.go
+a6068e8af19c9979bb8df6b2affe28c2f4f78021d0688b32a2a8924698d23046  docs/encryption-storage.md
+79eb52dbad050886c45efcd15ef29c796bfb78985d001558f9ca884bf0d9d3b3  docs/decisions/0012-authenticated-wal-segments.md
+6e7205fedd89071ffaa6c14fff66a3281dea63872cd5ab6b77c664b242b7bfbc  examples/encrypted-wal/README.md
+9592a22cc244948cceae8a016d85f0c3c5d2efc47e34100ee181ecf1e8e9283a  examples/encrypted-wal/main.go
+1e96f8b82245bbc12bad0487ed2ac26b082a538125865c84cc9392c0f40cd713  examples/encrypted-wal/main_test.go
++ date -u +%Y-%m-%dT%H:%M:%SZ
+2026-10-10T13:05:51Z
++ date -u +%Y-%m-%dT%H:%M:%SZ
+2026-10-10T13:06:47Z
++ git diff --check -- docs/encryption-storage.md docs/decisions/0012-authenticated-wal-segments.md examples/encrypted-wal
++ sha256sum docs/encryption-storage.md docs/decisions/0012-authenticated-wal-segments.md examples/encrypted-wal/README.md examples/encrypted-wal/main.go examples/encrypted-wal/main_test.go
++ tee /tmp/gosqlite-m8b-docs-example-sha256.txt
+b47e65e3ab19fc9767e2f9f29c6cad632a6ef7a60b82a089a861912cfa558eee  docs/encryption-storage.md
+79eb52dbad050886c45efcd15ef29c796bfb78985d001558f9ca884bf0d9d3b3  docs/decisions/0012-authenticated-wal-segments.md
+6e7205fedd89071ffaa6c14fff66a3281dea63872cd5ab6b77c664b242b7bfbc  examples/encrypted-wal/README.md
+9592a22cc244948cceae8a016d85f0c3c5d2efc47e34100ee181ecf1e8e9283a  examples/encrypted-wal/main.go
+1e96f8b82245bbc12bad0487ed2ac26b082a538125865c84cc9392c0f40cd713  examples/encrypted-wal/main_test.go
++ sha256sum -c ../m8b-storage-source-sha256.txt
+driver/driver.go: OK
+driver/encryption_test.go: OK
+internal/encstore/backup.go: OK
+internal/encstore/format.go: OK
+internal/encstore/format_test.go: OK
+internal/encstore/inventory.go: OK
+internal/encstore/namespace.go: OK
+internal/encstore/object.go: OK
+internal/encstore/platform_linux.go: OK
+internal/encstore/platform_other.go: OK
+internal/encstore/publish.go: OK
+internal/encstore/review_test.go: OK
+internal/encstore/snapshot.go: OK
+internal/encstore/store.go: OK
+internal/encstore/wal_format.go: OK
+internal/encstore/wal_format_test.go: OK
+internal/encstore/wal_object.go: OK
+internal/encstore/wal_review_test.go: OK
+internal/pager/encrypted_copy.go: OK
+internal/pager/encrypted_session.go: OK
+internal/pager/encrypted_session_test.go: OK
+internal/pager/encrypted_wal_test.go: OK
+sqlite/encrypted_wal_review_test.go: OK
+sqlite/encryption.go: OK
+sqlite/encryption_copy.go: OK
+sqlite/encryption_review_test.go: OK
+sqlite/encryption_test.go: OK
+sqlite/encryption_wal_test.go: OK
+sqlite/sqlite.go: OK
++ python3 -
+All relative links in the three edited/new documents resolve.

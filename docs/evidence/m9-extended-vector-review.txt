@@ -1,0 +1,118 @@
+M9 extended vector independent review
+=====================================
+Review date: 2026-10-10 UTC
+Repository working directory: /workspace/scratch/5e06a74e5f65/durable-restart/gosqlite
+
+This is a verification report, not an uninterrupted terminal transcript.
+Only the lines expressly labeled observed output below are raw command output.
+Package durations are those printed by go test, not independent wall-clock measurements.
+
+Result and scope
+----------------
+No production defect was found in the reviewed pure-memory half, packed-bit,
+sparse, subvector, or quantization primitives. Production files were not edited.
+The only regression code added by this review is:
+  extension/vector/extended_review_test.go (377 lines)
+That file was frozen before the final three-pass vector test, vet, and race run.
+
+The new regression checks include an integer-arithmetic metric oracle independent
+of dense metrics (729 operand pairs at six half/sparse scales), conversion-report
+and failure-atomicity checks, signed-zero and quantization semantics, every context
+cancellation checkpoint at selected boundary/maximal sizes, zero-allocation
+metrics/norms, exhaustive first-eight-header-byte mutations, all final-byte padding
+patterns for bit widths 1 through 16, and sparse validation before destination
+allocation. The sparse cancellation cases include 32,000 disjoint support positions.
+
+Existing exhaustive half rounding, subvector, and published pgvector fixture tests
+were also inspected. All six retained upstream SQL/output files matched their
+manifest byte counts and SHA-256 hashes. This verifies the retained files against
+the retained manifest; no new remote-source retrieval or runtime oracle was used.
+
+No SQL/type integration, ANN integration, PostgreSQL/pgvector execution, physical
+database fault/crash/corruption/wrong-key/process-exit testing, commits, or external
+writes were performed by this review. Passing this scope does not establish those
+separate properties or certify the entire project.
+
+Exact environment and commands
+------------------------------
+All Go test/vet commands used this environment in the working directory above:
+  GOTOOLCHAIN=local
+  GOPROXY=off
+  GOSUMDB=off
+  GOCACHE=/workspace/scratch/5e06a74e5f65/durable-restart/go-cache
+  GOPATH=/workspace/scratch/5e06a74e5f65/durable-restart/go-path
+The compiler invocation was ../toolchains/go1.27.2/bin/go.
+The formatter invocation was:
+  GOTOOLCHAIN=local ../toolchains/go1.27.2/bin/gofmt -w extension/vector/extended_review_test.go
+
+Toolchain check:
+  ../toolchains/go1.27.2/bin/go version
+Observed output:
+  go version go1.27.2 linux/amd64
+
+Baseline, before adding the review test file (CGO_ENABLED=0):
+  ../toolchains/go1.27.2/bin/go test ./extension/vector -count=1
+Observed output:
+  ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	0.234s
+Reported command exit status: 0.
+
+Focused initial review-file run (CGO_ENABLED=0):
+  ../toolchains/go1.27.2/bin/go test ./extension/vector -run '^TestExtendedReview' -count=1
+Observed output:
+  ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	0.111s
+Reported command exit status: 0.
+This initial run preceded the final additions to padding/allocation assertions;
+the following complete-package commands tested the final frozen review file.
+
+Final complete vector package, three repetitions (CGO_ENABLED=0):
+  ../toolchains/go1.27.2/bin/go test ./extension/vector -count=3
+Observed output:
+  ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	2.460s
+Result: passed. This command and the following vet command were run sequentially
+in one shell; the test printed the successful result above and the shell exited 0.
+
+Final vet (CGO_ENABLED=0):
+  ../toolchains/go1.27.2/bin/go vet ./extension/vector
+Observed output: none.
+Reported enclosing shell exit status: 0 (vet was its final command).
+
+Separate final race run (CGO_ENABLED=1):
+  ../toolchains/go1.27.2/bin/go test -race ./extension/vector -count=1
+Observed output:
+  ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	5.321s
+Reported command exit status: 0.
+
+Frozen source hashes
+--------------------
+Regression file SHA-256:
+2857ff4147a4a5f1bd9777d477136d1de207d623c7d579b551b16e23d11bdb52  extension/vector/extended_review_test.go
+
+Reviewed production/document/fixture hash-list SHA-256:
+cb7f2443e856b544b2f40f8b76e526c804222b6890986de65ad159f3bca04cf0
+
+Definition: SHA-256 of the UTF-8 lines listed next, sorted by relative path,
+each formatted as lowercase SHA-256, two ASCII spaces, relative path, and LF.
+The review test itself is hashed separately above.
+
+40fae78ff03017c553da90543bba2fb03dc6a5d117b0ced69fe7ec4b3a619583  extension/vector/bit.go
+baff66b0d0bf9b2e429e750ab4727efc9b29373ca269d078e23431f839403d45  extension/vector/bit_codec.go
+8ca0850e0db92f2822e6f4915f33fd85503d29d2bb149bfef2fef9bb465e5c42  extension/vector/bit_metric.go
+ca258865ba3b0e6627a46ea9000e83d068852b2da6aae657544cc6a9de4822c1  extension/vector/extended-values.md
+7758bd2f61f209e8cb48bcdd7b9b641d4cd05162001ed568a9343e678164b742  extension/vector/half.go
+745a1c42279eb146e2fcadd00f77455f8521cb02eb7915395960b265ac3315b2  extension/vector/half_codec.go
+27876fb0f2f117c80ea06f1a5f359d967b39a335c64c0d7cc7b072070227a240  extension/vector/half_metric.go
+5274a6bc60efbde3fff762867789a0840abdc378aacb05d26bc8dd628f6f4cea  extension/vector/quantize.go
+441bc45bac43eb48ebd4c6c0ff44308067fea77f7cdb8c4609ee10a97f5e5aa0  extension/vector/sparse.go
+4b9dd5cdfee75179528b34bc1e9f37b9c818179729376f1120beaf302016273c  extension/vector/sparse_codec.go
+0b19db178036aece5883bcac0b24e6921a825e0f0cafcc7b0f5abbd76bc5718e  extension/vector/sparse_metric.go
+b22ab8342fca65badbb88c360e4983ffccfeb0e6326919dc70e6fa5b7c7dd40e  extension/vector/subvector.go
+7831a83bc3cba258316e296071598f1f21c403957e018e7751202ed16349199c  testdata/pgvector-v0.8.7/extended/README.md
+99fa76f2e7d19bc2066b114074d107a4260e47f04506ee87f57e258c25da7a59  testdata/pgvector-v0.8.7/extended/bit.out
+cbbc6ca4fc4f59fc42a72a8a2a463fb0c1e7f5e40918884623bbd0729c235145  testdata/pgvector-v0.8.7/extended/bit.sql
+3acbd11d5220a973eec0f717e1760dacb5756f1ce1c60f1b1381c9aa7a47660c  testdata/pgvector-v0.8.7/extended/golden.json
+ab856cc0d5d7095a5732ba5a75a99fb55e102cd473fb55dde347a691781b44e4  testdata/pgvector-v0.8.7/extended/halfvec.out
+08d236799cc48ff41d62e00469942a288e23b5c21cb5117f65a08c505c4a7b57  testdata/pgvector-v0.8.7/extended/halfvec.sql
+5614c79782b40dfdc580182345d1a35d5f21b80aecb1bd23fd7a52b1db1d4e6e  testdata/pgvector-v0.8.7/extended/manifest.json
+c0b8a161bff158c30c9bb3706ab51c59d4b7f312398167a33e801b27456a9a9e  testdata/pgvector-v0.8.7/extended/sparse-edge-policies.json
+f5661760feb0dc817f51116f698de156297bfc981142bebada39a0b73d3bd18e  testdata/pgvector-v0.8.7/extended/sparsevec.out
+6c28e9fbbaeacceb9683fc53391869d0189167464b341135a3e2a67f4e36d08a  testdata/pgvector-v0.8.7/extended/sparsevec.sql

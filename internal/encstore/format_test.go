@@ -64,13 +64,13 @@ func TestInventoryAccountingMemory(t *testing.T) {
 	}
 	base := "private.gse"
 	id := string(bytes.Repeat([]byte{'a'}, 64))
-	for _, suffix := range []string{".base", ".retained", ".pending"} {
+	for _, suffix := range []string{".base", ".wal", ".retained", ".pending"} {
 		ok, err := familyEntry(base+".gse-"+id+suffix, base)
 		if !ok || err != nil {
 			t.Fatal(err)
 		}
 	}
-	for _, name := range []string{base + ".gse-short.base", base + ".gse-" + id + ".wal", base + ".gse-" + id + ".unknown"} {
+	for _, name := range []string{base + ".gse-short.base", base + ".gse-" + id + ".unknown"} {
 		if _, err := familyEntry(name, base); err == nil {
 			t.Fatal("unknown family member accepted")
 		}

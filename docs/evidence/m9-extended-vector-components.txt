@@ -1,0 +1,103 @@
+M9 extended mathematical vector primitives; pure-memory verification
+Working directory: /workspace/scratch/5e06a74e5f65/durable-restart/gosqlite
+Scope: only new half/bit/sparse/subvector/quantize primitive files, tests and retained fixtures. No SQL/ANN/dependency edits or physical database workflows.
+Pinned toolchain:
+go version go1.27.2 linux/amd64
++ GOTOOLCHAIN=local GOCACHE=/tmp/gosqlite-m9-vector-cache CGO_ENABLED=0 ../toolchains/go1.27.2/bin/go test ./extension/vector -count=3 -coverprofile=/tmp/gosqlite-m9-vector-cover-final.out
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	0.940s	coverage: 99.6% of statements
++ GOTOOLCHAIN=local GOCACHE=/tmp/gosqlite-m9-vector-cache CGO_ENABLED=0 ../toolchains/go1.27.2/bin/go vet ./extension/vector
+vet exit 0
++ GOTOOLCHAIN=local GOCACHE=/tmp/gosqlite-m9-vector-cache CGO_ENABLED=1 ../toolchains/go1.27.2/bin/go test -race ./extension/vector -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	2.419s
++ go tool cover -func=/tmp/gosqlite-m9-vector-cover-final.out (new files only)
+github.com/ms-xiaosnow/gosqlite/extension/vector/bit.go:23:		NewBit				100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/bit.go:33:		checkBitDimensions		100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/bit.go:41:		canonicalBitPadding		100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/bit.go:50:		Valid				100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/bit.go:54:		Dims				100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/bit.go:58:		Packed				100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/bit.go:62:		RequireDims			100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/bit.go:77:		String				100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/bit.go:88:		MarshalText			100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/bit.go:98:		ParseBit			100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/bit.go:117:		ParseBitDims			100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/bit_codec.go:27:	MarshalBinary			100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/bit_codec.go:42:	DecodeBit			100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/bit_codec.go:65:	Value				100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/bit_codec.go:78:	Scan				100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/bit_codec.go:103:	Value				100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/bit_metric.go:17:	Name				100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/bit_metric.go:19:	Distance			100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/bit_metric.go:27:	DistanceContext			100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/bit_metric.go:75:	HammingDistance			100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/bit_metric.go:79:	JaccardDistance			100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/half.go:19:		NewHalf				100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/half.go:36:		NewHalfBits			100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/half.go:51:		halfFromFloat32			100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/half.go:76:		halfFloat32			100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/half.go:87:		Valid				100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/half.go:88:		Dims				100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/half.go:89:		Bits				100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/half.go:92:		Values				100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/half.go:103:		RequireDims			100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/half.go:116:		String				100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/half.go:131:		MarshalText			100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/half.go:141:		ParseHalf			100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/half.go:149:		ParseHalfDims			100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/half.go:174:		HalfFromVector			100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/half.go:198:		Dense				100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/half_codec.go:18:	MarshalBinary			100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/half_codec.go:32:	DecodeHalf			100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/half_codec.go:57:	Value				100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/half_codec.go:66:	Scan				100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/half_codec.go:91:	Value				100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/half_metric.go:10:	DistanceHalf			100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/half_metric.go:17:	DistanceHalfContext		100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/half_metric.go:76:	HalfL2Distance			100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/half_metric.go:77:	HalfL1Distance			100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/half_metric.go:78:	HalfNegativeInnerProduct	100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/half_metric.go:79:	HalfCosineDistance		100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/half_metric.go:80:	HalfInnerProduct		100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/half_metric.go:87:	HalfNorm			100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/half_metric.go:88:	HalfNormContext			100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/quantize.go:7:		BinaryQuantize			100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/quantize.go:22:	HalfBinaryQuantize		100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/sparse.go:37:		checkSparseDimensions		100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/sparse.go:48:		NewSparse			100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/sparse.go:82:		Valid				100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/sparse.go:85:		Dims				100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/sparse.go:86:		NNZ				100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/sparse.go:87:		Entries				100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/sparse.go:89:		RequireDims			100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/sparse.go:102:		String				100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/sparse.go:120:		MarshalText			100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/sparse.go:132:		ParseSparse			100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/sparse.go:248:		sparseDecimalNonzero		100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/sparse.go:260:		ParseSparseDims			100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/sparse.go:276:		SparseFromVector		100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/sparse.go:298:		Dense				100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/sparse_codec.go:20:	MarshalBinary			100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/sparse_codec.go:38:	DecodeSparse			100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/sparse_codec.go:74:	Value				100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/sparse_codec.go:83:	Scan				100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/sparse_codec.go:108:	Value				100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/sparse_metric.go:8:	DistanceSparse			100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/sparse_metric.go:15:	DistanceSparseContext		100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/sparse_metric.go:87:	SparseL2Distance		100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/sparse_metric.go:88:	SparseL1Distance		100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/sparse_metric.go:89:	SparseNegativeInnerProduct	100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/sparse_metric.go:92:	SparseCosineDistance		100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/sparse_metric.go:93:	SparseInnerProduct		100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/sparse_metric.go:100:	SparseNorm			100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/sparse_metric.go:101:	SparseNormContext		100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/subvector.go:5:	subvectorBounds			100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/subvector.go:27:	Subvector			100.0%
+github.com/ms-xiaosnow/gosqlite/extension/vector/subvector.go:39:	HalfSubvector			100.0%
+total:									(statements)			99.6%
++ git diff --check
+git diff --check exit 0
+All 65536 half encodings; all adjacent finite positive-half midpoints and both signs/neighbors; all bit pairs widths 0..8; billion-dimensional sparse math; 207 retained published cases; tests all passed.
+Earlier bounded fuzz invocations: CGO_ENABLED=0 go test ./extension/vector -run ^$ -fuzz ^<target>$ -fuzztime=5s -parallel=2
+FuzzHalfText PASS 137529 executions; FuzzHalfCodec PASS 131569; FuzzHalfRounding PASS 107423; FuzzSparseText PASS 158776; FuzzSparseCodec PASS 172185; FuzzSparseFloatBitsMetrics PASS 58382; FuzzSubvectorBounds PASS 122009.
+Earlier packed-bit component record: three additional 5-second campaigns PASS: FuzzBitVectorText 158641; FuzzBitVectorCodec 168421; FuzzBitVectorMetrics 152217. Packed-bit component used /tmp/gosqlite-bit-go-cache.
+Published-source evidence only; no PostgreSQL/pgvector execution. All production code independently implemented.

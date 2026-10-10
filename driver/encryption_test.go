@@ -88,3 +88,45 @@ func TestEncryptedConnectorRejectsSecretDSNWithoutFiles(t *testing.T) {
 		t.Fatal(files, err)
 	}
 }
+
+func TestEncryptedWALConnectorCopiesLimits(t *testing.T) {
+	key := make([]byte, 32)
+	if _, err := rand.Read(key); err != nil {
+		t.Fatal(err)
+	}
+	defer clear(key)
+	cfg := sqlite.EncryptionOptions{KeyProvider: encryptedProvider(key), CredentialKind: encryption.RawKey256, Mode: sqlite.EncryptionWAL, WALLimits: sqlite.EncryptionWALLimits{MaxSegments: 8}}
+	path := filepath.Join(t.TempDir(), "wal-driver.gse")
+	connector, err := driver.NewConnector("file:"+path, sqlite.Options{Encryption: &cfg, KeepWALOnClose: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	cfg.KeyProvider = nil
+	cfg.Mode = 99
+	cfg.WALLimits.MaxSegments = 1
+	cfg.WALLimits.MaxRootBytes = 1
+	db := sql.OpenDB(connector)
+	db.SetMaxOpenConns(1)
+	defer db.Close()
+	if _, err = db.Exec("CREATE TABLE entries(id INTEGER PRIMARY KEY,body TEXT)"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = db.Exec("INSERT INTO entries VALUES(1,'committed')"); err != nil {
+		t.Fatal(err)
+	}
+	if err = db.Close(); err != nil {
+		t.Fatal(err)
+	}
+	cfg = sqlite.EncryptionOptions{KeyProvider: encryptedProvider(key), CredentialKind: encryption.RawKey256, Mode: sqlite.EncryptionWAL}
+	connector, err = driver.NewConnector("file:"+path+"?mode=ro", sqlite.Options{Encryption: &cfg})
+	if err != nil {
+		t.Fatal(err)
+	}
+	db = sql.OpenDB(connector)
+	db.SetMaxOpenConns(1)
+	defer db.Close()
+	var got string
+	if err = db.QueryRow("SELECT body FROM entries WHERE id=1").Scan(&got); err != nil || got != "committed" {
+		t.Fatal(got, err)
+	}
+}

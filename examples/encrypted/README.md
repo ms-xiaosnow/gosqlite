@@ -32,5 +32,6 @@ Keys stayed in memory; disposable files will now be removed (not securely erased
 See [storage API and limits](../../docs/encryption-storage.md),
 [primitive design and evidence](../../docs/encryption-primitives.md), and
 [security boundaries](../../docs/security.md). This is experimental, snapshot-only
-storage with no encrypted WAL, SEE compatibility, independent security audit,
+example. A separate [WAL example](../encrypted-wal) demonstrates dirty-page segments.
+Neither mode has SEE compatibility, independent security audit,
 stable format promise, or production-security/durability qualification.
