@@ -1,6 +1,6 @@
 # Exact text similarity (M5 ordinary implementation)
 
-This layer shares the pinned grams13 Unicode tokenizer. It does not claim pg_bigm compatibility. Vector/database fusion and restricted recovery acceptance remain open, so full M5 acceptance is conditional.
+This layer shares the pinned grams13 Unicode tokenizer. It does not claim pg_bigm compatibility. Same-snapshot vector/database fusion is now demonstrated by examples/vector; restricted recovery acceptance remains open, so full M5 acceptance is conditional.
 
 ## SQL
 
@@ -60,6 +60,6 @@ Zero Limits selects similarity.DefaultLimits; a nonzero struct must be fully val
 
 extension/similarity.New accepts an immutable versioned Config; prepared sets carry its canonical hash and cannot be compared under another configuration. Compare/ComparePrepared, bounded Levenshtein, exact Scan, cardinality bounds and candidate-condition helpers have independent reference/property tests.
 
-Engine.Fuse takes supplied best-first RankedList values with positive finite weights. It sums weight/(offset+one-based-rank), requiring positive finite offset; missing ranks contribute zero. Output sorts score DESC,rowid ASC and retains per-list name, rank, weight and contribution. Duplicate rowids within one list are errors. This is exact for the supplied lists, not evidence of upstream approximate recall. examples/similarity combines title/body text rankings; database vector fusion is not yet implemented.
+Engine.Fuse takes supplied best-first RankedList values with positive finite weights. It sums weight/(offset+one-based-rank), requiring positive finite offset; missing ranks contribute zero. Output sorts score DESC,rowid ASC and retains per-list name, rank, weight and contribution. Duplicate rowids within one list are errors. This is exact for the supplied lists, not evidence of upstream approximate recall. examples/similarity combines title/body text rankings; examples/vector adds same-snapshot database vector fusion with original text scores/cardinalities, vector distances and contribution details.
 
 Evidence: evidence/m5-review.md and m5-aggregate.txt; public driver/native/example and ordinary live-SQLite invalidation tests. No pg_bigm/PostgreSQL execution or full-production acceptance is claimed.

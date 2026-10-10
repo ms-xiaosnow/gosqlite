@@ -1,0 +1,58 @@
+Sat Oct 10 11:25:42 UTC 2026
+CGO1 pinned oracle vector conformance
+=== RUN   TestOracleDenseVectorStorageInterop
+=== RUN   TestOracleDenseVectorStorageInterop/page512/sharedfalse
+=== RUN   TestOracleDenseVectorStorageInterop/page512/sharedtrue
+=== RUN   TestOracleDenseVectorStorageInterop/page4096/sharedfalse
+=== RUN   TestOracleDenseVectorStorageInterop/page4096/sharedtrue
+=== RUN   TestOracleDenseVectorStorageInterop/page65536/sharedfalse
+=== RUN   TestOracleDenseVectorStorageInterop/page65536/sharedtrue
+--- PASS: TestOracleDenseVectorStorageInterop (0.24s)
+    --- PASS: TestOracleDenseVectorStorageInterop/page512/sharedfalse (0.03s)
+    --- PASS: TestOracleDenseVectorStorageInterop/page512/sharedtrue (0.03s)
+    --- PASS: TestOracleDenseVectorStorageInterop/page4096/sharedfalse (0.03s)
+    --- PASS: TestOracleDenseVectorStorageInterop/page4096/sharedtrue (0.03s)
+    --- PASS: TestOracleDenseVectorStorageInterop/page65536/sharedfalse (0.04s)
+    --- PASS: TestOracleDenseVectorStorageInterop/page65536/sharedtrue (0.08s)
+=== RUN   TestOracleCreatedDenseVectorDeclaration
+--- PASS: TestOracleCreatedDenseVectorDeclaration (0.01s)
+=== RUN   TestOracleVectorTypedReadErrorParity
+--- PASS: TestOracleVectorTypedReadErrorParity (0.01s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	1.279s
+CGO1 driver vector binding and quota classification count3
+=== RUN   TestDriverDenseVectorBindingsAndTransactions
+=== RUN   TestDriverDenseVectorBindingsAndTransactions/rollback
+=== RUN   TestDriverDenseVectorBindingsAndTransactions/shared
+--- PASS: TestDriverDenseVectorBindingsAndTransactions (0.03s)
+    --- PASS: TestDriverDenseVectorBindingsAndTransactions/rollback (0.01s)
+    --- PASS: TestDriverDenseVectorBindingsAndTransactions/shared (0.02s)
+=== RUN   TestDriverVectorQuotaErrorClassification
+--- PASS: TestDriverVectorQuotaErrorClassification (0.01s)
+=== RUN   TestDriverDenseVectorBindingsAndTransactions
+=== RUN   TestDriverDenseVectorBindingsAndTransactions/rollback
+=== RUN   TestDriverDenseVectorBindingsAndTransactions/shared
+--- PASS: TestDriverDenseVectorBindingsAndTransactions (0.03s)
+    --- PASS: TestDriverDenseVectorBindingsAndTransactions/rollback (0.01s)
+    --- PASS: TestDriverDenseVectorBindingsAndTransactions/shared (0.02s)
+=== RUN   TestDriverVectorQuotaErrorClassification
+--- PASS: TestDriverVectorQuotaErrorClassification (0.01s)
+=== RUN   TestDriverDenseVectorBindingsAndTransactions
+=== RUN   TestDriverDenseVectorBindingsAndTransactions/rollback
+=== RUN   TestDriverDenseVectorBindingsAndTransactions/shared
+--- PASS: TestDriverDenseVectorBindingsAndTransactions (0.03s)
+    --- PASS: TestDriverDenseVectorBindingsAndTransactions/rollback (0.01s)
+    --- PASS: TestDriverDenseVectorBindingsAndTransactions/shared (0.02s)
+=== RUN   TestDriverVectorQuotaErrorClassification
+--- PASS: TestDriverVectorQuotaErrorClassification (0.01s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.142s
+CGO0 go run ./examples/vector /workspace/scratch/5e06a74e5f65/durable-restart/m6-example-sPsWWW/example.db
+{"text_ranking":{"Hits":[{"RowID":1,"Score":{"Value":0.6666666666666666,"LeftTokens":2,"RightTokens":4,"Intersection":2}},{"RowID":2,"Score":{"Value":0.4,"LeftTokens":2,"RightTokens":3,"Intersection":1}},{"RowID":3,"Score":{"Value":0,"LeftTokens":2,"RightTokens":3,"Intersection":0}},{"RowID":5,"Score":{"Value":0,"LeftTokens":2,"RightTokens":12,"Intersection":0}},{"RowID":6,"Score":{"Value":0,"LeftTokens":2,"RightTokens":7,"Intersection":0}},{"RowID":7,"Score":{"Value":0,"LeftTokens":2,"RightTokens":8,"Intersection":0}}],"Plan":{"VectorMetric":"","VectorColumn":"","VectorDimensions":0,"VectorTopK":0,"VectorExact":false,"VectorRanking":"","Access":"SCAN","Table":"docs","Indexes":["docs_grams"],"Method":"grams13","MethodVersion":1,"Fields":["title"],"Namespace":"MATCH_CONFIG_V1","GramLengths":[2],"EstimatedCandidates":-1,"Recheck":true,"Reason":"zero threshold includes disjoint and zero-score ties","CandidateMode":"full-scan","QueryTokens":2,"ConfigHash":"db62347b090e7a5fb1a21c1dbd4f9af6484b6dd7a62a3ae30e573ee41ffba449","TokenizerHash":"d2ec70f2122ab4cd8ef6843523dfb60979fc91bcc302ae15d66f791c85332762","Generation":1,"MinGram":2,"MaxGram":2,"Metric":"dice","Threshold":0,"Limit":6,"Exact":true},"Stats":{"VectorRankedRows":0,"VectorFilteredRows":0,"VectorNullRows":0,"VectorRankComponents":0,"FrequencyLookups":0,"PostingKeysRead":0,"Candidates":0,"BaseRowFetches":8,"ReturnedRows":6,"PostingRangesRead":0,"FilteredRows":1,"ScoredRows":7,"MatchedRows":7}},"vector_ranking":{"Hits":[{"RowID":1,"Distance":0},{"RowID":7,"Distance":0.2440710539815456},{"RowID":5,"Distance":0.29289321881345254},{"RowID":2,"Distance":0.5},{"RowID":3,"Distance":0.5},{"RowID":8,"Distance":0.5370899501137243}],"Plan":{"VectorMetric":"","VectorColumn":"","VectorDimensions":0,"VectorTopK":0,"VectorExact":false,"VectorRanking":"","Access":"SCAN","Table":"docs","Indexes":null,"Method":"exact_vector","MethodVersion":1,"Fields":["embedding"],"Namespace":"","GramLengths":null,"EstimatedCandidates":-1,"Recheck":false,"Reason":"exact full scan; WHERE before distance","Field":"embedding","Metric":"cosine","Dimensions":3,"Limit":6,"Exact":true},"Stats":{"VectorRankedRows":0,"VectorFilteredRows":0,"VectorNullRows":0,"VectorRankComponents":0,"FrequencyLookups":0,"PostingKeysRead":0,"Candidates":0,"BaseRowFetches":8,"ReturnedRows":6,"FilteredRows":1,"ScoredRows":6,"NullRows":1,"ScoredComponents":21}},"fused_hits":[{"rowid":1,"text_score":{"Value":0.6666666666666666,"LeftTokens":2,"RightTokens":4,"Intersection":2},"vector_distance":0,"fused_score":0.03278688524590164,"contributions":[{"List":0,"Name":"title_dice","Rank":1,"Weight":1,"Value":0.01639344262295082},{"List":1,"Name":"embedding_cosine","Rank":1,"Weight":1,"Value":0.01639344262295082}]},{"rowid":2,"text_score":{"Value":0.4,"LeftTokens":2,"RightTokens":3,"Intersection":1},"vector_distance":0.5,"fused_score":0.031754032258064516,"contributions":[{"List":0,"Name":"title_dice","Rank":2,"Weight":1,"Value":0.016129032258064516},{"List":1,"Name":"embedding_cosine","Rank":4,"Weight":1,"Value":0.015625}]},{"rowid":5,"text_score":{"Value":0,"LeftTokens":2,"RightTokens":12,"Intersection":0},"vector_distance":0.29289321881345254,"fused_score":0.03149801587301587,"contributions":[{"List":0,"Name":"title_dice","Rank":4,"Weight":1,"Value":0.015625},{"List":1,"Name":"embedding_cosine","Rank":3,"Weight":1,"Value":0.015873015873015872}]}],"sql_plan":{"VectorMetric":"cosine","VectorColumn":"embedding","VectorDimensions":3,"VectorTopK":3,"VectorExact":true,"VectorRanking":"bounded_heap","Access":"SEARCH","Table":"docs","Indexes":["docs_grams"],"Method":"grams13","MethodVersion":1,"Fields":["title"],"Namespace":"LIKE_RAW_V1","GramLengths":[2],"EstimatedCandidates":3,"Recheck":true,"Reason":""},"sql_stats":{"VectorRankedRows":2,"VectorFilteredRows":1,"VectorNullRows":0,"VectorRankComponents":9,"FrequencyLookups":1,"PostingKeysRead":3,"Candidates":3,"BaseRowFetches":3,"ReturnedRows":2},"sql_rows":[[1,"数据库查询",0.6666666666666666,0],[2,"数据检索",0.4,0.5]]}
+CGO0 CLI vector KNN
+{"columns":["id","distance"]}
+{"row":[1,0]}
+{"row":[5,1]}
+{"row":[2,1.4142135623730951]}
+M6_ORACLE_DRIVER_EXAMPLE_PASSED
+Sat Oct 10 11:25:46 UTC 2026

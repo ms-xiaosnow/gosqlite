@@ -86,3 +86,17 @@ CGO_ENABLED=0 go run ./examples/similarity /new/disposable/path.db
 ```
 
 Component native indexed-versus-forced-scan, independent reference, SQL/driver, rollback/reopen/config rebuild and ordinary external SQLite invalidation/checkpoint tests pass. The final live-oracle race regression passed15.417s on2026-10-10. Exact commands/output for the final aggregate and scoped review are in evidence/m5-aggregate.txt and m5-review.md. PostgreSQL/pgvector is not executed: vector prerequisite tests use retained public expected outputs and independent math only. M5 vector-hybrid code and M6 database integration are still separate required implementation gaps. Restricted crash/fault/recovery, native-OS, independent security/legal and soak evidence remains BLOCKED/NOT_RUN and is not implied by these commands.
+
+## M6 ordinary typed-vector and hybrid verification
+
+```sh
+./scripts/check.sh
+SQLITE_ORACLE=/absolute/path/to/verified/sqlite3 ./scripts/test-oracle.sh
+CGO_ENABLED=1 SQLITE_ORACLE=/absolute/path/to/verified/sqlite3 go test -race -tags oracle ./internal/testkit -run 'TestOracleDenseVectorStorageInterop|TestOracleCreatedDenseVectorDeclaration|TestOracleVectorTypedReadErrorParity' -count=1
+CGO_ENABLED=1 go test -race ./driver -run 'TestDriverDenseVectorBindingsAndTransactions|TestDriverVectorQuotaErrorClassification' -count=3
+CGO_ENABLED=0 go run ./examples/vector /new/disposable/hybrid.db
+```
+
+Tests exercise valid SQLite files, normal transactions and type validation. Official SQL can legally put a wrong-dimension TEXT in VECTOR(n), which SQLite treats as affinity only; testing native rejection is ordinary SQL compatibility, not corruption of SQLite page bytes or physical recovery. Invalid vector mutation inputs fail before publication. No physical fault/tamper/recovery workflow is executed. Complete commands/results are in evidence/m6-driver-oracle-example.txt, m6-review.md and m6-aggregate.txt.
+
+The M5 Library-restored test session lost executor transport before its final result was collected; that uncollected result was not counted. All files/toolchain/bundle remained present. A retained-log rerun completed exit0 with ordinary gates and pinned oracle passing; see evidence/m5-library-restore-recheck.txt. CI also passed for its exact checkpoint. This infrastructure interruption is not a database crash-test result and does not qualify recovery.

@@ -89,7 +89,7 @@ func (tab *writeTable) constrain(rowid int64, values []any) ([]any, error) {
 			continue
 		}
 		var err error
-		values[i], err = sqlast.ApplyAffinity(values[i], col.Type)
+		values[i], err = storedColumnValue(values[i], col.Type)
 		if err != nil {
 			return nil, err
 		}
@@ -233,7 +233,7 @@ func (tab *writeTable) evalContext(ctx context.Context, params []any, rowid int6
 		if i < 0 {
 			return rowid, nil
 		}
-		return values[i], nil
+		return columnValue(values[i], tab.columns[i].Type)
 	}, Affinity: func(q, name string) string {
 		i, err := tab.column(q, name)
 		if err != nil {

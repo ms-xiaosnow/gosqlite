@@ -87,6 +87,8 @@ func Eval(e Expr, ctx *EvalContext) (any, error) {
 			return nil, err
 		}
 		switch x.Op {
+		case "<->", "<#>", "<=>", "<+>":
+			return vectorFunction(ctx.Context, vectorOperatorFunction(x.Op), []any{a, b})
 		case "AND":
 			at, an := Truth(a)
 			bt, bn := Truth(b)
@@ -257,6 +259,9 @@ func Eval(e Expr, ctx *EvalContext) (any, error) {
 		fn := ctx.Functions[name]
 		if fn == nil && isSimilarityFunction(name) {
 			return similarityFunction(ctx.Context, name, args)
+		}
+		if fn == nil && isVectorFunction(name) {
+			return vectorFunction(ctx.Context, name, args)
 		}
 		if fn == nil {
 			fn = BuiltinFunctions[name]

@@ -8,6 +8,7 @@ import (
 	"sort"
 	"sync"
 
+	"github.com/ms-xiaosnow/gosqlite/extension/vector"
 	sqlast "github.com/ms-xiaosnow/gosqlite/internal/sql"
 )
 
@@ -16,13 +17,17 @@ type orderExpr struct {
 	column int
 	desc   bool
 }
-type resultRow struct{ values, keys []any }
+type resultRow struct {
+	values, keys []any
+	rowid        int64
+}
 
 // Rows streams a SELECT result unless ORDER BY requires bounded sorting. It
 // owns no goroutine. Values returns copies safe to retain after the next row.
 // Next, Values, Err and Close are synchronized, but callers must not interleave
 // multiple consumers because their logical Next/Values pair is not atomic.
 type Rows struct {
+	vectorRank                      *vectorRank
 	queryPlan                       QueryPlan
 	queryStats                      QueryStats
 	explainDetail                   string
@@ -84,6 +89,7 @@ func (r *Rows) close() error {
 	r.sorted = nil
 	r.params = nil
 	r.functions = nil
+	r.vectorRank = nil
 	var err error
 	if r.source != nil {
 		err = r.source.Close()
@@ -176,6 +182,9 @@ func (r *Rows) fetch() (resultRow, int64, error) {
 		}
 		if r.table != nil {
 			r.queryStats.BaseRowFetches++
+			if r.vectorRank != nil && r.queryStats.BaseRowFetches > int64(r.vectorRank.limits.MaxCandidates) {
+				return resultRow{}, 0, fmt.Errorf("%w: vector source candidates", vector.ErrLimit)
+			}
 		}
 		rawCost := valuesSize(values)
 		if r.table != nil {
@@ -193,7 +202,7 @@ func (r *Rows) fetch() (resultRow, int64, error) {
 					if err != nil {
 						return resultRow{}, 0, err
 					}
-					v, err = sqlast.ApplyAffinity(v, affinity(c.Type))
+					v, err = storedColumnValue(v, c.Type)
 					if err != nil {
 						return resultRow{}, 0, err
 					}
@@ -220,7 +229,7 @@ func (r *Rows) fetch() (resultRow, int64, error) {
 			if i < 0 {
 				return rowid, nil
 			}
-			return values[i], nil
+			return columnValue(values[i], r.table.columns[i].Type)
 		}
 		ec.Affinity = func(q, name string) string {
 			i, err := r.table.column(q, name)
@@ -265,17 +274,33 @@ func (r *Rows) fetch() (resultRow, int64, error) {
 			}
 			truth, isNull := sqlast.Truth(value)
 			if isNull || !truth {
+				if r.vectorRank != nil {
+					r.queryStats.VectorFilteredRows++
+				}
 				continue
 			}
 		}
-		row := resultRow{values: make([]any, len(r.exprs))}
+		var distance any
+		if r.vectorRank != nil {
+			distance, err = r.vectorRank.score(r, values[r.vectorRank.ordinal])
+			if err != nil {
+				return resultRow{}, 0, err
+			}
+		}
+		row := resultRow{values: make([]any, len(r.exprs)), rowid: rowid}
 		for i, e := range r.exprs {
+			if r.vectorRank != nil && r.order[0].column == i {
+				row.values[i] = distance
+				continue
+			}
 			row.values[i], err = sqlast.Eval(e, ec)
 			if err != nil {
 				return resultRow{}, 0, err
 			}
 		}
-		if len(r.order) > 0 {
+		if r.vectorRank != nil {
+			row.keys = []any{distance}
+		} else if len(r.order) > 0 {
 			// Only a bare ORDER BY alias takes precedence over source
 			// columns (resolved to a result position by the planner). Nested
 			// expressions bind source columns first, then result aliases.
@@ -322,6 +347,9 @@ func valuesSize(values []any) int64 {
 }
 
 func (r *Rows) materialize() error {
+	if r.vectorRank != nil {
+		return r.materializeVector()
+	}
 	var used int64
 	for {
 		row, cost, err := r.fetch()

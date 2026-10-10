@@ -12,6 +12,15 @@ import (
 // BuiltinFunctions is read-only after initialization. Per-connection overrides
 // and extension functions belong in EvalContext.Functions, avoiding global races.
 var BuiltinFunctions = map[string]Function{
+	"vector":                 builtinVectorFunction("vector"),
+	"vector_dims":            builtinVectorFunction("vector_dims"),
+	"vector_norm":            builtinVectorFunction("vector_norm"),
+	"vector_to_text":         builtinVectorFunction("vector_to_text"),
+	"l2_distance":            builtinVectorFunction("l2_distance"),
+	"l1_distance":            builtinVectorFunction("l1_distance"),
+	"cosine_distance":        builtinVectorFunction("cosine_distance"),
+	"inner_product":          builtinVectorFunction("inner_product"),
+	"negative_inner_product": builtinVectorFunction("negative_inner_product"),
 	"ngram_similarity": func(a []any) (any, error) {
 		return similarityFunction(context.Background(), "ngram_similarity", a)
 	},
@@ -131,8 +140,8 @@ func ValidateFunction(name string, argc int) error {
 	}
 	want := 1
 	switch name {
-	case "abs", "length", "lower", "upper", "typeof", "hex":
-	case "nullif", "ifnull", "bigram_similarity":
+	case "abs", "length", "lower", "upper", "typeof", "hex", "vector", "vector_dims", "vector_norm", "vector_to_text":
+	case "nullif", "ifnull", "bigram_similarity", "l2_distance", "l1_distance", "cosine_distance", "inner_product", "negative_inner_product":
 		want = 2
 	case "ngram_similarity":
 		want = 4

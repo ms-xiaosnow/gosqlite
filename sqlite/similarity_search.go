@@ -461,7 +461,7 @@ func (d *DB) similarityFilter(ctx context.Context, reader btree.PageReader, tab 
 			if i < 0 {
 				return id, nil
 			}
-			return values[i], nil
+			return columnValue(values[i], tab.columns[i].Type)
 		}
 		ec.Affinity = func(q, name string) string {
 			i, err := tab.column(q, name)

@@ -83,5 +83,18 @@
     "remote_ci_status": "PASSED for exact SHA, observed 2026-10-10T11:05:16Z; ordinary-only",
     "open_gates": "Full M4 crash/recovery acceptance remains conditional; later integrated similarity/vector/encryption/migration features and independent OS/security/legal/soak gates remain open",
     "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38046568934"
+  },
+  {
+    "stage": "M5 ordinary exact text similarity; M6 dense-vector mathematical prerequisite",
+    "remote_commit": "e04308ae9a95dd48a6d44f46312929708692ded1",
+    "local_commit": "e04308ae9a95dd48a6d44f46312929708692ded1",
+    "tree": "685b539e63411252fc98239bb648c0c4a5aced75",
+    "bundle_sha256": "ce552816c5c0f94b4cc263c102809e69ca79d7f6dbbd6be6b0847233aa0c9fb9",
+    "library_file_id": "libfile_2b0076ca6d3881919ac4dbf3c8e82273",
+    "library_version": 0,
+    "verified": "Guarded remote ref and commit readback; exact local mirror; full-history bundle verify; Library byte-identical readback; clean restore/fsck; restored ordinary unit/vet/build/race and complete pinned oracle passed. First completion collection lost exec transport and was not counted; retained-log rerun completed exit0.",
+    "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38047806226",
+    "remote_ci_status": "PASSED for exact SHA, observed 2026-10-10T11:24:01Z; ordinary-only",
+    "open_gates": "M5 database vector/text fusion and M6 SQL/persistence are required code gaps; broader recovery/platform implementation, restricted physical durability and independent release gates remain open"
   }
 ]

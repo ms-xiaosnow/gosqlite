@@ -1,6 +1,6 @@
 # gosqlite
 
-A native Go database kernel targeting tested subsets of SQLite 3.54.0 files and SQL. Current development milestone: M5 exact text similarity over persistent grams13, with M6 dense-vector mathematical prerequisites. It is not production-ready. No CGO, SQLite subprocess, C ABI, or remote SQL engine is used in production.
+A native Go database kernel targeting tested subsets of SQLite 3.54.0 files and SQL. Current development milestone: M6 dense VECTOR(n), exact SQL/native KNN and same-snapshot text/vector hybrid ranking. It is not production-ready. No CGO, SQLite subprocess, C ABI, or remote SQL engine is used in production.
 
 ## Try the implemented SQL path
 
@@ -58,7 +58,7 @@ SQLITE_ORACLE=/absolute/path/to/verified/sqlite3 ./scripts/test-oracle.sh
 
 See [progress](docs/progress.md), [compatibility](docs/compatibility.md), [architecture](docs/architecture.md), [sources](docs/upstream.md), and [manual verification](docs/manual-verification.md). The unchanged [original goal](goal.md) remains the contract. [Restart protocol](docs/restart.md) and checkpoint records preserve durable development history.
 
-Qualified crash recovery, integrated vector/hybrid retrieval, independent authenticated encryption and pg_embedding migration remain unfinished milestones. Full SQLite/PostgreSQL semantics, SEE file compatibility and production security are not claimed.
+Qualified crash recovery, HNSW/IVFFlat, independent authenticated encryption and pg_embedding migration remain unfinished milestones. Full SQLite/PostgreSQL semantics, SEE file compatibility and production security are not claimed.
 
 
 ## Explicit exclusive WAL
@@ -99,4 +99,13 @@ CGO_ENABLED=0 go run ./examples/similarity disposable-similarity.db
 CGO_ENABLED=0 go run ./cmd/gosqlite query disposable-similarity.db "SELECT id,ngram_similarity(title,'数据库',2,'dice') AS score FROM docs WHERE score>=0.1 ORDER BY score DESC,id LIMIT 3"
 ```
 
-SQL exposes ngram_similarity, bigram_similarity and rune-based levenshtein. SQL score expressions currently scan; native DB/Tx.SimilaritySearch uses complete persistent posting unions when sound, then exact scoring and business filtering. Its plan and counters report the actual path. Zero threshold, empty query-token sets, dirty indices or insufficient posting budget use exact scans. Bounded operations return no partial result on error. See [similarity semantics and APIs](docs/similarity.md). The example also demonstrates weighted RRF of two text rankings, preserving contribution details; database vector fusion is a later integration.
+SQL exposes ngram_similarity, bigram_similarity and rune-based levenshtein. SQL score expressions currently scan; native DB/Tx.SimilaritySearch uses complete persistent posting unions when sound, then exact scoring and business filtering. Its plan and counters report the actual path. Zero threshold, empty query-token sets, dirty indices or insufficient posting budget use exact scans. Bounded operations return no partial result on error. See [similarity semantics and APIs](docs/similarity.md). The example also demonstrates weighted RRF of two text rankings, preserving contribution details. examples/vector adds same-snapshot text/vector fusion.
+
+## Dense vectors and exact hybrid retrieval
+
+```sh
+CGO_ENABLED=0 go run ./examples/vector disposable-hybrid.db
+CGO_ENABLED=0 go run ./cmd/gosqlite query disposable-hybrid.db "SELECT id,embedding <-> '[1,0,1]' AS distance FROM docs WHERE active=1 AND embedding IS NOT NULL ORDER BY distance LIMIT 3"
+```
+
+VECTOR(n) mutations validate finite float32 dimensions and persist versioned BLOB values. SQL exposes all four dense distance operators, conversion/dimension/norm functions and bounded exact Top-K for recognized queries. Native DB/Tx.VectorSearch provides exact filtered search and actual plans/counters. Vector and NullVector support database/sql. The example combines text/vector rankings in one snapshot and preserves raw measures plus RRF contributions. This is exact retrieval, with HNSW/IVFFlat still unimplemented. See [vector APIs, SQL boundaries and limits](docs/vector.md).

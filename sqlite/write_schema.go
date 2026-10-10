@@ -136,7 +136,11 @@ func writableTable(def *sqlast.CreateTable, root uint32) (*writeTable, error) {
 			}
 			// Parenthesized constant arithmetic is accepted at CREATE time; columns
 			// missing after an external ALTER require literal defaults on read.
-			if _, err := sqlast.Eval(col.Default, &sqlast.EvalContext{}); err != nil {
+			value, err := sqlast.Eval(col.Default, &sqlast.EvalContext{})
+			if err != nil {
+				return nil, err
+			}
+			if _, err := storedColumnValue(value, col.Type); err != nil {
 				return nil, err
 			}
 		}
@@ -276,7 +280,7 @@ func (t *writeTable) values(rowid int64, raw []any) ([]any, error) {
 			if err != nil {
 				return nil, err
 			}
-			value, err = sqlast.ApplyAffinity(value, t.columns[i].Type)
+			value, err = storedColumnValue(value, t.columns[i].Type)
 			if err != nil {
 				return nil, err
 			}

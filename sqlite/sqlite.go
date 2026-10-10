@@ -14,6 +14,7 @@ import (
 	"github.com/ms-xiaosnow/gosqlite/extension/grams13"
 	"github.com/ms-xiaosnow/gosqlite/extension/registry"
 	"github.com/ms-xiaosnow/gosqlite/extension/similarity"
+	"github.com/ms-xiaosnow/gosqlite/extension/vector"
 	"github.com/ms-xiaosnow/gosqlite/internal/btree"
 	"github.com/ms-xiaosnow/gosqlite/internal/pager"
 	"github.com/ms-xiaosnow/gosqlite/internal/record"
@@ -73,7 +74,7 @@ func wrap(op string, err error) error {
 	if errors.Is(err, record.ErrCorrupt) {
 		err = fmt.Errorf("%w: %w", ErrCorrupt, err)
 	}
-	if errors.Is(err, record.ErrLimit) || errors.Is(err, pager.ErrLimit) || errors.Is(err, grams13.ErrLimit) || errors.Is(err, similarity.ErrLimit) {
+	if errors.Is(err, record.ErrLimit) || errors.Is(err, pager.ErrLimit) || errors.Is(err, grams13.ErrLimit) || errors.Is(err, similarity.ErrLimit) || errors.Is(err, vector.ErrLimit) {
 		err = fmt.Errorf("%w: %w", ErrMemoryLimit, err)
 	}
 	if errors.As(err, &unsupported) || errors.Is(err, pager.ErrUnsupported) || errors.Is(err, record.ErrUnsupported) {

@@ -10,6 +10,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/ms-xiaosnow/gosqlite/extension/grams13"
+	"github.com/ms-xiaosnow/gosqlite/extension/vector"
 	"github.com/ms-xiaosnow/gosqlite/internal/btree"
 	sqlast "github.com/ms-xiaosnow/gosqlite/internal/sql"
 )
@@ -18,6 +19,13 @@ import (
 // posting B-tree ranges followed by individual source-table rowid seeks. Every
 // candidate still evaluates the original WHERE. EXPLAIN does not execute it.
 type QueryPlan struct {
+	// Vector ranking is separate from source access: a heap is never an index.
+	VectorMetric        vector.MetricKind
+	VectorColumn        string
+	VectorDimensions    int
+	VectorTopK          int64
+	VectorExact         bool
+	VectorRanking       string
 	Access              string
 	Table               string
 	Indexes             []string
@@ -38,11 +46,17 @@ type QueryPlan struct {
 // BaseRowFetches counts actual source rows read; ReturnedRows excludes OFFSET.
 // FrequencyLookups counts planning probes and also applies to EXPLAIN.
 type QueryStats struct {
-	FrequencyLookups int64
-	PostingKeysRead  int64
-	Candidates       int64
-	BaseRowFetches   int64
-	ReturnedRows     int64
+	// These count only the recognized exact vector ranking stage. NULL ranks
+	// are separate; components charge its query once and scored candidates.
+	VectorRankedRows     int64
+	VectorFilteredRows   int64
+	VectorNullRows       int64
+	VectorRankComponents int64
+	FrequencyLookups     int64
+	PostingKeysRead      int64
+	Candidates           int64
+	BaseRowFetches       int64
+	ReturnedRows         int64
 }
 
 func (r *Rows) Plan() QueryPlan {
@@ -57,10 +71,16 @@ func (r *Rows) Plan() QueryPlan {
 func (r *Rows) Stats() QueryStats { r.mu.Lock(); defer r.mu.Unlock(); return r.queryStats }
 
 func (p QueryPlan) Detail() string {
+	var detail string
 	if p.Access != "SEARCH" {
-		return fmt.Sprintf("%s %s; reason=%s", p.Access, p.Table, p.Reason)
+		detail = fmt.Sprintf("%s %s; reason=%s", p.Access, p.Table, p.Reason)
+	} else {
+		detail = fmt.Sprintf("SEARCH %s USING %s %s v%d; fields=%s; namespace=%s; grams=%v; estimated_candidates=%d; original_where_recheck=true; covering_posting_ranges=true; content_rowid_seek=true", p.Table, strings.Join(p.Indexes, ","), p.Method, p.MethodVersion, strings.Join(p.Fields, ","), p.Namespace, p.GramLengths, p.EstimatedCandidates)
 	}
-	return fmt.Sprintf("SEARCH %s USING %s %s v%d; fields=%s; namespace=%s; grams=%v; estimated_candidates=%d; original_where_recheck=true; covering_posting_ranges=true; content_rowid_seek=true", p.Table, strings.Join(p.Indexes, ","), p.Method, p.MethodVersion, strings.Join(p.Fields, ","), p.Namespace, p.GramLengths, p.EstimatedCandidates)
+	if p.VectorRanking != "" {
+		detail += fmt.Sprintf("; vector_ranking=%s; vector_metric=%s; vector_field=%s; dimensions=%d; retained_limit_plus_offset=%d; exact=%t; distance_order=ASC,rowid_ASC; nulls=FIRST", p.VectorRanking, p.VectorMetric, p.VectorColumn, p.VectorDimensions, p.VectorTopK, p.VectorExact)
+	}
+	return detail
 }
 
 type gramLookup struct {

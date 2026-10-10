@@ -1,0 +1,65 @@
+Sat Oct 10 11:24:27 UTC 2026
+M5 Library-restored ordinary recheck after uncollected transport loss
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/driver	(cached)
+?   	github.com/ms-xiaosnow/gosqlite/examples/grams	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/readonly	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/similarity	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/wal	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/write	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/extension/grams13	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/extension/registry	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/extension/similarity	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	(cached)
+?   	github.com/ms-xiaosnow/gosqlite/internal/buildinfo	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/journal	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/internal/record	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/internal/wal	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/driver	(cached)
+?   	github.com/ms-xiaosnow/gosqlite/examples/grams	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/readonly	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/similarity	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/wal	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/write	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/extension/grams13	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/extension/registry	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/extension/similarity	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	(cached)
+?   	github.com/ms-xiaosnow/gosqlite/internal/buildinfo	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/journal	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/internal/record	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/internal/wal	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/driver	(cached)
+?   	github.com/ms-xiaosnow/gosqlite/examples/grams	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/readonly	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/similarity	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/wal	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/write	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/extension/grams13	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/extension/registry	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/extension/similarity	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	18.729s
+?   	github.com/ms-xiaosnow/gosqlite/internal/buildinfo	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/journal	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/internal/record	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	130.715s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/wal	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	60.231s
+M5_LIBRARY_RESTORE_ORDINARY_PASSED
+Sat Oct 10 11:27:27 UTC 2026

@@ -333,6 +333,21 @@ func (p *parser) createTable() (*CreateTable, error) {
 			switch upperName(t.Text) {
 			case "INTEGER", "INT", "TEXT", "REAL", "BLOB", "NUMERIC":
 				c.Type = upperName(p.next().Text)
+			case "VECTOR":
+				p.next()
+				if err = p.need("("); err != nil {
+					return nil, err
+				}
+				dimension := p.peek()
+				n, ok := vectorDimensionNumber(dimension.Text)
+				if dimension.Kind != Number || !ok {
+					return nil, p.syntax("VECTOR dimension must be a decimal integer in [1,16000]")
+				}
+				p.next()
+				if err = p.need(")"); err != nil {
+					return nil, err
+				}
+				c.Type = "VECTOR(" + strconv.Itoa(n) + ")"
 			}
 		}
 		if p.peek().Kind == Identifier && !p.is("PRIMARY") && !p.is("NOT") && !p.is("DEFAULT") {
@@ -401,9 +416,15 @@ func (p *parser) defaultExpr() (Expr, error) {
 		return nil, err
 	}
 	err = Walk(e, func(e Expr) error {
-		switch e.(type) {
+		switch x := e.(type) {
 		case *Column, *Parameter, *Star, *Call:
 			return p.unsupported("nonconstant DEFAULT")
+		case *Binary:
+			// DEFAULT SQL is persisted verbatim in sqlite_schema. The type
+			// VECTOR(n) is legal SQLite, but our distance operators are not.
+			if isVectorOperator(x.Op) {
+				return p.unsupported("vector operator in DEFAULT")
+			}
 		}
 		return nil
 	})
@@ -807,7 +828,10 @@ func precedence(op string) int {
 		return 4
 	case "<", ">", "<=", ">=":
 		return 5
-	case "&", "|", "<<", ">>":
+	case "&", "|", "<<", ">>", "<->", "<#>", "<=>", "<+>":
+		// Project vector operators share SQLite's left-associative bitwise
+		// tier, above comparisons and below arithmetic. Existing tiers stay
+		// unchanged; this is not a general PostgreSQL expression grammar.
 		return 6
 	case "+", "-":
 		return 7
