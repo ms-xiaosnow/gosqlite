@@ -1,0 +1,7 @@
+Common: GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off GOFLAGS=-buildvcs=false GOCACHE=<root>/go-cache GOPATH=<root>/go-path CGO_ENABLED=0 SQLITE_ORACLE=<root>/toolchains/sqlite-build-3540000/sqlite3; go=<root>/toolchains/go1.27.2/bin/go.
+Fresh inventory/replay: python3 verify_inventory.py; python3 verify_inventory_v2.py.
+Exact source runs and commands: run-scoped-v1.sh; run-scoped-v2.sh, per-stage .command/.log/.exit.
+Final independent overlay: run-probes-v2.sh, per-stage .command/.log/.exit.
+Additional historical CLI: go run ./internal/testscope; go test ./cmd/gosqlite -run '^TestIndependentCLI' -count=1 -v; guard again; CGO_ENABLED=1 go test -race ./cmd/gosqlite -run '^TestIndependentCLI' -count=1 -v. Logs/exits cli-historical-*-v2.
+Original v1 negatives: run-probes-v1.sh; extra unknown-version negative selected by '^TestIndependentCheckUnknownGramsVersion$'. Nonzero failures deliberately retained.
+V1 ordinary/math/driver probes selected '^TestIndependent(CheckOrdinary|CheckOfficial|Driver)' normal, '^TestIndependentCheckMath' normal, '^TestIndependent(CheckOrdinary|CheckOfficial|CheckMath|Driver)' race. Additional valid fragmentation '^TestIndependentCheckOfficialFragmentedValidFixtures$' and Rows '^TestIndependentCheckOrdinaryUnrelatedRowsLifetime$'. All preceded central test-scope guard; matching logs/exits retained.

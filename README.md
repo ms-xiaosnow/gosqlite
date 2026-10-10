@@ -338,3 +338,9 @@ Required tooling now includes [encrypted CLI backup/rekey](docs/cli-encryption.m
 [caller-dataset numerical verification](docs/import-distance-verification.md) and
 [grams measurements](benchmarks/grams/README.md). Generic plaintext backup,
 full plaintext-WAL read-only CLI and final release qualification remain open.
+
+[Native full-profile DB/Tx/CLI checks](docs/native-check.md) and the
+[ordinary transaction/concurrent-soak harness](benchmarks/transactions/README.md)
+are available with independently reviewed bounded contracts. Whole-database
+checking verifies persisted built-in semantics, not runtime custom-registry
+provenance. A two-hour workload is predeclared, not yet executed or accepted.

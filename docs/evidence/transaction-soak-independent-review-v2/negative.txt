@@ -1,0 +1,33 @@
+=== RUN   TestIndependentUnexpectedJoinedErrorsRemainFatal
+=== RUN   TestIndependentUnexpectedJoinedErrorsRemainFatal/busy_plus_unknown
+    independent_negative_test.go:28: unexpected joined diagnostic suppressed: fatal=false counts={Attempts:1 Success:0 Committed:0 RolledBack:0 SavepointRollback:0 SavepointRelease:0 Busy:1 BusyEvents:0 Canceled:0 Failed:0 SnapshotChecks:0} ordinaryBusy=true err=SQLite database is busy
+        independent model diagnostic
+=== RUN   TestIndependentUnexpectedJoinedErrorsRemainFatal/busy_plus_changed
+    independent_negative_test.go:28: unexpected joined diagnostic suppressed: fatal=false counts={Attempts:1 Success:0 Committed:0 RolledBack:0 SavepointRollback:0 SavepointRelease:0 Busy:1 BusyEvents:0 Canceled:0 Failed:0 SnapshotChecks:0} ordinaryBusy=true err=SQLite database is busy
+        SQLite database changed during read
+=== RUN   TestIndependentUnexpectedJoinedErrorsRemainFatal/cancel_plus_unknown
+    independent_negative_test.go:28: unexpected joined diagnostic suppressed: fatal=false counts={Attempts:1 Success:0 Committed:0 RolledBack:0 SavepointRollback:0 SavepointRelease:0 Busy:0 BusyEvents:0 Canceled:1 Failed:0 SnapshotChecks:0} ordinaryBusy=false err=context canceled
+        independent model diagnostic
+=== RUN   TestIndependentUnexpectedJoinedErrorsRemainFatal/deadline_plus_changed
+    independent_negative_test.go:28: unexpected joined diagnostic suppressed: fatal=false counts={Attempts:1 Success:0 Committed:0 RolledBack:0 SavepointRollback:0 SavepointRelease:0 Busy:0 BusyEvents:0 Canceled:1 Failed:0 SnapshotChecks:0} ordinaryBusy=false err=context deadline exceeded
+        SQLite database changed during read
+=== RUN   TestIndependentUnexpectedJoinedErrorsRemainFatal/first_sqlite_error_masks_later_io
+    independent_negative_test.go:28: unexpected joined diagnostic suppressed: fatal=false counts={Attempts:1 Success:0 Committed:0 RolledBack:0 SavepointRollback:0 SavepointRelease:0 Busy:1 BusyEvents:0 Canceled:0 Failed:0 SnapshotChecks:0} ordinaryBusy=true err=sqlite memory: SQLite database is busy
+        sqlite memory: independent model diagnostic
+=== RUN   TestIndependentUnexpectedJoinedErrorsRemainFatal/outer_busy_masks_inner_io
+    independent_negative_test.go:28: unexpected joined diagnostic suppressed: fatal=false counts={Attempts:1 Success:0 Committed:0 RolledBack:0 SavepointRollback:0 SavepointRelease:0 Busy:1 BusyEvents:0 Canceled:0 Failed:0 SnapshotChecks:0} ordinaryBusy=true err=sqlite memory: SQLite database is busy
+        sqlite memory: independent model diagnostic
+=== RUN   TestIndependentUnexpectedJoinedErrorsRemainFatal/wrapped_busy_unknown
+    independent_negative_test.go:28: unexpected joined diagnostic suppressed: fatal=false counts={Attempts:1 Success:0 Committed:0 RolledBack:0 SavepointRollback:0 SavepointRelease:0 Busy:1 BusyEvents:0 Canceled:0 Failed:0 SnapshotChecks:0} ordinaryBusy=true err=context: SQLite database is busy
+        independent model diagnostic
+--- FAIL: TestIndependentUnexpectedJoinedErrorsRemainFatal (0.00s)
+    --- FAIL: TestIndependentUnexpectedJoinedErrorsRemainFatal/busy_plus_unknown (0.00s)
+    --- FAIL: TestIndependentUnexpectedJoinedErrorsRemainFatal/busy_plus_changed (0.00s)
+    --- FAIL: TestIndependentUnexpectedJoinedErrorsRemainFatal/cancel_plus_unknown (0.00s)
+    --- FAIL: TestIndependentUnexpectedJoinedErrorsRemainFatal/deadline_plus_changed (0.00s)
+    --- FAIL: TestIndependentUnexpectedJoinedErrorsRemainFatal/first_sqlite_error_masks_later_io (0.00s)
+    --- FAIL: TestIndependentUnexpectedJoinedErrorsRemainFatal/outer_busy_masks_inner_io (0.00s)
+    --- FAIL: TestIndependentUnexpectedJoinedErrorsRemainFatal/wrapped_busy_unknown (0.00s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/benchmarks/transactions	0.002s
+FAIL

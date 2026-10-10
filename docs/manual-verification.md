@@ -618,3 +618,40 @@ failures; V4b is awaiting independent review after6 V4 bound-LIMIT regressions. 
 shared-rekey source has independent model/compile review, not native runtime.
 Public recovery/Darwin/performance tooling remain separate corrective slices.
 Restricted recovery/fault, target runtime and independent M10 gates remain open.
+
+
+### Native full-profile integrity checks and ordinary transaction/soak tooling
+
+Exact source8b604e3c667152284a29d7ad7dfba5a10f63b053 adds22 checked paths over
+ddb957e2a1d804b236a295f7fe6ce383954b852c: independently reviewed transaction
+harness V4 and native CheckV2. Full ordinary unit/vet/build passed21:49:37Z,
+complete pinned ordinary oracle21:59:34Z, full race(SQLite583.504s), five builds,
+modules and complete source hashes passed22:10:33Z. Changed non-document bytes
+in the published checkpoint equal that fixed source; central docs are reconciled.
+
+DB.Check/Tx.Check/CLI full-profile checks share one pinned snapshot and bounded
+traversal. They validate catalog/free/all-page ownership, B-tree cell/freeblock/
+fragment accounting, table/ordinary-index correspondence and built-in grams plus
+dense/typed HNSW/IVF semantics. Detached-memory V1 false-success cases remain
+failed historical evidence; V2 exact accounting and builtin-only validation pass
+those retained controls. Custom registry callbacks never redefine full-check
+truth. Acquisition work has existing pager caps outside traversal counters;
+logical-NULL IPK checks do not claim physical serial-type0-only validation.
+Existing configured WAL sessions support Check; a genuine readonly plaintext-WAL
+full CLI is still an unimplemented profile. Existing named WAL checks retain
+historical writable coordination and are not relabeled readonly.
+
+TransactionV4 records actual concurrent epochs, deterministic transfer histories,
+reader snapshots, full rollback/savepoint outcomes, ordinary checkpoint/reopen,
+source/workload identity and truthful error/retirement status. Original V1 Reader
+ErrChanged run, V2/V3 mixed-error/pending-retirement model findings and V3 WAL
+storage-quota failure remain preserved. V4 requires all errorgraph branches and
+keeps pending owners through reporting; a later nilClose cannot erase uncertainty.
+Three64-attempt fixed-candidate runs passed, each with48 commits, exact independent
+model reconstruction and normal closure. These are bounded smoke observations.
+The predeclared two-hour-per-profile run, larger throughput measurements and
+confidence-qualified performance acceptance have NOT_RUN status here. There is
+no crash, fault, native recovery, namespace substitution or interrupted-rekey
+execution. Correctness/ordinary source review is not independent security/legal
+release approval. Wider planner, Windows/Darwin/public recovery and repaired
+ANN/performance-CI sources remain separate increments.

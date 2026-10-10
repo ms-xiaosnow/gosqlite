@@ -1,0 +1,26 @@
+[
+  {
+    "report": "throughput-v4-encrypted-shared.json",
+    "status": "passed",
+    "reconstructed_attempts": 64,
+    "reconstructed_commits": 48,
+    "final_model_sha256": "7f4d10530f62e6fc4368af43e9457355357ff25984464501e11cacfc61a01471",
+    "retained_failure": []
+  },
+  {
+    "report": "throughput-v4-rollback.json",
+    "status": "passed",
+    "reconstructed_attempts": 64,
+    "reconstructed_commits": 48,
+    "final_model_sha256": "7f4d10530f62e6fc4368af43e9457355357ff25984464501e11cacfc61a01471",
+    "retained_failure": []
+  },
+  {
+    "report": "throughput-v4-wal-shared.json",
+    "status": "passed",
+    "reconstructed_attempts": 64,
+    "reconstructed_commits": 48,
+    "final_model_sha256": "7f4d10530f62e6fc4368af43e9457355357ff25984464501e11cacfc61a01471",
+    "retained_failure": []
+  }
+]

@@ -1,0 +1,100 @@
+=== RUN   TestNativeCheckMemoryIntactAndBudgets
+--- PASS: TestNativeCheckMemoryIntactAndBudgets (0.00s)
+=== RUN   TestNativeCheckMemoryRejectsInconsistency
+=== RUN   TestNativeCheckMemoryRejectsInconsistency/missing_expected_key
+=== RUN   TestNativeCheckMemoryRejectsInconsistency/extra_wrong_value_same_rowid
+=== RUN   TestNativeCheckMemoryRejectsInconsistency/orphan_rowid
+=== RUN   TestNativeCheckMemoryRejectsInconsistency/null_constraint
+=== RUN   TestNativeCheckMemoryRejectsInconsistency/ipk_slot
+=== RUN   TestNativeCheckMemoryRejectsInconsistency/extra_record_field
+=== RUN   TestNativeCheckMemoryRejectsInconsistency/unsupported_encoding
+=== RUN   TestNativeCheckMemoryRejectsInconsistency/unsupported_invalid_text
+=== RUN   TestNativeCheckMemoryRejectsInconsistency/unknown_schema
+=== RUN   TestNativeCheckMemoryRejectsInconsistency/shared_root
+=== RUN   TestNativeCheckMemoryRejectsInconsistency/unaccounted_page
+=== RUN   TestNativeCheckMemoryRejectsInconsistency/free_live_page
+=== RUN   TestNativeCheckMemoryRejectsInconsistency/short_page
+=== RUN   TestNativeCheckMemoryRejectsInconsistency/reserved_serial
+--- PASS: TestNativeCheckMemoryRejectsInconsistency (0.00s)
+    --- PASS: TestNativeCheckMemoryRejectsInconsistency/missing_expected_key (0.00s)
+    --- PASS: TestNativeCheckMemoryRejectsInconsistency/extra_wrong_value_same_rowid (0.00s)
+    --- PASS: TestNativeCheckMemoryRejectsInconsistency/orphan_rowid (0.00s)
+    --- PASS: TestNativeCheckMemoryRejectsInconsistency/null_constraint (0.00s)
+    --- PASS: TestNativeCheckMemoryRejectsInconsistency/ipk_slot (0.00s)
+    --- PASS: TestNativeCheckMemoryRejectsInconsistency/extra_record_field (0.00s)
+    --- PASS: TestNativeCheckMemoryRejectsInconsistency/unsupported_encoding (0.00s)
+    --- PASS: TestNativeCheckMemoryRejectsInconsistency/unsupported_invalid_text (0.00s)
+    --- PASS: TestNativeCheckMemoryRejectsInconsistency/unknown_schema (0.00s)
+    --- PASS: TestNativeCheckMemoryRejectsInconsistency/shared_root (0.00s)
+    --- PASS: TestNativeCheckMemoryRejectsInconsistency/unaccounted_page (0.00s)
+    --- PASS: TestNativeCheckMemoryRejectsInconsistency/free_live_page (0.00s)
+    --- PASS: TestNativeCheckMemoryRejectsInconsistency/short_page (0.00s)
+    --- PASS: TestNativeCheckMemoryRejectsInconsistency/reserved_serial (0.00s)
+=== RUN   TestNativeCheckMemoryCancellationAndTypes
+=== RUN   TestNativeCheckMemoryCancellationAndTypes/VECTOR(2)
+=== RUN   TestNativeCheckMemoryCancellationAndTypes/HALFVEC(2)
+=== RUN   TestNativeCheckMemoryCancellationAndTypes/BIT(2)
+=== RUN   TestNativeCheckMemoryCancellationAndTypes/SPARSEVEC(2)
+--- PASS: TestNativeCheckMemoryCancellationAndTypes (0.00s)
+    --- PASS: TestNativeCheckMemoryCancellationAndTypes/VECTOR(2) (0.00s)
+    --- PASS: TestNativeCheckMemoryCancellationAndTypes/HALFVEC(2) (0.00s)
+    --- PASS: TestNativeCheckMemoryCancellationAndTypes/BIT(2) (0.00s)
+    --- PASS: TestNativeCheckMemoryCancellationAndTypes/SPARSEVEC(2) (0.00s)
+=== RUN   TestNativeCheckMemoryShadowOwners
+--- PASS: TestNativeCheckMemoryShadowOwners (0.00s)
+=== RUN   TestNativeCheckTransactionOwnershipAndCounters
+--- PASS: TestNativeCheckTransactionOwnershipAndCounters (0.00s)
+=== RUN   TestNativeCheckMemoryExtensionOrphanBeyondNamedScope
+--- PASS: TestNativeCheckMemoryExtensionOrphanBeyondNamedScope (0.01s)
+=== RUN   TestNativeCheckOrdinaryPageSizesAndReadOnly
+=== RUN   TestNativeCheckOrdinaryPageSizesAndReadOnly/512
+=== RUN   TestNativeCheckOrdinaryPageSizesAndReadOnly/4096
+=== RUN   TestNativeCheckOrdinaryPageSizesAndReadOnly/65536
+--- PASS: TestNativeCheckOrdinaryPageSizesAndReadOnly (0.09s)
+    --- PASS: TestNativeCheckOrdinaryPageSizesAndReadOnly/512 (0.04s)
+    --- PASS: TestNativeCheckOrdinaryPageSizesAndReadOnly/4096 (0.02s)
+    --- PASS: TestNativeCheckOrdinaryPageSizesAndReadOnly/65536 (0.04s)
+=== RUN   TestNativeCheckFreelistRollbackAndReopen
+--- PASS: TestNativeCheckFreelistRollbackAndReopen (0.07s)
+=== RUN   TestNativeCheckWALPinnedSnapshots
+=== RUN   TestNativeCheckWALPinnedSnapshots/false
+=== RUN   TestNativeCheckWALPinnedSnapshots/true
+--- PASS: TestNativeCheckWALPinnedSnapshots (0.02s)
+    --- PASS: TestNativeCheckWALPinnedSnapshots/false (0.00s)
+    --- PASS: TestNativeCheckWALPinnedSnapshots/true (0.01s)
+=== RUN   TestNativeCheckExtensionsAndTypedValues
+--- PASS: TestNativeCheckExtensionsAndTypedValues (1.22s)
+=== RUN   TestNativeCheckCorrectKeyReadOnly
+=== RUN   TestNativeCheckCorrectKeyReadOnly/0
+=== RUN   TestNativeCheckCorrectKeyReadOnly/1
+=== RUN   TestNativeCheckCorrectKeyReadOnly/2
+--- PASS: TestNativeCheckCorrectKeyReadOnly (0.01s)
+    --- PASS: TestNativeCheckCorrectKeyReadOnly/0 (0.01s)
+    --- PASS: TestNativeCheckCorrectKeyReadOnly/1 (0.00s)
+    --- PASS: TestNativeCheckCorrectKeyReadOnly/2 (0.00s)
+=== RUN   TestNativeCheckOfficialSupportedFixtures
+=== RUN   TestNativeCheckOfficialSupportedFixtures/512
+=== RUN   TestNativeCheckOfficialSupportedFixtures/4096
+=== RUN   TestNativeCheckOfficialSupportedFixtures/65536
+--- PASS: TestNativeCheckOfficialSupportedFixtures (0.02s)
+    --- PASS: TestNativeCheckOfficialSupportedFixtures/512 (0.02s)
+    --- PASS: TestNativeCheckOfficialSupportedFixtures/4096 (0.00s)
+    --- PASS: TestNativeCheckOfficialSupportedFixtures/65536 (0.00s)
+=== RUN   TestNativeCheckOfficialUnsupportedCatalogAndDirtyExtension
+--- PASS: TestNativeCheckOfficialUnsupportedCatalogAndDirtyExtension (0.03s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	1.487s
+=== RUN   TestCLINativeCheckPlainAndNamed
+--- PASS: TestCLINativeCheckPlainAndNamed (0.01s)
+=== RUN   TestCLINativeCheckCorrectKeyProviders
+=== RUN   TestCLINativeCheckCorrectKeyProviders/snapshot
+=== RUN   TestCLINativeCheckCorrectKeyProviders/wal
+=== RUN   TestCLINativeCheckCorrectKeyProviders/shared
+--- PASS: TestCLINativeCheckCorrectKeyProviders (0.02s)
+    --- PASS: TestCLINativeCheckCorrectKeyProviders/snapshot (0.00s)
+    --- PASS: TestCLINativeCheckCorrectKeyProviders/wal (0.01s)
+    --- PASS: TestCLINativeCheckCorrectKeyProviders/shared (0.01s)
+=== RUN   TestCLINativeCheckMemoryArguments
+--- PASS: TestCLINativeCheckMemoryArguments (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.031s

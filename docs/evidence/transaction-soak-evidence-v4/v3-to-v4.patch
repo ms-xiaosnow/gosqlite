@@ -1,0 +1,606 @@
+diff --git a/benchmarks/transactions/README.md b/benchmarks/transactions/README.md
+index 886e76f..29f10d1 100644
+--- a/benchmarks/transactions/README.md
++++ b/benchmarks/transactions/README.md
+@@ -122,7 +122,7 @@ checks every row again. Sum conservation alone would not detect a permutation;
+ the oracle compares each row value. Failed/BUSY/canceled attempts do not update
+ the model. BUSY commit retries are bounded (20 retries after the initial try),
+ counted separately and wait cooperatively. Cleanup/I/O errors cannot be masked
+-as BUSY or cancellation. Classification examines every branch in at most128
++as BUSY or cancellation. Classification examines every branch in at most 128
+ error nodes, accepting only exact known native/pager/encrypted/WAL-index BUSY
+ leaves or context cancellation/deadline leaves through standard fmt/errors.Join
+ wrappers and consistent SQLite code envelopes. Unknown leaves/wrappers, extra
+@@ -238,12 +238,23 @@ not the overall weighted throughput. No normal-theory confidence interval is
+ invented from transaction counts or correlated within-run windows. No SQLite,
+ pg_bigm or pgvector comparison is fabricated.
+ 
+-## V3 correction provenance
++## Correction provenance and V4 admission
+ 
+ V1/V2 reports retain their original identities. Independent pure-memory review
+ found that V2's errors.Is/errors.As classification could hide extra joined
+ diagnostics, and source review found incomplete all-handle closure reporting.
+-V3 corrects these defects without changing native engine behavior or converting
+-old measurements into clean-classifier acceptance. Its bounded runtime checks
+-use the separately accepted ordinary reader-acquisition fix composition. Original
++V3 corrected the classifier but its ownership reporting still missed public
++pending-retirement markers and failed-Open paths. V4 recognizes every public
++cleanup-pending marker, conservatively latches SQLite CodeIOErr, poison/commit
++uncertainty and opaque ownership envelopes, and installs finalization before the
++first database Open. Original token graphs remain retained even when no DB handle
++was returned. Unsafe failure cannot become an unsupported skip or a later pass.
++Its diagnostic discovery and rendering are bounded and do not invoke unknown
++error callbacks. Only a wholly understood unsupported graph can be skipped.
++
++Every V4 JSON report includes harness_revision="ordinary-transactions-v4". A
++performance comparator must require this exact revision; matching workload math,
++schema_version or zero closure fields in V1–V3 is insufficient corrected-report
++evidence. The workload math is unchanged. V4 bounded runtime checks use the
++separately accepted ordinary reader-acquisition fix composition. All original
+ failed controls remain failures; no native failure path was executed.
+diff --git a/benchmarks/transactions/classify.go b/benchmarks/transactions/classify.go
+index 4d8b102..0f04ded 100644
+--- a/benchmarks/transactions/classify.go
++++ b/benchmarks/transactions/classify.go
+@@ -6,7 +6,9 @@ import (
+ 	"fmt"
+ 	"reflect"
+ 
++	"github.com/ms-xiaosnow/gosqlite/encryption"
+ 	"github.com/ms-xiaosnow/gosqlite/internal/encstore"
++	"github.com/ms-xiaosnow/gosqlite/internal/pager"
+ 	"github.com/ms-xiaosnow/gosqlite/internal/vfs"
+ 	"github.com/ms-xiaosnow/gosqlite/internal/walindex"
+ 	"github.com/ms-xiaosnow/gosqlite/sqlite"
+@@ -15,9 +17,10 @@ import (
+ // Only transparent standard wrappers and the public SQLite diagnostic envelope
+ // are understood. Arbitrary Error/Is/As/Unwrap methods are never executed.
+ var (
+-	singleWrapType = reflect.TypeOf(fmt.Errorf("context: %w", context.Canceled))
+-	multiWrapType  = reflect.TypeOf(fmt.Errorf("%w: %w", context.Canceled, context.DeadlineExceeded))
+-	joinType       = reflect.TypeOf(errors.Join(context.Canceled, context.DeadlineExceeded))
++	terminalErrorType = reflect.TypeOf(errors.New("terminal diagnostic"))
++	singleWrapType    = reflect.TypeOf(fmt.Errorf("context: %w", context.Canceled))
++	multiWrapType     = reflect.TypeOf(fmt.Errorf("%w: %w", context.Canceled, context.DeadlineExceeded))
++	joinType          = reflect.TypeOf(errors.Join(context.Canceled, context.DeadlineExceeded))
+ )
+ 
+ const maxOutcomeErrorNodes = 128
+@@ -117,3 +120,44 @@ func classify(c *Counts, err error) bool {
+ 	}
+ 	return false
+ }
++
++// Only a wholly understood unsupported graph may be labeled skipped. An
++// unrelated joined diagnostic is a failure, not a platform skip.
++func benignUnsupported(err error) bool {
++	remaining := maxOutcomeErrorNodes
++	var visit func(error) bool
++	visit = func(node error) bool {
++		if node == nil || remaining == 0 {
++			return false
++		}
++		remaining--
++		switch node {
++		case sqlite.ErrUnsupported, pager.ErrUnsupported, vfs.ErrUnsupported, walindex.ErrUnsupported, encstore.ErrUnsupported, encryption.ErrUnsupported, encryption.ErrUnsupportedConfiguration:
++			return true
++		}
++		if e, ok := node.(*sqlite.Error); ok {
++			return e != nil && e.Code == sqlite.CodeError && visit(e.Err)
++		}
++		typ := reflect.TypeOf(node)
++		if typ != singleWrapType && typ != multiWrapType && typ != joinType {
++			return false
++		}
++		if reflect.ValueOf(node).IsNil() {
++			return false
++		}
++		if typ == singleWrapType {
++			return visit(node.(interface{ Unwrap() error }).Unwrap())
++		}
++		children := node.(interface{ Unwrap() []error }).Unwrap()
++		if len(children) == 0 || len(children) > remaining {
++			return false
++		}
++		for _, child := range children {
++			if !visit(child) {
++				return false
++			}
++		}
++		return true
++	}
++	return visit(err)
++}
+diff --git a/benchmarks/transactions/closure.go b/benchmarks/transactions/closure.go
+index bc581a7..4ddf9c1 100644
+--- a/benchmarks/transactions/closure.go
++++ b/benchmarks/transactions/closure.go
+@@ -1,10 +1,12 @@
+ package main
+ 
+ import (
++	"context"
+ 	"errors"
+ 	"fmt"
+ 	"github.com/ms-xiaosnow/gosqlite/sqlite"
+ 	"reflect"
++	"strings"
+ )
+ 
+ // closeLedger is single-goroutine-owned. Workers finish before their DB handles
+@@ -20,12 +22,14 @@ type ownedHandle struct {
+ type closeLedger struct {
+ 	live     map[*ownedHandle]struct{}
+ 	failures int
++	acquired int
+ }
+ 
+ func newCloseLedger() *closeLedger { return &closeLedger{live: make(map[*ownedHandle]struct{})} }
+ func (l *closeLedger) acquire(handle closeHandle, label string) *ownedHandle {
+ 	owner := &ownedHandle{handle: handle, label: label}
+ 	l.live[owner] = struct{}{}
++	l.acquired++
+ 	return owner
+ }
+ func (l *closeLedger) close(owner *ownedHandle) error {
+@@ -66,13 +70,20 @@ func (l *closeLedger) shutdown() string {
+ 	if l.failures > 0 {
+ 		return "close_error"
+ 	}
++	if l.acquired == 0 {
++		return "no_database_handle_returned"
++	}
+ 	return "workers_joined_normal_close"
+ }
+ 
+-// cleanupDiagnostic recognizes our own marker through known transparent
+-// wrappers without invoking untrusted error methods. An excessive known graph
+-// is conservatively unverified. Original errors are retained by Report.
++// cleanupDiagnostic refuses to infer retirement from a bare success elsewhere.
++// All public pending markers, IO/poison/uncertain diagnostics, opaque envelopes
++// and malformed/excessive graphs are conservatively unverified. No custom
++// Is/As/Error/Unwrap method is called while discovering ownership diagnostics.
+ func cleanupDiagnostic(err error) bool {
++	if err == nil {
++		return false
++	}
+ 	stack := []error{err}
+ 	visited := 0
+ 	for len(stack) > 0 {
+@@ -83,30 +94,40 @@ func cleanupDiagnostic(err error) bool {
+ 		node := stack[len(stack)-1]
+ 		stack = stack[:len(stack)-1]
+ 		if node == nil {
+-			continue
++			return true
++		}
++		if value := reflect.ValueOf(node); value.Kind() == reflect.Pointer && value.IsNil() {
++			return true
+ 		}
+-		if node == errCleanup {
++		switch node {
++		case errCleanup, sqlite.ErrPlaintextCleanupPending, sqlite.ErrOpenCleanupPending, sqlite.ErrCloseCleanupPending, sqlite.ErrEncryptedCleanupPending, sqlite.ErrPoisoned, sqlite.ErrCommitUncertain, sqlite.ErrRecoveryRequired:
+ 			return true
+ 		}
+ 		if e, ok := node.(*sqlite.Error); ok {
+-			if e != nil {
+-				stack = append(stack, e.Err)
++			if e == nil || e.Code == sqlite.CodeIOErr || e.Err == nil {
++				return true
+ 			}
++			stack = append(stack, e.Err)
+ 			continue
+ 		}
+ 		typ := reflect.TypeOf(node)
+-		if typ != singleWrapType && typ != multiWrapType && typ != joinType {
++		// Standard terminal error strings and exact context sentinels have no hidden
++		// owner envelope. Arbitrary custom leaves may hide one and stay unverified.
++		if typ == terminalErrorType || node == context.Canceled || node == context.DeadlineExceeded {
+ 			continue
+ 		}
++		if typ != singleWrapType && typ != multiWrapType && typ != joinType {
++			return true
++		}
+ 		if reflect.ValueOf(node).IsNil() {
+-			continue
++			return true
+ 		}
+ 		if typ == singleWrapType {
+ 			stack = append(stack, node.(interface{ Unwrap() error }).Unwrap())
+ 			continue
+ 		}
+ 		children := node.(interface{ Unwrap() []error }).Unwrap()
+-		if len(children) > maxOutcomeErrorNodes-visited-len(stack) {
++		if len(children) == 0 || len(children) > maxOutcomeErrorNodes-visited-len(stack) {
+ 			return true
+ 		}
+ 		stack = append(stack, children...)
+@@ -114,6 +135,90 @@ func cleanupDiagnostic(err error) bool {
+ 	return false
+ }
+ 
++// recordFailure retains original token/error graphs even if Open returned no DB.
++// Unsafe retirement is latched immediately, before any enclosing finalizer.
++func recordFailure(rep *Report, err error) {
++	if err == nil {
++		return
++	}
++	rep.retainedDiagnostics = append(rep.retainedDiagnostics, err)
++	rep.Errors = append(rep.Errors, diagnosticText(err))
++	if cleanupDiagnostic(err) {
++		rep.UnverifiedRetirement = true
++	}
++	setReportStatus(rep, "failed")
++}
++func setReportStatus(rep *Report, status string) {
++	rep.Status = status
++	if rep.UnverifiedRetirement {
++		rep.Status = "failed"
++		rep.Shutdown = "close_error_unverified_retirement"
++	}
++}
++func recordOpenFailure(rep *Report, err error) {
++	recordFailure(rep, err)
++	if !rep.UnverifiedRetirement && benignUnsupported(err) {
++		setReportStatus(rep, "skipped_unsupported")
++	}
++}
++
++// diagnosticText is bounded too: unknown error callbacks and cyclic SQLite
++// envelopes are never invoked while formatting the retained failure report.
++func diagnosticText(err error) string {
++	remaining := maxOutcomeErrorNodes
++	var render func(error) string
++	clip := func(s string) string {
++		if len(s) > 1024 {
++			return s[:1024] + " [truncated]"
++		}
++		return s
++	}
++	render = func(node error) string {
++		if remaining == 0 {
++			return "[error graph limit]"
++		}
++		remaining--
++		if node == nil {
++			return "[nil diagnostic]"
++		}
++		if value := reflect.ValueOf(node); value.Kind() == reflect.Pointer && value.IsNil() {
++			return "[typed nil diagnostic]"
++		}
++		if e, ok := node.(*sqlite.Error); ok {
++			if e == nil {
++				return "[nil SQLite diagnostic]"
++			}
++			return fmt.Sprintf("sqlite %s (code %d): %s", clip(e.Op), e.Code, render(e.Err))
++		}
++		typ := reflect.TypeOf(node)
++		if typ == terminalErrorType || node == context.Canceled || node == context.DeadlineExceeded {
++			return clip(node.Error())
++		}
++		if typ == singleWrapType || typ == multiWrapType {
++			if reflect.ValueOf(node).IsNil() {
++				return "[nil format wrapper]"
++			}
++			return clip(node.Error())
++		}
++		if typ == joinType {
++			if reflect.ValueOf(node).IsNil() {
++				return "[nil join wrapper]"
++			}
++			children := node.(interface{ Unwrap() []error }).Unwrap()
++			if len(children) > remaining {
++				return "[error graph limit]"
++			}
++			var parts []string
++			for _, child := range children {
++				parts = append(parts, render(child))
++			}
++			return strings.Join(parts, "; ")
++		}
++		return fmt.Sprintf("[opaque diagnostic %T; original retained]", node)
++	}
++	return render(err)
++}
++
+ func finalizeClosures(rep *Report, owners *closeLedger) error {
+ 	err := owners.closeRemaining()
+ 	rep.UnverifiedCloseHandles = len(owners.live)
+@@ -122,9 +227,6 @@ func finalizeClosures(rep *Report, owners *closeLedger) error {
+ 	if owners.failures > 0 || len(owners.live) > 0 {
+ 		rep.UnverifiedRetirement = true
+ 	}
+-	if rep.UnverifiedRetirement {
+-		rep.Shutdown = "close_error_unverified_retirement"
+-		rep.Status = "failed"
+-	}
++	setReportStatus(rep, rep.Status)
+ 	return err
+ }
+diff --git a/benchmarks/transactions/closure_test.go b/benchmarks/transactions/closure_test.go
+index 4dc6916..693a08e 100644
+--- a/benchmarks/transactions/closure_test.go
++++ b/benchmarks/transactions/closure_test.go
+@@ -51,8 +51,8 @@ func TestCleanupDiagnosticLatchDiscovery(t *testing.T) {
+ 	if !cleanupDiagnostic(cleanupJoin(nil, errors.New("memory rows close"))) || !cleanupDiagnostic(errors.Join(errors.New("operation"), cleanupJoin(nil, errors.New("memory tx rollback")))) {
+ 		t.Fatal("cleanup marker lost")
+ 	}
+-	if cleanupDiagnostic(errors.New("model mismatch")) || cleanupDiagnostic(nil) || cleanupDiagnostic(&forbiddenOutcomeMethods{}) {
+-		t.Fatal("opaque diagnostic invented cleanup")
++	if cleanupDiagnostic(errors.New("model mismatch")) || cleanupDiagnostic(nil) {
++		t.Fatal("plain memory failure incorrectly marked unverified")
+ 	}
+ }
+ func TestDBCloseOnlyThroughLedger(t *testing.T) {
+diff --git a/benchmarks/transactions/independent_retirement_test.go b/benchmarks/transactions/independent_retirement_test.go
+new file mode 100644
+index 0000000..edf6fd2
+--- /dev/null
++++ b/benchmarks/transactions/independent_retirement_test.go
+@@ -0,0 +1,29 @@
++package main
++
++import (
++	"errors"
++	"github.com/ms-xiaosnow/gosqlite/sqlite"
++	"testing"
++)
++
++// Pure-memory public diagnostic shapes only; no native owner or file is created.
++func TestIndependentPendingRetirementDiagnosticsLatch(t *testing.T) {
++	for _, tt := range []struct {
++		name   string
++		marker error
++	}{
++		{"plaintext", sqlite.ErrPlaintextCleanupPending}, {"shared_open", sqlite.ErrOpenCleanupPending},
++		{"shared_close", sqlite.ErrCloseCleanupPending}, {"encrypted", sqlite.ErrEncryptedCleanupPending},
++	} {
++		t.Run(tt.name, func(t *testing.T) {
++			diagnostic := &sqlite.Error{Code: sqlite.CodeIOErr, Op: "memory", Err: errors.Join(tt.marker, sqlite.ErrPoisoned)}
++			rep := Report{Status: "failed", UnverifiedRetirement: cleanupDiagnostic(diagnostic), retainedDiagnostics: []error{diagnostic}}
++			ledger := newCloseLedger()
++			ledger.acquire(&memoryCloseHandle{}, "otherwise clean writer")
++			finalizeClosures(&rep, ledger)
++			if !rep.UnverifiedRetirement || rep.Shutdown == "workers_joined_normal_close" {
++				t.Fatalf("pending diagnostic not latched: unverified=%v shutdown=%s", rep.UnverifiedRetirement, rep.Shutdown)
++			}
++		})
++	}
++}
+diff --git a/benchmarks/transactions/main.go b/benchmarks/transactions/main.go
+index 5a99edf..e293de2 100644
+--- a/benchmarks/transactions/main.go
++++ b/benchmarks/transactions/main.go
+@@ -22,6 +22,8 @@ import (
+ 	"github.com/ms-xiaosnow/gosqlite/sqlite"
+ )
+ 
++const harnessRevision = "ordinary-transactions-v4"
++
+ const workloadVersion = "ordinary-transfer-history-v1"
+ const epochAttempts = 64
+ const maxEpochs = 4096
+@@ -67,7 +69,8 @@ func (c Config) Validate() error {
+ }
+ 
+ type Report struct {
+-	UnverifiedRetirement         bool `json:"unverified_retirement"`
++	HarnessRevision              string `json:"harness_revision"`
++	UnverifiedRetirement         bool   `json:"unverified_retirement"`
+ 	retainedDiagnostics          []error
+ 	UnverifiedCloseHandles       int `json:"unverified_close_handles"`
+ 	CloseFailures                int `json:"close_failures"`
+@@ -212,7 +215,7 @@ func dataSize(dir string) (int64, int, error) {
+ }
+ func run(ctx context.Context, c Config) (rep Report) {
+ 	started := time.Now()
+-	rep = Report{SchemaVersion: 1, Benchmark: "native-transactions-and-soak", WorkloadVersion: workloadVersion, Config: c, Status: "failed", StartedUTC: started.UTC().Format(time.RFC3339Nano), GoVersion: runtime.Version(), GOOS: runtime.GOOS, GOARCH: runtime.GOARCH, CPUs: runtime.NumCPU(), GOMAXPROCS: runtime.GOMAXPROCS(0), PageSize: 4096, CacheCondition: "warm OS cache, bootstrap excluded, no OS cache flush; new DB each invocation", CheckpointStatus: "not_run", Errors: []string{}, Windows: []Window{}, Shutdown: "not_started", Limits: map[string]int64{"rows": 4096, "reader_goroutines": 8, "writer_goroutines": 1, "writer_attempts_per_epoch": epochAttempts, "epochs": maxEpochs, "soft_go_memory_bytes": memoryLimit, "transaction_pages": 128, "transaction_undo_bytes": 8 << 20, "encrypted_generations": 100000, "encrypted_directory_entries": 200000, "encrypted_adapter_memory_bytes": 64 << 20, "encrypted_logical_bytes": 8 << 20}, Notes: []string{"All latency histograms include BUSY/canceled outcomes; percentiles are power-of-two microsecond bucket upper bounds, not exact order statistics.", "One writer and independent reader handles overlap. BUSY is reported, never silently retried without counting. Commit has at most 20 cooperative retries.", "Every successful reader checks all rows twice against an exact committed-generation model within one pinned snapshot. Histories are retained only until epoch readers join.", "Every epoch joins canceled workers, performs supported normal checkpoint, closes all connections, reopens the same intact database, and checks the exact model.", "No fault injection, abrupt process exit with an open database, crash recovery, physical tamper, namespace race, external oracle, or rekey. Ordinary reopen/checkpoint timings are not recovery time.", "Encrypted-shared uses a public synthetic fixture key and retains immutable ciphertext history; quota/epoch exhaustion fails the run rather than truncating or calling a shorter run passed.", "Windows within a run are correlated. CI bounds are null; independent repeated runs on identical source/workload/hardware conditions are needed before a confidence-qualified regression decision.", "All data directories and JSON stdout are retained for investigation. No results are deleted or rewritten by the harness.", "Any close/retirement diagnostic latches failure. Unverified handles and original diagnostics remain referenced through report emission; no automatic retry is added. Process completion is not evidence of native retirement, and terminal uncertainty is not recovered by this harness."}}
++	rep = Report{HarnessRevision: harnessRevision, SchemaVersion: 1, Benchmark: "native-transactions-and-soak", WorkloadVersion: workloadVersion, Config: c, Status: "failed", StartedUTC: started.UTC().Format(time.RFC3339Nano), GoVersion: runtime.Version(), GOOS: runtime.GOOS, GOARCH: runtime.GOARCH, CPUs: runtime.NumCPU(), GOMAXPROCS: runtime.GOMAXPROCS(0), PageSize: 4096, CacheCondition: "warm OS cache, bootstrap excluded, no OS cache flush; new DB each invocation", CheckpointStatus: "not_run", Errors: []string{}, Windows: []Window{}, Shutdown: "not_started", Limits: map[string]int64{"rows": 4096, "reader_goroutines": 8, "writer_goroutines": 1, "writer_attempts_per_epoch": epochAttempts, "epochs": maxEpochs, "soft_go_memory_bytes": memoryLimit, "transaction_pages": 128, "transaction_undo_bytes": 8 << 20, "encrypted_generations": 100000, "encrypted_directory_entries": 200000, "encrypted_adapter_memory_bytes": 64 << 20, "encrypted_logical_bytes": 8 << 20}, Notes: []string{"All latency histograms include BUSY/canceled outcomes; percentiles are power-of-two microsecond bucket upper bounds, not exact order statistics.", "One writer and independent reader handles overlap. BUSY is reported, never silently retried without counting. Commit has at most 20 cooperative retries.", "Every successful reader checks all rows twice against an exact committed-generation model within one pinned snapshot. Histories are retained only until epoch readers join.", "Every epoch joins canceled workers, performs supported normal checkpoint, closes all connections, reopens the same intact database, and checks the exact model.", "No fault injection, abrupt process exit with an open database, crash recovery, physical tamper, namespace race, external oracle, or rekey. Ordinary reopen/checkpoint timings are not recovery time.", "Encrypted-shared uses a public synthetic fixture key and retains immutable ciphertext history; quota/epoch exhaustion fails the run rather than truncating or calling a shorter run passed.", "Windows within a run are correlated. CI bounds are null; independent repeated runs on identical source/workload/hardware conditions are needed before a confidence-qualified regression decision.", "All data directories and JSON stdout are retained for investigation. No results are deleted or rewritten by the harness.", "Any close/retirement diagnostic latches failure. Unverified handles and original diagnostics remain referenced through report emission; no automatic retry is added. Process completion is not evidence of native retirement, and terminal uncertainty is not recovered by this harness."}}
+ 	rep.BuildSettings = map[string]string{}
+ 	if info, ok := debug.ReadBuildInfo(); ok {
+ 		for _, setting := range info.Settings {
+@@ -238,16 +241,10 @@ func run(ctx context.Context, c Config) (rep Report) {
+ 		}
+ 		rep.EndToEndCommitsPerSecond = float64(rep.Writer.Committed) / rep.ElapsedSeconds
+ 	}()
+-	fail := func(e error) {
+-		rep.retainedDiagnostics = append(rep.retainedDiagnostics, e)
+-		rep.Errors = append(rep.Errors, e.Error())
+-		if cleanupDiagnostic(e) {
+-			rep.UnverifiedRetirement = true
+-		}
+-	}
++	fail := func(e error) { recordFailure(&rep, e) }
+ 	if e := c.Validate(); e != nil {
+ 		fail(e)
+-		rep.Status = "rejected"
++		setReportStatus(&rep, "rejected")
+ 		return
+ 	}
+ 	oldLimit := debug.SetMemoryLimit(memoryLimit)
+@@ -274,25 +271,21 @@ func run(ctx context.Context, c Config) (rep Report) {
+ 	rep.DataDirectory = dir
+ 	path := filepath.Join(dir, "benchmark.db")
+ 	o := options(c)
+-	db, e := sqlite.Open(path, o)
+-	if e != nil {
+-		fail(e)
+-		if errors.Is(e, sqlite.ErrUnsupported) {
+-			rep.Status = "skipped_unsupported"
+-		}
+-		return
+-	}
+-	// One ledger owns every acquired DB handle across epoch boundaries.
+-	// It releases a reference only after that exact handle closes successfully.
++	// Install ownership finalization before any potentially acquiring Open.
+ 	owners := newCloseLedger()
+ 	rep.retainedOwners = owners
+-	writerOwner := owners.acquire(db, "writer")
+-	rep.Shutdown = "normal_close_pending"
+ 	defer func() {
+ 		if e := finalizeClosures(&rep, owners); e != nil {
+ 			fail(e)
+ 		}
+ 	}()
++	db, e := sqlite.Open(path, o)
++	if e != nil {
++		recordOpenFailure(&rep, e)
++		return
++	}
++	writerOwner := owners.acquire(db, "writer")
++	rep.Shutdown = "normal_close_pending"
+ 	if e = bootstrap(db, m.current); e != nil {
+ 		fail(e)
+ 		return
+@@ -414,6 +407,6 @@ func run(ctx context.Context, c Config) (rep Report) {
+ 		fail(errors.New("required outcome coverage or accounting missing; incomplete"))
+ 		return
+ 	}
+-	rep.Status = "passed"
++	setReportStatus(&rep, "passed")
+ 	return
+ }
+diff --git a/benchmarks/transactions/report_failure_test.go b/benchmarks/transactions/report_failure_test.go
+new file mode 100644
+index 0000000..e0ad4d6
+--- /dev/null
++++ b/benchmarks/transactions/report_failure_test.go
+@@ -0,0 +1,137 @@
++package main
++
++import (
++	"context"
++	"errors"
++	"fmt"
++	"go/ast"
++	"go/parser"
++	"go/token"
++	"reflect"
++	"strings"
++	"testing"
++
++	"github.com/ms-xiaosnow/gosqlite/internal/pager"
++	"github.com/ms-xiaosnow/gosqlite/internal/vfs"
++	"github.com/ms-xiaosnow/gosqlite/sqlite"
++)
++
++// Descriptor-free errors/report state only: this does not call a native Open or
++// manufacture a native failure. The real pre-acquisition placement is AST-pinned.
++func TestPreHandleRetirementFailureCannotBecomeSkipOrPass(t *testing.T) {
++	for _, marker := range []error{sqlite.ErrPlaintextCleanupPending, sqlite.ErrOpenCleanupPending, sqlite.ErrCloseCleanupPending, sqlite.ErrEncryptedCleanupPending} {
++		original := &sqlite.Error{Code: sqlite.CodeIOErr, Op: "memory open", Err: errors.Join(sqlite.ErrUnsupported, marker, sqlite.ErrPoisoned)}
++		rep := Report{Status: "passed", Shutdown: "not_started"}
++		recordOpenFailure(&rep, original)
++		if !rep.UnverifiedRetirement || rep.Status != "failed" || rep.Shutdown != "close_error_unverified_retirement" || len(rep.retainedDiagnostics) != 1 || rep.retainedDiagnostics[0] != original {
++			t.Fatalf("pre-handle marker lost: %+v", rep)
++		}
++		for _, status := range []string{"skipped_unsupported", "passed", "rejected"} {
++			setReportStatus(&rep, status)
++			if rep.Status != "failed" {
++				t.Fatal("unsafe status overwritten")
++			}
++		}
++		// No DB was returned, but its original managed token remains retained.
++		empty := newCloseLedger()
++		if err := finalizeClosures(&rep, empty); err != nil {
++			t.Fatal(err)
++		}
++		if rep.Shutdown != "close_error_unverified_retirement" || !rep.UnverifiedRetirement || rep.UnverifiedCloseHandles != 0 || rep.retainedDiagnostics[0] != original {
++			t.Fatal("pre-handle finalizer erased uncertainty")
++		}
++	}
++	benign := &sqlite.Error{Code: sqlite.CodeError, Op: "memory open", Err: fmt.Errorf("%w: %w: %w", sqlite.ErrUnsupported, pager.ErrUnsupported, vfs.ErrUnsupported)}
++	rep := Report{}
++	recordOpenFailure(&rep, benign)
++	finalizeClosures(&rep, newCloseLedger())
++	if rep.Status != "skipped_unsupported" || rep.UnverifiedRetirement || rep.Shutdown != "no_database_handle_returned" {
++		t.Fatalf("benign unsupported report %+v", rep)
++	}
++	extra := Report{}
++	recordOpenFailure(&extra, errors.Join(sqlite.ErrUnsupported, errors.New("extra diagnostic")))
++	if extra.Status != "failed" {
++		t.Fatal("extra diagnostic hidden by unsupported")
++	}
++}
++func TestRetirementDiscoveryAndRenderingAreBounded(t *testing.T) {
++	for _, node := range []error{sqlite.ErrPlaintextCleanupPending, sqlite.ErrOpenCleanupPending, sqlite.ErrCloseCleanupPending, sqlite.ErrEncryptedCleanupPending, &sqlite.Error{Code: sqlite.CodeIOErr, Err: errors.New("unknown IO diagnostic")}, &forbiddenOutcomeMethods{}} {
++		if !cleanupDiagnostic(node) {
++			t.Fatalf("unverified diagnostic missed: %T", node)
++		}
++	}
++	cycle := &sqlite.Error{Code: sqlite.CodeBusy}
++	cycle.Err = cycle
++	if !cleanupDiagnostic(cycle) || !strings.Contains(diagnosticText(cycle), "graph limit") {
++		t.Fatal("unbounded graph")
++	}
++	var typedNil *sqlite.Error
++	terminalNil := reflect.Zero(terminalErrorType).Interface().(error)
++	for _, node := range []error{typedNil, terminalNil, &forbiddenOutcomeMethods{}} {
++		rep := Report{}
++		recordFailure(&rep, node)
++		if !rep.UnverifiedRetirement || rep.Status != "failed" || len(rep.Errors) != 1 {
++			t.Fatal("unsafe graph not retained")
++		}
++	}
++	rep := Report{Status: "passed"}
++	recordFailure(&rep, errors.Join(context.Canceled, errors.New("real diagnostic")))
++	if rep.Status != "failed" || len(rep.retainedDiagnostics) != 1 {
++		t.Fatal("joined failure discarded")
++	}
++}
++func TestFinalizerInstalledBeforeDatabaseOpen(t *testing.T) {
++	f, err := parser.ParseFile(token.NewFileSet(), "main.go", nil, 0)
++	if err != nil {
++		t.Fatal(err)
++	}
++	var run *ast.FuncDecl
++	for _, d := range f.Decls {
++		if fn, ok := d.(*ast.FuncDecl); ok && fn.Name.Name == "run" {
++			run = fn
++		}
++	}
++	if run == nil {
++		t.Fatal("run missing")
++	}
++	var finalizer token.Pos
++	var opens []token.Pos
++	ast.Inspect(run.Body, func(n ast.Node) bool {
++		if d, ok := n.(*ast.DeferStmt); ok {
++			found := false
++			ast.Inspect(d, func(x ast.Node) bool {
++				if id, ok := x.(*ast.Ident); ok && id.Name == "finalizeClosures" {
++					found = true
++				}
++				return true
++			})
++			if found {
++				finalizer = d.Pos()
++			}
++		}
++		if c, ok := n.(*ast.CallExpr); ok {
++			if sel, ok := c.Fun.(*ast.SelectorExpr); ok && sel.Sel.Name == "Open" {
++				if id, ok := sel.X.(*ast.Ident); ok && id.Name == "sqlite" {
++					opens = append(opens, c.Pos())
++				}
++			}
++		}
++		return true
++	})
++	if finalizer == token.NoPos || len(opens) != 2 {
++		t.Fatalf("expected one finalizer and initial/reopen paths: %v %v", finalizer, opens)
++	}
++	for _, pos := range opens {
++		if finalizer >= pos {
++			t.Fatal("database acquisition before finalizer")
++		}
++	}
++}
++func TestHarnessRevisionOnRejectedReport(t *testing.T) {
++	c := validConfig()
++	c.Profile = "not-supported"
++	rep := run(context.Background(), c)
++	if rep.HarnessRevision != "ordinary-transactions-v4" || rep.Status != "rejected" || rep.DataDirectory != "" {
++		t.Fatal("revision/rejection contract")
++	}
++}

@@ -1,0 +1,17 @@
+=== RUN   TestIndependentPendingRetirementDiagnosticsLatch
+=== RUN   TestIndependentPendingRetirementDiagnosticsLatch/plaintext
+    independent_retirement_test.go:14: pending diagnostic not latched: unverified=false shutdown=workers_joined_normal_close
+=== RUN   TestIndependentPendingRetirementDiagnosticsLatch/shared_open
+    independent_retirement_test.go:14: pending diagnostic not latched: unverified=false shutdown=workers_joined_normal_close
+=== RUN   TestIndependentPendingRetirementDiagnosticsLatch/shared_close
+    independent_retirement_test.go:14: pending diagnostic not latched: unverified=false shutdown=workers_joined_normal_close
+=== RUN   TestIndependentPendingRetirementDiagnosticsLatch/encrypted
+    independent_retirement_test.go:14: pending diagnostic not latched: unverified=false shutdown=workers_joined_normal_close
+--- FAIL: TestIndependentPendingRetirementDiagnosticsLatch (0.00s)
+    --- FAIL: TestIndependentPendingRetirementDiagnosticsLatch/plaintext (0.00s)
+    --- FAIL: TestIndependentPendingRetirementDiagnosticsLatch/shared_open (0.00s)
+    --- FAIL: TestIndependentPendingRetirementDiagnosticsLatch/shared_close (0.00s)
+    --- FAIL: TestIndependentPendingRetirementDiagnosticsLatch/encrypted (0.00s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/benchmarks/transactions	0.007s
+FAIL

@@ -1,0 +1,15 @@
+{
+  "candidate_tree": "99ee54afe1900ac0e9b814ac8f57772f6b76e493",
+  "probe_tree": "3822464fcf4ab081d0706048674a46e1f19c9584",
+  "candidate_files": 1339,
+  "baseline_and_candidate_unchanged_after_tests": true,
+  "fresh_replay_bytes_modes_equal": true,
+  "probe_production_and_existing_tests_equal_candidate": true,
+  "additional_probe_files": [
+    "cmd/gosqlite/check_independent_test.go",
+    "driver/check_independent_test.go",
+    "sqlite/check_independent_math_test.go",
+    "sqlite/check_independent_ordinary_test.go"
+  ],
+  "patch_sha256": "819b54f6af690a2ede21e78165dc5a07da4f5e608d70e5d398579c703487dafd"
+}

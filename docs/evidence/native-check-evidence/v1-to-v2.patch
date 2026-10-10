@@ -1,0 +1,601 @@
+diff --git a/docs/native-check.md b/docs/native-check.md
+index 636d22b..60d5b65 100644
+--- a/docs/native-check.md
++++ b/docs/native-check.md
+@@ -19,10 +19,11 @@ ordinary tables, indexes, overflow and every extension check. The checker:
+    solely as a read-only validator. Exact owned extension invalidation triggers
+    are recognized; arbitrary triggers/views are not silently skipped.
+ 3. Validates freelist trunks/leaves, all tree/overflow encodings and ordering,
+-   cycles, depth, record shape, key arity/rowid type, cross-tree page ownership,
++   cycles, depth, exact cell/freeblock/1–3-byte-fragment accounting, record shape,
++   key arity/rowid type, cross-tree page ownership,
+    and every logical page's accounting. The reserved SQLite lock-byte page is
+    the sole explicitly reserved page, rather than a fabricated tree owner.
+-4. Reads every table record. INTEGER PRIMARY KEY storage slots must be NULL and
++4. Reads every table record. INTEGER PRIMARY KEY decoded storage values must be logical NULL and
+    resolve to the signed rowid; short records use supported literal defaults.
+    Declared NOT NULL constraints and strict VECTOR/HALFVEC/BIT/SPARSEVEC
+    interpretations are checked. Ordinary SQLite affinity remains dynamic typing.
+@@ -53,7 +54,14 @@ Unsupported features fail instead of being reported as checked: WITHOUT ROWID,
+ STRICT, autovacuum, UTF-16, schema formats 1–3, UNIQUE/autoindexes, other primary
+ keys, arbitrary CHECK/foreign-key constraints, partial/expression/DESC/non-BINARY
+ indexes, generated columns, arbitrary views/triggers, sqlite_* internal objects,
+-unknown schema/extension formats or custom registry methods. This is narrower
++unknown schema/extension formats or persisted custom method identities. Full
++checks use a fresh built-in-only registry and never invoke application-provided
++Configure/Keys callbacks, including implementations registered as grams13 v1.
++Persisted grams13 v1 data is checked against actual built-in semantics regardless
++of the application registry. This does not audit the provenance of that registry.
++A same-name custom implementation can pass only when its persisted data also
++satisfies the built-in profile; unsupported persisted versions fail. Named
++extension checks keep their application-directed registry behavior. This is narrower
+ than the engine's ability to SELECT an otherwise readable table while ignoring
+ unsupported peer objects.
+ 
+@@ -76,7 +84,9 @@ uncommitted own writes. First access pins a lazy transaction through its existin
+ read path. A writable deferred transaction may therefore retain a read-state
+ pager transaction, but is not promoted to a writer by Check. The caller still
+ owns that transaction and its Rows; a failed check does not roll it back or
+-invalidate its cursor. A transaction-context or operation-context cancellation
++invalidate its cursor. Logical NULL follows the existing record decoder, which maps a stored REAL NaN
++to NULL; this checker does not promise a physical serial-type-0-only IPK audit.
++A transaction-context or operation-context cancellation
+ fails the check. Existing single-session lease restrictions still apply to
+ unrelated live Rows. Public `Options` and statement `Result` layouts are unchanged.
+ 
+@@ -95,6 +105,12 @@ readers; this checker makes no absolute erasure or new cryptographic audit claim
+   extension validation all share this bound. Admission fails before the next
+   read; there is no partial-success fallback.
+ 
++These check-specific quotas start after snapshot acquisition, when the check
++reader is installed. Acquiring the existing reader/session or a lazy writable
++Tx read-state snapshot can perform pager/header/freelist work under the existing
++pager limits before these counters begin. These are traversal quotas, not a cap
++on every open/acquisition read or allocation.
++
+ The existing separate 64 MiB record, 16 MiB retained schema, cursor depth/visited,
+ connection `MaxSortBytes` and extension construction/query limits remain in force.
+ These are bounded component limits, not a new aggregate live-heap budget or a
+diff --git a/internal/btree/check_space.go b/internal/btree/check_space.go
+new file mode 100644
+index 0000000..94b7cc1
+--- /dev/null
++++ b/internal/btree/check_space.go
+@@ -0,0 +1,140 @@
++package btree
++
++import (
++	"context"
++	"encoding/binary"
++	"sort"
++
++	"github.com/ms-xiaosnow/gosqlite/internal/record"
++)
++
++// CheckTreeSpace supplements CheckOwnership with exact B-tree cell-content
++// accounting. Every byte between the content boundary and usable-page end must
++// belong to a parsed cell, a freeblock, or a 1–3-byte fragment; the fragment sum
++// must match the page header. The unallocated gap before the content boundary
++// is distinct. Overflow and freelist pages are never interpreted as tree pages.
++// The caller retains the same snapshot and separately validates page ownership.
++func CheckTreeSpace(ctx context.Context, r PageReader, roots []RootSpec) error {
++	h := r.Header()
++	if h.PageCount == 0 || h.PageCount > MaxVisitedPages {
++		return record.ErrLimit
++	}
++	seen := make(map[uint32]bool)
++	all := make([]RootSpec, 0, len(roots)+1)
++	all = append(all, RootSpec{Page: 1, Kind: TableTree})
++	all = append(all, roots...)
++	for _, root := range all {
++		stack := []uint32{root.Page}
++		for len(stack) > 0 {
++			if err := ctx.Err(); err != nil {
++				return err
++			}
++			n := stack[len(stack)-1]
++			stack = stack[:len(stack)-1]
++			if n == 0 || n > h.PageCount || seen[n] {
++				return corrupt("invalid or repeated B-tree space page %d", n)
++			}
++			seen[n] = true
++			p, err := r.ReadPage(ctx, n)
++			if err != nil {
++				return err
++			}
++			if len(p) != int(h.PageSize) {
++				return corrupt("B-tree space page byte count")
++			}
++			children, err := checkPageSpace(p, n, int(h.UsableSize), root.Kind)
++			if err != nil {
++				return err
++			}
++			if len(children) > int(h.PageCount)-len(stack) {
++				return corrupt("B-tree space child count exceeds extent")
++			}
++			stack = append(stack, children...)
++		}
++	}
++	return ctx.Err()
++}
++
++func checkPageSpace(p []byte, n uint32, usable int, kind TreeKind) ([]uint32, error) {
++	off := 0
++	if n == 1 {
++		off = 100
++	}
++	var ends []int
++	var children []uint32
++	var leaf bool
++	// The existing parsers validate all offsets, cell/overflow-local lengths,
++	// freeblock chains and pairwise disjointness before any slice below is used.
++	switch kind {
++	case TableTree:
++		f, err := parsePage(p, n, usable, bounds{})
++		if err != nil {
++			return nil, err
++		}
++		leaf = f.leaf
++		ends = make([]int, len(f.cells))
++		for i, c := range f.cells {
++			ends[i] = c.end
++			if !leaf {
++				children = append(children, c.child)
++			}
++		}
++		if !leaf {
++			children = append(children, f.right)
++		}
++	case IndexTree:
++		f, err := parseIndexPage(p, n, usable)
++		if err != nil {
++			return nil, err
++		}
++		leaf = f.leaf
++		ends = make([]int, len(f.cells))
++		for i, c := range f.cells {
++			ends[i] = c.end
++			if !leaf {
++				children = append(children, c.child)
++			}
++		}
++		if !leaf {
++			children = append(children, f.right)
++		}
++	default:
++		return nil, corrupt("unknown B-tree space kind")
++	}
++	hdr := 8
++	if !leaf {
++		hdr = 12
++	}
++	content := int(binary.BigEndian.Uint16(p[off+5:]))
++	if content == 0 {
++		content = 65536
++	}
++	spans := make([]span, 0, len(ends))
++	for i, end := range ends {
++		start := int(binary.BigEndian.Uint16(p[off+hdr+2*i:]))
++		spans = append(spans, span{start, end})
++	}
++	for at := int(binary.BigEndian.Uint16(p[off+1:])); at != 0; at = int(binary.BigEndian.Uint16(p[at:])) {
++		size := int(binary.BigEndian.Uint16(p[at+2:]))
++		spans = append(spans, span{at, at + size})
++	}
++	sort.Slice(spans, func(i, j int) bool { return spans[i].start < spans[j].start })
++	end, fragments := content, 0
++	for _, s := range spans {
++		gap := s.start - end
++		if gap < 0 || gap > 3 {
++			return nil, corrupt("page %d unrepresented cell-content space", n)
++		}
++		fragments += gap
++		end = s.end
++	}
++	tail := usable - end
++	if tail < 0 || tail > 3 {
++		return nil, corrupt("page %d unrepresented cell-content tail", n)
++	}
++	fragments += tail
++	if fragments != int(p[off+7]) {
++		return nil, corrupt("page %d fragmented byte count differs", n)
++	}
++	return children, nil
++}
+diff --git a/sqlite/check.go b/sqlite/check.go
+index 5fb449f..62a5d55 100644
+--- a/sqlite/check.go
++++ b/sqlite/check.go
+@@ -20,7 +20,9 @@ import (
+ const CheckScope = "gosqlite-supported-profile-v1"
+ 
+ // CheckOptions bounds whole-check page ownership metadata and cumulative logical
+-// page reads, including catalog reloads, overflow, seeks and extension work.
++// page reads after snapshot acquisition, including catalog reloads, overflow,
++// seeks and extension work. Reader/Tx acquisition retains existing pager caps
++// and is outside these traversal quotas.
+ // Zero uses 1,048,576 pages and 16,777,216 reads. MaxPages cannot exceed the
+ // B-tree ownership limit; MaxPageReads cannot exceed 2^32. Existing record (64 MiB), schema (16 MiB), cursor,
+ // connection MaxSortBytes and extension-specific limits still apply separately;
+@@ -184,7 +186,16 @@ func (d *DB) checkSnapshot(ctx context.Context, source btree.PageReader, o Check
+ 	if err := checkLogicalHeader(ctx, r); err != nil {
+ 		return CheckResult{}, err
+ 	}
+-	helper := &Tx{db: d, reader: r}
++	// Full integrity checking has a fixed persisted-semantics profile. Never
++	// let an application registry redefine a built-in name/version and make its
++	// own missing postings pass by returning a different key set.
++	validator, err := copyValidator()
++	if err != nil {
++		return CheckResult{}, err
++	}
++	validator.opts = d.opts
++	validator.opts.IndexMethods = validator.methods
++	helper := &Tx{db: validator, reader: r}
+ 	c, err := helper.validateCatalog(ctx)
+ 	if err != nil {
+ 		return CheckResult{}, err
+@@ -215,6 +226,9 @@ func (d *DB) checkSnapshot(ctx context.Context, source btree.PageReader, o Check
+ 	if err = btree.CheckOwnership(ctx, r, roots, free); err != nil {
+ 		return CheckResult{}, err
+ 	}
++	if err = btree.CheckTreeSpace(ctx, r, roots); err != nil {
++		return CheckResult{}, err
++	}
+ 	result.FreePages = uint32(len(free))
+ 	if uint32(0x40000000/h.PageSize+1) <= h.PageCount {
+ 		result.ReservedPages = 1
+@@ -288,7 +302,7 @@ func (d *DB) checkSnapshot(ctx context.Context, source btree.PageReader, o Check
+ 	extensions := append([]*extensionIndex(nil), c.extensions.indexes...)
+ 	sort.Slice(extensions, func(i, j int) bool { return fold(extensions[i].name) < fold(extensions[j].name) })
+ 	for _, x := range extensions {
+-		if err = d.checkExtensionIndex(ctx, r, x.name); err != nil {
++		if err = validator.checkExtensionIndex(ctx, r, x.name); err != nil {
+ 			return CheckResult{}, err
+ 		}
+ 	}
+@@ -338,7 +352,7 @@ func checkLogicalHeader(ctx context.Context, r *checkReader) error {
+ 
+ func checkTableValues(tab *writeTable, id int64, raw []any) ([]any, error) {
+ 	if tab.ipk >= 0 && tab.ipk < len(raw) && raw[tab.ipk] != nil {
+-		return nil, fmt.Errorf("%w: INTEGER PRIMARY KEY record slot is not NULL", ErrCorrupt)
++		return nil, fmt.Errorf("%w: INTEGER PRIMARY KEY decoded record slot is not NULL", ErrCorrupt)
+ 	}
+ 	values, err := tab.values(id, raw)
+ 	if err != nil {
+diff --git a/sqlite/check_review_test.go b/sqlite/check_review_test.go
+new file mode 100644
+index 0000000..c220044
+--- /dev/null
++++ b/sqlite/check_review_test.go
+@@ -0,0 +1,305 @@
++package sqlite
++
++import (
++	"context"
++	"encoding/binary"
++	"errors"
++	"testing"
++
++	"github.com/ms-xiaosnow/gosqlite/extension/grams13"
++	"github.com/ms-xiaosnow/gosqlite/extension/registry"
++	"github.com/ms-xiaosnow/gosqlite/internal/btree"
++)
++
++// Independent negative fixtures remain pure-memory maps; no altered bytes
++// are passed to a file, VFS, pager session or driver.
++func TestIndependentCheckFragmentAccounting(t *testing.T) {
++	for _, page := range []uint32{1, 2, 3} {
++		t.Run(string(rune('0'+page)), func(t *testing.T) {
++			d, m := checkFixture(t)
++			off := 0
++			if page == 1 {
++				off = 100
++			}
++			if m.pages[page][off+7] != 0 {
++				t.Fatal("fixture unexpectedly fragmented")
++			}
++			m.pages[page][off+7] = 1
++			got, err := checkMemoryRun(d, m, CheckOptions{})
++			if err == nil || got != (CheckResult{}) {
++				t.Fatalf("incorrect fragmented-byte count passed: result=%+v error=%v", got, err)
++			}
++		})
++	}
++}
++func TestIndependentCheckUnrepresentedFreeBytes(t *testing.T) {
++	d, m := checkFixture(t)
++	p := m.pages[2]
++	content := binary.BigEndian.Uint16(p[5:7])
++	if content < 20 {
++		t.Fatal("fixture has no header gap")
++	}
++	binary.BigEndian.PutUint16(p[5:7], content-8) // Eight bytes become unrepresented cell-content space.
++	got, err := checkMemoryRun(d, m, CheckOptions{})
++	if err == nil || got != (CheckResult{}) {
++		t.Fatalf("unrepresented free bytes passed: result=%+v error=%v", got, err)
++	}
++}
++
++type independentCustomGrams struct {
++	calls   *int
++	version int
++	empty   bool
++}
++
++func (independentCustomGrams) Name() string { return grams13.MethodName }
++func (m independentCustomGrams) Version() int {
++	if m.version != 0 {
++		return m.version
++	}
++	return 1
++}
++func (m independentCustomGrams) Configure(b []byte) (registry.Index, error) {
++	if m.calls != nil {
++		*m.calls++
++	}
++	if m.empty {
++		return independentEmptyGrams{canonical: append([]byte(nil), b...), calls: m.calls}, nil
++	}
++	return grams13.Method().Configure(b)
++}
++
++type independentEmptyGrams struct {
++	canonical []byte
++	calls     *int
++}
++
++func (i independentEmptyGrams) Canonical() []byte { return append([]byte(nil), i.canonical...) }
++func (i independentEmptyGrams) Keys(context.Context, string) ([]registry.Key, error) {
++	if i.calls != nil {
++		*i.calls++
++	}
++	return nil, nil
++}
++
++func independentDetachedGrams(t *testing.T, body ...string) (*DB, *checkMemory) {
++	t.Helper()
++	ctx := context.Background()
++	db, err := Open(t.TempDir()+"/intact.db", Options{})
++	if err != nil {
++		t.Fatal(err)
++	}
++	defer db.Close()
++	initial := "database"
++	if len(body) > 0 {
++		initial = body[0]
++	}
++	for _, q := range []string{"CREATE TABLE docs(id INTEGER PRIMARY KEY,body TEXT)", "INSERT INTO docs VALUES(1,'" + initial + "')", "CREATE INDEX grams ON docs(body) USING grams13"} {
++		if _, err = db.Exec(ctx, q); err != nil {
++			t.Fatal(err)
++		}
++	}
++	r, err := db.openReader(ctx)
++	if err != nil {
++		t.Fatal(err)
++	}
++	m := &checkMemory{h: r.Header(), pages: map[uint32][]byte{}}
++	for n := uint32(1); n <= m.h.PageCount; n++ {
++		p, err := r.ReadPage(ctx, n)
++		if err != nil {
++			t.Fatal(err)
++		}
++		m.pages[n] = p
++	}
++	if err = r.Close(); err != nil {
++		t.Fatal(err)
++	}
++	if err = db.Close(); err != nil {
++		t.Fatal(err)
++	}
++	d, err := copyValidator()
++	if err != nil {
++		t.Fatal(err)
++	}
++	return d, m
++}
++func TestIndependentCheckCustomBuiltinNamedRegistry(t *testing.T) {
++	d, m := independentDetachedGrams(t)
++	calls := 0
++	methods, err := registry.New(independentCustomGrams{calls: &calls})
++	if err != nil {
++		t.Fatal(err)
++	}
++	d.methods = methods
++	got, err := checkMemoryRun(d, m, CheckOptions{})
++	if err != nil || got.Scope != CheckScope || calls != 0 {
++		t.Fatalf("full check must independently use builtin semantics without invoking custom callbacks: result=%+v error=%v calls=%d", got, err, calls)
++	}
++}
++func TestIndependentCheckCatalogUTF8(t *testing.T) {
++	d, m := checkFixture(t)
++	ctx := context.Background()
++	_, err := btree.DeleteTable(ctx, m, 1, 1)
++	if err != nil {
++		t.Fatal(err)
++	}
++	invalid := string([]byte{'c', 255})
++	q := "CREATE TABLE t(id INTEGER PRIMARY KEY,k TEXT NOT NULL,n NUMERIC,\"" + invalid + "\" TEXT)"
++	if err = btree.InsertTable(ctx, m, 1, 1, []any{"table", "t", "t", int64(2), q}); err != nil {
++		t.Fatal(err)
++	}
++	got, err := checkMemoryRun(d, m, CheckOptions{})
++	if err == nil || got != (CheckResult{}) {
++		t.Fatalf("invalid schema TEXT passed: result=%+v error=%v", got, err)
++	}
++}
++
++type independentVersionTwo struct{ independentCustomGrams }
++
++func (independentVersionTwo) Version() int { return 2 }
++func TestIndependentCheckUnknownGramsVersion(t *testing.T) {
++	d, m := independentDetachedGrams(t)
++	ctx := context.Background()
++	c, err := (&Tx{db: d, reader: m}).validateCatalog(ctx)
++	if err != nil {
++		t.Fatal(err)
++	}
++	root := c.tables[extensionCatalogName].root
++	raw, found, err := btree.SeekTable(ctx, m, root, 1)
++	if err != nil || !found {
++		t.Fatal(found, err)
++	}
++	if _, err = btree.DeleteTable(ctx, m, root, 1); err != nil {
++		t.Fatal(err)
++	}
++	raw[5] = int64(2)
++	if err = btree.InsertTable(ctx, m, root, 1, raw); err != nil {
++		t.Fatal(err)
++	}
++	d.methods, err = registry.New(independentVersionTwo{})
++	if err != nil {
++		t.Fatal(err)
++	}
++	got, err := checkMemoryRun(d, m, CheckOptions{})
++	if !errors.Is(err, ErrUnsupported) || got != (CheckResult{}) {
++		t.Fatalf("unknown grams method version accepted: result=%+v error=%v", got, err)
++	}
++}
++
++func TestIndependentCheckUnknownBuiltinVersion(t *testing.T) {
++	d, m := independentDetachedGrams(t)
++	ctx := context.Background()
++	c, err := (&Tx{db: d, reader: m}).validateCatalog(ctx)
++	if err != nil {
++		t.Fatal(err)
++	}
++	root := c.extensions.roots[extensionCatalogName]
++	row, ok, err := btree.SeekTable(ctx, m, root, 1)
++	if err != nil || !ok {
++		t.Fatal(ok, err)
++	}
++	row[5] = int64(2)
++	if _, err = btree.DeleteTable(ctx, m, root, 1); err != nil {
++		t.Fatal(err)
++	}
++	if err = btree.InsertTable(ctx, m, root, 1, row); err != nil {
++		t.Fatal(err)
++	}
++	calls := 0
++	d.methods, err = registry.New(independentCustomGrams{calls: &calls, version: 2})
++	if err != nil {
++		t.Fatal(err)
++	}
++	got, err := checkMemoryRun(d, m, CheckOptions{})
++	if !errors.Is(err, ErrUnsupported) || got != (CheckResult{}) || calls != 0 {
++		t.Fatal(got, err, calls)
++	}
++}
++func TestIndependentCheckCustomEmptyKeysCannotPass(t *testing.T) {
++	d, m := independentDetachedGrams(t, "")
++	ctx := context.Background()
++	c, err := (&Tx{db: d, reader: m}).validateCatalog(ctx)
++	if err != nil {
++		t.Fatal(err)
++	}
++	root := c.tables["docs"].root
++	if _, err = btree.DeleteTable(ctx, m, root, 1); err != nil {
++		t.Fatal(err)
++	}
++	if err = btree.InsertTable(ctx, m, root, 1, []any{nil, "database"}); err != nil {
++		t.Fatal(err)
++	}
++	calls := 0
++	d.methods, err = registry.New(independentCustomGrams{calls: &calls, empty: true})
++	if err != nil {
++		t.Fatal(err)
++	}
++	// The application-directed named check can accept its own empty-key semantics.
++	if err = d.checkExtensionIndex(ctx, m, "grams"); err != nil || calls == 0 {
++		t.Fatal(err, calls)
++	}
++	calls = 0
++	got, err := checkMemoryRun(d, m, CheckOptions{})
++	if !errors.Is(err, ErrCorrupt) || got != (CheckResult{}) || calls != 0 {
++		t.Fatal(got, err, calls)
++	}
++}
++func TestIndependentCheckValidMemoryPageSpace(t *testing.T) {
++	for _, page := range []uint32{1, 2, 3} {
++		for gap := 1; gap <= 8; gap++ {
++			d, m := checkFixture(t)
++			p := m.pages[page]
++			off := 0
++			if page == 1 {
++				off = 100
++			}
++			content := int(binary.BigEndian.Uint16(p[off+5:]))
++			top := content - gap
++			binary.BigEndian.PutUint16(p[off+5:], uint16(top))
++			if gap <= 3 {
++				p[off+7] = byte(gap)
++			} else {
++				binary.BigEndian.PutUint16(p[off+1:], uint16(top))
++				binary.BigEndian.PutUint16(p[top:], 0)
++				binary.BigEndian.PutUint16(p[top+2:], uint16(gap))
++			}
++			if r, err := checkMemoryRun(d, m, CheckOptions{}); err != nil || r.Scope != CheckScope {
++				t.Fatal(page, gap, r, err)
++			}
++		}
++	}
++	d, m := checkFixture(t)
++	_ = d
++	// An empty schema leaf with no fragments is valid; declared fragments are not.
++	empty := newCheckMemory()
++	if err := btree.CheckTreeSpace(context.Background(), empty, nil); err != nil {
++		t.Fatal(err)
++	}
++	empty.pages[1][107] = 1
++	if err := btree.CheckTreeSpace(context.Background(), empty, nil); err == nil {
++		t.Fatal("empty-page fragments accepted")
++	}
++	// Force actual interior table/index pages without native I/O.
++	for id := int64(10); id < 400; id++ {
++		if err := btree.InsertTable(context.Background(), m, 2, id, []any{nil, "b", id}); err != nil {
++			t.Fatal(err)
++		}
++		if err := btree.InsertIndex(context.Background(), m, 3, btree.KeyInfo{Columns: 2}, []any{"b", id, id}); err != nil {
++			t.Fatal(err)
++		}
++	}
++	if m.pages[2][0] != 5 || m.pages[3][0] != 2 {
++		t.Fatal("expected interior roots")
++	}
++	roots := []btree.RootSpec{{Page: 2, Kind: btree.TableTree}, {Page: 3, Kind: btree.IndexTree, KeyInfo: btree.KeyInfo{Columns: 2}}}
++	if err := btree.CheckTreeSpace(context.Background(), m, roots); err != nil {
++		t.Fatal(err)
++	}
++	for _, page := range []uint32{2, 3} {
++		m.pages[page][7] = 1
++		if err := btree.CheckTreeSpace(context.Background(), m, roots); err == nil {
++			t.Fatal("interior fragments accepted", page)
++		}
++		m.pages[page][7] = 0
++	}
++}
+diff --git a/sqlite/check_test.go b/sqlite/check_test.go
+index 55d922e..66e1572 100644
+--- a/sqlite/check_test.go
++++ b/sqlite/check_test.go
+@@ -370,3 +370,20 @@ func TestNativeCheckOfficialUnsupportedCatalogAndDirtyExtension(t *testing.T) {
+ 	checkExec(t, db, "REINDEX grams")
+ 	checkPass(t, db)
+ }
++
++func TestNativeCheckOfficialFragmentedTrees(t *testing.T) {
++	for _, size := range []int{512, 4096, 65536} {
++		t.Run(fmt.Sprint(size), func(t *testing.T) {
++			path := filepath.Join(t.TempDir(), "fragmented.db")
++			sql := fmt.Sprintf("PRAGMA page_size=%d; CREATE TABLE t(id INTEGER PRIMARY KEY,k TEXT,n NUMERIC); WITH RECURSIVE rows(n) AS (VALUES(1) UNION ALL SELECT n+1 FROM rows WHERE n<900) INSERT INTO t SELECT n,printf('%%0100d',n),n FROM rows; CREATE INDEX by_key ON t(k,n); DELETE FROM t WHERE id%%3=0; UPDATE t SET k=substr(k,1,7)||id WHERE id%%4=0; PRAGMA integrity_check;", size)
++			if result := checkOracle(t, path, sql); result != "ok" {
++				t.Fatal(result)
++			}
++			db := checkOpen(t, path, sqlite.Options{ReadOnly: true})
++			result := checkPass(t, db)
++			if result.TableRows != 600 || result.IndexEntries != 600 {
++				t.Fatal(result)
++			}
++		})
++	}
++}

@@ -1,0 +1,108 @@
+{
+  "cmd/gosqlite/check.go": {
+    "before": null,
+    "after": {
+      "sha256": "2c5563c36310706069ce7d37a73c5761d2a8f81e91b63139aa839c24cf882bc0",
+      "size": 4300,
+      "mode": "0o644",
+      "git_mode": "100644",
+      "blob": "527b0bb6d81bc0c243aab57cabb9eafa570a850e"
+    }
+  },
+  "cmd/gosqlite/check_test.go": {
+    "before": null,
+    "after": {
+      "sha256": "9adf857ebdc8c82783fec7169832db04e521e1958892340a9b36345c9b05e87b",
+      "size": 4820,
+      "mode": "0o644",
+      "git_mode": "100644",
+      "blob": "6ebe4f5fba256fa69cb2bfdb98a204068d0be579"
+    }
+  },
+  "cmd/gosqlite/main.go": {
+    "before": {
+      "sha256": "6206f348723605520908743751dc18aafd23c5eb6488f37e22465aa205741ef6",
+      "size": 5849,
+      "mode": "0o644",
+      "git_mode": "100644",
+      "blob": "1f8b17d133a4793dff860054d54abacab75c52d4"
+    },
+    "after": {
+      "sha256": "1587f5f05820958d8b885f31eab05f18a76c0bb2e6faa4cf87cbfa30c8219ea0",
+      "size": 5007,
+      "mode": "0o644",
+      "git_mode": "100644",
+      "blob": "7ad839c3f6ca069a9b0314d4f8caa6e6782336e3"
+    }
+  },
+  "docs/native-check.md": {
+    "before": null,
+    "after": {
+      "sha256": "ceb6d17b46663ae80b12064c09971b30a7235999bca035e688dbf0b9de3234d6",
+      "size": 12170,
+      "mode": "0o644",
+      "git_mode": "100644",
+      "blob": "60d5b65248ef5c42a13873c8b6311f03afd1ee05"
+    }
+  },
+  "examples/native-check/main.go": {
+    "before": null,
+    "after": {
+      "sha256": "321644829e19f60e3d1138b3fe214017d24212c1670ab4c0d976496b91c6a40c",
+      "size": 3990,
+      "mode": "0o644",
+      "git_mode": "100644",
+      "blob": "a11def403d9783028da8c4b7003d86d0ab4b9f31"
+    }
+  },
+  "internal/btree/check_space.go": {
+    "before": null,
+    "after": {
+      "sha256": "8a77078961e085ea121c617b11a62c081540c5d6f985ba8da02510d5bfcb3025",
+      "size": 3845,
+      "mode": "0o644",
+      "git_mode": "100644",
+      "blob": "94b7cc13897af0d6b799ea21868c412a04db2ea4"
+    }
+  },
+  "sqlite/check.go": {
+    "before": null,
+    "after": {
+      "sha256": "b0963ceb3977a9718bef1eb2064e63be737944350612a914e13f0c2a5304115b",
+      "size": 13941,
+      "mode": "0o644",
+      "git_mode": "100644",
+      "blob": "62a5d5583fe6195866a59c1f2bad82437b389b22"
+    }
+  },
+  "sqlite/check_internal_test.go": {
+    "before": null,
+    "after": {
+      "sha256": "d49403d1d228327d691c2db768750b7342d528acba9515590eee8810ea3d93d0",
+      "size": 13661,
+      "mode": "0o644",
+      "git_mode": "100644",
+      "blob": "bb4bb286838482e0888ac39d00b3b5581cff9c50"
+    }
+  },
+  "sqlite/check_review_test.go": {
+    "before": null,
+    "after": {
+      "sha256": "3308edbc0f9e809867942c122129953e2e5b8061d212b6b5ecd3dc6014e56212",
+      "size": 9049,
+      "mode": "0o644",
+      "git_mode": "100644",
+      "blob": "c220044fb6b5e0bbae76a0c03a1ba76b5c8bbd26"
+    }
+  },
+  "sqlite/check_test.go": {
+    "before": null,
+    "after": {
+      "sha256": "96d4cef513b87dd9701bd534ba54ed0a337a4e78ed9b88555a61b22467d13645",
+      "size": 13415,
+      "mode": "0o644",
+      "git_mode": "100644",
+      "blob": "66e15721e13ff9a187a1d7641ddc035b71e97a80"
+    }
+  }
+}

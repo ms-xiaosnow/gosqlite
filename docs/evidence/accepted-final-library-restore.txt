@@ -1,0 +1,23 @@
+Exact Library-restored maintenance/dataset checkpoint. Previously audited source/memory and intact ordinary acquisition, correct-key CLI lifecycle, dataset numeric/Top-K and persisted grams measurement. No native failure/namespace/crash/hot recovery/interrupted rekey. Complete frozen aggregate including NFC membership and full oracle/race already passed; this restore independently exercises focused changed scopes.
+8d9330c8c50de8fdf55e727f20efd6f75d3565c8
+2026-10-10T22:14:03Z
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.070s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.006s
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.642s
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	6.154s
+ok  	github.com/ms-xiaosnow/gosqlite/benchmarks/grams	17.643s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.218s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	1.056s
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	2.523s
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	35.322s
+ok  	github.com/ms-xiaosnow/gosqlite/benchmarks/grams	70.131s
+restored cross-build linux/arm64 PASS
+restored cross-build darwin/arm64 PASS
+restored cross-build darwin/amd64 PASS
+restored cross-build windows/amd64 PASS
+restored cross-build windows/arm64 PASS
+all modules verified
+2026-10-10T22:16:35Z
+EXACT RESTORED MAINTENANCE DATASET TOOLS CHECKPOINT PASS

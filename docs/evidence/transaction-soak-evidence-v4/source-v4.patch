@@ -1,0 +1,2305 @@
+diff --git a/benchmarks/transactions/README.md b/benchmarks/transactions/README.md
+new file mode 100644
+index 0000000..29f10d1
+--- /dev/null
++++ b/benchmarks/transactions/README.md
+@@ -0,0 +1,260 @@
++# Ordinary transactions and concurrent soak
++
++A native, runnable fixed-workload measurement for goal M10 / §11.3. This harness
++measures transaction throughput and actual elapsed concurrent activity. It is
++not a durability/recovery qualification and does not replace release security,
++format, license, native-platform, or other safety reviews.
++
++## Reproduce
++
++Use the project's pinned Go 1.27.2 and local module/build caches. Production
++builds use CGO_ENABLED=0; the race detector uses a separate CGO_ENABLED=1 build.
++From the repository root, after reviewing the selected source behavior:
++
++```sh
++export GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off GOFLAGS=-buildvcs=false
++export CGO_ENABLED=0
++go run ./internal/testscope
++go test ./benchmarks/transactions -count=1
++go vet ./benchmarks/transactions
++go build -trimpath -o /tmp/gosqlite-transactions ./benchmarks/transactions
++CGO_ENABLED=1 go test -race ./benchmarks/transactions -count=1
++
++# Fill these with the exact frozen source identity and controlled host label.
++SOURCE_ID='replace-with-tree-or-source-manifest-sha256'
++HARDWARE_ID='replace-with-host-cpu-os-label'
++for profile in rollback wal-shared encrypted-shared; do
++  /tmp/gosqlite-transactions -mode throughput -profile "$profile" \
++    -transactions 256 -rows 64 -readers 2 -batch 2 -seed 20261010 \
++    -source-id "$SOURCE_ID" -hardware-id "$HARDWARE_ID" \
++    > "throughput-$profile.json"
++  /tmp/gosqlite-transactions -mode soak -profile "$profile" \
++    -duration 20s -rows 64 -readers 2 -batch 2 -seed 20261010 \
++    -source-id "$SOURCE_ID" -hardware-id "$HARDWARE_ID" \
++    > "soak-smoke-$profile.json"
++done
++```
++
++Use new output filenames and preserve each exit status, including nonzero ones.
++A nonzero workload exit still emits the failure report after normal cleanup
++attempts; flag-parser usage errors happen before a workload/report exists.
++The command prints JSON on stdout and creates a new isolated temporary data
++folder, whose exact path is in `retained_data_directory`. It never removes
++results or database files. The caller may clean up a completed, closed fixture
++later. Unit tests similarly retain their small native fixture directories.
++
++Do not impose a process-killing shell timeout. Duration expires through
++cooperative context cancellation; all worker goroutines join, Rows and Tx
++resources close, and then DB handles close normally. An ordinary Ctrl-C is
++handled through context cancellation and yields an incomplete/failed report.
++No command in this harness sends a signal to any process.
++
++Unexpected close/retirement diagnostics latch a failed result. A single owner
++ledger tracks the writer and every reader, and only releases a handle after that
++exact Close succeeds. A successful writer Close cannot erase a failed reader
++Close. Failed handles and original error/token references remain retained through
++report emission; no automatic retry is added, because a second nil Close from a
++one-shot handle is not proof of retirement. JSON exposes close_failures,
++unverified_close_handles and unverified_retirement. Unverified retirement is
++never labeled workers_joined_normal_close or passed. Ordinary process completion
++is not evidence that these obligations retired, and this command does not promise
++recovery from terminal native uncertainty. These exceptional contracts are tested
++only with descriptor-free memory objects and source checks, not native failures.
++
++## Explicit profiles and scope
++
++- `rollback`: normal DELETE-journal connections, independent readers and one
++  writer; lock contention is reported. Checkpoint is explicitly skipped because
++  that API is unsupported in rollback mode. Normal close/reopen still runs.
++- `wal-shared`: native shared-memory WAL, with the conservative default storage
++  assertion (WALPowersafeOverwrite=false); no invented power-safety assertion.
++- `encrypted-shared`: correct-key EncryptionWALShared/layout 3, using a public
++  synthetic benchmark-only RawKey256 provider. Every borrow is separately owned
++  and cleared. This is not a secret or production credential, and no credential
++  is supplied through SQL, DSN, environment, or command line. Ciphertext has fresh
++  engine-generated salts, so ciphertext byte hashes are not reproducible.
++
++Unknown profiles are rejected before database creation. If an otherwise valid
++profile's initial Open is unsupported on the host, the report says
++`skipped_unsupported` and exits nonzero. Later unexpected unsupported operations
++fail the run. Exclusive WAL/encrypted modes are not relabeled as shared coverage.
++There is no fallback to another profile or to an in-memory database.
++
++All work is intact ordinary SQL, rollback/savepoints, normal checkpoint and
++normal reopen. There is no process kill, forced disconnect, crash/hot recovery,
++physical tamper/corruption/wrong-key test, selected-file removal, namespace
++replacement/race, injected I/O/lock/unmap/close/Sync/shortwrite/disk-full/permission
++failure, interrupted publication/rekey, or external database oracle. Normal
++reopen and checkpoint latency are never called WAL recovery time.
++
++## Workload and exact model
++
++The version is `ordinary-transfer-history-v1`; seed defaults to 20261010.
++The initial corpus has fixed row IDs and deterministic integer balances.
++`dataset_sha256` hashes that corpus. `workload_sha256` hashes the version and
++complete configuration except source/hardware labels, so two source versions
++can be compared under identical inputs. Source/hardware labels remain in the
++report. Changing a workload parameter changes its identity.
++
++There is one writer and 1–8 independent reader connections. Each writer attempt
++uses a deterministic seed/ordinal transfer sequence and 1–16 pairs of updates.
++Each epoch retains its first writer ordinal and a bounded one-byte-per-attempt
++terminal-outcome trace: C committed, R intentional full rollback, B BUSY,
++X canceled, F failed. The final model generation and SHA256 are retained even
++for failed runs. Together with seed and deterministic ordinal mixing, the C
++entries identify the successful transfer history without an unbounded event
++log. Scheduling and BUSY outcomes themselves are naturally nondeterministic.
++
++Attempts cycle through:
++
++1. An ordinary full rollback, followed immediately by a complete unchanged-model
++   check on a new read transaction.
++2. An outer transfer, an inner savepoint transfer, ROLLBACK TO and RELEASE;
++   validate the restored overlay, then commit only the outer change.
++3. Outer and inner transfers with RELEASE; validate and commit both.
++4. An ordinary transfer and commit.
++
++Every committed transaction updates a generation row atomically with account
++rows. A synchronized immutable model records exactly successful commits. Each
++reader pins a transaction, reads its generation, checks every row and ID against
++that generation's model, holds the snapshot for the configured period, and
++checks every row again. Sum conservation alone would not detect a permutation;
++the oracle compares each row value. Failed/BUSY/canceled attempts do not update
++the model. BUSY commit retries are bounded (20 retries after the initial try),
++counted separately and wait cooperatively. Cleanup/I/O errors cannot be masked
++as BUSY or cancellation. Classification examines every branch in at most 128
++error nodes, accepting only exact known native/pager/encrypted/WAL-index BUSY
++leaves or context cancellation/deadline leaves through standard fmt/errors.Join
++wrappers and consistent SQLite code envelopes. Unknown leaves/wrappers, extra
++diagnostics, unsafe codes, typed nils, cycles and oversized graphs fail closed.
++Custom Is/As/Error/Unwrap callbacks are not executed by classification. Mixed
++known BUSY and cancellation is canceled and cannot enter commit retry. One writer is intentional, not a multi-writer claim.
++
++At most 64 writer attempts or 5 seconds form an epoch. Cancellation joins every
++worker and closes reader handles. The writer performs a normal checkpoint when
++supported, closes, reopens the same intact file/family, and checks the entire
++latest model. Only then is history pruned. There is a final verified reopen even
++when the requested duration expires. No SQL growth is hidden by recreating the
++database between epochs.
++
++Pass requires the requested number of attempts or actual accumulated active
++seconds, correct outcome accounting, at least one committed transaction,
++successful reader, intentional rollback, committed savepoint rollback and
++committed savepoint release, plus a final exact-model check and normal closure.
++A very small or starved run may fail required coverage; that is not waived.
++
++## Bounds and timing interpretation
++
++Rows are 4–4096; batch is bounded by rows/2 and 16; there are at most nine worker
++goroutines, plus Go runtime/timer/signal support. Each epoch holds at most 65
++model versions, and reports at most 4096 epochs. SQL sort memory is 1 MiB;
++transaction overlays are 128 pages; undo is 8 MiB. Histograms use 48 fixed
++buckets rather than storing unbounded latency samples. Go has a 256 MiB **soft**
++memory limit, and heap is sampled and guarded at epoch boundaries; this is not
++a hard RSS limit or a continuously sampled peak memory claim. Reports state the
++maximum *observed* heap, not a true peak.
++
++Logical row count stays fixed. A configurable 1 MiB–1 GiB apparent-file-byte
++ceiling is checked at epoch boundaries. Plaintext can overshoot by one bounded
++epoch. Encrypted storage also receives that retained-bytes quota, 100000
++retained generations, 200000 directory entries, 2048 logical pages/8 MiB logical
++bytes, 128 active segments and a 64 MiB adapter memory quota. Immutable encrypted
++history grows legitimately; reaching any quota fails rather than silently
++shortening the measurement. There is no disk-full fault injection.
++
++- `elapsed_seconds` includes bootstrap, active work, ordinary checkpoint/reopen,
++  verification and final normal close. UTC start/end are actual wall clocks;
++  duration arithmetic uses Go monotonic clocks.
++- `active_seconds` sums concurrent epoch wall times including cooperative drain;
++  it excludes bootstrap and between-epoch checkpoint/reopen/verification.
++- Throughput reports committed transactions and writer attempts per active
++  second, plus committed transactions per end-to-end second. Intentional
++  rollbacks are successful outcomes but not committed transactions.
++- Latency includes the full attempt, its exact-model checking, any commit retry
++  wait, and cleanup, with all BUSY/canceled/failed attempts included. These are
++  workload transaction latencies, not isolated commit syscall latencies.
++- P50/P95 are explicitly logarithmic histogram **upper bounds** in milliseconds.
++  Exact min/max/mean/sample standard deviation and all histogram counts are
++  retained. Bucket i has upper bound 2^i microseconds. This approximation is
++  suitable for a bounded long run, not claims of tiny latency improvements.
++- Data is warm after initialization; no OS-cache eviction is performed. Host
++  sharing, process scheduling, filesystem/cache conditions and simultaneous
++  workloads must be recorded externally. A host label is not hardware isolation.
++
++## Predeclared longer release proposal (not yet executed)
++
++The goal gives no numerical definition of “long” or a required hour count. The
++following is a proposed, reproducible release profile, not a newly invented
++acceptance threshold and not evidence that a long run passed:
++
++```sh
++for profile in rollback wal-shared encrypted-shared; do
++  /tmp/gosqlite-transactions -mode soak -profile "$profile" -duration 2h \
++    -rows 256 -readers 4 -batch 4 -seed 20261010 -writer-pause 250ms \
++    -reader-pause 2ms -snapshot-hold 2ms -max-data-bytes 1073741824 \
++    -source-id "$SOURCE_ID" -hardware-id "$HARDWARE_ID" \
++    > "release-soak-2h-$profile.json"
++done
++```
++
++Two hours of actual concurrent activity per profile gives repeated transaction,
++snapshot, checkpoint and reopen lifetimes beyond a smoke run. Four readers and
++256 modeled rows exercise retained snapshots while 250ms writer pacing bounds
++ciphertext generation rate and leaves ample margin below the epoch cap.
++A preliminary 20.0016-active-second run of exactly this encrypted cadence
++recorded 51 commits, four verified checkpoint/reopen cycles, 920652 retained
++bytes, 117 observed files and encrypted commit sequence 57. Straight-line
++projection to two hours is about 332 MB, 42120 files and sequence 20520, below
++the declared 1 GiB / 200000-entry / 100000-generation ceilings. These projections
++are capacity planning, not measurements or a guarantee of sustained throughput.
++With 250ms pacing there are approximately 28800 attempts at most plus bounded
++epoch-cancellation edges; only three quarters are planned commits. This leaves
++substantial entry/generation headroom without changing or rotating the family.
++The fixed logical row count limits per-generation growth, but increased
++directory-scan cost or a quota can still stop the run. Any such result remains
++failed/incomplete evidence and motivates a separately declared profile change.
++Run sequentially on an otherwise controlled host; record filesystem, CPU,
++Go/runtime build, source identity and all raw reports. Reviewer acceptance of
++this chosen observation window is separate from the original qualitative goal.
++
++For unpaced transaction throughput, separately predeclare 10000 attempts,
++1024 rows, four readers, batch four, the same seed, and the 1 GiB ceiling.
++Do not compare this to paced-soak throughput or a different row count.
++
++## Future CI confidence policy
++
++CI wiring is deliberately outside this change. A future comparator should first
++require passed status, all invariant/coverage gates, matching workload/dataset
++hashes, same declared host/OS/filesystem/cache/page/Go settings and independent
++raw runs. Use at least five interleaved baseline/candidate repetitions on the
++same controlled host, predeclare the metric/regression threshold, and report
++paired uncertainty or a justified independent-run interval. Preserve failed
++runs and disclose exclusions rather than selecting only fast runs.
++
++`window_commit_rate_statistics` exposes sample count, mean, sample standard
++deviation and null 95% bounds with an explicit confidence-method explanation.
++Epoch rates are correlated and unequal-duration; their descriptive mean is
++not the overall weighted throughput. No normal-theory confidence interval is
++invented from transaction counts or correlated within-run windows. No SQLite,
++pg_bigm or pgvector comparison is fabricated.
++
++## Correction provenance and V4 admission
++
++V1/V2 reports retain their original identities. Independent pure-memory review
++found that V2's errors.Is/errors.As classification could hide extra joined
++diagnostics, and source review found incomplete all-handle closure reporting.
++V3 corrected the classifier but its ownership reporting still missed public
++pending-retirement markers and failed-Open paths. V4 recognizes every public
++cleanup-pending marker, conservatively latches SQLite CodeIOErr, poison/commit
++uncertainty and opaque ownership envelopes, and installs finalization before the
++first database Open. Original token graphs remain retained even when no DB handle
++was returned. Unsafe failure cannot become an unsupported skip or a later pass.
++Its diagnostic discovery and rendering are bounded and do not invoke unknown
++error callbacks. Only a wholly understood unsupported graph can be skipped.
++
++Every V4 JSON report includes harness_revision="ordinary-transactions-v4". A
++performance comparator must require this exact revision; matching workload math,
++schema_version or zero closure fields in V1–V3 is insufficient corrected-report
++evidence. The workload math is unchanged. V4 bounded runtime checks use the
++separately accepted ordinary reader-acquisition fix composition. All original
++failed controls remain failures; no native failure path was executed.
+diff --git a/benchmarks/transactions/classify.go b/benchmarks/transactions/classify.go
+new file mode 100644
+index 0000000..0f04ded
+--- /dev/null
++++ b/benchmarks/transactions/classify.go
+@@ -0,0 +1,163 @@
++package main
++
++import (
++	"context"
++	"errors"
++	"fmt"
++	"reflect"
++
++	"github.com/ms-xiaosnow/gosqlite/encryption"
++	"github.com/ms-xiaosnow/gosqlite/internal/encstore"
++	"github.com/ms-xiaosnow/gosqlite/internal/pager"
++	"github.com/ms-xiaosnow/gosqlite/internal/vfs"
++	"github.com/ms-xiaosnow/gosqlite/internal/walindex"
++	"github.com/ms-xiaosnow/gosqlite/sqlite"
++)
++
++// Only transparent standard wrappers and the public SQLite diagnostic envelope
++// are understood. Arbitrary Error/Is/As/Unwrap methods are never executed.
++var (
++	terminalErrorType = reflect.TypeOf(errors.New("terminal diagnostic"))
++	singleWrapType    = reflect.TypeOf(fmt.Errorf("context: %w", context.Canceled))
++	multiWrapType     = reflect.TypeOf(fmt.Errorf("%w: %w", context.Canceled, context.DeadlineExceeded))
++	joinType          = reflect.TypeOf(errors.Join(context.Canceled, context.DeadlineExceeded))
++)
++
++const maxOutcomeErrorNodes = 128
++const (
++	busyLeaf uint8 = 1 << iota
++	canceledLeaf
++)
++
++type outcome uint8
++
++const (
++	outcomeSuccess outcome = iota
++	outcomeBusy
++	outcomeCanceled
++	outcomeFailed
++)
++
++// errorOutcome discovers the whole accepted error graph in one bounded pass.
++// Every branch must terminate in exact known sentinels. Unknown diagnostics,
++// cleanup markers, unsafe SQLite codes, cycles and excessive graphs fail closed.
++// Known BUSY plus cancellation is canceled, so commit cannot retry it.
++func errorOutcome(err error) outcome {
++	if err == nil {
++		return outcomeSuccess
++	}
++	remaining := maxOutcomeErrorNodes
++	var visit func(error) uint8
++	visit = func(node error) uint8 {
++		if remaining == 0 || node == nil {
++			return 0
++		}
++		remaining--
++		switch node {
++		case sqlite.ErrBusy, vfs.ErrBusy, encstore.ErrBusy, walindex.ErrBusy:
++			return busyLeaf
++		case context.Canceled, context.DeadlineExceeded:
++			return canceledLeaf
++		}
++		if e, ok := node.(*sqlite.Error); ok {
++			if e == nil || (e.Code != sqlite.CodeBusy && e.Code != sqlite.CodeInterrupt) {
++				return 0
++			}
++			leaves := visit(e.Err)
++			if e.Code == sqlite.CodeBusy && leaves&busyLeaf == 0 {
++				return 0
++			}
++			if e.Code == sqlite.CodeInterrupt && leaves != canceledLeaf {
++				return 0
++			}
++			return leaves
++		}
++		typ := reflect.TypeOf(node)
++		if typ != singleWrapType && typ != multiWrapType && typ != joinType {
++			return 0
++		}
++		if reflect.ValueOf(node).IsNil() {
++			return 0
++		}
++		if typ == singleWrapType {
++			return visit(node.(interface{ Unwrap() error }).Unwrap())
++		}
++		children := node.(interface{ Unwrap() []error }).Unwrap()
++		if len(children) == 0 || len(children) > remaining {
++			return 0
++		}
++		var leaves uint8
++		for _, child := range children {
++			part := visit(child)
++			if part == 0 {
++				return 0
++			}
++			leaves |= part
++		}
++		return leaves
++	}
++	switch leaves := visit(err); {
++	case leaves == busyLeaf:
++		return outcomeBusy
++	case leaves&canceledLeaf != 0:
++		return outcomeCanceled
++	default:
++		return outcomeFailed
++	}
++}
++func ordinaryBusy(err error) bool { return errorOutcome(err) == outcomeBusy }
++func classify(c *Counts, err error) bool {
++	switch errorOutcome(err) {
++	case outcomeSuccess:
++		c.Success++
++	case outcomeBusy:
++		c.Busy++
++	case outcomeCanceled:
++		c.Canceled++
++	default:
++		c.Failed++
++		return true
++	}
++	return false
++}
++
++// Only a wholly understood unsupported graph may be labeled skipped. An
++// unrelated joined diagnostic is a failure, not a platform skip.
++func benignUnsupported(err error) bool {
++	remaining := maxOutcomeErrorNodes
++	var visit func(error) bool
++	visit = func(node error) bool {
++		if node == nil || remaining == 0 {
++			return false
++		}
++		remaining--
++		switch node {
++		case sqlite.ErrUnsupported, pager.ErrUnsupported, vfs.ErrUnsupported, walindex.ErrUnsupported, encstore.ErrUnsupported, encryption.ErrUnsupported, encryption.ErrUnsupportedConfiguration:
++			return true
++		}
++		if e, ok := node.(*sqlite.Error); ok {
++			return e != nil && e.Code == sqlite.CodeError && visit(e.Err)
++		}
++		typ := reflect.TypeOf(node)
++		if typ != singleWrapType && typ != multiWrapType && typ != joinType {
++			return false
++		}
++		if reflect.ValueOf(node).IsNil() {
++			return false
++		}
++		if typ == singleWrapType {
++			return visit(node.(interface{ Unwrap() error }).Unwrap())
++		}
++		children := node.(interface{ Unwrap() []error }).Unwrap()
++		if len(children) == 0 || len(children) > remaining {
++			return false
++		}
++		for _, child := range children {
++			if !visit(child) {
++				return false
++			}
++		}
++		return true
++	}
++	return visit(err)
++}
+diff --git a/benchmarks/transactions/classify_join_test.go b/benchmarks/transactions/classify_join_test.go
+new file mode 100644
+index 0000000..b9c134e
+--- /dev/null
++++ b/benchmarks/transactions/classify_join_test.go
+@@ -0,0 +1,35 @@
++package main
++
++import (
++	"context"
++	"errors"
++	"fmt"
++	"testing"
++
++	"github.com/ms-xiaosnow/gosqlite/sqlite"
++)
++
++// Pure memory error trees only. No database, filesystem mutation or native hooks.
++func TestIndependentUnexpectedJoinedErrorsRemainFatal(t *testing.T) {
++	unexpected := errors.New("independent model diagnostic")
++	for _, tt := range []struct {
++		name string
++		err  error
++	}{
++		{"busy_plus_unknown", errors.Join(sqlite.ErrBusy, unexpected)},
++		{"busy_plus_changed", errors.Join(sqlite.ErrBusy, sqlite.ErrChanged)},
++		{"cancel_plus_unknown", errors.Join(context.Canceled, unexpected)},
++		{"deadline_plus_changed", errors.Join(context.DeadlineExceeded, sqlite.ErrChanged)},
++		{"first_sqlite_error_masks_later_io", errors.Join(&sqlite.Error{Code: sqlite.CodeBusy, Op: "memory", Err: sqlite.ErrBusy}, &sqlite.Error{Code: sqlite.CodeIOErr, Op: "memory", Err: unexpected})},
++		{"outer_busy_masks_inner_io", &sqlite.Error{Code: sqlite.CodeBusy, Op: "memory", Err: errors.Join(sqlite.ErrBusy, &sqlite.Error{Code: sqlite.CodeIOErr, Op: "memory", Err: unexpected})}},
++		{"wrapped_busy_unknown", fmt.Errorf("context: %w", errors.Join(sqlite.ErrBusy, unexpected))},
++	} {
++		t.Run(tt.name, func(t *testing.T) {
++			c := Counts{Attempts: 1}
++			fatal := classify(&c, tt.err)
++			if !fatal || c.Failed != 1 || c.Busy != 0 || c.Canceled != 0 || ordinaryBusy(tt.err) {
++				t.Fatalf("unexpected joined diagnostic suppressed: fatal=%v counts=%+v ordinaryBusy=%v err=%v", fatal, c, ordinaryBusy(tt.err), tt.err)
++			}
++		})
++	}
++}
+diff --git a/benchmarks/transactions/classify_test.go b/benchmarks/transactions/classify_test.go
+new file mode 100644
+index 0000000..01fcc1f
+--- /dev/null
++++ b/benchmarks/transactions/classify_test.go
+@@ -0,0 +1,84 @@
++package main
++
++import (
++	"context"
++	"errors"
++	"fmt"
++	"testing"
++
++	"github.com/ms-xiaosnow/gosqlite/internal/encstore"
++	"github.com/ms-xiaosnow/gosqlite/internal/vfs"
++	"github.com/ms-xiaosnow/gosqlite/internal/walindex"
++	"github.com/ms-xiaosnow/gosqlite/sqlite"
++)
++
++// Pure memory values only: no native callbacks, files or failing database I/O.
++type forbiddenOutcomeMethods struct{}
++
++func (*forbiddenOutcomeMethods) Error() string { panic("must not format unknown error") }
++func (*forbiddenOutcomeMethods) Is(error) bool { panic("must not call custom Is") }
++func (*forbiddenOutcomeMethods) As(any) bool   { panic("must not call custom As") }
++func (*forbiddenOutcomeMethods) Unwrap() error { panic("must not call custom Unwrap") }
++
++type uncomparableOutcome []byte
++
++func (uncomparableOutcome) Error() string { return "opaque diagnostic" }
++
++func TestStrictOutcomeGraph(t *testing.T) {
++	busy := func(e error) error { return &sqlite.Error{Code: sqlite.CodeBusy, Op: "memory", Err: e} }
++	cancel := func(e error) error { return &sqlite.Error{Code: sqlite.CodeInterrupt, Op: "memory", Err: e} }
++	for _, e := range []error{sqlite.ErrBusy, sqlite.ErrBusySnapshot, encstore.ErrBusySnapshot, fmt.Errorf("lock: %w: %w", sqlite.ErrBusy, vfs.ErrBusy), errors.Join(sqlite.ErrBusy, walindex.ErrBusy), busy(errors.Join(sqlite.ErrBusy, encstore.ErrBusy))} {
++		if got := errorOutcome(e); got != outcomeBusy || !ordinaryBusy(e) {
++			t.Fatalf("legitimate BUSY outcome=%v", got)
++		}
++	}
++	for _, e := range []error{context.Canceled, context.DeadlineExceeded, cancel(fmt.Errorf("operation: %w", context.Canceled)), errors.Join(busy(sqlite.ErrBusy), cancel(context.Canceled)), busy(errors.Join(sqlite.ErrBusy, context.Canceled))} {
++		if got := errorOutcome(e); got != outcomeCanceled || ordinaryBusy(e) {
++			t.Fatalf("legitimate cancellation outcome=%v", got)
++		}
++	}
++	cycle := &sqlite.Error{Code: sqlite.CodeBusy, Op: "memory-cycle"}
++	cycle.Err = cycle
++	var typedNil *sqlite.Error
++	var customNil *forbiddenOutcomeMethods
++	tooDeep := error(sqlite.ErrBusy)
++	for i := 0; i < maxOutcomeErrorNodes; i++ {
++		tooDeep = busy(tooDeep)
++	}
++	many := make([]error, maxOutcomeErrorNodes)
++	for i := range many {
++		many[i] = sqlite.ErrBusy
++	}
++	bad := []error{&forbiddenOutcomeMethods{}, customNil, uncomparableOutcome{1}, typedNil, cycle, tooDeep, errors.Join(many...), busy(nil), busy(context.Canceled), cancel(sqlite.ErrBusy), &sqlite.Error{Code: sqlite.CodeIOErr, Err: sqlite.ErrBusy}, &sqlite.Error{Code: sqlite.CodeCorrupt, Err: context.Canceled}, cleanupJoin(sqlite.ErrBusy, errors.New("consumed close diagnostic")), errors.Join(context.Canceled, errCleanup)}
++	for i, e := range bad {
++		var c Counts
++		c.Attempts = 1
++		if !classify(&c, e) || ordinaryBusy(e) || !c.Valid() || c.Failed != 1 {
++			t.Fatalf("bad graph %d accepted: counts=%+v", i, c)
++		}
++	}
++	if errorOutcome(nil) != outcomeSuccess {
++		t.Fatal("nil error not successful")
++	}
++	// Node budget is inclusive: envelope(s) plus one recognized leaf.
++	boundary := error(sqlite.ErrBusy)
++	for i := 1; i < maxOutcomeErrorNodes; i++ {
++		boundary = busy(boundary)
++	}
++	if errorOutcome(boundary) != outcomeBusy {
++		t.Fatal("exact budget refused")
++	}
++}
++
++func TestGenerationAbsencePreservesIteratorErrors(t *testing.T) {
++	if missingGenerationError(context.Canceled) != context.Canceled {
++		t.Fatal("cancellation relabeled missing row")
++	}
++	joined := errors.Join(context.Canceled, errors.New("iterator diagnostic"))
++	if missingGenerationError(joined) != joined || errorOutcome(missingGenerationError(joined)) != outcomeFailed {
++		t.Fatal("iterator diagnostic suppressed")
++	}
++	if errorOutcome(missingGenerationError(nil)) != outcomeFailed {
++		t.Fatal("clean missing row accepted")
++	}
++}
+diff --git a/benchmarks/transactions/closure.go b/benchmarks/transactions/closure.go
+new file mode 100644
+index 0000000..4ddf9c1
+--- /dev/null
++++ b/benchmarks/transactions/closure.go
+@@ -0,0 +1,232 @@
++package main
++
++import (
++	"context"
++	"errors"
++	"fmt"
++	"github.com/ms-xiaosnow/gosqlite/sqlite"
++	"reflect"
++	"strings"
++)
++
++// closeLedger is single-goroutine-owned. Workers finish before their DB handles
++// are closed. Failed handles and original diagnostics stay owned; an unrelated
++// successful Close cannot clear the historical failure or prove their retirement.
++type closeHandle interface{ Close() error }
++type ownedHandle struct {
++	handle     closeHandle
++	label      string
++	attempted  bool
++	diagnostic error
++}
++type closeLedger struct {
++	live     map[*ownedHandle]struct{}
++	failures int
++	acquired int
++}
++
++func newCloseLedger() *closeLedger { return &closeLedger{live: make(map[*ownedHandle]struct{})} }
++func (l *closeLedger) acquire(handle closeHandle, label string) *ownedHandle {
++	owner := &ownedHandle{handle: handle, label: label}
++	l.live[owner] = struct{}{}
++	l.acquired++
++	return owner
++}
++func (l *closeLedger) close(owner *ownedHandle) error {
++	if owner == nil {
++		return nil
++	}
++	if _, ok := l.live[owner]; !ok {
++		return nil
++	}
++	// A second nil Close is not proof of retirement for one-shot rollback handles.
++	// Preserve this owner/diagnostic for its documented cleanup route instead.
++	if owner.attempted {
++		return owner.diagnostic
++	}
++	owner.attempted = true
++	if err := owner.handle.Close(); err != nil {
++		l.failures++
++		owner.diagnostic = fmt.Errorf("%s close: %w", owner.label, err)
++		return owner.diagnostic
++	}
++	delete(l.live, owner)
++	owner.handle = nil
++	return nil
++}
++func (l *closeLedger) closeRemaining() error {
++	var err error
++	for owner := range l.live {
++		if !owner.attempted {
++			err = errors.Join(err, l.close(owner))
++		}
++	}
++	return err
++}
++func (l *closeLedger) shutdown() string {
++	if len(l.live) > 0 {
++		return "close_error_unverified_retirement"
++	}
++	if l.failures > 0 {
++		return "close_error"
++	}
++	if l.acquired == 0 {
++		return "no_database_handle_returned"
++	}
++	return "workers_joined_normal_close"
++}
++
++// cleanupDiagnostic refuses to infer retirement from a bare success elsewhere.
++// All public pending markers, IO/poison/uncertain diagnostics, opaque envelopes
++// and malformed/excessive graphs are conservatively unverified. No custom
++// Is/As/Error/Unwrap method is called while discovering ownership diagnostics.
++func cleanupDiagnostic(err error) bool {
++	if err == nil {
++		return false
++	}
++	stack := []error{err}
++	visited := 0
++	for len(stack) > 0 {
++		if visited >= maxOutcomeErrorNodes {
++			return true
++		}
++		visited++
++		node := stack[len(stack)-1]
++		stack = stack[:len(stack)-1]
++		if node == nil {
++			return true
++		}
++		if value := reflect.ValueOf(node); value.Kind() == reflect.Pointer && value.IsNil() {
++			return true
++		}
++		switch node {
++		case errCleanup, sqlite.ErrPlaintextCleanupPending, sqlite.ErrOpenCleanupPending, sqlite.ErrCloseCleanupPending, sqlite.ErrEncryptedCleanupPending, sqlite.ErrPoisoned, sqlite.ErrCommitUncertain, sqlite.ErrRecoveryRequired:
++			return true
++		}
++		if e, ok := node.(*sqlite.Error); ok {
++			if e == nil || e.Code == sqlite.CodeIOErr || e.Err == nil {
++				return true
++			}
++			stack = append(stack, e.Err)
++			continue
++		}
++		typ := reflect.TypeOf(node)
++		// Standard terminal error strings and exact context sentinels have no hidden
++		// owner envelope. Arbitrary custom leaves may hide one and stay unverified.
++		if typ == terminalErrorType || node == context.Canceled || node == context.DeadlineExceeded {
++			continue
++		}
++		if typ != singleWrapType && typ != multiWrapType && typ != joinType {
++			return true
++		}
++		if reflect.ValueOf(node).IsNil() {
++			return true
++		}
++		if typ == singleWrapType {
++			stack = append(stack, node.(interface{ Unwrap() error }).Unwrap())
++			continue
++		}
++		children := node.(interface{ Unwrap() []error }).Unwrap()
++		if len(children) == 0 || len(children) > maxOutcomeErrorNodes-visited-len(stack) {
++			return true
++		}
++		stack = append(stack, children...)
++	}
++	return false
++}
++
++// recordFailure retains original token/error graphs even if Open returned no DB.
++// Unsafe retirement is latched immediately, before any enclosing finalizer.
++func recordFailure(rep *Report, err error) {
++	if err == nil {
++		return
++	}
++	rep.retainedDiagnostics = append(rep.retainedDiagnostics, err)
++	rep.Errors = append(rep.Errors, diagnosticText(err))
++	if cleanupDiagnostic(err) {
++		rep.UnverifiedRetirement = true
++	}
++	setReportStatus(rep, "failed")
++}
++func setReportStatus(rep *Report, status string) {
++	rep.Status = status
++	if rep.UnverifiedRetirement {
++		rep.Status = "failed"
++		rep.Shutdown = "close_error_unverified_retirement"
++	}
++}
++func recordOpenFailure(rep *Report, err error) {
++	recordFailure(rep, err)
++	if !rep.UnverifiedRetirement && benignUnsupported(err) {
++		setReportStatus(rep, "skipped_unsupported")
++	}
++}
++
++// diagnosticText is bounded too: unknown error callbacks and cyclic SQLite
++// envelopes are never invoked while formatting the retained failure report.
++func diagnosticText(err error) string {
++	remaining := maxOutcomeErrorNodes
++	var render func(error) string
++	clip := func(s string) string {
++		if len(s) > 1024 {
++			return s[:1024] + " [truncated]"
++		}
++		return s
++	}
++	render = func(node error) string {
++		if remaining == 0 {
++			return "[error graph limit]"
++		}
++		remaining--
++		if node == nil {
++			return "[nil diagnostic]"
++		}
++		if value := reflect.ValueOf(node); value.Kind() == reflect.Pointer && value.IsNil() {
++			return "[typed nil diagnostic]"
++		}
++		if e, ok := node.(*sqlite.Error); ok {
++			if e == nil {
++				return "[nil SQLite diagnostic]"
++			}
++			return fmt.Sprintf("sqlite %s (code %d): %s", clip(e.Op), e.Code, render(e.Err))
++		}
++		typ := reflect.TypeOf(node)
++		if typ == terminalErrorType || node == context.Canceled || node == context.DeadlineExceeded {
++			return clip(node.Error())
++		}
++		if typ == singleWrapType || typ == multiWrapType {
++			if reflect.ValueOf(node).IsNil() {
++				return "[nil format wrapper]"
++			}
++			return clip(node.Error())
++		}
++		if typ == joinType {
++			if reflect.ValueOf(node).IsNil() {
++				return "[nil join wrapper]"
++			}
++			children := node.(interface{ Unwrap() []error }).Unwrap()
++			if len(children) > remaining {
++				return "[error graph limit]"
++			}
++			var parts []string
++			for _, child := range children {
++				parts = append(parts, render(child))
++			}
++			return strings.Join(parts, "; ")
++		}
++		return fmt.Sprintf("[opaque diagnostic %T; original retained]", node)
++	}
++	return render(err)
++}
++
++func finalizeClosures(rep *Report, owners *closeLedger) error {
++	err := owners.closeRemaining()
++	rep.UnverifiedCloseHandles = len(owners.live)
++	rep.CloseFailures = owners.failures
++	rep.Shutdown = owners.shutdown()
++	if owners.failures > 0 || len(owners.live) > 0 {
++		rep.UnverifiedRetirement = true
++	}
++	setReportStatus(rep, rep.Status)
++	return err
++}
+diff --git a/benchmarks/transactions/closure_test.go b/benchmarks/transactions/closure_test.go
+new file mode 100644
+index 0000000..693a08e
+--- /dev/null
++++ b/benchmarks/transactions/closure_test.go
+@@ -0,0 +1,107 @@
++package main
++
++import (
++	"errors"
++	"go/ast"
++	"go/parser"
++	"go/token"
++	"testing"
++)
++
++// The fakes below are descriptor-free memory objects, not database/native hooks.
++type memoryCloseHandle struct {
++	calls int
++	err   error
++}
++
++func (m *memoryCloseHandle) Close() error { m.calls++; return m.err }
++func TestCloseLedgerRetainsFailures(t *testing.T) {
++	l := newCloseLedger()
++	bad := &memoryCloseHandle{err: errors.New("memory diagnostic")}
++	good := &memoryCloseHandle{}
++	failed := l.acquire(bad, "reader")
++	writer := l.acquire(good, "writer")
++	if l.close(failed) == nil || l.failures != 1 || len(l.live) != 2 || failed.handle != bad || failed.diagnostic == nil {
++		t.Fatal("failed owner lost")
++	}
++	// A hypothetical second nil result must not be mistaken for proof that the
++	// one-shot original owner retired. No automatic retry is invoked.
++	bad.err = nil
++	if l.close(failed) == nil || bad.calls != 1 {
++		t.Fatal("failed owner blindly retried")
++	}
++	if err := l.close(writer); err != nil {
++		t.Fatal(err)
++	}
++	if l.shutdown() != "close_error_unverified_retirement" || len(l.live) != 1 || failed.handle != bad {
++		t.Fatal("writer success hid reader failure")
++	}
++	if err := l.closeRemaining(); err != nil || bad.calls != 1 {
++		t.Fatal("unrequested retry", err)
++	}
++	clean := newCloseLedger()
++	a, b := &memoryCloseHandle{}, &memoryCloseHandle{}
++	clean.acquire(a, "one")
++	clean.acquire(b, "two")
++	if clean.closeRemaining() != nil || a.calls != 1 || b.calls != 1 || len(clean.live) != 0 || clean.shutdown() != "workers_joined_normal_close" {
++		t.Fatal("clean ledger")
++	}
++}
++func TestCleanupDiagnosticLatchDiscovery(t *testing.T) {
++	if !cleanupDiagnostic(cleanupJoin(nil, errors.New("memory rows close"))) || !cleanupDiagnostic(errors.Join(errors.New("operation"), cleanupJoin(nil, errors.New("memory tx rollback")))) {
++		t.Fatal("cleanup marker lost")
++	}
++	if cleanupDiagnostic(errors.New("model mismatch")) || cleanupDiagnostic(nil) {
++		t.Fatal("plain memory failure incorrectly marked unverified")
++	}
++}
++func TestDBCloseOnlyThroughLedger(t *testing.T) {
++	// Source contract: native DB Close is centralized in the ledger. In
++	// particular, the epoch error path cannot nil out a failed DB owner.
++	for _, path := range []string{"main.go", "workload.go"} {
++		file, err := parser.ParseFile(token.NewFileSet(), path, nil, 0)
++		if err != nil {
++			t.Fatal(err)
++		}
++		ast.Inspect(file, func(n ast.Node) bool {
++			call, ok := n.(*ast.CallExpr)
++			if !ok {
++				return true
++			}
++			sel, ok := call.Fun.(*ast.SelectorExpr)
++			if !ok || sel.Sel.Name != "Close" {
++				return true
++			}
++			id, ok := sel.X.(*ast.Ident)
++			if ok && (id.Name == "db" || id.Name == "writer") {
++				t.Errorf("raw DB.Close bypass in %s", path)
++			}
++			return true
++		})
++	}
++}
++
++func TestFinalClosureReportCannotEraseReaderFailure(t *testing.T) {
++	l := newCloseLedger()
++	reader := l.acquire(&memoryCloseHandle{err: errors.New("memory reader close")}, "reader")
++	if l.close(reader) == nil {
++		t.Fatal("fixture")
++	}
++	writer := &memoryCloseHandle{}
++	l.acquire(writer, "writer")
++	rep := Report{Status: "passed", retainedOwners: l}
++	if finalizeClosures(&rep, l) != nil {
++		t.Fatal("historical reader error must not be retried")
++	}
++	if rep.Status != "failed" || !rep.UnverifiedRetirement || rep.Shutdown != "close_error_unverified_retirement" || rep.UnverifiedCloseHandles != 1 || rep.CloseFailures != 1 || writer.calls != 1 || reader.handle == nil {
++		t.Fatalf("false closure report: %+v", rep)
++	}
++	// Nested Rows/Tx retirement diagnostics remain unverified even if all DB
++	// handles subsequently close without a fresh diagnostic.
++	clean := newCloseLedger()
++	clean.acquire(&memoryCloseHandle{}, "writer")
++	nested := Report{Status: "failed", UnverifiedRetirement: true}
++	if finalizeClosures(&nested, clean) != nil || nested.Shutdown != "close_error_unverified_retirement" || !nested.UnverifiedRetirement {
++		t.Fatal("nested retirement diagnostic erased")
++	}
++}
+diff --git a/benchmarks/transactions/independent_retirement_test.go b/benchmarks/transactions/independent_retirement_test.go
+new file mode 100644
+index 0000000..edf6fd2
+--- /dev/null
++++ b/benchmarks/transactions/independent_retirement_test.go
+@@ -0,0 +1,29 @@
++package main
++
++import (
++	"errors"
++	"github.com/ms-xiaosnow/gosqlite/sqlite"
++	"testing"
++)
++
++// Pure-memory public diagnostic shapes only; no native owner or file is created.
++func TestIndependentPendingRetirementDiagnosticsLatch(t *testing.T) {
++	for _, tt := range []struct {
++		name   string
++		marker error
++	}{
++		{"plaintext", sqlite.ErrPlaintextCleanupPending}, {"shared_open", sqlite.ErrOpenCleanupPending},
++		{"shared_close", sqlite.ErrCloseCleanupPending}, {"encrypted", sqlite.ErrEncryptedCleanupPending},
++	} {
++		t.Run(tt.name, func(t *testing.T) {
++			diagnostic := &sqlite.Error{Code: sqlite.CodeIOErr, Op: "memory", Err: errors.Join(tt.marker, sqlite.ErrPoisoned)}
++			rep := Report{Status: "failed", UnverifiedRetirement: cleanupDiagnostic(diagnostic), retainedDiagnostics: []error{diagnostic}}
++			ledger := newCloseLedger()
++			ledger.acquire(&memoryCloseHandle{}, "otherwise clean writer")
++			finalizeClosures(&rep, ledger)
++			if !rep.UnverifiedRetirement || rep.Shutdown == "workers_joined_normal_close" {
++				t.Fatalf("pending diagnostic not latched: unverified=%v shutdown=%s", rep.UnverifiedRetirement, rep.Shutdown)
++			}
++		})
++	}
++}
+diff --git a/benchmarks/transactions/main.go b/benchmarks/transactions/main.go
+new file mode 100644
+index 0000000..e293de2
+--- /dev/null
++++ b/benchmarks/transactions/main.go
+@@ -0,0 +1,412 @@
++// Command transactions measures ordinary native transactions and real-duration
++// concurrent soak. It never kills a process, mutates selected files, or injects faults.
++package main
++
++import (
++	"context"
++	"crypto/sha256"
++	"encoding/hex"
++	"encoding/json"
++	"errors"
++	"flag"
++	"fmt"
++	"io/fs"
++	"os"
++	"os/signal"
++	"path/filepath"
++	"runtime"
++	"runtime/debug"
++	"time"
++
++	"github.com/ms-xiaosnow/gosqlite/encryption"
++	"github.com/ms-xiaosnow/gosqlite/sqlite"
++)
++
++const harnessRevision = "ordinary-transactions-v4"
++
++const workloadVersion = "ordinary-transfer-history-v1"
++const epochAttempts = 64
++const maxEpochs = 4096
++const memoryLimit = 256 << 20
++
++type Config struct {
++	Mode         string        `json:"mode"`
++	Profile      string        `json:"profile"`
++	Duration     time.Duration `json:"requested_active_duration_ns"`
++	Transactions int           `json:"requested_writer_attempts"`
++	Rows         int           `json:"rows"`
++	Readers      int           `json:"readers"`
++	Batch        int           `json:"transfer_pairs_per_transaction"`
++	Seed         uint64        `json:"dataset_seed"`
++	WriterPause  time.Duration `json:"writer_pause_ns"`
++	ReaderPause  time.Duration `json:"reader_pause_ns"`
++	SnapshotHold time.Duration `json:"snapshot_hold_ns"`
++	MaxDataBytes int64         `json:"max_data_bytes"`
++	SourceID     string        `json:"source_id"`
++	HardwareID   string        `json:"hardware_id"`
++}
++
++func (c Config) Validate() error {
++	if c.Mode != "throughput" && c.Mode != "soak" {
++		return errors.New("mode must be throughput or soak")
++	}
++	if c.Profile != "rollback" && c.Profile != "wal-shared" && c.Profile != "encrypted-shared" {
++		return errors.New("profile must be rollback, wal-shared, or encrypted-shared; exclusive modes do not provide this concurrent workload")
++	}
++	if c.Duration < time.Second || c.Duration > 24*time.Hour || c.Transactions < 4 || c.Transactions > 200000 || c.Rows < 4 || c.Rows > 4096 || c.Readers < 1 || c.Readers > 8 || c.Batch < 1 || c.Batch > 16 || c.Batch*2 > c.Rows {
++		return errors.New("bounds: duration 1s..24h, transactions 4..200000, rows 4..4096, readers 1..8, pairs 1..min(16,rows/2)")
++	}
++	if c.WriterPause < 0 || c.WriterPause > time.Second || c.ReaderPause < 0 || c.ReaderPause > time.Second || c.SnapshotHold < 0 || c.SnapshotHold > 100*time.Millisecond {
++		return errors.New("pause/hold bounds exceeded")
++	}
++	if c.MaxDataBytes < 1<<20 || c.MaxDataBytes > 1<<30 {
++		return errors.New("max-data-bytes must be 1MiB..1GiB")
++	}
++	if c.SourceID == "" || c.HardwareID == "" || len(c.SourceID) > 256 || len(c.HardwareID) > 256 {
++		return errors.New("source-id and hardware-id are required, at most 256 bytes each")
++	}
++	return nil
++}
++
++type Report struct {
++	HarnessRevision              string `json:"harness_revision"`
++	UnverifiedRetirement         bool   `json:"unverified_retirement"`
++	retainedDiagnostics          []error
++	UnverifiedCloseHandles       int `json:"unverified_close_handles"`
++	CloseFailures                int `json:"close_failures"`
++	retainedOwners               *closeLedger
++	FinalModelGeneration         int64             `json:"final_model_generation"`
++	FinalModelSHA256             string            `json:"final_model_sha256"`
++	MaxObservedDataFiles         int               `json:"max_observed_data_files"`
++	FinalEncryptedCommitSequence uint64            `json:"final_encrypted_commit_sequence"`
++	BuildSettings                map[string]string `json:"build_settings"`
++	SchemaVersion                int               `json:"schema_version"`
++	Benchmark                    string            `json:"benchmark"`
++	WorkloadVersion              string            `json:"workload_version"`
++	WorkloadSHA256               string            `json:"workload_sha256"`
++	DatasetSHA256                string            `json:"dataset_sha256"`
++	Config                       Config            `json:"config"`
++	Status                       string            `json:"status"`
++	Errors                       []string          `json:"errors"`
++	StartedUTC                   string            `json:"started_utc"`
++	FinishedUTC                  string            `json:"finished_utc"`
++	ElapsedSeconds               float64           `json:"elapsed_seconds"`
++	ActiveSeconds                float64           `json:"active_seconds"`
++	GoVersion                    string            `json:"go_version"`
++	GOOS                         string            `json:"goos"`
++	GOARCH                       string            `json:"goarch"`
++	CPUs                         int               `json:"logical_cpus"`
++	GOMAXPROCS                   int               `json:"gomaxprocs"`
++	PageSize                     int               `json:"page_size"`
++	CacheCondition               string            `json:"cache_condition"`
++	DataDirectory                string            `json:"retained_data_directory"`
++	MaxObservedDataBytes         int64             `json:"max_observed_data_bytes"`
++	MaxObservedHeapBytes         uint64            `json:"max_observed_heap_bytes"`
++	Writer                       Counts            `json:"writer"`
++	Readers                      Counts            `json:"readers"`
++	WriteLatency                 LatencyReport     `json:"writer_attempt_latency"`
++	ReadLatency                  LatencyReport     `json:"reader_attempt_latency"`
++	CheckpointLatency            LatencyReport     `json:"ordinary_checkpoint_latency"`
++	ReopenLatency                LatencyReport     `json:"ordinary_reopen_latency"`
++	CheckpointStatus             string            `json:"checkpoint_status"`
++	Checkpoints                  int               `json:"successful_checkpoints"`
++	Reopens                      int               `json:"verified_reopens"`
++	FinalModelVerified           bool              `json:"final_model_verified"`
++	Shutdown                     string            `json:"shutdown"`
++	CommitsPerSecond             float64           `json:"committed_transactions_per_active_second"`
++	AttemptsPerSecond            float64           `json:"writer_attempts_per_active_second"`
++	EndToEndCommitsPerSecond     float64           `json:"committed_transactions_per_elapsed_second"`
++	WindowRates                  Summary           `json:"window_commit_rate_statistics"`
++	Windows                      []Window          `json:"windows"`
++	Limits                       map[string]int64  `json:"harness_limits"`
++	Notes                        []string          `json:"notes"`
++}
++
++func main() {
++	c := Config{}
++	flag.StringVar(&c.Mode, "mode", "throughput", "throughput (fixed attempts) or soak (actual active duration)")
++	flag.StringVar(&c.Profile, "profile", "rollback", "rollback, wal-shared, encrypted-shared")
++	flag.DurationVar(&c.Duration, "duration", 30*time.Second, "soak active duration; maintenance excluded")
++	flag.IntVar(&c.Transactions, "transactions", 256, "writer attempts for throughput mode")
++	flag.IntVar(&c.Rows, "rows", 64, "fixed row count")
++	flag.IntVar(&c.Readers, "readers", 2, "independent reader connections")
++	flag.IntVar(&c.Batch, "batch", 2, "transfer pairs per writer attempt")
++	flag.Uint64Var(&c.Seed, "seed", 20261010, "deterministic workload seed")
++	flag.DurationVar(&c.WriterPause, "writer-pause", 0, "cooperative pause after writer attempts")
++	flag.DurationVar(&c.ReaderPause, "reader-pause", time.Millisecond, "pause after reader attempts")
++	flag.DurationVar(&c.SnapshotHold, "snapshot-hold", time.Millisecond, "hold snapshot between two complete model checks")
++	flag.Int64Var(&c.MaxDataBytes, "max-data-bytes", 128<<20, "storage guard; encrypted engine also enforces retained quota")
++	flag.StringVar(&c.SourceID, "source-id", "", "required exact source/tree or manifest identity")
++	flag.StringVar(&c.HardwareID, "hardware-id", "", "required controlled host label; no inferred hardware identity")
++	flag.Parse()
++	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
++	defer stop()
++	rep := run(ctx, c)
++	enc := json.NewEncoder(os.Stdout)
++	enc.SetIndent("", "  ")
++	// run returns only after workers joined and normal DB closure was attempted.
++	if err := enc.Encode(rep); err != nil {
++		fmt.Fprintln(os.Stderr, err)
++		runtime.KeepAlive(rep.retainedOwners)
++		runtime.KeepAlive(rep.retainedDiagnostics)
++		os.Exit(1)
++	}
++	// References and original managed diagnostics remain alive through emission.
++	// Process completion does not establish retirement of failed native owners.
++	runtime.KeepAlive(rep.retainedOwners)
++	runtime.KeepAlive(rep.retainedDiagnostics)
++	if rep.UnverifiedRetirement {
++		fmt.Fprintln(os.Stderr, "close/retirement remains unverified; process completion is not proof of native owner retirement")
++	}
++	if rep.Status != "passed" {
++		os.Exit(1)
++	}
++}
++
++// Synthetic public fixture key, never a user's key; each borrow has owned bytes.
++type fixtureProvider struct{}
++type fixtureMaterial struct{ key []byte }
++
++func (fixtureProvider) Acquire(ctx context.Context, _ encryption.KeyRequest) (encryption.KeyMaterial, error) {
++	if err := ctx.Err(); err != nil {
++		return nil, err
++	}
++	k := sha256.Sum256([]byte("gosqlite ordinary benchmark public fixture key v1"))
++	return &fixtureMaterial{append([]byte(nil), k[:]...)}, nil
++}
++func (m *fixtureMaterial) Kind() encryption.CredentialKind { return encryption.RawKey256 }
++func (m *fixtureMaterial) Bytes() []byte                   { return m.key }
++func (m *fixtureMaterial) Release()                        { clear(m.key) }
++func options(c Config) sqlite.Options {
++	o := sqlite.Options{PageSize: 4096, MaxSortBytes: 1 << 20, MaxTransactionPages: 128, MaxTransactionUndoBytes: 8 << 20}
++	if c.Profile == "wal-shared" {
++		o.WALShared = true
++		o.KeepWALOnClose = true
++	}
++	if c.Profile == "encrypted-shared" {
++		o.KeepWALOnClose = true
++		o.Encryption = &sqlite.EncryptionOptions{Mode: sqlite.EncryptionWALShared, CredentialKind: encryption.RawKey256, KeyProvider: fixtureProvider{}, MaxGenerations: 100000, MaxDirectoryEntries: 200000, MaxRetainedBytes: uint64(c.MaxDataBytes), Limits: encryption.Limits{MaxPages: 2048, MaxLogicalBytes: 8 << 20}, WALLimits: sqlite.EncryptionWALLimits{MaxSegments: 128, MaxMemoryBytes: 64 << 20}}
++	}
++	return o
++}
++func digest(v any) string {
++	b, _ := json.Marshal(v)
++	sum := sha256.Sum256(b)
++	return hex.EncodeToString(sum[:])
++}
++func dataSize(dir string) (int64, int, error) {
++	var n int64
++	files := 0
++	err := filepath.WalkDir(dir, func(_ string, d fs.DirEntry, e error) error {
++		if e != nil {
++			return e
++		}
++		if d.IsDir() {
++			return nil
++		}
++		files++
++		i, e := d.Info()
++		if e == nil {
++			n += i.Size()
++		}
++		return e
++	})
++	return n, files, err
++}
++func run(ctx context.Context, c Config) (rep Report) {
++	started := time.Now()
++	rep = Report{HarnessRevision: harnessRevision, SchemaVersion: 1, Benchmark: "native-transactions-and-soak", WorkloadVersion: workloadVersion, Config: c, Status: "failed", StartedUTC: started.UTC().Format(time.RFC3339Nano), GoVersion: runtime.Version(), GOOS: runtime.GOOS, GOARCH: runtime.GOARCH, CPUs: runtime.NumCPU(), GOMAXPROCS: runtime.GOMAXPROCS(0), PageSize: 4096, CacheCondition: "warm OS cache, bootstrap excluded, no OS cache flush; new DB each invocation", CheckpointStatus: "not_run", Errors: []string{}, Windows: []Window{}, Shutdown: "not_started", Limits: map[string]int64{"rows": 4096, "reader_goroutines": 8, "writer_goroutines": 1, "writer_attempts_per_epoch": epochAttempts, "epochs": maxEpochs, "soft_go_memory_bytes": memoryLimit, "transaction_pages": 128, "transaction_undo_bytes": 8 << 20, "encrypted_generations": 100000, "encrypted_directory_entries": 200000, "encrypted_adapter_memory_bytes": 64 << 20, "encrypted_logical_bytes": 8 << 20}, Notes: []string{"All latency histograms include BUSY/canceled outcomes; percentiles are power-of-two microsecond bucket upper bounds, not exact order statistics.", "One writer and independent reader handles overlap. BUSY is reported, never silently retried without counting. Commit has at most 20 cooperative retries.", "Every successful reader checks all rows twice against an exact committed-generation model within one pinned snapshot. Histories are retained only until epoch readers join.", "Every epoch joins canceled workers, performs supported normal checkpoint, closes all connections, reopens the same intact database, and checks the exact model.", "No fault injection, abrupt process exit with an open database, crash recovery, physical tamper, namespace race, external oracle, or rekey. Ordinary reopen/checkpoint timings are not recovery time.", "Encrypted-shared uses a public synthetic fixture key and retains immutable ciphertext history; quota/epoch exhaustion fails the run rather than truncating or calling a shorter run passed.", "Windows within a run are correlated. CI bounds are null; independent repeated runs on identical source/workload/hardware conditions are needed before a confidence-qualified regression decision.", "All data directories and JSON stdout are retained for investigation. No results are deleted or rewritten by the harness.", "Any close/retirement diagnostic latches failure. Unverified handles and original diagnostics remain referenced through report emission; no automatic retry is added. Process completion is not evidence of native retirement, and terminal uncertainty is not recovered by this harness."}}
++	rep.BuildSettings = map[string]string{}
++	if info, ok := debug.ReadBuildInfo(); ok {
++		for _, setting := range info.Settings {
++			switch setting.Key {
++			case "CGO_ENABLED", "GOAMD64", "GOARM64", "-race", "-trimpath":
++				rep.BuildSettings[setting.Key] = setting.Value
++			}
++		}
++	}
++	var writes, reads, checkpoints, reopens Latency
++	var rates Moments
++	defer func() {
++		rep.FinishedUTC = time.Now().UTC().Format(time.RFC3339Nano)
++		rep.ElapsedSeconds = time.Since(started).Seconds()
++		rep.WriteLatency = writes.Report()
++		rep.ReadLatency = reads.Report()
++		rep.CheckpointLatency = checkpoints.Report()
++		rep.ReopenLatency = reopens.Report()
++		rep.WindowRates = summarize(rates)
++		if rep.ActiveSeconds > 0 {
++			rep.CommitsPerSecond = float64(rep.Writer.Committed) / rep.ActiveSeconds
++			rep.AttemptsPerSecond = float64(rep.Writer.Attempts) / rep.ActiveSeconds
++		}
++		rep.EndToEndCommitsPerSecond = float64(rep.Writer.Committed) / rep.ElapsedSeconds
++	}()
++	fail := func(e error) { recordFailure(&rep, e) }
++	if e := c.Validate(); e != nil {
++		fail(e)
++		setReportStatus(&rep, "rejected")
++		return
++	}
++	oldLimit := debug.SetMemoryLimit(memoryLimit)
++	defer debug.SetMemoryLimit(oldLimit)
++	identity := c
++	identity.SourceID, identity.HardwareID = "", ""
++	rep.WorkloadSHA256 = digest(struct {
++		Version string
++		Config  Config
++	}{workloadVersion, identity})
++	m := newModel(c.Rows, c.Seed)
++	defer func() {
++		m.mu.RLock()
++		defer m.mu.RUnlock()
++		rep.FinalModelGeneration = m.generation
++		rep.FinalModelSHA256 = digest(m.current)
++	}()
++	rep.DatasetSHA256 = digest(m.current)
++	dir, e := os.MkdirTemp("", "gosqlite-ordinary-transactions-")
++	if e != nil {
++		fail(e)
++		return
++	}
++	rep.DataDirectory = dir
++	path := filepath.Join(dir, "benchmark.db")
++	o := options(c)
++	// Install ownership finalization before any potentially acquiring Open.
++	owners := newCloseLedger()
++	rep.retainedOwners = owners
++	defer func() {
++		if e := finalizeClosures(&rep, owners); e != nil {
++			fail(e)
++		}
++	}()
++	db, e := sqlite.Open(path, o)
++	if e != nil {
++		recordOpenFailure(&rep, e)
++		return
++	}
++	writerOwner := owners.acquire(db, "writer")
++	rep.Shutdown = "normal_close_pending"
++	if e = bootstrap(db, m.current); e != nil {
++		fail(e)
++		return
++	}
++	rep.CheckpointStatus = "supported"
++	if c.Profile == "rollback" {
++		rep.CheckpointStatus = "skipped: rollback API has no WAL checkpoint"
++	}
++	var attempt uint64
++	for epoch := 0; epoch < maxEpochs; epoch++ {
++		if ctx.Err() != nil {
++			fail(ctx.Err())
++			return
++		}
++		if c.Mode == "throughput" && attempt >= uint64(c.Transactions) {
++			break
++		}
++		if c.Mode == "soak" && rep.ActiveSeconds >= c.Duration.Seconds() {
++			break
++		}
++		limit := epochAttempts
++		if c.Mode == "throughput" && uint64(limit) > uint64(c.Transactions)-attempt {
++			limit = int(uint64(c.Transactions) - attempt)
++		}
++		budget := 5 * time.Second
++		if c.Mode == "soak" {
++			left := c.Duration - time.Duration(rep.ActiveSeconds*float64(time.Second))
++			if left < budget {
++				budget = left
++			}
++		}
++		rep.FinalModelVerified = false
++		w, wl, rl, next, err := executeEpoch(ctx, db, path, o, c, m, owners, epoch, attempt, limit, budget)
++		attempt = next
++		rep.Windows = append(rep.Windows, w)
++		rep.ActiveSeconds += w.ActiveSeconds
++		rep.Writer.Merge(w.Writer)
++		rep.Readers.Merge(w.Readers)
++		writes.Merge(wl)
++		reads.Merge(rl)
++		rates.Add(w.CommittedPerSecond)
++		if err != nil {
++			fail(err)
++			return
++		}
++		if c.Profile != "rollback" {
++			t := time.Now()
++			err = db.Checkpoint(context.Background())
++			checkpoints.Add(time.Since(t))
++			if err != nil {
++				fail(fmt.Errorf("ordinary checkpoint: %w", err))
++				return
++			}
++			rep.Checkpoints++
++		}
++		if err = owners.close(writerOwner); err != nil {
++			fail(err)
++			return
++		}
++		db = nil
++		rep.Shutdown = owners.shutdown()
++		t := time.Now()
++		db, err = sqlite.Open(path, o)
++		reopens.Add(time.Since(t))
++		if err != nil {
++			fail(fmt.Errorf("ordinary reopen: %w", err))
++			return
++		}
++		writerOwner = owners.acquire(db, "writer")
++		if err = verifyCurrent(db, m); err != nil {
++			fail(fmt.Errorf("reopened model: %w", err))
++			return
++		}
++		rep.Reopens++
++		rep.FinalModelVerified = true
++		m.prune()
++		size, files, err := dataSize(dir)
++		if err != nil {
++			fail(err)
++			return
++		}
++		if files > rep.MaxObservedDataFiles {
++			rep.MaxObservedDataFiles = files
++		}
++		if c.Profile == "encrypted-shared" {
++			info, e := db.VerifyEncrypted(context.Background())
++			if e != nil {
++				fail(e)
++				return
++			}
++			rep.FinalEncryptedCommitSequence = info.CommitSequence
++		}
++		if size > rep.MaxObservedDataBytes {
++			rep.MaxObservedDataBytes = size
++		}
++		if size > c.MaxDataBytes {
++			fail(fmt.Errorf("data guard exceeded: observed %d > %d; incomplete", size, c.MaxDataBytes))
++			return
++		}
++		var mem runtime.MemStats
++		runtime.ReadMemStats(&mem)
++		if mem.HeapAlloc > rep.MaxObservedHeapBytes {
++			rep.MaxObservedHeapBytes = mem.HeapAlloc
++		}
++		if mem.HeapAlloc > memoryLimit {
++			fail(fmt.Errorf("sampled heap guard exceeded: %d; incomplete", mem.HeapAlloc))
++			return
++		}
++	}
++	if c.Mode == "soak" && rep.ActiveSeconds < c.Duration.Seconds() {
++		fail(errors.New("epoch guard reached before requested active duration"))
++		return
++	}
++	if c.Mode == "throughput" && attempt != uint64(c.Transactions) {
++		fail(errors.New("epoch guard reached before requested attempts"))
++		return
++	}
++	if !rep.Writer.Valid() || !rep.Readers.Valid() || rep.Writer.Committed == 0 || rep.Readers.Success == 0 || rep.Writer.RolledBack == 0 || rep.Writer.SavepointRollback == 0 || rep.Writer.SavepointRelease == 0 || !rep.FinalModelVerified {
++		fail(errors.New("required outcome coverage or accounting missing; incomplete"))
++		return
++	}
++	setReportStatus(&rep, "passed")
++	return
++}
+diff --git a/benchmarks/transactions/report.go b/benchmarks/transactions/report.go
+new file mode 100644
+index 0000000..eb43615
+--- /dev/null
++++ b/benchmarks/transactions/report.go
+@@ -0,0 +1,154 @@
++package main
++
++import (
++	"math"
++	"time"
++)
++
++// Moments uses Welford's algorithm and retains constant memory.
++type Moments struct {
++	Count uint64  `json:"sample_count"`
++	Mean  float64 `json:"mean"`
++	M2    float64 `json:"-"`
++	Min   float64 `json:"min"`
++	Max   float64 `json:"max"`
++}
++
++func (m *Moments) Add(x float64) {
++	m.Count++
++	if m.Count == 1 {
++		m.Min, m.Max = x, x
++	} else {
++		m.Min = math.Min(m.Min, x)
++		m.Max = math.Max(m.Max, x)
++	}
++	delta := x - m.Mean
++	m.Mean += delta / float64(m.Count)
++	m.M2 += delta * (x - m.Mean)
++}
++func (m Moments) Stddev() float64 {
++	if m.Count < 2 {
++		return 0
++	}
++	return math.Sqrt(m.M2 / float64(m.Count-1))
++}
++
++type Summary struct {
++	Count            uint64   `json:"sample_count"`
++	Mean             float64  `json:"mean"`
++	SampleStddev     float64  `json:"sample_stddev"`
++	Min              float64  `json:"min"`
++	Max              float64  `json:"max"`
++	ConfidenceMethod string   `json:"confidence_method"`
++	Confidence95Low  *float64 `json:"confidence_95_low"`
++	Confidence95High *float64 `json:"confidence_95_high"`
++}
++
++func summarize(m Moments) Summary {
++	return Summary{Count: m.Count, Mean: m.Mean, SampleStddev: m.Stddev(), Min: m.Min, Max: m.Max, ConfidenceMethod: "descriptive only; correlated within-run windows are not independent repetitions"}
++}
++
++// Histograms retain all observations in 48 logarithmic buckets, with exact
++// count/min/max/mean/sample variance and explicitly upper-bound quantiles.
++type Latency struct {
++	Buckets [48]uint64 `json:"buckets_power_of_two_microseconds"`
++	Moments Moments    `json:"-"`
++}
++
++func (h *Latency) Add(d time.Duration) {
++	ns := d.Nanoseconds()
++	if ns < 0 {
++		ns = 0
++	}
++	h.Moments.Add(float64(ns) / 1e6)
++	i := 0
++	for i < 47 && ns > int64(time.Microsecond)*(int64(1)<<i) {
++		i++
++	}
++	h.Buckets[i]++
++}
++func (h Latency) quantile(p float64) float64 {
++	if h.Moments.Count == 0 {
++		return 0
++	}
++	rank := uint64(math.Ceil(float64(h.Moments.Count) * p))
++	if rank < 1 {
++		rank = 1
++	}
++	var n uint64
++	for i, c := range h.Buckets {
++		n += c
++		if n >= rank {
++			return float64(uint64(1)<<i) / 1000
++		}
++	}
++	return h.Moments.Max
++}
++func (h *Latency) Merge(v Latency) {
++	for i, n := range v.Buckets {
++		h.Buckets[i] += n
++	}
++	if v.Moments.Count == 0 {
++		return
++	}
++	if h.Moments.Count == 0 {
++		h.Moments = v.Moments
++		return
++	}
++	a, b := h.Moments, v.Moments
++	n := a.Count + b.Count
++	d := b.Mean - a.Mean
++	h.Moments = Moments{Count: n, Mean: a.Mean + d*float64(b.Count)/float64(n), M2: a.M2 + b.M2 + d*d*float64(a.Count)*float64(b.Count)/float64(n), Min: math.Min(a.Min, b.Min), Max: math.Max(a.Max, b.Max)}
++}
++
++type LatencyReport struct {
++	Summary    Summary    `json:"milliseconds"`
++	P50UpperMS float64    `json:"p50_bucket_upper_ms"`
++	P95UpperMS float64    `json:"p95_bucket_upper_ms"`
++	Buckets    [48]uint64 `json:"buckets_power_of_two_microseconds"`
++}
++
++func (h Latency) Report() LatencyReport {
++	return LatencyReport{summarize(h.Moments), h.quantile(.5), h.quantile(.95), h.Buckets}
++}
++
++type Counts struct {
++	Attempts          uint64 `json:"attempts"`
++	Success           uint64 `json:"success"`
++	Committed         uint64 `json:"committed"`
++	RolledBack        uint64 `json:"intentional_rollbacks"`
++	SavepointRollback uint64 `json:"savepoint_rollback_commits"`
++	SavepointRelease  uint64 `json:"savepoint_release_commits"`
++	Busy              uint64 `json:"busy_outcomes"`
++	BusyEvents        uint64 `json:"busy_events_including_commit_retries"`
++	Canceled          uint64 `json:"canceled_outcomes"`
++	Failed            uint64 `json:"failed_outcomes"`
++	SnapshotChecks    uint64 `json:"snapshot_checks"`
++}
++
++func (a *Counts) Merge(b Counts) {
++	a.Attempts += b.Attempts
++	a.Success += b.Success
++	a.Committed += b.Committed
++	a.RolledBack += b.RolledBack
++	a.SavepointRollback += b.SavepointRollback
++	a.SavepointRelease += b.SavepointRelease
++	a.Busy += b.Busy
++	a.BusyEvents += b.BusyEvents
++	a.Canceled += b.Canceled
++	a.Failed += b.Failed
++	a.SnapshotChecks += b.SnapshotChecks
++}
++func (a Counts) Valid() bool { return a.Attempts == a.Success+a.Busy+a.Canceled+a.Failed }
++
++type Window struct {
++	FirstWriterOrdinal uint64  `json:"first_writer_ordinal"`
++	WriterOutcomes     string  `json:"writer_outcomes"`
++	Index              int     `json:"index"`
++	StartedUTC         string  `json:"started_utc"`
++	FinishedUTC        string  `json:"finished_utc"`
++	ActiveSeconds      float64 `json:"active_seconds"`
++	Writer             Counts  `json:"writer"`
++	Readers            Counts  `json:"readers"`
++	CommittedPerSecond float64 `json:"committed_transactions_per_second"`
++}
+diff --git a/benchmarks/transactions/report_failure_test.go b/benchmarks/transactions/report_failure_test.go
+new file mode 100644
+index 0000000..e0ad4d6
+--- /dev/null
++++ b/benchmarks/transactions/report_failure_test.go
+@@ -0,0 +1,137 @@
++package main
++
++import (
++	"context"
++	"errors"
++	"fmt"
++	"go/ast"
++	"go/parser"
++	"go/token"
++	"reflect"
++	"strings"
++	"testing"
++
++	"github.com/ms-xiaosnow/gosqlite/internal/pager"
++	"github.com/ms-xiaosnow/gosqlite/internal/vfs"
++	"github.com/ms-xiaosnow/gosqlite/sqlite"
++)
++
++// Descriptor-free errors/report state only: this does not call a native Open or
++// manufacture a native failure. The real pre-acquisition placement is AST-pinned.
++func TestPreHandleRetirementFailureCannotBecomeSkipOrPass(t *testing.T) {
++	for _, marker := range []error{sqlite.ErrPlaintextCleanupPending, sqlite.ErrOpenCleanupPending, sqlite.ErrCloseCleanupPending, sqlite.ErrEncryptedCleanupPending} {
++		original := &sqlite.Error{Code: sqlite.CodeIOErr, Op: "memory open", Err: errors.Join(sqlite.ErrUnsupported, marker, sqlite.ErrPoisoned)}
++		rep := Report{Status: "passed", Shutdown: "not_started"}
++		recordOpenFailure(&rep, original)
++		if !rep.UnverifiedRetirement || rep.Status != "failed" || rep.Shutdown != "close_error_unverified_retirement" || len(rep.retainedDiagnostics) != 1 || rep.retainedDiagnostics[0] != original {
++			t.Fatalf("pre-handle marker lost: %+v", rep)
++		}
++		for _, status := range []string{"skipped_unsupported", "passed", "rejected"} {
++			setReportStatus(&rep, status)
++			if rep.Status != "failed" {
++				t.Fatal("unsafe status overwritten")
++			}
++		}
++		// No DB was returned, but its original managed token remains retained.
++		empty := newCloseLedger()
++		if err := finalizeClosures(&rep, empty); err != nil {
++			t.Fatal(err)
++		}
++		if rep.Shutdown != "close_error_unverified_retirement" || !rep.UnverifiedRetirement || rep.UnverifiedCloseHandles != 0 || rep.retainedDiagnostics[0] != original {
++			t.Fatal("pre-handle finalizer erased uncertainty")
++		}
++	}
++	benign := &sqlite.Error{Code: sqlite.CodeError, Op: "memory open", Err: fmt.Errorf("%w: %w: %w", sqlite.ErrUnsupported, pager.ErrUnsupported, vfs.ErrUnsupported)}
++	rep := Report{}
++	recordOpenFailure(&rep, benign)
++	finalizeClosures(&rep, newCloseLedger())
++	if rep.Status != "skipped_unsupported" || rep.UnverifiedRetirement || rep.Shutdown != "no_database_handle_returned" {
++		t.Fatalf("benign unsupported report %+v", rep)
++	}
++	extra := Report{}
++	recordOpenFailure(&extra, errors.Join(sqlite.ErrUnsupported, errors.New("extra diagnostic")))
++	if extra.Status != "failed" {
++		t.Fatal("extra diagnostic hidden by unsupported")
++	}
++}
++func TestRetirementDiscoveryAndRenderingAreBounded(t *testing.T) {
++	for _, node := range []error{sqlite.ErrPlaintextCleanupPending, sqlite.ErrOpenCleanupPending, sqlite.ErrCloseCleanupPending, sqlite.ErrEncryptedCleanupPending, &sqlite.Error{Code: sqlite.CodeIOErr, Err: errors.New("unknown IO diagnostic")}, &forbiddenOutcomeMethods{}} {
++		if !cleanupDiagnostic(node) {
++			t.Fatalf("unverified diagnostic missed: %T", node)
++		}
++	}
++	cycle := &sqlite.Error{Code: sqlite.CodeBusy}
++	cycle.Err = cycle
++	if !cleanupDiagnostic(cycle) || !strings.Contains(diagnosticText(cycle), "graph limit") {
++		t.Fatal("unbounded graph")
++	}
++	var typedNil *sqlite.Error
++	terminalNil := reflect.Zero(terminalErrorType).Interface().(error)
++	for _, node := range []error{typedNil, terminalNil, &forbiddenOutcomeMethods{}} {
++		rep := Report{}
++		recordFailure(&rep, node)
++		if !rep.UnverifiedRetirement || rep.Status != "failed" || len(rep.Errors) != 1 {
++			t.Fatal("unsafe graph not retained")
++		}
++	}
++	rep := Report{Status: "passed"}
++	recordFailure(&rep, errors.Join(context.Canceled, errors.New("real diagnostic")))
++	if rep.Status != "failed" || len(rep.retainedDiagnostics) != 1 {
++		t.Fatal("joined failure discarded")
++	}
++}
++func TestFinalizerInstalledBeforeDatabaseOpen(t *testing.T) {
++	f, err := parser.ParseFile(token.NewFileSet(), "main.go", nil, 0)
++	if err != nil {
++		t.Fatal(err)
++	}
++	var run *ast.FuncDecl
++	for _, d := range f.Decls {
++		if fn, ok := d.(*ast.FuncDecl); ok && fn.Name.Name == "run" {
++			run = fn
++		}
++	}
++	if run == nil {
++		t.Fatal("run missing")
++	}
++	var finalizer token.Pos
++	var opens []token.Pos
++	ast.Inspect(run.Body, func(n ast.Node) bool {
++		if d, ok := n.(*ast.DeferStmt); ok {
++			found := false
++			ast.Inspect(d, func(x ast.Node) bool {
++				if id, ok := x.(*ast.Ident); ok && id.Name == "finalizeClosures" {
++					found = true
++				}
++				return true
++			})
++			if found {
++				finalizer = d.Pos()
++			}
++		}
++		if c, ok := n.(*ast.CallExpr); ok {
++			if sel, ok := c.Fun.(*ast.SelectorExpr); ok && sel.Sel.Name == "Open" {
++				if id, ok := sel.X.(*ast.Ident); ok && id.Name == "sqlite" {
++					opens = append(opens, c.Pos())
++				}
++			}
++		}
++		return true
++	})
++	if finalizer == token.NoPos || len(opens) != 2 {
++		t.Fatalf("expected one finalizer and initial/reopen paths: %v %v", finalizer, opens)
++	}
++	for _, pos := range opens {
++		if finalizer >= pos {
++			t.Fatal("database acquisition before finalizer")
++		}
++	}
++}
++func TestHarnessRevisionOnRejectedReport(t *testing.T) {
++	c := validConfig()
++	c.Profile = "not-supported"
++	rep := run(context.Background(), c)
++	if rep.HarnessRevision != "ordinary-transactions-v4" || rep.Status != "rejected" || rep.DataDirectory != "" {
++		t.Fatal("revision/rejection contract")
++	}
++}
+diff --git a/benchmarks/transactions/report_test.go b/benchmarks/transactions/report_test.go
+new file mode 100644
+index 0000000..b513ffa
+--- /dev/null
++++ b/benchmarks/transactions/report_test.go
+@@ -0,0 +1,160 @@
++package main
++
++import (
++	"context"
++	"errors"
++	"math"
++	"strings"
++	"testing"
++	"time"
++
++	"github.com/ms-xiaosnow/gosqlite/sqlite"
++)
++
++func TestMomentsAndHistogram(t *testing.T) {
++	var m Moments
++	for _, x := range []float64{1, 2, 3, 4, 5} {
++		m.Add(x)
++	}
++	if m.Mean != 3 || math.Abs(m.Stddev()-math.Sqrt(2.5)) > 1e-12 {
++		t.Fatal(m)
++	}
++	s := summarize(m)
++	if s.Confidence95Low != nil || s.Confidence95High != nil {
++		t.Fatal("correlated samples must not imply confidence")
++	}
++	var a, b, all Latency
++	for i, d := range []time.Duration{0, time.Microsecond, 1500 * time.Nanosecond, 4 * time.Microsecond, 10 * time.Millisecond} {
++		all.Add(d)
++		if i < 2 {
++			a.Add(d)
++		} else {
++			b.Add(d)
++		}
++	}
++	a.Merge(b)
++	if a.Buckets != all.Buckets || math.Abs(a.Moments.Mean-all.Moments.Mean) > 1e-12 || math.Abs(a.Moments.M2-all.Moments.M2) > 1e-12 {
++		t.Fatal("merge mismatch", a, all)
++	}
++	if a.quantile(.5) != .002 || a.quantile(.95) != 16.384 {
++		t.Fatal(a.Report())
++	}
++	if (Latency{}).quantile(.5) != 0 {
++		t.Fatal("empty")
++	}
++}
++func TestAccountingAndClassification(t *testing.T) {
++	var c Counts
++	for _, e := range []error{nil, sqlite.ErrBusy, context.Canceled, errors.New("model mismatch"), cleanupJoin(sqlite.ErrBusy, errors.New("cleanup"))} {
++		c.Attempts++
++		classify(&c, e)
++	}
++	if !c.Valid() || c.Success != 1 || c.Busy != 1 || c.Canceled != 1 || c.Failed != 2 {
++		t.Fatal(c)
++	}
++	if ordinaryBusy(cleanupJoin(sqlite.ErrBusy, errors.New("cleanup"))) {
++		t.Fatal("cleanup masked")
++	}
++	var copy Counts
++	copy.Merge(c)
++	if copy != c {
++		t.Fatal(copy)
++	}
++}
++func validConfig() Config {
++	return Config{Mode: "throughput", Profile: "rollback", Duration: time.Second, Transactions: 16, Rows: 8, Readers: 1, Batch: 1, Seed: 20261010, ReaderPause: time.Millisecond, SnapshotHold: time.Millisecond, MaxDataBytes: 16 << 20, SourceID: "unit-test-source", HardwareID: "unit-test-host"}
++}
++func TestBoundsAndIdentity(t *testing.T) {
++	c := validConfig()
++	if e := c.Validate(); e != nil {
++		t.Fatal(e)
++	}
++	for _, change := range []func(*Config){func(c *Config) { c.Readers = 0 }, func(c *Config) { c.Rows = 4097 }, func(c *Config) { c.Batch = 5 }, func(c *Config) { c.Profile = "wal-exclusive" }, func(c *Config) { c.Duration = 0 }, func(c *Config) { c.MaxDataBytes = 1 }, func(c *Config) { c.SourceID = "" }, func(c *Config) { c.WriterPause = -1 }} {
++		bad := c
++		change(&bad)
++		if bad.Validate() == nil {
++			t.Fatal("unbounded config accepted", bad)
++		}
++	}
++	a, b := newModel(8, 7), newModel(8, 7)
++	if digest(a.current) != digest(b.current) {
++		t.Fatal("nondeterministic corpus")
++	}
++	if digest(a.current) == digest(newModel(8, 8).current) {
++		t.Fatal("seed unused")
++	}
++	if equalState([]int64{1, 2}, []int64{2, 1}) == nil {
++		t.Fatal("equal sum hid row mismatch")
++	}
++	if _, e := a.expected(1); e == nil {
++		t.Fatal("missing generation accepted")
++	}
++}
++func TestOrdinaryHarnessSharedLifecycle(t *testing.T) {
++	c := validConfig()
++	c.Profile = "wal-shared"
++	c.Transactions = 32
++	rep := run(context.Background(), c)
++	if rep.Status == "skipped_unsupported" {
++		t.Skip(rep.Errors)
++	}
++	if rep.Status != "passed" {
++		t.Fatalf("status %s errors %v; retained data %s", rep.Status, rep.Errors, rep.DataDirectory)
++	}
++	if rep.Checkpoints < 1 || rep.Reopens < 1 || !rep.FinalModelVerified || rep.Shutdown != "workers_joined_normal_close" || !rep.Writer.Valid() || !rep.Readers.Valid() {
++		t.Fatalf("incomplete report %+v", rep)
++	}
++	for _, window := range rep.Windows {
++		if len(window.WriterOutcomes) != int(window.Writer.Attempts) || strings.Count(window.WriterOutcomes, "C") != int(window.Writer.Committed) || strings.Count(window.WriterOutcomes, "R") != int(window.Writer.RolledBack) {
++			t.Fatal("trace/counters disagree", window)
++		}
++	}
++	if rep.FinalModelGeneration != int64(rep.Writer.Committed) || rep.FinalModelSHA256 == "" {
++		t.Fatal("model identity missing")
++	}
++	if rep.ElapsedSeconds <= 0 || rep.ActiveSeconds <= 0 || rep.Writer.Committed == 0 || rep.Readers.Success == 0 {
++		t.Fatal("unmeasured work")
++	}
++}
++
++func TestOrdinaryHarnessCooperativeCancellation(t *testing.T) {
++	c := validConfig()
++	c.Mode = "soak"
++	c.Profile = "wal-shared"
++	c.Duration = 10 * time.Second
++	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
++	defer cancel()
++	rep := run(ctx, c)
++	if rep.Status == "skipped_unsupported" {
++		t.Skip(rep.Errors)
++	}
++	if rep.Status != "failed" || rep.Shutdown != "workers_joined_normal_close" || len(rep.Errors) == 0 || rep.ActiveSeconds >= c.Duration.Seconds() {
++		t.Fatalf("canceled run incorrectly accepted or not closed: %+v", rep)
++	}
++	if !rep.Writer.Valid() || !rep.Readers.Valid() {
++		t.Fatal("failed report lost outcomes")
++	}
++}
++
++func TestRejectedProfileHasNoDatabase(t *testing.T) {
++	c := validConfig()
++	c.Profile = "encrypted-exclusive"
++	rep := run(context.Background(), c)
++	if rep.Status != "rejected" || rep.DataDirectory != "" || rep.Shutdown != "not_started" || len(rep.Errors) == 0 {
++		t.Fatalf("unsupported profile fabricated coverage: %+v", rep)
++	}
++}
++
++func TestOutcomeTraceCodes(t *testing.T) {
++	tests := []struct {
++		kind  int
++		err   error
++		fatal bool
++		want  byte
++	}{{0, nil, false, 'R'}, {1, nil, false, 'C'}, {2, nil, false, 'C'}, {3, sqlite.ErrBusy, false, 'B'}, {1, context.Canceled, false, 'X'}, {1, errors.New("model"), true, 'F'}}
++	for _, tt := range tests {
++		if got := outcomeCode(tt.kind, tt.err, tt.fatal); got != tt.want {
++			t.Fatalf("outcome %q != %q", got, tt.want)
++		}
++	}
++}
+diff --git a/benchmarks/transactions/workload.go b/benchmarks/transactions/workload.go
+new file mode 100644
+index 0000000..33d9e8c
+--- /dev/null
++++ b/benchmarks/transactions/workload.go
+@@ -0,0 +1,460 @@
++package main
++
++import (
++	"context"
++	"errors"
++	"fmt"
++	"sync"
++	"time"
++
++	"github.com/ms-xiaosnow/gosqlite/sqlite"
++)
++
++var errCleanup = errors.New("normal resource cleanup failed")
++
++type model struct {
++	mu         sync.RWMutex
++	generation int64
++	current    []int64
++	history    map[int64][]int64
++}
++
++func newModel(rows int, seed uint64) *model {
++	v := make([]int64, rows)
++	for i := range v {
++		v[i] = 1000 + int64(mix(seed+uint64(i))%100)
++	}
++	return &model{current: v, history: map[int64][]int64{0: v}}
++}
++func mix(x uint64) uint64 {
++	x += 0x9e3779b97f4a7c15
++	x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9
++	x = (x ^ (x >> 27)) * 0x94d049bb133111eb
++	return x ^ (x >> 31)
++}
++func (m *model) prune() {
++	m.mu.Lock()
++	defer m.mu.Unlock()
++	m.history = map[int64][]int64{m.generation: m.current}
++}
++func (m *model) expected(g int64) ([]int64, error) {
++	m.mu.RLock()
++	defer m.mu.RUnlock()
++	v, ok := m.history[g]
++	if !ok {
++		return nil, fmt.Errorf("generation %d absent from retained committed model", g)
++	}
++	return v, nil
++}
++func equalState(got, want []int64) error {
++	if len(got) != len(want) {
++		return fmt.Errorf("row count %d != %d", len(got), len(want))
++	}
++	var gs, ws int64
++	for i, v := range got {
++		gs += v
++		ws += want[i]
++		if v != want[i] {
++			return fmt.Errorf("row %d value %d != model %d", i+1, v, want[i])
++		}
++	}
++	if gs != ws {
++		return errors.New("conserved total mismatch")
++	}
++	return nil
++}
++func bootstrap(db *sqlite.DB, values []int64) (err error) {
++	ctx := context.Background()
++	tx, err := db.Begin(ctx)
++	if err != nil {
++		return err
++	}
++	defer func() { err = cleanupJoin(err, tx.Rollback()) }()
++	for _, q := range []string{"CREATE TABLE accounts(id INTEGER PRIMARY KEY, value INTEGER NOT NULL)", "CREATE TABLE generation(id INTEGER PRIMARY KEY, version INTEGER NOT NULL)", "INSERT INTO generation VALUES(1,0)"} {
++		if _, err = tx.Exec(ctx, q); err != nil {
++			return err
++		}
++	}
++	for i, v := range values {
++		if _, err = tx.Exec(ctx, "INSERT INTO accounts VALUES(?,?)", int64(i+1), v); err != nil {
++			return err
++		}
++	}
++	return tx.Commit(ctx)
++}
++func cleanupJoin(err, cleanup error) error {
++	if cleanup == nil {
++		return err
++	}
++	return errors.Join(err, errCleanup, cleanup)
++}
++func version(ctx context.Context, tx *sqlite.Tx) (v int64, err error) {
++	r, err := tx.Query(ctx, "SELECT version FROM generation WHERE id=1")
++	if err != nil {
++		return 0, err
++	}
++	defer func() { err = cleanupJoin(err, r.Close()) }()
++	if !r.Next() {
++		return 0, missingGenerationError(r.Err())
++	}
++	vals := r.Values()
++	if len(vals) != 1 {
++		return 0, errors.New("generation shape")
++	}
++	var ok bool
++	v, ok = vals[0].(int64)
++	if !ok {
++		return 0, errors.New("generation type")
++	}
++	if r.Next() {
++		return 0, errors.New("duplicate generation row")
++	}
++	return v, r.Err()
++}
++func state(ctx context.Context, tx *sqlite.Tx, n int) (v []int64, err error) {
++	r, err := tx.Query(ctx, "SELECT id,value FROM accounts ORDER BY id")
++	if err != nil {
++		return nil, err
++	}
++	defer func() { err = cleanupJoin(err, r.Close()) }()
++	v = make([]int64, 0, n)
++	for r.Next() {
++		x := r.Values()
++		if len(x) != 2 {
++			return nil, errors.New("account row shape")
++		}
++		id, ok := x[0].(int64)
++		if !ok || id != int64(len(v)+1) {
++			return nil, errors.New("account id ordering/identity mismatch")
++		}
++		value, ok := x[1].(int64)
++		if !ok {
++			return nil, errors.New("account value type")
++		}
++		v = append(v, value)
++		if len(v) > n {
++			return nil, errors.New("account cardinality bound exceeded")
++		}
++	}
++	if err = r.Err(); err != nil {
++		return nil, err
++	}
++	return v, nil
++}
++func verifyCurrent(db *sqlite.DB, m *model) (err error) {
++	ctx := context.Background()
++	tx, err := db.Begin(ctx, sqlite.TxOptions{ReadOnly: true})
++	if err != nil {
++		return err
++	}
++	defer func() { err = cleanupJoin(err, tx.Rollback()) }()
++	g, err := version(ctx, tx)
++	if err != nil {
++		return err
++	}
++	m.mu.RLock()
++	want, current := m.current, m.generation
++	m.mu.RUnlock()
++	if g != current {
++		return fmt.Errorf("reopened generation %d != %d", g, current)
++	}
++	got, err := state(ctx, tx, len(want))
++	if err != nil {
++		return err
++	}
++	return equalState(got, want)
++}
++func pause(ctx context.Context, d time.Duration) error {
++	if d <= 0 {
++		return ctx.Err()
++	}
++	t := time.NewTimer(d)
++	defer t.Stop()
++	select {
++	case <-ctx.Done():
++		return ctx.Err()
++	case <-t.C:
++		return nil
++	}
++}
++
++func readerAttempt(ctx context.Context, db *sqlite.DB, m *model, c Config) (checks uint64, err error) {
++	tx, err := db.Begin(ctx, sqlite.TxOptions{ReadOnly: true})
++	if err != nil {
++		return 0, err
++	}
++	defer func() { err = cleanupJoin(err, tx.Rollback()) }()
++	g, err := version(ctx, tx)
++	if err != nil {
++		return 0, fmt.Errorf("reader generation: %w", err)
++	}
++	want, err := m.expected(g)
++	if err != nil {
++		return 0, err
++	}
++	for i := 0; i < 2; i++ {
++		got, e := state(ctx, tx, c.Rows)
++		if e != nil {
++			return checks, fmt.Errorf("reader scan %d generation %d: %w", i+1, g, e)
++		}
++		if e = equalState(got, want); e != nil {
++			return checks, fmt.Errorf("reader model %d generation %d: %w", i+1, g, e)
++		}
++		checks++
++		if i == 0 {
++			if e = pause(ctx, c.SnapshotHold); e != nil {
++				return checks, e
++			}
++		}
++	}
++	return checks, nil
++}
++
++// Attempt identity depends on seed+ordinal, not scheduling. BUSY attempts do
++// not advance the committed model; exact observed outcomes remain in reports.
++func writerAttempt(ctx context.Context, db *sqlite.DB, m *model, c Config, ordinal uint64) (kind int, busy uint64, err error) {
++	kind = int(ordinal % 4)
++	tx, err := db.Begin(ctx, sqlite.TxOptions{Immediate: true})
++	if err != nil {
++		return kind, 0, err
++	}
++	defer func() { err = cleanupJoin(err, tx.Rollback()) }()
++	m.mu.RLock()
++	next := append([]int64(nil), m.current...)
++	g := m.generation
++	m.mu.RUnlock()
++	transfer := func(salt uint64) error {
++		for j := 0; j < c.Batch; j++ {
++			x := mix(c.Seed ^ mix(ordinal*67+uint64(j)*2+salt))
++			a := int(x % uint64(c.Rows))
++			b := (a + 1 + int(mix(x)%uint64(c.Rows-1))) % c.Rows
++			delta := int64(1 + mix(x^17)%7)
++			next[a] += delta
++			next[b] -= delta
++			for _, id := range []int{a, b} {
++				if _, e := tx.Exec(ctx, "UPDATE accounts SET value=? WHERE id=?", next[id], int64(id+1)); e != nil {
++					return e
++				}
++			}
++		}
++		return nil
++	}
++	if err = transfer(1); err != nil {
++		return kind, busy, err
++	}
++	if kind == 1 || kind == 2 {
++		if _, err = tx.Exec(ctx, "SAVEPOINT inner_transfer"); err != nil {
++			return kind, busy, err
++		}
++		outer := append([]int64(nil), next...)
++		if err = transfer(1000001); err != nil {
++			return kind, busy, err
++		}
++		if kind == 1 {
++			if _, err = tx.Exec(ctx, "ROLLBACK TO inner_transfer"); err != nil {
++				return kind, busy, err
++			}
++			next = outer
++		}
++		if _, err = tx.Exec(ctx, "RELEASE inner_transfer"); err != nil {
++			return kind, busy, err
++		}
++	}
++	// Validate the writer's own overlay, including exact savepoint restoration.
++	got, e := state(ctx, tx, c.Rows)
++	if e != nil {
++		return kind, busy, e
++	}
++	if e = equalState(got, next); e != nil {
++		return kind, busy, e
++	}
++	if kind == 0 {
++		if err = tx.Rollback(); err != nil {
++			return kind, busy, cleanupJoin(nil, err)
++		}
++		return kind, busy, verifyCurrent(db, m)
++	}
++	if _, err = tx.Exec(ctx, "UPDATE generation SET version=? WHERE id=1", g+1); err != nil {
++		return kind, busy, err
++	}
++	// Readers looking up a newly committed generation wait for its publication.
++	// Never hold this mutex during BUSY retry waits: old readers need to finish.
++	for retry := 0; retry <= 20; retry++ {
++		m.mu.Lock()
++		err = tx.Commit(ctx)
++		if err == nil {
++			m.generation = g + 1
++			m.current = next
++			m.history[g+1] = next
++		}
++		m.mu.Unlock()
++		if err == nil {
++			return kind, busy, nil
++		}
++		if !ordinaryBusy(err) {
++			return kind, busy, err
++		}
++		busy++
++		if retry == 20 {
++			return kind, busy, err
++		}
++		if e = pause(ctx, time.Millisecond); e != nil {
++			return kind, busy, e
++		}
++	}
++	return kind, busy, err
++}
++
++type workerResult struct {
++	outcomes []byte
++	counts   Counts
++	latency  Latency
++	err      error
++	writer   bool
++	next     uint64
++}
++
++func executeEpoch(parent context.Context, writer *sqlite.DB, path string, o sqlite.Options, c Config, m *model, owners *closeLedger, index int, ordinal uint64, limit int, budget time.Duration) (w Window, wl, rl Latency, next uint64, err error) {
++	handles := make([]*sqlite.DB, 0, c.Readers)
++	readerOwners := make([]*ownedHandle, 0, c.Readers)
++	// The main goroutine owns all DB handles and closes only after workers join.
++	defer func() {
++		for _, owner := range readerOwners {
++			err = cleanupJoin(err, owners.close(owner))
++		}
++	}()
++	for i := 0; i < c.Readers; i++ {
++		db, e := sqlite.Open(path, o)
++		if e != nil {
++			return w, wl, rl, ordinal, e
++		}
++		handles = append(handles, db)
++		readerOwners = append(readerOwners, owners.acquire(db, fmt.Sprintf("reader %d", i)))
++	}
++	ctx, cancel := context.WithCancel(parent)
++	defer cancel()
++	results := make(chan workerResult, c.Readers+1)
++	start := make(chan struct{})
++	var ready sync.WaitGroup
++	ready.Add(c.Readers + 1)
++	for _, db := range handles {
++		go func(db *sqlite.DB) {
++			r := workerResult{}
++			ready.Done()
++			<-start
++			for ctx.Err() == nil {
++				t := time.Now()
++				checks, e := readerAttempt(ctx, db, m, c)
++				r.latency.Add(time.Since(t))
++				r.counts.Attempts++
++				r.counts.SnapshotChecks += checks
++				if classify(&r.counts, e) {
++					r.err = e
++					cancel()
++					break
++				}
++				if ordinaryBusy(e) {
++					r.counts.BusyEvents++
++				}
++				if pause(ctx, c.ReaderPause) != nil {
++					break
++				}
++			}
++			results <- r
++		}(db)
++	}
++	go func() {
++		r := workerResult{writer: true, next: ordinal, outcomes: make([]byte, 0, limit)}
++		ready.Done()
++		<-start
++		for i := 0; i < limit && ctx.Err() == nil; i++ {
++			t := time.Now()
++			kind, busy, e := writerAttempt(ctx, writer, m, c, r.next)
++			r.next++
++			r.latency.Add(time.Since(t))
++			r.counts.Attempts++
++			r.counts.BusyEvents += busy
++			if ordinaryBusy(e) && busy == 0 {
++				r.counts.BusyEvents++
++			}
++			fatal := classify(&r.counts, e)
++			r.outcomes = append(r.outcomes, outcomeCode(kind, e, fatal))
++			if fatal {
++				r.err = fmt.Errorf("writer attempt %d: %w", r.next-1, e)
++				cancel()
++				break
++			}
++			if e == nil {
++				if kind == 0 {
++					r.counts.RolledBack++
++				} else {
++					r.counts.Committed++
++					if kind == 1 {
++						r.counts.SavepointRollback++
++					}
++					if kind == 2 {
++						r.counts.SavepointRelease++
++					}
++				}
++			}
++			if pause(ctx, c.WriterPause) != nil {
++				break
++			}
++		}
++		cancel()
++		results <- r
++	}()
++	ready.Wait()
++	t := time.Now()
++	timer := time.AfterFunc(budget, cancel)
++	close(start)
++	for i := 0; i < c.Readers+1; i++ {
++		r := <-results
++		if r.writer {
++			w.FirstWriterOrdinal = ordinal
++			w.WriterOutcomes = string(r.outcomes)
++			w.Writer = r.counts
++			wl = r.latency
++			next = r.next
++		} else {
++			w.Readers.Merge(r.counts)
++			rl.Merge(r.latency)
++		}
++		if r.err != nil {
++			err = errors.Join(err, r.err)
++		}
++	}
++	timer.Stop()
++	w.Index = index
++	w.StartedUTC = t.UTC().Format(time.RFC3339Nano)
++	w.FinishedUTC = time.Now().UTC().Format(time.RFC3339Nano)
++	w.ActiveSeconds = time.Since(t).Seconds()
++	w.CommittedPerSecond = float64(w.Writer.Committed) / w.ActiveSeconds
++	return
++}
++
++// Trace codes describe terminal outcomes, not retry events. One byte per attempt.
++func outcomeCode(kind int, err error, fatal bool) byte {
++	if fatal {
++		return 'F'
++	}
++	if err == nil {
++		if kind == 0 {
++			return 'R'
++		}
++		return 'C'
++	}
++	if ordinaryBusy(err) {
++		return 'B'
++	}
++	return 'X'
++}
++
++// A canceled/failed iterator is not evidence that the generation row is absent.
++// Preserve its entire diagnostic; only clean EOF creates the absence failure.
++func missingGenerationError(iteratorErr error) error {
++	if iteratorErr != nil {
++		return iteratorErr
++	}
++	return errors.New("missing generation row")
++}

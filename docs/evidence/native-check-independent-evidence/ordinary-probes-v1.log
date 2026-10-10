@@ -1,0 +1,36 @@
+=== RUN   TestIndependentCheckOrdinaryLeaseQuotaAndSavepoint
+--- PASS: TestIndependentCheckOrdinaryLeaseQuotaAndSavepoint (0.00s)
+=== RUN   TestIndependentCheckOrdinarySharedExtensionSnapshot
+--- PASS: TestIndependentCheckOrdinarySharedExtensionSnapshot (0.54s)
+=== RUN   TestIndependentCheckOfficialUnsupportedMatrix
+=== RUN   TestIndependentCheckOfficialUnsupportedMatrix/0
+=== RUN   TestIndependentCheckOfficialUnsupportedMatrix/1
+=== RUN   TestIndependentCheckOfficialUnsupportedMatrix/2
+=== RUN   TestIndependentCheckOfficialUnsupportedMatrix/3
+=== RUN   TestIndependentCheckOfficialUnsupportedMatrix/4
+=== RUN   TestIndependentCheckOfficialUnsupportedMatrix/5
+=== RUN   TestIndependentCheckOfficialUnsupportedMatrix/6
+=== RUN   TestIndependentCheckOfficialUnsupportedMatrix/7
+=== RUN   TestIndependentCheckOfficialUnsupportedMatrix/8
+=== RUN   TestIndependentCheckOfficialUnsupportedMatrix/9
+=== RUN   TestIndependentCheckOfficialUnsupportedMatrix/10
+=== RUN   TestIndependentCheckOfficialUnsupportedMatrix/11
+--- PASS: TestIndependentCheckOfficialUnsupportedMatrix (0.03s)
+    --- PASS: TestIndependentCheckOfficialUnsupportedMatrix/0 (0.01s)
+    --- PASS: TestIndependentCheckOfficialUnsupportedMatrix/1 (0.00s)
+    --- PASS: TestIndependentCheckOfficialUnsupportedMatrix/2 (0.00s)
+    --- PASS: TestIndependentCheckOfficialUnsupportedMatrix/3 (0.00s)
+    --- PASS: TestIndependentCheckOfficialUnsupportedMatrix/4 (0.00s)
+    --- PASS: TestIndependentCheckOfficialUnsupportedMatrix/5 (0.00s)
+    --- PASS: TestIndependentCheckOfficialUnsupportedMatrix/6 (0.00s)
+    --- PASS: TestIndependentCheckOfficialUnsupportedMatrix/7 (0.00s)
+    --- PASS: TestIndependentCheckOfficialUnsupportedMatrix/8 (0.00s)
+    --- PASS: TestIndependentCheckOfficialUnsupportedMatrix/9 (0.00s)
+    --- PASS: TestIndependentCheckOfficialUnsupportedMatrix/10 (0.00s)
+    --- PASS: TestIndependentCheckOfficialUnsupportedMatrix/11 (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.581s
+=== RUN   TestIndependentDriverCheckTransactionCountersRows
+--- PASS: TestIndependentDriverCheckTransactionCountersRows (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.008s

@@ -1,0 +1,8 @@
+=== RUN   TestIndependentCLIHistoricalNamedWAL
+=== RUN   TestIndependentCLIHistoricalNamedWAL/--wal-exclusive
+=== RUN   TestIndependentCLIHistoricalNamedWAL/--wal-shared
+--- PASS: TestIndependentCLIHistoricalNamedWAL (0.16s)
+    --- PASS: TestIndependentCLIHistoricalNamedWAL/--wal-exclusive (0.09s)
+    --- PASS: TestIndependentCLIHistoricalNamedWAL/--wal-shared (0.07s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	1.180s

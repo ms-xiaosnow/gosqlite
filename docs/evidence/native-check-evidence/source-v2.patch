@@ -1,0 +1,2376 @@
+diff --git a/cmd/gosqlite/check.go b/cmd/gosqlite/check.go
+new file mode 100644
+index 0000000..527b0bb
+--- /dev/null
++++ b/cmd/gosqlite/check.go
+@@ -0,0 +1,139 @@
++package main
++
++import (
++	"context"
++	"encoding/json"
++	"errors"
++	"fmt"
++	"io"
++	"os"
++	"strings"
++
++	"github.com/ms-xiaosnow/gosqlite/sqlite"
++)
++
++const checkUsage = "usage: gosqlite check <db> [<extension-index>] [--key-provider <provider>] [--mode snapshot|wal|shared]; named extension checks also accept leading --wal-exclusive or --wal-shared"
++
++type checkCommandOptions struct {
++	path, index, provider   string
++	mode                    sqlite.EncryptionMode
++	walExclusive, walShared bool
++}
++
++func parseCheck(args []string) (checkCommandOptions, error) {
++	var o checkCommandOptions
++	if len(args) > 0 && (args[0] == "--wal-exclusive" || args[0] == "--wal-shared") {
++		o.walExclusive = args[0] == "--wal-exclusive"
++		o.walShared = args[0] == "--wal-shared"
++		args = args[1:]
++	}
++	if len(args) == 0 || args[0] == "" || strings.HasPrefix(args[0], "--") {
++		return o, errors.New(checkUsage)
++	}
++	o.path = args[0]
++	args = args[1:]
++	if len(args) > 0 && !strings.HasPrefix(args[0], "--") {
++		o.index = args[0]
++		args = args[1:]
++		if o.index == "" {
++			return checkCommandOptions{}, errors.New(checkUsage)
++		}
++	}
++	seen := map[string]bool{}
++	for len(args) > 0 {
++		if len(args) < 2 || args[1] == "" || seen[args[0]] {
++			return checkCommandOptions{}, errors.New(checkUsage)
++		}
++		seen[args[0]] = true
++		switch args[0] {
++		case "--key-provider":
++			o.provider = args[1]
++		case "--mode":
++			switch args[1] {
++			case "snapshot":
++				o.mode = sqlite.EncryptionSnapshot
++			case "wal":
++				o.mode = sqlite.EncryptionWAL
++			case "shared":
++				o.mode = sqlite.EncryptionWALShared
++			default:
++				return checkCommandOptions{}, errors.New(checkUsage)
++			}
++		default:
++			return checkCommandOptions{}, errors.New(checkUsage)
++		}
++		args = args[2:]
++	}
++	if seen["--mode"] && o.provider == "" || o.provider != "" && (o.walExclusive || o.walShared) {
++		return checkCommandOptions{}, errors.New(checkUsage)
++	}
++	if o.index == "" && (o.walExclusive || o.walShared) {
++		return checkCommandOptions{}, fmt.Errorf("%w: full check requires a read-only open; plaintext WAL CLI opens require writable coordination; use DB.Check on an existing configured WAL connection", sqlite.ErrUnsupported)
++	}
++	return o, nil
++}
++
++func runCheck(ctx context.Context, args []string, out io.Writer) error {
++	return runCheckWithInput(ctx, args, out, credentialInput{lookupEnv: os.LookupEnv, stdin: func() (io.Reader, error) {
++		info, err := os.Stdin.Stat()
++		if err != nil || (!info.Mode().IsRegular() && info.Mode()&os.ModeNamedPipe == 0) {
++			return nil, errors.New("stdin must be a noninteractive pipe or redirected regular file")
++		}
++		return os.Stdin, nil
++	}})
++}
++func runCheckWithInput(ctx context.Context, args []string, out io.Writer, input credentialInput) error {
++	if err := ctx.Err(); err != nil {
++		return err
++	}
++	o, err := parseCheck(args)
++	if err != nil {
++		return err
++	}
++	var provider *cliKeyProvider
++	if o.provider != "" {
++		provider, err = newCLIKeyProvider(o.provider, input)
++		if err != nil {
++			return err
++		}
++		defer provider.close()
++	}
++	result, err := executeCheck(ctx, o, provider)
++	if err != nil {
++		if provider != nil {
++			return maintenanceError("check", err)
++		}
++		return err
++	}
++	return json.NewEncoder(out).Encode(result)
++}
++func executeCheck(ctx context.Context, o checkCommandOptions, provider *cliKeyProvider) (_ any, resultErr error) {
++	opts := sqlite.Options{ReadOnly: !o.walExclusive && !o.walShared, NoCreate: true, WALExclusive: o.walExclusive, WALShared: o.walShared, KeepWALOnClose: o.walExclusive || o.walShared}
++	if provider != nil {
++		opts.Encryption = &sqlite.EncryptionOptions{KeyProvider: provider, CredentialKind: provider.kind, Mode: o.mode}
++		opts.KeepWALOnClose = o.mode != sqlite.EncryptionSnapshot
++	}
++	db, err := sqlite.OpenContext(ctx, o.path, opts)
++	if err != nil {
++		return nil, err
++	}
++	defer func() { resultErr = errors.Join(resultErr, db.Close()) }()
++	if o.index != "" {
++		if err = db.CheckExtensionIndex(ctx, o.index); err != nil {
++			return nil, err
++		}
++		return struct {
++			Status string `json:"status"`
++			Scope  string `json:"scope"`
++			Index  string `json:"index"`
++		}{"ok", "extension source/posting/frequency consistency only", o.index}, nil
++	}
++	result, err := db.Check(ctx)
++	if err != nil {
++		return nil, err
++	}
++	return struct {
++		Status string `json:"status"`
++		sqlite.CheckResult
++	}{"ok", result}, nil
++}
+diff --git a/cmd/gosqlite/check_test.go b/cmd/gosqlite/check_test.go
+new file mode 100644
+index 0000000..6ebe4f5
+--- /dev/null
++++ b/cmd/gosqlite/check_test.go
+@@ -0,0 +1,129 @@
++package main
++
++import (
++	"bytes"
++	"context"
++	"crypto/sha256"
++	"encoding/hex"
++	"encoding/json"
++	"errors"
++	"io"
++	"os"
++	"path/filepath"
++	"reflect"
++	"strings"
++	"testing"
++
++	"github.com/ms-xiaosnow/gosqlite/encryption"
++	"github.com/ms-xiaosnow/gosqlite/internal/testkit/fileview"
++	"github.com/ms-xiaosnow/gosqlite/sqlite"
++)
++
++func cliCheckFamily(t *testing.T, dir string) map[string][32]byte {
++	t.Helper()
++	m := map[string][32]byte{}
++	if err := filepath.WalkDir(dir, func(p string, e os.DirEntry, err error) error {
++		if err != nil {
++			return err
++		}
++		if e.IsDir() {
++			return nil
++		}
++		b, err := fileview.ReadFile(p)
++		if err != nil {
++			return err
++		}
++		m[p] = sha256.Sum256(b)
++		return nil
++	}); err != nil {
++		t.Fatal(err)
++	}
++	return m
++}
++func TestCLINativeCheckPlainAndNamed(t *testing.T) {
++	dir := t.TempDir()
++	path := filepath.Join(dir, "normal.db")
++	for _, q := range []string{"CREATE TABLE t(id INTEGER PRIMARY KEY,k TEXT)", "CREATE INDEX idx ON t(k)", "INSERT INTO t VALUES(1,'数据库')", "CREATE INDEX grams ON t(k) USING grams13"} {
++		if err := run([]string{"query", path, q}, io.Discard); err != nil {
++			t.Fatal(err)
++		}
++	}
++	before := cliCheckFamily(t, dir)
++	var out bytes.Buffer
++	if err := run([]string{"check", path}, &out); err != nil {
++		t.Fatal(err)
++	}
++	var result struct {
++		Status string `json:"status"`
++		sqlite.CheckResult
++	}
++	if err := json.Unmarshal(out.Bytes(), &result); err != nil || result.Status != "ok" || result.Scope != sqlite.CheckScope || result.ExtensionIndexes != 1 || result.Indexes != 4 {
++		t.Fatal(result, err)
++	}
++	out.Reset()
++	if err := run([]string{"check", path, "grams"}, &out); err != nil || !strings.Contains(out.String(), "consistency only") {
++		t.Fatal(out.String(), err)
++	}
++	out.Reset()
++	if err := run([]string{"inspect", path}, &out); err != nil || !strings.Contains(out.String(), "metadata inspection only") {
++		t.Fatal(out.String(), err)
++	}
++	if !reflect.DeepEqual(before, cliCheckFamily(t, dir)) {
++		t.Fatal("check/inspect changed family")
++	}
++	for _, flag := range []string{"--wal-exclusive", "--wal-shared"} {
++		out.Reset()
++		if err := run([]string{"check", flag, path}, &out); !errors.Is(err, sqlite.ErrUnsupported) || out.Len() != 0 {
++			t.Fatal(err, out.String())
++		}
++	}
++	if !reflect.DeepEqual(before, cliCheckFamily(t, dir)) {
++		t.Fatal("rejected full WAL check opened or converted database")
++	}
++}
++func TestCLINativeCheckCorrectKeyProviders(t *testing.T) {
++	for _, tc := range []struct {
++		name string
++		mode sqlite.EncryptionMode
++	}{{"snapshot", sqlite.EncryptionSnapshot}, {"wal", sqlite.EncryptionWAL}, {"shared", sqlite.EncryptionWALShared}} {
++		t.Run(tc.name, func(t *testing.T) {
++			key := disposableCLIKey(t)
++			input := credentialInput{lookupEnv: func(name string) (string, bool) { return hex.EncodeToString(key), name == "KEY" }, stdin: func() (io.Reader, error) { return strings.NewReader(hex.EncodeToString(key)), nil }}
++			provider := testCLIProvider(t, "env-hex:KEY", input)
++			cfg := sqlite.EncryptionOptions{KeyProvider: provider, CredentialKind: encryption.RawKey256, Mode: tc.mode}
++			dir := t.TempDir()
++			path := filepath.Join(dir, "normal.gse")
++			cliFixture(t, path, cfg)
++			before := cliCheckFamily(t, dir)
++			for _, descriptor := range []string{"env-hex:KEY", "stdin-hex"} {
++				var out bytes.Buffer
++				if err := runCheckWithInput(context.Background(), []string{path, "--key-provider", descriptor, "--mode", tc.name}, &out, input); err != nil {
++					t.Fatal(err)
++				}
++				if !strings.Contains(out.String(), sqlite.CheckScope) || strings.Contains(out.String(), hex.EncodeToString(key)) {
++					t.Fatal("missing scope or credential disclosure")
++				}
++			}
++			if !reflect.DeepEqual(before, cliCheckFamily(t, dir)) {
++				t.Fatal("encrypted check changed family")
++			}
++		})
++	}
++}
++func TestCLINativeCheckMemoryArguments(t *testing.T) {
++	const marker = "private-input-must-not-echo"
++	input := credentialInput{lookupEnv: func(string) (string, bool) { t.Fatal("invalid args acquired key"); return "", false }, stdin: func() (io.Reader, error) { t.Fatal("invalid args read stdin"); return nil, nil }}
++	for _, args := range [][]string{nil, {"db", "--key-provider"}, {"db", "--mode", marker}, {"db", "--key-provider", marker}, {"db", "--key-provider= " + marker}, {"db", "--key-provider", "env-hex:KEY", "--key-provider", marker}, {"--wal-shared", "db"}, {"--wal-exclusive", "db", "x", "--key-provider", "env-hex:KEY"}} {
++		var out bytes.Buffer
++		err := runCheckWithInput(context.Background(), args, &out, input)
++		if err == nil || strings.Contains(err.Error(), marker) || out.Len() != 0 {
++			t.Fatal(err, out.String())
++		}
++	}
++	ctx, cancel := context.WithCancel(context.Background())
++	cancel()
++	var out bytes.Buffer
++	if err := runCheckWithInput(ctx, []string{"unused"}, &out, input); !errors.Is(err, context.Canceled) || out.Len() != 0 {
++		t.Fatal(err)
++	}
++}
+diff --git a/cmd/gosqlite/main.go b/cmd/gosqlite/main.go
+index 1f8b17d..7ad839c 100644
+--- a/cmd/gosqlite/main.go
++++ b/cmd/gosqlite/main.go
+@@ -24,7 +24,7 @@ func runContext(ctx context.Context, args []string, out io.Writer) (resultErr er
+ 		return err
+ 	}
+ 	if len(args) == 0 || (len(args) == 1 && args[0] == "help") {
+-		_, err := fmt.Fprintln(out, "usage: gosqlite version\n       gosqlite query [--wal-exclusive|--wal-shared] <db> '<sql>'\n       gosqlite inspect <db>\n       gosqlite backup <db> --out <new-archive> --key-provider <provider> [--out-key-provider <provider>] [--mode snapshot|wal|shared]\n       gosqlite rekey <db> --key-provider <new-provider> --current-key-provider <provider> [--mode snapshot|wal|shared]\n       gosqlite migrate pgembedding inspect --catalog <catalog.json> [--format json|markdown]\n       gosqlite migrate pgembedding --input <export> --manifest <manifest.json> [--output <new.db> --apply [--resume]]\n       gosqlite migrate pgembedding verify --input <export> --manifest <manifest.json> --output <db>\n       gosqlite migrate pgembedding transition --catalog <catalog.json> --options <options.json> [--report <new.json>]\n       gosqlite check [--wal-exclusive|--wal-shared] <db> <index>\nSQLite SQL MVP. One statement per invocation; SELECT emits JSON Lines, writes emit a result.\nEncrypted maintenance: env-hex:NAME, env-password:NAME, stdin-hex, stdin-password. See docs/cli-encryption.md; plaintext backup is unsupported.")
++		_, err := fmt.Fprintln(out, "usage: gosqlite version\n       gosqlite query [--wal-exclusive|--wal-shared] <db> '<sql>'\n       gosqlite inspect <db>\n       gosqlite backup <db> --out <new-archive> --key-provider <provider> [--out-key-provider <provider>] [--mode snapshot|wal|shared]\n       gosqlite rekey <db> --key-provider <new-provider> --current-key-provider <provider> [--mode snapshot|wal|shared]\n       gosqlite migrate pgembedding inspect --catalog <catalog.json> [--format json|markdown]\n       gosqlite migrate pgembedding --input <export> --manifest <manifest.json> [--output <new.db> --apply [--resume]]\n       gosqlite migrate pgembedding verify --input <export> --manifest <manifest.json> --output <db>\n       gosqlite migrate pgembedding transition --catalog <catalog.json> --options <options.json> [--report <new.json>]\n       gosqlite check <db> [<extension-index>] [--key-provider <provider> --mode snapshot|wal|shared]\n       gosqlite check [--wal-exclusive|--wal-shared] <db> <extension-index>\nSQLite SQL MVP. One statement per invocation; SELECT emits JSON Lines, writes emit a result.\nEncrypted maintenance: env-hex:NAME, env-password:NAME, stdin-hex, stdin-password. See docs/cli-encryption.md; plaintext backup is unsupported.")
+ 		return err
+ 	}
+ 	switch args[0] {
+@@ -91,27 +91,7 @@ func runContext(ctx context.Context, args []string, out io.Writer) (resultErr er
+ 		}
+ 		return rows.Err()
+ 	case "check":
+-		walExclusive := len(args) > 1 && args[1] == "--wal-exclusive"
+-		walShared := len(args) > 1 && args[1] == "--wal-shared"
+-		if walExclusive || walShared {
+-			args = append([]string{args[0]}, args[2:]...)
+-		}
+-		if len(args) != 3 {
+-			return fmt.Errorf("usage: gosqlite check [--wal-exclusive|--wal-shared] <db> <index>; checks extension consistency, not full SQLite integrity")
+-		}
+-		db, err := sqlite.OpenContext(ctx, args[1], sqlite.Options{ReadOnly: !walExclusive && !walShared, NoCreate: true, WALExclusive: walExclusive, WALShared: walShared, KeepWALOnClose: walExclusive || walShared})
+-		if err != nil {
+-			return err
+-		}
+-		defer func() { resultErr = errors.Join(resultErr, db.Close()) }()
+-		if err = db.CheckExtensionIndex(ctx, args[2]); err != nil {
+-			return err
+-		}
+-		return json.NewEncoder(out).Encode(struct {
+-			Status string `json:"status"`
+-			Scope  string `json:"scope"`
+-			Index  string `json:"index"`
+-		}{"ok", "extension source/posting/frequency consistency only", args[2]})
++		return runCheck(ctx, args[1:], out)
+ 	case "inspect":
+ 		if len(args) != 2 {
+ 			return fmt.Errorf("usage: gosqlite inspect <db>")
+diff --git a/docs/native-check.md b/docs/native-check.md
+new file mode 100644
+index 0000000..60d5b65
+--- /dev/null
++++ b/docs/native-check.md
+@@ -0,0 +1,199 @@
++# Native supported-profile integrity checking
++
++`DB.Check(ctx[, CheckOptions])`, `Tx.Check(ctx[, CheckOptions])` and
++`gosqlite check <db>` implement a native bounded integrity/index-consistency
++outcome for goal §12.2. Production checking never invokes an external SQL engine.
++Success names `gosqlite-supported-profile-v1`; it does not claim general SQLite
++`PRAGMA integrity_check` parity, crash durability or a security audit.
++
++## What a pass covers
++
++One pinned logical snapshot is used throughout, including catalog, freelist,
++ordinary tables, indexes, overflow and every extension check. The checker:
++
++1. Revalidates the selected logical header, SQLite magic, page geometry, UTF-8
++   encoding and supported schema format. WAL's selected logical extent is kept
++   distinct from the physical main-file size; no live main/WAL file is copied.
++2. Parses the complete supported catalog and rejects unknown/unimplemented
++   objects and constraints. It reuses the conservative writable-catalog grammar
++   solely as a read-only validator. Exact owned extension invalidation triggers
++   are recognized; arbitrary triggers/views are not silently skipped.
++3. Validates freelist trunks/leaves, all tree/overflow encodings and ordering,
++   cycles, depth, exact cell/freeblock/1–3-byte-fragment accounting, record shape,
++   key arity/rowid type, cross-tree page ownership,
++   and every logical page's accounting. The reserved SQLite lock-byte page is
++   the sole explicitly reserved page, rather than a fabricated tree owner.
++4. Reads every table record. INTEGER PRIMARY KEY decoded storage values must be logical NULL and
++   resolve to the signed rowid; short records use supported literal defaults.
++   Declared NOT NULL constraints and strict VECTOR/HALFVEC/BIT/SPARSEVEC
++   interpretations are checked. Ordinary SQLite affinity remains dynamic typing.
++5. Reconciles ordinary indexes in both directions. Every table row must have its
++   expected complete BINARY ASC key plus rowid. Every index entry must resolve to
++   a source row and all indexed values must compare equal under SQLite storage
++   classes and exact mixed INTEGER/REAL comparison. Cardinality alone and a
++   structure-only traversal cannot pass missing/orphan/extra-wrong-value keys.
++6. Checks every grams13 index's source, postings and exact frequencies, and the
++   existing supported dense/typed HNSW graph or IVFFlat source/state/membership
++   invariants. The ordinary B-tree audit also covers every shadow lookup index.
++   Shadow table rows must have a real logical owner of the correct method;
++   orphan rows outside a named index's range cannot escape a full check.
++
++Tables/indexes are traversed in sorted names for stable work/count reporting.
++No source rows or synthetic replacement indexes are retained wholesale. A pass
++is about the checked snapshot; another connection may commit after it ends.
++
++## Fail-closed profile
++
++Supported files have no reserved page bytes, schema format 4 (or an empty
++format-0 database), UTF-8, ordinary rowid tables with the engine's supported
++simple column types/defaults/NOT NULL/INTEGER PRIMARY KEY, and nonunique ascending
++BINARY ordinary indexes. Supported owned extensions are grams13 and the current
++native dense/typed HNSW and IVFFlat configurations.
++
++Unsupported features fail instead of being reported as checked: WITHOUT ROWID,
++STRICT, autovacuum, UTF-16, schema formats 1–3, UNIQUE/autoindexes, other primary
++keys, arbitrary CHECK/foreign-key constraints, partial/expression/DESC/non-BINARY
++indexes, generated columns, arbitrary views/triggers, sqlite_* internal objects,
++unknown schema/extension formats or persisted custom method identities. Full
++checks use a fresh built-in-only registry and never invoke application-provided
++Configure/Keys callbacks, including implementations registered as grams13 v1.
++Persisted grams13 v1 data is checked against actual built-in semantics regardless
++of the application registry. This does not audit the provenance of that registry.
++A same-name custom implementation can pass only when its persisted data also
++satisfies the built-in profile; unsupported persisted versions fail. Named
++extension checks keep their application-directed registry behavior. This is narrower
++than the engine's ability to SELECT an otherwise readable table while ignoring
++unsupported peer objects.
++
++Malformed UTF-8 TEXT is explicitly outside this check profile and returns
++`ErrUnsupported`; the engine's raw-byte read/equality behavior is unchanged.
++A typed value mismatch fails the check. Dirty, missing-guard or schema-mismatched
++extensions return `ErrReindexRequired`, never an incomplete successful report.
++The checker does not rebuild them. ANN consistency does not certify recall,
++optimal topology, speed, training quality or pgvector binary compatibility.
++
++## Snapshot and ownership contract
++
++Without an active transaction, `DB.Check` opens one reader and closes it before
++returning a result. A read or close error returns the zero `CheckResult` and an
++error. It never acquires/promotes a writer, creates a transaction journal,
++checkpoints, repairs or changes `changes()`/`total_changes()`/`last_insert_rowid()`.
++
++With an active transaction, `DB.Check` and `Tx.Check` use its reader, including
++uncommitted own writes. First access pins a lazy transaction through its existing
++read path. A writable deferred transaction may therefore retain a read-state
++pager transaction, but is not promoted to a writer by Check. The caller still
++owns that transaction and its Rows; a failed check does not roll it back or
++invalidate its cursor. Logical NULL follows the existing record decoder, which maps a stored REAL NaN
++to NULL; this checker does not promise a physical serial-type-0-only IPK audit.
++A transaction-context or operation-context cancellation
++fails the check. Existing single-session lease restrictions still apply to
++unrelated live Rows. Public `Options` and statement `Result` layouts are unchanged.
++
++Encrypted APIs operate on the existing authenticated logical snapshot with its
++configured key provider. Plaintext buffers receive the same lifecycle as normal
++readers; this checker makes no absolute erasure or new cryptographic audit claim.
++
++## Bounds and reporting
++
++`CheckOptions` is a separate additive type:
++
++- `MaxPages`: maximum logical extent/ownership metadata; zero is 1,048,576 pages,
++  which is also the supported maximum. Larger requested bounds are unsupported.
++- `MaxPageReads`: cumulative logical PageReader calls across the entire check;
++  zero is 16,777,216; the supported maximum is 2^32. Repeated catalog reads, source/index seeks, overflow and
++  extension validation all share this bound. Admission fails before the next
++  read; there is no partial-success fallback.
++
++These check-specific quotas start after snapshot acquisition, when the check
++reader is installed. Acquiring the existing reader/session or a lazy writable
++Tx read-state snapshot can perform pager/header/freelist work under the existing
++pager limits before these counters begin. These are traversal quotas, not a cap
++on every open/acquisition read or allocation.
++
++The existing separate 64 MiB record, 16 MiB retained schema, cursor depth/visited,
++connection `MaxSortBytes` and extension construction/query limits remain in force.
++These are bounded component limits, not a new aggregate live-heap budget or a
++wall-clock SLA. Work can be substantially greater than a table scan because
++index reconciliation performs seeks. Cancellation and quota errors return no
++successful result and do not weaken the requested scope.
++
++Result fields: `scope`, `pages`, `free_pages` (including trunks), `reserved_pages`,
++`tables`, `indexes`, `extension_indexes`, `table_rows`, `index_entries`, and
++`page_reads`. Tables/rows and ordinary indexes/entries include extension shadows;
++`sqlite_schema` is checked but excluded from those counts. `extension_indexes`
++counts logical grams/ANN definitions. Each physical index entry is counted once.
++Page reads include repeated logical calls, not physical disk I/O. An empty
++database can legitimately report zero tables/rows/indexes.
++
++## CLI
++
++```sh
++gosqlite check ordinary.db
++gosqlite check ordinary.db docs_grams
++gosqlite check encrypted.gse --key-provider env-hex:DB_KEY --mode snapshot
++gosqlite check encrypted.gse --key-provider stdin-password --mode shared < key-input
++```
++
++No-provider full checks open existing rollback databases read-only/no-create.
++Encrypted full checks also open read-only/no-create and support existing snapshot,
++exclusive encrypted-WAL and shared encrypted-WAL selections. Modes are explicit;
++there is no conversion. Provider descriptors reuse the separately reviewed
++[CLI encryption adapter](cli-encryption.md), including explicit raw/password
++kinds, bounded pipe/regular-file stdin, lazy acquisition, redacted provider/errors
++and best-effort owned-buffer clearing. Password stdin is exact bytes; EOF is
++required and an unfinished producer can still block. Keys, passwords or DSNs
++must never be supplied as arguments. Environment and immutable-string exposure
++limitations remain. JSON includes no decrypted values or provider descriptors.
++Success JSON is emitted only after DB.Close completes.
++
++The optional extension-index argument retains the existing narrower named check
++and its `"extension source/posting/frequency consistency only"` scope. Named
++checks retain the historical leading `--wal-exclusive`/`--wal-shared` syntax;
++those routes require writable native WAL coordination and are not filesystem
++read-only opens. `inspect` remains metadata inspection only.
++
++A full plaintext WAL CLI check is explicitly unsupported. Leading WAL flags
++without a named extension index reject **before opening** the DB, avoiding mode
++conversion or writable session/SHM initialization. Plain read-only opens already
++refuse WAL files. `DB.Check`/`Tx.Check` work on an already configured WAL session
++without writer promotion, but a native filesystem-read-only plaintext WAL opener
++and corresponding full CLI route remain an actual implementation gap. They are
++not a manual-test gate and are not claimed as delivered.
++
++## Ordinary evidence and unexecuted gates
++
++The focused tests cover memory-only malformed PageReader/schema/record/index
++fixtures; missing/extra/orphan ordinary keys; constraints/types/encoding; page
++accounting; default/exact/insufficient budgets and normal context cancellation;
++intact native and official SQLite 512/4096/65536-page fixtures; overflow values,
++short-record defaults, signed rowid extremes and exact numeric keys; DML,
++freelist, rollback, transaction cursor/counter ownership, same-snapshot WAL
++readers, normal checkpoint/reopen; grams plus dense/half/bit/sparse HNSW and
++supported dense/half/bit IVF; correct-key snapshot/WAL/shared encryption; CLI
++full/named/inspect/provider paths and unchanged read-only family bytes.
++
++Official SQLite is used only to generate valid test fixtures and independently
++check valid SQL output. It never supplies the native check result. Review test
++bodies/helpers and run `go run ./internal/testscope` before scoped tests.
++
++No physical corruption/tamper/wrong-key/missing-selected-file test, selected-file
++removal/namespace mutation, crash/kill/abrupt exit/hot recovery, native
++I/O/lock/unmap/close/Sync/shortwrite/diskfull/permission failure, interrupted
++publication/rekey or manual-tag test is part of this slice. No such scenario was
++moved into CI. Native Darwin/Windows runtime, hostile namespaces, storage
++freshness, crash durability and security/release acceptance remain unqualified.
++A successful logical check cannot close any of those gates.
++
++A disposable API-versus-real-executable proof is available:
++
++```sh
++CGO_ENABLED=0 go build -o /tmp/gosqlite-check ./cmd/gosqlite
++CGO_ENABLED=0 go run ./examples/native-check /tmp/gosqlite-check
++```
++
++It creates intact plaintext and correctly keyed encrypted snapshot/WAL/shared
++fixtures, invokes the actual CLI with bounded stdin-hex for encrypted checks,
++compares complete API/CLI counts and verifies all source-family bytes/names stay
++unchanged. Each connection and subprocess finishes normally before the private
++temporary directory is cleaned up. It prints only mode and non-secret counts.
+diff --git a/examples/native-check/main.go b/examples/native-check/main.go
+new file mode 100644
+index 0000000..a11def4
+--- /dev/null
++++ b/examples/native-check/main.go
+@@ -0,0 +1,144 @@
++// The disposable proof uses native APIs to create intact fixtures and invokes
++// the real CLI with explicit provider descriptors. No external SQL engine is used.
++package main
++
++import (
++	"bytes"
++	"context"
++	"crypto/rand"
++	"crypto/sha256"
++	"encoding/hex"
++	"encoding/json"
++	"errors"
++	"fmt"
++	"os"
++	"os/exec"
++	"path/filepath"
++	"reflect"
++
++	"github.com/ms-xiaosnow/gosqlite/encryption"
++	"github.com/ms-xiaosnow/gosqlite/sqlite"
++)
++
++type keyProvider struct{ key []byte }
++type keyMaterial struct{ key []byte }
++
++func (p keyProvider) Acquire(context.Context, encryption.KeyRequest) (encryption.KeyMaterial, error) {
++	return &keyMaterial{append([]byte(nil), p.key...)}, nil
++}
++func (m *keyMaterial) Kind() encryption.CredentialKind { return encryption.RawKey256 }
++func (m *keyMaterial) Bytes() []byte                   { return m.key }
++func (m *keyMaterial) Release()                        { clear(m.key) }
++func snapshot(dir string) (map[string][32]byte, error) {
++	out := map[string][32]byte{}
++	err := filepath.WalkDir(dir, func(path string, e os.DirEntry, err error) error {
++		if err != nil {
++			return err
++		}
++		if e.IsDir() {
++			return nil
++		}
++		b, err := os.ReadFile(path)
++		if err != nil {
++			return err
++		}
++		out[path] = sha256.Sum256(b)
++		return nil
++	})
++	return out, err
++}
++func create(path string, opts sqlite.Options) (result sqlite.CheckResult, retErr error) {
++	db, err := sqlite.Open(path, opts)
++	if err != nil {
++		return result, err
++	}
++	defer func() { retErr = errors.Join(retErr, db.Close()) }()
++	ctx := context.Background()
++	for _, sql := range []string{"CREATE TABLE t(id INTEGER PRIMARY KEY,body TEXT)", "CREATE INDEX ordinary ON t(body)", "INSERT INTO t VALUES(1,'数据库'),(2,'bounded native check')", "CREATE INDEX grams ON t(body) USING grams13"} {
++		if _, err = db.Exec(ctx, sql); err != nil {
++			return result, err
++		}
++	}
++	return db.Check(ctx)
++}
++func run(binary string) error {
++	dir, err := os.MkdirTemp("", "gosqlite-check-proof-")
++	if err != nil {
++		return err
++	}
++	defer os.RemoveAll(dir) // only normally completed disposable fixture directory
++	key := make([]byte, 32)
++	if _, err = rand.Read(key); err != nil {
++		return err
++	}
++	defer clear(key)
++	for _, mode := range []string{"plain", "snapshot", "wal", "shared"} {
++		opts := sqlite.Options{}
++		if mode != "plain" {
++			cfg := sqlite.EncryptionOptions{KeyProvider: keyProvider{key}, CredentialKind: encryption.RawKey256}
++			if mode == "wal" {
++				cfg.Mode = sqlite.EncryptionWAL
++			}
++			if mode == "shared" {
++				cfg.Mode = sqlite.EncryptionWALShared
++			}
++			opts.Encryption = &cfg
++			opts.KeepWALOnClose = mode != "snapshot"
++		}
++		path := filepath.Join(dir, mode+".db")
++		want, err := create(path, opts)
++		if err != nil {
++			return err
++		}
++		before, err := snapshot(dir)
++		if err != nil {
++			return err
++		}
++		args := []string{"check", path}
++		if mode != "plain" {
++			args = append(args, "--key-provider", "stdin-hex", "--mode", mode)
++		}
++		cmd := exec.Command(binary, args...)
++		if mode != "plain" {
++			cmd.Stdin = bytes.NewBufferString(hex.EncodeToString(key))
++		}
++		output, err := cmd.CombinedOutput()
++		if err != nil {
++			return fmt.Errorf("%s CLI failed: %w", mode, err)
++		}
++		var got struct {
++			Status string `json:"status"`
++			sqlite.CheckResult
++		}
++		if err = json.Unmarshal(output, &got); err != nil {
++			return err
++		}
++		if got.Status != "ok" || got.CheckResult != want {
++			return fmt.Errorf("%s API/CLI result mismatch", mode)
++		}
++		after, err := snapshot(dir)
++		if err != nil {
++			return err
++		}
++		if !reflect.DeepEqual(before, after) {
++			return fmt.Errorf("%s read-only check changed family bytes", mode)
++		}
++		if err = json.NewEncoder(os.Stdout).Encode(struct {
++			Mode string `json:"mode"`
++			sqlite.CheckResult
++		}{mode, got.CheckResult}); err != nil {
++			return err
++		}
++	}
++	return nil
++}
++func main() {
++	if len(os.Args) != 2 {
++		fmt.Fprintln(os.Stderr, "usage: native-check <absolute gosqlite binary>")
++		os.Exit(1)
++	}
++	if err := run(os.Args[1]); err != nil {
++		fmt.Fprintln(os.Stderr, err)
++		os.Exit(1)
++	}
++}
+diff --git a/internal/btree/check_space.go b/internal/btree/check_space.go
+new file mode 100644
+index 0000000..94b7cc1
+--- /dev/null
++++ b/internal/btree/check_space.go
+@@ -0,0 +1,140 @@
++package btree
++
++import (
++	"context"
++	"encoding/binary"
++	"sort"
++
++	"github.com/ms-xiaosnow/gosqlite/internal/record"
++)
++
++// CheckTreeSpace supplements CheckOwnership with exact B-tree cell-content
++// accounting. Every byte between the content boundary and usable-page end must
++// belong to a parsed cell, a freeblock, or a 1–3-byte fragment; the fragment sum
++// must match the page header. The unallocated gap before the content boundary
++// is distinct. Overflow and freelist pages are never interpreted as tree pages.
++// The caller retains the same snapshot and separately validates page ownership.
++func CheckTreeSpace(ctx context.Context, r PageReader, roots []RootSpec) error {
++	h := r.Header()
++	if h.PageCount == 0 || h.PageCount > MaxVisitedPages {
++		return record.ErrLimit
++	}
++	seen := make(map[uint32]bool)
++	all := make([]RootSpec, 0, len(roots)+1)
++	all = append(all, RootSpec{Page: 1, Kind: TableTree})
++	all = append(all, roots...)
++	for _, root := range all {
++		stack := []uint32{root.Page}
++		for len(stack) > 0 {
++			if err := ctx.Err(); err != nil {
++				return err
++			}
++			n := stack[len(stack)-1]
++			stack = stack[:len(stack)-1]
++			if n == 0 || n > h.PageCount || seen[n] {
++				return corrupt("invalid or repeated B-tree space page %d", n)
++			}
++			seen[n] = true
++			p, err := r.ReadPage(ctx, n)
++			if err != nil {
++				return err
++			}
++			if len(p) != int(h.PageSize) {
++				return corrupt("B-tree space page byte count")
++			}
++			children, err := checkPageSpace(p, n, int(h.UsableSize), root.Kind)
++			if err != nil {
++				return err
++			}
++			if len(children) > int(h.PageCount)-len(stack) {
++				return corrupt("B-tree space child count exceeds extent")
++			}
++			stack = append(stack, children...)
++		}
++	}
++	return ctx.Err()
++}
++
++func checkPageSpace(p []byte, n uint32, usable int, kind TreeKind) ([]uint32, error) {
++	off := 0
++	if n == 1 {
++		off = 100
++	}
++	var ends []int
++	var children []uint32
++	var leaf bool
++	// The existing parsers validate all offsets, cell/overflow-local lengths,
++	// freeblock chains and pairwise disjointness before any slice below is used.
++	switch kind {
++	case TableTree:
++		f, err := parsePage(p, n, usable, bounds{})
++		if err != nil {
++			return nil, err
++		}
++		leaf = f.leaf
++		ends = make([]int, len(f.cells))
++		for i, c := range f.cells {
++			ends[i] = c.end
++			if !leaf {
++				children = append(children, c.child)
++			}
++		}
++		if !leaf {
++			children = append(children, f.right)
++		}
++	case IndexTree:
++		f, err := parseIndexPage(p, n, usable)
++		if err != nil {
++			return nil, err
++		}
++		leaf = f.leaf
++		ends = make([]int, len(f.cells))
++		for i, c := range f.cells {
++			ends[i] = c.end
++			if !leaf {
++				children = append(children, c.child)
++			}
++		}
++		if !leaf {
++			children = append(children, f.right)
++		}
++	default:
++		return nil, corrupt("unknown B-tree space kind")
++	}
++	hdr := 8
++	if !leaf {
++		hdr = 12
++	}
++	content := int(binary.BigEndian.Uint16(p[off+5:]))
++	if content == 0 {
++		content = 65536
++	}
++	spans := make([]span, 0, len(ends))
++	for i, end := range ends {
++		start := int(binary.BigEndian.Uint16(p[off+hdr+2*i:]))
++		spans = append(spans, span{start, end})
++	}
++	for at := int(binary.BigEndian.Uint16(p[off+1:])); at != 0; at = int(binary.BigEndian.Uint16(p[at:])) {
++		size := int(binary.BigEndian.Uint16(p[at+2:]))
++		spans = append(spans, span{at, at + size})
++	}
++	sort.Slice(spans, func(i, j int) bool { return spans[i].start < spans[j].start })
++	end, fragments := content, 0
++	for _, s := range spans {
++		gap := s.start - end
++		if gap < 0 || gap > 3 {
++			return nil, corrupt("page %d unrepresented cell-content space", n)
++		}
++		fragments += gap
++		end = s.end
++	}
++	tail := usable - end
++	if tail < 0 || tail > 3 {
++		return nil, corrupt("page %d unrepresented cell-content tail", n)
++	}
++	fragments += tail
++	if fragments != int(p[off+7]) {
++		return nil, corrupt("page %d fragmented byte count differs", n)
++	}
++	return children, nil
++}
+diff --git a/sqlite/check.go b/sqlite/check.go
+new file mode 100644
+index 0000000..62a5d55
+--- /dev/null
++++ b/sqlite/check.go
+@@ -0,0 +1,411 @@
++package sqlite
++
++import (
++	"context"
++	"encoding/binary"
++	"errors"
++	"fmt"
++	"sort"
++	"unicode/utf8"
++
++	"github.com/ms-xiaosnow/gosqlite/extension/grams13"
++	"github.com/ms-xiaosnow/gosqlite/extension/vector/ann"
++	"github.com/ms-xiaosnow/gosqlite/internal/btree"
++	"github.com/ms-xiaosnow/gosqlite/internal/pager"
++	sqlast "github.com/ms-xiaosnow/gosqlite/internal/sql"
++)
++
++// CheckScope identifies the versioned, fail-closed integrity profile. It is not
++// SQLite's PRAGMA integrity_check or a crash/durability/cryptographic audit.
++const CheckScope = "gosqlite-supported-profile-v1"
++
++// CheckOptions bounds whole-check page ownership metadata and cumulative logical
++// page reads after snapshot acquisition, including catalog reloads, overflow,
++// seeks and extension work. Reader/Tx acquisition retains existing pager caps
++// and is outside these traversal quotas.
++// Zero uses 1,048,576 pages and 16,777,216 reads. MaxPages cannot exceed the
++// B-tree ownership limit; MaxPageReads cannot exceed 2^32. Existing record (64 MiB), schema (16 MiB), cursor,
++// connection MaxSortBytes and extension-specific limits still apply separately;
++// this is not an aggregate heap-byte limit. A quota failure never passes.
++type CheckOptions struct {
++	MaxPages     uint32
++	MaxPageReads uint64
++}
++
++// CheckResult is returned only after all checks succeed. Counts include owned
++// extension shadow tables and their ordinary B-tree indexes; sqlite_schema is
++// checked but excluded from Tables/TableRows. IndexEntries counts each physical
++// ordinary index entry once. PageReads includes repeated logical reads, not OS
++// I/O. FreePages includes freelist trunks. ReservedPages is the lock-byte page.
++type CheckResult struct {
++	Scope            string `json:"scope"`
++	Pages            uint32 `json:"pages"`
++	FreePages        uint32 `json:"free_pages"`
++	ReservedPages    uint32 `json:"reserved_pages"`
++	Tables           int    `json:"tables"`
++	Indexes          int    `json:"indexes"`
++	ExtensionIndexes int    `json:"extension_indexes"`
++	TableRows        uint64 `json:"table_rows"`
++	IndexEntries     uint64 `json:"index_entries"`
++	PageReads        uint64 `json:"page_reads"`
++}
++
++func checkOptions(options []CheckOptions) (CheckOptions, error) {
++	if len(options) > 1 {
++		return CheckOptions{}, fmt.Errorf("at most one CheckOptions is accepted")
++	}
++	var o CheckOptions
++	if len(options) == 1 {
++		o = options[0]
++	}
++	if o.MaxPages == 0 {
++		o.MaxPages = btree.MaxVisitedPages
++	}
++	if o.MaxPages > btree.MaxVisitedPages {
++		return CheckOptions{}, fmt.Errorf("%w: check page budget exceeds supported maximum", ErrUnsupported)
++	}
++	if o.MaxPageReads == 0 {
++		o.MaxPageReads = 1 << 24
++	}
++	if o.MaxPageReads > 1<<32 {
++		return CheckOptions{}, fmt.Errorf("%w: check read budget exceeds supported maximum", ErrUnsupported)
++	}
++	return o, nil
++}
++
++// Check validates one pinned logical snapshot without promoting a write lease,
++// repairing data, creating a journal or changing SQL connection counters. With
++// an active transaction it checks that transaction, including its own writes.
++// Otherwise it owns and closes a read snapshot before reporting success.
++// Unsupported catalog features fail closed, even when normal SELECT can read
++// some objects in that database. See docs/native-check.md for the exact profile.
++func (d *DB) Check(ctx context.Context, options ...CheckOptions) (CheckResult, error) {
++	if err := checkContext(ctx); err != nil {
++		return CheckResult{}, wrap("check", err)
++	}
++	o, err := checkOptions(options)
++	if err != nil {
++		return CheckResult{}, wrap("check", err)
++	}
++	d.mu.Lock()
++	defer d.mu.Unlock()
++	if d.closed {
++		return CheckResult{}, wrap("check", ErrClosed)
++	}
++	if d.tx != nil {
++		return d.tx.checkLocked(ctx, o)
++	}
++	r, err := d.openReader(ctx)
++	if err != nil {
++		return CheckResult{}, wrap("check", err)
++	}
++	result, err := d.checkSnapshot(ctx, r, o)
++	err = errors.Join(err, r.Close())
++	if err != nil {
++		return CheckResult{}, wrap("check", err)
++	}
++	return result, nil
++}
++
++// Check uses the transaction's pinned snapshot and leaves its lifetime, active
++// Rows, savepoints and connection counters unchanged. First access pins a lazy
++// transaction through its usual read path, without write promotion.
++func (t *Tx) Check(ctx context.Context, options ...CheckOptions) (CheckResult, error) {
++	if err := checkContext(ctx); err != nil {
++		return CheckResult{}, wrap("check", err)
++	}
++	o, err := checkOptions(options)
++	if err != nil {
++		return CheckResult{}, wrap("check", err)
++	}
++	t.db.mu.Lock()
++	defer t.db.mu.Unlock()
++	return t.checkLocked(ctx, o)
++}
++func (t *Tx) checkLocked(ctx context.Context, o CheckOptions) (CheckResult, error) {
++	if err := t.check(); err != nil {
++		return CheckResult{}, wrap("check", err)
++	}
++	if err := t.ensureSnapshotLocked(ctx); err != nil {
++		return CheckResult{}, wrap("check", err)
++	}
++	result, err := t.db.checkSnapshot(ctx, t.reader, o)
++	if err != nil {
++		return CheckResult{}, wrap("check", err)
++	}
++	return result, nil
++}
++
++type checkReader struct {
++	btree.PageReader
++	header          pager.Header
++	maxReads, reads uint64
++	txContext       context.Context
++}
++
++func (r *checkReader) Header() pager.Header { return r.header }
++func (r *checkReader) ReadPage(ctx context.Context, n uint32) ([]byte, error) {
++	if err := ctx.Err(); err != nil {
++		return nil, err
++	}
++	if r.txContext != nil {
++		if err := r.txContext.Err(); err != nil {
++			return nil, err
++		}
++	}
++	if n == 0 || n > r.header.PageCount {
++		return nil, fmt.Errorf("%w: check page outside snapshot", ErrCorrupt)
++	}
++	if r.reads >= r.maxReads {
++		return nil, fmt.Errorf("%w: check logical page-read budget", ErrMemoryLimit)
++	}
++	r.reads++
++	p, err := r.PageReader.ReadPage(ctx, n)
++	if err != nil {
++		return nil, err
++	}
++	if len(p) != int(r.header.PageSize) {
++		clear(p)
++		return nil, fmt.Errorf("%w: check page byte count", ErrCorrupt)
++	}
++	return p, nil
++}
++
++func (d *DB) checkSnapshot(ctx context.Context, source btree.PageReader, o CheckOptions) (CheckResult, error) {
++	h := source.Header()
++	if h.PageSize < 512 || h.PageSize > 65536 || h.PageSize&(h.PageSize-1) != 0 || h.PageCount == 0 {
++		return CheckResult{}, fmt.Errorf("%w: check snapshot geometry", ErrCorrupt)
++	}
++	if h.PageCount > o.MaxPages {
++		return CheckResult{}, fmt.Errorf("%w: check page-ownership budget", ErrMemoryLimit)
++	}
++	r := &checkReader{PageReader: source, header: h, maxReads: o.MaxPageReads}
++	if d.tx != nil {
++		r.txContext = d.tx.ctx
++	}
++	if err := checkLogicalHeader(ctx, r); err != nil {
++		return CheckResult{}, err
++	}
++	// Full integrity checking has a fixed persisted-semantics profile. Never
++	// let an application registry redefine a built-in name/version and make its
++	// own missing postings pass by returning a different key set.
++	validator, err := copyValidator()
++	if err != nil {
++		return CheckResult{}, err
++	}
++	validator.opts = d.opts
++	validator.opts.IndexMethods = validator.methods
++	helper := &Tx{db: validator, reader: r}
++	c, err := helper.validateCatalog(ctx)
++	if err != nil {
++		return CheckResult{}, err
++	}
++	if h.SchemaFormat == 0 && len(c.names) != 0 {
++		return CheckResult{}, fmt.Errorf("%w: nonempty catalog has empty schema format", ErrCorrupt)
++	}
++	names := make([]string, 0, len(c.tables))
++	for name := range c.tables {
++		names = append(names, name)
++	}
++	sort.Strings(names)
++	roots := make([]btree.RootSpec, 0, len(c.names))
++	result := CheckResult{Scope: CheckScope, Pages: h.PageCount, Tables: len(c.tables), ExtensionIndexes: len(c.extensions.indexes)}
++	for _, name := range names {
++		tab := c.tables[name]
++		roots = append(roots, btree.RootSpec{Page: tab.root, Kind: btree.TableTree})
++		sort.Slice(tab.indexes, func(i, j int) bool { return fold(tab.indexes[i].name) < fold(tab.indexes[j].name) })
++		for _, idx := range tab.indexes {
++			roots = append(roots, btree.RootSpec{Page: idx.root, Kind: btree.IndexTree, KeyInfo: btree.KeyInfo{Columns: len(idx.columns)}})
++			result.Indexes++
++		}
++	}
++	free, err := pager.SnapshotFreePages(ctx, r, o.MaxPages)
++	if err != nil {
++		return CheckResult{}, err
++	}
++	if err = btree.CheckOwnership(ctx, r, roots, free); err != nil {
++		return CheckResult{}, err
++	}
++	if err = btree.CheckTreeSpace(ctx, r, roots); err != nil {
++		return CheckResult{}, err
++	}
++	result.FreePages = uint32(len(free))
++	if uint32(0x40000000/h.PageSize+1) <= h.PageCount {
++		result.ReservedPages = 1
++	}
++	byID := make(map[int64]*extensionIndex, len(c.extensions.indexes))
++	for _, x := range c.extensions.indexes {
++		if x.method != grams13.MethodName && x.method != ann.HNSW && x.method != ann.IVFFlat {
++			return CheckResult{}, fmt.Errorf("%w: extension method outside check profile", ErrUnsupported)
++		}
++		if !x.usable {
++			return CheckResult{}, fmt.Errorf("%w: %s", ErrReindexRequired, x.fallback)
++		}
++		byID[x.id] = x
++	}
++	for _, name := range names {
++		tab := c.tables[name]
++		err = btree.Scan(ctx, r, tab.root, func(id int64, raw []any) error {
++			values, err := checkTableValues(tab, id, raw)
++			if err != nil {
++				return err
++			}
++			if err = checkShadowOwner(tab.name, raw, byID); err != nil {
++				return err
++			}
++			result.TableRows++
++			for _, idx := range tab.indexes {
++				_, found, err := btree.SeekIndex(ctx, r, idx.root, btree.KeyInfo{Columns: len(idx.columns)}, idx.key(id, values))
++				if err != nil {
++					return err
++				}
++				if !found {
++					return fmt.Errorf("%w: table row missing expected index key", ErrCorrupt)
++				}
++			}
++			return nil
++		})
++		if err != nil {
++			return CheckResult{}, err
++		}
++		for _, idx := range tab.indexes {
++			err = btree.ScanIndex(ctx, r, idx.root, btree.KeyInfo{Columns: len(idx.columns)}, func(key []any) error {
++				id := key[len(idx.columns)].(int64) // IndexCursor validates arity and rowid storage class.
++				raw, found, err := btree.SeekTable(ctx, r, tab.root, id)
++				if err != nil {
++					return err
++				}
++				if !found {
++					return fmt.Errorf("%w: index rowid has no table row", ErrCorrupt)
++				}
++				values, err := checkTableValues(tab, id, raw)
++				if err != nil {
++					return err
++				}
++				for i, col := range idx.columns {
++					cmp, err := sqlast.Compare(key[i], values[col])
++					if err != nil {
++						return err
++					}
++					if cmp != 0 {
++						return fmt.Errorf("%w: index value differs from table row", ErrCorrupt)
++					}
++				}
++				result.IndexEntries++
++				return nil
++			})
++			if err != nil {
++				return CheckResult{}, err
++			}
++		}
++	}
++	extensions := append([]*extensionIndex(nil), c.extensions.indexes...)
++	sort.Slice(extensions, func(i, j int) bool { return fold(extensions[i].name) < fold(extensions[j].name) })
++	for _, x := range extensions {
++		if err = validator.checkExtensionIndex(ctx, r, x.name); err != nil {
++			return CheckResult{}, err
++		}
++	}
++	if err = ctx.Err(); err != nil {
++		return CheckResult{}, err
++	}
++	if r.txContext != nil {
++		if err = r.txContext.Err(); err != nil {
++			return CheckResult{}, err
++		}
++	}
++	result.PageReads = r.reads
++	return result, nil
++}
++
++// Revalidate logical page 1 without treating a WAL/transaction's selected extent
++// as the main file's physical extent. Only the known WAL version and the pager's
++// authoritative logical count are normalized in this private read buffer.
++func checkLogicalHeader(ctx context.Context, r *checkReader) error {
++	h := r.Header()
++	if h.ReservedBytes != 0 || h.UsableSize != h.PageSize || h.SchemaFormat != 0 && h.SchemaFormat != 4 {
++		return fmt.Errorf("%w: check requires unreserved schema format 4", ErrUnsupported)
++	}
++	if h.ReadVersion != h.WriteVersion || (h.ReadVersion != 1 && h.ReadVersion != 2) {
++		return fmt.Errorf("%w: check read/write version", ErrUnsupported)
++	}
++	p, err := r.ReadPage(ctx, 1)
++	if err != nil {
++		return err
++	}
++	defer clear(p)
++	if p[18] != h.WriteVersion || p[19] != h.ReadVersion {
++		return fmt.Errorf("%w: logical header version mismatch", ErrCorrupt)
++	}
++	p[18], p[19] = 1, 1
++	binary.BigEndian.PutUint32(p[28:], h.PageCount)
++	parsed, err := pager.ParseHeader(p, int64(h.PageSize)*int64(h.PageCount))
++	if err != nil {
++		return err
++	}
++	parsed.ReadVersion, parsed.WriteVersion = h.ReadVersion, h.WriteVersion
++	if parsed != h {
++		return fmt.Errorf("%w: logical header metadata mismatch", ErrCorrupt)
++	}
++	return nil
++}
++
++func checkTableValues(tab *writeTable, id int64, raw []any) ([]any, error) {
++	if tab.ipk >= 0 && tab.ipk < len(raw) && raw[tab.ipk] != nil {
++		return nil, fmt.Errorf("%w: INTEGER PRIMARY KEY decoded record slot is not NULL", ErrCorrupt)
++	}
++	values, err := tab.values(id, raw)
++	if err != nil {
++		return nil, err
++	}
++	for i, value := range values {
++		if tab.columns[i].NotNull && value == nil {
++			return nil, fmt.Errorf("%w: NULL violates declared NOT NULL", ErrCorrupt)
++		}
++		if s, ok := value.(string); ok && !utf8.ValidString(s) {
++			return nil, fmt.Errorf("%w: invalid UTF-8 TEXT outside check profile", ErrUnsupported)
++		}
++		if _, err = columnValue(value, tab.columns[i].Type); err != nil {
++			return nil, err
++		}
++	}
++	return values, nil
++}
++
++// Named per-index checks count only that index's rows. A full check additionally
++// rejects shadow rows that belong to no logical index or the wrong method.
++func checkShadowOwner(name string, raw []any, byID map[int64]*extensionIndex) error {
++	if !extensionReserved(name) || name == extensionCatalogName {
++		return nil
++	}
++	if len(raw) < 2 {
++		return extensionCorrupt("shadow row shape")
++	}
++	id, ok := raw[1].(int64)
++	x := byID[id]
++	if !ok || x == nil {
++		return extensionCorrupt("shadow row has no logical owner")
++	}
++	switch name {
++	case extensionFieldsName:
++	case extensionPostingsName, extensionFrequencyName:
++		if x.ann != nil {
++			return extensionCorrupt("ANN index owns text shadow rows")
++		}
++	case annStateName:
++		if x.ann == nil {
++			return extensionCorrupt("text index owns ANN state")
++		}
++	case annNodesName, annLiveName:
++		if x.method != ann.HNSW {
++			return extensionCorrupt("non-HNSW index owns graph rows")
++		}
++	case annCentroidsName, annMembersName:
++		if x.method != ann.IVFFlat {
++			return extensionCorrupt("non-IVF index owns IVF rows")
++		}
++	default:
++		return fmt.Errorf("%w: shadow table outside check profile", ErrUnsupported)
++	}
++	return nil
++}
+diff --git a/sqlite/check_internal_test.go b/sqlite/check_internal_test.go
+new file mode 100644
+index 0000000..bb4bb28
+--- /dev/null
++++ b/sqlite/check_internal_test.go
+@@ -0,0 +1,424 @@
++package sqlite
++
++import (
++	"context"
++	"encoding/binary"
++	"errors"
++	"fmt"
++	"reflect"
++	"testing"
++
++	"github.com/ms-xiaosnow/gosqlite/internal/btree"
++	"github.com/ms-xiaosnow/gosqlite/internal/pager"
++	"github.com/ms-xiaosnow/gosqlite/internal/record"
++)
++
++// Every malformed fixture in this file is exclusively an in-memory PageReader.
++// No fixture bytes are written to a native file or routed through a VFS.
++type checkMemory struct {
++	h        pager.Header
++	pages    map[uint32][]byte
++	reads    int
++	cancel   context.CancelFunc
++	cancelAt int
++}
++
++func newCheckMemory() *checkMemory {
++	p := make([]byte, 512)
++	copy(p, "SQLite format 3\x00")
++	binary.BigEndian.PutUint16(p[16:], 512)
++	p[18], p[19] = 1, 1
++	p[21], p[22], p[23] = 64, 32, 32
++	binary.BigEndian.PutUint32(p[28:], 1)
++	binary.BigEndian.PutUint32(p[44:], 4)
++	binary.BigEndian.PutUint32(p[56:], 1)
++	p[100] = 13
++	binary.BigEndian.PutUint16(p[105:], 512)
++	h, _ := pager.ParseHeader(p, 512)
++	return &checkMemory{h: h, pages: map[uint32][]byte{1: p}}
++}
++func (m *checkMemory) Header() pager.Header { return m.h }
++func (m *checkMemory) ReadPage(ctx context.Context, n uint32) ([]byte, error) {
++	m.reads++
++	if m.cancel != nil && m.reads == m.cancelAt {
++		m.cancel()
++	}
++	if err := ctx.Err(); err != nil {
++		return nil, err
++	}
++	p, ok := m.pages[n]
++	if !ok {
++		return nil, pager.ErrCorrupt
++	}
++	return append([]byte(nil), p...), nil
++}
++func (m *checkMemory) WritePage(ctx context.Context, n uint32, p []byte) error {
++	if err := ctx.Err(); err != nil {
++		return err
++	}
++	m.pages[n] = append([]byte(nil), p...)
++	return nil
++}
++func (m *checkMemory) AllocatePage(ctx context.Context) (uint32, error) {
++	if err := ctx.Err(); err != nil {
++		return 0, err
++	}
++	m.h.PageCount++
++	m.pages[m.h.PageCount] = make([]byte, m.h.PageSize)
++	binary.BigEndian.PutUint32(m.pages[1][28:], m.h.PageCount)
++	return m.h.PageCount, nil
++}
++func (m *checkMemory) FreePage(context.Context, uint32) error {
++	return fmt.Errorf("fixture never frees pages")
++}
++func checkFixture(t *testing.T) (*DB, *checkMemory) {
++	t.Helper()
++	d, err := copyValidator()
++	if err != nil {
++		t.Fatal(err)
++	}
++	m := newCheckMemory()
++	ctx := context.Background()
++	table, err := btree.CreateTree(ctx, m, btree.TableTree)
++	if err != nil {
++		t.Fatal(err)
++	}
++	index, err := btree.CreateTree(ctx, m, btree.IndexTree)
++	if err != nil {
++		t.Fatal(err)
++	}
++	for _, e := range []struct {
++		id int64
++		v  []any
++	}{{1, []any{"table", "t", "t", int64(table), "CREATE TABLE t(id INTEGER PRIMARY KEY,k TEXT NOT NULL,n NUMERIC)"}}, {2, []any{"index", "idx", "t", int64(index), "CREATE INDEX idx ON t(k,n)"}}} {
++		if err = btree.InsertTable(ctx, m, 1, e.id, e.v); err != nil {
++			t.Fatal(err)
++		}
++	}
++	for _, e := range []struct {
++		id int64
++		k  string
++		n  any
++	}{{-1, "", nil}, {1, "a", int64(9007199254740993)}, {2, "数据库", []byte{0, 1, 2}}, {3, "z", float64(1.25)}} {
++		if err = btree.InsertTable(ctx, m, table, e.id, []any{nil, e.k, e.n}); err != nil {
++			t.Fatal(err)
++		}
++		if err = btree.InsertIndex(ctx, m, index, btree.KeyInfo{Columns: 2}, []any{e.k, e.n, e.id}); err != nil {
++			t.Fatal(err)
++		}
++	}
++	m.reads = 0
++	return d, m
++}
++func checkMemoryRun(d *DB, m *checkMemory, options CheckOptions) (CheckResult, error) {
++	o, err := checkOptions([]CheckOptions{options})
++	if err != nil {
++		return CheckResult{}, err
++	}
++	r, err := d.checkSnapshot(context.Background(), m, o)
++	return r, wrap("check", err)
++}
++func TestNativeCheckMemoryIntactAndBudgets(t *testing.T) {
++	d, m := checkFixture(t)
++	before := map[uint32][]byte{}
++	for n, p := range m.pages {
++		before[n] = append([]byte(nil), p...)
++	}
++	got, err := checkMemoryRun(d, m, CheckOptions{})
++	if err != nil {
++		t.Fatal(err)
++	}
++	if got.Scope != CheckScope || got.Tables != 1 || got.Indexes != 1 || got.TableRows != 4 || got.IndexEntries != 4 || got.PageReads != uint64(m.reads) {
++		t.Fatal(got, m.reads)
++	}
++	if !reflect.DeepEqual(before, m.pages) {
++		t.Fatal("read-only check changed memory source")
++	}
++	exact, err := checkMemoryRun(d, m, CheckOptions{MaxPages: got.Pages, MaxPageReads: got.PageReads})
++	if err != nil || exact != got {
++		t.Fatal(exact, err)
++	}
++	for _, o := range []CheckOptions{{MaxPages: got.Pages - 1}, {MaxPageReads: got.PageReads - 1}} {
++		r, err := checkMemoryRun(d, m, o)
++		if !errors.Is(err, ErrMemoryLimit) || r != (CheckResult{}) {
++			t.Fatal(r, err)
++		}
++	}
++	if _, err = checkOptions([]CheckOptions{{}, {}}); err == nil {
++		t.Fatal("multiple options")
++	}
++	if _, err = checkOptions([]CheckOptions{{MaxPages: btree.MaxVisitedPages + 1}}); !errors.Is(err, ErrUnsupported) {
++		t.Fatal(err)
++	}
++	if _, err = checkOptions([]CheckOptions{{MaxPageReads: 1<<32 + 1}}); !errors.Is(err, ErrUnsupported) {
++		t.Fatal(err)
++	}
++}
++func TestNativeCheckMemoryRejectsInconsistency(t *testing.T) {
++	for _, tc := range []struct {
++		name   string
++		change func(*testing.T, *checkMemory)
++		kind   error
++	}{
++		{"missing expected key", func(t *testing.T, m *checkMemory) {
++			if _, err := btree.DeleteIndex(context.Background(), m, 3, btree.KeyInfo{Columns: 2}, []any{"a", int64(9007199254740993), int64(1)}); err != nil {
++				t.Fatal(err)
++			}
++		}, ErrCorrupt},
++		{"extra wrong value same rowid", func(t *testing.T, m *checkMemory) {
++			if err := btree.InsertIndex(context.Background(), m, 3, btree.KeyInfo{Columns: 2}, []any{"bad", nil, int64(1)}); err != nil {
++				t.Fatal(err)
++			}
++		}, ErrCorrupt},
++		{"orphan rowid", func(t *testing.T, m *checkMemory) {
++			if err := btree.InsertIndex(context.Background(), m, 3, btree.KeyInfo{Columns: 2}, []any{"bad", nil, int64(44)}); err != nil {
++				t.Fatal(err)
++			}
++		}, ErrCorrupt},
++		{"null constraint", func(t *testing.T, m *checkMemory) {
++			if err := btree.InsertTable(context.Background(), m, 2, 8, []any{nil, nil, nil}); err != nil {
++				t.Fatal(err)
++			}
++		}, ErrCorrupt},
++		{"ipk slot", func(t *testing.T, m *checkMemory) {
++			if err := btree.InsertTable(context.Background(), m, 2, 8, []any{int64(8), "new", nil}); err != nil {
++				t.Fatal(err)
++			}
++		}, ErrCorrupt},
++		{"extra record field", func(t *testing.T, m *checkMemory) {
++			if err := btree.InsertTable(context.Background(), m, 2, 8, []any{nil, "new", nil, int64(1)}); err != nil {
++				t.Fatal(err)
++			}
++		}, ErrCorrupt},
++		{"unsupported encoding", func(t *testing.T, m *checkMemory) {
++			m.h.TextEncoding = 2
++			binary.BigEndian.PutUint32(m.pages[1][56:], 2)
++		}, ErrUnsupported},
++		{"unsupported invalid text", func(t *testing.T, m *checkMemory) {
++			if err := btree.InsertTable(context.Background(), m, 2, 8, []any{nil, string([]byte{255}), nil}); err != nil {
++				t.Fatal(err)
++			}
++		}, ErrUnsupported},
++		{"unknown schema", func(t *testing.T, m *checkMemory) {
++			if err := btree.InsertTable(context.Background(), m, 1, 3, []any{"view", "v", "v", int64(0), "CREATE VIEW v AS SELECT 1"}); err != nil {
++				t.Fatal(err)
++			}
++		}, ErrUnsupported},
++		{"shared root", func(t *testing.T, m *checkMemory) {
++			if err := btree.InsertTable(context.Background(), m, 1, 3, []any{"table", "u", "u", int64(2), "CREATE TABLE u(k TEXT)"}); err != nil {
++				t.Fatal(err)
++			}
++		}, ErrCorrupt},
++		{"unaccounted page", func(t *testing.T, m *checkMemory) {
++			if _, err := m.AllocatePage(context.Background()); err != nil {
++				t.Fatal(err)
++			}
++		}, ErrCorrupt},
++		{"free live page", func(t *testing.T, m *checkMemory) {
++			binary.BigEndian.PutUint32(m.pages[1][32:], 2)
++			binary.BigEndian.PutUint32(m.pages[1][36:], 1)
++		}, ErrCorrupt},
++		{"short page", func(t *testing.T, m *checkMemory) { m.pages[2] = m.pages[2][:10] }, ErrCorrupt},
++		{"reserved serial", func(t *testing.T, m *checkMemory) {
++			p := m.pages[2]
++			cell := int(binary.BigEndian.Uint16(p[8:]))
++			_, payloadSize, err := record.DecodeVarint(p[cell:])
++			if err != nil {
++				t.Fatal(err)
++			}
++			_, rowidSize, err := record.DecodeVarint(p[cell+payloadSize:])
++			if err != nil {
++				t.Fatal(err)
++			}
++			payload := cell + payloadSize + rowidSize
++			_, headerSize, err := record.DecodeVarint(p[payload:])
++			if err != nil {
++				t.Fatal(err)
++			}
++			p[payload+headerSize] = 10
++		}, ErrCorrupt},
++	} {
++		t.Run(tc.name, func(t *testing.T) {
++			d, m := checkFixture(t)
++			tc.change(t, m)
++			r, err := checkMemoryRun(d, m, CheckOptions{})
++			if r != (CheckResult{}) || !errors.Is(err, tc.kind) {
++				t.Fatal(r, err)
++			}
++		})
++	}
++}
++func TestNativeCheckMemoryCancellationAndTypes(t *testing.T) {
++	d, m := checkFixture(t)
++	ctx, cancel := context.WithCancel(context.Background())
++	defer cancel()
++	m.cancel = cancel
++	m.cancelAt = 6
++	o, _ := checkOptions(nil)
++	r, err := d.checkSnapshot(ctx, m, o)
++	if !errors.Is(err, context.Canceled) || r != (CheckResult{}) {
++		t.Fatal(r, err)
++	}
++	for _, typ := range []string{"VECTOR(2)", "HALFVEC(2)", "BIT(2)", "SPARSEVEC(2)"} {
++		t.Run(typ, func(t *testing.T) {
++			d, m := checkFixture(t)
++			ctx := context.Background()
++			if _, err := btree.DeleteTable(ctx, m, 1, 2); err != nil {
++				t.Fatal(err)
++			}
++			if _, err := btree.DeleteTable(ctx, m, 1, 1); err != nil {
++				t.Fatal(err)
++			}
++			if err := btree.InsertTable(ctx, m, 1, 1, []any{"table", "t", "t", int64(2), "CREATE TABLE t(id INTEGER PRIMARY KEY,k TEXT NOT NULL,n " + typ + ")"}); err != nil {
++				t.Fatal(err)
++			}
++			if err := btree.InsertTable(ctx, m, 1, 2, []any{"index", "idx", "t", int64(3), "CREATE INDEX idx ON t(k,n)"}); err != nil {
++				t.Fatal(err)
++			}
++			if r, err := checkMemoryRun(d, m, CheckOptions{}); err == nil || r != (CheckResult{}) {
++				t.Fatal(r, err)
++			}
++		})
++	}
++}
++func TestNativeCheckMemoryShadowOwners(t *testing.T) {
++	byID := map[int64]*extensionIndex{1: {id: 1, method: "grams13"}, 2: {id: 2, method: "hnsw"}, 3: {id: 3, method: "ivfflat"}}
++	for _, name := range []string{extensionFieldsName, extensionPostingsName, extensionFrequencyName, annStateName, annNodesName, annLiveName, annCentroidsName, annMembersName} {
++		if err := checkShadowOwner(name, []any{nil, int64(9)}, byID); !errors.Is(err, ErrCorrupt) {
++			t.Fatal(name, err)
++		}
++	}
++	if err := checkShadowOwner(annMembersName, []any{nil, int64(2)}, byID); !errors.Is(err, ErrCorrupt) {
++		t.Fatal(err)
++	}
++}
++
++func TestNativeCheckTransactionOwnershipAndCounters(t *testing.T) {
++	ctx := context.Background()
++	db, err := Open(t.TempDir()+"/counters.db", Options{})
++	if err != nil {
++		t.Fatal(err)
++	}
++	defer db.Close()
++	for _, q := range []string{"CREATE TABLE t(id INTEGER PRIMARY KEY,k TEXT)", "CREATE INDEX idx ON t(k)", "INSERT INTO t VALUES(1,'one'),(2,'two')"} {
++		if _, err = db.Exec(ctx, q); err != nil {
++			t.Fatal(err)
++		}
++	}
++	before := db.counters
++	if _, err = db.Check(ctx); err != nil {
++		t.Fatal(err)
++	}
++	if db.counters != before || db.tx != nil || len(db.rows) != 0 {
++		t.Fatal("standalone check changed connection state")
++	}
++	tx, err := db.Begin(ctx)
++	if err != nil {
++		t.Fatal(err)
++	}
++	if tx.reader != nil {
++		t.Fatal("BEGIN was not lazy")
++	}
++	if _, err = tx.Check(ctx); err != nil {
++		t.Fatal(err)
++	}
++	reader := tx.reader
++	if reader == nil || tx.storage == nil {
++		t.Fatal("check did not retain deferred transaction snapshot")
++	}
++	rows, err := tx.Query(ctx, "SELECT id FROM t")
++	if err != nil {
++		t.Fatal(err)
++	}
++	if !rows.Next() || rows.Values()[0] != int64(1) {
++		t.Fatal(rows.Err())
++	}
++	if _, err = tx.Check(ctx); err != nil {
++		t.Fatal(err)
++	}
++	if !rows.Next() || rows.Values()[0] != int64(2) {
++		t.Fatal("check advanced caller-owned cursor", rows.Err())
++	}
++	if err = rows.Close(); err != nil {
++		t.Fatal(err)
++	}
++	if tx.reader != reader || db.counters != before || tx.activeRows != 0 {
++		t.Fatal("check lost caller resources or counters")
++	}
++	if err = tx.Rollback(); err != nil {
++		t.Fatal(err)
++	}
++	if r, err := tx.Check(ctx); !errors.Is(err, ErrTxDone) || r != (CheckResult{}) {
++		t.Fatal(r, err)
++	}
++	if err = db.Close(); err != nil {
++		t.Fatal(err)
++	}
++	if r, err := db.Check(ctx); !errors.Is(err, ErrClosed) || r != (CheckResult{}) {
++		t.Fatal(r, err)
++	}
++}
++
++func TestNativeCheckMemoryExtensionOrphanBeyondNamedScope(t *testing.T) {
++	// Build only an intact database on disk, read it normally, then perform every
++	// negative change exclusively in detached in-memory pages.
++	ctx := context.Background()
++	db, err := Open(t.TempDir()+"/intact.db", Options{})
++	if err != nil {
++		t.Fatal(err)
++	}
++	defer db.Close()
++	for _, q := range []string{"CREATE TABLE docs(id INTEGER PRIMARY KEY,body TEXT)", "INSERT INTO docs VALUES(1,'数据库')", "CREATE INDEX grams ON docs(body) USING grams13"} {
++		if _, err = db.Exec(ctx, q); err != nil {
++			t.Fatal(err)
++		}
++	}
++	r, err := db.openReader(ctx)
++	if err != nil {
++		t.Fatal(err)
++	}
++	m := &checkMemory{h: r.Header(), pages: map[uint32][]byte{}}
++	for n := uint32(1); n <= m.h.PageCount; n++ {
++		p, err := r.ReadPage(ctx, n)
++		if err != nil {
++			t.Fatal(err)
++		}
++		m.pages[n] = p
++	}
++	if err = r.Close(); err != nil {
++		t.Fatal(err)
++	}
++	if err = db.Close(); err != nil {
++		t.Fatal(err)
++	}
++	d, err := copyValidator()
++	if err != nil {
++		t.Fatal(err)
++	}
++	helper := &Tx{db: d, reader: m}
++	catalog, err := helper.validateCatalog(ctx)
++	if err != nil {
++		t.Fatal(err)
++	}
++	tab := catalog.tables[extensionPostingsName]
++	raw := []any{nil, int64(9999), int64(1), "match", int64(1), "orphan", int64(1234)}
++	const rowID int64 = 100000
++	if err = btree.InsertTable(ctx, m, tab.root, rowID, raw); err != nil {
++		t.Fatal(err)
++	}
++	values, err := tab.values(rowID, raw)
++	if err != nil {
++		t.Fatal(err)
++	}
++	for _, idx := range tab.indexes {
++		if err = btree.InsertIndex(ctx, m, idx.root, btree.KeyInfo{Columns: len(idx.columns)}, idx.key(rowID, values)); err != nil {
++			t.Fatal(err)
++		}
++	}
++	if err = d.checkExtensionIndex(ctx, m, "grams"); err != nil {
++		t.Fatal("named check should remain scoped to its own valid logical index", err)
++	}
++	if got, err := checkMemoryRun(d, m, CheckOptions{}); !errors.Is(err, ErrCorrupt) || got != (CheckResult{}) {
++		t.Fatal(got, err)
++	}
++}
+diff --git a/sqlite/check_review_test.go b/sqlite/check_review_test.go
+new file mode 100644
+index 0000000..c220044
+--- /dev/null
++++ b/sqlite/check_review_test.go
+@@ -0,0 +1,305 @@
++package sqlite
++
++import (
++	"context"
++	"encoding/binary"
++	"errors"
++	"testing"
++
++	"github.com/ms-xiaosnow/gosqlite/extension/grams13"
++	"github.com/ms-xiaosnow/gosqlite/extension/registry"
++	"github.com/ms-xiaosnow/gosqlite/internal/btree"
++)
++
++// Independent negative fixtures remain pure-memory maps; no altered bytes
++// are passed to a file, VFS, pager session or driver.
++func TestIndependentCheckFragmentAccounting(t *testing.T) {
++	for _, page := range []uint32{1, 2, 3} {
++		t.Run(string(rune('0'+page)), func(t *testing.T) {
++			d, m := checkFixture(t)
++			off := 0
++			if page == 1 {
++				off = 100
++			}
++			if m.pages[page][off+7] != 0 {
++				t.Fatal("fixture unexpectedly fragmented")
++			}
++			m.pages[page][off+7] = 1
++			got, err := checkMemoryRun(d, m, CheckOptions{})
++			if err == nil || got != (CheckResult{}) {
++				t.Fatalf("incorrect fragmented-byte count passed: result=%+v error=%v", got, err)
++			}
++		})
++	}
++}
++func TestIndependentCheckUnrepresentedFreeBytes(t *testing.T) {
++	d, m := checkFixture(t)
++	p := m.pages[2]
++	content := binary.BigEndian.Uint16(p[5:7])
++	if content < 20 {
++		t.Fatal("fixture has no header gap")
++	}
++	binary.BigEndian.PutUint16(p[5:7], content-8) // Eight bytes become unrepresented cell-content space.
++	got, err := checkMemoryRun(d, m, CheckOptions{})
++	if err == nil || got != (CheckResult{}) {
++		t.Fatalf("unrepresented free bytes passed: result=%+v error=%v", got, err)
++	}
++}
++
++type independentCustomGrams struct {
++	calls   *int
++	version int
++	empty   bool
++}
++
++func (independentCustomGrams) Name() string { return grams13.MethodName }
++func (m independentCustomGrams) Version() int {
++	if m.version != 0 {
++		return m.version
++	}
++	return 1
++}
++func (m independentCustomGrams) Configure(b []byte) (registry.Index, error) {
++	if m.calls != nil {
++		*m.calls++
++	}
++	if m.empty {
++		return independentEmptyGrams{canonical: append([]byte(nil), b...), calls: m.calls}, nil
++	}
++	return grams13.Method().Configure(b)
++}
++
++type independentEmptyGrams struct {
++	canonical []byte
++	calls     *int
++}
++
++func (i independentEmptyGrams) Canonical() []byte { return append([]byte(nil), i.canonical...) }
++func (i independentEmptyGrams) Keys(context.Context, string) ([]registry.Key, error) {
++	if i.calls != nil {
++		*i.calls++
++	}
++	return nil, nil
++}
++
++func independentDetachedGrams(t *testing.T, body ...string) (*DB, *checkMemory) {
++	t.Helper()
++	ctx := context.Background()
++	db, err := Open(t.TempDir()+"/intact.db", Options{})
++	if err != nil {
++		t.Fatal(err)
++	}
++	defer db.Close()
++	initial := "database"
++	if len(body) > 0 {
++		initial = body[0]
++	}
++	for _, q := range []string{"CREATE TABLE docs(id INTEGER PRIMARY KEY,body TEXT)", "INSERT INTO docs VALUES(1,'" + initial + "')", "CREATE INDEX grams ON docs(body) USING grams13"} {
++		if _, err = db.Exec(ctx, q); err != nil {
++			t.Fatal(err)
++		}
++	}
++	r, err := db.openReader(ctx)
++	if err != nil {
++		t.Fatal(err)
++	}
++	m := &checkMemory{h: r.Header(), pages: map[uint32][]byte{}}
++	for n := uint32(1); n <= m.h.PageCount; n++ {
++		p, err := r.ReadPage(ctx, n)
++		if err != nil {
++			t.Fatal(err)
++		}
++		m.pages[n] = p
++	}
++	if err = r.Close(); err != nil {
++		t.Fatal(err)
++	}
++	if err = db.Close(); err != nil {
++		t.Fatal(err)
++	}
++	d, err := copyValidator()
++	if err != nil {
++		t.Fatal(err)
++	}
++	return d, m
++}
++func TestIndependentCheckCustomBuiltinNamedRegistry(t *testing.T) {
++	d, m := independentDetachedGrams(t)
++	calls := 0
++	methods, err := registry.New(independentCustomGrams{calls: &calls})
++	if err != nil {
++		t.Fatal(err)
++	}
++	d.methods = methods
++	got, err := checkMemoryRun(d, m, CheckOptions{})
++	if err != nil || got.Scope != CheckScope || calls != 0 {
++		t.Fatalf("full check must independently use builtin semantics without invoking custom callbacks: result=%+v error=%v calls=%d", got, err, calls)
++	}
++}
++func TestIndependentCheckCatalogUTF8(t *testing.T) {
++	d, m := checkFixture(t)
++	ctx := context.Background()
++	_, err := btree.DeleteTable(ctx, m, 1, 1)
++	if err != nil {
++		t.Fatal(err)
++	}
++	invalid := string([]byte{'c', 255})
++	q := "CREATE TABLE t(id INTEGER PRIMARY KEY,k TEXT NOT NULL,n NUMERIC,\"" + invalid + "\" TEXT)"
++	if err = btree.InsertTable(ctx, m, 1, 1, []any{"table", "t", "t", int64(2), q}); err != nil {
++		t.Fatal(err)
++	}
++	got, err := checkMemoryRun(d, m, CheckOptions{})
++	if err == nil || got != (CheckResult{}) {
++		t.Fatalf("invalid schema TEXT passed: result=%+v error=%v", got, err)
++	}
++}
++
++type independentVersionTwo struct{ independentCustomGrams }
++
++func (independentVersionTwo) Version() int { return 2 }
++func TestIndependentCheckUnknownGramsVersion(t *testing.T) {
++	d, m := independentDetachedGrams(t)
++	ctx := context.Background()
++	c, err := (&Tx{db: d, reader: m}).validateCatalog(ctx)
++	if err != nil {
++		t.Fatal(err)
++	}
++	root := c.tables[extensionCatalogName].root
++	raw, found, err := btree.SeekTable(ctx, m, root, 1)
++	if err != nil || !found {
++		t.Fatal(found, err)
++	}
++	if _, err = btree.DeleteTable(ctx, m, root, 1); err != nil {
++		t.Fatal(err)
++	}
++	raw[5] = int64(2)
++	if err = btree.InsertTable(ctx, m, root, 1, raw); err != nil {
++		t.Fatal(err)
++	}
++	d.methods, err = registry.New(independentVersionTwo{})
++	if err != nil {
++		t.Fatal(err)
++	}
++	got, err := checkMemoryRun(d, m, CheckOptions{})
++	if !errors.Is(err, ErrUnsupported) || got != (CheckResult{}) {
++		t.Fatalf("unknown grams method version accepted: result=%+v error=%v", got, err)
++	}
++}
++
++func TestIndependentCheckUnknownBuiltinVersion(t *testing.T) {
++	d, m := independentDetachedGrams(t)
++	ctx := context.Background()
++	c, err := (&Tx{db: d, reader: m}).validateCatalog(ctx)
++	if err != nil {
++		t.Fatal(err)
++	}
++	root := c.extensions.roots[extensionCatalogName]
++	row, ok, err := btree.SeekTable(ctx, m, root, 1)
++	if err != nil || !ok {
++		t.Fatal(ok, err)
++	}
++	row[5] = int64(2)
++	if _, err = btree.DeleteTable(ctx, m, root, 1); err != nil {
++		t.Fatal(err)
++	}
++	if err = btree.InsertTable(ctx, m, root, 1, row); err != nil {
++		t.Fatal(err)
++	}
++	calls := 0
++	d.methods, err = registry.New(independentCustomGrams{calls: &calls, version: 2})
++	if err != nil {
++		t.Fatal(err)
++	}
++	got, err := checkMemoryRun(d, m, CheckOptions{})
++	if !errors.Is(err, ErrUnsupported) || got != (CheckResult{}) || calls != 0 {
++		t.Fatal(got, err, calls)
++	}
++}
++func TestIndependentCheckCustomEmptyKeysCannotPass(t *testing.T) {
++	d, m := independentDetachedGrams(t, "")
++	ctx := context.Background()
++	c, err := (&Tx{db: d, reader: m}).validateCatalog(ctx)
++	if err != nil {
++		t.Fatal(err)
++	}
++	root := c.tables["docs"].root
++	if _, err = btree.DeleteTable(ctx, m, root, 1); err != nil {
++		t.Fatal(err)
++	}
++	if err = btree.InsertTable(ctx, m, root, 1, []any{nil, "database"}); err != nil {
++		t.Fatal(err)
++	}
++	calls := 0
++	d.methods, err = registry.New(independentCustomGrams{calls: &calls, empty: true})
++	if err != nil {
++		t.Fatal(err)
++	}
++	// The application-directed named check can accept its own empty-key semantics.
++	if err = d.checkExtensionIndex(ctx, m, "grams"); err != nil || calls == 0 {
++		t.Fatal(err, calls)
++	}
++	calls = 0
++	got, err := checkMemoryRun(d, m, CheckOptions{})
++	if !errors.Is(err, ErrCorrupt) || got != (CheckResult{}) || calls != 0 {
++		t.Fatal(got, err, calls)
++	}
++}
++func TestIndependentCheckValidMemoryPageSpace(t *testing.T) {
++	for _, page := range []uint32{1, 2, 3} {
++		for gap := 1; gap <= 8; gap++ {
++			d, m := checkFixture(t)
++			p := m.pages[page]
++			off := 0
++			if page == 1 {
++				off = 100
++			}
++			content := int(binary.BigEndian.Uint16(p[off+5:]))
++			top := content - gap
++			binary.BigEndian.PutUint16(p[off+5:], uint16(top))
++			if gap <= 3 {
++				p[off+7] = byte(gap)
++			} else {
++				binary.BigEndian.PutUint16(p[off+1:], uint16(top))
++				binary.BigEndian.PutUint16(p[top:], 0)
++				binary.BigEndian.PutUint16(p[top+2:], uint16(gap))
++			}
++			if r, err := checkMemoryRun(d, m, CheckOptions{}); err != nil || r.Scope != CheckScope {
++				t.Fatal(page, gap, r, err)
++			}
++		}
++	}
++	d, m := checkFixture(t)
++	_ = d
++	// An empty schema leaf with no fragments is valid; declared fragments are not.
++	empty := newCheckMemory()
++	if err := btree.CheckTreeSpace(context.Background(), empty, nil); err != nil {
++		t.Fatal(err)
++	}
++	empty.pages[1][107] = 1
++	if err := btree.CheckTreeSpace(context.Background(), empty, nil); err == nil {
++		t.Fatal("empty-page fragments accepted")
++	}
++	// Force actual interior table/index pages without native I/O.
++	for id := int64(10); id < 400; id++ {
++		if err := btree.InsertTable(context.Background(), m, 2, id, []any{nil, "b", id}); err != nil {
++			t.Fatal(err)
++		}
++		if err := btree.InsertIndex(context.Background(), m, 3, btree.KeyInfo{Columns: 2}, []any{"b", id, id}); err != nil {
++			t.Fatal(err)
++		}
++	}
++	if m.pages[2][0] != 5 || m.pages[3][0] != 2 {
++		t.Fatal("expected interior roots")
++	}
++	roots := []btree.RootSpec{{Page: 2, Kind: btree.TableTree}, {Page: 3, Kind: btree.IndexTree, KeyInfo: btree.KeyInfo{Columns: 2}}}
++	if err := btree.CheckTreeSpace(context.Background(), m, roots); err != nil {
++		t.Fatal(err)
++	}
++	for _, page := range []uint32{2, 3} {
++		m.pages[page][7] = 1
++		if err := btree.CheckTreeSpace(context.Background(), m, roots); err == nil {
++			t.Fatal("interior fragments accepted", page)
++		}
++		m.pages[page][7] = 0
++	}
++}
+diff --git a/sqlite/check_test.go b/sqlite/check_test.go
+new file mode 100644
+index 0000000..66e1572
+--- /dev/null
++++ b/sqlite/check_test.go
+@@ -0,0 +1,389 @@
++package sqlite_test
++
++import (
++	"context"
++	"crypto/sha256"
++	"errors"
++	"fmt"
++	"os"
++	"os/exec"
++	"path/filepath"
++	"reflect"
++	"strings"
++	"testing"
++
++	"github.com/ms-xiaosnow/gosqlite/encryption"
++	"github.com/ms-xiaosnow/gosqlite/internal/testkit/fileview"
++	"github.com/ms-xiaosnow/gosqlite/sqlite"
++)
++
++func checkExec(t *testing.T, db *sqlite.DB, q string, args ...any) {
++	t.Helper()
++	if _, err := db.Exec(context.Background(), q, args...); err != nil {
++		t.Fatal(q, err)
++	}
++}
++func checkOpen(t *testing.T, path string, o sqlite.Options) *sqlite.DB {
++	t.Helper()
++	db, err := sqlite.Open(path, o)
++	if err != nil {
++		t.Fatal(err)
++	}
++	t.Cleanup(func() {
++		if err := db.Close(); err != nil {
++			t.Error(err)
++		}
++	})
++	return db
++}
++func checkFamily(t *testing.T, dir string) map[string][32]byte {
++	t.Helper()
++	out := map[string][32]byte{}
++	err := filepath.WalkDir(dir, func(path string, e os.DirEntry, err error) error {
++		if err != nil {
++			return err
++		}
++		if e.IsDir() {
++			return nil
++		}
++		p, err := fileview.ReadFile(path)
++		if err != nil {
++			return err
++		}
++		out[path] = sha256.Sum256(p)
++		return nil
++	})
++	if err != nil {
++		t.Fatal(err)
++	}
++	return out
++}
++func checkPass(t *testing.T, db *sqlite.DB) sqlite.CheckResult {
++	t.Helper()
++	r, err := db.Check(context.Background())
++	if err != nil {
++		t.Fatal(err)
++	}
++	if r.Scope != sqlite.CheckScope || r.PageReads == 0 {
++		t.Fatal(r)
++	}
++	return r
++}
++
++func TestNativeCheckOrdinaryPageSizesAndReadOnly(t *testing.T) {
++	for _, size := range []uint32{512, 4096, 65536} {
++		t.Run(fmt.Sprint(size), func(t *testing.T) {
++			dir := t.TempDir()
++			path := filepath.Join(dir, "normal.db")
++			db := checkOpen(t, path, sqlite.Options{PageSize: size})
++			checkExec(t, db, "CREATE TABLE t(id INTEGER PRIMARY KEY,k TEXT NOT NULL,n NUMERIC,r REAL,b BLOB)")
++			checkExec(t, db, "CREATE INDEX t_key ON t(k,n)")
++			checkExec(t, db, "CREATE INDEX t_id ON t(id,r,b)")
++			values := []any{nil, int64(9007199254740993), float64(1.25), "123text", []byte{0, 1, 2}}
++			tx, err := db.Begin(context.Background())
++			if err != nil {
++				t.Fatal(err)
++			}
++			for i := 0; i < 20; i++ {
++				if _, err = tx.Exec(context.Background(), "INSERT INTO t VALUES(?,?,?,?,?)", int64(i-10), "数据库\x00"+strings.Repeat("v", 700), values[i%len(values)], float64(i)/2, []byte{byte(i)}); err != nil {
++					t.Fatal(err)
++				}
++			}
++			if r, err := tx.Check(context.Background()); err != nil || r.TableRows != 20 || r.IndexEntries != 40 {
++				t.Fatal(r, err)
++			}
++			if err = tx.Commit(context.Background()); err != nil {
++				t.Fatal(err)
++			}
++			r := checkPass(t, db)
++			if r.Tables != 1 || r.Indexes != 2 || r.TableRows != 20 || r.IndexEntries != 40 {
++				t.Fatal(r)
++			}
++			if err = db.Close(); err != nil {
++				t.Fatal(err)
++			}
++			before := checkFamily(t, dir)
++			ro := checkOpen(t, path, sqlite.Options{ReadOnly: true, NoCreate: true})
++			again := checkPass(t, ro)
++			if again != r {
++				t.Fatal(r, again)
++			}
++			for _, o := range []sqlite.CheckOptions{{MaxPages: r.Pages - 1}, {MaxPageReads: r.PageReads - 1}} {
++				got, err := ro.Check(context.Background(), o)
++				if !errors.Is(err, sqlite.ErrMemoryLimit) || got != (sqlite.CheckResult{}) {
++					t.Fatal(got, err)
++				}
++			}
++			ctx, cancel := context.WithCancel(context.Background())
++			cancel()
++			if got, err := ro.Check(ctx); !errors.Is(err, context.Canceled) || got != (sqlite.CheckResult{}) {
++				t.Fatal(got, err)
++			}
++			if err = ro.Close(); err != nil {
++				t.Fatal(err)
++			}
++			if !reflect.DeepEqual(before, checkFamily(t, dir)) {
++				t.Fatal("read-only check changed database family")
++			}
++		})
++	}
++}
++func TestNativeCheckFreelistRollbackAndReopen(t *testing.T) {
++	path := filepath.Join(t.TempDir(), "free.db")
++	db := checkOpen(t, path, sqlite.Options{PageSize: 512})
++	checkExec(t, db, "CREATE TABLE t(id INTEGER PRIMARY KEY,k TEXT)")
++	checkExec(t, db, "CREATE INDEX t_key ON t(k)")
++	tx, err := db.Begin(context.Background())
++	if err != nil {
++		t.Fatal(err)
++	}
++	for i := 0; i < 80; i++ {
++		if _, err = tx.Exec(context.Background(), "INSERT INTO t VALUES(?,?)", i, strings.Repeat("overflow", 100)); err != nil {
++			t.Fatal(err)
++		}
++	}
++	if err = tx.Commit(context.Background()); err != nil {
++		t.Fatal(err)
++	}
++	checkExec(t, db, "DELETE FROM t WHERE id<60")
++	r := checkPass(t, db)
++	if r.FreePages == 0 || r.TableRows != 20 || r.IndexEntries != 20 {
++		t.Fatal(r)
++	}
++	tx, err = db.Begin(context.Background())
++	if err != nil {
++		t.Fatal(err)
++	}
++	if _, err = tx.Exec(context.Background(), "UPDATE t SET k='temporary' WHERE id>=60"); err != nil {
++		t.Fatal(err)
++	}
++	if _, err = tx.Check(context.Background()); err != nil {
++		t.Fatal(err)
++	}
++	if err = tx.Rollback(); err != nil {
++		t.Fatal(err)
++	}
++	if got := checkPass(t, db); got != r {
++		t.Fatal(got, r)
++	}
++	if err = db.Close(); err != nil {
++		t.Fatal(err)
++	}
++	db = checkOpen(t, path, sqlite.Options{ReadOnly: true})
++	if got := checkPass(t, db); got != r {
++		t.Fatal(got, r)
++	}
++}
++func TestNativeCheckWALPinnedSnapshots(t *testing.T) {
++	ctx := context.Background()
++	for _, shared := range []bool{false, true} {
++		t.Run(fmt.Sprint(shared), func(t *testing.T) {
++			path := filepath.Join(t.TempDir(), "wal.db")
++			opts := sqlite.Options{WALExclusive: !shared, WALShared: shared, KeepWALOnClose: true}
++			db := checkOpen(t, path, opts)
++			checkExec(t, db, "CREATE TABLE t(id INTEGER PRIMARY KEY,k TEXT)")
++			checkExec(t, db, "CREATE INDEX t_key ON t(k)")
++			checkExec(t, db, "INSERT INTO t VALUES(1,'one')")
++			tx, err := db.Begin(ctx, sqlite.TxOptions{ReadOnly: true})
++			if err != nil {
++				t.Fatal(err)
++			}
++			a, err := tx.Check(ctx)
++			if err != nil || a.TableRows != 1 {
++				t.Fatal(a, err)
++			}
++			if shared {
++				peer := checkOpen(t, path, opts)
++				checkExec(t, peer, "INSERT INTO t VALUES(2,'two')")
++				if err = peer.Close(); err != nil {
++					t.Fatal(err)
++				}
++			}
++			b, err := db.Check(ctx)
++			if err != nil || a != b {
++				t.Fatal(a, b, err)
++			}
++			if err = tx.Rollback(); err != nil {
++				t.Fatal(err)
++			}
++			latest := checkPass(t, db)
++			if shared && latest.TableRows != 2 {
++				t.Fatal(latest)
++			}
++			if err = db.Checkpoint(ctx); err != nil {
++				t.Fatal(err)
++			}
++			if got := checkPass(t, db); got.TableRows != latest.TableRows || got.IndexEntries != latest.IndexEntries {
++				t.Fatal(got, latest)
++			}
++			if err = db.Close(); err != nil {
++				t.Fatal(err)
++			}
++			db = checkOpen(t, path, opts)
++			if got := checkPass(t, db); got.TableRows != latest.TableRows {
++				t.Fatal(got)
++			}
++		})
++	}
++}
++func TestNativeCheckExtensionsAndTypedValues(t *testing.T) {
++	ctx := context.Background()
++	path := filepath.Join(t.TempDir(), "extensions.db")
++	db := checkOpen(t, path, sqlite.Options{})
++	checkExec(t, db, "CREATE TABLE docs(id INTEGER PRIMARY KEY,body TEXT,v VECTOR(2),h HALFVEC(2),b BIT(3),s SPARSEVEC(2))")
++	for i := 1; i <= 12; i++ {
++		checkExec(t, db, "INSERT INTO docs VALUES(?,?,?,?,?,?)", i, fmt.Sprintf("数据库 %d", i), fmt.Sprintf("[%d,1]", i), fmt.Sprintf("[%d,1]", i), "101", "{1:1,2:2}/2")
++	}
++	for _, q := range []string{
++		"CREATE INDEX text_idx ON docs(body) USING grams13",
++		"CREATE INDEX dense_hnsw ON docs(v) USING hnsw WITH(opclass='vector_l2_ops',m=4,ef_construction=16)",
++		"CREATE INDEX half_hnsw ON docs(h) USING hnsw WITH(opclass='halfvec_l2_ops',m=4,ef_construction=16)",
++		"CREATE INDEX bit_hnsw ON docs(b) USING hnsw WITH(opclass='bit_hamming_ops',m=4,ef_construction=16)",
++		"CREATE INDEX sparse_hnsw ON docs(s) USING hnsw WITH(opclass='sparsevec_l2_ops',m=4,ef_construction=16)",
++		"CREATE INDEX dense_ivf ON docs(v) USING ivfflat WITH(opclass='vector_l2_ops',lists=2,training_samples=12,training_iterations=2)",
++		"CREATE INDEX half_ivf ON docs(h) USING ivfflat WITH(opclass='halfvec_l2_ops',lists=2,training_samples=12,training_iterations=2)",
++		"CREATE INDEX bit_ivf ON docs(b) USING ivfflat WITH(opclass='bit_hamming_ops',lists=2,training_samples=12,training_iterations=2)",
++	} {
++		checkExec(t, db, q)
++	}
++	r := checkPass(t, db)
++	if r.ExtensionIndexes != 8 || r.Tables != 10 || r.Indexes != 9 {
++		t.Fatal(r)
++	}
++	checkExec(t, db, "UPDATE docs SET body='changed 数据库',v='[22,1]' WHERE id=2")
++	checkExec(t, db, "DELETE FROM docs WHERE id=3")
++	checkPass(t, db)
++	tx, err := db.Begin(ctx)
++	if err != nil {
++		t.Fatal(err)
++	}
++	if _, err = tx.Exec(ctx, "INSERT INTO docs VALUES(21,'rollback','[21,1]','[21,1]','010','{1:1}/2')"); err != nil {
++		t.Fatal(err)
++	}
++	if _, err = tx.Check(ctx); err != nil {
++		t.Fatal(err)
++	}
++	if err = tx.Rollback(); err != nil {
++		t.Fatal(err)
++	}
++	checkPass(t, db)
++	if err = db.Close(); err != nil {
++		t.Fatal(err)
++	}
++	db = checkOpen(t, path, sqlite.Options{ReadOnly: true})
++	checkPass(t, db)
++}
++func TestNativeCheckCorrectKeyReadOnly(t *testing.T) {
++	for _, mode := range []sqlite.EncryptionMode{sqlite.EncryptionSnapshot, sqlite.EncryptionWAL, sqlite.EncryptionWALShared} {
++		t.Run(fmt.Sprint(mode), func(t *testing.T) {
++			dir := t.TempDir()
++			path := filepath.Join(dir, "normal.gse")
++			cfg := encryptionOptions(t, encryption.RawKey256)
++			cfg.Mode = mode
++			db := checkOpen(t, path, sqlite.Options{Encryption: &cfg, KeepWALOnClose: mode != sqlite.EncryptionSnapshot})
++			checkExec(t, db, "CREATE TABLE t(id INTEGER PRIMARY KEY,k TEXT)")
++			checkExec(t, db, "CREATE INDEX t_k ON t(k)")
++			checkExec(t, db, "INSERT INTO t VALUES(1,'encrypted 数据库')")
++			checkPass(t, db)
++			if err := db.Close(); err != nil {
++				t.Fatal(err)
++			}
++			before := checkFamily(t, dir)
++			ro := checkOpen(t, path, sqlite.Options{Encryption: &cfg, ReadOnly: true, NoCreate: true, KeepWALOnClose: mode != sqlite.EncryptionSnapshot})
++			r := checkPass(t, ro)
++			if r.TableRows != 1 || r.IndexEntries != 1 {
++				t.Fatal(r)
++			}
++			if err := ro.Close(); err != nil {
++				t.Fatal(err)
++			}
++			if !reflect.DeepEqual(before, checkFamily(t, dir)) {
++				t.Fatal("read-only encrypted check changed family bytes")
++			}
++		})
++	}
++}
++
++// The official executable creates only valid databases via ordinary SQL. It is
++// an optional test oracle; no production checking delegates SQL to this process.
++func checkOracle(t *testing.T, path, sql string) string {
++	t.Helper()
++	oracle := os.Getenv("SQLITE_ORACLE")
++	if oracle == "" {
++		t.Skip("SQLITE_ORACLE is required for official supported-profile fixtures")
++	}
++	cmd := exec.Command(oracle, path, sql)
++	out, err := cmd.CombinedOutput()
++	if err != nil {
++		t.Fatal(string(out), err)
++	}
++	return strings.TrimSpace(string(out))
++}
++func TestNativeCheckOfficialSupportedFixtures(t *testing.T) {
++	for _, size := range []int{512, 4096, 65536} {
++		t.Run(fmt.Sprint(size), func(t *testing.T) {
++			dir := t.TempDir()
++			path := filepath.Join(dir, "official.db")
++			sql := fmt.Sprintf("PRAGMA page_size=%d; CREATE TABLE t(id INTEGER PRIMARY KEY,k TEXT NOT NULL,n NUMERIC,r REAL,b BLOB); INSERT INTO t VALUES(-9223372036854775808,'数据库',9007199254740993,3.0,X'0001'),(9223372036854775807,'end',1.25,2.5,X''),(0,'',NULL,NULL,NULL); ALTER TABLE t ADD COLUMN extra TEXT DEFAULT 'literal'; CREATE INDEX t_kn ON t(k,n,extra); CREATE INDEX t_id ON t(id,r,b); PRAGMA integrity_check;", size)
++			if got := checkOracle(t, path, sql); got != "ok" {
++				t.Fatal(got)
++			}
++			before := checkFamily(t, dir)
++			db := checkOpen(t, path, sqlite.Options{ReadOnly: true})
++			r := checkPass(t, db)
++			if r.TableRows != 3 || r.IndexEntries != 6 {
++				t.Fatal(r)
++			}
++			if err := db.Close(); err != nil {
++				t.Fatal(err)
++			}
++			if !reflect.DeepEqual(before, checkFamily(t, dir)) {
++				t.Fatal("official read-only fixture changed")
++			}
++		})
++	}
++}
++func TestNativeCheckOfficialUnsupportedCatalogAndDirtyExtension(t *testing.T) {
++	path := filepath.Join(t.TempDir(), "unsupported.db")
++	checkOracle(t, path, "CREATE TABLE t(id INTEGER PRIMARY KEY,k TEXT); CREATE INDEX descending ON t(k DESC);")
++	db := checkOpen(t, path, sqlite.Options{ReadOnly: true})
++	if r, err := db.Check(context.Background()); !errors.Is(err, sqlite.ErrUnsupported) || r != (sqlite.CheckResult{}) {
++		t.Fatal(r, err)
++	}
++	if err := db.Close(); err != nil {
++		t.Fatal(err)
++	}
++	path = filepath.Join(t.TempDir(), "dirty.db")
++	db = checkOpen(t, path, sqlite.Options{})
++	checkExec(t, db, "CREATE TABLE t(id INTEGER PRIMARY KEY,k TEXT)")
++	checkExec(t, db, "INSERT INTO t VALUES(1,'数据库')")
++	checkExec(t, db, "CREATE INDEX grams ON t(k) USING grams13")
++	checkPass(t, db)
++	if err := db.Close(); err != nil {
++		t.Fatal(err)
++	}
++	checkOracle(t, path, "UPDATE t SET k='official update' WHERE id=1;")
++	db = checkOpen(t, path, sqlite.Options{})
++	if r, err := db.Check(context.Background()); !errors.Is(err, sqlite.ErrReindexRequired) || r != (sqlite.CheckResult{}) {
++		t.Fatal(r, err)
++	}
++	checkExec(t, db, "REINDEX grams")
++	checkPass(t, db)
++}
++
++func TestNativeCheckOfficialFragmentedTrees(t *testing.T) {
++	for _, size := range []int{512, 4096, 65536} {
++		t.Run(fmt.Sprint(size), func(t *testing.T) {
++			path := filepath.Join(t.TempDir(), "fragmented.db")
++			sql := fmt.Sprintf("PRAGMA page_size=%d; CREATE TABLE t(id INTEGER PRIMARY KEY,k TEXT,n NUMERIC); WITH RECURSIVE rows(n) AS (VALUES(1) UNION ALL SELECT n+1 FROM rows WHERE n<900) INSERT INTO t SELECT n,printf('%%0100d',n),n FROM rows; CREATE INDEX by_key ON t(k,n); DELETE FROM t WHERE id%%3=0; UPDATE t SET k=substr(k,1,7)||id WHERE id%%4=0; PRAGMA integrity_check;", size)
++			if result := checkOracle(t, path, sql); result != "ok" {
++				t.Fatal(result)
++			}
++			db := checkOpen(t, path, sqlite.Options{ReadOnly: true})
++			result := checkPass(t, db)
++			if result.TableRows != 600 || result.IndexEntries != 600 {
++				t.Fatal(result)
++			}
++		})
++	}
++}

@@ -1,0 +1,22 @@
+{
+  "frozen_tree": "99ee54afe1900ac0e9b814ac8f57772f6b76e493",
+  "source_unchanged_after_checks": true,
+  "baseline_and_v1_freeze_unchanged": true,
+  "replay_still_exact": true,
+  "checks": {
+    "frozen-btree-vet-v2": 0,
+    "frozen-build-v2": 0,
+    "frozen-cgo-deps-v2": 0,
+    "frozen-cli-proof-v2": 0,
+    "frozen-module-v2": 0,
+    "frozen-normal-v2": 0,
+    "frozen-oracle-v2": 0,
+    "frozen-race-scope-v2": 0,
+    "frozen-race-v2": 0,
+    "frozen-scope-v2": 0,
+    "frozen-toolchain-v2": 0,
+    "frozen-vet-v2": 0
+  },
+  "binary_sha256": "79018667d091e709f635c6e6093b81edd1aca32f25b75f9e384c96e617663be5",
+  "production_cgo_dependencies": []
+}

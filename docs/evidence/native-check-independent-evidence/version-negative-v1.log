@@ -1,0 +1,6 @@
+=== RUN   TestIndependentCheckUnknownGramsVersion
+    check_independent_test.go:84: unknown grams method version accepted: result={Scope:gosqlite-supported-profile-v1 Pages:9 FreePages:0 ReservedPages:0 Tables:5 Indexes:3 ExtensionIndexes:1 TableRows:79 IndexEntries:77 PageReads:336} error=<nil>
+--- FAIL: TestIndependentCheckUnknownGramsVersion (0.01s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/sqlite	0.015s
+FAIL

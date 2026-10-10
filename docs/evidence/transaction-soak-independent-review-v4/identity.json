@@ -1,0 +1,31 @@
+{
+  "verified_trees": {
+    "base": "7d3184f87165e11e12560884ec6e4f92c9bfd039",
+    "frozen": "65f0d9bece6732499899db84f6d4fc008b6810e3",
+    "composition": "73d79d0e5cacf82c55777ad9756214a1859e6e1b"
+  },
+  "file_counts": {
+    "base": 1252,
+    "frozen": 1264,
+    "composition": 1266
+  },
+  "patch_sha256": "1e5d86e5b5f1643f3e20245048deda7c068630fade57d1d5f36d90e3ca33df4f",
+  "added_paths": [
+    "benchmarks/transactions/README.md",
+    "benchmarks/transactions/classify.go",
+    "benchmarks/transactions/classify_join_test.go",
+    "benchmarks/transactions/classify_test.go",
+    "benchmarks/transactions/closure.go",
+    "benchmarks/transactions/closure_test.go",
+    "benchmarks/transactions/independent_retirement_test.go",
+    "benchmarks/transactions/main.go",
+    "benchmarks/transactions/report.go",
+    "benchmarks/transactions/report_failure_test.go",
+    "benchmarks/transactions/report_test.go",
+    "benchmarks/transactions/workload.go"
+  ],
+  "unchanged_baseline": true,
+  "replay_exact": true,
+  "runtime_exact_composition": true,
+  "harness_twelve_files_identical_in_composition": true
+}

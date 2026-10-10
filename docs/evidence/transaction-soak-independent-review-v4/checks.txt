@@ -1,0 +1,140 @@
+
+2026-10-10T21:40:09Z go run ./internal/testscope 
+Ordinary test source-reference guard PASS; behavioral review is still required.
+exit=0
+
+2026-10-10T21:40:10Z go test ./benchmarks/transactions -count=1 -timeout=0 -v 
+=== RUN   TestIndependentUnexpectedJoinedErrorsRemainFatal
+=== RUN   TestIndependentUnexpectedJoinedErrorsRemainFatal/busy_plus_unknown
+=== RUN   TestIndependentUnexpectedJoinedErrorsRemainFatal/busy_plus_changed
+=== RUN   TestIndependentUnexpectedJoinedErrorsRemainFatal/cancel_plus_unknown
+=== RUN   TestIndependentUnexpectedJoinedErrorsRemainFatal/deadline_plus_changed
+=== RUN   TestIndependentUnexpectedJoinedErrorsRemainFatal/first_sqlite_error_masks_later_io
+=== RUN   TestIndependentUnexpectedJoinedErrorsRemainFatal/outer_busy_masks_inner_io
+=== RUN   TestIndependentUnexpectedJoinedErrorsRemainFatal/wrapped_busy_unknown
+--- PASS: TestIndependentUnexpectedJoinedErrorsRemainFatal (0.00s)
+    --- PASS: TestIndependentUnexpectedJoinedErrorsRemainFatal/busy_plus_unknown (0.00s)
+    --- PASS: TestIndependentUnexpectedJoinedErrorsRemainFatal/busy_plus_changed (0.00s)
+    --- PASS: TestIndependentUnexpectedJoinedErrorsRemainFatal/cancel_plus_unknown (0.00s)
+    --- PASS: TestIndependentUnexpectedJoinedErrorsRemainFatal/deadline_plus_changed (0.00s)
+    --- PASS: TestIndependentUnexpectedJoinedErrorsRemainFatal/first_sqlite_error_masks_later_io (0.00s)
+    --- PASS: TestIndependentUnexpectedJoinedErrorsRemainFatal/outer_busy_masks_inner_io (0.00s)
+    --- PASS: TestIndependentUnexpectedJoinedErrorsRemainFatal/wrapped_busy_unknown (0.00s)
+=== RUN   TestStrictOutcomeGraph
+--- PASS: TestStrictOutcomeGraph (0.00s)
+=== RUN   TestGenerationAbsencePreservesIteratorErrors
+--- PASS: TestGenerationAbsencePreservesIteratorErrors (0.00s)
+=== RUN   TestCloseLedgerRetainsFailures
+--- PASS: TestCloseLedgerRetainsFailures (0.00s)
+=== RUN   TestCleanupDiagnosticLatchDiscovery
+--- PASS: TestCleanupDiagnosticLatchDiscovery (0.00s)
+=== RUN   TestDBCloseOnlyThroughLedger
+--- PASS: TestDBCloseOnlyThroughLedger (0.00s)
+=== RUN   TestFinalClosureReportCannotEraseReaderFailure
+--- PASS: TestFinalClosureReportCannotEraseReaderFailure (0.00s)
+=== RUN   TestIndependentPendingRetirementDiagnosticsLatch
+=== RUN   TestIndependentPendingRetirementDiagnosticsLatch/plaintext
+=== RUN   TestIndependentPendingRetirementDiagnosticsLatch/shared_open
+=== RUN   TestIndependentPendingRetirementDiagnosticsLatch/shared_close
+=== RUN   TestIndependentPendingRetirementDiagnosticsLatch/encrypted
+--- PASS: TestIndependentPendingRetirementDiagnosticsLatch (0.00s)
+    --- PASS: TestIndependentPendingRetirementDiagnosticsLatch/plaintext (0.00s)
+    --- PASS: TestIndependentPendingRetirementDiagnosticsLatch/shared_open (0.00s)
+    --- PASS: TestIndependentPendingRetirementDiagnosticsLatch/shared_close (0.00s)
+    --- PASS: TestIndependentPendingRetirementDiagnosticsLatch/encrypted (0.00s)
+=== RUN   TestPreHandleRetirementFailureCannotBecomeSkipOrPass
+--- PASS: TestPreHandleRetirementFailureCannotBecomeSkipOrPass (0.00s)
+=== RUN   TestRetirementDiscoveryAndRenderingAreBounded
+--- PASS: TestRetirementDiscoveryAndRenderingAreBounded (0.00s)
+=== RUN   TestFinalizerInstalledBeforeDatabaseOpen
+--- PASS: TestFinalizerInstalledBeforeDatabaseOpen (0.00s)
+=== RUN   TestHarnessRevisionOnRejectedReport
+--- PASS: TestHarnessRevisionOnRejectedReport (0.00s)
+=== RUN   TestMomentsAndHistogram
+--- PASS: TestMomentsAndHistogram (0.00s)
+=== RUN   TestAccountingAndClassification
+--- PASS: TestAccountingAndClassification (0.00s)
+=== RUN   TestBoundsAndIdentity
+--- PASS: TestBoundsAndIdentity (0.00s)
+=== RUN   TestOrdinaryHarnessSharedLifecycle
+--- PASS: TestOrdinaryHarnessSharedLifecycle (0.14s)
+=== RUN   TestOrdinaryHarnessCooperativeCancellation
+--- PASS: TestOrdinaryHarnessCooperativeCancellation (0.06s)
+=== RUN   TestRejectedProfileHasNoDatabase
+--- PASS: TestRejectedProfileHasNoDatabase (0.00s)
+=== RUN   TestOutcomeTraceCodes
+--- PASS: TestOutcomeTraceCodes (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/benchmarks/transactions	0.219s
+exit=0
+
+2026-10-10T21:40:16Z env CGO_ENABLED=1 go test -race ./benchmarks/transactions -count=1 -timeout=0 -v 
+=== RUN   TestIndependentUnexpectedJoinedErrorsRemainFatal
+=== RUN   TestIndependentUnexpectedJoinedErrorsRemainFatal/busy_plus_unknown
+=== RUN   TestIndependentUnexpectedJoinedErrorsRemainFatal/busy_plus_changed
+=== RUN   TestIndependentUnexpectedJoinedErrorsRemainFatal/cancel_plus_unknown
+=== RUN   TestIndependentUnexpectedJoinedErrorsRemainFatal/deadline_plus_changed
+=== RUN   TestIndependentUnexpectedJoinedErrorsRemainFatal/first_sqlite_error_masks_later_io
+=== RUN   TestIndependentUnexpectedJoinedErrorsRemainFatal/outer_busy_masks_inner_io
+=== RUN   TestIndependentUnexpectedJoinedErrorsRemainFatal/wrapped_busy_unknown
+--- PASS: TestIndependentUnexpectedJoinedErrorsRemainFatal (0.00s)
+    --- PASS: TestIndependentUnexpectedJoinedErrorsRemainFatal/busy_plus_unknown (0.00s)
+    --- PASS: TestIndependentUnexpectedJoinedErrorsRemainFatal/busy_plus_changed (0.00s)
+    --- PASS: TestIndependentUnexpectedJoinedErrorsRemainFatal/cancel_plus_unknown (0.00s)
+    --- PASS: TestIndependentUnexpectedJoinedErrorsRemainFatal/deadline_plus_changed (0.00s)
+    --- PASS: TestIndependentUnexpectedJoinedErrorsRemainFatal/first_sqlite_error_masks_later_io (0.00s)
+    --- PASS: TestIndependentUnexpectedJoinedErrorsRemainFatal/outer_busy_masks_inner_io (0.00s)
+    --- PASS: TestIndependentUnexpectedJoinedErrorsRemainFatal/wrapped_busy_unknown (0.00s)
+=== RUN   TestStrictOutcomeGraph
+--- PASS: TestStrictOutcomeGraph (0.00s)
+=== RUN   TestGenerationAbsencePreservesIteratorErrors
+--- PASS: TestGenerationAbsencePreservesIteratorErrors (0.00s)
+=== RUN   TestCloseLedgerRetainsFailures
+--- PASS: TestCloseLedgerRetainsFailures (0.00s)
+=== RUN   TestCleanupDiagnosticLatchDiscovery
+--- PASS: TestCleanupDiagnosticLatchDiscovery (0.00s)
+=== RUN   TestDBCloseOnlyThroughLedger
+--- PASS: TestDBCloseOnlyThroughLedger (0.01s)
+=== RUN   TestFinalClosureReportCannotEraseReaderFailure
+--- PASS: TestFinalClosureReportCannotEraseReaderFailure (0.00s)
+=== RUN   TestIndependentPendingRetirementDiagnosticsLatch
+=== RUN   TestIndependentPendingRetirementDiagnosticsLatch/plaintext
+=== RUN   TestIndependentPendingRetirementDiagnosticsLatch/shared_open
+=== RUN   TestIndependentPendingRetirementDiagnosticsLatch/shared_close
+=== RUN   TestIndependentPendingRetirementDiagnosticsLatch/encrypted
+--- PASS: TestIndependentPendingRetirementDiagnosticsLatch (0.00s)
+    --- PASS: TestIndependentPendingRetirementDiagnosticsLatch/plaintext (0.00s)
+    --- PASS: TestIndependentPendingRetirementDiagnosticsLatch/shared_open (0.00s)
+    --- PASS: TestIndependentPendingRetirementDiagnosticsLatch/shared_close (0.00s)
+    --- PASS: TestIndependentPendingRetirementDiagnosticsLatch/encrypted (0.00s)
+=== RUN   TestPreHandleRetirementFailureCannotBecomeSkipOrPass
+--- PASS: TestPreHandleRetirementFailureCannotBecomeSkipOrPass (0.00s)
+=== RUN   TestRetirementDiscoveryAndRenderingAreBounded
+--- PASS: TestRetirementDiscoveryAndRenderingAreBounded (0.00s)
+=== RUN   TestFinalizerInstalledBeforeDatabaseOpen
+--- PASS: TestFinalizerInstalledBeforeDatabaseOpen (0.00s)
+=== RUN   TestHarnessRevisionOnRejectedReport
+--- PASS: TestHarnessRevisionOnRejectedReport (0.00s)
+=== RUN   TestMomentsAndHistogram
+--- PASS: TestMomentsAndHistogram (0.00s)
+=== RUN   TestAccountingAndClassification
+--- PASS: TestAccountingAndClassification (0.00s)
+=== RUN   TestBoundsAndIdentity
+--- PASS: TestBoundsAndIdentity (0.00s)
+=== RUN   TestOrdinaryHarnessSharedLifecycle
+--- PASS: TestOrdinaryHarnessSharedLifecycle (0.26s)
+=== RUN   TestOrdinaryHarnessCooperativeCancellation
+--- PASS: TestOrdinaryHarnessCooperativeCancellation (0.06s)
+=== RUN   TestRejectedProfileHasNoDatabase
+--- PASS: TestRejectedProfileHasNoDatabase (0.00s)
+=== RUN   TestOutcomeTraceCodes
+--- PASS: TestOutcomeTraceCodes (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/benchmarks/transactions	1.358s
+exit=0
+
+2026-10-10T21:40:28Z go vet ./benchmarks/transactions 
+exit=0
+
+2026-10-10T21:40:29Z go build -trimpath -o /workspace/scratch/5e06a74e5f65/durable-restart/transaction-soak-independent-review-v4/transactions ./benchmarks/transactions 
+exit=0

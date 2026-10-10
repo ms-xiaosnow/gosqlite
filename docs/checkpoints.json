@@ -466,5 +466,19 @@
     "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38087723483",
     "remote_ci_status": "COMPLETED SUCCESS for exact SHA, updated2026-10-10T21:43:16Z, observed21:44:56Z. Complete pinned ordinary oracle and ordinary jobs independently checked.",
     "open_gates": "Wider supported planner error/phase differences remain corrective source; Reader/shared fixes, native full check, CLI/import verification, grams/transaction/performance-CI slices excluded. Transaction harness later v2/v3 failures remain held engineering findings, not clean acceptance. Native failure/recovery/target runtime and independent M10 remain unqualified."
+  },
+  {
+    "stage": "Post-SHARED reader and shared absence fixes, encrypted maintenance CLI and dataset/grams verification",
+    "remote_commit": "8d9330c8c50de8fdf55e727f20efd6f75d3565c8",
+    "local_commit": "8d9330c8c50de8fdf55e727f20efd6f75d3565c8",
+    "tree": "b30067623a70b0d33d676ac957efa1ab49ba7b4a",
+    "bundle_sha256": "1f075f7492105be33c7fb57493fdf60a272a0d0227963b41cfdde5b3fb1d5270",
+    "bundle_bytes": 4561598,
+    "library_file_id": "libfile_c04f4b6a687481918b4aaa5be7e17f39",
+    "library_version": 0,
+    "verified": "Expected-SHA remote main readback2026-10-10T22:13:17Z and exact local mirror22:13:25Z. Complete-history bundle Library byte-readback, clone/fsck and original goal PASS22:14:02Z. Exact source ddb957e2a1d804b236a295f7fe6ce383954b852c full CGO0 unit/vet/build21:42:39Z, complete pinned ordinary oracle21:48:51Z, full race(SQLite718.662s), five target builds/modules/full hashes PASSexit0 at22:02:02Z. All published non-document changed bytes equal fixedsource. Focused exact Library-restored normal/race and full builds started22:14:03Z, pending. Exact Library-restored acquisition/CLI/dataset/grams focused normal/race and full vet/build/five targets/modules/clean tree PASS exit0 at2026-10-10T22:16:35Z.",
+    "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38090596555",
+    "remote_ci_status": "COMPLETED SUCCESS for exact SHA, updated2026-10-10T22:30:25Z, observed22:31:10Z. Ordinary job114326050222 and complete pinned-oracle job114326050489.",
+    "open_gates": "Generic plaintext backup, real readonly plaintext WAL CLI and supported planner parity remain code gaps. TransactionV4/CheckV2 full aggregate nowPASS but excluded pending separate checkpoint. PerformanceCI/ANN report validation corrective work, actuallongsoak/largerbench, physicalfailure/recovery/targetruntime and independent M10 remain unqualified."
   }
 ]

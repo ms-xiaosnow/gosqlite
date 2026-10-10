@@ -1,0 +1,10 @@
+=== RUN   TestIndependentCheckOrdinaryUnrelatedRowsLifetime
+=== RUN   TestIndependentCheckOrdinaryUnrelatedRowsLifetime/rollback
+=== RUN   TestIndependentCheckOrdinaryUnrelatedRowsLifetime/exclusive
+=== RUN   TestIndependentCheckOrdinaryUnrelatedRowsLifetime/shared
+--- PASS: TestIndependentCheckOrdinaryUnrelatedRowsLifetime (0.01s)
+    --- PASS: TestIndependentCheckOrdinaryUnrelatedRowsLifetime/rollback (0.00s)
+    --- PASS: TestIndependentCheckOrdinaryUnrelatedRowsLifetime/exclusive (0.00s)
+    --- PASS: TestIndependentCheckOrdinaryUnrelatedRowsLifetime/shared (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.015s

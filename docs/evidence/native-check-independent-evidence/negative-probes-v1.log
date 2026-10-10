@@ -1,0 +1,22 @@
+=== RUN   TestIndependentCheckFragmentAccounting
+=== RUN   TestIndependentCheckFragmentAccounting/1
+    check_independent_test.go:24: incorrect fragmented-byte count passed: result={Scope:gosqlite-supported-profile-v1 Pages:3 FreePages:0 ReservedPages:0 Tables:1 Indexes:1 ExtensionIndexes:0 TableRows:4 IndexEntries:4 PageReads:16} error=<nil>
+=== RUN   TestIndependentCheckFragmentAccounting/2
+    check_independent_test.go:24: incorrect fragmented-byte count passed: result={Scope:gosqlite-supported-profile-v1 Pages:3 FreePages:0 ReservedPages:0 Tables:1 Indexes:1 ExtensionIndexes:0 TableRows:4 IndexEntries:4 PageReads:16} error=<nil>
+=== RUN   TestIndependentCheckFragmentAccounting/3
+    check_independent_test.go:24: incorrect fragmented-byte count passed: result={Scope:gosqlite-supported-profile-v1 Pages:3 FreePages:0 ReservedPages:0 Tables:1 Indexes:1 ExtensionIndexes:0 TableRows:4 IndexEntries:4 PageReads:16} error=<nil>
+--- FAIL: TestIndependentCheckFragmentAccounting (0.00s)
+    --- FAIL: TestIndependentCheckFragmentAccounting/1 (0.00s)
+    --- FAIL: TestIndependentCheckFragmentAccounting/2 (0.00s)
+    --- FAIL: TestIndependentCheckFragmentAccounting/3 (0.00s)
+=== RUN   TestIndependentCheckUnrepresentedFreeBytes
+    check_independent_test.go:35: unrepresented free bytes passed: result={Scope:gosqlite-supported-profile-v1 Pages:3 FreePages:0 ReservedPages:0 Tables:1 Indexes:1 ExtensionIndexes:0 TableRows:4 IndexEntries:4 PageReads:16} error=<nil>
+--- FAIL: TestIndependentCheckUnrepresentedFreeBytes (0.00s)
+=== RUN   TestIndependentCheckCustomBuiltinNamedRegistry
+    check_independent_test.go:60: custom registry accepted under fixed supported profile: result={Scope:gosqlite-supported-profile-v1 Pages:9 FreePages:0 ReservedPages:0 Tables:5 Indexes:3 ExtensionIndexes:1 TableRows:79 IndexEntries:77 PageReads:336} error=<nil>
+--- FAIL: TestIndependentCheckCustomBuiltinNamedRegistry (0.01s)
+=== RUN   TestIndependentCheckCatalogUTF8
+--- PASS: TestIndependentCheckCatalogUTF8 (0.00s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/sqlite	0.012s
+FAIL

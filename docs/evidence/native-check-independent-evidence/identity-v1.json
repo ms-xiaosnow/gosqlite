@@ -1,0 +1,17 @@
+{
+  "baseline_tree": "0374382bdef1c61a7f5b36092a42109046b100dd",
+  "candidate_tree": "384f19e2e79cca04a9482ce4d8c78b298c07dd09",
+  "baseline_count": 1330,
+  "candidate_count": 1337,
+  "changed": [
+    "cmd/gosqlite/check.go",
+    "cmd/gosqlite/check_test.go",
+    "cmd/gosqlite/main.go",
+    "docs/native-check.md",
+    "examples/native-check/main.go",
+    "sqlite/check.go",
+    "sqlite/check_internal_test.go",
+    "sqlite/check_test.go"
+  ],
+  "complete_bytes_modes_replay_equal": true
+}

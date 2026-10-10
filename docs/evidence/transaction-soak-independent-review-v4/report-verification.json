@@ -1,0 +1,39 @@
+{
+  "checked": [
+    {
+      "path": "transaction-soak-evidence-v4/throughput-v4-encrypted-shared.json",
+      "sha256": "f93fe70cd0eb22ef1eb9ab1ae00e7d18155852564110b7852f1526adb4772a21",
+      "status": "passed",
+      "active_seconds": 0.468003002,
+      "attempts": 64,
+      "commits": 48,
+      "read_success": 55,
+      "reconstructed_model_sha256": "7f4d10530f62e6fc4368af43e9457355357ff25984464501e11cacfc61a01471",
+      "errors": []
+    },
+    {
+      "path": "transaction-soak-evidence-v4/throughput-v4-rollback.json",
+      "sha256": "afdd311f732066fee3cc96b2d7f6b6006719ac8b83d47f6248a75c8364eefbd9",
+      "status": "passed",
+      "active_seconds": 0.108698444,
+      "attempts": 64,
+      "commits": 48,
+      "read_success": 29,
+      "reconstructed_model_sha256": "7f4d10530f62e6fc4368af43e9457355357ff25984464501e11cacfc61a01471",
+      "errors": []
+    },
+    {
+      "path": "transaction-soak-evidence-v4/throughput-v4-wal-shared.json",
+      "sha256": "51e1e52a8a560dc40c1c7876e121342f39888d6f32e979700b43447740506f25",
+      "status": "passed",
+      "active_seconds": 0.062026606,
+      "attempts": 64,
+      "commits": 48,
+      "read_success": 20,
+      "reconstructed_model_sha256": "7f4d10530f62e6fc4368af43e9457355357ff25984464501e11cacfc61a01471",
+      "errors": []
+    }
+  ],
+  "original_v1_failed_report_and_closed_data_unchanged": true,
+  "v3_reports_and_failed_WAL_data_unchanged": true
+}

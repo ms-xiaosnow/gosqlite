@@ -1,0 +1,21 @@
+{
+  "baseline_tree": "0374382bdef1c61a7f5b36092a42109046b100dd",
+  "frozen_tree": "384f19e2e79cca04a9482ce4d8c78b298c07dd09",
+  "baseline_files": 1330,
+  "frozen_files": 1337,
+  "patch_sha256": "408afede0a32bebc28aee9089e9bf9eeebdfe7d118338f927980257ef2f0d503",
+  "owned_paths": [
+    "cmd/gosqlite/check.go",
+    "cmd/gosqlite/check_test.go",
+    "cmd/gosqlite/main.go",
+    "docs/native-check.md",
+    "examples/native-check/main.go",
+    "sqlite/check.go",
+    "sqlite/check_internal_test.go",
+    "sqlite/check_test.go"
+  ],
+  "all_unowned_modes_and_content_unchanged": true,
+  "patch_roundtrip_verified": true,
+  "composed_from_tree": "ad066d04d676b8368ca7d02d83664e50dfa47216",
+  "dependency_patch_sha256": "c7893f8a1c6f686cf137cca15dbfa4cdf670e986625f2bf863e01caf80e8c359"
+}

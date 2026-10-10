@@ -1,0 +1,6 @@
+{
+  "report_sha256": "a62f4bfed390582d1125d88a6dfbe06f06f3a33500a55fedacea934424a1e101",
+  "data_files": {
+    "/tmp/gosqlite-ordinary-transactions-1157657524/benchmark.db": "b996a714bd220924cd93370ca257c553f17ec775159a33382606b9b29ac773e9"
+  }
+}

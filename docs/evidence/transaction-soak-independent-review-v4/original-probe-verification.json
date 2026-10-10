@@ -1,0 +1,14 @@
+[
+  {
+    "prior_path": "/workspace/scratch/5e06a74e5f65/durable-restart/transaction-soak-independent-review-v2/pure-memory-negative/benchmarks/transactions/independent_negative_test.go",
+    "sha256": "5d9cbfcce23c82351cdf74330b7325a40e30df5e2d348c497e95013839f8255c",
+    "frozen_path": "/workspace/scratch/5e06a74e5f65/durable-restart/transaction-soak-freeze-v4/benchmarks/transactions/classify_join_test.go",
+    "gofmt_identical": true
+  },
+  {
+    "prior_path": "/workspace/scratch/5e06a74e5f65/durable-restart/transaction-soak-independent-review-v3/pure-memory-negative/benchmarks/transactions/independent_retirement_test.go",
+    "sha256": "519541f9c255f8eebe6c2f7457a7c7c34015fe0152b7ecf5a3ad20f55c964ada",
+    "frozen_path": "/workspace/scratch/5e06a74e5f65/durable-restart/transaction-soak-freeze-v4/benchmarks/transactions/independent_retirement_test.go",
+    "gofmt_identical": true
+  }
+]

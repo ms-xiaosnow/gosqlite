@@ -1,0 +1,10 @@
+=== RUN   TestIndependentCheckOfficialFragmentedValidFixtures
+=== RUN   TestIndependentCheckOfficialFragmentedValidFixtures/512
+=== RUN   TestIndependentCheckOfficialFragmentedValidFixtures/4096
+=== RUN   TestIndependentCheckOfficialFragmentedValidFixtures/65536
+--- PASS: TestIndependentCheckOfficialFragmentedValidFixtures (0.12s)
+    --- PASS: TestIndependentCheckOfficialFragmentedValidFixtures/512 (0.05s)
+    --- PASS: TestIndependentCheckOfficialFragmentedValidFixtures/4096 (0.03s)
+    --- PASS: TestIndependentCheckOfficialFragmentedValidFixtures/65536 (0.04s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.123s

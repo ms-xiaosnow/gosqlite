@@ -1,0 +1,4 @@
+{"mode":"plain","scope":"gosqlite-supported-profile-v1","pages":10,"free_pages":0,"reserved_pages":0,"tables":5,"indexes":4,"extension_indexes":1,"table_rows":232,"index_entries":231,"page_reads":950}
+{"mode":"snapshot","scope":"gosqlite-supported-profile-v1","pages":10,"free_pages":0,"reserved_pages":0,"tables":5,"indexes":4,"extension_indexes":1,"table_rows":232,"index_entries":231,"page_reads":950}
+{"mode":"wal","scope":"gosqlite-supported-profile-v1","pages":10,"free_pages":0,"reserved_pages":0,"tables":5,"indexes":4,"extension_indexes":1,"table_rows":232,"index_entries":231,"page_reads":950}
+{"mode":"shared","scope":"gosqlite-supported-profile-v1","pages":10,"free_pages":0,"reserved_pages":0,"tables":5,"indexes":4,"extension_indexes":1,"table_rows":232,"index_entries":231,"page_reads":950}

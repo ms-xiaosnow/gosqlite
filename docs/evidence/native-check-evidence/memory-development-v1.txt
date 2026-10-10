@@ -1,0 +1,7 @@
+--- FAIL: TestNativeCheckMemoryIntactAndBudgets (0.00s)
+    check_internal_test.go:130: {gosqlite-supported-profile-v1 3 0 0 1 1 0 4 4 16} 28
+--- FAIL: TestNativeCheckMemoryCancellationAndTypes (0.00s)
+    check_internal_test.go:242: {gosqlite-supported-profile-v1 3 0 0 1 1 0 4 4 16} <nil>
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/sqlite	0.004s
+FAIL

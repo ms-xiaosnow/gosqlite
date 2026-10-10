@@ -1,0 +1,39 @@
+{
+  "base": "ddb957e2a1d804b236a295f7fe6ce383954b852c",
+  "tree": "8b604e3c667152284a29d7ad7dfba5a10f63b053",
+  "owned": {
+    "benchmarks/transactions/README.md": "1205a4ccd1f5da1f31fa48a385f4c3e7b391faaee0de74ebbc07b102fecaa5c9",
+    "benchmarks/transactions/classify.go": "23f51895bb9d633897f9dfec2d5fa7170bb408c4c8db602a48716b0ac072f735",
+    "benchmarks/transactions/classify_join_test.go": "6229067b120b3373723496e7166ad44eb49e848b92465d967f7dc28538a449e3",
+    "benchmarks/transactions/classify_test.go": "3443587dd4c1769c69494625ef47c64cbcf55187d28fbe2401add7f79c7128ff",
+    "benchmarks/transactions/closure.go": "8e5b0f6df598e4e441972bdbc7d70a5a4c4fc289775740a4534ca3eaed725994",
+    "benchmarks/transactions/closure_test.go": "b0ce39371013e74fc201ea7ee8bd81123ca901c7dadae03749380fbcaec48a3a",
+    "benchmarks/transactions/independent_retirement_test.go": "28d2cf8581bb2fd3aac6ebe6ac681291c0c01738d3d0777d06a04667e92edc41",
+    "benchmarks/transactions/main.go": "2fc4938cbbe3aa758d03a537e41486f380124f027b8074ae961d5cc7b261dbac",
+    "benchmarks/transactions/report.go": "b0f5747d756fcb25a738f46aaaacad9803e64dde603364ff5d487354b1e35bd7",
+    "benchmarks/transactions/report_failure_test.go": "248dbb3a58a44020329171280a1756698f74b5976017f95ad908b42bc7500f50",
+    "benchmarks/transactions/report_test.go": "2e8ee86dfd86b9bbd8422637b31cca7d24b9570bbb164905742f84f0469213ee",
+    "benchmarks/transactions/workload.go": "19932aace46d3d20be0135ad269e8bc2e4b33ef0237f5548a4843639ff462bf0",
+    "cmd/gosqlite/check.go": "2c5563c36310706069ce7d37a73c5761d2a8f81e91b63139aa839c24cf882bc0",
+    "cmd/gosqlite/check_test.go": "9adf857ebdc8c82783fec7169832db04e521e1958892340a9b36345c9b05e87b",
+    "cmd/gosqlite/main.go": "1587f5f05820958d8b885f31eab05f18a76c0bb2e6faa4cf87cbfa30c8219ea0",
+    "docs/native-check.md": "ceb6d17b46663ae80b12064c09971b30a7235999bca035e688dbf0b9de3234d6",
+    "examples/native-check/main.go": "321644829e19f60e3d1138b3fe214017d24212c1670ab4c0d976496b91c6a40c",
+    "internal/btree/check_space.go": "8a77078961e085ea121c617b11a62c081540c5d6f985ba8da02510d5bfcb3025",
+    "sqlite/check.go": "b0963ceb3977a9718bef1eb2064e63be737944350612a914e13f0c2a5304115b",
+    "sqlite/check_internal_test.go": "d49403d1d228327d691c2db768750b7342d528acba9515590eee8810ea3d93d0",
+    "sqlite/check_review_test.go": "3308edbc0f9e809867942c122129953e2e5b8061d212b6b5ecd3dc6014e56212",
+    "sqlite/check_test.go": "96d4cef513b87dd9701bd534ba54ed0a337a4e78ed9b88555a61b22467d13645"
+  },
+  "patches": [
+    [
+      "transaction-soak-evidence-v4/source-v4.patch",
+      "1e5d86e5b5f1643f3e20245048deda7c068630fade57d1d5f36d90e3ca33df4f"
+    ],
+    [
+      "native-check-evidence/source-v2.patch",
+      "819b54f6af690a2ede21e78165dc5a07da4f5e608d70e5d398579c703487dafd"
+    ]
+  ],
+  "method": "Checked Git hunks over exact accepted-tools base; no stale unowned overwrite"
+}

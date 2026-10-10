@@ -1,0 +1,8 @@
+cmd/gosqlite/check.go
+cmd/gosqlite/check_test.go
+cmd/gosqlite/main.go
+docs/native-check.md
+examples/native-check/main.go
+sqlite/check.go
+sqlite/check_internal_test.go
+sqlite/check_test.go

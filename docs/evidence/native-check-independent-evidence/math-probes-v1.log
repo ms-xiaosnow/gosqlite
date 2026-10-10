@@ -1,0 +1,20 @@
+=== RUN   TestIndependentCheckMathStorageAndNumericBoundaries
+=== RUN   TestIndependentCheckMathStorageAndNumericBoundaries/integer-real-one
+=== RUN   TestIndependentCheckMathStorageAndNumericBoundaries/integer-real-two53
+=== RUN   TestIndependentCheckMathStorageAndNumericBoundaries/integer-lost-unit
+=== RUN   TestIndependentCheckMathStorageAndNumericBoundaries/max-rounded
+=== RUN   TestIndependentCheckMathStorageAndNumericBoundaries/min-rounded
+=== RUN   TestIndependentCheckMathStorageAndNumericBoundaries/text-number
+=== RUN   TestIndependentCheckMathStorageAndNumericBoundaries/blob-text
+=== RUN   TestIndependentCheckMathStorageAndNumericBoundaries/nil-empty
+--- PASS: TestIndependentCheckMathStorageAndNumericBoundaries (0.00s)
+    --- PASS: TestIndependentCheckMathStorageAndNumericBoundaries/integer-real-one (0.00s)
+    --- PASS: TestIndependentCheckMathStorageAndNumericBoundaries/integer-real-two53 (0.00s)
+    --- PASS: TestIndependentCheckMathStorageAndNumericBoundaries/integer-lost-unit (0.00s)
+    --- PASS: TestIndependentCheckMathStorageAndNumericBoundaries/max-rounded (0.00s)
+    --- PASS: TestIndependentCheckMathStorageAndNumericBoundaries/min-rounded (0.00s)
+    --- PASS: TestIndependentCheckMathStorageAndNumericBoundaries/text-number (0.00s)
+    --- PASS: TestIndependentCheckMathStorageAndNumericBoundaries/blob-text (0.00s)
+    --- PASS: TestIndependentCheckMathStorageAndNumericBoundaries/nil-empty (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.004s

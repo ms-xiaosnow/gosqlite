@@ -1,0 +1,2 @@
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	10.500s
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	1.534s
