@@ -4,7 +4,7 @@ This slice integrates the existing immutable `vector.HalfVector` into typed SQL,
 ordinary SQLite-compatible storage, `database/sql`, and exact native/SQL ranking.
 It stores actual IEEE-754 binary16 bits with the distinct **GSH v1** codec;
 existing dense GSV v1, packed-bit GSB v1 and dense search APIs are unchanged.
-Half ANN and SPARSEVEC SQL/native search remain later checkpoints.
+Half ANN remains required work; SPARSEVEC SQL/native exact search is covered in [sparse-vector.md](sparse-vector.md).
 
 ## SQL type and representation
 

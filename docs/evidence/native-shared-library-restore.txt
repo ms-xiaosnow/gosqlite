@@ -1,0 +1,26 @@
+Exact Library-restored native/shared checkpoint focused verification; no native Darwin/Windows execution.
+2026-10-10T14:33:59Z
+29ab5b1da66fc8067d8bd64f3d1ef70e015e9d2b
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.052s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	0.214s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	0.276s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.498s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.987s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.549s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-shared	0.022s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	1.084s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	2.850s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	1.840s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	2.434s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	4.184s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	2.951s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-shared	1.091s
+cross-build linux/amd64 PASS
+cross-build linux/arm64 PASS
+cross-build darwin/arm64 PASS
+cross-build windows/amd64 PASS
+all modules verified
+2026-10-10T14:34:55Z
+NATIVE SHARED LIBRARY RESTORE FOCUSED CHECKS PASS

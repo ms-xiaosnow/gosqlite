@@ -1,0 +1,222 @@
+M9 checkpoint G: independent SPARSEVEC SQL/search boundedness review
+Recorded 2026-10-10 UTC; Linux amd64; pinned Go 1.27.2.
+
+Scope and execution boundary
+- Only the ten explicitly named ordinary tests listed below were executed.
+- Review-owned files: internal/sql/sparse_review_test.go,
+  sqlite/sparse_review_test.go, docs/evidence/m9-sparse-review.txt.
+- No production edits, staging, commits, aggregate or manual-tag runs by this
+  reviewer. Owner separately maintains driver, official SQLite oracle, example,
+  public-fixture and component evidence; those are not claimed as this run.
+- Disk fixtures are intact ordinary databases created and changed with SQL.
+  Tests use normal rollback and shared WAL, failed ordinary typed statements,
+  explicit transaction rollback, normal second-connection writes/checkpoints.
+  Malformed codecs/representation values are memory-only inputs. No damaged,
+  tampered, wrong-key or missing-selected file was opened or executed; no
+  namespace replacement/retarget/race, injected native I/O/lock/unmap/Sync,
+  short-write/disk-full/permission failure, forced termination, crash, hot
+  recovery, interrupted publication/rekey or other physical recovery workflow
+  was executed. This is focused evidence, not a full-tree release qualification.
+
+Independent review findings
+1. Found by source review: SQL sparse score scratch was checked alone before
+   candidate/query decoding; only after fetch did materializeVector combine
+   that scratch with previously retained heap rows. Thus the logical combined
+   memory budget could be rejected after decoding had already allocated.
+2. Production owner fixed plan_vector.go/plan_sparse.go: materializer publishes
+   retained-row-only bytes before each fetch; sparse score checks remaining
+   MaxSortBytes with checked subtraction before either sparse decode. Existing
+   post-fetch accounting still reserves scratch plus projection/retained rows.
+3. TestSparseReviewCombinedScratchPreflightBeforeDecoding proves the fix with
+   valid maximum support (16000 entries, dimension 1e9). Standalone scratch
+   fits but retained+scratch exceeds budget: ErrMemoryLimit, no prepared state,
+   no charged support and ZERO measured scoring allocations. Exact remaining
+   scratch boundary succeeds and charges 16000, independent of dimension.
+4. Initial measurement included one caller-side []byte-to-interface box per
+   call. The harness now boxes caller input before AllocsPerRun, so it measures
+   scoring allocations only. This was a test-harness issue, not an additional
+   production defect. The final repeated CGO0 and race gates passed.
+
+Verified behavior
+- Exact independently assembled GSS v1 bytes: 16-byte header, version/format/
+  endianness/flags, 1e9 dimension, nnz and zero-based interleaved index/float32
+  bits. Text sorting/zero removal, duplicate explicit zeros vs retained-index
+  uniqueness, zero-index/out-of-bounds-zero rejection, strict binary rejection
+  of signed zero/nonfinite/unsorted/duplicate/out-of-range/length/count cases,
+  smallest binary32 subnormal, empty support distinct from NULL/invalid object.
+- Nullable scanner preserves state on failure and owns successful source data;
+  source-buffer/accessor mutation cannot affect immutable values. Explicit
+  billion-dimensional dense conversion fails with ErrLimit before allocation.
+- All numerical functions accept sparse identity through unary +, coalesce,
+  ifnull and nullif. Every dense/half/bit pairing in either argument order and
+  mixed known coalesce/ifnull identity rejects. Closed constructor/conversion
+  source signatures, closed GSS/GSV/GSH/GSB metric dispatch, dense behavior for
+  two untyped strings and explicit dense/sparse conversions are checked.
+- Arithmetic cancellation at maximum 16000 support is deterministic: the
+  fourth context check aborts each of four metrics and norm with zero result;
+  uncanceled maximum support uses <=66 checks rather than dimension-sized
+  traversal. Empty dimension-1e9 supports require no dense allocation/work.
+- Memory-only external TEXT/default/alias models preserve actual storage class
+  and sparse expression identity. Numeric-affinity short-record defaults reject
+  when interpreted; unrelated false predicates may filter them first. Typed
+  invalid candidates still reject with a NULL query; NULL candidates suppress
+  malformed query decoding, matching full-sort/heap behavior.
+- Candidate budgets count NULL and filtered source rows. Conservative explicit
+  zero-entry support accounting uses query=3 plus two merges of (3+2)=13;
+  budgets 1,3,7,8,12 reject without published partial ranking and 13 succeeds.
+  Entry-count and byte preflight precede malformed text parsing. Both heap and
+  full sorter reject insufficient retained memory. Dense/bit work counters stay
+  zero for sparse ranking.
+- Independent exact reference embeds only THREE coordinates at distant indices
+  0/499999999/999999999; no production metric/heap/reference decoder is used.
+  Native top-k, SQL heap and full-sort match for two queries, all four metrics,
+  both argument orders, filtered/unfiltered sets, NULLs, signed MinInt64 and
+  MaxInt64 ties, ordinal ordering, LIMIT/OFFSET and empty windows. Native NULL
+  exclusion and SQL NULL-first order are independently checked.
+- Native default storage matches independent exact GSS bytes. Failed typed
+  UPDATE leaves earlier transaction writes intact; normal outer rollback
+  removes them. Sparse subvector/binary_quantize explicitly return unsupported;
+  billion-dimensional dense conversion and dense/half/bit physical-column
+  misuse reject. HNSW/IVFFlat creation on sparse columns rejects.
+- Native option hard caps/partial invalid options, result caps, closed metric
+  strings, typed Valuer entry/memory preflight, typed nil pointers, NULLs,
+  zero-support tiny-memory success, and filtered/NULL candidate quotas checked.
+  Native zero-limit cosine validates zero norm; a later zero-norm candidate
+  returns no partial result. WHERE may exclude that candidate before scoring.
+- Native/SQL midscan cancellation, custom Valuer cancellation/errors, and all
+  error zero-results verified. An ordinary second writer and checkpoint after
+  canceled searches verify released readers. Rows.Close releases decoded/bound
+  sparse state and retains plan/stat diagnostics.
+
+Commands
+Common environment from repository root:
+  GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off
+  GOCACHE=$PWD/../go-cache GOPATH=$PWD/../go-path
+  GO=../toolchains/go1.27.2/bin/go
+Before EVERY executed test command:
+  CGO_ENABLED=0 $GO run ./internal/testscope
+  PASS: Ordinary test source-reference guard PASS; behavioral review is still required.
+
+The exact reviewed -run selection, both final gates:
+'^(TestSparseReviewCanonicalCodecAndPreflight|TestSparseReviewClosedTextAndBlobSignatures|TestSparseReviewSupportBoundedArithmeticCancellation|TestSparseReviewMemoryLazyNullAndSupportBudgets|TestSparseReviewMemoryExternalDefaultsAndAliases|TestSparseReviewIndependentBillionDimensionalRankings|TestSparseReviewExactBytesStatementsAndUnsupportedBoundaries|TestSparseReviewNativeBoundaryCancellationAndRelease|TestSparseReviewNativePreflightEmptyAndClosedOptions|TestSparseReviewCombinedScratchPreflightBeforeDecoding)$'
+
+CGO_ENABLED=0 $GO test ./internal/sql ./sqlite -count=3 -v -run "$selection"
+PASS: internal/sql 0.019s, sqlite 0.304s. All ten tests passed in each run.
+
+CGO_ENABLED=1 $GO test -race ./internal/sql ./sqlite -count=1 -v -run "$selection"
+PASS: internal/sql 1.038s, sqlite 1.417s. All ten passed; no race report.
+CGO1 was used only for this separate race verification.
+
+git diff --check -- sqlite/sparse_review_test.go internal/sql/sparse_review_test.go
+PASS (no output).
+
+Final CGO0 output
+=== RUN   TestSparseReviewCanonicalCodecAndPreflight
+--- PASS: TestSparseReviewCanonicalCodecAndPreflight (0.00s)
+=== RUN   TestSparseReviewClosedTextAndBlobSignatures
+--- PASS: TestSparseReviewClosedTextAndBlobSignatures (0.00s)
+=== RUN   TestSparseReviewSupportBoundedArithmeticCancellation
+--- PASS: TestSparseReviewSupportBoundedArithmeticCancellation (0.00s)
+=== RUN   TestSparseReviewCanonicalCodecAndPreflight
+--- PASS: TestSparseReviewCanonicalCodecAndPreflight (0.00s)
+=== RUN   TestSparseReviewClosedTextAndBlobSignatures
+--- PASS: TestSparseReviewClosedTextAndBlobSignatures (0.00s)
+=== RUN   TestSparseReviewSupportBoundedArithmeticCancellation
+--- PASS: TestSparseReviewSupportBoundedArithmeticCancellation (0.00s)
+=== RUN   TestSparseReviewCanonicalCodecAndPreflight
+--- PASS: TestSparseReviewCanonicalCodecAndPreflight (0.00s)
+=== RUN   TestSparseReviewClosedTextAndBlobSignatures
+--- PASS: TestSparseReviewClosedTextAndBlobSignatures (0.00s)
+=== RUN   TestSparseReviewSupportBoundedArithmeticCancellation
+--- PASS: TestSparseReviewSupportBoundedArithmeticCancellation (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.019s
+=== RUN   TestSparseReviewMemoryLazyNullAndSupportBudgets
+--- PASS: TestSparseReviewMemoryLazyNullAndSupportBudgets (0.00s)
+=== RUN   TestSparseReviewMemoryExternalDefaultsAndAliases
+--- PASS: TestSparseReviewMemoryExternalDefaultsAndAliases (0.00s)
+=== RUN   TestSparseReviewIndependentBillionDimensionalRankings
+--- PASS: TestSparseReviewIndependentBillionDimensionalRankings (0.07s)
+=== RUN   TestSparseReviewExactBytesStatementsAndUnsupportedBoundaries
+--- PASS: TestSparseReviewExactBytesStatementsAndUnsupportedBoundaries (0.00s)
+=== RUN   TestSparseReviewNativeBoundaryCancellationAndRelease
+--- PASS: TestSparseReviewNativeBoundaryCancellationAndRelease (0.01s)
+=== RUN   TestSparseReviewNativePreflightEmptyAndClosedOptions
+--- PASS: TestSparseReviewNativePreflightEmptyAndClosedOptions (0.01s)
+=== RUN   TestSparseReviewCombinedScratchPreflightBeforeDecoding
+--- PASS: TestSparseReviewCombinedScratchPreflightBeforeDecoding (0.00s)
+=== RUN   TestSparseReviewMemoryLazyNullAndSupportBudgets
+--- PASS: TestSparseReviewMemoryLazyNullAndSupportBudgets (0.00s)
+=== RUN   TestSparseReviewMemoryExternalDefaultsAndAliases
+--- PASS: TestSparseReviewMemoryExternalDefaultsAndAliases (0.00s)
+=== RUN   TestSparseReviewIndependentBillionDimensionalRankings
+--- PASS: TestSparseReviewIndependentBillionDimensionalRankings (0.08s)
+=== RUN   TestSparseReviewExactBytesStatementsAndUnsupportedBoundaries
+--- PASS: TestSparseReviewExactBytesStatementsAndUnsupportedBoundaries (0.00s)
+=== RUN   TestSparseReviewNativeBoundaryCancellationAndRelease
+--- PASS: TestSparseReviewNativeBoundaryCancellationAndRelease (0.01s)
+=== RUN   TestSparseReviewNativePreflightEmptyAndClosedOptions
+--- PASS: TestSparseReviewNativePreflightEmptyAndClosedOptions (0.00s)
+=== RUN   TestSparseReviewCombinedScratchPreflightBeforeDecoding
+--- PASS: TestSparseReviewCombinedScratchPreflightBeforeDecoding (0.00s)
+=== RUN   TestSparseReviewMemoryLazyNullAndSupportBudgets
+--- PASS: TestSparseReviewMemoryLazyNullAndSupportBudgets (0.00s)
+=== RUN   TestSparseReviewMemoryExternalDefaultsAndAliases
+--- PASS: TestSparseReviewMemoryExternalDefaultsAndAliases (0.00s)
+=== RUN   TestSparseReviewIndependentBillionDimensionalRankings
+--- PASS: TestSparseReviewIndependentBillionDimensionalRankings (0.10s)
+=== RUN   TestSparseReviewExactBytesStatementsAndUnsupportedBoundaries
+--- PASS: TestSparseReviewExactBytesStatementsAndUnsupportedBoundaries (0.00s)
+=== RUN   TestSparseReviewNativeBoundaryCancellationAndRelease
+--- PASS: TestSparseReviewNativeBoundaryCancellationAndRelease (0.01s)
+=== RUN   TestSparseReviewNativePreflightEmptyAndClosedOptions
+--- PASS: TestSparseReviewNativePreflightEmptyAndClosedOptions (0.00s)
+=== RUN   TestSparseReviewCombinedScratchPreflightBeforeDecoding
+--- PASS: TestSparseReviewCombinedScratchPreflightBeforeDecoding (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.304s
+
+Final CGO1 race output
+=== RUN   TestSparseReviewCanonicalCodecAndPreflight
+--- PASS: TestSparseReviewCanonicalCodecAndPreflight (0.00s)
+=== RUN   TestSparseReviewClosedTextAndBlobSignatures
+--- PASS: TestSparseReviewClosedTextAndBlobSignatures (0.00s)
+=== RUN   TestSparseReviewSupportBoundedArithmeticCancellation
+--- PASS: TestSparseReviewSupportBoundedArithmeticCancellation (0.01s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	1.038s
+=== RUN   TestSparseReviewMemoryLazyNullAndSupportBudgets
+--- PASS: TestSparseReviewMemoryLazyNullAndSupportBudgets (0.00s)
+=== RUN   TestSparseReviewMemoryExternalDefaultsAndAliases
+--- PASS: TestSparseReviewMemoryExternalDefaultsAndAliases (0.00s)
+=== RUN   TestSparseReviewIndependentBillionDimensionalRankings
+--- PASS: TestSparseReviewIndependentBillionDimensionalRankings (0.33s)
+=== RUN   TestSparseReviewExactBytesStatementsAndUnsupportedBoundaries
+--- PASS: TestSparseReviewExactBytesStatementsAndUnsupportedBoundaries (0.01s)
+=== RUN   TestSparseReviewNativeBoundaryCancellationAndRelease
+--- PASS: TestSparseReviewNativeBoundaryCancellationAndRelease (0.03s)
+=== RUN   TestSparseReviewNativePreflightEmptyAndClosedOptions
+--- PASS: TestSparseReviewNativePreflightEmptyAndClosedOptions (0.01s)
+=== RUN   TestSparseReviewCombinedScratchPreflightBeforeDecoding
+--- PASS: TestSparseReviewCombinedScratchPreflightBeforeDecoding (0.01s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	1.417s
+
+Review and relevant production snapshot SHA256
+dde631218e09a665302cc7a32f218e8a5f1223895c296d7128e398c19db35552  sqlite/sparse_review_test.go
+23e393df8c3bcdfd401b48dad5be4ae6d0687319702a6363e021094663a4b6a8  internal/sql/sparse_review_test.go
+441bc45bac43eb48ebd4c6c0ff44308067fea77f7cdb8c4609ee10a97f5e5aa0  extension/vector/sparse.go
+4b9dd5cdfee75179528b34bc1e9f37b9c818179729376f1120beaf302016273c  extension/vector/sparse_codec.go
+0b19db178036aece5883bcac0b24e6921a825e0f0cafcc7b0f5abbd76bc5718e  extension/vector/sparse_metric.go
+fe1e7bf2670ac13766ea50191e81333446a24f8c245dae00a6fc40c7d6261c24  internal/sql/sparse.go
+3f4734424d34ae2a1efaed91a729e52b6fec6d2e3a487d365a46fefe04e1c949  internal/sql/half.go
+58ca9133f36af714a5b533ec7efaea8c72778b1a9a595e9f69ea42c39a31e335  internal/sql/vector.go
+f5f470860db8cf13d417004f362ae78c801bbbb82f4a27d115432d9670fb10e0  internal/sql/parser.go
+652e3f4012513abe3452f6edb8326dbe3191632913383ce44d2533321a2fc691  sqlite/sparse_value.go
+95c58d6af3e9541f865730cd04acde9e24620cec9e26cfb67032216932570020  sqlite/sparse_search.go
+e6d0b1c063d5c1958e756c69832b7e46bb4c1579bdaec7b2d5bc27ac7496b3af  sqlite/plan_sparse.go
+b53477472c912f4008dba8ea6d22d9de278ceb6377f77564534d014cfb19484f  sqlite/plan_vector.go
+732f6150ff6a8d5924338ea99304d0968f0d38b4cf17795c41798ed493e161ca  sqlite/rows.go
+20659e880b8dd57389e8369c42c8247f556aca9a97f2f0d1beca0dacbbc227ac  sqlite/write_rows.go
+c06a29e95fe594f5df42c768719a3b6160136be6583ab6e6887e2780e30b0db7  sqlite/write_schema.go
+8a3a30435e94996fc21aded44d25090c758724a0df8b553a9331a2fc2efdc91f  sqlite/vector_value.go

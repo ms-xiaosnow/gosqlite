@@ -1,0 +1,23 @@
+Frozen SPARSE integration tree57b02e0fa1f99f4c6a4f470c7741624cce1ba977; later importer/expressions/platform ports excluded.
+2026-10-10T14:34:01Z
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	0.892s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.077s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	10.586s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.168s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/sparse-exact	0.006s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	7.075s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	1.102s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	29.789s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.348s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/sparse-exact	1.040s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	0.807s
+cross-build linux/amd64 PASS
+cross-build linux/arm64 PASS
+cross-build darwin/arm64 PASS
+cross-build windows/amd64 PASS
+all modules verified
+2026-10-10T14:35:25Z
+SPARSE FROZEN SOURCE AND FOCUSED CHECKS PASS

@@ -343,7 +343,7 @@ func (t *Tx) update(ctx context.Context, c *writeCatalog, stmt *sqlast.Update, p
 				if v != nil {
 					source := sqlast.VectorExpressionRepresentation(assignment.Expr, ec.DeclaredType)
 					target := sqlast.VectorExpressionRepresentation(&sqlast.Column{Name: tab.columns[targets[i]].Name}, ec.DeclaredType)
-					if source != "" && target != "" && source != target && (source == "halfvec" || target == "halfvec" || source == "mixed") {
+					if source != "" && target != "" && source != target {
 						return result, fmt.Errorf("%w: explicit vector representation conversion required", ErrMismatch)
 					}
 				}

@@ -300,3 +300,17 @@ exit, physical tamper/wrong-key/selected-file removal, active namespace mutation
 failed native IO/Sync/lock/unmap or interrupted publication/rekey is executed.
 Missing non-Linux encrypted code and failed-open retirement retry remain code
 work; physical, independent native/security/crypto/legal/soak gates stay unverified.
+
+## M9 G SPARSEVEC ordinary verification
+
+Only intact ordinary DDL/DML/read/write/rollback/snapshot/reopen and pure-memory
+invalid-codec/budget models are selected. The official test oracle reads canonical
+GSS overflow values and creates legal TEXT/default values at three page sizes.
+Ten independent review regressions plus exact pinned source expectations cover
+strict identity, bounded explicit conversion, NULL/zero policies and billion-
+dimensional support-sized work. Rejection before decoding is a memory-allocation
+precedence check, not physical fault injection. See m9-sparse-sql-components.txt
+and m9-sparse-review.txt; future expression/import/platform work is excluded by
+immutable lead snapshot57b02e0fa1f99f4c6a4f470c7741624cce1ba977. No full project,
+sparse ANN, native target-runtime or independent acceptance follows from these
+focused checks.

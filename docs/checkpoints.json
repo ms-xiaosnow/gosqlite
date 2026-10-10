@@ -214,5 +214,19 @@
     "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38059695568",
     "remote_ci_status": "IN_PROGRESS, observed2026-10-10T14:28:57Z.",
     "open_gates": "Sparse SQL and all extended ANN, remaining migration/SQL/recovery/native-platform code and restricted/independent acceptance remain open. Half reranking does not restore omitted candidates."
+  },
+  {
+    "stage": "Plain native Darwin/Windows backends and Linux shared encrypted sessions",
+    "remote_commit": "29ab5b1da66fc8067d8bd64f3d1ef70e015e9d2b",
+    "local_commit": "29ab5b1da66fc8067d8bd64f3d1ef70e015e9d2b",
+    "tree": "e83f010d4e77826da56d1d30e4e079b1e9de759d",
+    "bundle_sha256": "8e41364f6b10b96e383b6124749067d4bebeae540ab609b702f7946fb431acbf",
+    "bundle_bytes": 1403803,
+    "library_file_id": "libfile_5116f6134f6c8191b54957ce92feccfa",
+    "library_version": 0,
+    "verified": "Guarded remote commit/ref readback, exact local mirror, full-history bundle, byte-identical Library readback, clean clone/fsck and original goal hash verified2026-10-10T14:33:27Z. First ref-update transport response was lost; two unchanged-head reads preceded one expected-SHA guarded retry. Component/review checks and frozen full CGO0 unit/vet/build passed; full aggregate race/oracle is running. Exact Library-restored vfs/walindex/encstore/pager and named shared SQLite/driver/example CGO0 unit and CGO1 race, full vet/build, four cross-builds, module verification and clean tree passed exit0 at2026-10-10T14:34:55Z; focused evidence is not a full restored all-package/oracle rerun.",
+    "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38060037671",
+    "remote_ci_status": "IN_PROGRESS, observed2026-10-10T14:33:28Z.",
+    "open_gates": "Native Darwin/Windows runtime NOT_RUN; default Windows cross-vet has disclosed mapping warning. Non-Linux encrypted coordination and failed-open retirement retry remain code gaps; physical and independent security/crypto/legal/soak acceptance remains open."
   }
 ]

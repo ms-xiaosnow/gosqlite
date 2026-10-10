@@ -11,7 +11,7 @@ Behavior baseline: official SQLite 3.54.0. M2 implements a deliberately bounded 
 | Native file locking | partial | managed role-specific file/mapping ownership, Linux OFD shared/reserved/pending/exclusive byte-range locks; Darwin managed process-fcntl and Windows/amd64 checked LockFileEx/mapping backends implemented; only Linux ordinary runtime verified |
 | SELECT | partial | one rowid table or no FROM; projection, *, WHERE, parameters, ORDER BY, LIMIT/OFFSET; aliases and rowid/IPK semantics |
 | Expressions | partial | NULL3VL, comparisons/affinity, arithmetic/bitwise/concat, ASCII-insensitive rune LIKE with ESCAPE, tested scalar builtins |
-| Schema interpretation | partial | declared types INTEGER/INT/REAL/TEXT/BLOB/NUMERIC, strict VECTOR(n)/BIT(n)/HALFVEC(n), or typeless; supported INTEGER PRIMARY KEY, NOT NULL and literal DEFAULT enforced on writes; non-INTEGER PK metadata read-only |
+| Schema interpretation | partial | declared types INTEGER/INT/REAL/TEXT/BLOB/NUMERIC, strict VECTOR(n)/BIT(n)/HALFVEC(n)/SPARSEVEC(n), or typeless; supported INTEGER PRIMARY KEY, NOT NULL and literal DEFAULT enforced on writes; non-INTEGER PK metadata read-only |
 | database/sql | partial | Connector, prepared reads/writes, named/positional binds, transactions, cancellation, streaming rows and resource closure |
 | CREATE / CRUD / transactions | partial | native table/index creation, multirow INSERT, UPDATE/DELETE, lazy deferred and immediate/exclusive transactions, real nested savepoints/release/rollback-to, bounded statement/named undo, read-own-writes and transactional DDL; active Rows restrictions remain |
 | Journal publication | partial | standard SQLite DELETE journal and ordered Sync in successful commits; sector-size assumption explicit; error/crash paths unqualified |
@@ -27,7 +27,7 @@ Behavior baseline: official SQLite 3.54.0. M2 implements a deliberately bounded 
 | encrypted snapshot / rekey / backup | experimental ordinary slice | authenticated root/base, Linux stable locks, full snapshot publication, correct-key rekey/backup/restore and plaintext import/export; retained history and namespace/freshness limitations |
 | encrypted WAL | experimental ordinary slice | immutable authenticated final-dirty-page segments, bounded complete-head replay, checkpoint/rekey/copy and explicit snapshot upgrade; explicit Linux EncryptionWALShared adds single writer/immutable concurrent readers, pinned copies, stale-promotion refusal and quiescent rekey |
 | pg_embedding migration tooling | partial | bounded catalog/real-array inspector and typed source-span SQL converter with local execution fixtures and review-only PostgreSQL text; resumable import/transition templates remain required code; no live PostgreSQL execution |
-| extended vector values | partial | distinct half/bit/sparse memory codecs and metrics; BIT(n) and HALFVEC(n) SQL/storage/driver/exact ranking, explicit half conversion/loss reports and dense/half transforms implemented; sparse SQL and all extended ANN remain required code |
+| extended vector values | partial | distinct half/bit/sparse memory codecs and metrics; BIT(n), HALFVEC(n) and SPARSEVEC(n) SQL/storage/driver/exact ranking, explicit half conversion/loss reports and dense/half transforms implemented; all extended ANN remains required code |
 | release audits / native OS evidence | unsupported | M10 not started; cross-build success is not native-runtime evidence |
 
 Unimplemented SQL/PRAGMAs return explicit errors. JOIN, aggregate/grouping, subqueries, CTEs, window functions, DISTINCT, UNION, scalar COLLATE (CREATE INDEX COLLATE BINARY is accepted), CASE, IN/BETWEEN, general views/triggers, STRICT, WITHOUT ROWID, autovacuum, UTF-16 and unlisted schema grammar remain unsupported. Some storage mechanisms can safely coexist in a read-only file without their SQL being executable.
@@ -83,7 +83,7 @@ sparse dimensions can reach 1e9 while work scales with at most 16000 nonzeros.
 Bit zero/zero Jaccard is 1 per the pinned reference. Finite float64 accumulation
 and stricter malformed sparse-zero-index validation intentionally differ from
 some upstream outputs. Published fixtures are source evidence, not a running
-PostgreSQL comparison. BIT(n) now has typed SQL/storage/driver and exact search with distinct Hamming/Jaccard diagnostics. HALFVEC now has typed SQL and exact search with explicit conversion loss; sparse SQL and all extended ANN remain unsupported. See bit-vector.md and half-vector.md.
+PostgreSQL comparison. BIT(n) now has typed SQL/storage/driver and exact search with distinct Hamming/Jaccard diagnostics. HALFVEC now has typed SQL and exact search with explicit conversion loss; SPARSEVEC now has support-bounded SQL/native exact ranking and all extended ANN remains unsupported. See bit-vector.md, half-vector.md and sparse-vector.md.
 
 
 Transaction control now supports BEGIN [DEFERRED|IMMEDIATE|EXCLUSIVE], COMMIT/END,
@@ -141,3 +141,12 @@ connection blocks quiescent rekey. Default writable Close may return BUSY from
 checkpoint while releasing its connection safely. Legacy0/1 layout/base/segment/
 archive bytes remain unchanged; upgrades are explicit. Encrypted support remains
 Linux-only, independently of the plain native backends. See ADR0016.
+
+SPARSEVEC preserves declared representation identity through external TEXT/GSS,
+aliases and supported value-preserving expressions. Canonical GSS rejects malformed
+indices and explicit stored zeros; textual zero entries remain charged during
+parse/SQL preflight. SQL support scratch is combined with retained heap rows before
+decoding the next candidate. Native MaxNonzeros and SQL SQLVectorRankNonzeros bound
+query support plus examined row support; no allocation depends on declared1e9
+coordinates. Exact scalar/native/heap/full-sort results agree. Dense conversion is
+explicit and bounded by dense limits; sparse ANN is required future code.

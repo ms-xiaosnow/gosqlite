@@ -99,8 +99,11 @@ func VectorExpressionRepresentation(e Expr, declared func(string, string) string
 		}
 		d := declared(x.Table, x.Name)
 		switch d {
-		case "halfvec", "vector", "bit", "mixed":
+		case "halfvec", "vector", "sparsevec", "bit", "mixed":
 			return d
+		}
+		if _, ok := SparseDimensions(d); ok {
+			return "sparsevec"
 		}
 		if _, ok := HalfDimensions(d); ok {
 			return "halfvec"
@@ -119,7 +122,9 @@ func VectorExpressionRepresentation(e Expr, declared func(string, string) string
 		switch FoldName(x.Name) {
 		case "halfvec", "halfvec_from_vector":
 			return "halfvec"
-		case "vector", "vector_from_halfvec":
+		case "sparsevec", "sparsevec_from_vector":
+			return "sparsevec"
+		case "vector", "vector_from_halfvec", "vector_from_sparsevec":
 			return "vector"
 		case "bit_vector", "binary_quantize":
 			return "bit"
@@ -161,59 +166,56 @@ func vectorExpressionFunction(ctx *EvalContext, name string, exprs []Expr, args 
 			return vectorFunction(ctx.Context, name, args)
 		}
 	}
-	// Explicit constructors/converters still have closed source signatures.
+	// Explicit constructors and converters keep closed source signatures.
 	expected := ""
 	switch name {
 	case "halfvec", "halfvec_dims", "halfvec_norm", "halfvec_to_text", "vector_from_halfvec":
 		expected = "halfvec"
-	case "vector", "vector_dims", "vector_norm", "vector_to_text", "halfvec_from_vector", "halfvec_conversion_changed", "halfvec_conversion_max_abs", "halfvec_conversion_max_rel":
+	case "sparsevec", "sparsevec_dims", "sparsevec_nnz", "sparsevec_norm", "sparsevec_to_text", "vector_from_sparsevec":
+		expected = "sparsevec"
+	case "vector", "vector_dims", "vector_norm", "vector_to_text", "halfvec_from_vector", "sparsevec_from_vector", "halfvec_conversion_changed", "halfvec_conversion_max_abs", "halfvec_conversion_max_rel":
 		expected = "vector"
+	case "bit_vector", "bit_dims", "bit_to_text", "hamming_distance", "jaccard_distance":
+		expected = "bit"
 	}
-	if expected != "" && len(exprs) > 0 {
-		kind := VectorExpressionRepresentation(exprs[0], ctx.DeclaredType)
-		if kind != "" && kind != expected && (kind == "halfvec" || expected == "halfvec" || kind == "mixed") {
-			return nil, fmt.Errorf("%w: %s requires %s representation", vector.ErrInvalid, name, expected)
+	if expected != "" {
+		for i, e := range exprs {
+			if i > 0 && name != "hamming_distance" && name != "jaccard_distance" {
+				break
+			}
+			kind := VectorExpressionRepresentation(e, ctx.DeclaredType)
+			if kind != "" && kind != expected {
+				return nil, fmt.Errorf("%w: %s requires %s representation", vector.ErrInvalid, name, expected)
+			}
 		}
 	}
 	if !halfOverload(name) {
 		return vectorFunction(ctx.Context, name, args)
 	}
-	half := false
-	dense := false
+	kind, err := numericBlobRepresentation(name, args)
+	if err != nil {
+		return nil, err
+	}
 	for i, e := range exprs {
 		if i >= len(args) || name == "subvector" && i > 0 {
 			break
 		}
-		if args[i] == nil {
-			return vectorFunction(ctx.Context, name, args)
-		}
-		if isHalfBlob(args[i]) {
-			half = true
-		}
-		switch VectorExpressionRepresentation(e, ctx.DeclaredType) {
-		case "halfvec":
-			half = true
-		case "vector":
-			dense = true
-		case "mixed":
+		k := VectorExpressionRepresentation(e, ctx.DeclaredType)
+		if k == "mixed" || k != "" && kind != "" && kind != k {
 			return nil, fmt.Errorf("%w: mixed vector expression representations", vector.ErrInvalid)
 		}
-
+		if k != "" {
+			kind = k
+		}
 	}
-	if half {
-		if dense {
-			return nil, fmt.Errorf("%w: mixed VECTOR and HALFVEC signatures", vector.ErrInvalid)
-		}
-		if err := ValidateFunction(name, len(args)); err != nil {
-			return nil, err
-		}
-		c := ctx.Context
-		if c == nil {
-			c = context.Background()
-		}
-		if err := c.Err(); err != nil {
-			return nil, err
-		}
+	c := ctx.Context
+	if c == nil {
+		c = context.Background()
+	}
+	if kind == "sparsevec" {
+		return sparseFunction(c, name, args)
+	}
+	if kind == "halfvec" {
 		return halfFunction(c, name, args)
 	}
 	return vectorFunction(ctx.Context, name, args)

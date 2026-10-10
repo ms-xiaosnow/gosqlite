@@ -26,6 +26,10 @@ func (r *Rows) prepareANNVector(reader btree.PageReader) error {
 		}
 		return nil
 	}
+	if v.sparse {
+		r.queryPlan.ANNFallback = "SPARSEVEC(n) ANN is unsupported; exact sparse ranking"
+		return nil
+	}
 	if v.half {
 		r.queryPlan.ANNFallback = "HALFVEC(n) ANN is unsupported; exact binary16 ranking"
 		return nil

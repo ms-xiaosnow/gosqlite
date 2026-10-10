@@ -28,6 +28,9 @@ func BitDimensions(declared string) (int, bool) {
 // IsVectorDeclaration identifies supported typed vector columns. It deliberately
 // does not broaden dense VectorDimensions or dense ANN eligibility.
 func IsVectorDeclaration(declared string) bool {
+	if _, ok := SparseDimensions(declared); ok {
+		return true
+	}
 	if _, ok := VectorDimensions(declared); ok {
 		return true
 	}

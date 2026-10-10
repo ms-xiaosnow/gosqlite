@@ -60,10 +60,9 @@ remain code work; unsupported is a safe interim behavior, not removal from goal.
   separately. Legacy array Manhattan<~> becomes dense<+> only with typed legacy
   evidence; modern bit<~> remains Hamming.
 - Strict distinct half/bit/sparse memory values/codecs and metrics now exist;
-  BIT and HALFVEC typed storage/SQL/driver/exact ranking, explicit half loss
-  reports and dense/half transforms are integrated. Add sparse typed
-  storage/SQL/driver and exact search, then
-  versioned supported ANN identities while preserving dense
+  BIT, HALFVEC and SPARSEVEC typed storage/SQL/driver/exact ranking, explicit half
+  loss reports and bounded transforms are integrated. Add versioned supported
+  ANN identities while preserving dense
   GSVv1. Retain exhaustive half rounding and O(nonzeros) sparse contracts;
   quantized/half approximate search requires explicit lossy/rerank semantics.
 - The requested current Neon page was retrieved on2026-10-10; its migration chapter

@@ -129,7 +129,7 @@ Fresh restart, 2026-10-10 UTC. Historical work and test results are not acceptan
 - Review initially caught two grams fallback-reason regressions; move equality extraction before safety classification fixed them without changing scan results. Final component logs retained. Physical durability remains excluded.
 
 ### M9: Migration and extended vector types
-- Status: checkpoint A inspector, checkpoint B typed SQL converter, checkpoint E BIT and F HALFVEC integration plus extended memory primitives implemented. Resumable import/transition tooling, sparse SQL and all extended ANN remain incomplete code.
+- Status: checkpoint A inspector, checkpoint B typed SQL converter, checkpoint E BIT, F HALFVEC and G SPARSEVEC integration plus extended memory primitives implemented. Resumable import/transition tooling and all extended ANN remain incomplete code.
 - Inspector: strict bounded exact-schema JSON, extension/type/method/operator/function identity chain, dependency/shape/default findings, direct finite binary32 real[] conversion, deterministic JSON/Markdown and CLI reports. Reports do not execute SQL or authorize changes. Invalid legacy defaults100/16 and example3/5 are review findings with no usable proposed target. Programmatic structs receive aggregate preflight; canonical inspected-facts hashes and optional unchanged-source hashes are distinguished.
 - Component checks: CGO0 unit/vet/build, separate race, CLI and bounded memory fuzz pass (real-array62076, catalog194 inputs). Independent tests include201 finite binary32 roundtrips, NULL/shape/redaction, duplicate/unknown/UTF8 JSON, ownership spoofing, nonfinite profile numbers, mutated catalog provenance and deterministic cancellation. Initial invalid-parameter proposal assertion failed and was fixed; logs retained. See m9-inspector-components.txt and review evidence.
 - Public references: old embedding0.3.6 commit5d48508aeaeb86b9e9c630468ada7a124b905795, exact Apache2 LICENSE/NOTICE and source manifest. Current Neon page was retrieved but lacks the requested chapter; the historical official2024 chapter is linked, not mislabeled current. Export SQL is source-reviewed but not PostgreSQL-executed. Synthetic catalogs are explicitly synthetic.
@@ -286,3 +286,25 @@ checks and CI38057793162 are tracked independently.
 S1 exact Library-restored full guarded checks passed exit0 at2026-10-10T14:24:14Z;
 CI38057793162 also passed. M9 B CI38058308322 completed SUCCESS at14:16:31Z.
 See checkpoints.json and s1-library-restore.txt for distinct evidence scopes.
+
+### M9 checkpoint G: SPARSEVEC SQL and support-bounded exact ranking
+- Delivered: SPARSEVEC dimensions1..1e9, at most16000 nonzeros, canonical distinct
+  GSS persistence, defaults/DML/driver adapters, DB/Tx.SparseSearch and SQL exact
+  heap ranking for L2/negative-IP/cosine/L1. Work and memory depend on supports,
+  never declared dimensions; conversions are explicit and bounded.
+- Pinned56 parse and40 metric cases pass; repeated component/driver/storage
+  tests and separate race/vet/build pass. Official SQLite intact-file interop
+  validates canonical overflow values at512/4096/65536-byte pages, external legal
+  TEXT/GSS/default values, shared snapshots and normal rollback/reopen.
+- Independent review added ten tests for strict identity/bytes, billion-dimension
+  rankings, quotas/laziness/cancellation/rollback and unsupported boundaries.
+  It found and fixed combined heap-retention plus support-scratch admission before
+  candidate decoding; exact-boundary/zero-allocation-on-refusal tests pass.
+- Evidence: m9-sparse-sql-components/review/source hashes/example and
+  sparse-vector.md. Lead isolated tree57b02e0fa1f99f4c6a4f470c7741624cce1ba977
+  focused validation passed exit0 at2026-10-10T14:35:25Z: full production
+  vet/build, dense/half/bit/sparse component regressions and separate race,
+  named extended-type pinned-oracle checks, four cross-builds/modules and
+  unchanged complete source inventory. Later importer/SQL/platform edits excluded.
+  No live PostgreSQL execution or sparse ANN is claimed; all extended ANN and
+  restricted/independent release gates remain open.

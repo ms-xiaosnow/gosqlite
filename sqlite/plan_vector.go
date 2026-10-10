@@ -13,6 +13,11 @@ import (
 // vectorRank owns bounded ranking and optional ANN candidate selection.
 // The heap is never an index; QueryPlan reports the actual source method.
 type vectorRank struct {
+	sparse              bool
+	parsedSparse        vector.SparseVector
+	sparseScratch       int64
+	sparseQueryEntries  int
+	sparseRetainedBytes int64
 	half                bool
 	parsedHalf          vector.HalfVector
 	bitMetric           vector.BitMetricKind
@@ -109,9 +114,14 @@ func (r *Rows) prepareVectorRank() error {
 	}
 	dims, ok := sqlast.VectorDimensions(r.table.columns[ordinal].Type)
 	half := false
+	sparse := false
 	if !ok && bitMetric == "" {
 		dims, ok = sqlast.HalfDimensions(r.table.columns[ordinal].Type)
 		half = ok
+	}
+	if !ok && bitMetric == "" {
+		dims, ok = sqlast.SparseDimensions(r.table.columns[ordinal].Type)
+		sparse = ok
 	}
 	if bitMetric != "" {
 		dims, ok = sqlast.BitDimensions(r.table.columns[ordinal].Type)
@@ -136,10 +146,13 @@ func (r *Rows) prepareVectorRank() error {
 	}
 	// Preserve scalar laziness: do not parse input or reject zero cosine norms
 	// until a non-NULL row actually requires a distance. EXPLAIN does no scoring.
-	r.vectorRank = &vectorRank{half: half, bitMetric: bitMetric, bitLimits: DefaultBitSearchLimits(), ordinal: ordinal, dimensions: dims, query: query, metric: metric, retain: int(retain), limits: limits}
+	r.vectorRank = &vectorRank{sparse: sparse, half: half, bitMetric: bitMetric, bitLimits: DefaultBitSearchLimits(), ordinal: ordinal, dimensions: dims, query: query, metric: metric, retain: int(retain), limits: limits}
 	r.queryPlan.VectorMetric = metric
 	r.queryPlan.VectorBitMetric = bitMetric
 	r.queryPlan.VectorRepresentation = "vector"
+	if sparse {
+		r.queryPlan.VectorRepresentation = "sparsevec"
+	}
 	if half {
 		r.queryPlan.VectorRepresentation = "halfvec"
 	}
@@ -155,6 +168,9 @@ func (r *Rows) prepareVectorRank() error {
 }
 
 func (v *vectorRank) score(r *Rows, value any) (any, error) {
+	if v.sparse {
+		return v.scoreSparse(r, value)
+	}
 	if v.half {
 		return v.scoreHalf(r, value)
 	}
@@ -264,13 +280,25 @@ func (r *Rows) materializeVector() error {
 			return ErrMemoryLimit
 		}
 	}
+	var sparseReserved int64
 	for {
+		if r.vectorRank.sparse {
+			r.vectorRank.sparseRetainedBytes = used - sparseReserved
+		}
 		row, cost, err := r.fetch()
 		if err == io.EOF {
 			break
 		}
 		if err != nil {
 			return err
+		}
+		if r.vectorRank.sparse {
+			delta := r.vectorRank.sparseScratch - sparseReserved
+			if delta > r.db.opts.MaxSortBytes-used {
+				return ErrMemoryLimit
+			}
+			used += delta
+			sparseReserved = r.vectorRank.sparseScratch
 		}
 		if cost > r.db.opts.MaxSortBytes {
 			return ErrMemoryLimit

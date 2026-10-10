@@ -91,6 +91,8 @@ type QueryStats struct {
 	VectorFilteredRows   int64
 	VectorNullRows       int64
 	VectorRankComponents int64
+	// VectorRankNonzeros charges query entries once and both supports per sparse score.
+	VectorRankNonzeros int64
 	// Packed bit byte positions: query once plus scored candidates. Dense
 	// component and ANN counters remain separate and zero for bit ranking.
 	VectorRankPackedBytes int64

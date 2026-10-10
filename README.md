@@ -2,7 +2,7 @@
 
 Historical test-scope statements are corrected in [the namespace-test audit](docs/test-scope-audit.md); the affected tests are now excluded from ordinary workflows.
 
-A native Go database kernel targeting tested subsets of SQLite 3.54.0 files and SQL. Current development: persistent HNSW/IVFFlat, exact typed-vector KNN and same-snapshot hybrid ranking, plus experimental authenticated snapshot, dirty-page WAL and concurrent encrypted sessions, ordinary B-tree equality planning, nested savepoints, BIT/HALFVEC exact search, extended vector primitives, and bounded pg_embedding catalog inspection/typed offline SQL conversion. It is not production-ready. No CGO, SQLite subprocess, C ABI, or remote SQL engine is used in production.
+A native Go database kernel targeting tested subsets of SQLite 3.54.0 files and SQL. Current development: persistent HNSW/IVFFlat, exact typed-vector KNN and same-snapshot hybrid ranking, plus experimental authenticated snapshot, dirty-page WAL and concurrent encrypted sessions, ordinary B-tree equality planning, nested savepoints, BIT/HALFVEC/SPARSEVEC exact search, extended vector primitives, and bounded pg_embedding catalog inspection/typed offline SQL conversion. It is not production-ready. No CGO, SQLite subprocess, C ABI, or remote SQL engine is used in production.
 
 ## Try the implemented SQL path
 
@@ -60,7 +60,7 @@ SQLITE_ORACLE=/absolute/path/to/verified/sqlite3 ./scripts/test-oracle.sh
 
 See [progress](docs/progress.md), [compatibility](docs/compatibility.md), [architecture](docs/architecture.md), [sources](docs/upstream.md), and [manual verification](docs/manual-verification.md). The unchanged [original goal](goal.md) remains the contract. [Restart protocol](docs/restart.md) and checkpoint records preserve durable development history.
 
-Qualified crash recovery, non-Linux encrypted coordination, broader SQL, sparse SQL and all extended-vector ANN integration, and the remaining pg_embedding import/transition tooling remain unfinished implementation work. Full SQLite/PostgreSQL semantics, SEE file compatibility and production security are not claimed.
+Qualified crash recovery, non-Linux encrypted coordination, broader SQL and all extended-vector ANN integration, and the remaining pg_embedding import/transition tooling remain unfinished implementation work. Full SQLite/PostgreSQL semantics, SEE file compatibility and production security are not claimed.
 
 
 ## Explicit exclusive WAL
@@ -150,7 +150,7 @@ data yet. See [migration scope and examples](docs/migration-pgembedding.md).
 
 `extension/vector` also supplies distinct immutable half, packed-bit and sparse
 values, codecs, exact metrics, nullable adapters, subvector and quantization.
-BIT and HALFVEC also have typed SQL/storage/exact search. Sparse SQL and all extended ANN integration remain open.
+BIT, HALFVEC and SPARSEVEC also have typed SQL/storage/exact search. Extended ANN integration remains open.
 See [extended value contracts](extension/vector/extended-values.md).
 
 ## Transaction controls and packed-bit search
@@ -200,3 +200,12 @@ retain an immutable authenticated head while a writer commits or checkpoints;
 legacy layouts are never silently upgraded. Run examples/encrypted-shared only
 with disposable data. Non-Linux encrypted backends, retained-history collection,
 external freshness guarantees and independent security acceptance remain open.
+
+## Sparse exact vectors
+
+SPARSEVEC(1..1e9) stores a distinct GSS value with at most16000 nonzero binary32
+entries. Native and SQL exact ranking charge actual supports, never the declared
+billion-dimensional coordinate space. Four numeric metrics, strict driver/default/
+DML semantics and explicit bounded conversion are implemented. Sparse ANN and
+unbounded densification remain refused. See [sparse SQL](docs/sparse-vector.md)
+and examples/sparse-exact for true large-dimension, small-support operations.

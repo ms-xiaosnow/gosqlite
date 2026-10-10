@@ -141,13 +141,14 @@ func writableTable(def *sqlast.CreateTable, root uint32) (*writeTable, error) {
 				return nil, err
 			}
 			// A nonzero root reconstructs an existing catalog. Official SQLite
-			// may legally persist a half default outside our typed contract.
+			// may legally persist a half/sparse default outside our typed contract.
 			// Defer its interpretation until read/insert so an explicit UPDATE
 			// can replace that value. Root zero is native CREATE and must reject
-			// invalid half defaults before publishing the schema. Existing
+			// invalid half/sparse defaults before publishing the schema. Existing
 			// dense/default handling remains unchanged.
 			_, half := sqlast.HalfDimensions(col.Type)
-			if !half || root == 0 {
+			_, sparse := sqlast.SparseDimensions(col.Type)
+			if (!half && !sparse) || root == 0 {
 				if _, err := storedColumnValue(value, col.Type); err != nil {
 					return nil, err
 				}

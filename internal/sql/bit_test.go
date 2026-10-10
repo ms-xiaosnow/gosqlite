@@ -135,11 +135,6 @@ func TestBitScalarStrictBoundaries(t *testing.T) {
 			t.Fatalf("accepted %s", expr)
 		}
 	}
-	for _, name := range []string{"SPARSEVEC(2)"} {
-		if _, err := Parse("CREATE TABLE t(v " + name + ")"); err == nil {
-			t.Fatal("unimplemented type accepted", name)
-		}
-	}
 	for name, arity := range map[string]int{"bit_vector": 1, "bit_dims": 1, "bit_to_text": 1, "hamming_distance": 2, "jaccard_distance": 2, "binary_quantize": 1, "subvector": 3} {
 		for _, n := range []int{0, arity + 1} {
 			if _, err := BuiltinFunctions[name](make([]any, n)); err == nil {

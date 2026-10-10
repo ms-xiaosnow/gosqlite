@@ -1,0 +1,40 @@
+{
+  "dimensions": 1000000000,
+  "query_nonzeros": 2,
+  "query_gss_bytes": 32,
+  "explicit_dense_conversion": "rejected before dimension-sized allocation: dense output cap is 16000",
+  "exact_l2_hits": [
+    {
+      "RowID": 10,
+      "Distance": 0
+    },
+    {
+      "RowID": 20,
+      "Distance": 1
+    },
+    {
+      "RowID": 30,
+      "Distance": 3.7416573867739413
+    }
+  ],
+  "native_plan": "SCAN items; representation=sparsevec; sparse_field=s; sparse_metric=l2; dimensions=1000000000; limit=3; exact=true; distance_order=ASC,rowid_ASC; null_candidates=excluded; reason=exact full scan; WHERE before sparse binary32 distance",
+  "native_source_rows": 5,
+  "native_support_work": 13,
+  "sql_exact_l2_hits": [
+    {
+      "RowID": 10,
+      "Distance": 0
+    },
+    {
+      "RowID": 20,
+      "Distance": 1
+    },
+    {
+      "RowID": 30,
+      "Distance": 3.7416573867739413
+    }
+  ],
+  "sql_representation": "sparsevec",
+  "sql_ranking": "bounded_heap",
+  "sql_support_work": 13
+}

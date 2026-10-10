@@ -39,10 +39,11 @@ func boundedDimensionNumber(s string, limit int) (int, bool) {
 		if !digit(s[i]) {
 			return 0, false
 		}
-		n = n*10 + int(s[i]-'0')
-		if n > limit {
+		digitValue := int(s[i] - '0')
+		if n > (limit-digitValue)/10 {
 			return 0, false
 		}
+		n = n*10 + digitValue
 	}
 	return n, n > 0
 }
@@ -84,7 +85,7 @@ func vectorOperatorFunction(op string) string {
 func isVectorOperator(op string) bool { return vectorOperatorFunction(op) != "" }
 
 func isVectorFunction(name string) bool {
-	if isHalfFunction(name) {
+	if isHalfFunction(name) || isSparseFunction(name) {
 		return true
 	}
 	switch name {
@@ -128,16 +129,22 @@ func vectorFunction(ctx context.Context, name string, args []any) (any, error) {
 	if isHalfFunction(name) {
 		return halfFunction(ctx, name, args)
 	}
+	if isSparseFunction(name) {
+		return sparseFunction(ctx, name, args)
+	}
 	if halfOverload(name) {
-		for i, value := range args {
-			if name == "subvector" && i > 0 {
-				break
-			}
-			if isHalfBlob(value) {
-				return halfFunction(ctx, name, args)
-			}
+		kind, err := numericBlobRepresentation(name, args)
+		if err != nil {
+			return nil, err
+		}
+		if kind == "sparsevec" {
+			return sparseFunction(ctx, name, args)
+		}
+		if kind == "halfvec" {
+			return halfFunction(ctx, name, args)
 		}
 	}
+
 	a, err := VectorValue(args[0])
 	if err != nil {
 		return nil, err
