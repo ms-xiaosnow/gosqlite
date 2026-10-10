@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 
 	"github.com/ms-xiaosnow/gosqlite/internal/journal"
+
+	"github.com/ms-xiaosnow/gosqlite/internal/vfs"
 )
 
 // RecoveryOptions bounds the explicit, internal rollback recovery operation.
@@ -84,13 +86,13 @@ func RecoverRollback(ctx context.Context, path string, opts RecoveryOptions) (re
 	if !info.Mode().IsRegular() {
 		return result, fmt.Errorf("%w: recovery requires a regular database", ErrUnsupported)
 	}
-	if err = validateWritableFile(info); err != nil {
+	if err = validateWritableFile(db); err != nil {
 		return result, err
 	}
 	if err = lockShared(db); err != nil {
 		return result, err
 	}
-	if err = recoveryCheckPath(path, info); err != nil {
+	if err = recoveryCheckPath(path, db, info); err != nil {
 		return result, err
 	}
 	if err = recoveryCheckWAL(path); err != nil {
@@ -134,7 +136,7 @@ func RecoverRollback(ctx context.Context, path string, opts RecoveryOptions) (re
 	if err = recoveryCheckReserved(db); err != nil {
 		return result, err
 	}
-	if err = recoveryCheckPath(path, info); err != nil {
+	if err = recoveryCheckPath(path, db, info); err != nil {
 		return result, err
 	}
 	if err = recoveryCheckWAL(path); err != nil {
@@ -199,7 +201,7 @@ func RecoverRollback(ctx context.Context, path string, opts RecoveryOptions) (re
 	if err = recoveryCheckUnchanged(jpath, jf, ji); err != nil {
 		return result, err
 	}
-	if err = recoveryCheckPath(path, info); err != nil {
+	if err = recoveryCheckPath(path, db, info); err != nil {
 		return result, err
 	}
 	if err = ctx.Err(); err != nil {
@@ -220,7 +222,7 @@ func RecoverRollback(ctx context.Context, path string, opts RecoveryOptions) (re
 	if err = recoveryCheckUnchanged(jpath, jf, ji); err != nil {
 		return result, err
 	}
-	if err = recoveryCheckPath(path, info); err != nil {
+	if err = recoveryCheckPath(path, db, info); err != nil {
 		return result, err
 	}
 	err = jf.Close()
@@ -238,7 +240,7 @@ func RecoverRollback(ctx context.Context, path string, opts RecoveryOptions) (re
 	return RecoveryResult{Recovered: true, RestoredPages: uint32(len(plan.Pages)), OriginalPages: plan.Header.OriginalPages}, nil
 }
 
-func recoveryCheckReserved(db *os.File) error {
+func recoveryCheckReserved(db *vfs.File) error {
 	reserved, err := recoveryReservedHeld(db)
 	if err != nil {
 		return err
@@ -260,7 +262,7 @@ func recoveryCheckWAL(path string) error {
 	return nil
 }
 
-func recoveryOpenJournal(path string) (*os.File, error) {
+func recoveryOpenJournal(path string) (*vfs.File, error) {
 	info, err := os.Lstat(path)
 	if err != nil {
 		return nil, err
@@ -268,14 +270,14 @@ func recoveryOpenJournal(path string) (*os.File, error) {
 	if !info.Mode().IsRegular() {
 		return nil, fmt.Errorf("%w: recovery journal must be a regular file", ErrUnsupported)
 	}
-	if err = validateWritableFile(info); err != nil {
-		return nil, err
-	}
-	file, err := openRecoveryFile(path, os.O_RDWR)
+	file, err := openJournal(path, os.O_RDWR)
 	if err != nil {
 		return nil, err
 	}
 	opened, err := file.Stat()
+	if err == nil {
+		err = validateWritableFile(file)
+	}
 	if err == nil && (!opened.Mode().IsRegular() || !os.SameFile(info, opened)) {
 		err = ErrChanged
 	}
@@ -285,7 +287,10 @@ func recoveryOpenJournal(path string) (*os.File, error) {
 	return file, nil
 }
 
-func recoveryCheckPath(path string, original os.FileInfo) error {
+func recoveryCheckPath(path string, file *vfs.File, original os.FileInfo) error {
+	if err := validateNativePath(file); err != nil {
+		return err
+	}
 	current, err := os.Lstat(path)
 	if err != nil {
 		return errors.Join(ErrChanged, err)
@@ -293,11 +298,11 @@ func recoveryCheckPath(path string, original os.FileInfo) error {
 	if !current.Mode().IsRegular() || !os.SameFile(current, original) {
 		return fmt.Errorf("%w: recovery pathname identity", ErrChanged)
 	}
-	return validateWritableFile(current)
+	return validateWritableFile(file)
 }
 
-func recoveryCheckUnchanged(path string, file *os.File, original os.FileInfo) error {
-	if err := recoveryCheckPath(path, original); err != nil {
+func recoveryCheckUnchanged(path string, file *vfs.File, original os.FileInfo) error {
+	if err := recoveryCheckPath(path, file, original); err != nil {
 		return err
 	}
 	current, err := file.Stat()
@@ -310,7 +315,7 @@ func recoveryCheckUnchanged(path string, file *os.File, original os.FileInfo) er
 	return nil
 }
 
-func recoveryValidateHeader(db *os.File, plan *journal.ReplayPlan) error {
+func recoveryValidateHeader(db *vfs.File, plan *journal.ReplayPlan) error {
 	if plan.Header.OriginalPages == 0 {
 		return nil
 	}

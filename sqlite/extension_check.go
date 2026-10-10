@@ -29,6 +29,9 @@ func (d *DB) CheckExtensionIndex(ctx context.Context, name string) error {
 		if err := d.tx.check(); err != nil {
 			return wrap("check extension index", err)
 		}
+		if err := d.tx.ensureSnapshotLocked(ctx); err != nil {
+			return wrap("check extension index", err)
+		}
 		reader = d.tx.reader
 	} else {
 		r, err := d.openReader(ctx)
@@ -47,6 +50,9 @@ func (t *Tx) CheckExtensionIndex(ctx context.Context, name string) error {
 	t.db.mu.Lock()
 	defer t.db.mu.Unlock()
 	if err := t.check(); err != nil {
+		return wrap("check extension index", err)
+	}
+	if err := t.ensureSnapshotLocked(ctx); err != nil {
 		return wrap("check extension index", err)
 	}
 	return wrap("check extension index", t.db.checkExtensionIndex(ctx, t.reader, name))

@@ -1,0 +1,52 @@
+M9 checkpoint E integration review
+Reviewed 2026-10-10 UTC. Review is source inspection plus explicitly selected
+ordinary tests, not a full external audit or durability qualification.
+
+Implemented and frozen:
+- BIT(1..64000), strict canonical GSB writes and typed reads, nullable driver
+  bindings/scans, defaults, statement/transaction rollback and normal reopen.
+- bit_vector, bit_dims, bit_to_text, Hamming/<~>, Jaccard/<%>, dense subvector
+  and binary_quantize SQL. Integer bitwise grammar and dense GSV semantics stay.
+- Explicit DB/Tx.BitSearch, exact bounded SQL heap, separate bit metric identity
+  and packed-byte statistics, WHERE-before-score, NULL policy and signed ties.
+- HNSW/IVFFlat/dense search reject BIT; SQL reports explicit exact fallback.
+- Executable same-snapshot filtered Hamming-candidate/dense-L2 rerank example.
+
+Independent read-only reviewer checked strict decoding, representation identity,
+NULL/zero-width split, precedence, exact ranking/ties, quotas, lazy query values,
+ANN boundaries, snapshot use and truthful candidate recall disclosure.
+
+Findings resolved before freeze:
+1. Existing missing-column default paths used write canonicalization. For an
+   external ALTER-added BIT(3) DEFAULT '001', official SQLite exposes INTEGER1
+   on old records. Canonicalizing that to GSB guessed lost width. The new
+   missingColumnValue helper applies ordinary BIT affinity while leaving dense
+   behavior unchanged; only referenced typed values then reject. The ordinary
+   oracle regression covers numeric rejection and canonical BLOB defaults.
+2. A driver test's DESC ranking did not prove prior-statement/partial-row
+   rollback. A direct in-transaction ids>=7 query now requires exactly row7,
+   proving row8 is absent and row7 remains before transaction rollback.
+
+Additional coverage:
+- Independent per-bit reference ranking with random 17-bit data, all-zero
+  Jaccard, min/max signed rowid ties, NULLs, filters, both operand orders,
+  functions, aliases, ordinals, OFFSET and general-sort fallback.
+- Maximum-width 64000-bit storage, exact search, overflow pages and memory cap.
+- Native candidate/result/packed-byte limits, no partial errors, cancellation
+  including a Valuer callback, SQL NULL/limit-zero lazy decoding.
+- Shared-WAL transaction snapshot stays pinned across another ordinary commit;
+  DB and Tx entry points agree. Explicit same-statement quantization maintenance.
+- Dense regressions pass after the strengthened ordinary-test source guard.
+
+Evidence:
+- m9-bit-sql-components.txt: actual final guard/CGO0/race/vet/build output.
+- m9-bit-sql-oracle.txt: observed three-run selected ordinary oracle result.
+- m9-bit-sql-example.txt: executable example output from a fresh file.
+- m9-bit-sql-source-sha256.txt: selected checkpoint file hashes.
+
+No unresolved E code blocker identified. Required subsequent work remains:
+HALFVEC and SPARSEVEC SQL/typed exact integration; typed ANN; migration later
+slices; full lead-owned aggregate/oracle gates for the final combined tree;
+restricted physical durability/security/recovery and independent release audit.
+The half/sparse primitive/codecs remain implemented, but their SQL declarations
+are explicitly unsupported in this checkpoint. No PostgreSQL runtime was used.

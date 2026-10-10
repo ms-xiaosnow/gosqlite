@@ -1,0 +1,8 @@
+2026-10-10T13:51:28Z
+Source tree 2a974fa1f54c29ea804cc5fcc16f76bb38d976bc, standalone archive; VCS stamping explicitly disabled.
+35e7f3099324e8c66463ab6ae9cef2b9c17bc6a0ac5ed65fbd31bdf7881f19c6  ../build-evidence/gosqlite-s1-a
+35e7f3099324e8c66463ab6ae9cef2b9c17bc6a0ac5ed65fbd31bdf7881f19c6  ../build-evidence/gosqlite-s1-b
+../build-evidence/gosqlite-s1-a: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), statically linked, Go BuildID=wRCHAqXHW52zU_JTUgzm/3Y9KEsiE9bt-5o6AD4kx/w2X2gDdS7v_jiKQT4H4m/r3h02d8CZw1ebUzqQcO8, BuildID[sha1]=3981dd21ff343284367581925866d363fe03c251, with debug_info, not stripped
+gosqlite 0.0.0-dev; Go 1.27.2; SQLite behavior baseline 3.54.0
+2026-10-10T13:51:29Z
+REPRODUCIBLE STATIC BUILD PASS

@@ -160,11 +160,7 @@ func (r *Reader) ValidatePlaintextCopySource() error {
 	if err := r.checkStable(); err != nil {
 		return err
 	}
-	info, err := r.file.Stat()
-	if err != nil {
-		return err
-	}
-	return validateWritableFile(info)
+	return validateWritableFile(r.file)
 }
 
 func (s *EncryptedSession) CopyBudget() error {

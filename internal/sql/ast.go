@@ -114,7 +114,7 @@ func (*Delete) statement() {}
 
 type Transaction struct {
 	Base
-	Action, Mode string
+	Action, Mode, Name string
 }
 
 func (*Transaction) statement() {}

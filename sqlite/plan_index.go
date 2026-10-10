@@ -157,8 +157,7 @@ func ordinarySafeWhere(r *Rows, e sqlast.Expr) bool {
 		if !ok || i < 0 {
 			return ok
 		}
-		_, vector := sqlast.VectorDimensions(r.table.columns[i].Type)
-		return !vector
+		return !sqlast.IsVectorDeclaration(r.table.columns[i].Type)
 	case *sqlast.Unary:
 		switch x.Op {
 		case "+", "-", "~", "NOT":
@@ -304,7 +303,7 @@ func ordinaryReadIndex(ctx context.Context, reader btree.PageReader, t *table, c
 				usable = false
 				break
 			}
-			if _, typed := sqlast.VectorDimensions(t.columns[ordinal].Type); typed {
+			if sqlast.IsVectorDeclaration(t.columns[ordinal].Type) {
 				usable = false
 				break
 			}

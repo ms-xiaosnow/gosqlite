@@ -1,0 +1,100 @@
+2026-10-10T13:32:04Z
+c7764896c541c4ed6177288ec8f9625828093ade
+Ordinary test source-reference guard PASS; behavioral review is still required.
+?   	github.com/ms-xiaosnow/gosqlite/benchmarks/ann	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.049s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	2.942s
+ok  	github.com/ms-xiaosnow/gosqlite/encryption	1.324s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ann	1.579s
+?   	github.com/ms-xiaosnow/gosqlite/examples/encrypted	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-wal	0.024s
+?   	github.com/ms-xiaosnow/gosqlite/examples/grams	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ivfflat	0.775s
+?   	github.com/ms-xiaosnow/gosqlite/examples/readonly	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/similarity	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/vector	0.207s
+?   	github.com/ms-xiaosnow/gosqlite/examples/wal	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/write	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/extension/grams13	1.553s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/registry	0.093s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/similarity	3.812s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	0.947s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector/ann	6.330s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	17.411s
+?   	github.com/ms-xiaosnow/gosqlite/internal/buildinfo	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	0.178s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/journal	0.021s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.306s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/record	0.011s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.067s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testscope	0.004s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/wal	0.752s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	0.137s
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	0.083s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	73.565s
+?   	github.com/ms-xiaosnow/gosqlite/benchmarks/ann	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	1.144s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	11.701s
+ok  	github.com/ms-xiaosnow/gosqlite/encryption	5.280s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ann	6.614s
+?   	github.com/ms-xiaosnow/gosqlite/examples/encrypted	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-wal	1.047s
+?   	github.com/ms-xiaosnow/gosqlite/examples/grams	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ivfflat	2.996s
+?   	github.com/ms-xiaosnow/gosqlite/examples/readonly	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/similarity	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/vector	1.545s
+?   	github.com/ms-xiaosnow/gosqlite/examples/wal	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/write	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/extension/grams13	6.966s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/registry	1.255s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/similarity	17.238s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	9.006s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector/ann	36.399s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	61.801s
+?   	github.com/ms-xiaosnow/gosqlite/internal/buildinfo	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	1.925s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/journal	1.175s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.950s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/record	1.041s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	1.267s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testscope	1.034s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/wal	10.325s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	3.173s
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	2.049s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	364.282s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+?   	github.com/ms-xiaosnow/gosqlite/benchmarks/ann	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.059s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	4.210s
+ok  	github.com/ms-xiaosnow/gosqlite/encryption	1.413s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ann	2.021s
+?   	github.com/ms-xiaosnow/gosqlite/examples/encrypted	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-wal	0.018s
+?   	github.com/ms-xiaosnow/gosqlite/examples/grams	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ivfflat	0.767s
+?   	github.com/ms-xiaosnow/gosqlite/examples/readonly	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/similarity	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/vector	0.194s
+?   	github.com/ms-xiaosnow/gosqlite/examples/wal	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/write	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/extension/grams13	1.896s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/registry	0.084s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/similarity	4.766s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	1.190s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector/ann	6.766s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	21.534s
+?   	github.com/ms-xiaosnow/gosqlite/internal/buildinfo	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	0.445s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/journal	0.028s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.448s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/record	0.007s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.280s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	261.424s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testscope	0.003s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/wal	0.873s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	0.137s
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	0.095s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	81.325s
+2026-10-10T13:46:19Z
+AUDITED GUARDED LIBRARY RESTORE CHECKS PASS

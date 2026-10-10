@@ -29,6 +29,7 @@ const (
 )
 
 var (
+	ErrPoisoned      = errors.New("SQLite WAL-index ownership cannot safely continue")
 	ErrBusy          = errors.New("SQLite WAL-index lock busy")
 	ErrHeader        = errors.New("invalid SQLite WAL-index")
 	ErrUninitialized = errors.New("SQLite WAL-index is not initialized")

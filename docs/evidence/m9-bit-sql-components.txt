@@ -1,0 +1,32 @@
+M9 checkpoint E component verification
+UTC: 2026-10-10T13:33:34Z
+Base HEAD: c7764896c541c4ed6177288ec8f9625828093ade
+go version go1.27.2 linux/amd64
+
+Scope: intact files; ordinary SQL, rollback, normal reopen/checkpoint, in-memory codec errors. No restricted physical/namespace/process/fault workflows. Whole-repository aggregate is owned by the lead after concurrent slices freeze.
+
+$ CGO_ENABLED=0 go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
+
+$ CGO_ENABLED=0 go test ./internal/sql ./sqlite ./driver ./examples/bit-rerank -run "^(TestBit|TestDriverBit)" -count=3
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.020s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.559s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.063s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/bit-rerank	0.017s
+
+$ CGO_ENABLED=0 go test ./internal/sql ./sqlite ./driver -run "^(TestVector|TestDriverDenseVector|TestDriverVectorQuota)" -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.018s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.933s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.016s
+
+$ CGO_ENABLED=1 go test -race ./internal/sql ./sqlite ./driver ./examples/bit-rerank -run "^(TestBit|TestDriverBit|TestVector|TestDriverDenseVector|TestDriverVectorQuota)" -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	1.075s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	10.654s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.137s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/bit-rerank	1.069s
+
+$ CGO_ENABLED=0 go vet ./internal/sql ./sqlite ./driver ./examples/bit-rerank
+
+$ CGO_ENABLED=0 go build -trimpath ./internal/sql ./sqlite ./driver ./examples/bit-rerank
+
+Component gates PASS

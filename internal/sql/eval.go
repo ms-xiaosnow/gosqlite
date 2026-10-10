@@ -87,7 +87,7 @@ func Eval(e Expr, ctx *EvalContext) (any, error) {
 			return nil, err
 		}
 		switch x.Op {
-		case "<->", "<#>", "<=>", "<+>":
+		case "<->", "<#>", "<=>", "<+>", "<~>", "<%>":
 			return vectorFunction(ctx.Context, vectorOperatorFunction(x.Op), []any{a, b})
 		case "AND":
 			at, an := Truth(a)

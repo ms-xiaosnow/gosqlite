@@ -12,10 +12,12 @@ import (
 	"sort"
 
 	"github.com/ms-xiaosnow/gosqlite/internal/journal"
+
+	"github.com/ms-xiaosnow/gosqlite/internal/vfs"
 )
 
 // writeFullAt treats short writes as errors, even if the OS reports no error.
-func writeFullAt(f *os.File, b []byte, off int64) error {
+func writeFullAt(f *vfs.File, b []byte, off int64) error {
 	n, err := f.WriteAt(b, off)
 	if err != nil {
 		return err
@@ -25,14 +27,7 @@ func writeFullAt(f *os.File, b []byte, off int64) error {
 	}
 	return nil
 }
-func syncDirectory(path string) error {
-	d, err := os.Open(filepath.Dir(path))
-	if err != nil {
-		return err
-	}
-	err = d.Sync()
-	return errors.Join(err, d.Close())
-}
+func syncDirectory(path string) error { return nativeFileError(vfs.SyncDirectory(filepath.Dir(path))) }
 func sortedPages(m map[uint32][]byte) []uint32 {
 	out := make([]uint32, 0, len(m))
 	for n := range m {
@@ -82,6 +77,7 @@ func (t *Tx) journalPages(dirty []uint32) []uint32 {
 func (t *Tx) Commit(ctx context.Context) error {
 	t.mu.Lock()
 	defer t.mu.Unlock()
+	defer t.clearClosedUndoLocked()
 	if err := ctx.Err(); err != nil {
 		return err
 	}
@@ -155,7 +151,7 @@ func (t *Tx) Commit(ctx context.Context) error {
 	// Pre-I/O failures remain retryable and release PENDING/EXCLUSIVE while
 	// retaining this transaction's SHARED+RESERVED locks.
 	preflight := func(e error) error {
-		if t.keepFile {
+		if t.keepFile || t.exclusive {
 			return e
 		}
 		if unlock := unlockExclusive(t.file); unlock != nil {
@@ -170,7 +166,7 @@ func (t *Tx) Commit(ctx context.Context) error {
 		return preflight(err)
 	}
 	jpath := t.path + "-journal"
-	jf, err := os.OpenFile(jpath, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0600)
+	jf, err := openJournal(jpath, os.O_WRONLY|os.O_CREATE|os.O_EXCL)
 	if err != nil {
 		return preflight(err)
 	}

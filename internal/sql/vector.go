@@ -27,6 +27,10 @@ func VectorDimensions(declared string) (int, bool) {
 }
 
 func vectorDimensionNumber(s string) (int, bool) {
+	return boundedDimensionNumber(s, vector.MaxDimensions)
+}
+
+func boundedDimensionNumber(s string, limit int) (int, bool) {
 	if len(s) == 0 {
 		return 0, false
 	}
@@ -36,7 +40,7 @@ func vectorDimensionNumber(s string) (int, bool) {
 			return 0, false
 		}
 		n = n*10 + int(s[i]-'0')
-		if n > vector.MaxDimensions {
+		if n > limit {
 			return 0, false
 		}
 	}
@@ -69,6 +73,10 @@ func vectorOperatorFunction(op string) string {
 		return "cosine_distance"
 	case "<+>":
 		return "l1_distance"
+	case "<~>":
+		return "hamming_distance"
+	case "<%>":
+		return "jaccard_distance"
 	}
 	return ""
 }
@@ -77,7 +85,7 @@ func isVectorOperator(op string) bool { return vectorOperatorFunction(op) != "" 
 
 func isVectorFunction(name string) bool {
 	switch name {
-	case "vector", "vector_dims", "vector_norm", "vector_to_text", "l2_distance", "l1_distance", "cosine_distance", "inner_product", "negative_inner_product":
+	case "vector", "vector_dims", "vector_norm", "vector_to_text", "l2_distance", "l1_distance", "cosine_distance", "inner_product", "negative_inner_product", "bit_vector", "bit_dims", "bit_to_text", "hamming_distance", "jaccard_distance", "subvector", "binary_quantize":
 		return true
 	}
 	return false
@@ -111,6 +119,9 @@ func vectorFunction(ctx context.Context, name string, args []any) (any, error) {
 			return nil, nil
 		}
 	}
+	if isBitFunction(name) {
+		return bitFunction(ctx, name, args)
+	}
 	a, err := VectorValue(args[0])
 	if err != nil {
 		return nil, err
@@ -128,6 +139,26 @@ func vectorFunction(ctx context.Context, name string, args []any) (any, error) {
 		result, err = vector.Norm(a)
 	case "vector_to_text":
 		result = a.String()
+	case "binary_quantize":
+		var b vector.BitVector
+		b, err = vector.BinaryQuantize(a)
+		if err == nil {
+			result, err = b.MarshalBinary()
+		}
+	case "subvector":
+		start, e := subvectorInteger(args[1])
+		if e != nil {
+			return nil, e
+		}
+		count, e := subvectorInteger(args[2])
+		if e != nil {
+			return nil, e
+		}
+		var b vector.Vector
+		b, err = vector.Subvector(a, start, count)
+		if err == nil {
+			result, err = b.MarshalBinary()
+		}
 	default:
 		b, decodeErr := VectorValue(args[1])
 		if decodeErr != nil {

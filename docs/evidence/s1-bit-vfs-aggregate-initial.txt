@@ -1,0 +1,70 @@
+S1 savepoints / managed native ownership / M9 BIT aggregate; converter is excluded
+Audited corrected scope: manual namespace/recovery excluded. Intact-file ordinary operations and memory-only models only.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+2026-10-10T13:45:48Z
+go version go1.27.2 linux/amd64
+Frozen archived Git tree: 2a974fa1f54c29ea804cc5fcc16f76bb38d976bc
+Verification directory has no Git metadata; this is a source-tree test, not a mirrored-commit claim.
+
+Production unit/vet/build
+?   	github.com/ms-xiaosnow/gosqlite/benchmarks/ann	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.072s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	3.508s
+ok  	github.com/ms-xiaosnow/gosqlite/encryption	1.404s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ann	1.446s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/bit-rerank	0.006s
+?   	github.com/ms-xiaosnow/gosqlite/examples/encrypted	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-wal	0.012s
+?   	github.com/ms-xiaosnow/gosqlite/examples/grams	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ivfflat	0.754s
+?   	github.com/ms-xiaosnow/gosqlite/examples/readonly	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/similarity	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/vector	0.128s
+?   	github.com/ms-xiaosnow/gosqlite/examples/wal	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/write	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/extension/grams13	1.740s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/registry	0.080s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/similarity	3.912s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	1.082s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector/ann	6.057s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	16.423s
+?   	github.com/ms-xiaosnow/gosqlite/internal/buildinfo	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	0.150s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/journal	0.023s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.380s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/record	0.011s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.111s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testscope	0.015s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.016s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/wal	0.844s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	0.381s
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	0.223s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	86.191s
+error obtaining VCS status: exit status 128
+	Use -buildvcs=false to disable VCS stamping.
+error obtaining VCS status: exit status 128
+	Use -buildvcs=false to disable VCS stamping.
+error obtaining VCS status: exit status 128
+	Use -buildvcs=false to disable VCS stamping.
+error obtaining VCS status: exit status 128
+	Use -buildvcs=false to disable VCS stamping.
+error obtaining VCS status: exit status 128
+	Use -buildvcs=false to disable VCS stamping.
+error obtaining VCS status: exit status 128
+	Use -buildvcs=false to disable VCS stamping.
+error obtaining VCS status: exit status 128
+	Use -buildvcs=false to disable VCS stamping.
+error obtaining VCS status: exit status 128
+	Use -buildvcs=false to disable VCS stamping.
+error obtaining VCS status: exit status 128
+	Use -buildvcs=false to disable VCS stamping.
+error obtaining VCS status: exit status 128
+	Use -buildvcs=false to disable VCS stamping.
+error obtaining VCS status: exit status 128
+	Use -buildvcs=false to disable VCS stamping.
+error obtaining VCS status: exit status 128
+	Use -buildvcs=false to disable VCS stamping.
+error obtaining VCS status: exit status 128
+	Use -buildvcs=false to disable VCS stamping.
+error obtaining VCS status: exit status 128
+	Use -buildvcs=false to disable VCS stamping.

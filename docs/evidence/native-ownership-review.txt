@@ -1,0 +1,97 @@
+Independent managed native ownership review
+Date: 2026-10-10 UTC
+Scope: Linux extraction only. No Darwin or Windows implementation is claimed.
+
+Reviewed sources:
+  docs/decisions/0014-managed-native-file-ownership.md
+  internal/vfs/file.go, locks.go, mapping.go, native_linux.go, native_other.go
+  internal/pager/native_file.go, session.go, shared_session.go, tx.go,
+    commit.go, wal.go, recovery.go, pager.go, savepoint.go
+  internal/walindex/native_file.go, index.go
+
+Findings corrected by lead, production edits not made by reviewer:
+1. File.LockDB/DowngradeDBToShared returned ErrPoisoned without latching it.
+   A partial downgrade could leave cached EXCLUSIVE true after physical SHARED
+   conversion and make a later acquisition falsely succeed. lockResultLocked
+   now latches closing=true before returning an ownership-poisoned result.
+   checkLocked rejects further I/O, locking, and mapping before cached lock
+   state or the private native descriptor can be used. Close remains possible.
+2. The first SHM opener could retain a DMS writer hold after truncate or final
+   writer-to-reader conversion failure without classifying ownership failure.
+   nativeAttachDMS now tags those post-acquisition failures ErrPoisoned; errors
+   before initial writer acquisition preserve their original classification.
+3. Failed native SHM unlock now joins ErrPoisoned through the same latch.
+   This protects direct managed-file/index callers as well as SharedSession's
+   pre-existing poison-on-unlock-error path.
+
+These failure branches were reviewed as source and modeled in memory only.
+No native error, failed unmap, failed truncate, failed Sync, permission fault,
+short write, disk-full, forced exit, kill, interrupted publication, corruption,
+wrong-key, missing-selected-file, physical recovery, or namespace mutation
+scenario was executed.
+
+Ownership conclusions:
+- Linux OFD locks are description-local. SHARED takes temporary PENDING read,
+  then the SHARED range, then releases PENDING. Failed EXCLUSIVE releases
+  temporary PENDING and retains SHARED; uncertain cleanup is poisoned.
+- Portable SHM mode changes require explicit release. Linux's atomic backend
+  conversion and range-unlock behavior remain separate low-level behavior.
+- Original native mapping views remain owned independently of logical slices.
+  File.Close attempts all view retirements before descriptor/DMS release; any
+  retained view preserves the descriptor and all its locks for a later Close.
+  Index.Close rejects further access while keeping its file for retry.
+- SharedSession.Close keeps its main SHARED and WAL owners until index Close
+  succeeds, preventing a compatible exclusive opener from removing live SHM.
+- OpenSharedSession's failed-open cleanup likewise retains those owners after
+  an index-retirement failure, but returns no session to the caller. This is an
+  explicit fail-closed resource-leak/lifecycle gate: the registry retains the
+  files, but no public Close retry for that failed-open group exists. Normal
+  explicit Close retryability must not be described as universal recovery.
+  A future bounded, synchronous pending-retirement group registry could provide
+  explicit ordered retries without evicting live locks or background cleanup.
+- WAL replacement requires distinct leases, a DB EXCLUSIVE owner, WAL roles,
+  replaceable old/candidate leases, canonical related paths, and identity checks
+  before native rename. Shared WAL opens opt out. Pager still orders candidate
+  Sync, namespace publication, directory Sync, snapshot adoption, old close.
+  Replacement itself was statically reviewed only; no replacement test ran.
+- Recovery source remains internal, unsupported by ordinary public opens, and
+  was only read. Manual recovery/namespace tests were never executed.
+
+Reviewer-added tests: internal/vfs/ownership_review_test.go only.
+All four tests are pure memory models. Synthetic os.File placeholders are not
+opened, registered, or used in native calls. Role/alias rejection stops before
+path validation/replacement; retirement callbacks are memory-only functions.
+
+Commands and results (pinned offline Go, exact named tests, no aggregate suite):
+Sat Oct 10 13:43:57 UTC 2026
+Environment: GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off GOCACHE=$PWD/../go-cache GOPATH=$PWD/../go-path
+CGO_ENABLED=0 go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
+CGO_ENABLED=0 go test ./internal/vfs -run '^(TestOwnershipReviewPartialRetirementRetainsAllLocks|TestOwnershipReviewClosingLeaseRejectsReuse|TestOwnershipReviewLockPoisonLatch|TestOwnershipReviewReplacementRejectsIneligibleRoles|TestSlotLedgerStrictOwnership|TestMappingSpanGranularity|TestMappingRetirementMemoryModel|TestCloseOrderingMemoryModel|TestIndependentOFDLocksAndPOSIXInterop|TestOFDSubrangeAndUnionUnlock|TestManagedDBProbeRetainsReservedAndSnapshot|TestManagedMappingLogicalSpanAndClose)$' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.005s
+CGO_ENABLED=0 go test ./internal/walindex -run '^(TestDMSNormalLifecycleAndHeaderPublication|TestDMSEarlierExclusiveOpenerReturnsBusy|TestRealHashBlocksSnapshotAndCleanup|TestCheckpointMetadataAndLimits|TestConcurrentHeaderPublication|TestNativeHashAndPageMappingBytes|TestPortableSHMLockRequiresExplicitRelease)$' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	0.143s
+CGO_ENABLED=0 go test ./internal/pager -run '^(TestTxBusyCommitIsRetryableWithoutSideEffects|TestSharedWALSnapshotsPromotionAndCheckpoint|TestSharedWALConcurrentReadersAndWriter|TestSharedWALCrossesNativeIndexBlock)$' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.124s
+CGO_ENABLED=1 scoped race tool run; production checks remain CGO_ENABLED=0
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	1.020s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	2.552s
+CGO_ENABLED=0 go vet ./internal/vfs ./internal/walindex
+Independent scoped review checks PASS.
+Sat Oct 10 13:44:06 UTC 2026
+
+Exact race selections for the successful CGO_ENABLED=1 runs above:
+go test -race ./internal/vfs -run '^(TestOwnershipReviewPartialRetirementRetainsAllLocks|TestOwnershipReviewClosingLeaseRejectsReuse|TestOwnershipReviewLockPoisonLatch|TestOwnershipReviewReplacementRejectsIneligibleRoles|TestIndependentOFDLocksAndPOSIXInterop|TestOFDSubrangeAndUnionUnlock|TestManagedDBProbeRetainsReservedAndSnapshot|TestManagedMappingLogicalSpanAndClose)$' -count=1
+go test -race ./internal/walindex -run '^(TestDMSNormalLifecycleAndHeaderPublication|TestRealHashBlocksSnapshotAndCleanup|TestConcurrentHeaderPublication|TestPortableSHMLockRequiresExplicitRelease)$' -count=1
+
+Final reviewed production and review-test SHA-256:
+843898ced972cee2efac82666b9e707223ebeeaf7bea0c77669d1b99a91c06f1  internal/vfs/file.go
+7519233f79c75d496cd33a04d3b7d94f5c23dcc9bbef30098f57eb62e7e13b4f  internal/vfs/locks.go
+f4e243e005f634ddec968ce9885a3bca4db6e998b072a128d0f44116f107f437  internal/vfs/mapping.go
+ea32e7b45225baa81b0b51f422e4c0ac35fdbfbbba1bf5a7742b3df9f63eb31c  internal/vfs/native_linux.go
+46cc95fcdad1e0ab93e6a63e11cb0a926344debeea257a4a8286e58aaff7233f  internal/vfs/native_other.go
+d05a6957c057cb39502751e93fa24df6af8f92b854f95cebe2eb9a346f6faf62  internal/vfs/ownership_review_test.go
+a22f4243a2dd9c1293b8fde0564b6fc2115f8a7f661027b519de7e31abdd9974  internal/pager/native_file.go
+199b903cb63a2683ba494855806d3ebdbd01bfb77fb272b9cdb8f32bc98a5a7e  internal/pager/shared_session.go
+60b853ebc8c0b728c14dc4d6aedfdfebee252fda8ecb5b3e2d527cc23cdc47b8  internal/walindex/index.go
+41a864b8b0c762ae5e56108eab4d669bb40aa4b86602c309ffa831d6e6efd8b1  internal/walindex/native_file.go

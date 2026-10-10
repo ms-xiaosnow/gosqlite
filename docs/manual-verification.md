@@ -228,3 +228,21 @@ exit0 at2026-10-10T12:55:04Z; CI38052742168 succeeded for exact bd6b19c9e88b7729
 See m8-library-restore-recheck.txt. Restricted physical recovery/security gates
 remain BLOCKED/NOT_RUN; simultaneous encrypted writer/readers and other missing
 code remain implementation work.
+
+## S1, BIT and native ownership ordinary increments
+
+The default and oracle scripts first run the source-scope guard; manual tags are
+refused. New component records document only reviewed normal transactions,
+intact files, normal cooperating processes and memory-only negative cases:
+
+- evidence/s1-transactions-{components,race,oracle}.txt: actual lazy snapshot,
+  savepoint, undo quota, ordinary BUSY, extension restoration and driver checks.
+- evidence/m9-bit-sql-{components,oracle,review,example}.txt: bit SQL/persistence,
+  exact ranking and dense-regression checks, including legal SQLite affinity.
+- evidence/native-ownership-components.txt: role-specific managed descriptors,
+  normal Linux byte locks/mappings and official cooperative-lock behavior.
+
+They do not qualify failed native locking/unmap/close, hostile namespace changes,
+interrupted publication, physical fault/recovery or native Darwin/Windows runtime.
+Darwin/Windows production backends are still required implementation work.
+Combined-tree aggregate and restored/remote gates are reported separately.

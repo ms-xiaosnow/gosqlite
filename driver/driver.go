@@ -135,9 +135,8 @@ func parseDSNMode(dsn string) (string, string, error) {
 }
 
 type conn struct {
-	db            *sqlite.DB
-	closed        atomic.Bool
-	inTransaction bool // database/sql serializes connection methods.
+	db     *sqlite.DB
+	closed atomic.Bool
 }
 
 func (c *conn) Close() error {
@@ -152,14 +151,13 @@ func (c *conn) ResetSession(ctx context.Context) error {
 	if err := ctx.Err(); err != nil {
 		return err
 	}
-	if c.inTransaction {
-		// SQL BEGIN on a pinned sql.Conn may be abandoned when it is returned
+	if !c.db.Autocommit() {
+		// SQL BEGIN or SAVEPOINT on a pinned sql.Conn may be abandoned when returned
 		// to the pool. Never expose that transaction to the next borrower.
 		if _, err := c.db.Exec(ctx, "ROLLBACK"); err != nil {
 			c.Close()
 			return sqldriver.ErrBadConn
 		}
-		c.inTransaction = false
 	}
 	return nil
 }
@@ -194,7 +192,6 @@ func (c *conn) BeginTx(ctx context.Context, opts sqldriver.TxOptions) (sqldriver
 	if err != nil {
 		return nil, err
 	}
-	c.inTransaction = true
 	return &transaction{conn: c, inner: t, ctx: ctx}, nil
 }
 func (c *conn) Ping(ctx context.Context) error { _, err := c.db.Schema(ctx); return err }
@@ -213,12 +210,6 @@ func (c *conn) ExecContext(ctx context.Context, query string, args []sqldriver.N
 	result, err := c.db.Exec(ctx, query, namedArguments(args)...)
 	if err != nil {
 		return nil, err
-	}
-	// Track only successfully executed controls. DB owns the actual native
-	// transaction and dispatches all Query/Exec calls to it while active.
-	ast, _ := sqlast.Parse(query)
-	if control, ok := ast.(*sqlast.Transaction); ok {
-		c.inTransaction = control.Action == "BEGIN"
 	}
 	return result, nil
 }
@@ -239,12 +230,10 @@ func (t *transaction) Commit() error {
 			err = errors.Join(err, rollbackErr)
 		}
 	}
-	t.conn.inTransaction = false
 	return err
 }
 func (t *transaction) Rollback() error {
 	err := t.inner.Rollback()
-	t.conn.inTransaction = false
 	if err != nil {
 		t.conn.Close()
 	}

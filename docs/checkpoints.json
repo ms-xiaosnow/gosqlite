@@ -158,5 +158,19 @@
     "remote_ci_status": "COMPLETED SUCCESS at2026-10-10T13:25:22Z, observed13:26:57Z; includes the two later-gated namespace tests, not corrected ordinary-scope evidence.",
     "open_gates": "Concurrent encrypted writer/readers; remaining migration/extended SQL/ANN, broad SQL, recovery and native-platform code; restricted physical durability and independent release acceptance remain open.",
     "test_scope_correction": "Full suites at this checkpoint included two namespace-mutation tests later gated on2026-10-10. PASS results are factual, not clean ordinary-scope evidence; see docs/test-scope-audit.md."
+  },
+  {
+    "stage": "Ordinary test-scope correction: explicit namespace gating and pre-suite source audit",
+    "remote_commit": "c7764896c541c4ed6177288ec8f9625828093ade",
+    "local_commit": "c7764896c541c4ed6177288ec8f9625828093ade",
+    "tree": "a8450b7150476613350cbae6b8866b0f06c67be5",
+    "bundle_sha256": "dcbe49be7ccd7fb0362870370951a211d96b8394c382c54f27fd12db09d14534",
+    "bundle_bytes": 1074237,
+    "library_file_id": "libfile_e94b5944a3a481919e03d83293617671",
+    "library_version": 0,
+    "verified": "Guarded remote readback/exact local mirror; full-history bundle; byte-identical Library readback, clean clone/fsck and unchanged goal hash verified. Restored corrected guarded unit/vet/build/race and pinned SQLite oracle passed exit0 at2026-10-10T13:46:19Z; restored Git tree remains clean.",
+    "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38056050522",
+    "remote_ci_status": "COMPLETED SUCCESS for exact SHA; ordinary job completed2026-10-10T13:40:14Z, observed13:41:30Z. Guarded unit/vet/build/race only; oracle separately restored.",
+    "open_gates": "Scope guard is a source-reference prevention aid, not complete helper/callgraph analysis. Historical PASS logs remain factual with corrected scope. Broader implementation and restricted/independent acceptance gates remain open."
   }
 ]

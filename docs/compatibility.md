@@ -8,12 +8,12 @@ Behavior baseline: official SQLite 3.54.0. M2 implements a deliberately bounded 
 | SQLite header/records | partial | format3, UTF-8, rollback-mode header; page sizes 512/4096/65536 exercised; integer widths/REAL/NULL/TEXT/BLOB |
 | Rowid B-trees | partial | leaf/interior, signed rowids, overflow, streaming, schema root1 including schema overflow |
 | Ordinary secondary indices | partial | create/maintain nonunique BINARY ASC keys; actual rowid/IPK equality and leading-prefix equality SELECT seeks with residual recheck; unsupported shapes scan; no general range/covering/order optimization |
-| Native file locking | partial | Linux OFD shared/reserved/pending/exclusive byte-range locks; non-Linux Open fails explicitly |
+| Native file locking | partial | managed role-specific file/mapping ownership, Linux OFD shared/reserved/pending/exclusive byte-range locks; native Darwin/Windows implementations still absent |
 | SELECT | partial | one rowid table or no FROM; projection, *, WHERE, parameters, ORDER BY, LIMIT/OFFSET; aliases and rowid/IPK semantics |
 | Expressions | partial | NULL3VL, comparisons/affinity, arithmetic/bitwise/concat, ASCII-insensitive rune LIKE with ESCAPE, tested scalar builtins |
-| Schema interpretation | partial | declared types INTEGER/INT/REAL/TEXT/BLOB/NUMERIC, strict VECTOR(n), or typeless; supported INTEGER PRIMARY KEY, NOT NULL and literal DEFAULT enforced on writes; non-INTEGER PK metadata read-only |
+| Schema interpretation | partial | declared types INTEGER/INT/REAL/TEXT/BLOB/NUMERIC, strict VECTOR(n)/BIT(n), or typeless; supported INTEGER PRIMARY KEY, NOT NULL and literal DEFAULT enforced on writes; non-INTEGER PK metadata read-only |
 | database/sql | partial | Connector, prepared reads/writes, named/positional binds, transactions, cancellation, streaming rows and resource closure |
-| CREATE / CRUD / transactions | partial | native table/index creation, multirow INSERT, UPDATE/DELETE, deferred/immediate transactions, read-own-writes, transactional DDL, statement rollback; no savepoints |
+| CREATE / CRUD / transactions | partial | native table/index creation, multirow INSERT, UPDATE/DELETE, lazy deferred and immediate/exclusive transactions, real nested savepoints/release/rollback-to, bounded statement/named undo, read-own-writes and transactional DDL; active Rows restrictions remain |
 | Journal publication | partial | standard SQLite DELETE journal and ordered Sync in successful commits; sector-size assumption explicit; error/crash paths unqualified |
 | WAL binary codec | partial | native header/frame/salt/checksum validation, both byteorders, bounded committed-prefix index and strict tail refusal; memory tests |
 | Exclusive WAL | partial | explicit WALExclusive; one connection-lifetime EXCLUSIVE lock and one local lease; ordinary commit/read/checkpoint/normal-close interop; requires writable access |
@@ -27,7 +27,7 @@ Behavior baseline: official SQLite 3.54.0. M2 implements a deliberately bounded 
 | encrypted snapshot / rekey / backup | experimental ordinary slice | authenticated root/base, Linux stable locks, full snapshot publication, correct-key rekey/backup/restore and plaintext import/export; retained history and namespace/freshness limitations |
 | encrypted WAL | experimental ordinary slice | immutable authenticated final-dirty-page segments, bounded complete-head replay, checkpoint/rekey/copy and explicit snapshot upgrade; concurrent encrypted writer/readers remain required code |
 | pg_embedding migration inspector | partial | bounded local catalog/real-array inspection and deterministic identity-aware reports; converter/import/transition templates remain required code; no live PostgreSQL execution |
-| extended vector values | partial memory primitives | distinct half/bit/sparse codecs, metrics, conversions, nullable adapters, subvector/quantization; SQL/storage/ANN integration remains required code |
+| extended vector values | partial | distinct half/bit/sparse memory codecs and metrics; BIT(n) SQL/storage/driver/exact ranking plus dense subvector/quantization implemented; half/sparse SQL and all extended ANN remain required code |
 | release audits / native OS evidence | unsupported | M10 not started; cross-build success is not native-runtime evidence |
 
 Unimplemented SQL/PRAGMAs return explicit errors. JOIN, aggregate/grouping, subqueries, CTEs, window functions, DISTINCT, UNION, scalar COLLATE (CREATE INDEX COLLATE BINARY is accepted), CASE, IN/BETWEEN, general views/triggers, STRICT, WITHOUT ROWID, autovacuum, UTF-16 and unlisted schema grammar remain unsupported. Some storage mechanisms can safely coexist in a read-only file without their SQL being executable.
@@ -83,4 +83,28 @@ sparse dimensions can reach 1e9 while work scales with at most 16000 nonzeros.
 Bit zero/zero Jaccard is 1 per the pinned reference. Finite float64 accumulation
 and stricter malformed sparse-zero-index validation intentionally differ from
 some upstream outputs. Published fixtures are source evidence, not a running
-PostgreSQL comparison. No extended SQL type or extended ANN index is enabled yet.
+PostgreSQL comparison. BIT(n) now has typed SQL/storage/driver and exact search with distinct Hamming/Jaccard diagnostics. Half/sparse SQL and all extended ANN remain unsupported. See bit-vector.md.
+
+
+Transaction control now supports BEGIN [DEFERRED|IMMEDIATE|EXCLUSIVE], COMMIT/END,
+ROLLBACK, SAVEPOINT, RELEASE and ROLLBACK TO on a retained connection. Lazy BEGIN,
+empty controls and constant SELECT do not pin a snapshot; first actual database
+access does. Released inner names merge into the parent and outermost RELEASE
+commits only a savepoint-started transaction. Undo images, freelist state and
+metadata share MaxTransactionUndoBytes; exceeding it rejects before the next
+retained copy. Active transaction Rows still prevent mutations/control/Commit;
+full rollback invalidates them. Connection-level changes()/last_insert_rowid()
+SQL functions and general cursor relaxation are absent. See transactions.md.
+
+Managed native ownership is a Linux prerequisite for later ports. Every adopted
+plain pager/SHM descriptor participates in explicit lifetime ownership; a mapping
+retains its complete native view and owner. Native Darwin process-fcntl close
+coordination and Windows lock/mapping/publication policies are still missing
+code, regardless of successful cross-compilation. See ADR0014.
+
+Native ownership error handling latches uncertain lock state before allowing
+further operations. A failed normal Close can retain mappings and protecting
+locks for retry. If shared-session construction itself fails and cleanup cannot
+retire a mapping, the resources are retained fail-closed without a reachable
+session retry API; process-lifetime retention is a remaining lifecycle code gap.
+No native lock/unmap failure execution is claimed.

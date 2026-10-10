@@ -280,7 +280,7 @@ func (t *writeTable) values(rowid int64, raw []any) ([]any, error) {
 			if err != nil {
 				return nil, err
 			}
-			value, err = storedColumnValue(value, t.columns[i].Type)
+			value, err = missingColumnValue(value, t.columns[i].Type)
 			if err != nil {
 				return nil, err
 			}

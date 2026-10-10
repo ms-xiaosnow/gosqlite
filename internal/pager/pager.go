@@ -8,6 +8,8 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
+
+	"github.com/ms-xiaosnow/gosqlite/internal/vfs"
 )
 
 // Reader owns either a read-only descriptor with a SQLite-compatible SHARED
@@ -16,7 +18,7 @@ import (
 // Concurrent ReadPage and Close are safe; each page returned is caller-owned.
 type Reader struct {
 	mu        sync.RWMutex
-	file      *os.File
+	file      *vfs.File
 	path      string
 	info      os.FileInfo
 	header    Header
@@ -27,11 +29,15 @@ type Reader struct {
 func Open(path string) (*Reader, error) {
 	// Resolve symlinks so sidecar checks apply to the actual database pathname.
 	// Multiple hard-linked names remain unsupported by SQLite itself.
-	path, err := filepath.EvalSymlinks(path)
+	path, err := filepath.Abs(path)
 	if err != nil {
 		return nil, err
 	}
-	file, err := os.Open(path)
+	path, err = filepath.EvalSymlinks(path)
+	if err != nil {
+		return nil, err
+	}
+	file, err := openReadOnlyDatabase(path)
 	if err != nil {
 		return nil, err
 	}
@@ -101,6 +107,9 @@ func (r *Reader) Header() Header {
 }
 
 func (r *Reader) checkStable() error {
+	if err := validateNativePath(r.file); err != nil {
+		return err
+	}
 	if err := checkSidecars(r.path); err != nil {
 		return err
 	}

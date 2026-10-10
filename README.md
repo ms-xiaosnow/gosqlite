@@ -2,7 +2,7 @@
 
 Historical test-scope statements are corrected in [the namespace-test audit](docs/test-scope-audit.md); the affected tests are now excluded from ordinary workflows.
 
-A native Go database kernel targeting tested subsets of SQLite 3.54.0 files and SQL. Current development: persistent HNSW/IVFFlat, exact typed-vector KNN and same-snapshot hybrid ranking, plus experimental authenticated snapshot and dirty-page WAL storage, ordinary B-tree equality planning, extended vector primitives, and a bounded pg_embedding catalog inspector. It is not production-ready. No CGO, SQLite subprocess, C ABI, or remote SQL engine is used in production.
+A native Go database kernel targeting tested subsets of SQLite 3.54.0 files and SQL. Current development: persistent HNSW/IVFFlat, exact typed-vector KNN and same-snapshot hybrid ranking, plus experimental authenticated snapshot and dirty-page WAL storage, ordinary B-tree equality planning, nested savepoints, BIT exact search, extended vector primitives, and a bounded pg_embedding catalog inspector. It is not production-ready. No CGO, SQLite subprocess, C ABI, or remote SQL engine is used in production.
 
 ## Try the implemented SQL path
 
@@ -50,7 +50,7 @@ func read(ctx context.Context) error {
 
 The read-only example requires an existing database and docs table. For writes, use a normal path or mode=rwc DSN, or mode=rw to require an existing file. Native sqlite.Options{} is writable/create; ReadOnly and NoCreate are explicit alternatives. See examples/write for prepared inserts and transactions. Native transactions can retry BUSY Commit after readers close; database/sql transactions cannot be reused after Commit, so the adapter rolls back on an error. Close Rows promptly to release their snapshot locks.
 
-CREATE TABLE, nonunique BINARY ASC CREATE INDEX, INSERT, UPDATE, DELETE and explicit Go/driver transactions are implemented for the documented subset. Ordinary secondary indices are maintained on disk. Registered grams13 posting indices accelerate supported LIKE and configured MATCH predicates. Eligible rowid and ordinary leading-prefix equality predicates use real source/index seeks; unsupported shapes scan. See [ordinary index planning](docs/ordinary-index.md). Unsupported schema objects/constraints reject writes to the database rather than being ignored. Existing journals require recovery and are refused. Existing zero-byte files are conservatively rejected. Normal successful commit tests do not qualify crash durability; use only disposable data.
+CREATE TABLE, nonunique BINARY ASC CREATE INDEX, INSERT, UPDATE, DELETE and retained-connection SQL/native/driver transactions with nested savepoints are implemented for the documented subset. Ordinary secondary indices are maintained on disk. Registered grams13 posting indices accelerate supported LIKE and configured MATCH predicates. Eligible rowid and ordinary leading-prefix equality predicates use real source/index seeks; unsupported shapes scan. See [ordinary index planning](docs/ordinary-index.md). Unsupported schema objects/constraints reject writes to the database rather than being ignored. Existing journals require recovery and are refused. Existing zero-byte files are conservatively rejected. Normal successful commit tests do not qualify crash durability; use only disposable data.
 
 If home is read-only, set GOCACHE and GOPATH to writable directories. The Unicode tokenizer uses pinned pure-Go golang.org/x/text; go.sum records verified module checksums and third_party/ retains its license. Official SQLite is a separately built test oracle only:
 
@@ -60,7 +60,7 @@ SQLITE_ORACLE=/absolute/path/to/verified/sqlite3 ./scripts/test-oracle.sh
 
 See [progress](docs/progress.md), [compatibility](docs/compatibility.md), [architecture](docs/architecture.md), [sources](docs/upstream.md), and [manual verification](docs/manual-verification.md). The unchanged [original goal](goal.md) remains the contract. [Restart protocol](docs/restart.md) and checkpoint records preserve durable development history.
 
-Qualified crash recovery, concurrent encrypted writer/readers, broader SQL/native-platform support, typed SQL/ANN integration for extended vectors, and the remaining pg_embedding converter/import/transition tooling remain unfinished implementation work. Full SQLite/PostgreSQL semantics, SEE file compatibility and production security are not claimed.
+Qualified crash recovery, concurrent encrypted writer/readers, broader SQL/native-platform support, half/sparse SQL and all extended-vector ANN integration, and the remaining pg_embedding converter/import/transition tooling remain unfinished implementation work. Full SQLite/PostgreSQL semantics, SEE file compatibility and production security are not claimed.
 
 
 ## Explicit exclusive WAL
@@ -152,3 +152,17 @@ data yet. See [migration scope and examples](docs/migration-pgembedding.md).
 values, codecs, exact metrics, nullable adapters, subvector and quantization.
 These are memory primitives; typed SQL storage and ANN integration remain open.
 See [extended value contracts](extension/vector/extended-values.md).
+
+## Transaction controls and packed-bit search
+
+Retained native/driver connections support lazy BEGIN, IMMEDIATE/EXCLUSIVE,
+SAVEPOINT, RELEASE and ROLLBACK TO with bounded aggregate undo. See
+[transaction behavior](docs/transactions.md) for snapshot timing, driver cleanup
+and current active-Rows restrictions. A one-statement CLI invocation cannot carry
+a transaction into another invocation.
+
+BIT(1..64000) stores strict packed GSB values. Hamming/<~>, Jaccard/<%>, native
+DB/Tx.BitSearch and eligible SQL bounded-heap ranking are exact; no bit ANN exists.
+Dense subvector and binary_quantize are explicit transforms. See
+[bit SQL and search](docs/bit-vector.md) and the runnable examples/bit-rerank;
+its deliberately truncated bit candidates demonstrate lost dense recall.

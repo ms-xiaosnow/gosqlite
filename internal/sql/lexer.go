@@ -195,7 +195,7 @@ func Tokenize(s string) ([]Token, error) {
 			add(Identifier, s[start:i], start, i, false)
 			continue
 		}
-		// Dense vector operators are maximal three-byte tokens. Recognize them
+		// Vector distance operators are maximal three-byte tokens. Recognize them
 		// before SQLite's <= and -> without changing either existing operator.
 		if i+2 < len(s) && isVectorOperator(s[i:i+3]) {
 			i += 3

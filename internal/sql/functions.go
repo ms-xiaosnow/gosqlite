@@ -12,6 +12,13 @@ import (
 // BuiltinFunctions is read-only after initialization. Per-connection overrides
 // and extension functions belong in EvalContext.Functions, avoiding global races.
 var BuiltinFunctions = map[string]Function{
+	"bit_vector":             builtinVectorFunction("bit_vector"),
+	"bit_dims":               builtinVectorFunction("bit_dims"),
+	"bit_to_text":            builtinVectorFunction("bit_to_text"),
+	"hamming_distance":       builtinVectorFunction("hamming_distance"),
+	"jaccard_distance":       builtinVectorFunction("jaccard_distance"),
+	"subvector":              builtinVectorFunction("subvector"),
+	"binary_quantize":        builtinVectorFunction("binary_quantize"),
 	"vector":                 builtinVectorFunction("vector"),
 	"vector_dims":            builtinVectorFunction("vector_dims"),
 	"vector_norm":            builtinVectorFunction("vector_norm"),
@@ -140,9 +147,11 @@ func ValidateFunction(name string, argc int) error {
 	}
 	want := 1
 	switch name {
-	case "abs", "length", "lower", "upper", "typeof", "hex", "vector", "vector_dims", "vector_norm", "vector_to_text":
-	case "nullif", "ifnull", "bigram_similarity", "l2_distance", "l1_distance", "cosine_distance", "inner_product", "negative_inner_product":
+	case "abs", "length", "lower", "upper", "typeof", "hex", "vector", "vector_dims", "vector_norm", "vector_to_text", "bit_vector", "bit_dims", "bit_to_text", "binary_quantize":
+	case "nullif", "ifnull", "bigram_similarity", "l2_distance", "l1_distance", "cosine_distance", "inner_product", "negative_inner_product", "hamming_distance", "jaccard_distance":
 		want = 2
+	case "subvector":
+		want = 3
 	case "ngram_similarity":
 		want = 4
 	case "levenshtein":

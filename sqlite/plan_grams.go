@@ -27,23 +27,25 @@ type QueryPlan struct {
 	ANNProbes, ANNMaxProbes, ANNEffectiveProbes int
 	ANNStopReason, ANNFallback                  string
 	// Vector ranking is separate from source access: a heap is never an index.
-	VectorMetric        vector.MetricKind
-	VectorColumn        string
-	VectorDimensions    int
-	VectorTopK          int64
-	VectorExact         bool
-	VectorRanking       string
-	Access              string
-	Table               string
-	Indexes             []string
-	Method              string
-	MethodVersion       int
-	Fields              []string
-	Namespace           string
-	GramLengths         []int
-	EstimatedCandidates int64
-	Recheck             bool
-	Reason              string
+	VectorMetric         vector.MetricKind
+	VectorBitMetric      vector.BitMetricKind
+	VectorRepresentation string
+	VectorColumn         string
+	VectorDimensions     int
+	VectorTopK           int64
+	VectorExact          bool
+	VectorRanking        string
+	Access               string
+	Table                string
+	Indexes              []string
+	Method               string
+	MethodVersion        int
+	Fields               []string
+	Namespace            string
+	GramLengths          []int
+	EstimatedCandidates  int64
+	Recheck              bool
+	Reason               string
 }
 
 // QueryStats reports work performed so far, including eager ORDER BY work.
@@ -89,11 +91,14 @@ type QueryStats struct {
 	VectorFilteredRows   int64
 	VectorNullRows       int64
 	VectorRankComponents int64
-	FrequencyLookups     int64
-	PostingKeysRead      int64
-	Candidates           int64
-	BaseRowFetches       int64
-	ReturnedRows         int64
+	// Packed bit byte positions: query once plus scored candidates. Dense
+	// component and ANN counters remain separate and zero for bit ranking.
+	VectorRankPackedBytes int64
+	FrequencyLookups      int64
+	PostingKeysRead       int64
+	Candidates            int64
+	BaseRowFetches        int64
+	ReturnedRows          int64
 }
 
 func (r *Rows) Plan() QueryPlan {
@@ -123,7 +128,14 @@ func (p QueryPlan) Detail() string {
 		detail = fmt.Sprintf("SEARCH %s USING %s %s v%d; fields=%s; original_where_recheck=%t; reason=%s", p.Table, strings.Join(p.Indexes, ","), p.Method, p.MethodVersion, strings.Join(p.Fields, ","), p.Recheck, p.Reason)
 	}
 	if p.VectorRanking != "" {
-		detail += fmt.Sprintf("; vector_ranking=%s; vector_metric=%s; vector_field=%s; dimensions=%d; retained_limit_plus_offset=%d; exact=%t; distance_order=ASC,rowid_ASC; nulls=FIRST", p.VectorRanking, p.VectorMetric, p.VectorColumn, p.VectorDimensions, p.VectorTopK, p.VectorExact)
+		metric := string(p.VectorMetric)
+		if p.VectorBitMetric != "" {
+			metric = string(p.VectorBitMetric)
+		}
+		detail += fmt.Sprintf("; vector_ranking=%s; vector_metric=%s; vector_field=%s; dimensions=%d; retained_limit_plus_offset=%d; exact=%t; distance_order=ASC,rowid_ASC; nulls=FIRST", p.VectorRanking, metric, p.VectorColumn, p.VectorDimensions, p.VectorTopK, p.VectorExact)
+		if p.VectorRepresentation != "" {
+			detail += "; vector_representation=" + p.VectorRepresentation
+		}
 	}
 	return detail + p.annDetail()
 }

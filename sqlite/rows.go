@@ -216,7 +216,7 @@ func (r *Rows) evaluateSourceRow(rowid int64, values []any) (resultRow, int64, b
 				if err != nil {
 					return resultRow{}, 0, false, err
 				}
-				v, err = storedColumnValue(v, c.Type)
+				v, err = missingColumnValue(v, c.Type)
 				if err != nil {
 					return resultRow{}, 0, false, err
 				}

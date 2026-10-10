@@ -1,0 +1,13 @@
+S1 transaction controls, bounded savepoint undo, lazy snapshots: frozen-source ordinary focused components
+go version go1.27.2 linux/amd64
+CGO_ENABLED=0 go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
+CGO_ENABLED=0 go test ./internal/sql ./internal/pager ./sqlite ./driver -run 'TestTransaction|TestSavepoint|TestTxStatementPanicAndCancellationUndo|TestTxRollbackAndStatementUndo|TestNativeStatementRollbackAndTransactionalDDL|TestNativeSnapshotsBusyAndCleanup|TestNativeBudgetsCancellationAndReadOnly|TestNativeWALConnectionLifecycle|TestSharedWALSnapshotsAndWriterContention|TestWritableDatabaseSQLTransactions|TestWritableReadOnlyTransactionsAndIsolation|TestWritableExplicitSQLTransactionsAndPoolReset|TestWritableCommitBusyRollsBackForPool|TestDriver.*(Savepoint|OuterRelease|DeferredBegin)' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.011s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.021s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	12.907s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.029s
+CGO_ENABLED=0 go test ./internal/sql -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.070s
+CGO_ENABLED=0 go vet ./internal/sql ./internal/pager ./sqlite ./driver
+CGO_ENABLED=0 go build ./internal/sql ./internal/pager ./sqlite ./driver

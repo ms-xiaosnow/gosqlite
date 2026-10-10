@@ -23,9 +23,10 @@ remain code work; unsupported is a safe interim behavior, not removal from goal.
 
 ## Required SQL batches
 
-- Complete transaction semantics: lazy deferred snapshots, BEGIN EXCLUSIVE,
-  savepoints, rollback-to/release and driver state. BEGIN/COMMIT/ROLLBACK already
-  exist and must not be replaced by stubs.
+- Lazy deferred snapshots, BEGIN EXCLUSIVE, nested savepoints, rollback-to/release,
+  bounded aggregate undo and authoritative driver state now exist. Complete cursor
+  relaxation and remaining connection-state/statement-outcome parity without
+  regressing these implemented paths.
 - Ordinary rowid and leading BINARY ASC equality seeks now exist. Extend to
   inequalities, covering access, reverse/order use and statistics only with
   proven residual/error semantics, reduced work and truthful diagnostics.
@@ -59,9 +60,10 @@ remain code work; unsupported is a safe interim behavior, not removal from goal.
   primary keys and committed batch cursors. Verify exact distances and ANN recall
   separately. Legacy array Manhattan<~> becomes dense<+> only with typed legacy
   evidence; modern bit<~> remains Hamming.
-- Strict distinct half/bit/sparse memory values, codecs, exact metrics, nullable
-  adapters, subvector and quantization now exist. Add typed storage/SQL/driver
-  integration, then versioned supported ANN identities while preserving dense
+- Strict distinct half/bit/sparse memory values/codecs and metrics now exist;
+  BIT typed storage/SQL/driver/exact ranking and dense subvector/quantization are
+  integrated. Add half/sparse typed storage/SQL/driver and exact search, then
+  versioned supported ANN identities while preserving dense
   GSVv1. Retain exhaustive half rounding and O(nonzeros) sparse contracts;
   quantized/half approximate search requires explicit lossy/rerank semantics.
 - The requested current Neon page was retrieved on2026-10-10; its migration chapter
@@ -77,3 +79,11 @@ runtime evidence and independent security/cryptography/license/API reviews remai
 required. Restricted physical crash/fault/forced-exit/hot-recovery/tampered-disk
 execution is BLOCKED/NOT_RUN and cannot be moved elsewhere as a workaround. No
 source plan, cross-build, ordinary rollback or benchmark closes those gates.
+
+## Exceptional ownership cleanup
+
+Add a bounded synchronous pending-retirement group for shared-session failed-open
+cleanup when mapping retirement fails. Keep DMS/main locks until every view is
+retired, never evict live ownership, and expose a deliberate retry. Current
+fail-closed resource retention can last for the process lifetime; ordinary tests
+and memory state models do not qualify real unmap/close failures.

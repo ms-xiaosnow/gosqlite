@@ -109,6 +109,9 @@ func (d *DB) SimilaritySearch(ctx context.Context, index, field string, query an
 		if err := d.tx.check(); err != nil {
 			return SimilarityResult{}, wrap("similarity search", err)
 		}
+		if err := d.tx.ensureSnapshotLocked(ctx); err != nil {
+			return SimilarityResult{}, wrap("similarity search", err)
+		}
 		result, err := d.similaritySearch(ctx, d.tx.reader, index, field, query, options)
 		return result, wrap("similarity search", err)
 	}
@@ -132,6 +135,9 @@ func (t *Tx) SimilaritySearch(ctx context.Context, index, field string, query an
 	t.db.mu.Lock()
 	defer t.db.mu.Unlock()
 	if err := t.check(); err != nil {
+		return SimilarityResult{}, wrap("similarity search", err)
+	}
+	if err := t.ensureSnapshotLocked(ctx); err != nil {
 		return SimilarityResult{}, wrap("similarity search", err)
 	}
 	result, err := t.db.similaritySearch(ctx, t.reader, index, field, query, options)

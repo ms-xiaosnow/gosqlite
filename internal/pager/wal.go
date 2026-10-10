@@ -7,9 +7,10 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path/filepath"
 
 	"github.com/ms-xiaosnow/gosqlite/internal/wal"
+
+	"github.com/ms-xiaosnow/gosqlite/internal/vfs"
 )
 
 func (s *Session) openWALLocked(ctx context.Context) error {
@@ -23,7 +24,7 @@ func (s *Session) openWALLocked(ctx context.Context) error {
 	if !st.Mode().IsRegular() {
 		return fmt.Errorf("%w: WAL must be a regular file", ErrUnsupported)
 	}
-	f, err := openWritableDatabase(s.path+"-wal", os.O_RDWR)
+	f, err := openWALFile(s.path+"-wal", os.O_RDWR, true)
 	if err != nil {
 		return err
 	}
@@ -35,7 +36,7 @@ func (s *Session) openWALLocked(ctx context.Context) error {
 	if !os.SameFile(st, s.walInfo) {
 		return ErrChanged
 	}
-	if err = validateWritableFile(s.walInfo); err != nil {
+	if err = validateWritableFile(s.walFile); err != nil {
 		return err
 	}
 	if s.walInfo.Size() == 0 {
@@ -67,6 +68,9 @@ func (s *Session) checkWALStableLocked() error {
 	if err != nil || !pathInfo.Mode().IsRegular() {
 		return fmt.Errorf("%w: WAL pathname", ErrChanged)
 	}
+	if err := validateNativePath(s.walFile); err != nil {
+		return err
+	}
 	st, err := s.walFile.Stat()
 	if err != nil {
 		return err
@@ -74,7 +78,7 @@ func (s *Session) checkWALStableLocked() error {
 	if !os.SameFile(st, pathInfo) || st.Size() != s.walInfo.Size() || !st.ModTime().Equal(s.walInfo.ModTime()) {
 		return fmt.Errorf("%w: WAL file", ErrChanged)
 	}
-	return validateWritableFile(st)
+	return validateWritableFile(s.walFile)
 }
 
 // ensureWALLocked writes and separately syncs a fresh WAL header before any
@@ -100,7 +104,7 @@ func (s *Session) ensureWALLocked() error {
 		return err
 	}
 	if s.walFile == nil {
-		s.walFile, err = openWritableDatabase(s.path+"-wal", os.O_RDWR|os.O_CREATE|os.O_EXCL)
+		s.walFile, err = openWALFile(s.path+"-wal", os.O_RDWR|os.O_CREATE|os.O_EXCL, true)
 		if err != nil {
 			return err
 		}
@@ -165,7 +169,7 @@ func (s *Session) normalizeAppendWALLocked() error {
 	if dbSize == 0 || dbSize != s.snapshot.DBSize {
 		return fmt.Errorf("%w: WAL final commit marker", ErrCorrupt)
 	}
-	candidate, err := os.CreateTemp(filepath.Dir(s.path), filepath.Base(s.path)+"-wal-pad-*")
+	candidate, err := vfs.CreateWALCandidate(s.path)
 	if err != nil {
 		return err
 	}
@@ -223,7 +227,7 @@ func (s *Session) normalizeAppendWALLocked() error {
 	if err = s.checkWALStableLocked(); err != nil {
 		return fail(err)
 	}
-	if err = os.Rename(tempPath, s.path+"-wal"); err != nil {
+	if err = vfs.ReplaceWAL(s.file, s.walFile, candidate); err != nil {
 		return fail(err)
 	}
 	renamed = true

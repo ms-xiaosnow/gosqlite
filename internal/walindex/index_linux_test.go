@@ -89,68 +89,6 @@ func TestDMSNormalLifecycleAndHeaderPublication(t *testing.T) {
 	}
 }
 
-func TestIndependentOFDLocksAndPOSIXInterop(t *testing.T) {
-	path := filepath.Join(t.TempDir(), "db-shm")
-	x := openTestIndex(t, path)
-	y := openTestIndex(t, path)
-	lockTest(t, x, WriteLock, 1, true)
-	if err := y.Lock(WriteLock, 1, true); !errors.Is(err, ErrBusy) {
-		t.Fatalf("second writer: %v", err)
-	}
-	// Closing an unrelated descriptor must not drop x's open-description locks.
-	extra, err := os.Open(path)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err = extra.Close(); err != nil {
-		t.Fatal(err)
-	}
-	if err = y.Lock(WriteLock, 1, true); !errors.Is(err, ErrBusy) {
-		t.Fatalf("writer released by unrelated close: %v", err)
-	}
-	if err = x.Unlock(WriteLock, 1); err != nil {
-		t.Fatal(err)
-	}
-	lockTest(t, x, ReadLock0+1, 1, false)
-	lockTest(t, y, ReadLock0+1, 1, false)
-	if err = y.Lock(ReadLock0+1, 1, true); !errors.Is(err, ErrBusy) {
-		t.Fatalf("exclusive read mark: %v", err)
-	}
-	if err = x.Unlock(ReadLock0+1, 1); err != nil {
-		t.Fatal(err)
-	}
-	lockTest(t, y, ReadLock0+1, 1, true)
-	if err = y.Unlock(ReadLock0+1, 1); err != nil {
-		t.Fatal(err)
-	}
-	native, err := os.OpenFile(path, os.O_RDWR, 0)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer native.Close()
-	l := syscall.Flock_t{Type: syscall.F_WRLCK, Whence: 0, Start: 120, Len: 1}
-	if err = syscall.FcntlFlock(native.Fd(), syscall.F_SETLK, &l); err != nil {
-		t.Fatal(err)
-	}
-	if err = x.Lock(WriteLock, 1, true); !errors.Is(err, ErrBusy) {
-		t.Fatalf("OFD did not conflict with POSIX: %v", err)
-	}
-	l.Type = syscall.F_UNLCK
-	if err = syscall.FcntlFlock(native.Fd(), syscall.F_SETLK, &l); err != nil {
-		t.Fatal(err)
-	}
-	lockTest(t, x, WriteLock, 1, true)
-	l.Type = syscall.F_WRLCK
-	if err = syscall.FcntlFlock(native.Fd(), syscall.F_SETLK, &l); !errors.Is(err, syscall.EAGAIN) && !errors.Is(err, syscall.EACCES) {
-		t.Fatalf("POSIX did not conflict with OFD: %v", err)
-	}
-	l.Type = syscall.F_WRLCK
-	l.Start = 128
-	if err = syscall.FcntlFlock(native.Fd(), syscall.F_SETLK, &l); !errors.Is(err, syscall.EAGAIN) && !errors.Is(err, syscall.EACCES) {
-		t.Fatalf("DMS not held shared: %v", err)
-	}
-}
-
 func TestDMSEarlierExclusiveOpenerReturnsBusy(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "db-shm")
 	first := openTestIndex(t, path)
@@ -389,5 +327,29 @@ func TestNativeHashAndPageMappingBytes(t *testing.T) {
 	}
 	if binary.NativeEndian.Uint16(bytes[16384+382*2:]) != 0 || binary.NativeEndian.Uint16(bytes[16384+385*2:]) != 0 {
 		t.Fatal("hash publication changed an adjacent halfword")
+	}
+}
+
+func TestPortableSHMLockRequiresExplicitRelease(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "db-shm")
+	x, y := openTestIndex(t, path), openTestIndex(t, path)
+	lockTest(t, x, ReadLock0+1, 1, false)
+	lockTest(t, x, ReadLock0+1, 1, false)
+	if err := x.Lock(ReadLock0+1, 1, true); !errors.Is(err, ErrLock) {
+		t.Fatalf("conversion accepted: %v", err)
+	}
+	if err := y.Lock(ReadLock0+1, 1, true); !errors.Is(err, ErrBusy) {
+		t.Fatalf("rejected conversion released snapshot: %v", err)
+	}
+	if err := x.Unlock(ReadLock0+1, 1); err != nil {
+		t.Fatal(err)
+	}
+	lockTest(t, y, ReadLock0+1, 1, true)
+	if err := y.Unlock(ReadLock0+1, 1); err != nil {
+		t.Fatal(err)
+	}
+	lockTest(t, x, ReadLock0+1, 1, true)
+	if err := x.Lock(ReadLock0+1, 1, false); !errors.Is(err, ErrLock) {
+		t.Fatalf("downgrade accepted: %v", err)
 	}
 }

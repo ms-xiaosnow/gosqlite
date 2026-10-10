@@ -1,0 +1,44 @@
+Sat Oct 10 13:24:11 UTC 2026
+CGO0 ordinary managed ownership, pager, and WAL-index tests
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.008s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.161s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	0.124s
+Separate CGO1 scoped race tooling; production remains CGO0
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	1.059s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.774s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	2.464s
+Pinned official SQLite ordinary rollback/lock oracle only
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.129s
+Scoped vet
+Compile-only targets; not native non-Linux execution or platform support
+linux/amd64 production package build PASS
+linux/arm64 production package build PASS
+darwin/arm64 production package build PASS
+windows/amd64 production package build PASS
+Manual recovery compile ONLY; binary is never executed
+Scoped ownership gates PASS
+Sat Oct 10 13:24:23 UTC 2026
+Final supplemental ownership checks after explicit probe oracle and error-class preservation
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.025s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.168s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	0.140s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.121s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.564s
+darwin/arm64 tests compile PASS (not executed)
+windows/amd64 tests compile PASS (not executed)
+Sat Oct 10 13:25:31 UTC 2026
+Final scoped gates after Reader canonical-path correction (2026-10-10)
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.005s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.169s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	0.124s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	1.029s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.599s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	2.259s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.101s
+linux/amd64 final production packages PASS
+linux/arm64 final production packages PASS
+darwin/arm64 final production packages PASS
+windows/amd64 final production packages PASS
+Final scoped ownership gates PASS; manual recovery compile-only
+Sat Oct 10 13:30:39 UTC 2026

@@ -96,7 +96,7 @@ func TestVectorOperatorTokens(t *testing.T) {
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("tokens %q, want %q", got, want)
 	}
-	for _, bad := range []string{"'[1]' <~> '[2]'", "'[1]' <%> '[2]'", "'[1]' < - > '[2]'", "'[1]' < # > '[2]'"} {
+	for _, bad := range []string{"'[1]' < - > '[2]'", "'[1]' < # > '[2]'"} {
 		if _, err := ParseExpr(bad); err == nil {
 			t.Fatalf("accepted unsupported operator %s", bad)
 		}

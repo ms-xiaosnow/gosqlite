@@ -147,3 +147,51 @@ Fresh restart, 2026-10-10 UTC. Historical work and test results are not acceptan
 - Status: NOT_STARTED / required independent evidence unavailable.
 - Native-OS runtime, security, cryptography, legal/license/API review, large benchmarks and real-duration soak remain separate gates. Restricted physical fault/crash/hot recovery remains BLOCKED/NOT_RUN and must not be relocated.
 - Every meaningful checkpoint stays remotely committed and independently backed up. Ordinary results and source plans do not establish full goal acceptance.
+
+### Native platform prerequisite: managed file ownership
+- Status: IN_PROGRESS (integrated Linux ownership slice; Darwin/Windows backends remain missing)
+- Deliverables: real `internal/vfs` private file/mapping ownership across plain pager probes, DB/WAL/journal/temp/directory opens, WAL-index DMS/slots, and source-only recovery helpers. Linux OFD semantics/SQLite offsets preserved. Portable SHM conversions require explicit release. Mapping retirement precedes DMS and main SHARED release; unresolved cleanup retains resources.
+- Key ADR: 0014-managed-native-file-ownership. Exclusive imported-WAL replacement now requires managed role-checked leases; shared-WAL never receives replacement authority. Encrypted container implementation remains separate.
+- Code: internal/vfs; internal/pager native_file/pager/tx/commit/session/shared_session/wal/recovery; internal/walindex native_file/index. A plaintext-copy source check now uses its existing managed reader handle.
+- Actual focused checks: CGO0 ordinary vfs/pager/walindex tests; separate CGO1 race; scoped vet; pinned SQLite TestTxOracle transaction/lock checks; four-target production package builds; Darwin/Windows test-binary compilation; manual-recovery source compilation only. See docs/evidence/native-ownership-components.txt for exact passes. No physical failure/recovery test executed.
+- Evidence boundary: native execution is Linux/amd64 only. Cross-builds still include unsupported non-Linux hooks. Memory-only view-retirement/alignment/ledger models are not native failure-injection or interprocess-memory/durability proof.
+- Required next code: Darwin process-inode lock aggregation/deferred-close manager and POSIX/mmap/sync backend; Windows native identity/open policy, exact LockFileEx bookkeeping, DMS, granularity-aware mapping handles, replacement and declared sync policy. Native ordinary interoperability tests follow their actual implementation. M3/M10 restricted/independent acceptance remains open.
+
+### S1 transaction controls and bounded undo
+- Implemented: deferred snapshot acquisition at first actual database access,
+  IMMEDIATE/EXCLUSIVE, nested/repeated savepoint names, release/rollback-to,
+  savepoint-started outer commit, and authoritative native/driver autocommit state.
+  Statement and named undo share a prepaid aggregate memory budget, including
+  page images, freelist state and retained metadata. Native APIs participate in
+  the same first-access path; constant SELECT stays snapshot-free.
+- Focused evidence: guarded CGO0 SQL/pager/sqlite/driver tests, all SQL tests,
+  affected-package vet/build, CGO1 races and pinned transaction oracle/race passed.
+  Independent review exercised name substring ownership, aggregate retained undo,
+  BUSY retry, failed lazy replay cleanup, cancellation and extension restoration.
+  See s1-transactions component/race/oracle evidence and transactions.md.
+- Limits: active transaction Rows still block mutations, named controls and
+  Commit; cursor relaxation remains required code. Connection-level SQL counters
+  are absent. Combined-tree aggregate/publication is recorded separately; none of
+  these checks qualifies physical interruption or independent release acceptance.
+
+### M9 checkpoint E: BIT SQL and exact ranking
+- Implemented: BIT(1..64000), strict GSB persistence/default/mutation/driver paths,
+  Hamming/<~>, Jaccard/<%>, bit accessors, dense subvector/binary_quantize, explicit
+  native exact search and eligible bounded SQL heap ranking with packed-byte
+  quotas, distinct representation/metric diagnostics and deterministic ties.
+- Focused guarded repeated unit/race/vet/build, preserved dense regressions,
+  three ordinary official-oracle cases and executable example passed. Review
+  fixed external trailing-default NUMERIC affinity and strengthened statement
+  rollback assertions. See m9-bit-sql component/oracle/review/example evidence.
+- The same-snapshot rerank example measures recall@1=0 with one Hamming candidate
+  and 1 with two; exact dense rescoring cannot restore an omitted candidate.
+  Half/sparse SQL and all extended-type ANN remain missing code. BIT's legal
+  SQLite NUMERIC affinity requires canonical BLOBs from external writers to
+  preserve leading zeros. Full combined-tree gates remain separately recorded.
+
+### Corrected ordinary-scope durable verification
+- Exact c7764896c541c4ed6177288ec8f9625828093ade and Library
+  libfile_e94b5944a3a481919e03d83293617671 verified. CI38056050522 passed.
+  Byte-identical clean restore passed guarded unit/vet/build/race and complete
+  pinned SQLite oracle, exit0 at13:46:19Z; restored tree stayed clean. The earlier
+  namespace-test findings and their historical scope qualifications remain.

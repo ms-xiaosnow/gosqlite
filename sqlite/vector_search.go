@@ -86,6 +86,9 @@ func (d *DB) VectorSearch(ctx context.Context, table, field string, query any, o
 		if err := d.tx.check(); err != nil {
 			return VectorResult{}, wrap("vector search", err)
 		}
+		if err := d.tx.ensureSnapshotLocked(ctx); err != nil {
+			return VectorResult{}, wrap("vector search", err)
+		}
 		result, err := d.vectorSearch(ctx, d.tx.reader, table, field, query, options)
 		return result, wrap("vector search", err)
 	}
@@ -109,6 +112,9 @@ func (t *Tx) VectorSearch(ctx context.Context, table, field string, query any, o
 	t.db.mu.Lock()
 	defer t.db.mu.Unlock()
 	if err := t.check(); err != nil {
+		return VectorResult{}, wrap("vector search", err)
+	}
+	if err := t.ensureSnapshotLocked(ctx); err != nil {
 		return VectorResult{}, wrap("vector search", err)
 	}
 	result, err := t.db.vectorSearch(ctx, t.reader, table, field, query, options)

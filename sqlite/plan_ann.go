@@ -17,11 +17,17 @@ func (r *Rows) prepareANNVector(reader btree.PageReader) error {
 			if order.column >= 0 {
 				key = r.exprs[order.column]
 			}
-			if _, _, _, distance := vectorDistanceExpression(key); distance {
+			_, _, _, denseDistance := vectorDistanceExpression(key)
+			_, _, _, bitDistance := bitDistanceExpression(key)
+			if denseDistance || bitDistance {
 				r.queryPlan.ANNFallback = "unsupported ANN SQL shape; requires one ASC distance on a typed vector column, constant/bound query, and bounded LIMIT"
 				break
 			}
 		}
+		return nil
+	}
+	if v.bitMetric != "" {
+		r.queryPlan.ANNFallback = "BIT(n) ANN is unsupported; exact packed-bit ranking"
 		return nil
 	}
 	if r.sel.NotIndexed {

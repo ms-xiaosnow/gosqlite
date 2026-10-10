@@ -71,3 +71,22 @@ A second source review confirmed the two files' default/oracle selection metadat
 and identified guard hardening gaps, which were fixed before publication. The
 scope correction does not certify an exhaustive adversarial audit or undo earlier
 execution. Only new audited, gated runs can supply corrected-scope verification.
+
+The next S1/BIT/converter/native-ownership source audit additionally distinguishes
+SQL-text fixtures from database files: the converter CLI test writes only an
+input text script to a fresh temporary path, and the converter never executes
+that input. New ownership cleanup/poison regressions use never-opened synthetic
+file placeholders and memory callbacks; every public method is stopped by state
+validation before any native backend call. No native lock/unmap/close error is
+injected. New live lock tests use intact files, normal acquisition/BUSY/release,
+and official CLI normal completion. The source-reference guard passed again
+at 2026-10-10T13:44:06Z before the planned combined aggregate.
+
+## Corrected-checkpoint results
+
+Commit c7764896c541c4ed6177288ec8f9625828093ade was mirrored exactly and
+restored byte-for-byte from Library libfile_e94b5944a3a481919e03d83293617671.
+Its guarded CI38056050522 completed success at13:40:15Z. The clean restored
+unit/vet/build/race plus pinned SQLite oracle finished exit0 at13:46:19Z; the
+restored Git tree remained clean. See evidence/test-scope-library-restore-recheck.txt.
+These are new corrected-scope results, without changing historical findings.

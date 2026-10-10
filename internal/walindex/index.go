@@ -2,7 +2,6 @@ package walindex
 
 import (
 	"encoding/binary"
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -10,21 +9,23 @@ import (
 	"sync"
 	"sync/atomic"
 	"unsafe"
+
+	"github.com/ms-xiaosnow/gosqlite/internal/vfs"
 )
 
 // Index owns a distinct open file description and its lifetime DMS shared
 // lock. Methods serialize local access, including Close, but callers own
 // transaction-level locking. A slot acquisition is idempotent, not recursive;
-// changing a held slot's mode performs an OFD upgrade or downgrade.
+// changing a held slot's mode requires an explicit Unlock first.
 // Cooperating SQLite clients must not truncate/unlink a live SHM file. Identity
 // and size checks reject a detected replacement/shrink, but cannot make mmap
 // safe against a malicious process truncating it concurrently with a load.
 type Index struct {
 	mu        sync.Mutex
-	file      *os.File
+	file      *vfs.File
 	path      string
 	identity  os.FileInfo
-	maps      map[int64][]byte
+	maps      map[int64]*vfs.Mapping
 	mapSize   int
 	mappedEnd int64
 	maxFrames uint32
@@ -68,13 +69,13 @@ func OpenWithLimit(path string, maxFrames uint32) (*Index, error) {
 	if unit%BlockSize != 0 || unit&(unit-1) != 0 {
 		return nil, ErrUnsupported
 	}
-	x := &Index{file: f, path: p, maps: make(map[int64][]byte), mapSize: unit, maxFrames: maxFrames}
+	x := &Index{file: f, path: p, maps: make(map[int64]*vfs.Mapping), mapSize: unit, maxFrames: maxFrames}
 	info, err := x.statLocked()
 	if err != nil {
 		return nil, err
 	}
 	x.identity = info
-	if err = attachDMS(f); err != nil {
+	if err = nativeError(f.AttachDMS()); err != nil {
 		return nil, err
 	}
 	if _, err = x.statLocked(); err != nil {
@@ -88,6 +89,9 @@ func (x *Index) statLocked() (os.FileInfo, error) {
 	if x.closed || x.file == nil {
 		return nil, ErrClosed
 	}
+	if err := nativeError(x.file.ValidatePath()); err != nil {
+		return nil, err
+	}
 	info, err := x.file.Stat()
 	if err != nil {
 		return nil, err
@@ -95,7 +99,7 @@ func (x *Index) statLocked() (os.FileInfo, error) {
 	if !info.Mode().IsRegular() {
 		return nil, fmt.Errorf("%w: sidecar is not a regular file", ErrIdentity)
 	}
-	if err = validateLinks(info); err != nil {
+	if err = nativeError(x.file.ValidateSingleLink()); err != nil {
 		return nil, err
 	}
 	named, err := os.Lstat(x.path)
@@ -121,25 +125,18 @@ func (x *Index) ValidateIdentity() error {
 func (x *Index) Close() error {
 	x.mu.Lock()
 	defer x.mu.Unlock()
-	if x.closed {
+	if x.file == nil {
 		return nil
 	}
 	x.closed = true
-	var errs []error
-	// Keep DMS until every mapped region has been unmapped.
-	for _, b := range x.maps {
-		if err := unmapFile(b); err != nil {
-			errs = append(errs, err)
-		}
+	// The owner retains all failed native mappings and DMS on an unmap error.
+	// Retrying Close is permitted; reads and further lock acquisitions are not.
+	if err := x.file.Close(); err != nil {
+		return nativeError(err)
 	}
 	x.maps = nil
-	if x.file != nil {
-		if err := x.file.Close(); err != nil {
-			errs = append(errs, err)
-		}
-		x.file = nil
-	}
-	return errors.Join(errs...)
+	x.file = nil
+	return nil
 }
 
 func validRange(slot, n int) bool { return slot >= 0 && n > 0 && slot < 8 && n <= 8-slot }
@@ -152,7 +149,7 @@ func (x *Index) Lock(slot, n int, exclusive bool) error {
 	if _, err := x.statLocked(); err != nil {
 		return err
 	}
-	if err := setRangeLock(x.file, slot, n, exclusive, false); err != nil {
+	if err := nativeError(x.file.LockSHM(slot, n, exclusive)); err != nil {
 		return err
 	}
 	mode := uint8(1)
@@ -174,7 +171,7 @@ func (x *Index) Unlock(slot, n int) error {
 	if x.closed || x.file == nil {
 		return ErrClosed
 	}
-	if err := setRangeLock(x.file, slot, n, false, true); err != nil {
+	if err := nativeError(x.file.UnlockSHM(slot, n)); err != nil {
 		return err
 	}
 	for i := slot; i < slot+n; i++ {
@@ -214,7 +211,7 @@ func (x *Index) blockLocked(block uint32, extend bool) ([]byte, error) {
 	end := base + int64(x.mapSize)
 	if b, ok := x.maps[base]; ok {
 		delta := int(off - base)
-		return b[delta : delta+BlockSize], nil
+		return b.Bytes[delta : delta+BlockSize], nil
 	}
 	if info.Size() < end {
 		if !extend {
@@ -241,7 +238,7 @@ func (x *Index) blockLocked(block uint32, extend bool) ([]byte, error) {
 			return nil, fmt.Errorf("%w: sidecar shrank during extension", ErrIdentity)
 		}
 	}
-	b, err := mapFile(x.file, base, x.mapSize)
+	b, err := x.file.MapShared(base, x.mapSize)
 	if err != nil {
 		return nil, fmt.Errorf("map WAL-index: %w", err)
 	}
@@ -250,7 +247,7 @@ func (x *Index) blockLocked(block uint32, extend bool) ([]byte, error) {
 		x.mappedEnd = end
 	}
 	delta := int(off - base)
-	return b[delta : delta+BlockSize], nil
+	return b.Bytes[delta : delta+BlockSize], nil
 }
 
 func load32(b []byte, off int) uint32     { return atomic.LoadUint32((*uint32)(unsafe.Pointer(&b[off]))) }

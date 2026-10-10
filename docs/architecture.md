@@ -74,3 +74,11 @@ Migration inspection is a standalone bounded local parser/identity checker, not
 a remote database client or a production SQL delegation path. Extended vector
 primitives are immutable values beneath future typed SQL integration; they do
 not silently alter existing dense storage or planner identity.
+
+Plain native file ownership now passes through `internal/vfs`: private managed
+leases own OFD locks, stable identity checks, WAL-index mapping resources, and
+close ordering. The pager still owns transaction/publication sequencing. SHM
+slot mode changes require explicit release; Linux-native OFD conversion remains
+separately tested. An unresolved view retains DMS and the shared connection's
+main SHARED lease. Darwin/Windows backends remain missing implementation, not
+merely missing runtime tests. See ADR0014 and its component evidence.

@@ -163,3 +163,40 @@ func TestTxOraclePOSIXAndNativeOFDLocksConflict(t *testing.T) {
 	}
 	noJournal(t, path)
 }
+
+// A read-only header/inspection probe is a managed lease even though it never
+// writes. The independent official process must still see the sibling writer.
+func TestTxOracleManagedProbeRetainsReservation(t *testing.T) {
+	txPlatform(t)
+	verifyPagerOracle(t)
+	ctx := context.Background()
+	path := createEmpty(t, 4096)
+	tx := openTxTest(t, path, Options{})
+	if err := tx.PromoteWrite(ctx); err != nil {
+		t.Fatal(err)
+	}
+	probe, err := Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = probe.ReadPage(ctx, 1); err != nil {
+		t.Fatal(err)
+	}
+	if err = probe.Close(); err != nil {
+		t.Fatal(err)
+	}
+	cmd := exec.Command(os.Getenv("SQLITE_ORACLE"), "-batch", "-bail", path, "BEGIN IMMEDIATE; COMMIT;")
+	out, err := cmd.CombinedOutput()
+	if err == nil || !strings.Contains(string(out), "database is locked") {
+		t.Fatalf("probe released native reservation: %v %s", err, out)
+	}
+	if got := pagerOracle(t, path, "SELECT count(*) FROM sqlite_schema;"); got != "0" {
+		t.Fatal(got)
+	}
+	if err = tx.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if got := pagerOracle(t, path, "BEGIN IMMEDIATE; COMMIT; PRAGMA integrity_check;"); got != "ok" {
+		t.Fatal(got)
+	}
+}

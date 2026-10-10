@@ -13,6 +13,9 @@ import (
 // vectorRank owns bounded ranking and optional ANN candidate selection.
 // The heap is never an index; QueryPlan reports the actual source method.
 type vectorRank struct {
+	bitMetric           vector.BitMetricKind
+	bitLimits           BitSearchLimits
+	parsedBit           vector.BitVector
 	ann                 *annCandidateQuery
 	expected            *vector.Vector
 	annCandidate        bool
@@ -83,8 +86,12 @@ func (r *Rows) prepareVectorRank() error {
 		key = r.exprs[r.order[0].column]
 	}
 	metric, left, right, ok := vectorDistanceExpression(key)
+	var bitMetric vector.BitMetricKind
 	if !ok {
-		return nil
+		bitMetric, left, right, ok = bitDistanceExpression(key)
+		if !ok {
+			return nil
+		}
 	}
 	col, ok := left.(*sqlast.Column)
 	if !ok || !vectorConstant(right) {
@@ -99,6 +106,9 @@ func (r *Rows) prepareVectorRank() error {
 		return nil
 	}
 	dims, ok := sqlast.VectorDimensions(r.table.columns[ordinal].Type)
+	if bitMetric != "" {
+		dims, ok = sqlast.BitDimensions(r.table.columns[ordinal].Type)
+	}
 	if !ok {
 		return nil
 	}
@@ -119,8 +129,13 @@ func (r *Rows) prepareVectorRank() error {
 	}
 	// Preserve scalar laziness: do not parse input or reject zero cosine norms
 	// until a non-NULL row actually requires a distance. EXPLAIN does no scoring.
-	r.vectorRank = &vectorRank{ordinal: ordinal, dimensions: dims, query: query, metric: metric, retain: int(retain), limits: limits}
+	r.vectorRank = &vectorRank{bitMetric: bitMetric, bitLimits: DefaultBitSearchLimits(), ordinal: ordinal, dimensions: dims, query: query, metric: metric, retain: int(retain), limits: limits}
 	r.queryPlan.VectorMetric = metric
+	r.queryPlan.VectorBitMetric = bitMetric
+	r.queryPlan.VectorRepresentation = "vector"
+	if bitMetric != "" {
+		r.queryPlan.VectorRepresentation = "bit"
+	}
 	r.queryPlan.VectorColumn = r.table.columns[ordinal].Name
 	r.queryPlan.VectorDimensions = dims
 	r.queryPlan.VectorTopK = retain
@@ -130,6 +145,9 @@ func (r *Rows) prepareVectorRank() error {
 }
 
 func (v *vectorRank) score(r *Rows, value any) (any, error) {
+	if v.bitMetric != "" {
+		return v.scoreBit(r, value)
+	}
 	if value == nil {
 		if v.annCandidate {
 			return nil, extensionCorrupt("ANN candidate refers to NULL source vector")

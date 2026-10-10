@@ -1,0 +1,6 @@
+3.54.0|2026-10-09 15:46:58 be8d059e9a49089ab2dce5ed26dd87aaf598fdc5fbe0b107c0dd758464bcd5e3
+Ordinary test source-reference guard PASS; behavioral review is still required.
+CGO_ENABLED=0 go test -tags oracle ./internal/testkit -run ^TestOracleTransaction -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	0.217s
+CGO_ENABLED=1 go test -race -tags oracle ./internal/testkit -run ^TestOracleTransaction -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	1.523s

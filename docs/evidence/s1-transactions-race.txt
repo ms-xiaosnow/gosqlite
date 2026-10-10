@@ -1,0 +1,6 @@
+CGO_ENABLED=1 go test -race ./internal/sql ./internal/pager ./sqlite ./driver -run 'TestTransaction|TestSavepoint|TestTxStatementPanicAndCancellationUndo|TestTxRollbackAndStatementUndo|TestNativeStatementRollbackAndTransactionalDDL|TestNativeSnapshotsBusyAndCleanup|TestNativeBudgetsCancellationAndReadOnly|TestNativeWALConnectionLifecycle|TestSharedWALSnapshotsAndWriterContention|TestWritableDatabaseSQLTransactions|TestWritableReadOnlyTransactionsAndIsolation|TestWritableExplicitSQLTransactionsAndPoolReset|TestWritableCommitBusyRollsBackForPool|TestDriver.*(Savepoint|OuterRelease|DeferredBegin)' -count=1
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	1.075s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.064s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	27.590s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.133s

@@ -152,6 +152,10 @@ type Options struct {
 	// MaxTransactionPages bounds the pager's dirty-page transaction overlay.
 	// Zero selects 4096 pages. Exceeding a quota rolls back the statement.
 	MaxTransactionPages uint32
+	// MaxTransactionUndoBytes bounds all retained statement/savepoint page
+	// images and metadata together. Zero derives room for one worst-case
+	// statement from the page and freelist quotas. Undo never spills to disk.
+	MaxTransactionUndoBytes int64
 	// PageSize applies only to newly created files. Zero selects 4096.
 	PageSize uint32
 	// SectorSize is the storage-sector assumption for rollback-journal
@@ -325,7 +329,7 @@ func fileInfo(h pager.Header) FileInfo {
 	return FileInfo{PageSize: h.PageSize, UsableSize: h.UsableSize, PageCount: h.PageCount, SchemaCookie: h.SchemaCookie, SchemaFormat: h.SchemaFormat, TextEncoding: h.TextEncoding, ReadVersion: h.ReadVersion, WriteVersion: h.WriteVersion}
 }
 func (d *DB) pagerOptions() pager.Options {
-	return pager.Options{Create: !d.opts.NoCreate && !d.opts.ReadOnly, PageSize: d.opts.PageSize, MaxDirtyPages: d.opts.MaxTransactionPages, SectorSize: d.opts.SectorSize, KeepWALOnClose: d.opts.KeepWALOnClose, WALPowersafeOverwrite: d.opts.WALPowersafeOverwrite}
+	return pager.Options{Create: !d.opts.NoCreate && !d.opts.ReadOnly, PageSize: d.opts.PageSize, MaxDirtyPages: d.opts.MaxTransactionPages, MaxUndoBytes: d.opts.MaxTransactionUndoBytes, SectorSize: d.opts.SectorSize, KeepWALOnClose: d.opts.KeepWALOnClose, WALPowersafeOverwrite: d.opts.WALPowersafeOverwrite}
 }
 
 // Info returns the most recently observed header metadata.
@@ -345,6 +349,9 @@ func (d *DB) Schema(ctx context.Context) ([]SchemaEntry, error) {
 	var close func() error
 	if d.tx != nil {
 		if err := d.tx.check(); err != nil {
+			return nil, wrap("schema", err)
+		}
+		if err := d.tx.ensureSnapshotLocked(ctx); err != nil {
 			return nil, wrap("schema", err)
 		}
 		reader = d.tx.reader
@@ -507,6 +514,9 @@ type pageSession interface {
 // normalizeConnectionLimits is shared by opening and standalone copy validators
 // so a restored catalog receives the same bounded defaults as a connection.
 func normalizeConnectionLimits(opts Options) (Options, error) {
+	if opts.MaxTransactionUndoBytes < 0 {
+		return opts, fmt.Errorf("MaxTransactionUndoBytes must not be negative")
+	}
 	if opts.MaxSortBytes < 0 {
 		return opts, fmt.Errorf("MaxSortBytes must not be negative")
 	}

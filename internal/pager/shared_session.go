@@ -13,6 +13,8 @@ import (
 
 	"github.com/ms-xiaosnow/gosqlite/internal/wal"
 	"github.com/ms-xiaosnow/gosqlite/internal/walindex"
+
+	"github.com/ms-xiaosnow/gosqlite/internal/vfs"
 )
 
 // SharedSession implements SQLite's native single-writer/multiple-reader WAL
@@ -22,8 +24,8 @@ import (
 // concurrent transactions. Shared WAL currently requires writable sidecars.
 type SharedSession struct {
 	mu       sync.Mutex
-	file     *os.File
-	walFile  *os.File
+	file     *vfs.File
+	walFile  *vfs.File
 	index    *walindex.Index
 	path     string
 	opts     Options
@@ -47,6 +49,8 @@ func sharedIndexError(err error) error {
 		return err
 	}
 	switch {
+	case errors.Is(err, walindex.ErrPoisoned):
+		return fmt.Errorf("%w: %w", ErrPoisoned, err)
 	case errors.Is(err, walindex.ErrBusy):
 		return fmt.Errorf("%w: shared WAL lock", ErrBusy)
 	case errors.Is(err, walindex.ErrLimit):
@@ -65,7 +69,7 @@ func sharedIndexError(err error) error {
 // OpenSharedSession enters or opens standard shared WAL. Mode changes require
 // the database EXCLUSIVE lock, but an already-WAL database does not. The WAL
 // and SHM inodes are never replaced or unlinked by a SharedSession.
-func OpenSharedSession(ctx context.Context, path string, opts Options) (*SharedSession, error) {
+func OpenSharedSession(ctx context.Context, path string, opts Options) (result *SharedSession, retErr error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
@@ -102,12 +106,17 @@ func OpenSharedSession(ctx context.Context, path string, opts Options) (*SharedS
 	defer func() {
 		if !success {
 			if s.index != nil {
-				_ = s.index.Close()
+				if err := s.index.Close(); err != nil {
+					// Keep the database SHARED lock too: an exclusive opener
+					// must not remove SHM beneath an unresolved native view.
+					retErr = errors.Join(retErr, sharedIndexError(err))
+					return
+				}
 			}
 			if s.walFile != nil {
-				_ = s.walFile.Close()
+				retErr = errors.Join(retErr, s.walFile.Close())
 			}
-			_ = f.Close()
+			retErr = errors.Join(retErr, f.Close())
 		}
 	}()
 	if err = lockShared(f); err != nil {
@@ -155,7 +164,7 @@ func OpenSharedSession(ctx context.Context, path string, opts Options) (*SharedS
 		return nil, fmt.Errorf("%w: main page size", ErrCorrupt)
 	}
 	s.header.PageSize = size
-	s.walFile, err = openWritableDatabase(path+"-wal", os.O_RDWR|os.O_CREATE)
+	s.walFile, err = openWALFile(path+"-wal", os.O_RDWR|os.O_CREATE, false)
 	if err != nil {
 		return nil, err
 	}
@@ -205,9 +214,12 @@ func (s *SharedSession) checkStableLocked() error {
 		return err
 	}
 	for _, entry := range []struct {
-		f    *os.File
+		f    *vfs.File
 		path string
 	}{{s.file, s.path}, {s.walFile, s.path + "-wal"}} {
+		if err := validateNativePath(entry.f); err != nil {
+			return err
+		}
 		st, err := entry.f.Stat()
 		if err != nil {
 			return err
@@ -216,7 +228,7 @@ func (s *SharedSession) checkStableLocked() error {
 		if err != nil || !st.Mode().IsRegular() || !other.Mode().IsRegular() || !os.SameFile(st, other) {
 			return fmt.Errorf("%w: shared WAL pathname %s", ErrChanged, entry.path)
 		}
-		if err = validateWritableFile(st); err != nil {
+		if err = validateWritableFile(entry.f); err != nil {
 			return err
 		}
 	}
@@ -408,7 +420,12 @@ func (s *SharedSession) Close() error {
 			err = nil
 		}
 	}
-	err = errors.Join(err, s.index.Close(), s.walFile.Close(), s.file.Close())
+	if closeErr := s.index.Close(); closeErr != nil {
+		// Retain main SHARED and WAL while the index still owns native views.
+		// A later Close can retry cleanup; no transaction may continue.
+		return s.poisonLocked(errors.Join(err, sharedIndexError(closeErr)))
+	}
+	err = errors.Join(err, s.walFile.Close(), s.file.Close())
 	s.file = nil
 	s.walFile = nil
 	s.index = nil

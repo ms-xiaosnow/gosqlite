@@ -9,6 +9,8 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
+
+	"github.com/ms-xiaosnow/gosqlite/internal/vfs"
 )
 
 var (
@@ -25,8 +27,9 @@ var (
 // 4096 for a newly created database; existing databases retain their page size.
 // SectorSize is a conservative storage-sector assumption, not autodetection.
 // Set it no smaller than the actual storage sector. Default: 4096 bytes.
-// MaxDirtyPages bounds the overlay; an active statement may retain an equally
-// large undo snapshot. WAL commits also reserve unchanged sector neighbors
+// MaxDirtyPages bounds the overlay. MaxUndoBytes bounds all retained statement
+// and savepoint snapshots together; zero derives a limit for one maximum-size
+// statement snapshot plus metadata. WAL commits also reserve unchanged sector neighbors
 // within this bound. No dirty data spills to disk before Commit.
 // MaxFreelistPages bounds validation metadata, default 1,048,576 pages.
 type Options struct {
@@ -34,6 +37,7 @@ type Options struct {
 	PageSize         uint32
 	MaxDirtyPages    uint32
 	MaxFreelistPages uint32
+	MaxUndoBytes     int64
 	SectorSize       uint32
 	// KeepWALOnClose retains a synced WAL on normal Session.Close. It has no
 	// effect on the default rollback-mode OpenTx API.
@@ -53,7 +57,7 @@ type Options struct {
 // Commit leaves the complete in-memory transaction available for retry.
 type Tx struct {
 	mu             sync.Mutex
-	file           *os.File
+	file           *vfs.File
 	path           string
 	info           os.FileInfo
 	header         Header
@@ -64,6 +68,8 @@ type Tx struct {
 	free           map[uint32]struct{}
 	reserved       bool
 	statement      bool
+	undo           undoState
+	exclusive      bool
 	poisoned       error
 	session        *Session
 	shared         *SharedSession
@@ -76,6 +82,9 @@ type Tx struct {
 }
 
 func normalizedOptions(o Options) (Options, error) {
+	if o.MaxUndoBytes < 0 {
+		return o, fmt.Errorf("MaxUndoBytes must not be negative")
+	}
 	if o.PageSize == 0 {
 		o.PageSize = 4096
 	}
@@ -142,7 +151,7 @@ func OpenTx(ctx context.Context, path string, opts Options) (*Tx, error) {
 	if !info.Mode().IsRegular() {
 		return nil, fmt.Errorf("%w: database must be a regular file", ErrUnsupported)
 	}
-	if err = validateWritableFile(info); err != nil {
+	if err = validateWritableFile(f); err != nil {
 		return nil, err
 	}
 	if err = lockShared(f); err != nil {
@@ -245,6 +254,9 @@ func (t *Tx) checkStable() error {
 	if err := t.checkSidecars(); err != nil {
 		return err
 	}
+	if err := validateNativePath(t.file); err != nil {
+		return err
+	}
 	st, err := t.file.Stat()
 	if err != nil {
 		return err
@@ -256,7 +268,7 @@ func (t *Tx) checkStable() error {
 	if !other.Mode().IsRegular() || !os.SameFile(st, other) || st.Size() != t.info.Size() || !st.ModTime().Equal(t.info.ModTime()) {
 		return ErrChanged
 	}
-	if err = validateWritableFile(st); err != nil {
+	if err = validateWritableFile(t.file); err != nil {
 		return err
 	}
 	if t.originalPages > 0 {
@@ -420,49 +432,8 @@ func (t *Tx) BumpSchemaCookie(ctx context.Context) error {
 // Statement creates a bounded memory-only undo boundary, including allocation,
 // freelist, and schema-cookie changes. Nested statements are not supported.
 // A callback error, cancellation, or panic restores its entry state.
-func (t *Tx) Statement(ctx context.Context, fn func() error) (err error) {
-	if fn == nil {
-		return ErrMisuse
-	}
-	t.mu.Lock()
-	if err = t.checkOpen(); err != nil {
-		t.mu.Unlock()
-		return err
-	}
-	if err = ctx.Err(); err != nil {
-		t.mu.Unlock()
-		return err
-	}
-	if t.statement {
-		t.mu.Unlock()
-		return fmt.Errorf("%w: nested statement", ErrMisuse)
-	}
-	old := make(map[uint32][]byte, len(t.dirty))
-	for n, p := range t.dirty {
-		old[n] = p
-	}
-	free := make(map[uint32]struct{}, len(t.free))
-	for n := range t.free {
-		free[n] = struct{}{}
-	}
-	h := t.header
-	t.statement = true
-	t.mu.Unlock()
-	complete := false
-	defer func() {
-		t.mu.Lock()
-		defer t.mu.Unlock()
-		if !complete || err != nil {
-			t.dirty, t.free, t.header = old, free, h
-		}
-		t.statement = false
-	}()
-	err = fn()
-	if err == nil {
-		err = ctx.Err()
-	}
-	complete = true
-	return err
+func (t *Tx) Statement(ctx context.Context, fn func() error) error {
+	return t.statementUndo(ctx, fn)
 }
 
 // Rollback releases locks without changing database bytes. All transactional
@@ -470,6 +441,7 @@ func (t *Tx) Statement(ctx context.Context, fn func() error) (err error) {
 func (t *Tx) Rollback() error {
 	t.mu.Lock()
 	defer t.mu.Unlock()
+	defer t.clearClosedUndoLocked()
 	if t.statement {
 		return fmt.Errorf("%w: rollback inside statement", ErrMisuse)
 	}

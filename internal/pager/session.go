@@ -11,6 +11,8 @@ import (
 	"sync"
 
 	"github.com/ms-xiaosnow/gosqlite/internal/wal"
+
+	"github.com/ms-xiaosnow/gosqlite/internal/vfs"
 )
 
 // Session is the opt-in exclusive WAL pager. A single read-write database
@@ -19,13 +21,13 @@ import (
 // concurrency. One local reader or transaction may hold a lease at a time.
 type Session struct {
 	mu         sync.Mutex
-	file       *os.File
+	file       *vfs.File
 	path       string
 	opts       Options
 	info       os.FileInfo
 	rawHeader  [100]byte // Physical main-file header, not the WAL overlay.
 	header     Header    // Latest durable logical snapshot.
-	walFile    *os.File
+	walFile    *vfs.File
 	walInfo    os.FileInfo
 	snapshot   wal.Snapshot
 	active     *Tx
@@ -215,7 +217,7 @@ func (s *Session) refreshMainLocked() error {
 	if !info.Mode().IsRegular() {
 		return fmt.Errorf("%w: database must be a regular file", ErrUnsupported)
 	}
-	if err = validateWritableFile(info); err != nil {
+	if err = validateWritableFile(s.file); err != nil {
 		return err
 	}
 	s.info = info
@@ -262,6 +264,9 @@ func (s *Session) checkStableLocked() error {
 	if err := s.checkJournalLocked(); err != nil {
 		return err
 	}
+	if err := validateNativePath(s.file); err != nil {
+		return err
+	}
 	st, err := s.file.Stat()
 	if err != nil {
 		return err
@@ -273,7 +278,7 @@ func (s *Session) checkStableLocked() error {
 	if !pathInfo.Mode().IsRegular() || !os.SameFile(st, pathInfo) || st.Size() != s.info.Size() || !st.ModTime().Equal(s.info.ModTime()) {
 		return ErrChanged
 	}
-	if err = validateWritableFile(st); err != nil {
+	if err = validateWritableFile(s.file); err != nil {
 		return err
 	}
 	var header [100]byte

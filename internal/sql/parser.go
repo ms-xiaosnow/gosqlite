@@ -75,7 +75,22 @@ func Parse(text string) (Statement, error) {
 		stmt = &Transaction{Action: "COMMIT"}
 	case p.take("ROLLBACK"):
 		p.take("TRANSACTION")
-		stmt = &Transaction{Action: "ROLLBACK"}
+		x := &Transaction{Action: "ROLLBACK"}
+		if p.take("TO") {
+			p.take("SAVEPOINT")
+			x.Action = "ROLLBACK TO"
+			x.Name, err = p.savepointName()
+		}
+		stmt = x
+	case p.take("SAVEPOINT"):
+		x := &Transaction{Action: "SAVEPOINT"}
+		x.Name, err = p.savepointName()
+		stmt = x
+	case p.take("RELEASE"):
+		p.take("SAVEPOINT")
+		x := &Transaction{Action: "RELEASE"}
+		x.Name, err = p.savepointName()
+		stmt = x
 	default:
 		return nil, p.unsupported("statement " + p.peek().Text)
 	}
@@ -333,21 +348,25 @@ func (p *parser) createTable() (*CreateTable, error) {
 			switch upperName(t.Text) {
 			case "INTEGER", "INT", "TEXT", "REAL", "BLOB", "NUMERIC":
 				c.Type = upperName(p.next().Text)
-			case "VECTOR":
-				p.next()
+			case "VECTOR", "BIT":
+				typeName := upperName(p.next().Text)
+				maxDimension := 16000
+				if typeName == "BIT" {
+					maxDimension = 64000
+				}
 				if err = p.need("("); err != nil {
 					return nil, err
 				}
 				dimension := p.peek()
-				n, ok := vectorDimensionNumber(dimension.Text)
+				n, ok := boundedDimensionNumber(dimension.Text, maxDimension)
 				if dimension.Kind != Number || !ok {
-					return nil, p.syntax("VECTOR dimension must be a decimal integer in [1,16000]")
+					return nil, p.syntax(fmt.Sprintf("%s dimension must be a decimal integer in [1,%d]", typeName, maxDimension))
 				}
 				p.next()
 				if err = p.need(")"); err != nil {
 					return nil, err
 				}
-				c.Type = "VECTOR(" + strconv.Itoa(n) + ")"
+				c.Type = typeName + "(" + strconv.Itoa(n) + ")"
 			}
 		}
 		if p.peek().Kind == Identifier && !p.is("PRIMARY") && !p.is("NOT") && !p.is("DEFAULT") {
@@ -828,7 +847,7 @@ func precedence(op string) int {
 		return 4
 	case "<", ">", "<=", ">=":
 		return 5
-	case "&", "|", "<<", ">>", "<->", "<#>", "<=>", "<+>":
+	case "&", "|", "<<", ">>", "<->", "<#>", "<=>", "<+>", "<~>", "<%>":
 		// Project vector operators share SQLite's left-associative bitwise
 		// tier, above comparisons and below arithmetic. Existing tiers stay
 		// unchanged; this is not a general PostgreSQL expression grammar.

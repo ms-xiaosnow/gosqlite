@@ -133,11 +133,14 @@ func (t *Tx) extensionWriteLocked(ctx context.Context, action func(*writeCatalog
 	if err := t.check(); err != nil {
 		return err
 	}
-	if t.storage == nil {
+	if t.readOnly {
 		return ErrReadOnly
 	}
 	if t.activeRows != 0 {
 		return fmt.Errorf("%w: close transaction rows before executing a write", ErrBusy)
+	}
+	if err := t.ensureSnapshotLocked(ctx); err != nil {
+		return err
 	}
 	return t.storage.Statement(ctx, func() error {
 		c, err := t.validateCatalog(ctx)

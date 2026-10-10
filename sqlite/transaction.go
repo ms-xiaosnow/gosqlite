@@ -10,13 +10,16 @@ import (
 	sqlast "github.com/ms-xiaosnow/gosqlite/internal/sql"
 )
 
-// TxOptions chooses read-only or immediate-reserved locking. The default is
-// a deferred read/write transaction; EXCLUSIVE and nested transactions are not supported.
-type TxOptions struct{ ReadOnly, Immediate bool }
+// TxOptions chooses read-only, immediate-reserved, or exclusive locking. The
+// default is a genuinely deferred transaction: its first database access pins
+// the snapshot. Immediate and Exclusive are mutually exclusive.
+type TxOptions struct{ ReadOnly, Immediate, Exclusive bool }
 
-// Tx owns one SQLite rollback-journal transaction. Close all Rows before an
-// Exec or Commit. A failed statement is rolled back without aborting prior
-// statements. A Commit returning ErrBusy may be retried. Rollback is idempotent.
+// Tx owns a logical transaction and, after its first database access, one pinned
+// rollback/WAL/encrypted snapshot. Close its Rows before writes, savepoint
+// controls or Commit. Full Rollback invalidates Rows and is idempotent. Failed
+// statements preserve earlier work. Native Commit returning ErrBusy is retryable.
+// Nested BEGIN is rejected; SAVEPOINT controls are accepted through Exec.
 type Tx struct {
 	db                 *DB
 	ctx                context.Context
@@ -26,6 +29,10 @@ type Tx struct {
 	activeRows         int
 	ownershipValidated bool
 	initialInfo        FileInfo
+	readOnly           bool
+	savepointTxn       bool
+	savepoints         []transactionSavepoint
+	markBytes          uint64
 	done               bool
 }
 
@@ -53,52 +60,46 @@ func (d *DB) Begin(ctx context.Context, options ...TxOptions) (*Tx, error) {
 	return tx, wrap("begin", err)
 }
 func (d *DB) beginLocked(ctx context.Context, opts TxOptions) (*Tx, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	if d.closed {
 		return nil, ErrClosed
 	}
 	if d.tx != nil {
 		return nil, fmt.Errorf("cannot begin a transaction within a transaction")
 	}
-	if opts.ReadOnly && opts.Immediate {
-		return nil, fmt.Errorf("read-only transactions cannot reserve a writer lock")
+	if opts.Immediate && opts.Exclusive {
+		return nil, fmt.Errorf("Immediate and Exclusive are mutually exclusive")
 	}
-	tx := &Tx{db: d, ctx: ctx}
-	if d.opts.ReadOnly || opts.ReadOnly {
-		r, err := d.openReader(ctx)
-		if err != nil {
+	if (d.opts.ReadOnly || opts.ReadOnly) && (opts.Immediate || opts.Exclusive) {
+		return nil, ErrReadOnly
+	}
+	// Session readers own the sole local lease. Preserve the documented safe
+	// active-Rows restriction without acquiring a snapshot for deferred BEGIN.
+	if d.session != nil && len(d.rows) != 0 {
+		return nil, ErrBusy
+	}
+	tx := &Tx{db: d, ctx: ctx, readOnly: d.opts.ReadOnly || opts.ReadOnly, initialInfo: d.info}
+	if opts.Immediate || opts.Exclusive {
+		if err := tx.ensureSnapshotLocked(ctx); err != nil {
 			return nil, err
 		}
-		tx.reader = r
-		tx.readClose = r.Close
-	} else {
-		pagerOptions := d.pagerOptions()
-		// Open already created the database if authorized. A later removal
-		// must not silently replace that database with an empty one.
-		pagerOptions.Create = false
-		var p *pager.Tx
 		var err error
-		if d.session != nil {
-			p, err = d.session.Begin(ctx)
+		if opts.Exclusive {
+			err = tx.storage.Exclusive(ctx)
 		} else {
-			p, err = pager.OpenTx(ctx, d.path, pagerOptions)
+			err = tx.storage.PromoteWrite(ctx)
 		}
 		if err != nil {
+			_ = tx.storage.Rollback()
 			return nil, err
-		}
-		tx.reader = p
-		tx.storage = p
-		if opts.Immediate {
-			if err := p.PromoteWrite(ctx); err != nil {
-				p.Rollback()
-				return nil, err
-			}
 		}
 	}
 	d.tx = tx
-	tx.initialInfo = fileInfo(tx.reader.Header())
-	d.info = tx.initialInfo
 	return tx, nil
 }
+
 func (t *Tx) check() error {
 	if t.db.closed {
 		return ErrClosed
@@ -132,6 +133,11 @@ func (t *Tx) queryLocked(ctx context.Context, query string, args []any) (*Rows, 
 	if err != nil {
 		return nil, wrap("bind", err)
 	}
+	if selectReadsDatabase(sel) {
+		if err := t.ensureSnapshotLocked(ctx); err != nil {
+			return nil, wrap("query", err)
+		}
+	}
 	rows, err := t.db.plan(ctx, t.reader, sel, params)
 	if err != nil {
 		return nil, wrap("query", err)
@@ -159,13 +165,17 @@ func (t *Tx) commitLocked(ctx context.Context) error {
 	var err error
 	if t.storage != nil {
 		err = t.storage.Commit(ctx)
-	} else {
+	} else if t.readClose != nil {
 		err = t.readClose()
 	}
 	if err != nil {
 		return err
 	}
-	t.db.info = fileInfo(t.reader.Header())
+	if t.reader != nil {
+		t.db.info = fileInfo(t.reader.Header())
+	}
+	t.savepoints = nil
+	t.markBytes = 0
 	t.done = true
 	if t.db.tx == t {
 		t.db.tx = nil
@@ -192,9 +202,11 @@ func (t *Tx) rollbackLocked() error {
 	var err error
 	if t.storage != nil {
 		err = t.storage.Rollback()
-	} else {
+	} else if t.readClose != nil {
 		err = t.readClose()
 	}
+	t.savepoints = nil
+	t.markBytes = 0
 	t.done = true
 	t.db.info = t.initialInfo
 	if t.db.tx == t {
@@ -224,27 +236,7 @@ func (d *DB) Exec(ctx context.Context, query string, args ...any) (Result, error
 		return Result{}, wrap("exec", ErrClosed)
 	}
 	if control, ok := stmt.(*sqlast.Transaction); ok {
-		switch control.Action {
-		case "BEGIN":
-			if control.Mode == "EXCLUSIVE" {
-				err = fmt.Errorf("%w: BEGIN EXCLUSIVE", ErrUnsupported)
-			} else {
-				_, err = d.beginLocked(ctx, TxOptions{Immediate: control.Mode == "IMMEDIATE"})
-			}
-		case "COMMIT":
-			if d.tx == nil {
-				err = fmt.Errorf("no transaction is active")
-			} else {
-				err = d.tx.commitLocked(ctx)
-			}
-		case "ROLLBACK":
-			if d.tx == nil {
-				err = fmt.Errorf("no transaction is active")
-			} else {
-				err = d.tx.rollbackLocked()
-			}
-		}
-		return Result{}, wrap("exec", err)
+		return Result{}, wrap("exec", d.controlLocked(ctx, control))
 	}
 	if d.tx != nil {
 		return d.tx.execLocked(ctx, stmt, params)
@@ -286,11 +278,17 @@ func (t *Tx) execLocked(ctx context.Context, stmt sqlast.Statement, params []any
 	if err := t.check(); err != nil {
 		return Result{}, wrap("exec", err)
 	}
-	if t.storage == nil {
+	if control, ok := stmt.(*sqlast.Transaction); ok {
+		return Result{}, wrap("exec", t.db.controlLocked(ctx, control))
+	}
+	if t.readOnly {
 		return Result{}, wrap("exec", ErrReadOnly)
 	}
 	if t.activeRows != 0 {
 		return Result{}, wrap("exec", fmt.Errorf("%w: close transaction rows before executing a write", ErrBusy))
+	}
+	if err := t.ensureSnapshotLocked(ctx); err != nil {
+		return Result{}, wrap("exec", err)
 	}
 	var result Result
 	err := t.storage.Statement(ctx, func() error {

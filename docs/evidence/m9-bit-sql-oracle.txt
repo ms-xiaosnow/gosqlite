@@ -1,0 +1,27 @@
+M9 checkpoint E reviewed ordinary oracle verification
+Observed 2026-10-10 UTC, before component freeze. This file records the completed
+command output from the worker tool run; it is not a new run or aggregate claim.
+
+Working directory: durable-restart/gosqlite
+Environment: GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off
+GOCACHE=$PWD/../go-cache GOPATH=$PWD/../go-path CGO_ENABLED=0
+SQLITE_ORACLE=$PWD/../toolchains/sqlite-build-3540000/sqlite3
+Go executable: ../toolchains/go1.27.2/bin/go
+
+Command:
+go test -tags oracle ./internal/testkit -run '^TestOracle(BitCanonicalStorageInterop|CreatedBitTypeAndNumericAffinityBoundary|BitAddedColumnDefaultPreservesNumericAffinity)$' -count=3
+
+Observed output:
+ok  github.com/ms-xiaosnow/gosqlite/internal/testkit  0.812s
+Exit status: 0
+
+Cases use only intact files and ordinary native/official SQL, native statement
+and transaction rollback, normal close/reopen/checkpoint, and official SQLite
+integrity_check. Native canonical GSB writes interoperate at 512/4096/65536-byte
+pages in rollback/shared-WAL modes. Ordinary external numeric-affinity values
+and ALTER-added numeric text defaults fail typed interpretation rather than
+being guessed back into bit strings; canonical external GSB values/defaults
+remain usable. Invalid typed values are ordinary SQL compatibility cases.
+No wrong-key, physical corruption, missing-file, fault-I/O, forced-exit, crash,
+namespace replacement/race, interrupted-publication or recovery scenario ran.
+The full repository oracle aggregate is a separate lead-owned gate.
