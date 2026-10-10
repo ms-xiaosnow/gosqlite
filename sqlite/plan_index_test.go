@@ -90,7 +90,11 @@ func TestOrdinaryIndexRowIDAndShadowedNames(t *testing.T) {
 	}
 	for _, q := range []string{"SELECT id FROM t WHERE id IS TRUE", "SELECT id FROM t WHERE id IS FALSE", "SELECT id FROM t WHERE id>0", "SELECT id FROM t WHERE id=1 OR id=42"} {
 		p, _, _ := ordinaryCompare(t, db, q)
-		if p.Access != "SCAN" {
+		if q == "SELECT id FROM t WHERE id>0" {
+			if p.Access != "SEARCH" || p.Method != "rowid_range" {
+				t.Fatal(q, p)
+			}
+		} else if p.Access != "SCAN" {
 			t.Fatal(q, p)
 		}
 	}

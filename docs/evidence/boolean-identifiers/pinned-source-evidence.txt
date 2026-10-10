@@ -1,0 +1,230 @@
+src/parse.y:260-341
+260: // and all of the comparison operators need to be clustered together.
+261: // Various assert() statements throughout the code enforce these restrictions.
+262: //
+263: %token ABORT ACTION AFTER ANALYZE ASC ATTACH BEFORE BEGIN BY CASCADE CAST.
+264: %token CONFLICT DATABASE DEFERRED DESC DETACH EACH END EXCLUSIVE EXPLAIN FAIL.
+265: %token OR AND NOT IS ISNOT MATCH LIKE_KW BETWEEN IN ISNULL NOTNULL NE EQ.
+266: %token GT LE LT GE ESCAPE.
+267: 
+268: // The following directive causes tokens ABORT, AFTER, ASC, etc. to
+269: // fallback to ID if they will not parse as their original value.
+270: // This obviates the need for the "id" nonterminal.
+271: //
+272: %fallback ID
+273:   ABORT ACTION AFTER ANALYZE ASC ATTACH BEFORE BEGIN BY CASCADE CAST COLUMNKW
+274:   CONFLICT DATABASE DEFERRED DESC DETACH DO
+275:   EACH END EXCLUSIVE EXPLAIN FAIL FOR
+276:   IGNORE IMMEDIATE INITIALLY INSTEAD LIKE_KW MATCH NO PLAN
+277:   QUERY KEY OF OFFSET PRAGMA RAISE RECURSIVE RELEASE REPLACE RESTRICT ROW ROWS
+278:   ROLLBACK SAVEPOINT TEMP TRIGGER VACUUM VIEW VIRTUAL WITH WITHOUT
+279:   NULLS FIRST LAST
+280: %ifdef SQLITE_OMIT_COMPOUND_SELECT
+281:   EXCEPT INTERSECT UNION
+282: %endif SQLITE_OMIT_COMPOUND_SELECT
+283: %ifndef SQLITE_OMIT_WINDOWFUNC
+284:   CURRENT FOLLOWING PARTITION PRECEDING RANGE UNBOUNDED
+285:   EXCLUDE GROUPS OTHERS TIES
+286: %endif SQLITE_OMIT_WINDOWFUNC
+287: %ifdef SQLITE_ENABLE_ORDERED_SET_AGGREGATES
+288:   WITHIN
+289: %endif SQLITE_ENABLE_ORDERED_SET_AGGREGATES
+290: %ifndef SQLITE_OMIT_GENERATED_COLUMNS
+291:   GENERATED ALWAYS
+292: %endif
+293:   MATERIALIZED
+294:   REINDEX RENAME CTIME_KW IF
+295:   .
+296: %wildcard ANY.
+297: 
+298: // Define operator precedence early so that this is the first occurrence
+299: // of the operator tokens in the grammar.  Keeping the operators together
+300: // causes them to be assigned integer values that are close together,
+301: // which keeps parser tables smaller.
+302: //
+303: // The token values assigned to these symbols is determined by the order
+304: // in which lemon first sees them.  It must be the case that ISNULL/NOTNULL,
+305: // NE/EQ, GT/LE, and GE/LT are separated by only a single value.  See
+306: // the sqlite3ExprIfFalse() routine for additional information on this
+307: // constraint.
+308: //
+309: %left OR.
+310: %left AND.
+311: %right NOT.
+312: %left IS MATCH LIKE_KW BETWEEN IN ISNULL NOTNULL NE EQ.
+313: %left GT LE LT GE.
+314: %right ESCAPE.
+315: %left BITAND BITOR LSHIFT RSHIFT.
+316: %left PLUS MINUS.
+317: %left STAR SLASH REM.
+318: %left CONCAT PTR.
+319: %left COLLATE.
+320: %right BITNOT.
+321: %nonassoc ON.
+322: 
+323: // An IDENTIFIER can be a generic identifier, or one of several
+324: // keywords.  Any non-standard keyword can also be an identifier.
+325: //
+326: %token_class id  ID|INDEXED.
+327: 
+328: // And "ids" is an identifier-or-string.
+329: //
+330: %token_class ids  ID|STRING.
+331: 
+332: // An identifier or a join-keyword
+333: //
+334: %token_class idj  ID|INDEXED|JOIN_KW.
+335: 
+336: // The name of a column or table can be any of the following:
+337: //
+338: %type nm {Token}
+339: nm(A) ::= idj(A).
+340: nm(A) ::= STRING(A).
+341: 
+
+src/parse.y:729-739
+729: }
+730: 
+731: // An option "AS <id>" phrase that can follow one of the expressions that
+732: // define the result set, or one of the tables in the FROM clause.
+733: //
+734: %type as {Token}
+735: as(X) ::= AS nm(Y).    {X = Y;}
+736: as(X) ::= ids(X).
+737: as(X) ::= .            {X.n = 0; X.z = 0;}
+738: 
+739: 
+
+src/parse.y:1180-1199
+1180: 
+1181: expr(A) ::= term(A).
+1182: expr(A) ::= LP expr(X) RP. {A = X;}
+1183: expr(A) ::= idj(X).          {A=tokenExpr(pParse,TK_ID,X); /*A-overwrites-X*/}
+1184: expr(A) ::= nm(X) DOT nm(Y). {
+1185:   Expr *temp1 = tokenExpr(pParse,TK_ID,X);
+1186:   Expr *temp2 = tokenExpr(pParse,TK_ID,Y);
+1187:   A = sqlite3PExpr(pParse, TK_DOT, temp1, temp2);
+1188: }
+1189: expr(A) ::= nm(X) DOT nm(Y) DOT nm(Z). {
+1190:   Expr *temp1 = tokenExpr(pParse,TK_ID,X);
+1191:   Expr *temp2 = tokenExpr(pParse,TK_ID,Y);
+1192:   Expr *temp3 = tokenExpr(pParse,TK_ID,Z);
+1193:   Expr *temp4 = sqlite3PExpr(pParse, TK_DOT, temp2, temp3);
+1194:   if( IN_RENAME_OBJECT ){
+1195:     sqlite3RenameTokenRemap(pParse, 0, temp1);
+1196:   }
+1197:   A = sqlite3PExpr(pParse, TK_DOT, temp1, temp4);
+1198: }
+1199: term(A) ::= NULL|FLOAT|BLOB(X). {A=tokenExpr(pParse,@X,X); /*A-overwrites-X*/}
+
+src/parse.y:1237-1250
+1237: }
+1238: %endif  SQLITE_OMIT_CAST
+1239: 
+1240: 
+1241: expr(A) ::= idj(X) LP distinct(D) exprlist(Y) RP. {
+1242:   A = sqlite3ExprFunction(pParse, Y, &X, D);
+1243: }
+1244: expr(A) ::= idj(X) LP distinct(D) exprlist(Y) ORDER BY sortlist(O) RP. {
+1245:   A = sqlite3ExprFunction(pParse, Y, &X, D);
+1246:   sqlite3ExprAddFunctionOrderBy(pParse, A, O);
+1247: }
+1248: expr(A) ::= idj(X) LP STAR RP. {
+1249:   A = sqlite3ExprFunction(pParse, 0, &X, 0);
+1250: }
+
+src/expr.c:2353-2370
+2353: /*
+2354: ** If the input expression is an ID with the name "true" or "false"
+2355: ** then convert it into an TK_TRUEFALSE term.  Return non-zero if
+2356: ** the conversion happened, and zero if the expression is unaltered.
+2357: */
+2358: int sqlite3ExprIdToTrueFalse(Expr *pExpr){
+2359:   u32 v;
+2360:   assert( pExpr->op==TK_ID || pExpr->op==TK_STRING );
+2361:   if( !ExprHasProperty(pExpr, EP_Quoted|EP_IntValue)
+2362:    && (v = sqlite3IsTrueOrFalse(pExpr->u.zToken))!=0
+2363:   ){
+2364:     pExpr->op = TK_TRUEFALSE;
+2365:     ExprSetProperty(pExpr, v);
+2366:     return 1;
+2367:   }
+2368:   return 0;
+2369: }
+2370: 
+
+src/resolve.c:642-693
+642:     ** might refer to an result-set alias.  This happens, for example, when
+643:     ** we are resolving names in the WHERE clause of the following command:
+644:     **
+645:     **     SELECT a+b AS x FROM table WHERE x<10;
+646:     **
+647:     ** In cases like this, replace pExpr with a copy of the expression that
+648:     ** forms the result set entry ("a+b" in the example) and return immediately.
+649:     ** Note that the expression in the result set should have already been
+650:     ** resolved by the time the WHERE clause is resolved.
+651:     **
+652:     ** The ability to use an output result-set column in the WHERE, GROUP BY,
+653:     ** or HAVING clauses, or as part of a larger expression in the ORDER BY
+654:     ** clause is not standard SQL.  This is a (goofy) SQLite extension, that
+655:     ** is supported for backwards compatibility only. Hence, we issue a warning
+656:     ** on sqlite3_log() whenever the capability is used.
+657:     */
+658:     if( cnt==0
+659:      && (pNC->ncFlags & NC_UEList)!=0
+660:      && zTab==0
+661:     ){
+662:       pEList = pNC->uNC.pEList;
+663:       assert( pEList!=0 );
+664:       for(j=0; j<pEList->nExpr; j++){
+665:         char *zAs = pEList->a[j].zEName;
+666:         if( pEList->a[j].fg.eEName==ENAME_NAME
+667:          && sqlite3_stricmp(zAs, zCol)==0
+668:         ){
+669:           Expr *pOrig;
+670:           assert( pExpr->pLeft==0 && pExpr->pRight==0 );
+671:           assert( ExprUseXList(pExpr)==0 || pExpr->x.pList==0 );
+672:           assert( ExprUseXSelect(pExpr)==0 || pExpr->x.pSelect==0 );
+673:           pOrig = pEList->a[j].pExpr;
+674:           if( (pNC->ncFlags&NC_AllowAgg)==0 && ExprHasProperty(pOrig, EP_Agg) ){
+675:             sqlite3ErrorMsg(pParse, "misuse of aliased aggregate %s", zAs);
+676:             return WRC_Abort;
+677:           }
+678:           if( ExprHasProperty(pOrig, EP_Win)
+679:            && ((pNC->ncFlags&NC_AllowWin)==0 || pNC!=pTopNC )
+680:           ){
+681:             sqlite3ErrorMsg(pParse, "misuse of aliased window function %s",zAs);
+682:             return WRC_Abort;
+683:           }
+684:           if( sqlite3ExprVectorSize(pOrig)!=1 ){
+685:             sqlite3ErrorMsg(pParse, "row value misused");
+686:             return WRC_Abort;
+687:           }
+688:           resolveAlias(pParse, pEList, j, pExpr, nSubquery);
+689:           cnt = 1;
+690:           pMatch = 0;
+691:           assert( zTab==0 && zDb==0 );
+692:           if( IN_RENAME_OBJECT ){
+693:             sqlite3RenameTokenRemap(pParse, 0, (void*)pExpr);
+
+src/resolve.c:735-752
+735:       ** a huge amount of legacy SQL that uses it. So for now, we just
+736:       ** issue a warning.
+737:       */
+738:       sqlite3_log(SQLITE_WARNING,
+739:         "double-quoted string literal: \"%w\"", zCol);
+740: #ifdef SQLITE_ENABLE_NORMALIZE
+741:       sqlite3VdbeAddDblquoteStr(db, pParse->pVdbe, zCol);
+742: #endif
+743:       pExpr->op = TK_STRING;
+744:       memset(&pExpr->y, 0, sizeof(pExpr->y));
+745:       return WRC_Prune;
+746:     }
+747:     if( sqlite3ExprIdToTrueFalse(pExpr) ){
+748:       return WRC_Prune;
+749:     }
+750:   }
+751: 
+752:   /*
+
+tool/mkkeywordhash.c contains no TRUE or FALSE keyword spelling: True

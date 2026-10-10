@@ -1,0 +1,27 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestBooleanIdentifierASTPrecedence
+    boolean_identifier_test.go:34: true.false: got <nil> (unsupported SQL: expression suffix . at byte 4), want &sql.Column{Table:"true", Name:"false"}
+    boolean_identifier_test.go:34: FaLsE.TrUe: got <nil> (unsupported SQL: expression suffix . at byte 5), want &sql.Column{Table:"FaLsE", Name:"TrUe"}
+    boolean_identifier_test.go:34: "true".false: got <nil> (unsupported SQL: reserved identifier false at byte 7), want &sql.Column{Table:"true", Name:"false"}
+    boolean_identifier_test.go:34: true.*: got <nil> (unsupported SQL: expression suffix . at byte 4), want &sql.Star{Table:"true"}
+    boolean_identifier_test.go:34: true(): got <nil> (unsupported SQL: expression suffix ( at byte 4), want &sql.Call{Name:"true", Args:[]sql.Expr(nil)}
+    boolean_identifier_test.go:34: FaLsE(TRUE, null): got <nil> (unsupported SQL: expression suffix ( at byte 5), want &sql.Call{Name:"false", Args:[]sql.Expr{(*sql.Literal)(0x250d6ec564c8), (*sql.Literal)(0x250d6ec564e0)}}
+    boolean_identifier_test.go:39: parse TrUe(FaLsE(2 IS TRUE)): unsupported SQL: expression suffix ( at byte 4
+--- FAIL: TestBooleanIdentifierASTPrecedence (0.00s)
+=== RUN   TestBooleanIdentifierGrammar
+    boolean_identifier_test.go:64: SELECT 0 AS true,1 false FROM true false WHERE true OR false ORDER BY false unsupported SQL: reserved identifier true at byte 12
+    boolean_identifier_test.go:64: SELECT true.*,false.true FROM true AS true LEFT JOIN false AS false ON true.false IS false.true unsupported SQL: trailing syntax . at byte 11
+    boolean_identifier_test.go:64: CREATE TABLE true(false INTEGER PRIMARY KEY, true INTEGER DEFAULT FALSE) unsupported SQL: reserved identifier true at byte 13
+    boolean_identifier_test.go:64: CREATE TABLE FaLsE(TrUe TEXT DEFAULT NULL, FaLsE BLOB) unsupported SQL: reserved identifier FaLsE at byte 13
+    boolean_identifier_test.go:64: CREATE INDEX false ON true(false,true DESC) unsupported SQL: reserved identifier false at byte 13
+    boolean_identifier_test.go:64: REINDEX false unsupported SQL: reserved identifier false at byte 8
+    boolean_identifier_test.go:64: INSERT INTO true(false,true) VALUES(?1,TRUE) unsupported SQL: reserved identifier true at byte 12
+    boolean_identifier_test.go:64: UPDATE true SET false=?1,true=FALSE WHERE true IS TRUE unsupported SQL: reserved identifier true at byte 7
+    boolean_identifier_test.go:64: DELETE FROM false WHERE true IS FALSE unsupported SQL: reserved identifier false at byte 12
+    boolean_identifier_test.go:69: unsupported SQL: reserved identifier TrUe at byte 13
+--- FAIL: TestBooleanIdentifierGrammar (0.00s)
+=== RUN   TestBooleanIdentifierRetainedRejections
+--- PASS: TestBooleanIdentifierRetainedRejections (0.00s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/sql	0.005s
+FAIL

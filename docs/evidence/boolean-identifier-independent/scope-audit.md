@@ -1,0 +1,9 @@
+# Independent review scope audit
+
+2026-10-10 UTC. Baseline affinity-substitution-freeze-v1; candidate boolean-identifier-freeze-v2. No production source edited, staged, committed, or uploaded. Only isolated copies receive test sources; review artifacts are confined to this evidence directory in main.
+
+Behavioral review completed before each selected suite: new parser tests are pure parser/evaluator work; sqlite Boolean identifier and alias tests create intact SQL fixtures, use normal SQL updates/rollback, normal ownership close/reopen, pure-memory budget rejection and pre-cancellation; driver tests use normal database/sql prepared statements. The testkit identifier, DML and alias matrices create normal SQL fixtures, query pinned SQLite readonly or :memory:, use quote-mode typed comparisons and normal EOF/process completion. No child termination hooks are used.
+
+Independent root and multi-source matrices use intact SQL-created fixtures and a readonly oracle. Oracle parameter setup inserts known literals into temp.sqlite_parameters, with eight explicit value/type control queries, avoiding shell quote heuristics. Independent AST reuse calls the planner repeatedly against one normally opened readonly reader with a parsed AST; extraction-specific quotas and cancellation use in-memory scopes only. Baseline negative control uses four readonly queries on an intact fixture. Compiler race instrumentation is not injected racing of lifecycle operations.
+
+Each test, race, build, and vet stage has go run ./internal/testscope immediately before its command. No general ./... test suite, manual tags, physical tampering/corruption, wrong-key or missing-file test, namespace mutation, process kill/exit, crash/hot recovery, native I/O/lock/unmap/close/Sync fault, short write/disk full/permission fault, interrupted publication, or rekey is executed. Compile-only build ./... executes no package tests. This audit does not certify unrelated broad suites.

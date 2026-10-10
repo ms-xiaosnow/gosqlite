@@ -14,9 +14,9 @@ import (
 // quota. Earlier streaming rows are not a complete answer; always check Rows.Err.
 var ErrQueryWorkLimit = errors.New("relational query work limit exceeded")
 
-// RelationalLimits bounds the multi-source FROM executor. Zero uses 16,777,216
+// RelationalLimits bounds multi-source FROM and global aggregate execution. Zero uses 16,777,216
 // work units and Options.MaxSortBytes respectively. MaxBytes can only lower that
-// connection memory cap. These limits do not change the legacy single-table or
+// connection memory cap. These limits do not change legacy non-aggregate single-table or
 // ANN limits. Cancellation applies in addition to the quotas, including child
 // reopen, ON/filter/projection evaluation and sorting. No spill is performed.
 type RelationalLimits struct{ MaxWork, MaxBytes int64 }
@@ -28,7 +28,7 @@ func WithRelationalLimits(ctx context.Context, limits RelationalLimits) context.
 	return context.WithValue(ctx, relationalLimitsKey{}, limits)
 }
 
-// RelationalStats describes actual multi-source work, including discarded join
+// RelationalStats describes actual relational/aggregate work, including discarded join
 // pairs and eager sort work. Bytes are conservative charged state, not RSS.
 type RelationalStats struct {
 	Work, SourceOpens, SourceRows, PageReads, JoinPairs, NullExtensions int64
@@ -164,7 +164,7 @@ func (r *relationalReader) BeforePage(n int64) error {
 type relationalRootBudgetKey struct{}
 
 func (d *DB) bindSelect(ctx context.Context, sel *sqlast.Select, args []any) (context.Context, []any, error) {
-	if sel.Relation == nil {
+	if sel.Relation == nil && !selectUsesAggregate(sel) {
 		params, err := bind(sel, args)
 		return ctx, params, err
 	}

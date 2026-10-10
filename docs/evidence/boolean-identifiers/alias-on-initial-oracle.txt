@@ -1,0 +1,47 @@
+SELECT t.id,flag AS z,u.y FROM t LEFT JOIN u ON z
+exit=0
+2,1,7
+
+SELECT t.id,flag AS z,u.y FROM t LEFT JOIN u ON +z
+exit=0
+1,0,NULL
+2,1,7
+3,NULL,NULL
+
+SELECT t.id,0 AS z,u.y FROM t LEFT JOIN u ON +z
+exit=0
+1,0,NULL
+2,0,NULL
+3,0,NULL
+
+SELECT t.id,0 AS z,u.y FROM t LEFT JOIN u ON z=0
+exit=0
+1,0,7
+2,0,7
+3,0,7
+
+SELECT t.id,0 AS z,u.y FROM t LEFT JOIN u ON z OR 0
+exit=0
+1,0,NULL
+2,0,NULL
+3,0,NULL
+
+SELECT t.id,0 AS z,u.y FROM t LEFT JOIN u ON z AND 1
+exit=0
+
+SELECT t.id,flag OR 1 AS z,u.y FROM t LEFT JOIN u ON z
+exit=0
+1,1,7
+2,1,7
+3,1,7
+
+SELECT t.id,abs(-9223372036854775808) AS z,u.y FROM t LEFT JOIN u ON z
+exit=1
+Error in 5th command line argument: integer overflow
+
+SELECT t.id,0 AS z,u.y FROM t LEFT JOIN u ON z AND abs(-9223372036854775808)
+exit=0
+
+SELECT t.id,0 AS z,u.y FROM t LEFT JOIN u ON abs(-9223372036854775808) AND z
+exit=0
+

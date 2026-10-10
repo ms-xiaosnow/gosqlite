@@ -1,0 +1,6 @@
+=== RUN   TestReviewBoundedIndependentEndpointAdmission
+    review_bounded_independent_test.go:373: both bound clones must be admitted before copying or reading: err=<nil> reads=[2]
+--- FAIL: TestReviewBoundedIndependentEndpointAdmission (0.00s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/btree	0.004s
+FAIL

@@ -1,0 +1,26 @@
+{
+  "candidate_tree": "e92277d411e0ca8702b5319566c7588549a9a517",
+  "baseline_tree": "1336a5d7b5e1a336fb01e012334cec776a61c4a7",
+  "files": 1062,
+  "owned": 28,
+  "full_patch_sha256": "a3ca18e68eaf7e9df19aa3d5143e2b639c479356d4fb0bc09f9e224853409040",
+  "fixes_patch_sha256": "1f47b25db72fa94edb35fa22ccb4450359c8d186195d8ff3de3aea6a0f0fb6cc",
+  "copy": "/workspace/scratch/5e06a74e5f65/durable-restart/aggregate-independent-copy-v3",
+  "production_changes_from_v1": [
+    "internal/sql/aggregate.go",
+    "sqlite/relational_bind.go"
+  ],
+  "all_changes_from_v1": [
+    "docs/aggregate-sql.md",
+    "docs/evidence/global-aggregates/checks-v3.txt",
+    "docs/evidence/global-aggregates/independent-pre-fix.txt",
+    "docs/evidence/global-aggregates/run-v3-focused.sh",
+    "docs/progress.md",
+    "internal/sql/aggregate.go",
+    "internal/sql/aggregate_test.go",
+    "internal/testkit/aggregate_conformance_test.go",
+    "internal/testkit/aggregate_review_test.go",
+    "sqlite/aggregate_test.go",
+    "sqlite/relational_bind.go"
+  ]
+}

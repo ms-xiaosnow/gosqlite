@@ -203,3 +203,14 @@ Go;207 extracted published cases and separate mathematics are tested. PostgreSQL
 pgvector was not built or run. Sparse malformed-zero-index validation, finite
 float64 versus upstream overflow/NaN, and explicit lossy conversions are recorded
 in extension/vector/extended-values.md. No new production dependency was added.
+
+## Native global aggregate behavior reference
+
+The bounded global-aggregate SQL increment uses the same pinned 3.54.0 public
+source identity above. `src/func.c` supplies the count/min/max and compensated
+sum/total/avg numeric behavior; `src/vdbe.c` supplies numeric-type conversion;
+`src/util.c` supplies infinity/NaN overflow classification. Native Go state and
+pull execution are in internal/sql/aggregate.go and sqlite/aggregate.go. Tagged
+complete-value/type/error tests invoke only the existing official oracle; no
+production C dependency or private SEE material is introduced. SQLite's
+public-domain notice applies to the referenced implementation algorithms.

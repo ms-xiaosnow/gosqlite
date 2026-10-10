@@ -1,0 +1,24 @@
+=== RUN   TestBoundedSQLite354Oracle
+    bounded_oracle_test.go:115: oracle 3.54.0
+        2026-10-09 15:46:58 be8d059e9a49089ab2dce5ed26dd87aaf598fdc5fbe0b107c0dd758464bcd5e3
+=== RUN   TestBoundedSQLite354Oracle/512
+    bounded_oracle_test.go:230: index page_size=512 reverse=false singleton_reads=6 full_scan_reads=345 exact_trace=[3 99 100 101 643 563]
+    bounded_oracle_test.go:230: index page_size=512 reverse=true singleton_reads=3 full_scan_reads=345 exact_trace=[3 233 12]
+    bounded_oracle_test.go:265: rowid page_size=512 reverse=false three_row_reads=3 full_scan_reads=366 exact_trace=[2 676 706]
+    bounded_oracle_test.go:265: rowid page_size=512 reverse=true three_row_reads=3 full_scan_reads=366 exact_trace=[2 676 706]
+=== RUN   TestBoundedSQLite354Oracle/4096
+    bounded_oracle_test.go:230: index page_size=4096 reverse=false singleton_reads=5 full_scan_reads=112 exact_trace=[3 119 122 66 104]
+    bounded_oracle_test.go:230: index page_size=4096 reverse=true singleton_reads=5 full_scan_reads=112 exact_trace=[3 119 121 9 12]
+    bounded_oracle_test.go:265: rowid page_size=4096 reverse=false three_row_reads=2 full_scan_reads=46 exact_trace=[2 158]
+    bounded_oracle_test.go:265: rowid page_size=4096 reverse=true three_row_reads=2 full_scan_reads=46 exact_trace=[2 158]
+=== RUN   TestBoundedSQLite354Oracle/65536
+    bounded_oracle_test.go:230: index page_size=65536 reverse=false singleton_reads=2 full_scan_reads=4 exact_trace=[3 9]
+    bounded_oracle_test.go:230: index page_size=65536 reverse=true singleton_reads=2 full_scan_reads=4 exact_trace=[3 6]
+    bounded_oracle_test.go:265: rowid page_size=65536 reverse=false three_row_reads=2 full_scan_reads=4 exact_trace=[2 8]
+    bounded_oracle_test.go:265: rowid page_size=65536 reverse=true three_row_reads=2 full_scan_reads=4 exact_trace=[2 8]
+--- PASS: TestBoundedSQLite354Oracle (1.64s)
+    --- PASS: TestBoundedSQLite354Oracle/512 (1.04s)
+    --- PASS: TestBoundedSQLite354Oracle/4096 (0.38s)
+    --- PASS: TestBoundedSQLite354Oracle/65536 (0.21s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	1.644s

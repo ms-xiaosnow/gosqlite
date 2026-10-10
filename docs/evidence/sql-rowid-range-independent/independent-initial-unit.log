@@ -1,0 +1,22 @@
+source=/workspace/scratch/5e06a74e5f65/durable-restart/sql-rowid-range-independent-copy-v1
++ go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ go test ./sqlite -run ^TestReviewRowIDRange -count=1 -v
+=== RUN   TestReviewRowIDRangeWholePlannerPageEvidence
+    review_rowid_range_internal_independent_test.go:57: modifier="" planning page calls=3 total page calls=6 stats={IndexKeysRead:0 IndexPageReads:0 RowIDSeeks:1 ANNStateReads:0 ANNNodeReads:0 ANNEdgeReads:0 ANNVisited:0 ANNDistanceEvaluations:0 ANNIdentityLookups:0 ANNCentroidScores:0 ANNCentroidReads:0 ANNListsOpened:0 ANNMemberKeysRead:0 ANNIterations:0 ANNExactRescores:0 ANNPeakBytes:0 VectorRankedRows:0 VectorFilteredRows:0 VectorNullRows:0 VectorRankComponents:0 VectorRankNonzeros:0 VectorRankPackedBytes:0 FrequencyLookups:0 PostingKeysRead:0 Candidates:3 BaseRowFetches:3 ReturnedRows:2} plan=SEARCH samples USING INTEGER PRIMARY KEY; method=rowid_range; original_where_recheck=true; estimated_candidates=-1; reason=native rowid interval; direction=reverse; bounded=true; order_satisfied=true; sort=false; covering=false
+    review_rowid_range_internal_independent_test.go:57: modifier=" NOT INDEXED" planning page calls=829 total page calls=829 stats={IndexKeysRead:0 IndexPageReads:0 RowIDSeeks:0 ANNStateReads:0 ANNNodeReads:0 ANNEdgeReads:0 ANNVisited:0 ANNDistanceEvaluations:0 ANNIdentityLookups:0 ANNCentroidScores:0 ANNCentroidReads:0 ANNListsOpened:0 ANNMemberKeysRead:0 ANNIterations:0 ANNExactRescores:0 ANNPeakBytes:0 VectorRankedRows:0 VectorFilteredRows:0 VectorNullRows:0 VectorRankComponents:0 VectorRankNonzeros:0 VectorRankPackedBytes:0 FrequencyLookups:0 PostingKeysRead:0 Candidates:0 BaseRowFetches:1028 ReturnedRows:2} plan=SCAN samples; reason=NOT INDEXED requested
+    review_rowid_range_internal_independent_test.go:77: SELECT id FROM samples WHERE id>10 ORDER BY id DESC LIMIT 0: 3 planning page calls, zero iteration/range pages
+    review_rowid_range_internal_independent_test.go:77: EXPLAIN QUERY PLAN SELECT id FROM samples WHERE id>10 ORDER BY id DESC: 2 planning page calls, zero iteration/range pages
+--- PASS: TestReviewRowIDRangeWholePlannerPageEvidence (0.01s)
+=== RUN   TestReviewRowIDRangeCancelAndPreallocation
+    review_rowid_range_internal_independent_test.go:118: limits={PageReads:0 Work:1 Records:0 PayloadBytes:0} page calls=1; sticky error; close stops source
+    review_rowid_range_internal_independent_test.go:118: limits={PageReads:-1 Work:0 Records:0 PayloadBytes:0} page calls=0; sticky error; close stops source
+--- PASS: TestReviewRowIDRangeCancelAndPreallocation (0.00s)
+=== RUN   TestReviewRowIDRangeIndependentIntersections
+    review_rowid_range_independent_test.go:130: 4096 independently selected SQL interval intersections checked against exact rational/storage-class model; 512 also independently forced scan
+--- PASS: TestReviewRowIDRangeIndependentIntersections (1.84s)
+=== RUN   TestReviewRowIDRangeOrderAdmissionAndTies
+    review_rowid_range_independent_test.go:172: 304 order/shadow/alias/residual/tie LIMIT/OFFSET cases matched forced scan
+--- PASS: TestReviewRowIDRangeOrderAdmissionAndTies (0.10s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	1.955s

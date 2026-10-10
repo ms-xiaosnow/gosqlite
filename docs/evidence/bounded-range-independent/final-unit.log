@@ -1,0 +1,292 @@
+=== RUN   TestBoundedIndexCompositeProperty
+--- PASS: TestBoundedIndexCompositeProperty (0.12s)
+=== RUN   TestBoundedIndexExactSelectiveTraversal
+--- PASS: TestBoundedIndexExactSelectiveTraversal (0.00s)
+=== RUN   TestBoundedIndexOverflowDuplicatesOwnership
+--- PASS: TestBoundedIndexOverflowDuplicatesOwnership (0.00s)
+=== RUN   TestBoundedRowIDOracleFixtureProperty
+=== RUN   TestBoundedRowIDOracleFixtureProperty/512
+=== RUN   TestBoundedRowIDOracleFixtureProperty/4096
+=== RUN   TestBoundedRowIDOracleFixtureProperty/65536
+--- PASS: TestBoundedRowIDOracleFixtureProperty (4.73s)
+    --- PASS: TestBoundedRowIDOracleFixtureProperty/512 (3.13s)
+    --- PASS: TestBoundedRowIDOracleFixtureProperty/4096 (0.78s)
+    --- PASS: TestBoundedRowIDOracleFixtureProperty/65536 (0.82s)
+=== RUN   TestBoundedBudgetsCancellationAndClose
+--- PASS: TestBoundedBudgetsCancellationAndClose (0.00s)
+=== RUN   TestBoundedRowIDBudgetsAndExactStop
+--- PASS: TestBoundedRowIDBudgetsAndExactStop (0.00s)
+=== RUN   TestBoundedOverflowCancellationOnReread
+--- PASS: TestBoundedOverflowCancellationOnReread (0.00s)
+=== RUN   TestBoundedCancellationInsidePageAdmission
+--- PASS: TestBoundedCancellationInsidePageAdmission (0.00s)
+=== RUN   TestBoundedEndpointCopyAdmission
+--- PASS: TestBoundedEndpointCopyAdmission (0.00s)
+=== RUN   TestRelationalCursorParseAllocationPreflight
+--- PASS: TestRelationalCursorParseAllocationPreflight (0.00s)
+=== RUN   TestOracleRowsAllPageSizes
+=== RUN   TestOracleRowsAllPageSizes/512
+=== RUN   TestOracleRowsAllPageSizes/4096
+=== RUN   TestOracleRowsAllPageSizes/65536
+--- PASS: TestOracleRowsAllPageSizes (0.05s)
+    --- PASS: TestOracleRowsAllPageSizes/512 (0.03s)
+    --- PASS: TestOracleRowsAllPageSizes/4096 (0.01s)
+    --- PASS: TestOracleRowsAllPageSizes/65536 (0.01s)
+=== RUN   TestOracleIntegerWidthsAndSchema
+--- PASS: TestOracleIntegerWidthsAndSchema (0.00s)
+=== RUN   TestCursorCancellationAndEarlyStop
+--- PASS: TestCursorCancellationAndEarlyStop (0.00s)
+=== RUN   TestMalformedPageParser
+=== RUN   TestMalformedPageParser/type
+=== RUN   TestMalformedPageParser/array
+=== RUN   TestMalformedPageParser/content
+=== RUN   TestMalformedPageParser/fragments
+=== RUN   TestMalformedPageParser/cell
+=== RUN   TestMalformedPageParser/free
+--- PASS: TestMalformedPageParser (0.00s)
+    --- PASS: TestMalformedPageParser/type (0.00s)
+    --- PASS: TestMalformedPageParser/array (0.00s)
+    --- PASS: TestMalformedPageParser/content (0.00s)
+    --- PASS: TestMalformedPageParser/fragments (0.00s)
+    --- PASS: TestMalformedPageParser/cell (0.00s)
+    --- PASS: TestMalformedPageParser/free (0.00s)
+=== RUN   TestOracleInteriorSchemaAndOverflow
+--- PASS: TestOracleInteriorSchemaAndOverflow (0.00s)
+=== RUN   TestIndexRangeBoundariesAndStorageClasses
+=== RUN   TestIndexRangeBoundariesAndStorageClasses/unbounded
+=== RUN   TestIndexRangeBoundariesAndStorageClasses/null_prefix
+=== RUN   TestIndexRangeBoundariesAndStorageClasses/nan_as_null
+=== RUN   TestIndexRangeBoundariesAndStorageClasses/numeric_equality
+=== RUN   TestIndexRangeBoundariesAndStorageClasses/exact_integer_precision
+=== RUN   TestIndexRangeBoundariesAndStorageClasses/int64_end
+=== RUN   TestIndexRangeBoundariesAndStorageClasses/inclusive_partial
+=== RUN   TestIndexRangeBoundariesAndStorageClasses/inclusive_rowid
+=== RUN   TestIndexRangeBoundariesAndStorageClasses/minimum_rowid
+=== RUN   TestIndexRangeBoundariesAndStorageClasses/maximum_rowid
+=== RUN   TestIndexRangeBoundariesAndStorageClasses/absent_rowid
+=== RUN   TestIndexRangeBoundariesAndStorageClasses/complete_prefix
+=== RUN   TestIndexRangeBoundariesAndStorageClasses/later_prefix
+=== RUN   TestIndexRangeBoundariesAndStorageClasses/lower_after_prefix
+=== RUN   TestIndexRangeBoundariesAndStorageClasses/longer_prefix
+=== RUN   TestIndexRangeBoundariesAndStorageClasses/lower_after_complete_prefix
+=== RUN   TestIndexRangeBoundariesAndStorageClasses/field_not_string_prefix
+=== RUN   TestIndexRangeBoundariesAndStorageClasses/empty_blob
+=== RUN   TestIndexRangeBoundariesAndStorageClasses/binary_blob
+=== RUN   TestIndexRangeBoundariesAndStorageClasses/absent_prefix
+=== RUN   TestIndexRangeBoundariesAndStorageClasses/above_maximum
+=== RUN   TestIndexRangeBoundariesAndStorageClasses/absent_between
+--- PASS: TestIndexRangeBoundariesAndStorageClasses (0.00s)
+    --- PASS: TestIndexRangeBoundariesAndStorageClasses/unbounded (0.00s)
+    --- PASS: TestIndexRangeBoundariesAndStorageClasses/null_prefix (0.00s)
+    --- PASS: TestIndexRangeBoundariesAndStorageClasses/nan_as_null (0.00s)
+    --- PASS: TestIndexRangeBoundariesAndStorageClasses/numeric_equality (0.00s)
+    --- PASS: TestIndexRangeBoundariesAndStorageClasses/exact_integer_precision (0.00s)
+    --- PASS: TestIndexRangeBoundariesAndStorageClasses/int64_end (0.00s)
+    --- PASS: TestIndexRangeBoundariesAndStorageClasses/inclusive_partial (0.00s)
+    --- PASS: TestIndexRangeBoundariesAndStorageClasses/inclusive_rowid (0.00s)
+    --- PASS: TestIndexRangeBoundariesAndStorageClasses/minimum_rowid (0.00s)
+    --- PASS: TestIndexRangeBoundariesAndStorageClasses/maximum_rowid (0.00s)
+    --- PASS: TestIndexRangeBoundariesAndStorageClasses/absent_rowid (0.00s)
+    --- PASS: TestIndexRangeBoundariesAndStorageClasses/complete_prefix (0.00s)
+    --- PASS: TestIndexRangeBoundariesAndStorageClasses/later_prefix (0.00s)
+    --- PASS: TestIndexRangeBoundariesAndStorageClasses/lower_after_prefix (0.00s)
+    --- PASS: TestIndexRangeBoundariesAndStorageClasses/longer_prefix (0.00s)
+    --- PASS: TestIndexRangeBoundariesAndStorageClasses/lower_after_complete_prefix (0.00s)
+    --- PASS: TestIndexRangeBoundariesAndStorageClasses/field_not_string_prefix (0.00s)
+    --- PASS: TestIndexRangeBoundariesAndStorageClasses/empty_blob (0.00s)
+    --- PASS: TestIndexRangeBoundariesAndStorageClasses/binary_blob (0.00s)
+    --- PASS: TestIndexRangeBoundariesAndStorageClasses/absent_prefix (0.00s)
+    --- PASS: TestIndexRangeBoundariesAndStorageClasses/above_maximum (0.00s)
+    --- PASS: TestIndexRangeBoundariesAndStorageClasses/absent_between (0.00s)
+=== RUN   TestIndexRangeCompositePrefixesAndOwnedValues
+--- PASS: TestIndexRangeCompositePrefixesAndOwnedValues (0.00s)
+=== RUN   TestIndexRangeDuplicatePrefixesAcrossPages
+--- PASS: TestIndexRangeDuplicatePrefixesAcrossPages (0.00s)
+=== RUN   TestIndexRangeDoesNotReadUnrelatedSubtrees
+--- PASS: TestIndexRangeDoesNotReadUnrelatedSubtrees (0.00s)
+=== RUN   TestIndexRangeInteriorOverflowProbeReread
+--- PASS: TestIndexRangeInteriorOverflowProbeReread (0.00s)
+=== RUN   TestIndexRangeOracleFixturesAllPageSizes
+=== RUN   TestIndexRangeOracleFixturesAllPageSizes/512
+=== RUN   TestIndexRangeOracleFixturesAllPageSizes/4096
+=== RUN   TestIndexRangeOracleFixturesAllPageSizes/65536
+--- PASS: TestIndexRangeOracleFixturesAllPageSizes (0.50s)
+    --- PASS: TestIndexRangeOracleFixturesAllPageSizes/512 (0.22s)
+    --- PASS: TestIndexRangeOracleFixturesAllPageSizes/4096 (0.10s)
+    --- PASS: TestIndexRangeOracleFixturesAllPageSizes/65536 (0.18s)
+=== RUN   TestIndexRangeEmptyCancellationAndClose
+--- PASS: TestIndexRangeEmptyCancellationAndClose (0.00s)
+=== RUN   TestIndexRangeCancellationDuringOverflowReread
+--- PASS: TestIndexRangeCancellationDuringOverflowReread (0.00s)
+=== RUN   TestIndexRangeValidationAndLimitsInMemory
+=== RUN   TestIndexRangeValidationAndLimitsInMemory/depth
+=== RUN   TestIndexRangeValidationAndLimitsInMemory/visited
+--- PASS: TestIndexRangeValidationAndLimitsInMemory (0.20s)
+    --- PASS: TestIndexRangeValidationAndLimitsInMemory/depth (0.00s)
+    --- PASS: TestIndexRangeValidationAndLimitsInMemory/visited (0.16s)
+=== RUN   TestIndexRangeMalformedOwnershipInMemory
+=== RUN   TestIndexRangeMalformedOwnershipInMemory/shared_chain
+=== RUN   TestIndexRangeMalformedOwnershipInMemory/overflow_cycle
+=== RUN   TestIndexRangeMalformedOwnershipInMemory/overflow_as_child
+=== RUN   TestIndexRangeMalformedOwnershipInMemory/repeated_child
+=== RUN   TestIndexRangeMalformedOwnershipInMemory/parent_bounds
+--- PASS: TestIndexRangeMalformedOwnershipInMemory (0.00s)
+    --- PASS: TestIndexRangeMalformedOwnershipInMemory/shared_chain (0.00s)
+    --- PASS: TestIndexRangeMalformedOwnershipInMemory/overflow_cycle (0.00s)
+    --- PASS: TestIndexRangeMalformedOwnershipInMemory/overflow_as_child (0.00s)
+    --- PASS: TestIndexRangeMalformedOwnershipInMemory/repeated_child (0.00s)
+    --- PASS: TestIndexRangeMalformedOwnershipInMemory/parent_bounds (0.00s)
+=== RUN   TestIndexOracleScanAndSeekAllPageSizes
+=== RUN   TestIndexOracleScanAndSeekAllPageSizes/512
+=== RUN   TestIndexOracleScanAndSeekAllPageSizes/4096
+=== RUN   TestIndexOracleScanAndSeekAllPageSizes/65536
+--- PASS: TestIndexOracleScanAndSeekAllPageSizes (0.53s)
+    --- PASS: TestIndexOracleScanAndSeekAllPageSizes/512 (0.20s)
+    --- PASS: TestIndexOracleScanAndSeekAllPageSizes/4096 (0.12s)
+    --- PASS: TestIndexOracleScanAndSeekAllPageSizes/65536 (0.21s)
+=== RUN   TestIndexInteriorRecordsAndOverflow
+--- PASS: TestIndexInteriorRecordsAndOverflow (0.00s)
+=== RUN   TestIndexStorageClassesAndExactNumericComparison
+--- PASS: TestIndexStorageClassesAndExactNumericComparison (0.00s)
+=== RUN   TestIndexCompositeKeysAndOwnedValues
+--- PASS: TestIndexCompositeKeysAndOwnedValues (0.00s)
+=== RUN   TestIndexCancellationCloseAndCallback
+--- PASS: TestIndexCancellationCloseAndCallback (0.00s)
+=== RUN   TestIndexKeyValidation
+--- PASS: TestIndexKeyValidation (0.00s)
+=== RUN   TestIndexMalformedPageParserInMemory
+=== RUN   TestIndexMalformedPageParserInMemory/type
+=== RUN   TestIndexMalformedPageParserInMemory/array
+=== RUN   TestIndexMalformedPageParserInMemory/content
+=== RUN   TestIndexMalformedPageParserInMemory/fragments
+=== RUN   TestIndexMalformedPageParserInMemory/cell_offset
+=== RUN   TestIndexMalformedPageParserInMemory/cell_overlap
+=== RUN   TestIndexMalformedPageParserInMemory/freeblock_offset
+=== RUN   TestIndexMalformedPageParserInMemory/freeblock_overlap
+=== RUN   TestIndexMalformedPageParserInMemory/truncated_cell
+--- PASS: TestIndexMalformedPageParserInMemory (0.00s)
+    --- PASS: TestIndexMalformedPageParserInMemory/type (0.00s)
+    --- PASS: TestIndexMalformedPageParserInMemory/array (0.00s)
+    --- PASS: TestIndexMalformedPageParserInMemory/content (0.00s)
+    --- PASS: TestIndexMalformedPageParserInMemory/fragments (0.00s)
+    --- PASS: TestIndexMalformedPageParserInMemory/cell_offset (0.00s)
+    --- PASS: TestIndexMalformedPageParserInMemory/cell_overlap (0.00s)
+    --- PASS: TestIndexMalformedPageParserInMemory/freeblock_offset (0.00s)
+    --- PASS: TestIndexMalformedPageParserInMemory/freeblock_overlap (0.00s)
+    --- PASS: TestIndexMalformedPageParserInMemory/truncated_cell (0.00s)
+=== RUN   TestIndexEmptyAndPageOneLayouts
+--- PASS: TestIndexEmptyAndPageOneLayouts (0.00s)
+=== RUN   TestIndexInMemoryTraversalBounds
+=== RUN   TestIndexInMemoryTraversalBounds/depth
+=== RUN   TestIndexInMemoryTraversalBounds/cycle
+=== RUN   TestIndexInMemoryTraversalBounds/outside_database
+=== RUN   TestIndexInMemoryTraversalBounds/key_order
+--- PASS: TestIndexInMemoryTraversalBounds (0.00s)
+    --- PASS: TestIndexInMemoryTraversalBounds/depth (0.00s)
+    --- PASS: TestIndexInMemoryTraversalBounds/cycle (0.00s)
+    --- PASS: TestIndexInMemoryTraversalBounds/outside_database (0.00s)
+    --- PASS: TestIndexInMemoryTraversalBounds/key_order (0.00s)
+=== RUN   TestMutableTableModel
+=== RUN   TestMutableTableModel/512
+=== RUN   TestMutableTableModel/4096
+=== RUN   TestMutableTableModel/65536
+--- PASS: TestMutableTableModel (5.78s)
+    --- PASS: TestMutableTableModel/512 (0.56s)
+    --- PASS: TestMutableTableModel/4096 (1.67s)
+    --- PASS: TestMutableTableModel/65536 (3.55s)
+=== RUN   TestMutableTableRootOneAndBoundaries
+--- PASS: TestMutableTableRootOneAndBoundaries (0.00s)
+=== RUN   TestMutableIndexModel
+=== RUN   TestMutableIndexModel/512
+=== RUN   TestMutableIndexModel/4096
+=== RUN   TestMutableIndexModel/65536
+--- PASS: TestMutableIndexModel (2.69s)
+    --- PASS: TestMutableIndexModel/512 (0.37s)
+    --- PASS: TestMutableIndexModel/4096 (0.85s)
+    --- PASS: TestMutableIndexModel/65536 (1.47s)
+=== RUN   TestMutableLocalWorkAndReuse
+--- PASS: TestMutableLocalWorkAndReuse (0.33s)
+=== RUN   TestOwnershipMemoryValidation
+=== RUN   TestOwnershipMemoryValidation/live_listed_free
+=== RUN   TestOwnershipMemoryValidation/duplicate_root
+=== RUN   TestOwnershipMemoryValidation/unclaimed_page
+=== RUN   TestOwnershipMemoryValidation/duplicate_free
+=== RUN   TestOwnershipMemoryValidation/invalid_free
+--- PASS: TestOwnershipMemoryValidation (0.00s)
+    --- PASS: TestOwnershipMemoryValidation/live_listed_free (0.00s)
+    --- PASS: TestOwnershipMemoryValidation/duplicate_root (0.00s)
+    --- PASS: TestOwnershipMemoryValidation/unclaimed_page (0.00s)
+    --- PASS: TestOwnershipMemoryValidation/duplicate_free (0.00s)
+    --- PASS: TestOwnershipMemoryValidation/invalid_free (0.00s)
+=== RUN   TestReviewBoundedIndependentPrefixExhaustive
+    review_bounded_independent_test.go:205: independent exact-rational/prefix cases=42436 keys=120
+--- PASS: TestReviewBoundedIndependentPrefixExhaustive (3.95s)
+=== RUN   TestReviewBoundedIndependentRowIDBoundaries
+    review_bounded_independent_test.go:273: independent rowid boundary cases=5000 records=165
+--- PASS: TestReviewBoundedIndependentRowIDBoundaries (0.39s)
+=== RUN   TestReviewBoundedIndependentInteriorSelectivity
+    review_bounded_independent_test.go:308: at=0 reverse=false exact trace=[2 3 4] complete scan=21
+    review_bounded_independent_test.go:308: at=29 reverse=false exact trace=[2] complete scan=21
+    review_bounded_independent_test.go:308: at=30 reverse=false exact trace=[2 8 9] complete scan=21
+    review_bounded_independent_test.go:308: at=59 reverse=false exact trace=[2] complete scan=21
+    review_bounded_independent_test.go:308: at=60 reverse=false exact trace=[2 13 14] complete scan=21
+    review_bounded_independent_test.go:308: at=89 reverse=false exact trace=[2] complete scan=21
+    review_bounded_independent_test.go:308: at=90 reverse=false exact trace=[2 18 19] complete scan=21
+    review_bounded_independent_test.go:308: at=119 reverse=false exact trace=[2 18 22] complete scan=21
+    review_bounded_independent_test.go:308: at=0 reverse=true exact trace=[2 3 4] complete scan=21
+    review_bounded_independent_test.go:308: at=29 reverse=true exact trace=[2] complete scan=21
+    review_bounded_independent_test.go:308: at=30 reverse=true exact trace=[2 8 9] complete scan=21
+    review_bounded_independent_test.go:308: at=59 reverse=true exact trace=[2] complete scan=21
+    review_bounded_independent_test.go:308: at=60 reverse=true exact trace=[2 13 14] complete scan=21
+    review_bounded_independent_test.go:308: at=89 reverse=true exact trace=[2] complete scan=21
+    review_bounded_independent_test.go:308: at=90 reverse=true exact trace=[2 18 19] complete scan=21
+    review_bounded_independent_test.go:308: at=119 reverse=true exact trace=[2 18 22] complete scan=21
+--- PASS: TestReviewBoundedIndependentInteriorSelectivity (0.00s)
+=== RUN   TestReviewBoundedIndependentMemoryParserRefusal
+--- PASS: TestReviewBoundedIndependentMemoryParserRefusal (0.00s)
+=== RUN   TestReviewBoundedIndependentCancelDuringAdmission
+--- PASS: TestReviewBoundedIndependentCancelDuringAdmission (0.00s)
+=== RUN   TestReviewBoundedIndependentEndpointAdmission
+--- PASS: TestReviewBoundedIndependentEndpointAdmission (0.00s)
+=== RUN   TestReviewBoundedIndependentCumulativeStats
+--- PASS: TestReviewBoundedIndependentCumulativeStats (0.00s)
+=== RUN   TestReviewMutableInteriorIndexDrain
+=== RUN   TestReviewMutableInteriorIndexDrain/480
+=== RUN   TestReviewMutableInteriorIndexDrain/512
+=== RUN   TestReviewMutableInteriorIndexDrain/1024
+=== RUN   TestReviewMutableInteriorIndexDrain/2048
+=== RUN   TestReviewMutableInteriorIndexDrain/8192
+--- PASS: TestReviewMutableInteriorIndexDrain (7.67s)
+    --- PASS: TestReviewMutableInteriorIndexDrain/480 (0.72s)
+    --- PASS: TestReviewMutableInteriorIndexDrain/512 (1.10s)
+    --- PASS: TestReviewMutableInteriorIndexDrain/1024 (0.91s)
+    --- PASS: TestReviewMutableInteriorIndexDrain/2048 (1.31s)
+    --- PASS: TestReviewMutableInteriorIndexDrain/8192 (3.63s)
+=== RUN   TestReviewMutableTableVariableReplacements
+=== RUN   TestReviewMutableTableVariableReplacements/512
+=== RUN   TestReviewMutableTableVariableReplacements/1024
+=== RUN   TestReviewMutableTableVariableReplacements/2048
+--- PASS: TestReviewMutableTableVariableReplacements (3.86s)
+    --- PASS: TestReviewMutableTableVariableReplacements/512 (0.78s)
+    --- PASS: TestReviewMutableTableVariableReplacements/1024 (1.62s)
+    --- PASS: TestReviewMutableTableVariableReplacements/2048 (1.46s)
+=== RUN   TestReviewMutableIndexPayloadLimitRoundTrip
+--- PASS: TestReviewMutableIndexPayloadLimitRoundTrip (0.15s)
+=== RUN   TestReviewCursorRejectsMalformedStructureMemory
+=== RUN   TestReviewCursorRejectsMalformedStructureMemory/1/unequal-depth
+=== RUN   TestReviewCursorRejectsMalformedStructureMemory/1/empty-child
+=== RUN   TestReviewCursorRejectsMalformedStructureMemory/1/empty-interior-root
+=== RUN   TestReviewCursorRejectsMalformedStructureMemory/2/unequal-depth
+=== RUN   TestReviewCursorRejectsMalformedStructureMemory/2/empty-child
+=== RUN   TestReviewCursorRejectsMalformedStructureMemory/2/empty-interior-root
+--- PASS: TestReviewCursorRejectsMalformedStructureMemory (0.00s)
+    --- PASS: TestReviewCursorRejectsMalformedStructureMemory/1/unequal-depth (0.00s)
+    --- PASS: TestReviewCursorRejectsMalformedStructureMemory/1/empty-child (0.00s)
+    --- PASS: TestReviewCursorRejectsMalformedStructureMemory/1/empty-interior-root (0.00s)
+    --- PASS: TestReviewCursorRejectsMalformedStructureMemory/2/unequal-depth (0.00s)
+    --- PASS: TestReviewCursorRejectsMalformedStructureMemory/2/empty-child (0.00s)
+    --- PASS: TestReviewCursorRejectsMalformedStructureMemory/2/empty-interior-root (0.00s)
+=== RUN   TestReviewCursorAllowsSchemaUnaryRootMemory
+--- PASS: TestReviewCursorAllowsSchemaUnaryRootMemory (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	30.991s

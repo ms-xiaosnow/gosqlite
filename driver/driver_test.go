@@ -103,7 +103,7 @@ func TestConnectorAndContext(t *testing.T) {
 	}
 	db := sql.OpenDB(connector)
 	defer db.Close()
-	if _, err := db.Query("SELECT id FROM samples ORDER BY id"); !errors.Is(err, sqlite.ErrMemoryLimit) {
+	if _, err := db.Query("SELECT id FROM samples ORDER BY id+0"); !errors.Is(err, sqlite.ErrMemoryLimit) {
 		t.Fatal(err)
 	}
 	ctx, cancel := context.WithCancel(context.Background())

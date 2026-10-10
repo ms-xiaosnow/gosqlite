@@ -1,0 +1,9 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestBooleanAliasOnNativeProvenance
+--- PASS: TestBooleanAliasOnNativeProvenance (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.007s
+=== RUN   TestDriverBooleanAliasOnPreparedReuse
+--- PASS: TestDriverBooleanAliasOnPreparedReuse (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.006s

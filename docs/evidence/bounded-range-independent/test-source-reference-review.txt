@@ -1,0 +1,171 @@
+=== internal/btree/bounded_oracle_test.go
+package btree
+
+24:func boundedOracleSQL(t *testing.T, cli, path, sql string) string {
+26:	cmd := exec.Command(cli, "-batch", "-bail", path)
+34:func boundedLiteral(v any) string {
+66:func boundedOracleCompare(key []any) string {
+75:func boundedOraclePredicate(lo, hi *IndexBound) string {
+96:func boundedIDs(keys [][]any) string {
+113:func TestBoundedSQLite354Oracle(t *testing.T) {
+114:	cli := os.Getenv("GOSQLITE_SQLITE354")
+164:			raw, err := os.ReadFile(path)
+181:			r, err := pager.Open(path)
+218:			scan.Close()
+261:				c.Close()
+274:			if err = r.Close(); err != nil {
+277:			raw, err = os.ReadFile(path)
+285:			r, err = pager.Open(path)
+297:			c.Close()
+298:			if err = r.Close(); err != nil {
+=== internal/btree/bounded_range_test.go
+package btree
+
+19:func collectBoundedIndex(t *testing.T, c *BoundedIndexCursor) [][]any {
+21:	defer c.Close()
+43:func boundedWant(keys [][]any, lo, hi *IndexBound, rev bool) [][]any {
+67:func TestBoundedIndexCompositeProperty(t *testing.T) {
+104:func sortKeys(keys [][]any) {
+111:func TestBoundedIndexExactSelectiveTraversal(t *testing.T) {
+147:func TestBoundedIndexOverflowDuplicatesOwnership(t *testing.T) {
+188:func TestBoundedRowIDOracleFixtureProperty(t *testing.T) {
+232:						c.Close()
+262:func TestBoundedBudgetsCancellationAndClose(t *testing.T) {
+275:			c.Close()
+319:	c.Close()
+328:func TestBoundedRowIDBudgetsAndExactStop(t *testing.T) {
+369:		c.Close()
+383:			c.Close()
+400:			c.Close()
+420:	c.Close()
+436:func TestBoundedOverflowCancellationOnReread(t *testing.T) {
+461:	c.Close()
+=== internal/btree/cursor_budget_test.go
+package btree
+
+12:func TestRelationalCursorParseAllocationPreflight(t *testing.T) {
+=== internal/btree/cursor_test.go
+package btree
+
+30:func openFixture(t *testing.T, size int) *pager.Reader {
+36:	r, e := pager.Open(p)
+41:		if e := r.Close(); e != nil {
+48:func schemaRoot(t *testing.T, r *pager.Reader, name string) uint32 {
+63:func TestOracleRowsAllPageSizes(t *testing.T) {
+64:	expected, e := os.ReadFile(filepath.Join("..", "..", "testdata", "readonly", "samples.json"))
+80:			before, e := os.ReadFile(path)
+89:			defer c.Close()
+145:			after, e := os.ReadFile(path)
+156:func TestOracleIntegerWidthsAndSchema(t *testing.T) {
+192:func TestCursorCancellationAndEarlyStop(t *testing.T) {
+200:	defer c.Close()
+220:	c.Close()
+226:func TestMalformedPageParser(t *testing.T) {
+255:func TestOracleInteriorSchemaAndOverflow(t *testing.T) {
+260:	r, e := pager.Open(path)
+264:	defer r.Close()
+276:	expected, e := os.ReadFile(filepath.Join("..", "..", "testdata", "readonly", "schema.json"))
+=== internal/btree/index_range_test.go
+package btree
+
+18:func collectIndexRange(t *testing.T, c *IndexRangeCursor) [][]any {
+20:	defer c.Close()
+41:func readIndexRange(t *testing.T, r PageReader, root uint32, info KeyInfo, lower, prefix []any) [][]any {
+52:func makeIndexRangeTree(t *testing.T, keys [][]any) (*indexTestReader, uint32) {
+73:func TestIndexRangeBoundariesAndStorageClasses(t *testing.T) {
+124:func TestIndexRangeCompositePrefixesAndOwnedValues(t *testing.T) {
+161:	defer c.Close()
+176:func TestIndexRangeDuplicatePrefixesAcrossPages(t *testing.T) {
+201:func TestIndexRangeDoesNotReadUnrelatedSubtrees(t *testing.T) {
+228:func TestIndexRangeInteriorOverflowProbeReread(t *testing.T) {
+258:func TestIndexRangeOracleFixturesAllPageSizes(t *testing.T) {
+286:func TestIndexRangeEmptyCancellationAndClose(t *testing.T) {
+309:	if err := c.Close(); err != nil {
+336:func TestIndexRangeCancellationDuringOverflowReread(t *testing.T) {
+346:	defer c.Close()
+361:func TestIndexRangeValidationAndLimitsInMemory(t *testing.T) {
+408:		defer c.Close()
+420:func TestIndexRangeMalformedOwnershipInMemory(t *testing.T) {
+463:				defer c.Close()
+=== internal/btree/index_read_test.go
+package btree
+
+29:func newIndexTestReader() *indexTestReader {
+55:func addIndexTestPage(t *testing.T, r *indexTestReader, n uint32, leaf bool, keys [][]any, children []uint32) {
+125:func TestIndexOracleScanAndSeekAllPageSizes(t *testing.T) {
+177:func TestIndexInteriorRecordsAndOverflow(t *testing.T) {
+206:func TestIndexStorageClassesAndExactNumericComparison(t *testing.T) {
+237:func TestIndexCompositeKeysAndOwnedValues(t *testing.T) {
+245:	defer c.Close()
+271:func TestIndexCancellationCloseAndCallback(t *testing.T) {
+288:	if err := c.Close(); err != nil {
+307:func TestIndexKeyValidation(t *testing.T) {
+323:func TestIndexMalformedPageParserInMemory(t *testing.T) {
+376:func TestIndexEmptyAndPageOneLayouts(t *testing.T) {
+399:func TestIndexInMemoryTraversalBounds(t *testing.T) {
+=== internal/btree/mutable_oracle_test.go
+//go:build oracle
+
+20:func mutableOracle(t *testing.T, path, sql string) string {
+22:	exe := os.Getenv("SQLITE_ORACLE")
+26:	cmd := exec.Command(exe, "-batch", "-bail", "-noheader", "-list", path)
+34:func TestMutableDurableOracle(t *testing.T) {
+36:	exe := os.Getenv("SQLITE_ORACLE")
+40:	if version, e := exec.Command(exe, "-version").Output(); e != nil || !strings.HasPrefix(string(version), buildinfo.SQLiteBaseline+" ") {
+46:			tx, e := pager.OpenTx(ctx, path, pager.Options{Create: true, PageSize: size, MaxDirtyPages: 16384})
+50:			defer tx.Close()
+102:			tx, e = pager.OpenTx(ctx, path, pager.Options{MaxDirtyPages: 16384})
+106:			defer tx.Close()
+143:			tx, e = pager.OpenTx(ctx, path, pager.Options{MaxDirtyPages: 16384})
+147:			defer tx.Close()
+=== internal/btree/mutable_test.go
+package btree
+
+27:func newMemoryPages(size uint32) *memoryPages {
+87:func assertTableModel(t *testing.T, p *memoryPages, root uint32, model map[int64][]any) {
+98:	defer c.Close()
+113:func TestMutableTableModel(t *testing.T) {
+176:func TestMutableTableRootOneAndBoundaries(t *testing.T) {
+208:func makeIndexKey(id int64, version int) []any {
+228:func assertIndexModel(t *testing.T, p *memoryPages, root uint32, model map[int64][]any) {
+239:	defer c.Close()
+250:func TestMutableIndexModel(t *testing.T) {
+300:func TestMutableLocalWorkAndReuse(t *testing.T) {
+=== internal/btree/ownership_test.go
+package btree
+
+27:func ownershipFixture() ownershipMemory {
+42:func TestOwnershipMemoryValidation(t *testing.T) {
+=== internal/btree/review_bounded_independent_test.go
+package btree
+
+24:func reviewClass(v any) int {
+42:func reviewField(a, b any) int {
+90:func reviewPrefix(a, b []any) int {
+98:func reviewMatches(k []any, l, u *IndexBound) bool {
+116:func reviewTree(t *testing.T, keys [][]any, fanout int) (*indexTestReader, uint32) {
+148:func TestReviewBoundedIndependentPrefixExhaustive(t *testing.T) {
+207:func TestReviewBoundedIndependentRowIDBoundaries(t *testing.T) {
+269:			c.Close()
+275:func TestReviewBoundedIndependentInteriorSelectivity(t *testing.T) {
+294:	full.Close()
+312:func TestReviewBoundedIndependentMemoryParserRefusal(t *testing.T) {
+321:			c.Close()
+354:func TestReviewBoundedIndependentCancelDuringAdmission(t *testing.T) {
+366:func TestReviewBoundedIndependentEndpointAdmission(t *testing.T) {
+377:func TestReviewBoundedIndependentCumulativeStats(t *testing.T) {
+401:		c.Close()
+=== internal/btree/review_mutation_test.go
+package btree
+
+20:func reviewTreeLevels(t *testing.T, p *memoryPages, root uint32, kind TreeKind, info KeyInfo) int {
+54:func reviewIndexModel(t *testing.T, p *memoryPages, root uint32, info KeyInfo, model map[int64][]any) {
+65:	defer c.Close()
+81:func TestReviewMutableInteriorIndexDrain(t *testing.T) {
+153:func TestReviewMutableTableVariableReplacements(t *testing.T) {
+192:func TestReviewMutableIndexPayloadLimitRoundTrip(t *testing.T) {
+232:func TestReviewCursorRejectsMalformedStructureMemory(t *testing.T) {
+294:						defer c.Close()
+303:						defer c.Close()
+317:func TestReviewCursorAllowsSchemaUnaryRootMemory(t *testing.T) {
+349:	defer c.Close()

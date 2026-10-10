@@ -1,0 +1,40 @@
+source=/workspace/scratch/5e06a74e5f65/durable-restart/sql-rowid-range-independent-copy-v1
+go version go1.27.2 linux/amd64
++ go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ go test ./sqlite ./driver -run \^\(TestRowIDRange\|TestDriverRowIDRange\|TestStreamingMemoryCancellationAndClosure\|TestConnectorAndContext\) -count=1 -v 
+=== RUN   TestRowIDRangeRationalBoundaryLaw
+--- PASS: TestRowIDRangeRationalBoundaryLaw (0.00s)
+=== RUN   TestRowIDRangeSourceMemoryQuotasWorkAndOwnership
+    plan_rowid_range_internal_test.go:127: reverse=false: 3 native range page calls/3 rows vs 828 full scan page calls/1028 rows
+    plan_rowid_range_internal_test.go:127: reverse=true: 3 native range page calls/3 rows vs 828 full scan page calls/1028 rows
+--- PASS: TestRowIDRangeSourceMemoryQuotasWorkAndOwnership (0.00s)
+=== RUN   TestRowIDRangeStorageClassesDirectionsAndCuts
+    plan_rowid_range_test.go:64: 1104 native/forced-scan storage-class, side, direction cases
+--- PASS: TestRowIDRangeStorageClassesDirectionsAndCuts (0.55s)
+=== RUN   TestRowIDRangeOrderProofLazyWorkAndBinding
+    plan_rowid_range_test.go:104: SELECT id,v FROM t WHERE id>=850 AND id<860 ORDER BY id DESC LIMIT 3 OFFSET 2: range=5 source rows; scan=1800 source rows
+    plan_rowid_range_test.go:104: SELECT id,v FROM t WHERE id>=850 AND id<860 ORDER BY 1 DESC NULLS FIRST LIMIT 3 OFFSET 2: range=5 source rows; scan=1800 source rows
+    plan_rowid_range_test.go:104: SELECT id AS rid,v FROM t WHERE id>=850 AND id<860 ORDER BY rid DESC LIMIT 3 OFFSET 2: range=5 source rows; scan=1800 source rows
+    plan_rowid_range_test.go:104: SELECT id AS rid,v FROM t WHERE rid>=850 AND rid<860 ORDER BY rid DESC LIMIT 3 OFFSET 2: range=5 source rows; scan=1800 source rows
+--- PASS: TestRowIDRangeOrderProofLazyWorkAndBinding (0.37s)
+=== RUN   TestRowIDRangeErrorOrderAndConservativeJoin
+--- PASS: TestRowIDRangeErrorOrderAndConservativeJoin (0.00s)
+=== RUN   TestRowIDRangeTransactionsSnapshotsCancelAndReopen
+=== RUN   TestRowIDRangeTransactionsSnapshotsCancelAndReopen/false
+=== RUN   TestRowIDRangeTransactionsSnapshotsCancelAndReopen/true
+--- PASS: TestRowIDRangeTransactionsSnapshotsCancelAndReopen (0.01s)
+    --- PASS: TestRowIDRangeTransactionsSnapshotsCancelAndReopen/false (0.00s)
+    --- PASS: TestRowIDRangeTransactionsSnapshotsCancelAndReopen/true (0.01s)
+=== RUN   TestStreamingMemoryCancellationAndClosure
+--- PASS: TestStreamingMemoryCancellationAndClosure (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.948s
+=== RUN   TestConnectorAndContext
+--- PASS: TestConnectorAndContext (0.00s)
+=== RUN   TestDriverRowIDRangePreparedStreamingAndRollback
+--- PASS: TestDriverRowIDRangePreparedStreamingAndRollback (0.00s)
+=== RUN   TestDriverRowIDRangeAvoidsOnlyProvenSort
+--- PASS: TestDriverRowIDRangeAvoidsOnlyProvenSort (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.012s

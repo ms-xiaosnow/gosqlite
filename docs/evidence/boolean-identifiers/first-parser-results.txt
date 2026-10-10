@@ -1,0 +1,11 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestBooleanIdentifierASTPrecedence
+--- PASS: TestBooleanIdentifierASTPrecedence (0.00s)
+=== RUN   TestBooleanIdentifierGrammar
+    boolean_identifier_test.go:77: parameters: []sql.Parameter{sql.Parameter{Index:1, Name:"?1"}, sql.Parameter{Index:2, Name:"?2"}, sql.Parameter{Index:3, Name:":false"}, sql.Parameter{Index:4, Name:""}}
+--- FAIL: TestBooleanIdentifierGrammar (0.00s)
+=== RUN   TestBooleanIdentifierRetainedRejections
+--- PASS: TestBooleanIdentifierRetainedRejections (0.00s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/sql	0.006s
+FAIL

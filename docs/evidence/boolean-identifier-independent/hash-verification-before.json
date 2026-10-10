@@ -1,0 +1,15 @@
+{
+  "baseline": {
+    "manifest_sha256": "8b060026749d944fc027840e834a840659566789668292a93902e6b1cc5728be",
+    "entries": 879,
+    "hash_mismatches": [],
+    "unlisted": []
+  },
+  "candidate": {
+    "manifest_sha256": "2d65674d219f87c89191826bef43168e264509dbfd4433dd21df1940b4f7ae39",
+    "entries": 970,
+    "hash_mismatches": [],
+    "unlisted": []
+  },
+  "ownership_exact": true
+}

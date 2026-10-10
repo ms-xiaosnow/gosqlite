@@ -1,0 +1,96 @@
+package sqlite
+
+import (
+	"context"
+	"errors"
+	sqlast "github.com/ms-xiaosnow/gosqlite/internal/sql"
+	"reflect"
+	"testing"
+)
+
+// Normal immutable SQL-created fixture; no physical or lifecycle faults.
+func TestIndependentAliasSameASTAndBudget(t *testing.T) {
+	db, _ := reviewVectorDB(t, Options{})
+	for _, q := range []string{`CREATE TABLE l(id INTEGER,flag INTEGER)`, `INSERT INTO l VALUES(1,0),(2,1)`, `CREATE TABLE r(id INTEGER)`, `INSERT INTO r VALUES(7)`} {
+		reviewVectorExec(t, db, q)
+	}
+	query := `SELECT l.id,?1 AS true,flag AS z,r.id FROM l LEFT JOIN r ON true AND (z OR 0) WHERE l.id>0 ORDER BY l.id`
+	stmt, err := sqlast.Parse(query)
+	if err != nil {
+		t.Fatal(err)
+	}
+	pristine, err := sqlast.Parse(query)
+	if err != nil {
+		t.Fatal(err)
+	}
+	sel := stmt.(*sqlast.Select)
+	reader, err := db.openReader(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer reader.Close()
+	for _, v := range []any{int64(0), int64(1), nil, "0", "1", int64(0)} {
+		ctx, params, err := db.bindSelect(context.Background(), sel, []any{v})
+		if err != nil {
+			t.Fatal(err)
+		}
+		rows, err := db.planRelational(ctx, reader, sel, params)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var got [][]any
+		for rows.Next() {
+			got = append(got, rows.Values())
+		}
+		err = rows.Err()
+		rows.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
+		var want [][]any
+		if v == int64(1) || v == "1" {
+			want = [][]any{{int64(1), v, int64(0), nil}, {int64(2), v, int64(1), int64(7)}}
+		}
+		if !reflect.DeepEqual(got, want) {
+			t.Fatalf("%v: got=%#v want=%#v", v, got, want)
+		}
+		if !reflect.DeepEqual(stmt, pristine) {
+			t.Fatal("plan mutated caller-owned AST")
+		}
+	}
+	// Pure-memory helper quotas target the extraction path itself.
+	original, err := sqlast.ParseExpr("z AND (z AND +z)")
+	if err != nil {
+		t.Fatal(err)
+	}
+	bound, err := sqlast.ParseExpr("1 AND (1 AND +1)")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, tc := range []struct {
+		name   string
+		limits RelationalLimits
+		cancel bool
+		want   error
+	}{
+		{"work", RelationalLimits{MaxWork: 2}, false, ErrQueryWorkLimit},
+		{"memory", RelationalLimits{MaxBytes: 16}, false, ErrMemoryLimit},
+		{"canceled", RelationalLimits{}, true, context.Canceled},
+	} {
+		ctx, cancel := context.WithCancel(context.Background())
+		if tc.cancel {
+			cancel()
+		}
+		budget, err := newRelationalBudget(WithRelationalLimits(ctx, tc.limits), 1<<20)
+		if err != nil {
+			t.Fatal(err)
+		}
+		scope := &relationalScope{budget: budget, slots: &table{index: map[string]int{}, ipk: -1}}
+		_, _, err = scope.extractOuterAliasTerms(original, bound, map[string]sqlast.Expr{"z": &sqlast.Literal{Value: int64(1)}})
+		cancel()
+		if !errors.Is(err, tc.want) {
+			t.Fatal(tc.name, err)
+		}
+	}
+	t.Log("Same AST remained structurally unchanged across six typed parameter plans; extractor work/memory/cancel limits preserved")
+}

@@ -1,0 +1,9 @@
+../toolchains/go1.27.2/bin/go test -tags oracle ./internal/testkit -run ^TestBooleanIdentifierOracle(Matrix|DML)$ -count=1 -v
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestBooleanIdentifierOracleMatrix
+    boolean_identifier_conformance_test.go:138: 2021 Boolean identifier values/classes/labels/error cases checked against pinned SQLite
+--- PASS: TestBooleanIdentifierOracleMatrix (8.07s)
+=== RUN   TestBooleanIdentifierOracleDML
+--- PASS: TestBooleanIdentifierOracleDML (0.02s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	8.089s

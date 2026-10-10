@@ -1,0 +1,7 @@
+Independent behavioral audit: aggregate/sqlite/driver tests and called fixture/oracle helpers inspected; intact SQL creation/read/write/shared snapshot/transaction/rollback/BUSY/cancel/checkpoint/ordinary close, pure-memory arithmetic/parser/budget. No physical/native fault, namespace or process termination paths.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.015s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.092s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.059s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	1.889s
+FOCUSED_EXIT=0

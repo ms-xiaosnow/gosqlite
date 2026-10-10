@@ -1,0 +1,159 @@
+//go:build oracle
+
+package testkit_test
+
+import (
+	"context"
+	"fmt"
+	"math/rand"
+	"os/exec"
+	"strings"
+	"testing"
+)
+
+// Independent review probes: ordinary intact SQL fixtures and completed read-only
+// official CLI comparisons only. No faults, namespace changes, recovery or kills.
+func TestIndependentAggregateLimitZeroOffset(t *testing.T) {
+	db, path := aggregateOracleFixture(t, false)
+	for _, q := range []string{
+		"SELECT count(*) LIMIT 0 OFFSET abs(-9223372036854775808)",
+		"SELECT count(*) LIMIT 0 OFFSET NULL",
+		"SELECT count(*) LIMIT 0 OFFSET 1.5",
+		"SELECT sum(x) FROM a LIMIT 0 OFFSET abs(-9223372036854775808)",
+		"SELECT count(*) FROM a,b LIMIT 0 OFFSET NULL",
+		"SELECT count(*) FROM a LIMIT (1-1) OFFSET 1.5",
+		"SELECT count(*) FROM empty_source LIMIT 0 OFFSET abs(-9223372036854775808)",
+	} {
+		t.Run(q, func(t *testing.T) { confCompare(t, confExpected(t, path, q), confNative(t, db, q)) })
+	}
+}
+func TestIndependentAggregateNumericEdges(t *testing.T) {
+	db, path := aggregateOracleFixture(t, false)
+	atoms := []string{
+		"'9223372036854775807'", "'9223372036854775808'", "'-9223372036854775808'", "'-9223372036854775809'",
+		"'18446744073709551615'", "'9007199254740993'", "'9007199254740993.0'", "'4503599627370497.0'",
+		"'-0.0'", "'0e999'", "'1e999'", "'-1e999'", "'1e-999'", "'-1e-999'",
+		"'1e-308'", "'2.2250738585072014e-308'", "'4.9406564584124654e-324'", "'1.7976931348623157e308'",
+		"'1.7976931348623159e308'", "'1.00000000000000011102230246251565404236316680908203125'",
+		"'0.1000000000000000055511151231257827021181583404541015625'", "'.1'", "'+.1'", "'-.1'", "'1.e2'",
+		"'1e2tail'", "' 123.5 tail'", "'000000000000000000000000000000000001'", "'123e'", "'123e-'", "'1.2.3'",
+		"CAST(x'310032' AS TEXT)", "CAST(x'310920' AS TEXT)", "CAST(x'0b31320c' AS TEXT)",
+		"x'39323233333732303336383534373735383037'", "x'39303037313939323534373430393933'", "x'2d302e30'",
+	}
+	for i, a := range atoms {
+		cols := []string{}
+		for _, fn := range []string{"sum", "total", "avg"} {
+			cols = append(cols, fn+"("+a+")", "typeof("+fn+"("+a+"))")
+		}
+		q := "SELECT " + strings.Join(cols, ",")
+		t.Run(fmt.Sprint(i), func(t *testing.T) { confCompare(t, confExpected(t, path, q), confNative(t, db, q)) })
+	}
+	for _, a := range []string{"9223372036854775807", "-9223372036854775808", "9007199254740993", "1e308", "9e999", "-9e999"} {
+		for _, b := range []string{"1.0", "0.0", "-1.0", "9007199254740992.0", "-9223372036854775808.0", "1e308", "-1e308"} {
+			expr := "CASE WHEN id=1 THEN " + a + " WHEN id=2 THEN " + b + " ELSE NULL END"
+			q := "SELECT sum(" + expr + "),total(" + expr + "),avg(" + expr + "),min(" + expr + "),max(" + expr + "),typeof(min(" + expr + ")),typeof(max(" + expr + ")) FROM a"
+			t.Run(a+"_"+b, func(t *testing.T) { confCompare(t, confExpected(t, path, q), confNative(t, db, q)) })
+		}
+	}
+}
+func TestIndependentAggregateJoinedScope(t *testing.T) {
+	db, path := aggregateOracleFixture(t, false)
+	for _, q := range []string{
+		"SELECT count(*),sum(a.id),sum(b.id),sum(c.id) FROM a LEFT JOIN b ON a.x=b.x LEFT JOIN b c ON c.x=a.x",
+		"SELECT count(*),min(a.n),max(b.n),sum(c.id) FROM a,b JOIN b c ON c.id=b.id WHERE a.id=b.x",
+		"SELECT count(*),sum(a.id),sum(c.id) FROM a LEFT JOIN b ON a.id=b.x LEFT JOIN b c ON b.id=c.id WHERE a.id>2",
+		"SELECT count(*) AS cnt,1 AS keep FROM a,b ON keep WHERE keep ORDER BY cnt",
+		"SELECT count(*),sum(x+1),min(n),max(CAST(n AS BLOB)) FROM a WHERE id=1 OR id=3 OR id=5",
+		"SELECT count(*) AS \"sum(x)\",sum(x) AS \"Count\" FROM a ORDER BY \"sum(x)\"",
+		"SELECT sum(x)='0',total(x)='0',avg(x)='0' FROM a WHERE 0",
+		"SELECT count(*)=0,count(*)='0',typeof(count(*)) FROM empty_source",
+		"SELECT CASE WHEN 0 THEN sum(abs(-9223372036854775808)) ELSE 3 END FROM a WHERE 0",
+	} {
+		t.Run(q, func(t *testing.T) { confCompare(t, confExpected(t, path, q), confNative(t, db, q)) })
+	}
+}
+
+func TestIndependentAggregateExplainAndBindOrder(t *testing.T) {
+	db, path := aggregateOracleFixture(t, false)
+	for _, q := range []string{
+		"EXPLAIN QUERY PLAN SELECT count(*) LIMIT abs(-9223372036854775808)",
+		"EXPLAIN QUERY PLAN SELECT count(*) LIMIT 1 OFFSET NULL",
+		"EXPLAIN QUERY PLAN SELECT count(*) FROM a LIMIT NULL",
+	} {
+		t.Run(q, func(t *testing.T) {
+			output, err := exec.Command(confOracle(t), "-batch", "-bail", "-readonly", path, q).CombinedOutput()
+			if err != nil {
+				t.Fatal(err, string(output))
+			}
+			rows, err := db.Query(context.Background(), q)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer rows.Close()
+			if !rows.Next() || rows.Err() != nil || rows.RelationalStats().SourceOpens != 0 {
+				t.Fatal(rows.Err(), rows.RelationalStats())
+			}
+		})
+	}
+	for _, tc := range []struct{ q, category string }{
+		{"SELECT count(*) LIMIT NULL OFFSET missing", "no such column"},
+		{"SELECT count(*) LIMIT abs(-9223372036854775808) OFFSET missing", "no such column"},
+		{"SELECT count(*) LIMIT NULL OFFSET abs()", "wrong number of arguments"},
+		{"SELECT count(*) LIMIT 0 OFFSET missing", "no such column"},
+		{"SELECT count(*) LIMIT 0 OFFSET abs()", "wrong number of arguments"},
+	} {
+		t.Run(tc.q, func(t *testing.T) {
+			output, err := exec.Command(confOracle(t), "-batch", "-bail", "-readonly", path, tc.q).CombinedOutput()
+			if err == nil || !strings.Contains(string(output), tc.category) {
+				t.Fatal(err, string(output))
+			}
+			rows, err := db.Query(context.Background(), tc.q)
+			if rows != nil {
+				rows.Close()
+			}
+			if err == nil || !strings.Contains(err.Error(), tc.category) {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
+func TestIndependentAggregateNULOverflow(t *testing.T) {
+	db, path := aggregateOracleFixture(t, false)
+	q := "SELECT sum(CASE id WHEN 1 THEN 9223372036854775807 WHEN 2 THEN 1 ELSE CAST(x'300078' AS TEXT) END) FROM a"
+	output, err := exec.Command(confOracle(t), "-batch", "-bail", "-readonly", path, q).CombinedOutput()
+	if err == nil || !strings.Contains(string(output), "integer overflow") {
+		t.Fatal(err, string(output))
+	}
+	rows, err := db.Query(context.Background(), q)
+	if err == nil {
+		defer rows.Close()
+		for rows.Next() {
+			t.Logf("incorrect row: %#v", rows.Values())
+		}
+		err = rows.Err()
+	}
+	if err == nil || !strings.Contains(err.Error(), "integer overflow") {
+		t.Fatal(err)
+	}
+}
+
+// Decimal coercion spans leading/trailing digits and normal/subnormal exponents.
+func TestIndependentAggregateDecimalSequences(t *testing.T) {
+	db, path := aggregateOracleFixture(t, false)
+	r := rand.New(rand.NewSource(917354))
+	for n := 0; n < 256; n++ {
+		expr := "CASE id"
+		for id := 1; id <= 6; id++ {
+			sign := ""
+			if r.Intn(2) == 0 {
+				sign = "-"
+			}
+			decimal := fmt.Sprintf("%s%d.%018de%d", sign, r.Intn(1000000), r.Int63n(1000000000000000000), r.Intn(650)-330)
+			expr += fmt.Sprintf(" WHEN %d THEN '%s'", id, decimal)
+		}
+		expr += " END"
+		q := "SELECT sum(" + expr + "),total(" + expr + "),avg(" + expr + ") FROM a"
+		t.Run(fmt.Sprint(n), func(t *testing.T) { confCompare(t, confExpected(t, path, q), confNative(t, db, q)) })
+	}
+}

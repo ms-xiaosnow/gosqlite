@@ -1,0 +1,54 @@
+Exact8d7 combines reviewed Boolean/affinity/rank source816, bounded rowid/planner, identifiers/LEFT alias provenance and repaired global aggregates v3. Every patch applied by checked hunks; shared source bytes preserved. Plain Reader/Tx/exclusive and secondary ranges excluded.
+Aggregate original/reviewed tests audit: intact ordinary SQL/typed-value/parser errors, pure-memory arithmetic/work/cancellation, native and driver normal transactions/shared snapshots, pinned CLI comparisons normal EOF; prior complete source audits and guard retained. No restricted physical/native-fault/namespace/crash/hot-recovery/interrupted-publication/rekey workflows.
+8d7a0fcc5a2e3a83850ea780b64b403047677568
+2026-10-10T19:47:44Z
+Ordinary test source-reference guard PASS; behavioral review is still required.
+?   	github.com/ms-xiaosnow/gosqlite/benchmarks/ann	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.349s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	5.953s
+ok  	github.com/ms-xiaosnow/gosqlite/encryption	1.263s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ann	1.520s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/bit-rerank	0.016s
+?   	github.com/ms-xiaosnow/gosqlite/examples/encrypted	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-shared	0.040s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-wal	0.031s
+?   	github.com/ms-xiaosnow/gosqlite/examples/grams	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/half-rerank	0.014s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ivfflat	0.712s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/migrate-pgembedding	0.038s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/migration-full-table	0.065s
+?   	github.com/ms-xiaosnow/gosqlite/examples/migration-transition	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/pgembedding-import	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/readonly	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/similarity	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/sparse-exact	0.016s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/typed-ann-rerank	1.054s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/vector	0.281s
+?   	github.com/ms-xiaosnow/gosqlite/examples/wal	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/write	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/extension/grams13	1.408s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/registry	0.138s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/similarity	3.604s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	0.793s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector/ann	9.341s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	18.010s
+?   	github.com/ms-xiaosnow/gosqlite/internal/buildinfo	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/darwinfile	0.038s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	0.222s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/journal	0.016s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.469s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/record	0.004s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.159s
+?   	github.com/ms-xiaosnow/gosqlite/internal/testkit/fileview	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testscope	0.009s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.140s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/wal	1.047s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	0.280s
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	4.525s
+--- FAIL: TestGramsHighFrequencyFallbackAndLimits (10.28s)
+    plan_grams_test.go:223: common gram {ANNOpclass: ANNGeneration:0 ANNLists:0 ANNTrainingState: ANNEFSearch:0 ANNMaxEFSearch:0 ANNEffectiveEF:0 ANNProbes:0 ANNMaxProbes:0 ANNEffectiveProbes:0 ANNStopReason: ANNFallback: VectorMetric: VectorBitMetric: VectorRepresentation: VectorColumn: VectorDimensions:0 VectorTopK:0 VectorExact:false VectorRanking: Access:SCAN Table:docs Indexes:[] Method: MethodVersion:0 Fields:[] Namespace: GramLengths:[] EstimatedCandidates:0 Recheck:false Reason:rowid range requires an error-safe residual WHERE and defaults}
+--- FAIL: TestGramsConfiguredMatchSnapshotAndCandidates (0.54s)
+    plan_grams_test.go:260:  { 0 0  0 0 0 0 0 0       0 0 false  SCAN docs []  0 []  [] 0 false rowid range requires an error-safe residual WHERE and defaults} {0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 40 40} {0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 40 40}
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/sqlite	77.657s
+FAIL

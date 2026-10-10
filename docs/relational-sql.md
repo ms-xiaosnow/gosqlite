@@ -34,7 +34,7 @@ Options/QueryPlan/QueryStats layout changes in this slice.
 ## Deliberate unsupported boundaries
 
 `USING`, `NATURAL`, RIGHT/FULL joins, parenthesized joins, derived tables,
-subqueries/correlation, schema-qualified FROM, CTEs, aggregate/grouping,
+subqueries/correlation, schema-qualified FROM, CTEs, grouping/HAVING,
 DISTINCT/compound/window queries, COLLATE expressions, and INDEXED BY are not
 implemented. Unlisted schema/collation grammar still fails closed.
 
@@ -192,3 +192,13 @@ unmap/close/Sync failure, disk-full/permission, publication or interrupted-rekey
 workflow is qualified by this slice. The existing separately gated manual
 sources remain excluded. Native non-Linux runtime, broad SQL and full durability
 acceptance remain open.
+
+
+## Additive global-aggregate slice
+
+Global COUNT, SUM/TOTAL/AVG and one-argument MIN/MAX now use this same borrowed
+relation graph and budget, also adapting single-table and no-FROM inputs. The
+aggregate operator adds no public Rows/transaction lease and evaluates bound ON
+expressions in the input scope. GROUP BY/HAVING and mixed bare-column aggregates
+remain unsupported. See aggregate-sql.md; its separate tests/results do not imply
+new storage, recovery or broader relational acceptance.

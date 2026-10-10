@@ -472,3 +472,19 @@ No restricted manual tag, physical corruption/tamper/wrong-key/namespace/crash/
 hot-recovery/native-failure/interrupted-publication workflow was run. Target
 cross-compilation is not native runtime acceptance. Plain ownership, broader
 SQL/planner/migration code and independent M10 gates remain separately open.
+
+
+## Rowid/identifier/global aggregate ordinary gate
+
+Final source48370bbe2dc585c1b45821fbc360c525d156a9f5 completed the full guarded
+ordinary unit/vet/build, pinned oracle, separate full race, five target builds,
+module and unchanged-source checks at2026-10-10T20:23:10Z (exit0). Original8d7 ordinary
+FAIL and1e full-oracle FAIL are preserved; the exact query and genuine quota
+negative remain tested after the diagnosed corrections. Component and combined
+independent reports include exact source hashes and isolated negative controls.
+All executed new tests use intact ordinary databases, normal SQL/transaction/
+BUSY/cancel/close/reopen/snapshots, pure-memory arithmetic/AST/quota laws or pinned
+read-only CLI queries with normal process completion. No manual tag or physical
+corruption/tamper/wrong-key/namespace/crash/hot-recovery/native-I/O-failure/
+interrupted-publication/rekey workflow ran. Cross-builds remain compile evidence.
+Broader missing SQL/recovery/platform code and M10 gates are not waived.

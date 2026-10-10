@@ -1,0 +1,18 @@
+source=/workspace/scratch/5e06a74e5f65/durable-restart/sql-rowid-range-independent-copy-v1
+go version go1.27.2 linux/amd64
++ go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ go test -tags oracle ./internal/testkit -run \^TestOracleRowIDRangeSQL\$ -count=1 -v 
+=== RUN   TestOracleRowIDRangeSQL
+=== RUN   TestOracleRowIDRangeSQL/512
+    rowid_range_conformance_test.go:110: 354 exact values/types/order/error CLI comparisons
+=== RUN   TestOracleRowIDRangeSQL/4096
+    rowid_range_conformance_test.go:110: 354 exact values/types/order/error CLI comparisons
+=== RUN   TestOracleRowIDRangeSQL/65536
+    rowid_range_conformance_test.go:110: 354 exact values/types/order/error CLI comparisons
+--- PASS: TestOracleRowIDRangeSQL (4.44s)
+    --- PASS: TestOracleRowIDRangeSQL/512 (1.45s)
+    --- PASS: TestOracleRowIDRangeSQL/4096 (1.45s)
+    --- PASS: TestOracleRowIDRangeSQL/65536 (1.54s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	4.452s

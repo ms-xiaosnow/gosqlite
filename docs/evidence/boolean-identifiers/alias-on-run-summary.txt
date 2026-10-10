@@ -1,0 +1,9 @@
+alias-on-final-internal-sql: exit 0
+alias-on-final-native-focused: exit 0
+alias-on-final-scalar-oracle: exit 0
+alias-on-final-ordinary-oracle: exit 0
+alias-on-final-identifier-oracle-strict: exit 0
+alias-on-final-native-race: exit 0
+alias-on-final-vet: exit 0
+alias-on-final-oracle-vet: exit 0
+alias-on-final-build: exit 0

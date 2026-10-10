@@ -722,3 +722,49 @@ has both complete ordinary and pinned-oracle CI jobs SUCCESS in run38079679118
 at19:37:11Z; its exact Library-restored full unit/vet/build/oracle, focused race,
 five cross-builds and clean-tree checks passed19:38:52Z. This records terminal
 evidence without changing the earlier pre-correction failures.
+
+
+### Bounded rowid planning, identifier provenance and global aggregates
+
+This checkpoint integrates independently frozen and reviewed components, not a
+claim that broad SQLite SQL is complete. Native signed forward/reverse rowid
+interval cursors now feed real conservative inequality plans and proved rowid
+order elimination. Independent whole-query page evidence is6 versus829 calls,
+including planning; LIMIT0 and EXPLAIN still perform metadata planning. Secondary
+inequalities/covering/general order/JOIN pushdown/statistics remain separate code.
+
+TRUE/FALSE identifier parsing and SQLite's scoped direct LEFT-ON result-alias
+provenance are preserved through immutable binding. The global aggregate profile
+implements COUNT/SUM/TOTAL/AVG/MIN/MAX with bounded state, first-root snapshot and
+native SQLite-compatible arithmetic/storage classes. GROUP BY/HAVING, DISTINCT,
+windows, bare-column aggregate projections and broader ordering remain code gaps.
+Independent interaction probes cover these components together; each component's
+initial failures and fixes are retained in its own immutable evidence.
+
+Initial combined8d7a0f failed two unchanged grams scan-reason assertions. A real
+rowid planner diagnostic defect was fixed without changing those assertions:
+rejected order-only optimization leaves the existing plan intact, and genuine
+range rejection retains the preceding fallback explanation. Corrected1e413b4
+then passed full ordinary unit/vet/build but its full tagged oracle failed one
+obsolete sorting-quota assertion. Original SQL SELECT * FROM edge ORDER BY id
+now has a complete official value/type and rowid-plan positive at MaxSortBytes1;
+ORDER BY id+0 preserves an actual sort-quota negative and normal-quota official
+comparison. This is not removal of the original statement or its resource test.
+Both full-run failures remain exit1, and the one-path assertion correction was
+independently reviewed on exact final source48370bbe2dc585c1b45821fbc360c525d156a9f5.
+
+That exact final source passed complete CGO0 unit/vet/build, complete pinned
+ordinary SQLite3.54 oracle, full race, five target cross-builds, modules and full
+inventory with exit0 at2026-10-10T20:23:10Z. Exact commands/output are sql-final-commands.txt
+and sql-final-lead-checks.txt. All published non-document bytes equal this tested
+source. Plain ownership, secondary-range, grouping and new journal parsing code
+are excluded. CI and exact restored commit results will be recorded separately.
+
+Previous c89c88e74ec38adff2c752016cb07a96e90edbb3 completed CI38081496897 SUCCESS
+20:03:43Z (ordinary job114299164359 and oracle job114299164537); its exact Library-
+restored focused SQL/driver normal/race/oracle, full vet/build, five builds,
+modules and clean tree passed19:54:46Z. No conditional checkpoint qualifies native
+Windows/Darwin runtime, physical failures/recovery, independent security/legal or
+M10 final acceptance. The current compatibility matrix is consolidated; its old
+chronological statements are preserved in docs/history rather than left to
+contradict the current feature summary.

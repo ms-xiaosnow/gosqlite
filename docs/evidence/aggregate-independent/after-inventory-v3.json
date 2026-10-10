@@ -1,0 +1,10 @@
+{
+  "before_and_after_full_inventory_pass": true,
+  "candidate_tree": "e92277d411e0ca8702b5319566c7588549a9a517",
+  "baseline_tree": "1336a5d7b5e1a336fb01e012334cec776a61c4a7",
+  "candidate_files": 1062,
+  "owned_delta": 28,
+  "copy_only_addition": [
+    "internal/testkit/aggregate_reviewer_final_test.go"
+  ]
+}

@@ -1,0 +1,9 @@
+internal-sql: exit 0
+native-focused: exit 0
+scalar-oracle: exit 0
+ordinary-oracle: exit 0
+identifier-oracle-strict: exit 1
+native-race: exit 0
+vet: exit 0
+oracle-vet: exit 0
+build: exit 0

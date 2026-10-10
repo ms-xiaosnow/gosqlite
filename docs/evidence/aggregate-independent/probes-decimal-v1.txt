@@ -1,0 +1,4 @@
+Behavioral audit: 256 deterministic sequences of six decimal TEXT values using CASE against intact fixture and completed readonly oracle/native queries only.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	0.954s
+DECIMAL_SEQUENCE_EXIT=0

@@ -1,0 +1,14 @@
+#!/bin/bash
+set -uo pipefail
+root=/workspace/scratch/5e06a74e5f65/durable-restart
+cd "$root/sql-rowid-range-independent-copy-v1"
+export PATH="$root/toolchains/go1.27.2/bin:$PATH" GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off GOFLAGS=-buildvcs=false GOCACHE="$root/go-cache" GOPATH="$root/go-path" SQLITE_ORACLE="$root/toolchains/sqlite-build-3540000/sqlite3" CGO_ENABLED=0
+out="$root/gosqlite/docs/evidence/sql-rowid-range-independent"
+run() { local name=$1; shift; { echo "source=$PWD"; echo "CGO_ENABLED=$CGO_ENABLED"; go version; printf '+ go run ./internal/testscope\n'; go run ./internal/testscope && { printf '+ '; printf '%q ' "$@"; printf '\n'; "$@"; }; } >"$out/$name.log" 2>&1; rc=$?;echo "$rc" >"$out/$name.exit";tail -10 "$out/$name.log";if [ "$rc" != 0 ];then exit "$rc";fi; }
+pattern='^(TestReviewRowIDRange|TestRowIDRange|TestDriverRowIDRange|TestOrdinaryIndex|TestStreamingMemoryCancellationAndClosure|TestConnectorAndContext)'
+run final-native go test ./sqlite ./driver -run "$pattern" -count=1 -v
+CGO_ENABLED=1 run final-native-race go test -race ./sqlite ./driver -run "$pattern" -count=1 -v
+CGO_ENABLED=1 run final-oracle-race go test -race -tags oracle ./internal/testkit -run '^Test(OracleRowIDRangeSQL|ReviewRowIDRangeIndependentSQLite354)$' -count=1 -v
+run final-build go build ./...
+run final-vet go vet ./sqlite ./driver ./internal/btree
+run final-oracle-vet go vet -tags oracle ./internal/testkit

@@ -1,0 +1,23 @@
+2026-10-10T19:42:52Z
+Behavioral audit: review probes read fully; all added aggregate tests use intact SQL-created fixtures, ordinary reads/shared snapshots/rollback/BUSY/cancel/close/checkpoint and pure-memory arithmetic/parser/budget admission. NUL bytes are SQL values, never file-byte mutation. Oracle commands finish normally. No physical/native failures, namespace mutation, termination, hot recovery or interrupted rekey.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.005s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.168s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.128s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	2.895s
+FOCUSED_ORACLE_V3_EXIT=0
+Behavioral audit: review probes read fully; all added aggregate tests use intact SQL-created fixtures, ordinary reads/shared snapshots/rollback/BUSY/cancel/close/checkpoint and pure-memory arithmetic/parser/budget admission. NUL bytes are SQL values, never file-byte mutation. Oracle commands finish normally. No physical/native failures, namespace mutation, termination, hot recovery or interrupted rekey.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	1.025s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	1.295s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.228s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	4.184s
+FOCUSED_ORACLE_RACE_V3_EXIT=0
+VET_V3_EXIT=0
+BUILD_V3_EXIT=0
+CROSS_V3_linux/arm64=0
+CROSS_V3_darwin/arm64=0
+CROSS_V3_darwin/amd64=0
+CROSS_V3_windows/amd64=0
+CROSS_V3_windows/arm64=0
+2026-10-10T19:43:35Z

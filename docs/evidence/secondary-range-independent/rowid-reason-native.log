@@ -1,0 +1,6 @@
+=== RUN   TestRowIDRangeRejectedOrderPreservesPlan
+--- PASS: TestRowIDRangeRejectedOrderPreservesPlan (0.00s)
+=== RUN   TestReviewRowIDReasonPreservesUnselectedState
+--- PASS: TestReviewRowIDReasonPreservesUnselectedState (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.003s

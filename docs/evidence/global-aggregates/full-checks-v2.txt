@@ -1,0 +1,77 @@
+2026-10-10T19:31:45Z
+Behavioral audit: inherited frozen 1336a5d7 ordinary source review plus all owned aggregate tests inspected: intact SQL fixture creation/read/write, regular shared snapshots, rollback/BUSY/cancel/close/checkpoint, pure-memory arithmetic/parser/quota/clone admission. Oracle command finishes normally, no native failure or physical mutation/termination/recovery.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+?   	github.com/ms-xiaosnow/gosqlite/benchmarks/ann	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.374s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	9.432s
+ok  	github.com/ms-xiaosnow/gosqlite/encryption	1.613s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ann	2.400s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/bit-rerank	0.010s
+?   	github.com/ms-xiaosnow/gosqlite/examples/encrypted	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-shared	0.025s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-wal	0.040s
+?   	github.com/ms-xiaosnow/gosqlite/examples/grams	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/half-rerank	0.015s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ivfflat	0.757s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/migrate-pgembedding	0.034s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/migration-full-table	0.068s
+?   	github.com/ms-xiaosnow/gosqlite/examples/migration-transition	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/pgembedding-import	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/readonly	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/similarity	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/sparse-exact	0.007s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/typed-ann-rerank	1.387s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/vector	0.273s
+?   	github.com/ms-xiaosnow/gosqlite/examples/wal	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/write	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/extension/grams13	1.846s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/registry	0.098s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/similarity	5.769s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	1.181s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector/ann	18.565s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	28.871s
+?   	github.com/ms-xiaosnow/gosqlite/internal/buildinfo	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/darwinfile	0.045s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	0.285s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/journal	0.037s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.848s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/record	0.020s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.364s
+?   	github.com/ms-xiaosnow/gosqlite/internal/testkit/fileview	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testscope	0.008s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.203s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/wal	1.286s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	0.489s
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	8.413s
+--- FAIL: TestSparseReviewMemoryLazyNullAndSupportBudgets (0.00s)
+    sparse_review_test.go:99: false SQLite datatype mismatch: vector: invalid text syntax []
+--- FAIL: TestSparseReviewMemoryExternalDefaultsAndAliases (0.00s)
+    sparse_review_test.go:124: SQLite datatype mismatch: vector: invalid zero value: SQL sparsevec requires text or a versioned GSS BLOB, got int64
+--- FAIL: TestANNReviewEmptyIndexAndAllFilteredSQL (0.01s)
+    ann_review_test.go:141: '[0,0]' [[1]]
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/sqlite	157.963s
+FAIL
+FULL_UNIT_V2_EXIT=1
+Behavioral audit: inherited frozen 1336a5d7 ordinary source review plus all owned aggregate tests inspected: intact SQL fixture creation/read/write, regular shared snapshots, rollback/BUSY/cancel/close/checkpoint, pure-memory arithmetic/parser/quota/clone admission. Oracle command finishes normally, no native failure or physical mutation/termination/recovery.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.004s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.126s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.107s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	1.597s
+FOCUSED_ORACLE_V2_EXIT=0
+Behavioral audit: inherited frozen 1336a5d7 ordinary source review plus all owned aggregate tests inspected: intact SQL fixture creation/read/write, regular shared snapshots, rollback/BUSY/cancel/close/checkpoint, pure-memory arithmetic/parser/quota/clone admission. Oracle command finishes normally, no native failure or physical mutation/termination/recovery.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	1.023s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	1.417s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.393s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	3.186s
+FOCUSED_ORACLE_RACE_V2_EXIT=0
+VET_V2_EXIT=0
+BUILD_V2_EXIT=0
+CROSS_V2_linux/arm64=0
+CROSS_V2_darwin/arm64=0
+CROSS_V2_darwin/amd64=0
+CROSS_V2_windows/amd64=0
+CROSS_V2_windows/arm64=0
+2026-10-10T19:35:11Z

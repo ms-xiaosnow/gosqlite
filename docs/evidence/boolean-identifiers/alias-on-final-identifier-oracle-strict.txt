@@ -1,0 +1,7 @@
+CGO_ENABLED=0 ../toolchains/go1.27.2/bin/go test -tags oracle ./internal/testkit -run ^TestBooleanIdentifierOracleMatrix$ -count=1 -v 
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestBooleanIdentifierOracleMatrix
+    boolean_identifier_conformance_test.go:138: 2021 Boolean identifier values/classes/labels/error cases checked against pinned SQLite
+--- PASS: TestBooleanIdentifierOracleMatrix (9.36s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	9.387s

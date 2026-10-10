@@ -1,0 +1,24 @@
+Behavioral audit: all added probes are intact aggregateOracleFixture SQL + completed readonly confExpected and native Query loops; numeric strings/literals, joined scope and runtime OFFSET evaluation only.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+--- FAIL: TestIndependentAggregateLimitZeroOffset (0.04s)
+    --- FAIL: TestIndependentAggregateLimitZeroOffset/SELECT_count(*)_LIMIT_0_OFFSET_abs(-9223372036854775808) (0.01s)
+        aggregate_independent_review_test.go:24: native query "SELECT count(*) LIMIT 0 OFFSET abs(-9223372036854775808)": sqlite query: integer overflow
+    --- FAIL: TestIndependentAggregateLimitZeroOffset/SELECT_count(*)_LIMIT_0_OFFSET_NULL (0.00s)
+        aggregate_independent_review_test.go:24: native query "SELECT count(*) LIMIT 0 OFFSET NULL": sqlite query: LIMIT/OFFSET requires an integer
+    --- FAIL: TestIndependentAggregateLimitZeroOffset/SELECT_count(*)_LIMIT_0_OFFSET_1.5 (0.00s)
+        aggregate_independent_review_test.go:24: native query "SELECT count(*) LIMIT 0 OFFSET 1.5": sqlite query: LIMIT/OFFSET requires an integer
+    --- FAIL: TestIndependentAggregateLimitZeroOffset/SELECT_sum(x)_FROM_a_LIMIT_0_OFFSET_abs(-9223372036854775808) (0.00s)
+        aggregate_independent_review_test.go:24: native query "SELECT sum(x) FROM a LIMIT 0 OFFSET abs(-9223372036854775808)": sqlite query: integer overflow
+    --- FAIL: TestIndependentAggregateLimitZeroOffset/SELECT_count(*)_FROM_a,b_LIMIT_0_OFFSET_NULL (0.00s)
+        aggregate_independent_review_test.go:24: native query "SELECT count(*) FROM a,b LIMIT 0 OFFSET NULL": sqlite query: LIMIT/OFFSET requires an integer
+    --- FAIL: TestIndependentAggregateLimitZeroOffset/SELECT_count(*)_FROM_a_LIMIT_(1-1)_OFFSET_1.5 (0.00s)
+        aggregate_independent_review_test.go:24: native query "SELECT count(*) FROM a LIMIT (1-1) OFFSET 1.5": sqlite query: LIMIT/OFFSET requires an integer
+    --- FAIL: TestIndependentAggregateLimitZeroOffset/SELECT_count(*)_FROM_empty_source_LIMIT_0_OFFSET_abs(-9223372036854775808) (0.00s)
+        aggregate_independent_review_test.go:24: native query "SELECT count(*) FROM empty_source LIMIT 0 OFFSET abs(-9223372036854775808)": sqlite query: integer overflow
+--- FAIL: TestIndependentAggregateNumericEdges (0.23s)
+    --- FAIL: TestIndependentAggregateNumericEdges/31 (0.00s)
+        aggregate_independent_review_test.go:46: row 0 column 0: got float64(1); oracle int64(1)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/testkit	0.299s
+FAIL
+INDEPENDENT_PROBES_EXIT=1

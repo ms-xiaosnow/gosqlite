@@ -1,0 +1,9 @@
+{
+  "tree": "48370bbe2dc585c1b45821fbc360c525d156a9f5",
+  "files": 1226,
+  "sha256_manifest_match": true,
+  "patch_sha256": "ff51f7c64de46363d186c3c9adebdde181fb23a0d7789c0e0f4428be7dddb42a",
+  "only_changed_path": "internal/testkit/readonly_conformance_test.go",
+  "goal_sha256": "9ae7b1d776856669a10eb753408c7754d015d266f8783240165450e96e4bac81",
+  "copy": "/workspace/scratch/5e06a74e5f65/durable-restart/grouped-review-sort-foundation"
+}

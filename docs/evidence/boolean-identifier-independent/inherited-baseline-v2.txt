@@ -1,0 +1,9 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestIndependentInheritedAliasBoundary
+    boolean_independent_baseline_test.go:12: SELECT l.id,0 AS z,r.id FROM l LEFT JOIN r ON z: native=[][]interface {}{[]interface {}{1, 0, interface {}(nil)}} oracle=[][]interface {}(nil)
+    boolean_independent_baseline_test.go:12: SELECT l.id,NULL AS z,r.id FROM l LEFT JOIN r ON z: native=[][]interface {}{[]interface {}{1, interface {}(nil), interface {}(nil)}} oracle=[][]interface {}(nil)
+    boolean_independent_baseline_test.go:12: SELECT l.id,0 AS "true",r.id FROM l LEFT JOIN r ON "true": native=[][]interface {}{[]interface {}{1, 0, interface {}(nil)}} oracle=[][]interface {}(nil)
+--- FAIL: TestIndependentInheritedAliasBoundary (0.02s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/testkit	0.027s
+FAIL

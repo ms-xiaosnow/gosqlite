@@ -1,0 +1,11 @@
+source=/workspace/scratch/5e06a74e5f65/durable-restart/sql-rowid-range-independent-baseline-v1
++ go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ go test -tags oracle ./internal/testkit -run ^TestReviewRowIDRangeBaselineGaps$ -count=1 -v
+=== RUN   TestReviewRowIDRangeBaselineGaps
+    review_rowid_range_baseline_gaps_test.go:37: known baseline gap: SELECT abs(id) FROM t WHERE id<0 ORDER BY id DESC LIMIT 1; native=sqlite query: integer overflow; official=[[1]]
+    review_rowid_range_baseline_gaps_test.go:37: known baseline gap: SELECT id AS true FROM t WHERE true>0 ORDER BY true DESC LIMIT 4 OFFSET 1; native=sqlite query: unsupported SQLite feature: unsupported SQL: reserved identifier true at byte 13; official=[]
+    review_rowid_range_baseline_gaps_test.go:37: known baseline gap: SELECT id AS false FROM t WHERE false<0 ORDER BY false LIMIT 4 OFFSET 1; native=sqlite query: unsupported SQLite feature: unsupported SQL: reserved identifier false at byte 13; official=[[-1]]
+--- PASS: TestReviewRowIDRangeBaselineGaps (0.01s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	0.012s

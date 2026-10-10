@@ -1,0 +1,24 @@
+Independent v3 behavioral audit: all selected aggregate native/parser/driver/oracle tests and helpers plus adopted review probes/NUL matrix inspected. Ordinary intact SQL lifecycle/shared snapshots/transaction/BUSY/cancel/close/checkpoint, pure-memory scalar/parser/quota tests only. No physical/native fault, namespace, process termination, hot recovery or interrupted publication/rekey.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.005s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.038s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.015s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	2.063s
+FOCUSED_ORACLE_V3_EXIT=0
+Independent v3 race behavioral audit: same reviewed selection and intact helpers.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	1.016s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	1.127s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.065s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	3.700s
+FOCUSED_ORACLE_RACE_V3_EXIT=0
+VET_V3_EXIT=0
+BUILD_V3_EXIT=0
+all modules verified
+MOD_VERIFY_V3_EXIT=0
+PRODUCTION_CGO_CLOSURE_V3_EXIT=0
+CROSS_V3_linux/arm64=0
+CROSS_V3_darwin/arm64=0
+CROSS_V3_darwin/amd64=0
+CROSS_V3_windows/amd64=0
+CROSS_V3_windows/arm64=0

@@ -1,0 +1,241 @@
+package sqlite_test
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"math"
+	"math/big"
+	"math/rand"
+	"reflect"
+	"sort"
+	"strings"
+	"testing"
+
+	"github.com/ms-xiaosnow/gosqlite/sqlite"
+)
+
+type reviewRangeValue struct {
+	value  any
+	number *big.Rat
+	null   bool
+}
+
+func reviewRangeInt(x int64) reviewRangeValue {
+	return reviewRangeValue{value: x, number: new(big.Rat).SetInt64(x)}
+}
+func reviewRangeReal(x float64) reviewRangeValue {
+	return reviewRangeValue{value: x, number: new(big.Rat).SetFloat64(x)}
+}
+func reviewRangeCompare(id int64, op string, value reviewRangeValue) bool {
+	if value.null {
+		return false
+	}
+	cmp := -1 // All rowids precede nonnumeric TEXT/BLOB.
+	if value.number != nil {
+		cmp = new(big.Rat).SetInt64(id).Cmp(value.number)
+	}
+	if v, ok := value.value.(float64); ok && math.IsInf(v, -1) {
+		cmp = 1
+	}
+	switch op {
+	case "<":
+		return cmp < 0
+	case "<=":
+		return cmp <= 0
+	case ">":
+		return cmp > 0
+	case ">=":
+		return cmp >= 0
+	}
+	panic(op)
+}
+func TestReviewRowIDRangeIndependentIntersections(t *testing.T) {
+	db, _ := writable(t, sqlite.Options{PageSize: 512})
+	execute(t, db, "CREATE TABLE t(id INTEGER PRIMARY KEY,k INTEGER)")
+	ids := []int64{math.MinInt64, math.MinInt64 + 1, -9007199254740993, -9007199254740992, -9007199254740991, 9007199254740991, 9007199254740992, 9007199254740993, math.MaxInt64 - 1, math.MaxInt64}
+	for i := -90; i <= 90; i++ {
+		ids = append(ids, int64(i))
+	}
+	sort.Slice(ids, func(i, j int) bool { return ids[i] < ids[j] })
+	tx, err := db.Begin(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, id := range ids {
+		txExecute(t, tx, "INSERT INTO t VALUES(?,?)", id, id%3)
+	}
+	if err = tx.Commit(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	probes := []reviewRangeValue{{null: true}, {value: math.NaN(), null: true}, {value: "bad"}, {value: []byte{}}, {value: []byte("1")}, {value: "0001", number: new(big.Rat).SetInt64(1)}, {value: "1e1", number: new(big.Rat).SetInt64(10)}}
+	for _, i := range []int64{math.MinInt64, math.MinInt64 + 1, -9007199254740993, -1, 0, 1, 9007199254740993, math.MaxInt64 - 1, math.MaxInt64} {
+		probes = append(probes, reviewRangeInt(i))
+	}
+	for _, f := range []float64{math.Inf(-1), math.Nextafter(-9223372036854775808.0, math.Inf(-1)), -9223372036854775808.0, math.Nextafter(-9223372036854775808.0, 0), -9007199254740992, -1.1, -0.5, math.Copysign(0, -1), math.SmallestNonzeroFloat64, 0.5, 1.1, 9007199254740992, math.Nextafter(9223372036854775808.0, 0), 9223372036854775808.0, math.Inf(1)} {
+		probes = append(probes, reviewRangeReal(f))
+	}
+	rng := rand.New(rand.NewSource(20261010))
+	ops := []string{"<", "<=", ">", ">="}
+	checks := 0
+	for n := 0; n < 4096; n++ {
+		a, b := probes[rng.Intn(len(probes))], probes[rng.Intn(len(probes))]
+		oa, ob := ops[rng.Intn(4)], ops[rng.Intn(4)]
+		desc := n%2 == 0
+		limit := []int{0, 1, 3, 9, -1}[n%5]
+		off := n % 7
+		col := []string{"id", "_rowid_", "oid"}[n%3]
+		where := col + oa + "? AND " + col + ob + "?"
+		if n%4 == 0 {
+			where += " AND (k<>0 OR k IS NULL)"
+		}
+		direction := "ASC"
+		if desc {
+			direction = "DESC"
+		}
+		q := fmt.Sprintf("SELECT id FROM t WHERE %s ORDER BY %s %s NULLS %s LIMIT %d OFFSET %d", where, col, direction, []string{"FIRST", "LAST"}[n%2], limit, off)
+		var want [][]any
+		visit := append([]int64(nil), ids...)
+		if desc {
+			sort.Slice(visit, func(i, j int) bool { return visit[i] > visit[j] })
+		}
+		skipped := 0
+		for _, id := range visit {
+			if !reviewRangeCompare(id, oa, a) || !reviewRangeCompare(id, ob, b) || (n%4 == 0 && id%3 == 0) {
+				continue
+			}
+			if skipped < off {
+				skipped++
+				continue
+			}
+			if limit >= 0 && len(want) >= limit {
+				break
+			}
+			want = append(want, []any{id})
+		}
+		got, p, s := gramResults(t, db, q, a.value, b.value)
+		if !reflect.DeepEqual(got, want) {
+			t.Fatalf("case %d %s args=%#v,%#v\ngot=%#v want=%#v plan=%+v", n, q, a.value, b.value, got, want, p)
+		}
+		if p.Method != "rowid_range" || !strings.Contains(p.Reason, "order_satisfied=true; sort=false") || s.IndexPageReads != 0 || s.IndexKeysRead != 0 || s.RowIDSeeks > 1 {
+			t.Fatal(q, p, s)
+		}
+		if n%8 == 0 {
+			scan, _, _ := gramResults(t, db, strings.Replace(q, "FROM t", "FROM t NOT INDEXED", 1), a.value, b.value)
+			if !reflect.DeepEqual(scan, want) {
+				t.Fatal("forced scan differs", q, scan, want)
+			}
+		}
+		checks++
+	}
+	t.Logf("%d independently selected SQL interval intersections checked against exact rational/storage-class model; 512 also independently forced scan", checks)
+}
+
+func TestReviewRowIDRangeOrderAdmissionAndTies(t *testing.T) {
+	db, _ := writable(t, sqlite.Options{PageSize: 512})
+	execute(t, db, "CREATE TABLE t(id INTEGER PRIMARY KEY,rowid TEXT,oid INTEGER,_rowid_ TEXT,k INTEGER)")
+	execute(t, db, "INSERT INTO t VALUES(-2,'same',5,'z',0),(-1,'same',4,'y',1),(0,'same',3,'x',0),(1,'same',2,'w',1),(2,'same',1,'v',0)")
+	cases := []struct {
+		q       string
+		ordered bool
+	}{
+		{"SELECT id FROM t WHERE id>-10 ORDER BY id DESC", true},
+		{"SELECT id AS rid FROM t WHERE rid>-10 ORDER BY rid DESC", true},
+		{"SELECT id AS rowid FROM t WHERE id>-10 ORDER BY rowid DESC", true},
+		{"SELECT k AS id FROM t WHERE id>-10 ORDER BY id DESC", false},
+		{"SELECT rowid AS id FROM t WHERE id>-10 ORDER BY id DESC", false},
+		{"SELECT id FROM t WHERE rowid>'a' ORDER BY id DESC", true},
+		{"SELECT id FROM t WHERE id>-10 ORDER BY rowid DESC", false},
+		{"SELECT id FROM t WHERE id>-10 ORDER BY oid DESC", false},
+		{"SELECT id FROM t WHERE id>-10 ORDER BY _rowid_ DESC", false},
+		{"SELECT id,k FROM t WHERE id>-10 ORDER BY k DESC", false},
+		{"SELECT id,k FROM t WHERE id>-10 ORDER BY k,id DESC", false},
+		{"SELECT id,k FROM t WHERE id>-10 ORDER BY 1 DESC,2", false},
+		{"SELECT id,k FROM t WHERE id>-10 ORDER BY +1 DESC", true},
+		{"SELECT id,k FROM t WHERE id>-10 ORDER BY id+0 DESC", false},
+		{"SELECT id/0,id FROM t WHERE id>-10 ORDER BY 2 DESC", true},
+		{"SELECT id FROM t WHERE id>-10 AND k BETWEEN 0 AND 1 ORDER BY id DESC", false},
+		{"SELECT id FROM t WHERE id>-10 AND k IN (0,1) ORDER BY id DESC", false},
+		{"SELECT id FROM t WHERE id>-10 AND rowid LIKE 's%' ORDER BY id DESC", false},
+		{"SELECT CASE WHEN k=0 THEN 1 ELSE 2 END,id FROM t WHERE id>-10 ORDER BY id DESC", false},
+	}
+	for _, tc := range cases {
+		for _, limit := range []int{-1, 0, 1, 4} {
+			for _, offset := range []int{0, 1, 5, 9} {
+				q := fmt.Sprintf("%s LIMIT %d OFFSET %d", tc.q, limit, offset)
+				p, _, _ := ordinaryCompare(t, db, q)
+				if strings.Contains(p.Reason, "order_satisfied=true") != tc.ordered {
+					t.Fatal(q, p, tc.ordered)
+				}
+			}
+		}
+	}
+	t.Logf("%d order/shadow/alias/residual/tie LIMIT/OFFSET cases matched forced scan", len(cases)*16)
+}
+
+func TestReviewRowIDRangeDeferredSnapshotAndFalseStartup(t *testing.T) {
+	ctx := context.Background()
+	db, path := writable(t, sqlite.Options{PageSize: 512, WALShared: true, KeepWALOnClose: true})
+	execute(t, db, "CREATE TABLE t(id INTEGER PRIMARY KEY,v TEXT)")
+	execute(t, db, "INSERT INTO t VALUES(1,'one'),(2,'two'),(3,'three')")
+	peer, err := sqlite.Open(path, sqlite.Options{PageSize: 512, WALShared: true, KeepWALOnClose: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer peer.Close()
+	for _, direction := range []string{"ASC", "DESC"} {
+		r, err := peer.Query(ctx, "SELECT id,v FROM t WHERE id>0 ORDER BY id "+direction)
+		if err != nil {
+			t.Fatal(err)
+		}
+		p := r.Plan()
+		if r.Stats().RowIDSeeks != 0 {
+			t.Fatal("not deferred", r.Stats())
+		}
+		execute(t, db, "UPDATE t SET v='new' WHERE id=2")
+		var got [][]any
+		for r.Next() {
+			got = append(got, r.Values())
+		}
+		if r.Err() != nil || len(got) != 3 || !reflect.DeepEqual(got[1], []any{int64(2), "two"}) || !reflect.DeepEqual(p, r.Plan()) {
+			t.Fatal(direction, got, r.Err(), p, r.Plan())
+		}
+		r.Close()
+		execute(t, db, "UPDATE t SET v='two' WHERE id=2")
+	}
+	for _, where := range []string{"0 AND id>0", "NULL AND id>0", "id>NULL", "id>=2 AND id<2"} {
+		r, err := db.Query(ctx, "SELECT id FROM t WHERE "+where+" ORDER BY id DESC")
+		if err != nil {
+			t.Fatal(err)
+		}
+		p := r.Plan()
+		if r.Next() || r.Err() != nil || r.Stats().RowIDSeeks != 0 || r.Stats().BaseRowFetches != 0 || !reflect.DeepEqual(p, r.Plan()) {
+			t.Fatal(where, r.Err(), r.Stats(), r.Plan())
+		}
+		r.Close()
+	}
+	cancelCtx, cancel := context.WithCancel(ctx)
+	r, err := peer.Query(cancelCtx, "SELECT id FROM t WHERE id>0 ORDER BY id DESC")
+	if err != nil {
+		t.Fatal(err)
+	}
+	cancel()
+	if r.Next() || !errors.Is(r.Err(), context.Canceled) || r.Stats().RowIDSeeks != 0 {
+		t.Fatal(r.Err(), r.Stats())
+	}
+	r.Close()
+	r, err = peer.Query(ctx, "SELECT id FROM t WHERE id>0 ORDER BY id DESC")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = peer.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if r.Next() || !errors.Is(r.Err(), sqlite.ErrClosed) {
+		t.Fatal(r.Err())
+	}
+	r.Close()
+	if err = db.Checkpoint(ctx); err != nil {
+		t.Fatal(err)
+	}
+}

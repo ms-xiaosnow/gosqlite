@@ -1,0 +1,9 @@
+{
+  "unchanged_identifier_cases": 2021,
+  "unchanged_identifier_mismatches": 0,
+  "additional_alias_provenance_cases": 748,
+  "additional_alias_provenance_mismatches": 0,
+  "parser_only_historical_mismatches": 40,
+  "preserved_historical_file": "differential-classification.json",
+  "scope": "Explicit result-alias roots in top-level LEFT JOIN ON conjuncts after physical-name precedence; operator parents keep outer-join provenance. No broad planner reordering or keyword fallback."
+}

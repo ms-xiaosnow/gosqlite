@@ -1,0 +1,29 @@
+{
+  "exploratory_first_matrix": {
+    "cases": 1146,
+    "supported_cases": 1086,
+    "supported_mismatches": 0,
+    "unsupported_scalar_collate_cases": 60,
+    "raw_failure_preserved": "independent-matrix-first.txt",
+    "original_probe_preserved": "independent-matrix-first.go.txt",
+    "classification": "All 60 exploratory mismatches are the documented unsupported scalar COLLATE syntax; no supported result mismatch was removed. Supported matrix excludes only that unsupported construct."
+  },
+  "independent_supported_matrix": {
+    "root_operator_empty_right": 1086,
+    "multi_source_parameter_name_error": 871,
+    "total": 1957,
+    "mismatches": 0
+  },
+  "baseline_negative_control": {
+    "queries": 4,
+    "expected_mismatches": 3,
+    "matching_plus_alias_control": 1,
+    "candidate_mismatches": 0
+  },
+  "original_strict_matrices": {
+    "identifier": 2021,
+    "alias_provenance": 748,
+    "mismatches": 0,
+    "original_40_failures_preserved": true
+  }
+}

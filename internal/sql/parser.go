@@ -184,9 +184,13 @@ func (p *parser) name() (string, error) {
 	p.next()
 	return t.Text, nil
 }
+
+// TRUE/FALSE are ordinary IDs in pinned SQLite 3.54 parse.y/mkkeywordhash,
+// not reserved tokens. Only unqualified, non-call expressions become fallback
+// Boolean literals; the binder still gives physical columns and aliases priority.
 func reserved(s string) bool {
 	switch s {
-	case "SELECT", "FROM", "WHERE", "ORDER", "BY", "LIMIT", "OFFSET", "GROUP", "HAVING", "JOIN", "LEFT", "RIGHT", "FULL", "INNER", "OUTER", "CROSS", "ON", "USING", "UNION", "INTERSECT", "EXCEPT", "AS", "ASC", "DESC", "NULL", "NOT", "AND", "OR", "IS", "LIKE", "ESCAPE", "IN", "BETWEEN", "COLLATE", "WHEN", "THEN", "ELSE", "END", "CASE", "DISTINCT", "ALL", "SET", "VALUES", "RETURNING", "DEFAULT", "PRIMARY", "KEY", "UNIQUE", "CHECK", "FOREIGN", "REFERENCES", "CONSTRAINT", "WITHOUT", "STRICT", "AUTOINCREMENT", "CREATE", "TABLE", "INDEX", "INSERT", "UPDATE", "DELETE", "DROP", "ALTER", "IF", "EXISTS", "INTO", "BEGIN", "COMMIT", "ROLLBACK", "TRANSACTION", "REPLACE", "DO", "CONFLICT", "TRUE", "FALSE", "WINDOW", "OVER", "FILTER", "NULLS", "INDEXED", "REINDEX", "EXPLAIN":
+	case "SELECT", "FROM", "WHERE", "ORDER", "BY", "LIMIT", "OFFSET", "GROUP", "HAVING", "JOIN", "LEFT", "RIGHT", "FULL", "INNER", "OUTER", "CROSS", "ON", "USING", "UNION", "INTERSECT", "EXCEPT", "AS", "ASC", "DESC", "NULL", "NOT", "AND", "OR", "IS", "LIKE", "ESCAPE", "IN", "BETWEEN", "COLLATE", "WHEN", "THEN", "ELSE", "END", "CASE", "DISTINCT", "ALL", "SET", "VALUES", "RETURNING", "DEFAULT", "PRIMARY", "KEY", "UNIQUE", "CHECK", "FOREIGN", "REFERENCES", "CONSTRAINT", "WITHOUT", "STRICT", "AUTOINCREMENT", "CREATE", "TABLE", "INDEX", "INSERT", "UPDATE", "DELETE", "DROP", "ALTER", "IF", "EXISTS", "INTO", "BEGIN", "COMMIT", "ROLLBACK", "TRANSACTION", "REPLACE", "DO", "CONFLICT", "WINDOW", "OVER", "FILTER", "NULLS", "INDEXED", "REINDEX", "EXPLAIN":
 		return true
 	}
 	return false
@@ -734,12 +738,6 @@ func (p *parser) expression(min int) (Expr, error) {
 		}
 	case t.Kind == Identifier && !t.Quoted && EqualName(t.Text, "NULL"):
 		left = &Literal{}
-	case t.Kind == Identifier && !t.Quoted && (EqualName(t.Text, "TRUE") || EqualName(t.Text, "FALSE")):
-		v := int64(0)
-		if EqualName(t.Text, "TRUE") {
-			v = 1
-		}
-		left = &Literal{Value: v, Boolean: true}
 	case t.Kind == Identifier && !t.Quoted && EqualName(t.Text, "CASE"):
 		left, err = p.caseExpr()
 	case t.Kind == Identifier && !t.Quoted && EqualName(t.Text, "CAST"):
@@ -751,11 +749,17 @@ func (p *parser) expression(min int) (Expr, error) {
 		if p.take("(") {
 			name := FoldName(t.Text)
 			switch name {
-			case "count", "sum", "avg", "total", "group_concat", "string_agg", "min", "max":
+			case "group_concat", "string_agg":
 				return nil, p.unsupported("aggregate function " + name)
 			}
 			call := &Call{Name: name}
-			if !p.take(")") {
+			if AggregateName(name) && p.is("DISTINCT") {
+				return nil, p.unsupported("DISTINCT aggregate")
+			}
+			if name == "count" && p.take("*") {
+				call.Args = []Expr{&Star{}}
+				err = p.need(")")
+			} else if !p.take(")") {
 				for {
 					arg, err := p.expression(0)
 					if err != nil {
@@ -780,6 +784,12 @@ func (p *parser) expression(min int) (Expr, error) {
 				err = e
 				left = &Column{Table: t.Text, Name: n}
 			}
+		} else if !t.Quoted && (EqualName(t.Text, "TRUE") || EqualName(t.Text, "FALSE")) {
+			v := int64(0)
+			if EqualName(t.Text, "TRUE") {
+				v = 1
+			}
+			left = &Literal{Value: v, Boolean: true}
 		} else {
 			left = &Column{Name: t.Text}
 		}

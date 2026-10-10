@@ -1,0 +1,6 @@
+=== RUN   TestReviewBoundedIndependentCancelDuringAdmission
+    review_bounded_independent_test.go:362: page admission must return context cancellation before parser allocation, got <nil>
+--- FAIL: TestReviewBoundedIndependentCancelDuringAdmission (0.00s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/btree	0.002s
+FAIL

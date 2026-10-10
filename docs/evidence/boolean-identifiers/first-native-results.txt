@@ -1,0 +1,17 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestBooleanIdentifierASTPrecedence
+--- PASS: TestBooleanIdentifierASTPrecedence (0.00s)
+=== RUN   TestBooleanIdentifierGrammar
+--- PASS: TestBooleanIdentifierGrammar (0.00s)
+=== RUN   TestBooleanIdentifierRetainedRejections
+--- PASS: TestBooleanIdentifierRetainedRejections (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.004s
+=== RUN   TestBooleanIdentifierNativeLifecycle
+--- PASS: TestBooleanIdentifierNativeLifecycle (0.01s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.012s
+=== RUN   TestDriverBooleanIdentifierPrepared
+--- PASS: TestDriverBooleanIdentifierPrepared (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.009s

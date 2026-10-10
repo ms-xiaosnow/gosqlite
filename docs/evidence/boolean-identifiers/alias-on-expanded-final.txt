@@ -1,0 +1,6 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestBooleanAliasOnOracleProvenance
+    boolean_alias_on_conformance_test.go:126: 748 alias-root/operator/physical/parameter/empty-source/error provenance cases checked
+--- PASS: TestBooleanAliasOnOracleProvenance (2.89s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	2.919s

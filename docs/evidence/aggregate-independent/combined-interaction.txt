@@ -1,0 +1,4 @@
+Behavioral audit: focused aggregation/identifier/LEFT-ON/rowid-dispatch interactions only; intact fixture, completed readonly CLI, native Query/Rows and Plan metadata.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	0.081s
+INTERACTION_EXIT=0

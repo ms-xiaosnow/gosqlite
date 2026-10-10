@@ -1,0 +1,12 @@
+{
+  "verified_after_review": true,
+  "files": 1058,
+  "owned": 24,
+  "changes_from_review_freeze": [
+    "docs/aggregate-sql.md",
+    "docs/evidence/global-aggregates/full-checks-v2.txt",
+    "docs/evidence/global-aggregates/run-v2.sh",
+    "docs/progress.md"
+  ],
+  "all_production_and_tests_identical_to_review_freeze": true
+}

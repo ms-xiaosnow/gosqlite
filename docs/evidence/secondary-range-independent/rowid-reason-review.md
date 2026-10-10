@@ -1,0 +1,7 @@
+# Rowid diagnostic repair independent review
+
+PASS for exact tree 1e413b466d10db5c7304ba231fd5d4536dfc5fa5 over 8d7a0fcc5a2e3a83850ea780b64b403047677568. The exact two-path patch SHA-256 is 9a003b679e7767734ee575b8e4519c73ec05be34c571a51c820175ece0a11012. Source changes only the unsafe residual/default admission branch: an unselected order-only attempt leaves the prior plan unchanged; a rejected actual rowid bound appends a reason instead of overwriting the preceding reason. No source, ordering, cursor, result, or counter path changed.
+
+The parent negative log demonstrates the unchanged source lost “high posting frequency”; that original failure is preserved here. The owner descriptor-free law passes independently, as does a new 8-case AST law for unsafe WHERE versus unsafe default, actual bound versus speculative order-only, and live versus pre-canceled context. It checks the entire QueryPlan, existing source identity and order direction. There is no PageReader or native resource in these laws. internal/testscope immediately preceded the selected command; see rowid-reason-native.command/.guard/.log/.exit.
+
+The complete supplied manifest was independently checked against the freeze and tested copy after testing; the latter adds only the independent test. Git confirms exactly the two declared changed paths. Existing grams test assertions remain untouched. This narrow diagnostic acceptance does not replace the lead’s corrected full combined-tree gate.

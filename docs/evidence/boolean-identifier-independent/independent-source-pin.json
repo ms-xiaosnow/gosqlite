@@ -1,0 +1,12 @@
+{
+  "oracle_sha256": "470775f6ada29ccfb2d3046ac2b4c975df95a9c20b782332d4e8ba6b6233e6c6",
+  "oracle_version_source": "3.54.0|2026-10-09 15:46:58 be8d059e9a49089ab2dce5ed26dd87aaf598fdc5fbe0b107c0dd758464bcd5e3",
+  "source_files": {
+    "src/parse.y": "ba52f3a1a8c7500d35fe71b46730ae13f3e5dc3701ae23d854ffbfefae7a449a",
+    "src/expr.c": "25cd7d766086512d6c7f3f612bb0fa6d4057b8ac79c3d20c1d8c924b9440361e",
+    "src/resolve.c": "2eef0df295984d78bb85106df5bd9008b671a6057d87efc0d8164e2e4cfdf247",
+    "tool/mkkeywordhash.c": "099f834d82274c1c4dd1a31fb7f2ad59cf1e71db30f5fd87772d2dfc70c35cae",
+    "src/select.c": "5412c2b35f52b458aada282b905547cdea69b9a2afb50243c0f697d977ef6240",
+    "src/where.c": "c06e1353a1635f5f2cbfa06353eaabb1dd947231ebe53c3b5daf3b92b6f7aaad"
+  }
+}

@@ -1,0 +1,231 @@
+=== RUN   TestIndependentAggregateLimitZeroOffset
+=== RUN   TestIndependentAggregateLimitZeroOffset/SELECT_count(*)_LIMIT_0_OFFSET_abs(-9223372036854775808)
+    aggregate_review_test.go:26: native query "SELECT count(*) LIMIT 0 OFFSET abs(-9223372036854775808)": sqlite query: integer overflow
+=== RUN   TestIndependentAggregateLimitZeroOffset/SELECT_count(*)_LIMIT_0_OFFSET_NULL
+    aggregate_review_test.go:26: native query "SELECT count(*) LIMIT 0 OFFSET NULL": sqlite query: LIMIT/OFFSET requires an integer
+=== RUN   TestIndependentAggregateLimitZeroOffset/SELECT_count(*)_LIMIT_0_OFFSET_1.5
+    aggregate_review_test.go:26: native query "SELECT count(*) LIMIT 0 OFFSET 1.5": sqlite query: LIMIT/OFFSET requires an integer
+=== RUN   TestIndependentAggregateLimitZeroOffset/SELECT_sum(x)_FROM_a_LIMIT_0_OFFSET_abs(-9223372036854775808)
+    aggregate_review_test.go:26: native query "SELECT sum(x) FROM a LIMIT 0 OFFSET abs(-9223372036854775808)": sqlite query: integer overflow
+=== RUN   TestIndependentAggregateLimitZeroOffset/SELECT_count(*)_FROM_a,b_LIMIT_0_OFFSET_NULL
+    aggregate_review_test.go:26: native query "SELECT count(*) FROM a,b LIMIT 0 OFFSET NULL": sqlite query: LIMIT/OFFSET requires an integer
+=== RUN   TestIndependentAggregateLimitZeroOffset/SELECT_count(*)_FROM_a_LIMIT_(1-1)_OFFSET_1.5
+    aggregate_review_test.go:26: native query "SELECT count(*) FROM a LIMIT (1-1) OFFSET 1.5": sqlite query: LIMIT/OFFSET requires an integer
+=== RUN   TestIndependentAggregateLimitZeroOffset/SELECT_count(*)_FROM_empty_source_LIMIT_0_OFFSET_abs(-9223372036854775808)
+    aggregate_review_test.go:26: native query "SELECT count(*) FROM empty_source LIMIT 0 OFFSET abs(-9223372036854775808)": sqlite query: integer overflow
+--- FAIL: TestIndependentAggregateLimitZeroOffset (0.02s)
+    --- FAIL: TestIndependentAggregateLimitZeroOffset/SELECT_count(*)_LIMIT_0_OFFSET_abs(-9223372036854775808) (0.00s)
+    --- FAIL: TestIndependentAggregateLimitZeroOffset/SELECT_count(*)_LIMIT_0_OFFSET_NULL (0.00s)
+    --- FAIL: TestIndependentAggregateLimitZeroOffset/SELECT_count(*)_LIMIT_0_OFFSET_1.5 (0.00s)
+    --- FAIL: TestIndependentAggregateLimitZeroOffset/SELECT_sum(x)_FROM_a_LIMIT_0_OFFSET_abs(-9223372036854775808) (0.00s)
+    --- FAIL: TestIndependentAggregateLimitZeroOffset/SELECT_count(*)_FROM_a,b_LIMIT_0_OFFSET_NULL (0.00s)
+    --- FAIL: TestIndependentAggregateLimitZeroOffset/SELECT_count(*)_FROM_a_LIMIT_(1-1)_OFFSET_1.5 (0.00s)
+    --- FAIL: TestIndependentAggregateLimitZeroOffset/SELECT_count(*)_FROM_empty_source_LIMIT_0_OFFSET_abs(-9223372036854775808) (0.00s)
+=== RUN   TestIndependentAggregateNumericEdges
+=== RUN   TestIndependentAggregateNumericEdges/0
+=== RUN   TestIndependentAggregateNumericEdges/1
+=== RUN   TestIndependentAggregateNumericEdges/2
+=== RUN   TestIndependentAggregateNumericEdges/3
+=== RUN   TestIndependentAggregateNumericEdges/4
+=== RUN   TestIndependentAggregateNumericEdges/5
+=== RUN   TestIndependentAggregateNumericEdges/6
+=== RUN   TestIndependentAggregateNumericEdges/7
+=== RUN   TestIndependentAggregateNumericEdges/8
+=== RUN   TestIndependentAggregateNumericEdges/9
+=== RUN   TestIndependentAggregateNumericEdges/10
+=== RUN   TestIndependentAggregateNumericEdges/11
+=== RUN   TestIndependentAggregateNumericEdges/12
+=== RUN   TestIndependentAggregateNumericEdges/13
+=== RUN   TestIndependentAggregateNumericEdges/14
+=== RUN   TestIndependentAggregateNumericEdges/15
+=== RUN   TestIndependentAggregateNumericEdges/16
+=== RUN   TestIndependentAggregateNumericEdges/17
+=== RUN   TestIndependentAggregateNumericEdges/18
+=== RUN   TestIndependentAggregateNumericEdges/19
+=== RUN   TestIndependentAggregateNumericEdges/20
+=== RUN   TestIndependentAggregateNumericEdges/21
+=== RUN   TestIndependentAggregateNumericEdges/22
+=== RUN   TestIndependentAggregateNumericEdges/23
+=== RUN   TestIndependentAggregateNumericEdges/24
+=== RUN   TestIndependentAggregateNumericEdges/25
+=== RUN   TestIndependentAggregateNumericEdges/26
+=== RUN   TestIndependentAggregateNumericEdges/27
+=== RUN   TestIndependentAggregateNumericEdges/28
+=== RUN   TestIndependentAggregateNumericEdges/29
+=== RUN   TestIndependentAggregateNumericEdges/30
+=== RUN   TestIndependentAggregateNumericEdges/31
+    aggregate_review_test.go:48: row 0 column 0: got float64(1); oracle int64(1)
+=== RUN   TestIndependentAggregateNumericEdges/32
+=== RUN   TestIndependentAggregateNumericEdges/33
+=== RUN   TestIndependentAggregateNumericEdges/34
+=== RUN   TestIndependentAggregateNumericEdges/35
+=== RUN   TestIndependentAggregateNumericEdges/36
+=== RUN   TestIndependentAggregateNumericEdges/9223372036854775807_1.0
+=== RUN   TestIndependentAggregateNumericEdges/9223372036854775807_0.0
+=== RUN   TestIndependentAggregateNumericEdges/9223372036854775807_-1.0
+=== RUN   TestIndependentAggregateNumericEdges/9223372036854775807_9007199254740992.0
+=== RUN   TestIndependentAggregateNumericEdges/9223372036854775807_-9223372036854775808.0
+=== RUN   TestIndependentAggregateNumericEdges/9223372036854775807_1e308
+=== RUN   TestIndependentAggregateNumericEdges/9223372036854775807_-1e308
+=== RUN   TestIndependentAggregateNumericEdges/-9223372036854775808_1.0
+=== RUN   TestIndependentAggregateNumericEdges/-9223372036854775808_0.0
+=== RUN   TestIndependentAggregateNumericEdges/-9223372036854775808_-1.0
+=== RUN   TestIndependentAggregateNumericEdges/-9223372036854775808_9007199254740992.0
+=== RUN   TestIndependentAggregateNumericEdges/-9223372036854775808_-9223372036854775808.0
+=== RUN   TestIndependentAggregateNumericEdges/-9223372036854775808_1e308
+=== RUN   TestIndependentAggregateNumericEdges/-9223372036854775808_-1e308
+=== RUN   TestIndependentAggregateNumericEdges/9007199254740993_1.0
+=== RUN   TestIndependentAggregateNumericEdges/9007199254740993_0.0
+=== RUN   TestIndependentAggregateNumericEdges/9007199254740993_-1.0
+=== RUN   TestIndependentAggregateNumericEdges/9007199254740993_9007199254740992.0
+=== RUN   TestIndependentAggregateNumericEdges/9007199254740993_-9223372036854775808.0
+=== RUN   TestIndependentAggregateNumericEdges/9007199254740993_1e308
+=== RUN   TestIndependentAggregateNumericEdges/9007199254740993_-1e308
+=== RUN   TestIndependentAggregateNumericEdges/1e308_1.0
+=== RUN   TestIndependentAggregateNumericEdges/1e308_0.0
+=== RUN   TestIndependentAggregateNumericEdges/1e308_-1.0
+=== RUN   TestIndependentAggregateNumericEdges/1e308_9007199254740992.0
+=== RUN   TestIndependentAggregateNumericEdges/1e308_-9223372036854775808.0
+=== RUN   TestIndependentAggregateNumericEdges/1e308_1e308
+=== RUN   TestIndependentAggregateNumericEdges/1e308_-1e308
+=== RUN   TestIndependentAggregateNumericEdges/9e999_1.0
+=== RUN   TestIndependentAggregateNumericEdges/9e999_0.0
+=== RUN   TestIndependentAggregateNumericEdges/9e999_-1.0
+=== RUN   TestIndependentAggregateNumericEdges/9e999_9007199254740992.0
+=== RUN   TestIndependentAggregateNumericEdges/9e999_-9223372036854775808.0
+=== RUN   TestIndependentAggregateNumericEdges/9e999_1e308
+=== RUN   TestIndependentAggregateNumericEdges/9e999_-1e308
+=== RUN   TestIndependentAggregateNumericEdges/-9e999_1.0
+=== RUN   TestIndependentAggregateNumericEdges/-9e999_0.0
+=== RUN   TestIndependentAggregateNumericEdges/-9e999_-1.0
+=== RUN   TestIndependentAggregateNumericEdges/-9e999_9007199254740992.0
+=== RUN   TestIndependentAggregateNumericEdges/-9e999_-9223372036854775808.0
+=== RUN   TestIndependentAggregateNumericEdges/-9e999_1e308
+=== RUN   TestIndependentAggregateNumericEdges/-9e999_-1e308
+--- FAIL: TestIndependentAggregateNumericEdges (0.18s)
+    --- PASS: TestIndependentAggregateNumericEdges/0 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/1 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/2 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/3 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/4 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/5 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/6 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/7 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/8 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/9 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/10 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/11 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/12 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/13 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/14 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/15 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/16 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/17 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/18 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/19 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/20 (0.01s)
+    --- PASS: TestIndependentAggregateNumericEdges/21 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/22 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/23 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/24 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/25 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/26 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/27 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/28 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/29 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/30 (0.00s)
+    --- FAIL: TestIndependentAggregateNumericEdges/31 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/32 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/33 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/34 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/35 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/36 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/9223372036854775807_1.0 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/9223372036854775807_0.0 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/9223372036854775807_-1.0 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/9223372036854775807_9007199254740992.0 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/9223372036854775807_-9223372036854775808.0 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/9223372036854775807_1e308 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/9223372036854775807_-1e308 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/-9223372036854775808_1.0 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/-9223372036854775808_0.0 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/-9223372036854775808_-1.0 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/-9223372036854775808_9007199254740992.0 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/-9223372036854775808_-9223372036854775808.0 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/-9223372036854775808_1e308 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/-9223372036854775808_-1e308 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/9007199254740993_1.0 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/9007199254740993_0.0 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/9007199254740993_-1.0 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/9007199254740993_9007199254740992.0 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/9007199254740993_-9223372036854775808.0 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/9007199254740993_1e308 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/9007199254740993_-1e308 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/1e308_1.0 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/1e308_0.0 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/1e308_-1.0 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/1e308_9007199254740992.0 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/1e308_-9223372036854775808.0 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/1e308_1e308 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/1e308_-1e308 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/9e999_1.0 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/9e999_0.0 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/9e999_-1.0 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/9e999_9007199254740992.0 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/9e999_-9223372036854775808.0 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/9e999_1e308 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/9e999_-1e308 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/-9e999_1.0 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/-9e999_0.0 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/-9e999_-1.0 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/-9e999_9007199254740992.0 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/-9e999_-9223372036854775808.0 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/-9e999_1e308 (0.00s)
+    --- PASS: TestIndependentAggregateNumericEdges/-9e999_-1e308 (0.00s)
+=== RUN   TestIndependentAggregateJoinedScope
+=== RUN   TestIndependentAggregateJoinedScope/SELECT_count(*),sum(a.id),sum(b.id),sum(c.id)_FROM_a_LEFT_JOIN_b_ON_a.x=b.x_LEFT_JOIN_b_c_ON_c.x=a.x
+=== RUN   TestIndependentAggregateJoinedScope/SELECT_count(*),min(a.n),max(b.n),sum(c.id)_FROM_a,b_JOIN_b_c_ON_c.id=b.id_WHERE_a.id=b.x
+=== RUN   TestIndependentAggregateJoinedScope/SELECT_count(*),sum(a.id),sum(c.id)_FROM_a_LEFT_JOIN_b_ON_a.id=b.x_LEFT_JOIN_b_c_ON_b.id=c.id_WHERE_a.id>2
+=== RUN   TestIndependentAggregateJoinedScope/SELECT_count(*)_AS_cnt,1_AS_keep_FROM_a,b_ON_keep_WHERE_keep_ORDER_BY_cnt
+=== RUN   TestIndependentAggregateJoinedScope/SELECT_count(*),sum(x+1),min(n),max(CAST(n_AS_BLOB))_FROM_a_WHERE_id=1_OR_id=3_OR_id=5
+=== RUN   TestIndependentAggregateJoinedScope/SELECT_count(*)_AS_"sum(x)",sum(x)_AS_"Count"_FROM_a_ORDER_BY_"sum(x)"
+=== RUN   TestIndependentAggregateJoinedScope/SELECT_sum(x)='0',total(x)='0',avg(x)='0'_FROM_a_WHERE_0
+=== RUN   TestIndependentAggregateJoinedScope/SELECT_count(*)=0,count(*)='0',typeof(count(*))_FROM_empty_source
+=== RUN   TestIndependentAggregateJoinedScope/SELECT_CASE_WHEN_0_THEN_sum(abs(-9223372036854775808))_ELSE_3_END_FROM_a_WHERE_0
+--- PASS: TestIndependentAggregateJoinedScope (0.02s)
+    --- PASS: TestIndependentAggregateJoinedScope/SELECT_count(*),sum(a.id),sum(b.id),sum(c.id)_FROM_a_LEFT_JOIN_b_ON_a.x=b.x_LEFT_JOIN_b_c_ON_c.x=a.x (0.00s)
+    --- PASS: TestIndependentAggregateJoinedScope/SELECT_count(*),min(a.n),max(b.n),sum(c.id)_FROM_a,b_JOIN_b_c_ON_c.id=b.id_WHERE_a.id=b.x (0.00s)
+    --- PASS: TestIndependentAggregateJoinedScope/SELECT_count(*),sum(a.id),sum(c.id)_FROM_a_LEFT_JOIN_b_ON_a.id=b.x_LEFT_JOIN_b_c_ON_b.id=c.id_WHERE_a.id>2 (0.00s)
+    --- PASS: TestIndependentAggregateJoinedScope/SELECT_count(*)_AS_cnt,1_AS_keep_FROM_a,b_ON_keep_WHERE_keep_ORDER_BY_cnt (0.00s)
+    --- PASS: TestIndependentAggregateJoinedScope/SELECT_count(*),sum(x+1),min(n),max(CAST(n_AS_BLOB))_FROM_a_WHERE_id=1_OR_id=3_OR_id=5 (0.00s)
+    --- PASS: TestIndependentAggregateJoinedScope/SELECT_count(*)_AS_"sum(x)",sum(x)_AS_"Count"_FROM_a_ORDER_BY_"sum(x)" (0.00s)
+    --- PASS: TestIndependentAggregateJoinedScope/SELECT_sum(x)='0',total(x)='0',avg(x)='0'_FROM_a_WHERE_0 (0.00s)
+    --- PASS: TestIndependentAggregateJoinedScope/SELECT_count(*)=0,count(*)='0',typeof(count(*))_FROM_empty_source (0.00s)
+    --- PASS: TestIndependentAggregateJoinedScope/SELECT_CASE_WHEN_0_THEN_sum(abs(-9223372036854775808))_ELSE_3_END_FROM_a_WHERE_0 (0.00s)
+=== RUN   TestIndependentAggregateExplainAndBindOrder
+=== RUN   TestIndependentAggregateExplainAndBindOrder/EXPLAIN_QUERY_PLAN_SELECT_count(*)_LIMIT_abs(-9223372036854775808)
+    aggregate_review_test.go:83: parse oracle quote output: strconv.ParseFloat: parsing "QUERY PLAN": invalid syntax
+=== RUN   TestIndependentAggregateExplainAndBindOrder/EXPLAIN_QUERY_PLAN_SELECT_count(*)_LIMIT_1_OFFSET_NULL
+    aggregate_review_test.go:83: parse oracle quote output: strconv.ParseFloat: parsing "QUERY PLAN": invalid syntax
+=== RUN   TestIndependentAggregateExplainAndBindOrder/EXPLAIN_QUERY_PLAN_SELECT_count(*)_FROM_a_LIMIT_NULL
+    aggregate_review_test.go:83: parse oracle quote output: strconv.ParseFloat: parsing "QUERY PLAN": invalid syntax
+=== RUN   TestIndependentAggregateExplainAndBindOrder/SELECT_count(*)_LIMIT_NULL_OFFSET_missing
+    aggregate_review_test.go:111: sqlite query: LIMIT/OFFSET requires an integer
+=== RUN   TestIndependentAggregateExplainAndBindOrder/SELECT_count(*)_LIMIT_abs(-9223372036854775808)_OFFSET_missing
+    aggregate_review_test.go:111: sqlite query: integer overflow
+=== RUN   TestIndependentAggregateExplainAndBindOrder/SELECT_count(*)_LIMIT_NULL_OFFSET_abs()
+    aggregate_review_test.go:111: sqlite query: LIMIT/OFFSET requires an integer
+=== RUN   TestIndependentAggregateExplainAndBindOrder/SELECT_count(*)_LIMIT_0_OFFSET_missing
+=== RUN   TestIndependentAggregateExplainAndBindOrder/SELECT_count(*)_LIMIT_0_OFFSET_abs()
+--- FAIL: TestIndependentAggregateExplainAndBindOrder (0.02s)
+    --- FAIL: TestIndependentAggregateExplainAndBindOrder/EXPLAIN_QUERY_PLAN_SELECT_count(*)_LIMIT_abs(-9223372036854775808) (0.00s)
+    --- FAIL: TestIndependentAggregateExplainAndBindOrder/EXPLAIN_QUERY_PLAN_SELECT_count(*)_LIMIT_1_OFFSET_NULL (0.00s)
+    --- FAIL: TestIndependentAggregateExplainAndBindOrder/EXPLAIN_QUERY_PLAN_SELECT_count(*)_FROM_a_LIMIT_NULL (0.00s)
+    --- FAIL: TestIndependentAggregateExplainAndBindOrder/SELECT_count(*)_LIMIT_NULL_OFFSET_missing (0.00s)
+    --- FAIL: TestIndependentAggregateExplainAndBindOrder/SELECT_count(*)_LIMIT_abs(-9223372036854775808)_OFFSET_missing (0.00s)
+    --- FAIL: TestIndependentAggregateExplainAndBindOrder/SELECT_count(*)_LIMIT_NULL_OFFSET_abs() (0.00s)
+    --- PASS: TestIndependentAggregateExplainAndBindOrder/SELECT_count(*)_LIMIT_0_OFFSET_missing (0.01s)
+    --- PASS: TestIndependentAggregateExplainAndBindOrder/SELECT_count(*)_LIMIT_0_OFFSET_abs() (0.00s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/testkit	0.255s
+FAIL

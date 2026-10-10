@@ -1,0 +1,8 @@
+{
+  "internal/testkit/boolean_identifier_conformance_test.go": true,
+  "docs/evidence/boolean-identifiers/identifier-oracle-strict.txt": true,
+  "docs/evidence/boolean-identifiers/differential-classification.json": true,
+  "docs/evidence/boolean-identifiers/initial-oracle-probe.go.txt": true,
+  "docs/evidence/boolean-identifiers/first-oracle-results.txt": true,
+  "docs/evidence/boolean-identifiers/first-parser-results.txt": true
+}

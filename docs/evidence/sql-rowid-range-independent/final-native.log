@@ -1,0 +1,91 @@
+source=/workspace/scratch/5e06a74e5f65/durable-restart/sql-rowid-range-independent-copy-v1
+CGO_ENABLED=0
+go version go1.27.2 linux/amd64
++ go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ go test ./sqlite ./driver -run \^\(TestReviewRowIDRange\|TestRowIDRange\|TestDriverRowIDRange\|TestOrdinaryIndex\|TestStreamingMemoryCancellationAndClosure\|TestConnectorAndContext\) -count=1 -v 
+=== RUN   TestOrdinaryIndexIndependentRangePageEvidence
+    plan_index_internal_test.go:88: independent PageReader: prefix=3 reads/2 keys vs full index=84 reads/1600 keys
+--- PASS: TestOrdinaryIndexIndependentRangePageEvidence (0.13s)
+=== RUN   TestOrdinaryIndexTotalPredicateProof
+--- PASS: TestOrdinaryIndexTotalPredicateProof (0.00s)
+=== RUN   TestRowIDRangeRationalBoundaryLaw
+--- PASS: TestRowIDRangeRationalBoundaryLaw (0.00s)
+=== RUN   TestRowIDRangeSourceMemoryQuotasWorkAndOwnership
+    plan_rowid_range_internal_test.go:127: reverse=false: 3 native range page calls/3 rows vs 828 full scan page calls/1028 rows
+    plan_rowid_range_internal_test.go:127: reverse=true: 3 native range page calls/3 rows vs 828 full scan page calls/1028 rows
+--- PASS: TestRowIDRangeSourceMemoryQuotasWorkAndOwnership (0.00s)
+=== RUN   TestReviewRowIDRangeWholePlannerPageEvidence
+    review_rowid_range_internal_independent_test.go:57: modifier="" planning page calls=3 total page calls=6 stats={IndexKeysRead:0 IndexPageReads:0 RowIDSeeks:1 ANNStateReads:0 ANNNodeReads:0 ANNEdgeReads:0 ANNVisited:0 ANNDistanceEvaluations:0 ANNIdentityLookups:0 ANNCentroidScores:0 ANNCentroidReads:0 ANNListsOpened:0 ANNMemberKeysRead:0 ANNIterations:0 ANNExactRescores:0 ANNPeakBytes:0 VectorRankedRows:0 VectorFilteredRows:0 VectorNullRows:0 VectorRankComponents:0 VectorRankNonzeros:0 VectorRankPackedBytes:0 FrequencyLookups:0 PostingKeysRead:0 Candidates:3 BaseRowFetches:3 ReturnedRows:2} plan=SEARCH samples USING INTEGER PRIMARY KEY; method=rowid_range; original_where_recheck=true; estimated_candidates=-1; reason=native rowid interval; direction=reverse; bounded=true; order_satisfied=true; sort=false; covering=false
+    review_rowid_range_internal_independent_test.go:57: modifier=" NOT INDEXED" planning page calls=829 total page calls=829 stats={IndexKeysRead:0 IndexPageReads:0 RowIDSeeks:0 ANNStateReads:0 ANNNodeReads:0 ANNEdgeReads:0 ANNVisited:0 ANNDistanceEvaluations:0 ANNIdentityLookups:0 ANNCentroidScores:0 ANNCentroidReads:0 ANNListsOpened:0 ANNMemberKeysRead:0 ANNIterations:0 ANNExactRescores:0 ANNPeakBytes:0 VectorRankedRows:0 VectorFilteredRows:0 VectorNullRows:0 VectorRankComponents:0 VectorRankNonzeros:0 VectorRankPackedBytes:0 FrequencyLookups:0 PostingKeysRead:0 Candidates:0 BaseRowFetches:1028 ReturnedRows:2} plan=SCAN samples; reason=NOT INDEXED requested
+    review_rowid_range_internal_independent_test.go:77: SELECT id FROM samples WHERE id>10 ORDER BY id DESC LIMIT 0: 3 planning page calls, zero iteration/range pages
+    review_rowid_range_internal_independent_test.go:77: EXPLAIN QUERY PLAN SELECT id FROM samples WHERE id>10 ORDER BY id DESC: 2 planning page calls, zero iteration/range pages
+--- PASS: TestReviewRowIDRangeWholePlannerPageEvidence (0.01s)
+=== RUN   TestReviewRowIDRangeCancelAndPreallocation
+    review_rowid_range_internal_independent_test.go:118: limits={PageReads:0 Work:1 Records:0 PayloadBytes:0} page calls=1; sticky error; close stops source
+    review_rowid_range_internal_independent_test.go:118: limits={PageReads:-1 Work:0 Records:0 PayloadBytes:0} page calls=0; sticky error; close stops source
+--- PASS: TestReviewRowIDRangeCancelAndPreallocation (0.00s)
+=== RUN   TestOrdinaryIndexStorageClassesAndAffinities
+    plan_index_test.go:69: 240 storage-class/affinity equality and IS probes matched independently forced scans
+--- PASS: TestOrdinaryIndexStorageClassesAndAffinities (0.65s)
+=== RUN   TestOrdinaryIndexRowIDAndShadowedNames
+--- PASS: TestOrdinaryIndexRowIDAndShadowedNames (0.28s)
+=== RUN   TestOrdinaryIndexPrefixWorkAndDeterministicLimit
+    plan_index_test.go:137: tail="" matching keys=20 range page reads=3 source fetches=20 forced-scan fetches=1800
+    plan_index_test.go:137: tail=" LIMIT 7 OFFSET 3" matching keys=20 range page reads=3 source fetches=10 forced-scan fetches=900
+    plan_index_test.go:137: tail=" ORDER BY tie LIMIT 7 OFFSET 3" matching keys=20 range page reads=3 source fetches=20 forced-scan fetches=1800
+    plan_index_test.go:137: tail=" ORDER BY tie DESC LIMIT 7 OFFSET 3" matching keys=20 range page reads=3 source fetches=20 forced-scan fetches=1800
+    plan_index_test.go:137: tail=" ORDER BY suffix,id LIMIT 7 OFFSET 3" matching keys=20 range page reads=3 source fetches=20 forced-scan fetches=1800
+    plan_index_test.go:137: tail=" ORDER BY id DESC LIMIT 7 OFFSET 3" matching keys=20 range page reads=3 source fetches=20 forced-scan fetches=1800
+--- PASS: TestOrdinaryIndexPrefixWorkAndDeterministicLimit (0.25s)
+=== RUN   TestOrdinaryIndexBudgetsCancellationAndResidualErrors
+--- PASS: TestOrdinaryIndexBudgetsCancellationAndResidualErrors (0.04s)
+=== RUN   TestOrdinaryIndexTransactionsRollbackReopenAndSnapshot
+=== RUN   TestOrdinaryIndexTransactionsRollbackReopenAndSnapshot/sharedfalse
+=== RUN   TestOrdinaryIndexTransactionsRollbackReopenAndSnapshot/sharedtrue
+--- PASS: TestOrdinaryIndexTransactionsRollbackReopenAndSnapshot (0.02s)
+    --- PASS: TestOrdinaryIndexTransactionsRollbackReopenAndSnapshot/sharedfalse (0.00s)
+    --- PASS: TestOrdinaryIndexTransactionsRollbackReopenAndSnapshot/sharedtrue (0.01s)
+=== RUN   TestOrdinaryIndexGramsANNPrecedenceAndExactVector
+--- PASS: TestOrdinaryIndexGramsANNPrecedenceAndExactVector (2.83s)
+=== RUN   TestOrdinaryIndexConcurrentQueries
+--- PASS: TestOrdinaryIndexConcurrentQueries (0.02s)
+=== RUN   TestOrdinaryIndexSlotBindingAndUnsupportedShapes
+--- PASS: TestOrdinaryIndexSlotBindingAndUnsupportedShapes (0.00s)
+=== RUN   TestRowIDRangeStorageClassesDirectionsAndCuts
+    plan_rowid_range_test.go:64: 1104 native/forced-scan storage-class, side, direction cases
+--- PASS: TestRowIDRangeStorageClassesDirectionsAndCuts (0.33s)
+=== RUN   TestRowIDRangeOrderProofLazyWorkAndBinding
+    plan_rowid_range_test.go:104: SELECT id,v FROM t WHERE id>=850 AND id<860 ORDER BY id DESC LIMIT 3 OFFSET 2: range=5 source rows; scan=1800 source rows
+    plan_rowid_range_test.go:104: SELECT id,v FROM t WHERE id>=850 AND id<860 ORDER BY 1 DESC NULLS FIRST LIMIT 3 OFFSET 2: range=5 source rows; scan=1800 source rows
+    plan_rowid_range_test.go:104: SELECT id AS rid,v FROM t WHERE id>=850 AND id<860 ORDER BY rid DESC LIMIT 3 OFFSET 2: range=5 source rows; scan=1800 source rows
+    plan_rowid_range_test.go:104: SELECT id AS rid,v FROM t WHERE rid>=850 AND rid<860 ORDER BY rid DESC LIMIT 3 OFFSET 2: range=5 source rows; scan=1800 source rows
+--- PASS: TestRowIDRangeOrderProofLazyWorkAndBinding (0.18s)
+=== RUN   TestRowIDRangeErrorOrderAndConservativeJoin
+--- PASS: TestRowIDRangeErrorOrderAndConservativeJoin (0.00s)
+=== RUN   TestRowIDRangeTransactionsSnapshotsCancelAndReopen
+=== RUN   TestRowIDRangeTransactionsSnapshotsCancelAndReopen/false
+=== RUN   TestRowIDRangeTransactionsSnapshotsCancelAndReopen/true
+--- PASS: TestRowIDRangeTransactionsSnapshotsCancelAndReopen (0.01s)
+    --- PASS: TestRowIDRangeTransactionsSnapshotsCancelAndReopen/false (0.00s)
+    --- PASS: TestRowIDRangeTransactionsSnapshotsCancelAndReopen/true (0.00s)
+=== RUN   TestReviewRowIDRangeIndependentIntersections
+    review_rowid_range_independent_test.go:131: 4096 independently selected SQL interval intersections checked against exact rational/storage-class model; 512 also independently forced scan
+--- PASS: TestReviewRowIDRangeIndependentIntersections (1.76s)
+=== RUN   TestReviewRowIDRangeOrderAdmissionAndTies
+    review_rowid_range_independent_test.go:173: 304 order/shadow/alias/residual/tie LIMIT/OFFSET cases matched forced scan
+--- PASS: TestReviewRowIDRangeOrderAdmissionAndTies (0.10s)
+=== RUN   TestReviewRowIDRangeDeferredSnapshotAndFalseStartup
+--- PASS: TestReviewRowIDRangeDeferredSnapshotAndFalseStartup (0.00s)
+=== RUN   TestStreamingMemoryCancellationAndClosure
+--- PASS: TestStreamingMemoryCancellationAndClosure (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	6.655s
+=== RUN   TestConnectorAndContext
+--- PASS: TestConnectorAndContext (0.00s)
+=== RUN   TestDriverRowIDRangePreparedStreamingAndRollback
+--- PASS: TestDriverRowIDRangePreparedStreamingAndRollback (0.00s)
+=== RUN   TestDriverRowIDRangeAvoidsOnlyProvenSort
+--- PASS: TestDriverRowIDRangeAvoidsOnlyProvenSort (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.010s

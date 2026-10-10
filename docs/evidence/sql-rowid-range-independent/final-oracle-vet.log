@@ -1,0 +1,6 @@
+source=/workspace/scratch/5e06a74e5f65/durable-restart/sql-rowid-range-independent-copy-v1
+CGO_ENABLED=0
+go version go1.27.2 linux/amd64
++ go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ go vet -tags oracle ./internal/testkit 

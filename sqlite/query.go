@@ -146,6 +146,13 @@ func affinity(typ string) string {
 }
 
 func (d *DB) plan(ctx context.Context, reader btree.PageReader, sel *sqlast.Select, params []any) (*Rows, error) {
+	if selectUsesAggregate(sel) {
+		copy := *sel
+		if copy.Relation == nil && copy.From != "" {
+			copy.Relation = &sqlast.TableRelation{Name: copy.From, Alias: copy.Alias, NotIndexed: copy.NotIndexed}
+		}
+		return d.planRelational(ctx, reader, &copy, params)
+	}
 	if sel.Relation != nil {
 		return d.planRelational(ctx, reader, sel, params)
 	}
@@ -268,6 +275,12 @@ func (d *DB) plan(ctx context.Context, reader btree.PageReader, sel *sqlast.Sele
 		return nil, err
 	}
 	if err = d.planOrdinarySource(ctx, reader, r); err != nil {
+		if r.source != nil {
+			r.source.Close()
+		}
+		return nil, err
+	}
+	if err = d.planRowIDRange(ctx, reader, r); err != nil {
 		if r.source != nil {
 			r.source.Close()
 		}

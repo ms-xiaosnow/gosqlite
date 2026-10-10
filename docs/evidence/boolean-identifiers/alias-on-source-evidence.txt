@@ -1,0 +1,160 @@
+src/select.c:412-455
+412: ** Set the EP_OuterON property on all terms of the given expression.
+413: ** And set the Expr.w.iJoin to iTable for every term in the
+414: ** expression.
+415: **
+416: ** The EP_OuterON property is used on terms of an expression to tell
+417: ** the OUTER JOIN processing logic that this term is part of the
+418: ** join restriction specified in the ON or USING clause and not a part
+419: ** of the more general WHERE clause.  These terms are moved over to the
+420: ** WHERE clause during join processing but we need to remember that they
+421: ** originated in the ON or USING clause.
+422: **
+423: ** The Expr.w.iJoin tells the WHERE clause processing that the
+424: ** expression depends on table w.iJoin even if that table is not
+425: ** explicitly mentioned in the expression.  That information is needed
+426: ** for cases like this:
+427: **
+428: **    SELECT * FROM t1 LEFT JOIN t2 ON t1.a=t2.b AND t1.x=5
+429: **
+430: ** The where clause needs to defer the handling of the t1.x=5
+431: ** term until after the t2 loop of the join.  In that way, a
+432: ** NULL t2 row will be inserted whenever t1.x!=5.  If we do not
+433: ** defer the handling of t1.x=5, it will be processed immediately
+434: ** after the t1 loop and rows with t1.x!=5 will never appear in
+435: ** the output, which is incorrect.
+436: */
+437: void sqlite3SetJoinExpr(Expr *p, int iTable, u32 joinFlag){
+438:   assert( joinFlag==EP_OuterON || joinFlag==EP_InnerON );
+439:   while( p ){
+440:     ExprSetProperty(p, joinFlag);
+441:     assert( !ExprHasProperty(p, EP_TokenOnly|EP_Reduced) );
+442:     ExprSetVVAProperty(p, EP_NoReduce);
+443:     p->w.iJoin = iTable;
+444:     if( ExprUseXList(p) ){
+445:       if( p->x.pList ){
+446:         int i;
+447:         for(i=0; i<p->x.pList->nExpr; i++){
+448:           sqlite3SetJoinExpr(p->x.pList->a[i].pExpr, iTable, joinFlag);
+449:         }
+450:       }
+451:     }
+452:     sqlite3SetJoinExpr(p->pLeft, iTable, joinFlag);
+453:     p = p->pRight;
+454:   }
+455: }
+
+src/select.c:646-664
+646:           ExprSetVVAProperty(pEq, EP_NoReduce);
+647:           pEq->w.iJoin = pE2->iTable;
+648:         }
+649:         p->pWhere = sqlite3ExprAnd(pParse, p->pWhere, pEq);
+650:       }
+651:     }
+652: 
+653:     /* Add the ON clause to the end of the WHERE clause, connected by
+654:     ** an AND operator.
+655:     */
+656:     else if( pRight->u3.pOn ){
+657:       sqlite3SetJoinExpr(pRight->u3.pOn, pRight->iCursor, joinType);
+658:       p->pWhere = sqlite3ExprAnd(pParse, p->pWhere, pRight->u3.pOn);
+659:       pRight->u3.pOn = 0;
+660:       pRight->fg.isOn = 1;
+661:       p->selFlags |= SF_OnToWhere;
+662:     }
+663: 
+664:     if( bSeenTFunc==0 ){
+
+src/resolve.c:68-109
+68: static void resolveAlias(
+69:   Parse *pParse,         /* Parsing context */
+70:   ExprList *pEList,      /* A result set */
+71:   int iCol,              /* A column in the result set.  0..pEList->nExpr-1 */
+72:   Expr *pExpr,           /* Transform this into an alias to the result set */
+73:   int nSubquery          /* Number of subqueries that the label is moving */
+74: ){
+75:   Expr *pOrig;           /* The iCol-th column of the result set */
+76:   Expr *pDup;            /* Copy of pOrig */
+77:   sqlite3 *db;           /* The database connection */
+78: 
+79:   assert( iCol>=0 && iCol<pEList->nExpr );
+80:   pOrig = pEList->a[iCol].pExpr;
+81:   assert( pOrig!=0 );
+82:   assert( !ExprHasProperty(pExpr, EP_Reduced|EP_TokenOnly) );
+83:   if( pExpr->pAggInfo ) return;
+84:   db = pParse->db;
+85:   pDup = sqlite3ExprDup(db, pOrig, 0);
+86:   if( db->mallocFailed ){
+87:     sqlite3ExprDelete(db, pDup);
+88:     pDup = 0;
+89:   }else{
+90:     Expr temp;
+91:     incrAggFunctionDepth(pDup, nSubquery);
+92:     if( pExpr->op==TK_COLLATE ){
+93:       assert( !ExprHasProperty(pExpr, EP_IntValue) );
+94:       pDup = sqlite3ExprAddCollateString(pParse, pDup, pExpr->u.zToken);
+95:     }
+96:     memcpy(&temp, pDup, sizeof(Expr));
+97:     memcpy(pDup, pExpr, sizeof(Expr));
+98:     memcpy(pExpr, &temp, sizeof(Expr));
+99:     if( ExprHasProperty(pExpr, EP_WinFunc) ){
+100:       if( ALWAYS(pExpr->y.pWin!=0) ){
+101:         pExpr->y.pWin->pOwner = pExpr;
+102:       }
+103:     }
+104:     sqlite3ExprDeferredDelete(pParse, pDup);
+105:   }
+106: }
+107: 
+108: /*
+109: ** Subqueries store the original database, table and column names for their
+
+src/where.c:7005-7052
+7005:   /* The False-WHERE-Term-Bypass optimization:
+7006:   **
+7007:   ** If there are WHERE terms that are false, then no rows will be output,
+7008:   ** so skip over all of the code generated here.
+7009:   **
+7010:   ** Conditions:
+7011:   **
+7012:   **   (1)  The WHERE term must not refer to any tables in the join.
+7013:   **   (2)  The term must not come from an ON clause on the
+7014:   **        right-hand side of a LEFT or FULL JOIN.
+7015:   **   (3)  The term must not come from an ON clause, or there must be
+7016:   **        no RIGHT or FULL OUTER joins in pTabList.
+7017:   **   (4)  If the expression contains non-deterministic functions
+7018:   **        that are not within a sub-select. This is not required
+7019:   **        for correctness but rather to preserves SQLite's legacy
+7020:   **        behaviour in the following two cases:
+7021:   **
+7022:   **          WHERE random()>0;           -- eval random() once per row
+7023:   **          WHERE (SELECT random())>0;  -- eval random() just once overall
+7024:   **
+7025:   ** Note that the Where term need not be a constant in order for this
+7026:   ** optimization to apply, though it does need to be constant relative to
+7027:   ** the current subquery (condition 1).  The term might include variables
+7028:   ** from outer queries so that the value of the term changes from one
+7029:   ** invocation of the current subquery to the next.
+7030:   */
+7031:   for(ii=0; ii<sWLB.pWC->nBase; ii++){
+7032:     WhereTerm *pT = &sWLB.pWC->a[ii];  /* A term of the WHERE clause */
+7033:     Expr *pX;                          /* The expression of pT */
+7034:     if( pT->wtFlags & TERM_VIRTUAL ) continue;
+7035:     pX = pT->pExpr;
+7036:     assert( pX!=0 );
+7037:     assert( pT->prereqAll!=0 || !ExprHasProperty(pX, EP_OuterON) );
+7038:     if( pT->prereqAll==0                           /* Conditions (1) and (2) */
+7039:      && (nTabList==0 || exprIsDeterministic(pX))   /* Condition (4) */
+7040:      && !(ExprHasProperty(pX, EP_InnerON)          /* Condition (3) */
+7041:           && (pTabList->a[0].fg.jointype & JT_LTORJ)!=0 )
+7042:     ){
+7043:       sqlite3ExprIfFalse(pParse, pX, pWInfo->iBreak, SQLITE_JUMPIFNULL);
+7044:       pT->wtFlags |= TERM_CODED;
+7045:     }
+7046:   }
+7047: 
+7048:   if( wctrlFlags & WHERE_WANT_DISTINCT ){
+7049:     if( OptimizationDisabled(db, SQLITE_DistinctOpt) ){
+7050:       /* Disable the DISTINCT optimization if SQLITE_DistinctOpt is set via
+7051:       ** sqlite3_test_ctrl(SQLITE_TESTCTRL_OPTIMIZATIONS,...) */
+7052:       wctrlFlags &= ~WHERE_WANT_DISTINCT;

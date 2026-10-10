@@ -1,0 +1,78 @@
+=== RUN   TestRejectUnsupported
+    sql_test.go:98: accepted unsupported: SELECT count(*) FROM t
+    sql_test.go:98: accepted unsupported: SELECT sum(x) FROM t
+    sql_test.go:104: expected unsupported, got <nil>
+--- FAIL: TestRejectUnsupported (0.00s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/sql	0.005s
+=== RUN   TestRejectionsAndCodes
+=== RUN   TestRejectionsAndCodes/SELECT_absent_FROM_samples_WHERE_0
+=== RUN   TestRejectionsAndCodes/SELECT_absent()_FROM_samples_WHERE_0
+=== RUN   TestRejectionsAndCodes/SELECT_length()_FROM_samples_WHERE_0
+=== RUN   TestRejectionsAndCodes/SELECT_count(*)_FROM_samples
+    sqlite_test.go:236: accepted invalid/unsupported query
+=== RUN   TestRejectionsAndCodes/SELECT_id_FROM_samples_ORDER_BY_0
+=== RUN   TestRejectionsAndCodes/SELECT_id_FROM_samples_ORDER_BY_-1
+=== RUN   TestRejectionsAndCodes/SELECT_id_FROM_samples_LIMIT_NULL
+=== RUN   TestRejectionsAndCodes/SELECT_id_FROM_samples_LIMIT_1.5
+=== RUN   TestRejectionsAndCodes/SELECT_*
+=== RUN   TestRejectionsAndCodes/SELECT_samples.id_FROM_samples_AS_s
+=== RUN   TestRejectionsAndCodes/SELECT_?
+=== RUN   TestRejectionsAndCodes/SELECT_1;_SELECT_2
+=== RUN   TestRejectionsAndCodes/SELECT_id_FROM_samples_JOIN_numbers_USING(id)
+--- FAIL: TestRejectionsAndCodes (0.00s)
+    --- PASS: TestRejectionsAndCodes/SELECT_absent_FROM_samples_WHERE_0 (0.00s)
+    --- PASS: TestRejectionsAndCodes/SELECT_absent()_FROM_samples_WHERE_0 (0.00s)
+    --- PASS: TestRejectionsAndCodes/SELECT_length()_FROM_samples_WHERE_0 (0.00s)
+    --- FAIL: TestRejectionsAndCodes/SELECT_count(*)_FROM_samples (0.00s)
+    --- PASS: TestRejectionsAndCodes/SELECT_id_FROM_samples_ORDER_BY_0 (0.00s)
+    --- PASS: TestRejectionsAndCodes/SELECT_id_FROM_samples_ORDER_BY_-1 (0.00s)
+    --- PASS: TestRejectionsAndCodes/SELECT_id_FROM_samples_LIMIT_NULL (0.00s)
+    --- PASS: TestRejectionsAndCodes/SELECT_id_FROM_samples_LIMIT_1.5 (0.00s)
+    --- PASS: TestRejectionsAndCodes/SELECT_* (0.00s)
+    --- PASS: TestRejectionsAndCodes/SELECT_samples.id_FROM_samples_AS_s (0.00s)
+    --- PASS: TestRejectionsAndCodes/SELECT_? (0.00s)
+    --- PASS: TestRejectionsAndCodes/SELECT_1;_SELECT_2 (0.00s)
+    --- PASS: TestRejectionsAndCodes/SELECT_id_FROM_samples_JOIN_numbers_USING(id) (0.00s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/sqlite	0.011s
+=== RUN   TestOracleErrorsAndResources
+=== RUN   TestOracleErrorsAndResources/SELECT_missing_FROM_empty_table
+=== RUN   TestOracleErrorsAndResources/SELECT_id_FROM_empty_table_WHERE_missing=0
+=== RUN   TestOracleErrorsAndResources/SELECT_id_FROM_empty_table_ORDER_BY_missing
+=== RUN   TestOracleErrorsAndResources/SELECT_abs()_FROM_empty_table
+=== RUN   TestOracleErrorsAndResources/SELECT_missing_function(id)_FROM_empty_table
+=== RUN   TestOracleErrorsAndResources/SELECT_1_LIMIT_NULL
+=== RUN   TestOracleErrorsAndResources/SELECT_1_LIMIT_1.5
+=== RUN   TestOracleErrorsAndResources/SELECT_1_ORDER_BY_2
+=== RUN   TestOracleErrorsAndResources/SELECT_abs(-9223372036854775808)
+=== RUN   TestOracleErrorsAndResources/SELECT_-0x8000000000000000
+=== RUN   TestOracleErrorsAndResources/unsupported/SELECT_DISTINCT_id_FROM_edge
+=== RUN   TestOracleErrorsAndResources/unsupported/SELECT_id_FROM_edge_UNION_SELECT_id_FROM_edge
+=== RUN   TestOracleErrorsAndResources/unsupported/SELECT_count(*)_FROM_edge
+    readonly_conformance_test.go:465: want explicit ErrUnsupported, got <nil>
+=== RUN   TestOracleErrorsAndResources/unsupported/SELECT_e.id_FROM_edge_e_JOIN_edge_f_USING(id)
+=== RUN   TestOracleErrorsAndResources/unsupported/SELECT_id_FROM_edge;_SELECT_1
+=== RUN   TestOracleErrorsAndResources/unsupported/PRAGMA_user_version
+=== RUN   TestOracleErrorsAndResources/unsupported/WITH_x_AS_(SELECT_1)_SELECT_*_FROM_x
+--- FAIL: TestOracleErrorsAndResources (0.09s)
+    --- PASS: TestOracleErrorsAndResources/SELECT_missing_FROM_empty_table (0.01s)
+    --- PASS: TestOracleErrorsAndResources/SELECT_id_FROM_empty_table_WHERE_missing=0 (0.01s)
+    --- PASS: TestOracleErrorsAndResources/SELECT_id_FROM_empty_table_ORDER_BY_missing (0.01s)
+    --- PASS: TestOracleErrorsAndResources/SELECT_abs()_FROM_empty_table (0.01s)
+    --- PASS: TestOracleErrorsAndResources/SELECT_missing_function(id)_FROM_empty_table (0.00s)
+    --- PASS: TestOracleErrorsAndResources/SELECT_1_LIMIT_NULL (0.00s)
+    --- PASS: TestOracleErrorsAndResources/SELECT_1_LIMIT_1.5 (0.01s)
+    --- PASS: TestOracleErrorsAndResources/SELECT_1_ORDER_BY_2 (0.01s)
+    --- PASS: TestOracleErrorsAndResources/SELECT_abs(-9223372036854775808) (0.01s)
+    --- PASS: TestOracleErrorsAndResources/SELECT_-0x8000000000000000 (0.00s)
+    --- PASS: TestOracleErrorsAndResources/unsupported/SELECT_DISTINCT_id_FROM_edge (0.00s)
+    --- PASS: TestOracleErrorsAndResources/unsupported/SELECT_id_FROM_edge_UNION_SELECT_id_FROM_edge (0.00s)
+    --- FAIL: TestOracleErrorsAndResources/unsupported/SELECT_count(*)_FROM_edge (0.00s)
+    --- PASS: TestOracleErrorsAndResources/unsupported/SELECT_e.id_FROM_edge_e_JOIN_edge_f_USING(id) (0.00s)
+    --- PASS: TestOracleErrorsAndResources/unsupported/SELECT_id_FROM_edge;_SELECT_1 (0.00s)
+    --- PASS: TestOracleErrorsAndResources/unsupported/PRAGMA_user_version (0.00s)
+    --- PASS: TestOracleErrorsAndResources/unsupported/WITH_x_AS_(SELECT_1)_SELECT_*_FROM_x (0.00s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/testkit	0.102s
+FAIL

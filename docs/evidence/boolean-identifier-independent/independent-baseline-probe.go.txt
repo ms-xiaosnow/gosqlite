@@ -1,0 +1,14 @@
+//go:build oracle
+package testkit_test
+import("bytes";"context";"os/exec";"path/filepath";"reflect";"strings";"testing";"github.com/ms-xiaosnow/gosqlite/sqlite")
+// Intact fixture and normal readonly oracle completion only.
+func TestIndependentInheritedAliasBoundary(t *testing.T){
+ cli:=confOracle(t);path:=filepath.Join(t.TempDir(),"alias.db");db,err:=sqlite.Open(path,sqlite.Options{});if err!=nil{t.Fatal(err)};defer db.Close()
+ for _,q:=range []string{`CREATE TABLE l(id INTEGER)`,`INSERT INTO l VALUES(1)`,`CREATE TABLE r(id INTEGER)`,`INSERT INTO r VALUES(2)`}{writeExec(t,db,q)}
+ for _,q:=range []string{`SELECT l.id,0 AS z,r.id FROM l LEFT JOIN r ON z`,`SELECT l.id,NULL AS z,r.id FROM l LEFT JOIN r ON z`,`SELECT l.id,0 AS "true",r.id FROM l LEFT JOIN r ON "true"`,`SELECT l.id,0 AS z,r.id FROM l LEFT JOIN r ON +z`}{
+  cmd:=exec.Command(cli,"-batch","-bail","-quote","-noheader","-readonly",path);cmd.Stdin=strings.NewReader(q+";\n");var stderr bytes.Buffer;cmd.Stderr=&stderr
+  raw,err:=cmd.Output();if err!=nil{t.Fatal(err,stderr.String())};want,err:=confQuoted(raw);if err!=nil{t.Fatal(err)}
+  rows,err:=db.Query(context.Background(),q);if err!=nil{t.Fatal(err)};var got [][]any;for rows.Next(){got=append(got,rows.Values())};err=rows.Err();rows.Close();if err!=nil{t.Fatal(err)}
+  if len(got)==0&&len(want)==0{continue};if !reflect.DeepEqual(got,want){t.Errorf("%s: native=%#v oracle=%#v",q,got,want)}
+ }
+}

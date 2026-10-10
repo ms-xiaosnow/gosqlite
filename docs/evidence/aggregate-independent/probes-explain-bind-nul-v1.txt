@@ -1,0 +1,22 @@
+Behavioral audit: EXPLAIN oracle harness corrected to completed CLI without quote parsing; extra NUL overflow probe uses only CASE constants against existing intact fixture.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+--- FAIL: TestIndependentAggregateExplainAndBindOrder (0.02s)
+    --- FAIL: TestIndependentAggregateExplainAndBindOrder/EXPLAIN_QUERY_PLAN_SELECT_count(*)_LIMIT_abs(-9223372036854775808) (0.00s)
+        aggregate_independent_review_test.go:89: sqlite query: integer overflow
+    --- FAIL: TestIndependentAggregateExplainAndBindOrder/EXPLAIN_QUERY_PLAN_SELECT_count(*)_LIMIT_1_OFFSET_NULL (0.00s)
+        aggregate_independent_review_test.go:89: sqlite query: LIMIT/OFFSET requires an integer
+    --- FAIL: TestIndependentAggregateExplainAndBindOrder/EXPLAIN_QUERY_PLAN_SELECT_count(*)_FROM_a_LIMIT_NULL (0.00s)
+        aggregate_independent_review_test.go:89: sqlite query: LIMIT/OFFSET requires an integer
+    --- FAIL: TestIndependentAggregateExplainAndBindOrder/SELECT_count(*)_LIMIT_NULL_OFFSET_missing (0.00s)
+        aggregate_independent_review_test.go:114: sqlite query: LIMIT/OFFSET requires an integer
+    --- FAIL: TestIndependentAggregateExplainAndBindOrder/SELECT_count(*)_LIMIT_abs(-9223372036854775808)_OFFSET_missing (0.00s)
+        aggregate_independent_review_test.go:114: sqlite query: integer overflow
+    --- FAIL: TestIndependentAggregateExplainAndBindOrder/SELECT_count(*)_LIMIT_NULL_OFFSET_abs() (0.00s)
+        aggregate_independent_review_test.go:114: sqlite query: LIMIT/OFFSET requires an integer
+--- FAIL: TestIndependentAggregateNULOverflow (0.00s)
+    aggregate_independent_review_test.go:131: incorrect row: []interface {}{9.223372036854776e+18}
+    aggregate_independent_review_test.go:136: <nil>
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/testkit	0.027s
+FAIL
+EXPLAIN_BIND_ORDER_NUL_EXIT=1

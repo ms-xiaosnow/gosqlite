@@ -1,0 +1,3 @@
+CGO_ENABLED=0 ../toolchains/go1.27.2/bin/go test ./internal/sql -count=1 
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.328s

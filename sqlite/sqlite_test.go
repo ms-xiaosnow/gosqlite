@@ -228,7 +228,7 @@ func TestRelationalReadonlyFixtureJoin(t *testing.T) {
 
 func TestRejectionsAndCodes(t *testing.T) {
 	db := openFixture(t, sqlite.Options{})
-	for _, text := range []string{"SELECT absent FROM samples WHERE 0", "SELECT absent() FROM samples WHERE 0", "SELECT length() FROM samples WHERE 0", "SELECT count(*) FROM samples", "SELECT id FROM samples ORDER BY 0", "SELECT id FROM samples ORDER BY -1", "SELECT id FROM samples LIMIT NULL", "SELECT id FROM samples LIMIT 1.5", "SELECT *", "SELECT samples.id FROM samples AS s", "SELECT ?", "SELECT 1; SELECT 2", "SELECT id FROM samples JOIN numbers USING(id)"} {
+	for _, text := range []string{"SELECT absent FROM samples WHERE 0", "SELECT absent() FROM samples WHERE 0", "SELECT length() FROM samples WHERE 0", "SELECT id FROM samples ORDER BY 0", "SELECT id FROM samples ORDER BY -1", "SELECT id FROM samples LIMIT NULL", "SELECT id FROM samples LIMIT 1.5", "SELECT *", "SELECT samples.id FROM samples AS s", "SELECT ?", "SELECT 1; SELECT 2", "SELECT id FROM samples JOIN numbers USING(id)"} {
 		t.Run(text, func(t *testing.T) {
 			rows, err := db.Query(context.Background(), text)
 			if err == nil {
@@ -266,7 +266,7 @@ func TestStreamingMemoryCancellationAndClosure(t *testing.T) {
 	if rows.Next() || rows.Err() != nil {
 		t.Fatal("closed iterator")
 	}
-	if _, err := db.Query(context.Background(), "SELECT id FROM samples ORDER BY id"); !errors.Is(err, sqlite.ErrMemoryLimit) {
+	if _, err := db.Query(context.Background(), "SELECT id FROM samples ORDER BY id+0"); !errors.Is(err, sqlite.ErrMemoryLimit) {
 		t.Fatal(err)
 	}
 	ctx, cancel := context.WithCancel(context.Background())

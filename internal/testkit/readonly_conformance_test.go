@@ -455,7 +455,7 @@ func TestOracleErrorsAndResources(t *testing.T) {
 			}
 		})
 	}
-	for _, q := range []string{"SELECT DISTINCT id FROM edge", "SELECT id FROM edge UNION SELECT id FROM edge", "SELECT count(*) FROM edge", "SELECT e.id FROM edge e JOIN edge f USING(id)", "SELECT id FROM edge; SELECT 1", "PRAGMA user_version", "WITH x AS (SELECT 1) SELECT * FROM x"} {
+	for _, q := range []string{"SELECT DISTINCT id FROM edge", "SELECT id FROM edge UNION SELECT id FROM edge", "SELECT e.id FROM edge e JOIN edge f USING(id)", "SELECT id FROM edge; SELECT 1", "PRAGMA user_version", "WITH x AS (SELECT 1) SELECT * FROM x"} {
 		t.Run("unsupported/"+q, func(t *testing.T) {
 			r, err := db.Query(context.Background(), q)
 			if r != nil {
@@ -516,7 +516,23 @@ func TestOracleErrorsAndResources(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	r, err := limited.Query(context.Background(), "SELECT * FROM edge ORDER BY id")
+	// Retain the original SQL as a positive oracle comparison: the proven
+	// rowid order now streams and must not consume a general-sort allowance.
+	ordered := "SELECT * FROM edge ORDER BY id"
+	confCompare(t, confExpected(t, path, ordered), confNative(t, limited, ordered))
+	r, err := limited.Query(context.Background(), ordered)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if p := r.Plan(); p.Method != "rowid_range" || !strings.Contains(p.Reason, "order_satisfied=true; sort=false") {
+		t.Errorf("original rowid order did not use its proved stream: %+v", p)
+	}
+	r.Close()
+	// Keep a real sorting quota negative. The expression is deliberately not
+	// admitted by the conservative physical-rowid order proof.
+	sorted := "SELECT * FROM edge ORDER BY id+0"
+	confCompare(t, confExpected(t, path, sorted), confNative(t, db, sorted))
+	r, err = limited.Query(context.Background(), sorted)
 	if r != nil {
 		r.Close()
 	}

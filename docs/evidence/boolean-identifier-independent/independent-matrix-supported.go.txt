@@ -1,0 +1,206 @@
+//go:build oracle
+
+package testkit_test
+
+import (
+	"bytes"
+	"context"
+	"fmt"
+	"os/exec"
+	"path/filepath"
+	"reflect"
+	"strings"
+	"testing"
+
+	"github.com/ms-xiaosnow/gosqlite/sqlite"
+)
+
+// Independent intact fixture, readonly oracle, ordinary EOF only. No faults.
+func TestIndependentAliasOnRootMatrix(t *testing.T) {
+	cli := confOracle(t)
+	path := filepath.Join(t.TempDir(), "independent.db")
+	db, err := sqlite.Open(path, sqlite.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	for _, q := range []string{
+		`CREATE TABLE l(id INTEGER PRIMARY KEY,flag INTEGER)`,
+		`INSERT INTO l VALUES(1,0),(2,1),(3,NULL)`,
+		`CREATE TABLE r(id INTEGER PRIMARY KEY,v)`,
+		`INSERT INTO r VALUES(1,0),(2,1),(3,NULL),(4,0.5),(5,'0'),(6,x'31')`,
+		`CREATE TABLE e(id INTEGER,v)`,
+		`CREATE TABLE p(id INTEGER,true INTEGER,false INTEGER,z INTEGER)`,
+		`INSERT INTO p VALUES(1,0,1,0),(2,1,0,1),(3,NULL,NULL,NULL)`,
+	} {
+		writeExec(t, db, q)
+	}
+	n := 0
+	compare := func(q string) {
+		t.Helper()
+		n++
+		cmd := exec.Command(cli, "-batch", "-bail", "-quote", "-noheader", "-readonly", path)
+		cmd.Stdin = strings.NewReader(q + ";\n")
+		var stderr bytes.Buffer
+		cmd.Stderr = &stderr
+		raw, werr := cmd.Output()
+		rows, gerr := db.Query(context.Background(), q)
+		var got [][]any
+		if gerr == nil {
+			for rows.Next() {
+				got = append(got, rows.Values())
+			}
+			gerr = rows.Err()
+			rows.Close()
+		}
+		if (gerr == nil) != (werr == nil) {
+			t.Errorf("SQL: %s | native=%#v error=%v | oracle=%s error=%s", q, got, gerr, raw, stderr.String())
+			return
+		}
+		if werr != nil {
+			kinds := []string{"integer overflow", "no such column", "ambiguous column name", "no such function"}
+			for _, k := range kinds {
+				if strings.Contains(stderr.String(), k) && !strings.Contains(fmt.Sprint(gerr), k) && !(k == "no such function" && strings.Contains(fmt.Sprint(gerr), "unsupported SQL: function")) {
+					t.Errorf("SQL: %s | native error=%v | oracle error=%s", q, gerr, stderr.String())
+				}
+			}
+			return
+		}
+		want, err := confQuoted(raw)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(got) == 0 && len(want) == 0 {
+			return
+		}
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("SQL: %s | native=%#v | oracle=%#v", q, got, want)
+		}
+	}
+	for _, alias := range []string{"z", "true", "false"} {
+		for _, value := range []string{"0", "1", "NULL", "l.flag", "r.v", "r.v IS NULL", "l.flag AND r.v", "l.flag OR r.v", "r.v=0", "typeof(r.v)='null'"} {
+			for _, right := range []string{"r", "e r"} {
+				for _, on := range []string{alias, alias + " AND 0", "0 AND " + alias, alias + " AND FALSE", "FALSE AND " + alias, "(" + alias + " AND 0) OR 0", "0 OR (" + alias + " AND 0)", alias + " AND (1 AND 0)", "1 AND (" + alias + " AND 0)", "(" + alias + " AND 1) AND 1", alias + " AND r.id=1", "r.id=1 AND " + alias, alias + " OR r.id=1", "(" + alias + " OR 0) AND 1", "+" + alias, "NOT NOT " + alias, alias + " IS TRUE", alias + "=0"} {
+					compare("SELECT l.id," + value + " AS " + alias + ",r.id,r.v,typeof(r.v) FROM l LEFT JOIN " + right + " ON " + on + " ORDER BY l.id,r.id")
+				}
+			}
+		}
+	}
+	for _, q := range []string{
+		`SELECT l.id,0 AS z,r.id FROM l LEFT JOIN r ON z AND 0`,
+		`SELECT l.id,0 AS z,r.id FROM l LEFT JOIN r ON 0 AND z`,
+		`SELECT l.id,abs(-9223372036854775808) AS z,r.id FROM l LEFT JOIN r ON z AND 0 LIMIT 0`,
+		`SELECT l.id,1 AS z,r.id FROM l LEFT JOIN r ON z AND missing WHERE 0`,
+		`SELECT l.id,1 AS z,r.id FROM l LEFT JOIN r ON z AND nofunc() LIMIT 0`,
+		`SELECT l.id,0 AS z,a.id,b.id FROM l LEFT JOIN r a ON z AND 0 LEFT JOIN r b ON a.id=b.id ORDER BY l.id,a.id,b.id`,
+	} {
+		compare(q)
+	}
+	t.Logf("%d independent cases checked", n)
+}
+
+func TestIndependentAliasOnMultiSourceParameter(t *testing.T) {
+	cli := confOracle(t)
+	path := filepath.Join(t.TempDir(), "multi.db")
+	db, err := sqlite.Open(path, sqlite.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	for _, q := range []string{`CREATE TABLE l(id INTEGER,flag INTEGER)`, `INSERT INTO l VALUES(1,0),(2,1),(3,NULL)`, `CREATE TABLE r(id INTEGER,v)`, `INSERT INTO r VALUES(1,0),(2,1),(3,NULL),(4,0.5),(5,'0'),(6,x'31')`, `CREATE TABLE e(id INTEGER,v)`, `CREATE TABLE p(id INTEGER,true INTEGER,false INTEGER,z INTEGER)`, `INSERT INTO p VALUES(1,0,1,0),(2,1,0,1),(3,NULL,NULL,NULL)`} {
+		writeExec(t, db, q)
+	}
+	n := 0
+	compare := func(q string, arg any, literal string) {
+		t.Helper()
+		n++
+		cmd := exec.Command(cli, "-batch", "-bail", "-quote", "-noheader", "-readonly", path)
+		script := ".parameter init\nINSERT INTO temp.sqlite_parameters(key,value) VALUES('?1'," + literal + ");\n" + q + ";\n"
+		cmd.Stdin = strings.NewReader(script)
+		var stderr bytes.Buffer
+		cmd.Stderr = &stderr
+		raw, werr := cmd.Output()
+		var args []any
+		if strings.Contains(q, "?1") {
+			args = []any{arg}
+		}
+		rows, gerr := db.Query(context.Background(), q, args...)
+		var got [][]any
+		if gerr == nil {
+			for rows.Next() {
+				got = append(got, rows.Values())
+			}
+			gerr = rows.Err()
+			rows.Close()
+		}
+		if (gerr == nil) != (werr == nil) {
+			t.Errorf("SQL: %s [?1=%s] native=%#v error=%v oracle=%s error=%s", q, literal, got, gerr, raw, stderr.String())
+			return
+		}
+		if werr != nil {
+			for _, k := range []string{"integer overflow", "no such column", "ambiguous column name"} {
+				if strings.Contains(stderr.String(), k) && !strings.Contains(fmt.Sprint(gerr), k) {
+					t.Errorf("SQL: %s native error=%v oracle error=%s", q, gerr, stderr.String())
+				}
+			}
+			return
+		}
+		want, err := confQuoted(raw)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(got) == 0 && len(want) == 0 {
+			return
+		}
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("SQL: %s [?1=%s] native=%#v oracle=%#v", q, literal, got, want)
+		}
+	}
+	for _, rightA := range []string{"r a", "e a"} {
+		for _, rightB := range []string{"r b", "e b"} {
+			for _, valueA := range []string{"l.flag", "a.v", "a.v IS NULL"} {
+				for _, valueB := range []string{"b.v", "a.id=b.id", "b.v IS NULL"} {
+					for _, onA := range []string{"z", "+z", "NOT NOT z", "z AND 1", "z OR 0"} {
+						for _, onB := range []string{"w", "+w", "w AND 1"} {
+							compare("SELECT l.id,"+valueA+" AS z,"+valueB+" AS w,a.id,a.v,b.id,b.v FROM l LEFT JOIN "+rightA+" ON "+onA+" LEFT JOIN "+rightB+" ON "+onB+" ORDER BY l.id,a.id,b.id", nil, "NULL")
+						}
+					}
+				}
+			}
+		}
+	}
+	for _, p := range []struct {
+		v any
+		s string
+	}{{int64(0), "0"}, {int64(1), "1"}, {float64(0.5), "0.5"}, {nil, "NULL"}, {"0", "CAST('0' AS TEXT)"}, {"1", "CAST('1' AS TEXT)"}, {"x", "CAST('x' AS TEXT)"}, {[]byte{49}, "x'31'"}} {
+		// Independent binding control ensures SQL-owned shell parameters retain type.
+		compare("SELECT ?1,typeof(?1)", p.v, p.s)
+		for _, alias := range []string{"z", "true", "false"} {
+			for _, right := range []string{"r", "e r"} {
+				for _, on := range []string{alias, "+" + alias, alias + " AND r.id=1", alias + " OR r.id=1", "(" + alias + ") AND (r.id=1 OR r.id IS NULL)", alias + " IS NULL"} {
+					compare("SELECT l.id,?1 AS "+alias+",typeof(?1),r.id,r.v FROM l LEFT JOIN "+right+" ON "+on+" ORDER BY l.id,r.id", p.v, p.s)
+				}
+			}
+		}
+	}
+	for _, alias := range []string{"z", "true", "false"} {
+		for _, on := range []string{alias, "p." + alias, "r." + alias} {
+			for _, value := range []string{"0", "1", "NULL"} {
+				compare("SELECT p.id,"+value+" AS "+alias+",r.id FROM p LEFT JOIN l r ON "+on+" ORDER BY p.id,r.id", nil, "NULL")
+			}
+		}
+	}
+	for _, q := range []string{
+		`SELECT l.id,0 AS z,1 AS z,r.id FROM l LEFT JOIN r ON z ORDER BY l.id,r.id`,
+		`SELECT l.id,1 AS z,0 AS z,r.id FROM l LEFT JOIN r ON z ORDER BY l.id,r.id`,
+		`SELECT l.id,FALSE,1 AS false,r.id FROM l LEFT JOIN r ON false ORDER BY l.id,r.id`,
+		`SELECT l.id,TRUE,0 AS true,r.id FROM l LEFT JOIN r ON true ORDER BY l.id,r.id`,
+		`SELECT l.id,NULL,1 AS "NULL",r.id FROM l LEFT JOIN r ON "NULL" ORDER BY l.id,r.id`,
+		`SELECT l.id,1 AS z,r.id FROM l LEFT JOIN r ON z AND abs(-9223372036854775808) WHERE 0`,
+		`SELECT l.id,0 AS z,r.id FROM l LEFT JOIN r ON z AND abs(-9223372036854775808)`,
+		`SELECT l.id,0 AS z,r.id FROM e l LEFT JOIN r ON z AND abs(-9223372036854775808)`,
+	} {
+		compare(q, nil, "NULL")
+	}
+	t.Logf("%d independent multi-source/type/binding/name/error cases checked", n)
+}

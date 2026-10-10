@@ -1,0 +1,51 @@
+package sqlite
+
+import (
+	"context"
+	"errors"
+	sqlast "github.com/ms-xiaosnow/gosqlite/internal/sql"
+	"reflect"
+	"testing"
+)
+
+// Pure AST/default/cancellation law. No PageReader or OS resource exists.
+func TestReviewRowIDReasonPreservesUnselectedState(t *testing.T) {
+	for _, defaultUnsafe := range []bool{false, true} {
+		for _, bounded := range []bool{false, true} {
+			for _, canceled := range []bool{false, true} {
+				tab := &table{name: "t", columns: []sqlast.ColumnDef{{Name: "id", Type: "INTEGER", PrimaryKey: true}, {Name: "k", Type: "TEXT"}}, index: map[string]int{"id": 0, "k": 1}, ipk: 0}
+				unsafe := sqlast.Expr(&sqlast.Call{Name: "abs", Args: []sqlast.Expr{&sqlast.Column{Name: "k"}}})
+				if defaultUnsafe {
+					tab.columns[1].Default = unsafe
+					unsafe = &sqlast.Literal{Value: int64(1)}
+				}
+				if bounded {
+					unsafe = &sqlast.Binary{Op: "AND", Left: &sqlast.Binary{Op: ">", Left: &sqlast.Column{Name: "id"}, Right: &sqlast.Literal{Value: int64(0)}}, Right: unsafe}
+				}
+				origin := &constantSource{}
+				r := &Rows{table: tab, sel: &sqlast.Select{Where: unsafe}, exprs: []sqlast.Expr{&sqlast.Column{Name: "id"}}, order: []orderExpr{{column: 0, desc: true}}, source: origin, queryPlan: QueryPlan{Access: "SCAN", Table: "t", Reason: "kept prior reason", Indexes: []string{"prior"}, Fields: []string{"k"}, GramLengths: []int{1, 3}, EstimatedCandidates: -1, Recheck: true}}
+				ctx, cancel := context.WithCancel(context.Background())
+				if canceled {
+					cancel()
+				}
+				before := r.Plan()
+				err := (&DB{}).planRowIDRange(ctx, nil, r)
+				cancel()
+				if canceled {
+					if !errors.Is(err, context.Canceled) {
+						t.Fatal(err)
+					}
+				} else if err != nil {
+					t.Fatal(err)
+				}
+				want := before
+				if bounded && !canceled {
+					want.Reason += "; rowid range requires an error-safe residual WHERE and defaults"
+				}
+				if !reflect.DeepEqual(r.Plan(), want) || r.source != origin || len(r.order) != 1 || !r.order[0].desc {
+					t.Fatal(defaultUnsafe, bounded, canceled, r.Plan(), want)
+				}
+			}
+		}
+	}
+}

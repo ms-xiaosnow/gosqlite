@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+set -euo pipefail
+SRC=$(realpath "${1:?isolated final source directory}")
+E=$(realpath "${2:?existing evidence directory}")
+cd "$SRC"
+export GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off GOFLAGS=-buildvcs=false
+export GOCACHE="$SRC/../go-cache" GOPATH="$SRC/../go-path"
+GO="$SRC/../toolchains/go1.27.2/bin/go"
+export SQLITE_ORACLE="$SRC/../toolchains/sqlite-build-3540000/sqlite3"
+printf '470775f6ada29ccfb2d3046ac2b4c975df95a9c20b782332d4e8ba6b6233e6c6  %s\n' "$SQLITE_ORACLE" | sha256sum -c - > "$E/oracle-binary-verify.log"
+"$GO" version > "$E/go-version.txt"
+# Read behavioral-audit.md before invoking. Only reviewed default B-tree tests,
+# the specifically selected tagged bounded oracle, and compile/static checks.
+for suite in unit race oracle build vet; do
+ case "$suite" in
+ unit) export CGO_ENABLED=0; cmd=("$GO" test ./internal/btree -count=1 -v);;
+ race) export CGO_ENABLED=1; cmd=("$GO" test -race ./internal/btree -count=1 -v);;
+ oracle) export CGO_ENABLED=0; cmd=("$GO" test -tags oracle ./internal/btree -run '^TestBoundedSQLite354Oracle$' -count=1 -v);;
+ build) export CGO_ENABLED=0; cmd=("$GO" build ./...);;
+ vet) export CGO_ENABLED=0; cmd=("$GO" vet ./internal/btree);;
+ esac
+ "$GO" run ./internal/testscope > "$E/final-$suite-guard.log" 2>&1
+ printf 'CGO_ENABLED=%s GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off GOFLAGS=-buildvcs=false GOCACHE=%q GOPATH=%q ' "$CGO_ENABLED" "$GOCACHE" "$GOPATH" > "$E/final-$suite-command.txt"
+ printf '%q ' "${cmd[@]}" >> "$E/final-$suite-command.txt"; printf '\n' >> "$E/final-$suite-command.txt"
+ set +e
+ "${cmd[@]}" > "$E/final-$suite.log" 2>&1
+ code=$?
+ set -e
+ echo "$code" > "$E/final-$suite.exit"
+ echo "$suite: exit $code"; tail -4 "$E/final-$suite.log"
+ test "$code" = 0 || exit "$code"
+done

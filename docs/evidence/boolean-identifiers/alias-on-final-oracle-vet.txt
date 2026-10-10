@@ -1,0 +1,2 @@
+CGO_ENABLED=0 ../toolchains/go1.27.2/bin/go vet -tags oracle ./internal/testkit 
+Ordinary test source-reference guard PASS; behavioral review is still required.

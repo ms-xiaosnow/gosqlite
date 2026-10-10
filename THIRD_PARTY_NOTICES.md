@@ -25,3 +25,15 @@ SHA256-hashed and verified through Go's checksum database; go.mod/go.sum pin
 versions. No CgoFiles exist in the imported closure. Other optional dependencies
 in upstream go.mod are not imported into this project. This informational
 provenance/license check is not independent legal or cryptographic acceptance.
+
+## SQLite 3.54.0 aggregate arithmetic reference
+
+Native Go aggregate arithmetic re-expresses the pinned public SQLite count,
+MIN/MAX and compensated sum/total/avg behavior, including large-integer splitting
+and overflow finalization. Reference: public-domain `src/func.c`, `src/vdbe.c`
+and `src/util.c` at check-in
+be8d059e9a49089ab2dce5ed26dd87aaf598fdc5fbe0b107c0dd758464bcd5e3.
+See [SQLite's public-domain dedication](https://www.sqlite.org/copyright.html).
+No SQLite C source is compiled, linked or executed in production; the official
+CLI remains a tagged test oracle only. This is source/license provenance, not
+independent release legal review.

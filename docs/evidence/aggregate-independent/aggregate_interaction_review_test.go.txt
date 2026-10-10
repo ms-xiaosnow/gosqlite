@@ -1,0 +1,86 @@
+//go:build oracle
+
+package testkit_test
+
+import (
+	"context"
+	"os/exec"
+	"strings"
+	"testing"
+)
+
+// Interaction probes use only intact ordinary SQL fixtures and normal completed
+// read-only oracle invocations. No injected failures or physical mutations.
+func TestReviewerAggregateIdentifierInteraction(t *testing.T) {
+	db, path := aggregateOracleFixture(t, false)
+	for _, q := range []string{
+		"SELECT count(*),FALSE FROM a LEFT JOIN b ON FALSE",
+		"SELECT count(*),TRUE FROM a LEFT JOIN b ON TRUE",
+		"SELECT count(*),0 AS false FROM a LEFT JOIN b ON false",
+		"SELECT count(*),1 AS false FROM a LEFT JOIN b ON false",
+		"SELECT count(*),NULL AS false FROM a LEFT JOIN b ON false",
+		"SELECT count(*),0 AS z FROM a LEFT JOIN b ON z",
+		"SELECT count(*),0 AS false FROM a LEFT JOIN b ON +false",
+		"SELECT count(*),0 AS false FROM a LEFT JOIN b ON false OR 0",
+		"SELECT count(*),0 AS false FROM a LEFT JOIN b ON false=0",
+		"SELECT count(*),sum(a.id),count(b.id),0 AS false FROM a LEFT JOIN b ON false AND a.x=b.x WHERE a.id>0",
+		"SELECT count(*),sum(a.id),count(b.id),1 AS false FROM a LEFT JOIN b ON a.x=b.x AND false WHERE a.id>0",
+		"SELECT count(*),sum(a.id),0 AS false FROM a LEFT JOIN b ON false LEFT JOIN b c ON c.x=a.x",
+		"SELECT count(*),sum(a.id),0 AS false FROM a LEFT JOIN b ON +false LEFT JOIN b c ON c.x=a.x",
+		"SELECT count(*),sum(true.x),sum(false.x) FROM a true LEFT JOIN b false ON true.x=false.x",
+		"SELECT sum(false.true),sum(false.false),count(*) FROM boolnames false",
+		"SELECT sum(true),sum(false),min(true),max(false) FROM boolnames",
+		"SELECT sum(TRUE),sum(FALSE),count(TRUE),count(FALSE)",
+		"SELECT count(*) false FROM a ORDER BY false",
+		"SELECT sum(a.x) true,count(*) false FROM a ORDER BY true,false",
+		"SELECT count(*),sum(id) FROM a WHERE rowid BETWEEN 2 AND 4",
+		"SELECT count(*),sum(id) FROM a WHERE rowid=2 LIMIT 0 OFFSET NULL",
+	} {
+		t.Run(q, func(t *testing.T) {
+			confCompare(t, confExpected(t, path, q), confNative(t, db, q))
+			rows, err := db.Query(context.Background(), q)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer rows.Close()
+			if p := rows.Plan(); p.Access != "AGGREGATE" || p.Method != "global" {
+				t.Fatal(p)
+			}
+		})
+	}
+	for _, q := range []string{
+		"SELECT count(*) AS false FROM a LEFT JOIN b ON false LIMIT 0",
+		"SELECT sum(a.id) AS z FROM a LEFT JOIN b ON z LIMIT 0",
+		"SELECT sum(a.id) AS true FROM a LEFT JOIN b ON +true LIMIT 0",
+		"SELECT sum(sum(true)) FROM boolnames LIMIT 0",
+	} {
+		t.Run(q, func(t *testing.T) {
+			output, err := exec.Command(confOracle(t), "-batch", "-bail", "-readonly", path, q).CombinedOutput()
+			if err == nil || !strings.Contains(string(output), "misuse of aggregate") {
+				t.Fatal(err, string(output))
+			}
+			rows, err := db.Query(context.Background(), q)
+			if rows != nil {
+				rows.Close()
+			}
+			if err == nil || !strings.Contains(err.Error(), "misuse of aggregate") {
+				t.Fatal(err)
+			}
+		})
+	}
+	for _, q := range []string{"SELECT sum(true()) FROM a LIMIT 0", "SELECT count(false(NULL)) FROM a WHERE 0"} {
+		t.Run(q, func(t *testing.T) {
+			output, err := exec.Command(confOracle(t), "-batch", "-bail", "-readonly", path, q).CombinedOutput()
+			if err == nil || !strings.Contains(string(output), "no such function") {
+				t.Fatal(err, string(output))
+			}
+			rows, err := db.Query(context.Background(), q)
+			if rows != nil {
+				rows.Close()
+			}
+			if err == nil || !strings.Contains(err.Error(), "function") {
+				t.Fatal(err)
+			}
+		})
+	}
+}

@@ -1,0 +1,11 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestBooleanIdentifierInheritedBoundaryProbe
+    boolean_identifier_boundary_probe_test.go:8: SELECT t.id,0 AS z,u.y FROM t LEFT JOIN u ON z: native [][]interface {}{[]interface {}{1, 0, interface {}(nil)}}; SQLite [][]interface {}{}
+    boolean_identifier_boundary_probe_test.go:8: SELECT t.id,NULL AS z,u.y FROM t LEFT JOIN u ON z: native [][]interface {}{[]interface {}{1, interface {}(nil), interface {}(nil)}}; SQLite [][]interface {}{}
+    boolean_identifier_boundary_probe_test.go:8: SELECT t.id,0 AS "true",u.y FROM t LEFT JOIN u ON "true": native [][]interface {}{[]interface {}{1, 0, interface {}(nil)}}; SQLite [][]interface {}{}
+    boolean_identifier_boundary_probe_test.go:8: SELECT t.id,NULL AS "true",u.y FROM t LEFT JOIN u ON "true": native [][]interface {}{[]interface {}{1, interface {}(nil), interface {}(nil)}}; SQLite [][]interface {}{}
+    boolean_identifier_boundary_probe_test.go:8: SELECT t.id,0 AS "false",u.y FROM t LEFT JOIN u ON "false": native [][]interface {}{[]interface {}{1, 0, interface {}(nil)}}; SQLite [][]interface {}{}
+    boolean_identifier_boundary_probe_test.go:8: SELECT t.id,NULL AS "false",u.y FROM t LEFT JOIN u ON "false": native [][]interface {}{[]interface {}{1, interface {}(nil), interface {}(nil)}}; SQLite [][]interface {}{}
+--- PASS: TestBooleanIdentifierInheritedBoundaryProbe (0.02s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	0.018s

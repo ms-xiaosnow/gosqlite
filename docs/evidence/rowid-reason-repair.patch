@@ -1,0 +1,61 @@
+diff --git a/sqlite/plan_rowid_range.go b/sqlite/plan_rowid_range.go
+index e5b141e..432790d 100644
+--- a/sqlite/plan_rowid_range.go
++++ b/sqlite/plan_rowid_range.go
+@@ -157,7 +157,12 @@ func (d *DB) planRowIDRange(ctx context.Context, reader btree.PageReader, r *Row
+ 		return nil
+ 	}
+ 	if r.sel.Where != nil && !ordinarySafeWhere(r, r.sel.Where) || !ordinarySafeDefaults(ctx, r.table) {
+-		r.queryPlan.Reason = "rowid range requires an error-safe residual WHERE and defaults"
++		// A rejected order-only optimization leaves the selected scan and its
++		// earlier grams/index fallback explanation untouched. An actual range
++		// rejection adds context without erasing that preceding explanation.
++		if bounds.seen {
++			r.queryPlan.Reason += "; rowid range requires an error-safe residual WHERE and defaults"
++		}
+ 		return ctx.Err()
+ 	}
+ 	if bounds.lower != nil && bounds.lower.Value == math.MaxInt64 && !bounds.lower.Inclusive || bounds.upper != nil && bounds.upper.Value == math.MinInt64 && !bounds.upper.Inclusive {
+diff --git a/sqlite/plan_rowid_reason_test.go b/sqlite/plan_rowid_reason_test.go
+new file mode 100644
+index 0000000..3e8f153
+--- /dev/null
++++ b/sqlite/plan_rowid_reason_test.go
+@@ -0,0 +1,37 @@
++package sqlite
++
++import (
++	"context"
++	sqlast "github.com/ms-xiaosnow/gosqlite/internal/sql"
++	"reflect"
++	"strings"
++	"testing"
++)
++
++// Descriptor-free proof: refusing a speculative order-only range must not
++// rewrite the existing access plan or its more specific fallback reason.
++func TestRowIDRangeRejectedOrderPreservesPlan(t *testing.T) {
++	for _, reason := range []string{"high posting frequency", "empty normalized MATCH query", "candidate memory budget"} {
++		for _, bounded := range []bool{false, true} {
++			where := sqlast.Expr(&sqlast.Call{Name: "unknown_unproven", Args: []sqlast.Expr{&sqlast.Column{Name: "v"}}})
++			if bounded {
++				where = &sqlast.Binary{Op: "AND", Left: &sqlast.Binary{Op: ">", Left: &sqlast.Column{Name: "id"}, Right: &sqlast.Literal{Value: int64(4)}}, Right: where}
++			}
++			tab := &table{name: "t", columns: []sqlast.ColumnDef{{Name: "id", Type: "INTEGER", PrimaryKey: true}, {Name: "v", Type: "TEXT"}}, index: map[string]int{"id": 0, "v": 1}, ipk: 0}
++			r := &Rows{table: tab, sel: &sqlast.Select{Where: where}, exprs: []sqlast.Expr{&sqlast.Column{Name: "id"}}, order: []orderExpr{{column: 0}}, queryPlan: QueryPlan{Access: "SCAN", Table: "t", Reason: reason}}
++			before := r.queryPlan
++			if err := (&DB{}).planRowIDRange(context.Background(), nil, r); err != nil {
++				t.Fatal(err)
++			}
++			if bounded {
++				if !strings.HasPrefix(r.queryPlan.Reason, reason+"; ") || !strings.Contains(r.queryPlan.Reason, "rowid range requires") {
++					t.Fatalf("bounded fallback lost prior reason: %+v", r.queryPlan)
++				}
++				r.queryPlan.Reason = before.Reason
++			}
++			if !reflect.DeepEqual(r.queryPlan, before) || len(r.order) != 1 || r.source != nil {
++				t.Fatalf("rejected planner mutated prior plan: before=%+v after=%+v", before, r.queryPlan)
++			}
++		}
++	}
++}

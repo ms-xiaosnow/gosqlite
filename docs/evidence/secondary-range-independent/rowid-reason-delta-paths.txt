@@ -1,0 +1,2 @@
+sqlite/plan_rowid_range.go
+sqlite/plan_rowid_reason_test.go

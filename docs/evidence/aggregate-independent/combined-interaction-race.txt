@@ -1,0 +1,4 @@
+Behavioral audit: same reviewed 27 interaction SQL cases and ordinary intact helpers, now race instrumented; no broad suite.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	1.123s
+INTERACTION_RACE_EXIT=0

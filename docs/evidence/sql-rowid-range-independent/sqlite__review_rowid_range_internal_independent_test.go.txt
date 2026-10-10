@@ -1,0 +1,128 @@
+package sqlite
+
+import (
+	"context"
+	"errors"
+	"io"
+	"path/filepath"
+	"reflect"
+	"testing"
+
+	"github.com/ms-xiaosnow/gosqlite/internal/btree"
+	"github.com/ms-xiaosnow/gosqlite/internal/pager"
+	"github.com/ms-xiaosnow/gosqlite/internal/record"
+	sqlast "github.com/ms-xiaosnow/gosqlite/internal/sql"
+	"github.com/ms-xiaosnow/gosqlite/internal/testkit/fileview"
+)
+
+func TestReviewRowIDRangeWholePlannerPageEvidence(t *testing.T) {
+	image, err := fileview.ReadFile(filepath.Join("..", "testdata", "readonly", "page512.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	h, err := pager.ParseHeader(image[:100], int64(len(image)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var totals []int
+	for _, not := range []string{"", " NOT INDEXED"} {
+		mem := &rowIDMemoryReader{h: h, image: image}
+		d := &DB{opts: Options{MaxSortBytes: 64 << 20}}
+		stmt, err := sqlast.Parse("SELECT id FROM samples" + not + " WHERE id>=10 AND id<=12 ORDER BY id DESC LIMIT 2 OFFSET 1")
+		if err != nil {
+			t.Fatal(err)
+		}
+		r, err := d.plan(context.Background(), mem, stmt.(*sqlast.Select), nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		before := mem.reads
+		plan := r.Plan()
+		var got [][]any
+		for r.Next() {
+			got = append(got, r.Values())
+			if !reflect.DeepEqual(plan, r.Plan()) {
+				t.Fatal("plan mutated midstream")
+			}
+		}
+		if r.Err() != nil || !reflect.DeepEqual(got, [][]any{{int64(11)}, {int64(10)}}) {
+			t.Fatal(got, r.Err())
+		}
+		after := mem.reads
+		if !reflect.DeepEqual(plan, r.Plan()) {
+			t.Fatal("plan mutated after EOF")
+		}
+		r.Close()
+		totals = append(totals, after)
+		t.Logf("modifier=%q planning page calls=%d total page calls=%d stats=%+v plan=%s", not, before, after, r.Stats(), plan.Detail())
+	}
+	if totals[0] >= totals[1]/4 {
+		t.Fatal("whole planner did not reduce pages", totals)
+	}
+	for _, q := range []string{"SELECT id FROM samples WHERE id>10 ORDER BY id DESC LIMIT 0", "EXPLAIN QUERY PLAN SELECT id FROM samples WHERE id>10 ORDER BY id DESC"} {
+		mem := &rowIDMemoryReader{h: h, image: image}
+		d := &DB{opts: Options{MaxSortBytes: 64 << 20}}
+		stmt, _ := sqlast.Parse(q)
+		r, err := d.plan(context.Background(), mem, stmt.(*sqlast.Select), nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		before := mem.reads
+		for r.Next() {
+		}
+		if r.Err() != nil || mem.reads != before || r.Stats().RowIDSeeks != 0 {
+			t.Fatal(q, before, mem.reads, r.Err(), r.Stats())
+		}
+		r.Close()
+		t.Logf("%s: %d planning page calls, zero iteration/range pages", q, before)
+	}
+}
+func TestReviewRowIDRangeCancelAndPreallocation(t *testing.T) {
+	image, err := fileview.ReadFile(filepath.Join("..", "testdata", "readonly", "page512.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	h, err := pager.ParseHeader(image[:100], int64(len(image)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	mem := &rowIDMemoryReader{h: h, image: image}
+	tab, err := (&DB{}).table(context.Background(), mem, &sqlast.Select{From: "samples"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, limits := range []btree.RangeLimits{{Work: 1}, {PageReads: -1}} {
+		reader := &rowIDMemoryReader{h: h, image: image}
+		var stats QueryStats
+		s := &rowIDRangeSource{ctx: context.Background(), reader: reader, root: tab.root, stats: &stats, limits: limits}
+		_, _, err := s.Next()
+		if err == nil {
+			t.Fatal("quota admitted", limits)
+		}
+		want := record.ErrLimit
+		if limits.PageReads < 0 {
+			want = record.ErrUnsupported
+		}
+		if !errors.Is(err, want) {
+			t.Fatal(err)
+		}
+		reads := reader.reads
+		_, _, again := s.Next()
+		if again != err || reader.reads != reads {
+			t.Fatal("not sticky", err, again)
+		}
+		s.Close()
+		if _, _, err = s.Next(); err != io.EOF {
+			t.Fatal(err)
+		}
+		t.Logf("limits=%+v page calls=%d; sticky error; close stops source", limits, reads)
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	reader := &rowIDMemoryReader{h: h, image: image}
+	var stats QueryStats
+	s := &rowIDRangeSource{ctx: ctx, reader: reader, root: tab.root, stats: &stats}
+	if _, _, err = s.Next(); !errors.Is(err, context.Canceled) || reader.reads != 0 || stats.RowIDSeeks != 0 {
+		t.Fatal(err, reader.reads, stats)
+	}
+}

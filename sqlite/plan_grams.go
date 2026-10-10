@@ -51,7 +51,8 @@ type QueryPlan struct {
 // QueryStats reports work performed so far, including eager ORDER BY work.
 // PostingKeysRead counts matching covering posting records returned by ranges,
 // not page I/O, seek comparisons or a posting-table scan.
-// Candidates is the distinct rowid set before original-WHERE verification.
+// Candidates is the distinct rowid set before original-WHERE verification;
+// a streaming rowid range counts only candidates yielded so far.
 // BaseRowFetches counts actual source rows read; ReturnedRows excludes OFFSET.
 // FrequencyLookups counts planning probes and also applies to EXPLAIN.
 // ANN counters count logical shadow-record operations and metric calls, not
@@ -69,6 +70,9 @@ type QueryStats struct {
 	// Ordinary B-tree work only: returned prefix keys, actual range-page reads
 	// (including seek probes), and base rowid seek attempts. Schema reads and
 	// grams/ANN probes are excluded. Abandoned budgeted range work is retained.
+	// Rowid-range traversal does not count table reads as IndexPageReads or
+	// records as IndexKeysRead. RowIDSeeks counts its one initial positioning
+	// attempt (bounded seek or table-edge descent); proved-empty ranges use zero.
 	IndexKeysRead          int64
 	IndexPageReads         int64
 	RowIDSeeks             int64
@@ -116,7 +120,9 @@ func (r *Rows) Stats() QueryStats { r.mu.Lock(); defer r.mu.Unlock(); return r.q
 
 func (p QueryPlan) Detail() string {
 	var detail string
-	if p.Access != "SEARCH" {
+	if p.Method == "rowid_range" {
+		detail = fmt.Sprintf("%s %s USING INTEGER PRIMARY KEY; method=rowid_range; original_where_recheck=true; estimated_candidates=%d; reason=%s", p.Access, p.Table, p.EstimatedCandidates, p.Reason)
+	} else if p.Access != "SEARCH" {
 		detail = fmt.Sprintf("%s %s; reason=%s", p.Access, p.Table, p.Reason)
 	} else if p.Method == "hnsw" || p.Method == "ivfflat" {
 		detail = fmt.Sprintf("SEARCH %s USING %s %s v%d; fields=%s; original_where_recheck=%t; content_rowid_seek=true; approximate_recall=true", p.Table, strings.Join(p.Indexes, ","), p.Method, p.MethodVersion, strings.Join(p.Fields, ","), p.Recheck)

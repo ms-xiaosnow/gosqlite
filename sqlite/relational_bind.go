@@ -17,9 +17,10 @@ type relationalBinding struct {
 	offset int
 }
 type relationalScope struct {
-	budget *relationalBudget
-	leaves []relationalBinding
-	slots  *table
+	aggregates bool
+	budget     *relationalBudget
+	leaves     []relationalBinding
+	slots      *table
 }
 
 func slotName(i int) string { return fmt.Sprintf("\x00slot%d", i) }
@@ -93,6 +94,14 @@ func (s *relationalScope) bind(e sqlast.Expr, aliases map[string]sqlast.Expr) (s
 		if err := s.budget.step(relationalNodeWork(e)); err != nil {
 			return err
 		}
+		if s.aggregates {
+			if call, ok := e.(*sqlast.Call); ok && sqlast.AggregateName(call.Name) {
+				return nil
+			}
+			if _, ok := e.(*sqlast.Star); ok {
+				return nil
+			}
+		}
 		return validateNode(e, s.slots, nil)
 	}); err != nil {
 		return nil, err
@@ -163,6 +172,9 @@ func (d *DB) relationalScope(ctx context.Context, reader btree.PageReader, relat
 		s.slots.columns = append(s.slots.columns, sqlast.ColumnDef{Name: name, Type: "INTEGER"})
 		return nil
 	}
+	if relation == nil {
+		return s, nil
+	}
 	if err := visit(relation); err != nil {
 		return nil, err
 	}
@@ -189,6 +201,8 @@ func (d *DB) planRelational(ctx context.Context, reader btree.PageReader, origin
 	if err != nil {
 		return nil, err
 	}
+	aggregate := selectUsesAggregate(original)
+	scope.aggregates = aggregate
 	sel := *original
 	r := &Rows{db: d, ctx: ctx, table: scope.slots, sel: &sel, params: params, limit: -1, aliases: map[string]int{}, relational: budget}
 	defer func() {
@@ -198,6 +212,9 @@ func (d *DB) planRelational(ctx context.Context, reader btree.PageReader, origin
 	}()
 	aliases := map[string]sqlast.Expr{}
 	resultIndexes := map[string]int{}
+	// Only explicit aliases lose ON provenance. An implicit label from SELECT
+	// FALSE must not turn literal LEFT JOIN ON FALSE into a WHERE rejection.
+	onAliases := map[string]sqlast.Expr{}
 	add := func(e sqlast.Expr, label string) error {
 		if err := budget.step(1 + int64(len(label))); err != nil {
 			return err
@@ -219,6 +236,9 @@ func (d *DB) planRelational(ctx context.Context, reader btree.PageReader, origin
 	}
 	for _, c := range original.Columns {
 		if star, ok := c.Expr.(*sqlast.Star); ok {
+			if aggregate {
+				return nil, fmt.Errorf("%w: wildcard in global aggregate projection", ErrUnsupported)
+			}
 			found := false
 			for _, b := range scope.leaves {
 				if !b.table.qualifier(star.Table) {
@@ -263,6 +283,15 @@ func (d *DB) planRelational(ctx context.Context, reader btree.PageReader, origin
 			if err := add(bound, label); err != nil {
 				return nil, err
 			}
+			if c.Alias != "" {
+				key := fold(c.Alias)
+				if _, exists := onAliases[key]; !exists {
+					if err := budget.reserve(64 + int64(len(key))); err != nil {
+						return nil, err
+					}
+					onAliases[key] = bound
+				}
+			}
 		}
 	}
 	if len(r.exprs) > sqlast.MaxColumns {
@@ -295,24 +324,26 @@ func (d *DB) planRelational(ctx context.Context, reader btree.PageReader, origin
 		}
 		r.order = append(r.order, orderExpr{expr: bound, column: -1, desc: o.Desc, nulls: o.Nulls})
 	}
-	if sel.Limit != nil {
-		if err = relationalValidate(sel.Limit, nil, budget); err != nil {
-			return nil, err
+	if !aggregate {
+		if sel.Limit != nil {
+			if err = relationalValidate(sel.Limit, nil, budget); err != nil {
+				return nil, err
+			}
+			r.limit, err = limitValue(ctx, sel.Limit, params)
+			if err != nil {
+				return nil, err
+			}
 		}
-		r.limit, err = limitValue(ctx, sel.Limit, params)
-		if err != nil {
-			return nil, err
+		if sel.Offset != nil {
+			if err = relationalValidate(sel.Offset, nil, budget); err != nil {
+				return nil, err
+			}
+			r.offset, err = limitValue(ctx, sel.Offset, params)
+			if err != nil {
+				return nil, err
+			}
+			r.offset = max(r.offset, 0)
 		}
-	}
-	if sel.Offset != nil {
-		if err = relationalValidate(sel.Offset, nil, budget); err != nil {
-			return nil, err
-		}
-		r.offset, err = limitValue(ctx, sel.Offset, params)
-		if err != nil {
-			return nil, err
-		}
-		r.offset = max(r.offset, 0)
 	}
 	// Bind all ON expressions before any row is fetched. Forward references in
 	// ON are explicitly excluded for now, including through result aliases.
@@ -321,6 +352,9 @@ func (d *DB) planRelational(ctx context.Context, reader btree.PageReader, origin
 	var onPrograms []*predicateProgram
 	var build func(sqlast.Relation) (relationalFactory, int, error)
 	build = func(relation sqlast.Relation) (relationalFactory, int, error) {
+		if relation == nil {
+			return func() (source, error) { return &constantSource{}, nil }, 0, nil
+		}
 		if _, ok := relation.(*sqlast.TableRelation); ok {
 			b := scope.leaves[n]
 			n++
@@ -337,7 +371,11 @@ func (d *DB) planRelational(ctx context.Context, reader btree.PageReader, origin
 		if e != nil {
 			return nil, 0, e
 		}
-		on, e := scope.bind(j.On, aliases)
+		joinAliases := aliases
+		if j.Kind == "LEFT" {
+			joinAliases = onAliases
+		}
+		on, e := scope.bind(j.On, joinAliases)
 		if e != nil {
 			return nil, 0, e
 		}
@@ -355,6 +393,23 @@ func (d *DB) planRelational(ctx context.Context, reader btree.PageReader, origin
 		}); e != nil {
 			return nil, 0, e
 		}
+		if j.Kind == "LEFT" {
+			var ordinary []sqlast.Expr
+			on, ordinary, e = scope.extractOuterAliasTerms(j.On, on, onAliases)
+			if e != nil {
+				return nil, 0, e
+			}
+			for _, term := range ordinary {
+				if sel.Where == nil {
+					sel.Where = term
+				} else {
+					if e = budget.reserve(80); e != nil {
+						return nil, 0, e
+					}
+					sel.Where = &sqlast.Binary{Op: "AND", Left: sel.Where, Right: term}
+				}
+			}
+		}
 		onExprs = append(onExprs, on)
 		onProgram := &predicateProgram{outerON: j.Kind == "LEFT"}
 		onPrograms = append(onPrograms, onProgram)
@@ -369,6 +424,23 @@ func (d *DB) planRelational(ctx context.Context, reader btree.PageReader, origin
 	factory, _, err := build(original.Relation)
 	if err != nil {
 		return nil, err
+	}
+	if aggregate {
+		for _, e := range r.exprs {
+			if err = checkAggregateExpression(e, true, false, budget); err != nil {
+				return nil, err
+			}
+		}
+		for _, e := range append([]sqlast.Expr{sel.Where, sel.Limit, sel.Offset}, onExprs...) {
+			if err = checkAggregateExpression(e, false, false, budget); err != nil {
+				return nil, err
+			}
+		}
+		for _, o := range r.order {
+			if o.column < 0 {
+				return nil, fmt.Errorf("%w: global aggregate ORDER BY requires a result alias or ordinal", ErrUnsupported)
+			}
+		}
 	}
 	// Include ON-only grams calls in the same snapshot-bound function registry.
 	projections := r.exprs
@@ -433,15 +505,49 @@ func (d *DB) planRelational(ctx context.Context, reader btree.PageReader, origin
 		tables = append(tables, label)
 	}
 	r.queryPlan = QueryPlan{Access: "JOIN", Table: strings.Join(tables, ", "), Method: "nested_loop", Reason: "left-to-right bounded nested-loop table scans; ON before null extension; WHERE after join; no index or ANN pushdown"}
+	if aggregate {
+		if err = r.prepareAggregate(factory); err != nil {
+			return nil, err
+		}
+		r.queryPlan = QueryPlan{Access: "AGGREGATE", Table: strings.Join(tables, ", "), Method: "global", Reason: "native bounded global aggregate over table scans and left-to-right joins; no index or ANN pushdown"}
+	}
+	if aggregate {
+		// Binding is unconditional and complete before any bound expression is
+		// evaluated. EXPLAIN executes neither bound; LIMIT 0 bypasses OFFSET.
+		if err = relationalValidate(sel.Limit, nil, budget); err != nil {
+			return nil, err
+		}
+		if err = relationalValidate(sel.Offset, nil, budget); err != nil {
+			return nil, err
+		}
+		if !original.Explain {
+			if sel.Limit != nil {
+				r.limit, err = limitValue(ctx, sel.Limit, params)
+				if err != nil {
+					return nil, err
+				}
+			}
+			if r.limit != 0 && sel.Offset != nil {
+				r.offset, err = limitValue(ctx, sel.Offset, params)
+				if err != nil {
+					return nil, err
+				}
+				r.offset = max(r.offset, 0)
+			}
+		}
+		r.source.(*aggregateSource).discardOutput = r.offset > 0
+	}
 	if original.Explain {
 		r.explainDetail = r.queryPlan.Detail()
 		r.columns = []string{"id", "parent", "notused", "detail"}
 		r.limit, r.offset = -1, 0
 		return r, nil
 	}
-	r.source, err = factory()
-	if err != nil {
-		return nil, err
+	if !aggregate {
+		r.source, err = factory()
+		if err != nil {
+			return nil, err
+		}
 	}
 	if len(r.order) > 0 && r.limit != 0 {
 		if err = r.materialize(); err != nil {

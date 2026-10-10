@@ -1,0 +1,28 @@
+=== RUN   TestReviewBoundedIndependentPrefixExhaustive
+    review_bounded_independent_test.go:205: independent exact-rational/prefix cases=42436 keys=120
+--- PASS: TestReviewBoundedIndependentPrefixExhaustive (2.21s)
+=== RUN   TestReviewBoundedIndependentRowIDBoundaries
+    review_bounded_independent_test.go:273: independent rowid boundary cases=5000 records=165
+--- PASS: TestReviewBoundedIndependentRowIDBoundaries (0.49s)
+=== RUN   TestReviewBoundedIndependentInteriorSelectivity
+    review_bounded_independent_test.go:308: at=0 reverse=false exact trace=[2 3 4] complete scan=21
+    review_bounded_independent_test.go:308: at=29 reverse=false exact trace=[2] complete scan=21
+    review_bounded_independent_test.go:308: at=30 reverse=false exact trace=[2 8 9] complete scan=21
+    review_bounded_independent_test.go:308: at=59 reverse=false exact trace=[2] complete scan=21
+    review_bounded_independent_test.go:308: at=60 reverse=false exact trace=[2 13 14] complete scan=21
+    review_bounded_independent_test.go:308: at=89 reverse=false exact trace=[2] complete scan=21
+    review_bounded_independent_test.go:308: at=90 reverse=false exact trace=[2 18 19] complete scan=21
+    review_bounded_independent_test.go:308: at=119 reverse=false exact trace=[2 18 22] complete scan=21
+    review_bounded_independent_test.go:308: at=0 reverse=true exact trace=[2 3 4] complete scan=21
+    review_bounded_independent_test.go:308: at=29 reverse=true exact trace=[2] complete scan=21
+    review_bounded_independent_test.go:308: at=30 reverse=true exact trace=[2 8 9] complete scan=21
+    review_bounded_independent_test.go:308: at=59 reverse=true exact trace=[2] complete scan=21
+    review_bounded_independent_test.go:308: at=60 reverse=true exact trace=[2 13 14] complete scan=21
+    review_bounded_independent_test.go:308: at=89 reverse=true exact trace=[2] complete scan=21
+    review_bounded_independent_test.go:308: at=90 reverse=true exact trace=[2 18 19] complete scan=21
+    review_bounded_independent_test.go:308: at=119 reverse=true exact trace=[2 18 22] complete scan=21
+--- PASS: TestReviewBoundedIndependentInteriorSelectivity (0.00s)
+=== RUN   TestReviewBoundedIndependentMemoryParserRefusal
+--- PASS: TestReviewBoundedIndependentMemoryParserRefusal (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	2.710s

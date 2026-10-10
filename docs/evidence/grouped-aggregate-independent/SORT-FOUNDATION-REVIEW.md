@@ -1,0 +1,11 @@
+# Independent sort-quota assertion correction review
+
+Accepted for the exact one-file correction at tree `48370bbe2dc585c1b45821fbc360c525d156a9f5` over `1e413b466d10db5c7304ba231fd5d4536dfc5fa5`.
+
+The only changed path is `internal/testkit/readonly_conformance_test.go`. The historical `SELECT * FROM edge ORDER BY id` remains unchanged and now has a complete official result, labels, and storage-class comparison under `MaxSortBytes: 1`. The extra plan check requires actual `rowid_range` and `order_satisfied=true; sort=false`. This is consistent with the separately accepted physical-rowid ordering proof, so the old expectation of sorting-quota rejection was obsolete. `SELECT * FROM edge ORDER BY id+0` keeps a genuine `ErrMemoryLimit` negative under the tiny quota and is independently compared to official SQLite at the normal allowance. Existing negative/error/resource assertions remain intact.
+
+Verified all 1,226 SHA256 manifest entries before and after the independent checks, independently reconstructed the exact tree in an isolated copy, checked the only-path delta against the specified baseline, verified reverse patch applicability, and verified patch SHA256 `ff51f7c64de46363d186c3c9adebdde181fb23a0d7789c0e0f4428be7dddb42a`. Goal SHA256 is unchanged. The original full-oracle failure is preserved in the lead's aggregate-repaired evidence; this review does not rewrite or supersede its failure status.
+
+PASS: selected `TestOracleErrorsAndResources`, both ordinary and race builds, using pinned official SQLite 3.54.0 and Go 1.27.2. The source-reference guard preceded each run. Selected test/helper behavior was audited: ordinary fresh intact CLI fixtures, read-only queries, expected SQL errors, pure quotas, cancellation and normal close; no excluded physical/native-fault/crash/namespace/recovery workflows. No broad suite was started. Full combined-tree gates remain the lead's responsibility.
+
+Exact independent script, outputs and inventory: `run-sort-foundation.sh`, `sort-foundation-checks.txt`, `sort-foundation-checks.exit`, `sort-foundation-inventory.json`. Only review evidence was written in the lead-owned checkout. Production/test execution used sibling `grouped-review-sort-foundation`.

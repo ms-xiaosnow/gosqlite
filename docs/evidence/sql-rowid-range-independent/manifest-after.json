@@ -1,0 +1,19 @@
+{
+  "candidate_full_manifest": "PASS",
+  "candidate_files": 905,
+  "baseline_full_manifest": "PASS",
+  "baseline_files": 879,
+  "owned_base_hashes": "PASS",
+  "exact_six_additive_cursor_overlay": "PASS",
+  "candidate_copy_only_additions": {
+    "sqlite/review_rowid_range_independent_test.go": "a9dca518a455c144006dee6a70748a7a3858133577dd3e29e99af0c45258e5cc",
+    "sqlite/review_rowid_range_internal_independent_test.go": "e0978aeafac0132dfa7a7af5a261fd298d91aa1f741ed0fb883f3e36a72af481",
+    "internal/testkit/review_rowid_range_independent_test.go": "e1a2bbe06b9e16b2d379e2a875ac96e3eb82e4f408d788bd83e81d9f6cea856f",
+    "internal/testkit/review_rowid_range_baseline_gaps_test.go": "18ce25e55cfbd9daf6f207bf4189e433952602e2ce9ff1ba1bea5d692b39d86e"
+  },
+  "baseline_copy_only_addition": "internal/testkit/review_rowid_range_baseline_gaps_test.go",
+  "exact_patch_reproduction": "PASS",
+  "patch_files": 891,
+  "all_original_copy_bytes_unchanged": "PASS",
+  "oracle_sha256": "470775f6ada29ccfb2d3046ac2b4c975df95a9c20b782332d4e8ba6b6233e6c6"
+}

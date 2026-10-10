@@ -1,0 +1,9 @@
+//go:build oracle
+package testkit_test
+import("testing";"path/filepath";"github.com/ms-xiaosnow/gosqlite/sqlite")
+// Intact native SQL fixture, readonly pinned oracle, normal completion.
+func TestBooleanIdentifierInheritedBoundaryProbe(t *testing.T){
+ path:=filepath.Join(t.TempDir(),"inherited.db");db,err:=sqlite.Open(path,sqlite.Options{});if err!=nil{t.Fatal(err)};defer db.Close()
+ for _,q:=range []string{"CREATE TABLE t(id INTEGER)","CREATE TABLE u(y INTEGER)","INSERT INTO t VALUES(1)","INSERT INTO u VALUES(7)"}{writeExec(t,db,q)}
+ for _,alias:=range []string{"z",`"true"`,`"false"`}{for _,value:=range []string{"0","NULL"}{q:="SELECT t.id,"+value+" AS "+alias+",u.y FROM t LEFT JOIN u ON "+alias;got:=confNative(t,db,q);want:=confExpected(t,path,q);t.Logf("%s: native %#v; SQLite %#v",q,got.rows,want.rows);if len(got.rows)!=1||len(want.rows)!=0{t.Fatal("boundary changed")}}}
+}

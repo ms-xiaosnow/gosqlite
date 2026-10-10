@@ -1,0 +1,7 @@
+../toolchains/go1.27.2/bin/go test -tags oracle ./internal/testkit -run ^TestBooleanAliasOnOracleProvenance$ -count=1 -v
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestBooleanAliasOnOracleProvenance
+    boolean_alias_on_conformance_test.go:126: 748 alias-root/operator/physical/parameter/empty-source/error provenance cases checked
+--- PASS: TestBooleanAliasOnOracleProvenance (2.99s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	3.000s

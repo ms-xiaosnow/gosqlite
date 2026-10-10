@@ -1,0 +1,41 @@
+Audited selected test and called helpers: owned ordinary SQLite-created fixtures, read-only queries, SQL errors, quota/cancel/Close and byte-hash unchanged checks. CLI runs ordinary EOF. No excluded workflow.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestOracleErrorsAndResources
+=== RUN   TestOracleErrorsAndResources/SELECT_missing_FROM_empty_table
+=== RUN   TestOracleErrorsAndResources/SELECT_id_FROM_empty_table_WHERE_missing=0
+=== RUN   TestOracleErrorsAndResources/SELECT_id_FROM_empty_table_ORDER_BY_missing
+=== RUN   TestOracleErrorsAndResources/SELECT_abs()_FROM_empty_table
+=== RUN   TestOracleErrorsAndResources/SELECT_missing_function(id)_FROM_empty_table
+=== RUN   TestOracleErrorsAndResources/SELECT_1_LIMIT_NULL
+=== RUN   TestOracleErrorsAndResources/SELECT_1_LIMIT_1.5
+=== RUN   TestOracleErrorsAndResources/SELECT_1_ORDER_BY_2
+=== RUN   TestOracleErrorsAndResources/SELECT_abs(-9223372036854775808)
+=== RUN   TestOracleErrorsAndResources/SELECT_-0x8000000000000000
+=== RUN   TestOracleErrorsAndResources/unsupported/SELECT_DISTINCT_id_FROM_edge
+=== RUN   TestOracleErrorsAndResources/unsupported/SELECT_id_FROM_edge_UNION_SELECT_id_FROM_edge
+=== RUN   TestOracleErrorsAndResources/unsupported/SELECT_e.id_FROM_edge_e_JOIN_edge_f_USING(id)
+=== RUN   TestOracleErrorsAndResources/unsupported/SELECT_id_FROM_edge;_SELECT_1
+=== RUN   TestOracleErrorsAndResources/unsupported/PRAGMA_user_version
+=== RUN   TestOracleErrorsAndResources/unsupported/WITH_x_AS_(SELECT_1)_SELECT_*_FROM_x
+--- PASS: TestOracleErrorsAndResources (0.05s)
+    --- PASS: TestOracleErrorsAndResources/SELECT_missing_FROM_empty_table (0.01s)
+    --- PASS: TestOracleErrorsAndResources/SELECT_id_FROM_empty_table_WHERE_missing=0 (0.00s)
+    --- PASS: TestOracleErrorsAndResources/SELECT_id_FROM_empty_table_ORDER_BY_missing (0.00s)
+    --- PASS: TestOracleErrorsAndResources/SELECT_abs()_FROM_empty_table (0.00s)
+    --- PASS: TestOracleErrorsAndResources/SELECT_missing_function(id)_FROM_empty_table (0.00s)
+    --- PASS: TestOracleErrorsAndResources/SELECT_1_LIMIT_NULL (0.00s)
+    --- PASS: TestOracleErrorsAndResources/SELECT_1_LIMIT_1.5 (0.00s)
+    --- PASS: TestOracleErrorsAndResources/SELECT_1_ORDER_BY_2 (0.00s)
+    --- PASS: TestOracleErrorsAndResources/SELECT_abs(-9223372036854775808) (0.00s)
+    --- PASS: TestOracleErrorsAndResources/SELECT_-0x8000000000000000 (0.00s)
+    --- PASS: TestOracleErrorsAndResources/unsupported/SELECT_DISTINCT_id_FROM_edge (0.00s)
+    --- PASS: TestOracleErrorsAndResources/unsupported/SELECT_id_FROM_edge_UNION_SELECT_id_FROM_edge (0.00s)
+    --- PASS: TestOracleErrorsAndResources/unsupported/SELECT_e.id_FROM_edge_e_JOIN_edge_f_USING(id) (0.00s)
+    --- PASS: TestOracleErrorsAndResources/unsupported/SELECT_id_FROM_edge;_SELECT_1 (0.00s)
+    --- PASS: TestOracleErrorsAndResources/unsupported/PRAGMA_user_version (0.00s)
+    --- PASS: TestOracleErrorsAndResources/unsupported/WITH_x_AS_(SELECT_1)_SELECT_*_FROM_x (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	0.050s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	1.067s
+Sort foundation checks PASS

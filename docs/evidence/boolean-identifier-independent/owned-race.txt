@@ -1,0 +1,5 @@
+../toolchains/go1.27.2/bin/go test -race ./internal/sql ./sqlite ./driver -run ^Test(BooleanIdentifier|BooleanAliasOn|DriverBooleanIdentifier|DriverBooleanAliasOn) -count=1
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	1.028s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	1.070s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.064s

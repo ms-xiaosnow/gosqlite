@@ -1,0 +1,9 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestIndependentAliasOnRootMatrix
+    boolean_independent_review_test.go:99: 1086 independent cases checked
+--- PASS: TestIndependentAliasOnRootMatrix (4.56s)
+=== RUN   TestIndependentAliasOnMultiSourceParameter
+    boolean_independent_review_test.go:205: 871 independent multi-source/type/binding/name/error cases checked
+--- PASS: TestIndependentAliasOnMultiSourceParameter (3.97s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	8.541s

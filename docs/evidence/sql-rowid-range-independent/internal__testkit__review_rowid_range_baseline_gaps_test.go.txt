@@ -1,0 +1,43 @@
+//go:build oracle
+
+package testkit_test
+
+import (
+	"context"
+	"fmt"
+	"github.com/ms-xiaosnow/gosqlite/sqlite"
+	"path/filepath"
+	"strings"
+	"testing"
+)
+
+func TestReviewRowIDRangeBaselineGaps(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "gap.db")
+	db := writeOpen(t, path, 512)
+	writeExec(t, db, "CREATE TABLE t(id INTEGER PRIMARY KEY)")
+	writeExec(t, db, "INSERT INTO t VALUES(-9223372036854775808),(-1),(1)")
+	for _, tc := range []struct{ q, kind string }{
+		{"SELECT abs(id) FROM t WHERE id<0 ORDER BY id DESC LIMIT 1", "integer overflow"},
+		{"SELECT id AS true FROM t WHERE true>0 ORDER BY true DESC LIMIT 4 OFFSET 1", "reserved identifier true"},
+		{"SELECT id AS false FROM t WHERE false<0 ORDER BY false LIMIT 4 OFFSET 1", "reserved identifier false"},
+	} {
+		var nativeErr error
+		r, err := db.Query(context.Background(), tc.q)
+		nativeErr = err
+		if err == nil {
+			for r.Next() {
+			}
+			nativeErr = r.Err()
+			r.Close()
+		}
+		if nativeErr == nil || !strings.Contains(nativeErr.Error(), tc.kind) {
+			t.Fatal(tc.q, nativeErr)
+		}
+		reference := confExpected(t, path, tc.q)
+		t.Logf("known baseline gap: %s; native=%v; official=%s", tc.q, nativeErr, fmt.Sprint(reference.rows))
+	}
+	if _, err := db.Query(context.Background(), "SELECT id AS true FROM t"); err == nil {
+		t.Fatal("unexpected baseline scope change")
+	}
+	_ = sqlite.Options{}
+}

@@ -1,0 +1,271 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestIndependentAliasOnRootMatrix
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,0 AS z,r.id,r.v,typeof(r.v) FROM l LEFT JOIN r ON z COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 64 | oracle= error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,0 AS z,r.id,r.v,typeof(r.v) FROM l LEFT JOIN e r ON z COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 66 | oracle= error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,1 AS z,r.id,r.v,typeof(r.v) FROM l LEFT JOIN r ON z COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 64 | oracle=1,1,1,0,'integer'
+        1,1,2,1,'integer'
+        1,1,3,NULL,'null'
+        1,1,4,0.5,'real'
+        1,1,5,'0','text'
+        1,1,6,x'31','blob'
+        2,1,1,0,'integer'
+        2,1,2,1,'integer'
+        2,1,3,NULL,'null'
+        2,1,4,0.5,'real'
+        2,1,5,'0','text'
+        2,1,6,x'31','blob'
+        3,1,1,0,'integer'
+        3,1,2,1,'integer'
+        3,1,3,NULL,'null'
+        3,1,4,0.5,'real'
+        3,1,5,'0','text'
+        3,1,6,x'31','blob'
+         error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,1 AS z,r.id,r.v,typeof(r.v) FROM l LEFT JOIN e r ON z COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 66 | oracle=1,1,NULL,NULL,'null'
+        2,1,NULL,NULL,'null'
+        3,1,NULL,NULL,'null'
+         error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,NULL AS z,r.id,r.v,typeof(r.v) FROM l LEFT JOIN r ON z COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 67 | oracle= error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,NULL AS z,r.id,r.v,typeof(r.v) FROM l LEFT JOIN e r ON z COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 69 | oracle= error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,l.flag AS z,r.id,r.v,typeof(r.v) FROM l LEFT JOIN r ON z COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 69 | oracle=2,1,1,0,'integer'
+        2,1,2,1,'integer'
+        2,1,3,NULL,'null'
+        2,1,4,0.5,'real'
+        2,1,5,'0','text'
+        2,1,6,x'31','blob'
+         error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,l.flag AS z,r.id,r.v,typeof(r.v) FROM l LEFT JOIN e r ON z COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 71 | oracle=2,1,NULL,NULL,'null'
+         error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,r.v AS z,r.id,r.v,typeof(r.v) FROM l LEFT JOIN r ON z COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 66 | oracle=1,1,2,1,'integer'
+        1,0.5,4,0.5,'real'
+        1,x'31',6,x'31','blob'
+        2,1,2,1,'integer'
+        2,0.5,4,0.5,'real'
+        2,x'31',6,x'31','blob'
+        3,1,2,1,'integer'
+        3,0.5,4,0.5,'real'
+        3,x'31',6,x'31','blob'
+         error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,r.v AS z,r.id,r.v,typeof(r.v) FROM l LEFT JOIN e r ON z COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 68 | oracle= error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,r.v IS NULL AS z,r.id,r.v,typeof(r.v) FROM l LEFT JOIN r ON z COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 74 | oracle=1,1,3,NULL,'null'
+        2,1,3,NULL,'null'
+        3,1,3,NULL,'null'
+         error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,r.v IS NULL AS z,r.id,r.v,typeof(r.v) FROM l LEFT JOIN e r ON z COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 76 | oracle=1,1,NULL,NULL,'null'
+        2,1,NULL,NULL,'null'
+        3,1,NULL,NULL,'null'
+         error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,l.flag AND r.v AS z,r.id,r.v,typeof(r.v) FROM l LEFT JOIN r ON z COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 77 | oracle=2,1,2,1,'integer'
+        2,1,4,0.5,'real'
+        2,1,6,x'31','blob'
+         error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,l.flag AND r.v AS z,r.id,r.v,typeof(r.v) FROM l LEFT JOIN e r ON z COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 79 | oracle= error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,l.flag OR r.v AS z,r.id,r.v,typeof(r.v) FROM l LEFT JOIN r ON z COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 76 | oracle=1,1,2,1,'integer'
+        1,1,4,0.5,'real'
+        1,1,6,x'31','blob'
+        2,1,1,0,'integer'
+        2,1,2,1,'integer'
+        2,1,3,NULL,'null'
+        2,1,4,0.5,'real'
+        2,1,5,'0','text'
+        2,1,6,x'31','blob'
+        3,1,2,1,'integer'
+        3,1,4,0.5,'real'
+        3,1,6,x'31','blob'
+         error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,l.flag OR r.v AS z,r.id,r.v,typeof(r.v) FROM l LEFT JOIN e r ON z COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 78 | oracle=2,1,NULL,NULL,'null'
+         error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,r.v=0 AS z,r.id,r.v,typeof(r.v) FROM l LEFT JOIN r ON z COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 68 | oracle=1,1,1,0,'integer'
+        2,1,1,0,'integer'
+        3,1,1,0,'integer'
+         error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,r.v=0 AS z,r.id,r.v,typeof(r.v) FROM l LEFT JOIN e r ON z COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 70 | oracle= error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,typeof(r.v)='null' AS z,r.id,r.v,typeof(r.v) FROM l LEFT JOIN r ON z COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 81 | oracle=1,1,3,NULL,'null'
+        2,1,3,NULL,'null'
+        3,1,3,NULL,'null'
+         error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,typeof(r.v)='null' AS z,r.id,r.v,typeof(r.v) FROM l LEFT JOIN e r ON z COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 83 | oracle=1,1,NULL,NULL,'null'
+        2,1,NULL,NULL,'null'
+        3,1,NULL,NULL,'null'
+         error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,0 AS true,r.id,r.v,typeof(r.v) FROM l LEFT JOIN r ON true COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 70 | oracle= error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,0 AS true,r.id,r.v,typeof(r.v) FROM l LEFT JOIN e r ON true COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 72 | oracle= error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,1 AS true,r.id,r.v,typeof(r.v) FROM l LEFT JOIN r ON true COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 70 | oracle=1,1,1,0,'integer'
+        1,1,2,1,'integer'
+        1,1,3,NULL,'null'
+        1,1,4,0.5,'real'
+        1,1,5,'0','text'
+        1,1,6,x'31','blob'
+        2,1,1,0,'integer'
+        2,1,2,1,'integer'
+        2,1,3,NULL,'null'
+        2,1,4,0.5,'real'
+        2,1,5,'0','text'
+        2,1,6,x'31','blob'
+        3,1,1,0,'integer'
+        3,1,2,1,'integer'
+        3,1,3,NULL,'null'
+        3,1,4,0.5,'real'
+        3,1,5,'0','text'
+        3,1,6,x'31','blob'
+         error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,1 AS true,r.id,r.v,typeof(r.v) FROM l LEFT JOIN e r ON true COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 72 | oracle=1,1,NULL,NULL,'null'
+        2,1,NULL,NULL,'null'
+        3,1,NULL,NULL,'null'
+         error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,NULL AS true,r.id,r.v,typeof(r.v) FROM l LEFT JOIN r ON true COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 73 | oracle= error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,NULL AS true,r.id,r.v,typeof(r.v) FROM l LEFT JOIN e r ON true COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 75 | oracle= error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,l.flag AS true,r.id,r.v,typeof(r.v) FROM l LEFT JOIN r ON true COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 75 | oracle=2,1,1,0,'integer'
+        2,1,2,1,'integer'
+        2,1,3,NULL,'null'
+        2,1,4,0.5,'real'
+        2,1,5,'0','text'
+        2,1,6,x'31','blob'
+         error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,l.flag AS true,r.id,r.v,typeof(r.v) FROM l LEFT JOIN e r ON true COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 77 | oracle=2,1,NULL,NULL,'null'
+         error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,r.v AS true,r.id,r.v,typeof(r.v) FROM l LEFT JOIN r ON true COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 72 | oracle=1,1,2,1,'integer'
+        1,0.5,4,0.5,'real'
+        1,x'31',6,x'31','blob'
+        2,1,2,1,'integer'
+        2,0.5,4,0.5,'real'
+        2,x'31',6,x'31','blob'
+        3,1,2,1,'integer'
+        3,0.5,4,0.5,'real'
+        3,x'31',6,x'31','blob'
+         error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,r.v AS true,r.id,r.v,typeof(r.v) FROM l LEFT JOIN e r ON true COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 74 | oracle= error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,r.v IS NULL AS true,r.id,r.v,typeof(r.v) FROM l LEFT JOIN r ON true COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 80 | oracle=1,1,3,NULL,'null'
+        2,1,3,NULL,'null'
+        3,1,3,NULL,'null'
+         error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,r.v IS NULL AS true,r.id,r.v,typeof(r.v) FROM l LEFT JOIN e r ON true COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 82 | oracle=1,1,NULL,NULL,'null'
+        2,1,NULL,NULL,'null'
+        3,1,NULL,NULL,'null'
+         error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,l.flag AND r.v AS true,r.id,r.v,typeof(r.v) FROM l LEFT JOIN r ON true COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 83 | oracle=2,1,2,1,'integer'
+        2,1,4,0.5,'real'
+        2,1,6,x'31','blob'
+         error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,l.flag AND r.v AS true,r.id,r.v,typeof(r.v) FROM l LEFT JOIN e r ON true COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 85 | oracle= error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,l.flag OR r.v AS true,r.id,r.v,typeof(r.v) FROM l LEFT JOIN r ON true COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 82 | oracle=1,1,2,1,'integer'
+        1,1,4,0.5,'real'
+        1,1,6,x'31','blob'
+        2,1,1,0,'integer'
+        2,1,2,1,'integer'
+        2,1,3,NULL,'null'
+        2,1,4,0.5,'real'
+        2,1,5,'0','text'
+        2,1,6,x'31','blob'
+        3,1,2,1,'integer'
+        3,1,4,0.5,'real'
+        3,1,6,x'31','blob'
+         error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,l.flag OR r.v AS true,r.id,r.v,typeof(r.v) FROM l LEFT JOIN e r ON true COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 84 | oracle=2,1,NULL,NULL,'null'
+         error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,r.v=0 AS true,r.id,r.v,typeof(r.v) FROM l LEFT JOIN r ON true COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 74 | oracle=1,1,1,0,'integer'
+        2,1,1,0,'integer'
+        3,1,1,0,'integer'
+         error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,r.v=0 AS true,r.id,r.v,typeof(r.v) FROM l LEFT JOIN e r ON true COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 76 | oracle= error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,typeof(r.v)='null' AS true,r.id,r.v,typeof(r.v) FROM l LEFT JOIN r ON true COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 87 | oracle=1,1,3,NULL,'null'
+        2,1,3,NULL,'null'
+        3,1,3,NULL,'null'
+         error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,typeof(r.v)='null' AS true,r.id,r.v,typeof(r.v) FROM l LEFT JOIN e r ON true COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 89 | oracle=1,1,NULL,NULL,'null'
+        2,1,NULL,NULL,'null'
+        3,1,NULL,NULL,'null'
+         error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,0 AS false,r.id,r.v,typeof(r.v) FROM l LEFT JOIN r ON false COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 72 | oracle= error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,0 AS false,r.id,r.v,typeof(r.v) FROM l LEFT JOIN e r ON false COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 74 | oracle= error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,1 AS false,r.id,r.v,typeof(r.v) FROM l LEFT JOIN r ON false COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 72 | oracle=1,1,1,0,'integer'
+        1,1,2,1,'integer'
+        1,1,3,NULL,'null'
+        1,1,4,0.5,'real'
+        1,1,5,'0','text'
+        1,1,6,x'31','blob'
+        2,1,1,0,'integer'
+        2,1,2,1,'integer'
+        2,1,3,NULL,'null'
+        2,1,4,0.5,'real'
+        2,1,5,'0','text'
+        2,1,6,x'31','blob'
+        3,1,1,0,'integer'
+        3,1,2,1,'integer'
+        3,1,3,NULL,'null'
+        3,1,4,0.5,'real'
+        3,1,5,'0','text'
+        3,1,6,x'31','blob'
+         error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,1 AS false,r.id,r.v,typeof(r.v) FROM l LEFT JOIN e r ON false COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 74 | oracle=1,1,NULL,NULL,'null'
+        2,1,NULL,NULL,'null'
+        3,1,NULL,NULL,'null'
+         error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,NULL AS false,r.id,r.v,typeof(r.v) FROM l LEFT JOIN r ON false COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 75 | oracle= error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,NULL AS false,r.id,r.v,typeof(r.v) FROM l LEFT JOIN e r ON false COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 77 | oracle= error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,l.flag AS false,r.id,r.v,typeof(r.v) FROM l LEFT JOIN r ON false COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 77 | oracle=2,1,1,0,'integer'
+        2,1,2,1,'integer'
+        2,1,3,NULL,'null'
+        2,1,4,0.5,'real'
+        2,1,5,'0','text'
+        2,1,6,x'31','blob'
+         error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,l.flag AS false,r.id,r.v,typeof(r.v) FROM l LEFT JOIN e r ON false COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 79 | oracle=2,1,NULL,NULL,'null'
+         error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,r.v AS false,r.id,r.v,typeof(r.v) FROM l LEFT JOIN r ON false COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 74 | oracle=1,1,2,1,'integer'
+        1,0.5,4,0.5,'real'
+        1,x'31',6,x'31','blob'
+        2,1,2,1,'integer'
+        2,0.5,4,0.5,'real'
+        2,x'31',6,x'31','blob'
+        3,1,2,1,'integer'
+        3,0.5,4,0.5,'real'
+        3,x'31',6,x'31','blob'
+         error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,r.v AS false,r.id,r.v,typeof(r.v) FROM l LEFT JOIN e r ON false COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 76 | oracle= error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,r.v IS NULL AS false,r.id,r.v,typeof(r.v) FROM l LEFT JOIN r ON false COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 82 | oracle=1,1,3,NULL,'null'
+        2,1,3,NULL,'null'
+        3,1,3,NULL,'null'
+         error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,r.v IS NULL AS false,r.id,r.v,typeof(r.v) FROM l LEFT JOIN e r ON false COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 84 | oracle=1,1,NULL,NULL,'null'
+        2,1,NULL,NULL,'null'
+        3,1,NULL,NULL,'null'
+         error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,l.flag AND r.v AS false,r.id,r.v,typeof(r.v) FROM l LEFT JOIN r ON false COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 85 | oracle=2,1,2,1,'integer'
+        2,1,4,0.5,'real'
+        2,1,6,x'31','blob'
+         error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,l.flag AND r.v AS false,r.id,r.v,typeof(r.v) FROM l LEFT JOIN e r ON false COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 87 | oracle= error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,l.flag OR r.v AS false,r.id,r.v,typeof(r.v) FROM l LEFT JOIN r ON false COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 84 | oracle=1,1,2,1,'integer'
+        1,1,4,0.5,'real'
+        1,1,6,x'31','blob'
+        2,1,1,0,'integer'
+        2,1,2,1,'integer'
+        2,1,3,NULL,'null'
+        2,1,4,0.5,'real'
+        2,1,5,'0','text'
+        2,1,6,x'31','blob'
+        3,1,2,1,'integer'
+        3,1,4,0.5,'real'
+        3,1,6,x'31','blob'
+         error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,l.flag OR r.v AS false,r.id,r.v,typeof(r.v) FROM l LEFT JOIN e r ON false COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 86 | oracle=2,1,NULL,NULL,'null'
+         error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,r.v=0 AS false,r.id,r.v,typeof(r.v) FROM l LEFT JOIN r ON false COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 76 | oracle=1,1,1,0,'integer'
+        2,1,1,0,'integer'
+        3,1,1,0,'integer'
+         error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,r.v=0 AS false,r.id,r.v,typeof(r.v) FROM l LEFT JOIN e r ON false COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 78 | oracle= error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,typeof(r.v)='null' AS false,r.id,r.v,typeof(r.v) FROM l LEFT JOIN r ON false COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 89 | oracle=1,1,3,NULL,'null'
+        2,1,3,NULL,'null'
+        3,1,3,NULL,'null'
+         error=
+    boolean_independent_review_test.go:84: SQL: SELECT l.id,typeof(r.v)='null' AS false,r.id,r.v,typeof(r.v) FROM l LEFT JOIN e r ON false COLLATE BINARY ORDER BY l.id,r.id | native=[][]interface {}(nil) error=sqlite query: unsupported SQLite feature: unsupported SQL: trailing syntax COLLATE at byte 91 | oracle=1,1,NULL,NULL,'null'
+        2,1,NULL,NULL,'null'
+        3,1,NULL,NULL,'null'
+         error=
+    boolean_independent_review_test.go:99: 1146 independent cases checked
+--- FAIL: TestIndependentAliasOnRootMatrix (8.71s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/testkit	8.730s
+FAIL

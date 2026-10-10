@@ -1,0 +1,5 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestIndependentInheritedAliasBoundary
+--- PASS: TestIndependentInheritedAliasBoundary (0.02s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	0.024s

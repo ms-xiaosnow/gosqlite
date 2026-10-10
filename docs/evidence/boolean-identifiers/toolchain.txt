@@ -1,0 +1,2 @@
+go version go1.27.2 linux/amd64
+548d3c32f83fa81152f543eb1526be7884cfe0526eb5e9ce29d3eca14786e7e0  ../toolchains/go1.27.2/bin/go

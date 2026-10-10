@@ -74,3 +74,10 @@ rows versus1800 forced-scan source rows. Independent PageReader instrumentation
 also measures a late two-key prefix reading3 pages versus84 for a complete
 1600-key index traversal. These are scoped logical-work observations, not latency
 or universal optimization claims. No physical crash/fault/recovery gate is covered.
+
+## Later rowid interval increment
+
+The separate [SQL rowid interval guide](sql-rowid-ranges.md) adds native bounded
+rowid traversal and narrowly proven forward/reverse ORDER BY elimination. The
+secondary equality-prefix path described above still sorts rowid candidates and
+does not claim order satisfaction or secondary-index inequality support.

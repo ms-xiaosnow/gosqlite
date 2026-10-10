@@ -26,14 +26,17 @@ remain code work; unsupported is a safe interim behavior, not removal from goal.
   bounded aggregate undo and authoritative driver state now exist. Complete cursor
   relaxation and remaining connection-state/statement-outcome parity without
   regressing these implemented paths.
-- Ordinary rowid and leading BINARY ASC equality seeks now exist. Extend to
-  inequalities, covering access, reverse/order use and statistics only with
+- Ordinary rowid equality/inequality and proved forward/reverse ordering plus
+  leading BINARY ASC equality seeks now exist. Extend secondary inequalities,
+  composite equality-plus-range, covering access, secondary order and statistics with
   proven residual/error semantics, reduced work and truthful diagnostics.
 - CASE/CAST/BETWEEN/IN-list scalar nodes, SELECT ALL and explicit NULL ordering
   now exist with immutable boolean binding. Scoped named-table INNER/CROSS/comma/LEFT
   joins now use bounded composable pull operators and one statement snapshot.
-  Correct inherited predicate AND/OR error suppression, then extend remaining
-  JOIN forms, grouping/aggregates, subqueries, compound SELECT, CTE and windows.
+  Context-sensitive Boolean evaluation, affinity and identifier/LEFT-ON alias
+  provenance are corrected within the documented profile; native bounded global
+  aggregates now exist. Complete remaining planner-dependent error-order gaps,
+  JOIN forms, GROUP BY/HAVING, subqueries, compound SELECT, CTE and windows.
   Preserve binding, lifetime and shared work/memory budgets across operators.
 - Unify mutation outcomes before general constraints, conflict policies, UPSERT,
   foreign keys and triggers. SQLite FAIL can preserve earlier row changes in the

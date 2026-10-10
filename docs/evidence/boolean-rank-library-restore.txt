@@ -1,0 +1,21 @@
+Exact Library-restored c89c88e. Audited intact SQL/typed-value, descriptor-free AST/work/math and normal prepared Tx tests. Full source816 gates are separate evidence; this is a focused restore test.
+c89c88e74ec38adff2c752016cb07a96e90edbb3
+2026-10-10T19:53:15Z
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.068s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.176s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.006s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	1.018s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	2.380s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.187s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	15.451s
+restored cross-build linux/arm64 PASS
+restored cross-build darwin/arm64 PASS
+restored cross-build darwin/amd64 PASS
+restored cross-build windows/amd64 PASS
+restored cross-build windows/arm64 PASS
+all modules verified
+2026-10-10T19:54:46Z
+EXACT RESTORED PREDICATE/AFFINITY FOCUSED CHECKPOINT PASS

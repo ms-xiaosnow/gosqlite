@@ -1,0 +1,5 @@
+CGO_ENABLED=1 ../toolchains/go1.27.2/bin/go test -race ./internal/sql ./sqlite ./driver -run ^Test(Boolean|DriverBoolean|Relational|DriverRelational|OrdinaryIndex|Expression|SQLExpression|Affinity) -count=1 
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	1.143s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	13.122s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.239s

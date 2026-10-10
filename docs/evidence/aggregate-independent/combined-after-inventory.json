@@ -1,0 +1,7 @@
+{
+  "tree": "8d7a0fcc5a2e3a83850ea780b64b403047677568",
+  "source_hashes_verified_before_and_after": 1225,
+  "only_independent_copy_addition": [
+    "internal/testkit/aggregate_interaction_review_test.go"
+  ]
+}

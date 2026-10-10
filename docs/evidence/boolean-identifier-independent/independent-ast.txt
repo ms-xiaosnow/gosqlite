@@ -1,0 +1,6 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestIndependentAliasSameASTAndBudget
+    boolean_independent_ast_test.go:95: Same AST remained structurally unchanged across six typed parameter plans; extractor work/memory/cancel limits preserved
+--- PASS: TestIndependentAliasSameASTAndBudget (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.008s

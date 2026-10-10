@@ -1,0 +1,10 @@
+Behavioral audit: same inspected original aggregate and driver suites plus independent joined-scope SQL probes; no physical/native fault, namespace, termination, recovery or rekey tests.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	1.022s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	1.141s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.106s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	2.403s
+FOCUSED_RACE_EXIT=0
+VET_EXIT=0
+BUILD_EXIT=0
+PRODUCTION_CGO_CLOSURE_EXIT=0

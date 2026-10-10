@@ -1,0 +1,23 @@
+=== RUN   TestGlobalAggregateOffsetProjectionSuppression
+    aggregate_test.go:269: [] sqlite next: integer overflow
+--- FAIL: TestGlobalAggregateOffsetProjectionSuppression (0.00s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/sqlite	0.008s
+=== RUN   TestGlobalAggregateOracleOffsetErrorSuppression
+=== RUN   TestGlobalAggregateOracleOffsetErrorSuppression/SELECT_count(*)+abs(-9223372036854775808)_FROM_a_LIMIT_1_OFFSET_1
+    aggregate_conformance_test.go:218: native iteration "SELECT count(*)+abs(-9223372036854775808) FROM a LIMIT 1 OFFSET 1": sqlite next: integer overflow
+=== RUN   TestGlobalAggregateOracleOffsetErrorSuppression/SELECT_count(*)+abs(-9223372036854775808)_AS_cnt_FROM_a_ORDER_BY_cnt_LIMIT_-1_OFFSET_2
+    aggregate_conformance_test.go:218: native iteration "SELECT count(*)+abs(-9223372036854775808) AS cnt FROM a ORDER BY cnt LIMIT -1 OFFSET 2": sqlite next: integer overflow
+=== RUN   TestGlobalAggregateOracleOffsetErrorSuppression/SELECT_count(*)+abs(-9223372036854775808)_FROM_empty_source_LIMIT_1_OFFSET_1
+    aggregate_conformance_test.go:218: native iteration "SELECT count(*)+abs(-9223372036854775808) FROM empty_source LIMIT 1 OFFSET 1": sqlite next: integer overflow
+=== RUN   TestGlobalAggregateOracleOffsetErrorSuppression/SELECT_sum(x)_FROM_overpos_LIMIT_1_OFFSET_1
+=== RUN   TestGlobalAggregateOracleOffsetErrorSuppression/SELECT_sum(abs(-9223372036854775808))_FROM_a_LIMIT_1_OFFSET_1
+--- FAIL: TestGlobalAggregateOracleOffsetErrorSuppression (0.03s)
+    --- FAIL: TestGlobalAggregateOracleOffsetErrorSuppression/SELECT_count(*)+abs(-9223372036854775808)_FROM_a_LIMIT_1_OFFSET_1 (0.00s)
+    --- FAIL: TestGlobalAggregateOracleOffsetErrorSuppression/SELECT_count(*)+abs(-9223372036854775808)_AS_cnt_FROM_a_ORDER_BY_cnt_LIMIT_-1_OFFSET_2 (0.01s)
+    --- FAIL: TestGlobalAggregateOracleOffsetErrorSuppression/SELECT_count(*)+abs(-9223372036854775808)_FROM_empty_source_LIMIT_1_OFFSET_1 (0.00s)
+    --- PASS: TestGlobalAggregateOracleOffsetErrorSuppression/SELECT_sum(x)_FROM_overpos_LIMIT_1_OFFSET_1 (0.00s)
+    --- PASS: TestGlobalAggregateOracleOffsetErrorSuppression/SELECT_sum(abs(-9223372036854775808))_FROM_a_LIMIT_1_OFFSET_1 (0.00s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/testkit	0.035s
+FAIL
