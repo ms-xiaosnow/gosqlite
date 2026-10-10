@@ -44,5 +44,18 @@
     "verified": "Guarded remote commit/ref readback; exact local commit mirror; complete-history bundle verify; clean clone/fsck; persisted Library readback bytes identical; original goal and all fixture manifest hashes unchanged; Library-restored clean clone passed scripts/check.sh and pinned oracle suite",
     "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38043149889",
     "remote_ci_status": "PASSED for exact checkpoint SHA; observed 2026-10-10T09:58:48Z; only ordinary checks"
+  },
+  {
+    "stage": "M3 exclusive-WAL intermediate slice; full M3 incomplete",
+    "remote_commit": "fab8d2e272fe27b819cc50e717f865048ddc28b0",
+    "local_commit": "fab8d2e272fe27b819cc50e717f865048ddc28b0",
+    "tree": "d1c0886a19b8bd8232827bab3b5292985434678f",
+    "bundle_sha256": "0a5bf5b8fac13ffaef90d0bb198d425676157ffb99e73470cc28bdfe05f8d75d",
+    "library_file_id": "libfile_14dde118d1e4819186beb7cbf231e658",
+    "library_version": 0,
+    "verified": "Guarded remote readback; exact local mirror; full-history bundle verify; Library byte-identical readback; clean restore/fsck; restored ordinary unit/vet/build/race and pinned oracle suite passed; manual recovery compiled only and never executed",
+    "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38044412625",
+    "remote_ci_status": "PASSED for exact SHA, observed 2026-10-10T10:20:05Z; ordinary-only",
+    "open_gates": "Shared concurrent WAL implementation; restricted crash/fault/physical recovery acceptance; independent native-OS/security/legal gates"
   }
 ]

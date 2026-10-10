@@ -36,17 +36,24 @@ Fresh restart, 2026-10-10 UTC. Historical work and test results are not acceptan
 - Next: persist verified M2 checkpoint, then M3 native recovery/WAL implementation and allowed concurrency/interop evidence; restricted gates remain manual and later milestone acceptance conditional.
 
 ### M3: Durability and concurrency
-- Status: PARTIAL / BLOCKED; ordinary exclusive-WAL intermediate slice VERIFIED. M3 is not complete.
-- Implemented slice: native WAL codecs/committed-prefix index, connection-owned EXCLUSIVE session, same-descriptor read/write leases, ordinary append/checkpoint/normal-close retention, public native/driver/CLI integration; isolated single-segment rollback-recovery source and doubly gated manual harness.
-- ADR: 0004-exclusive-wal-and-recovery-gates. All live clients are excluded while an exclusive session is open; this is sequential interoperability, not the goal's single-writer/multiple-reader WAL concurrency.
-- Evidence: component memory tests/fuzz/race, native valid-data WAL operations and official SQLite roundtrips pass; full CGO0 unit/vet/build, separate race, pinned oracle suite and four cross-builds PASSED after independently reviewed WAL-only normalization; manual recovery compiled only. All fixture/goal hashes unchanged. See docs/evidence/m3-exclusive-aggregate.txt. See docs/evidence/m3-components.md.
-- Required implementation still open: full shared-memory WAL-index protocol, checked dual headers/hash blocks, read marks and reader/writer/checkpoint/recovery locks; simultaneous cross-process reader/writer snapshots; broader journal recovery/mode support. These are code gaps, not merely manual acceptance gaps, and remain active development work.
+- Status: PARTIAL / BLOCKED; ordinary exclusive and shared-WAL paths implemented. M3 is not complete.
+- Implemented: native WAL codec/committed-prefix scanner; optional connection-owned exclusive session; real shared-memory WAL-index dual headers, hash blocks, read marks, DMS and reader/writer/checkpoint/reconstruction locks; independent concurrent connection snapshots, deferred single writer and BUSY_SNAPSHOT; conservative append, partial/full checkpoint and safe reset. Native/driver/CLI support both explicit modes. Shared sessions never rename/unlink the WAL or SHM inode.
+- ADRs: 0004-exclusive-wal-and-recovery-gates and 0006-shared-wal-protocol. Exclusive remains an intermediate/restricted alternative; the shared implementation now supplies actual single-writer/multiple-reader coordination rather than substituting an exclusive lock.
+- Evidence: native valid-data page-size suites, all-four-readmark saturation, multiple hash blocks, pooled writes, ordinary rollback/reopen and live official SQLite 3.54.0 concurrent reader/writer/checkpoint/reset tests pass. Public/driver/CLI and live oracle race runs pass. Full aggregate and review evidence: docs/evidence/m3-shared-aggregate.txt and m3-shared-review.md. No failure-path execution is implied.
+- Required implementation still open: broader rollback-journal recovery segments/modes and automatic safe Open recovery; incomplete/checksum-invalid current-generation WAL tail recovery; native non-Linux file locking. These remain code gaps, separately from unavailable execution gates.
 - Required execution evidence blocked: physical hot rollback replay, failed/short/wrong-offset I/O, disk-full/permission faults, forced exit/power loss and interrupted checkpoint. Source-only recovery compilation is not runtime recovery verification. These gates remain BLOCKED/NOT_RUN and cannot be moved elsewhere to evade the restriction.
-- Other limits: Linux-only native runtime; strict WAL tail refusal; writable access required for exclusive WAL; one local lease; bounded growth/work; sector assumptions explicit; no qualification for interrupted publication.
-- Next: persist the independently reviewed exclusive-WAL slice, then implement shared-WAL concurrency. A dedicated shared-WAL implementation task is active in design. Later independent feature work may proceed under revised user sequencing without treating M3 code gaps or restricted tests as complete.
+- Limits: Linux native runtime, writable DB/WAL/SHM required, one local lease per connection, bounded WAL growth/work, no native shrink, conservative imported-sector append/checkpoint gates unless caller explicitly asserts PSOW. Cold reconstruction accepts only committed data, valid discarded rollback suffixes or normal old-salt reset suffixes; other ambiguous tails refuse. No production acceptance claim.
+- Next: preserve the reviewed shared implementation durably; implement remaining recovery/platform code under the same execution restrictions while advancing independent M4 features.
 
-### M4–M10
-- Status: NOT_STARTED (M4 persistent-index design research only)
+### M4: Persistent grams13 and indexed LIKE
+- Status: PREREQUISITES VERIFIED / REQUIRED INDEX IMPLEMENTATION OPEN.
+- Implemented prerequisites: direct lower-bound/prefix B-tree range cursor with real bounded descent/interior-key traversal, and immutable versioned Unicode rune 1/2/3-gram tokenizer. LIKE_RAW_V1 preserves SQL LIKE semantics without NFC false negatives; MATCH_CONFIG_V1 applies actual pinned NFC/optional full folding. Canonical configuration persists dependency/Unicode versions and resource limits.
+- Evidence: all three official page-size fixtures, valid-memory range models and exact page-read assertions; tokenizer Unicode goldens, exhaustive scalar CGJ behavior, 4,096-word containment proof, concurrency and memory fuzz (reference91,549; LIKE71,448; config155,283 executions). Tokenizer coverage92.7%, race/vet pass. Pinned pure-Go x/text v0.43.0 checksums/license documented.
+- Not implemented: persistent registry/postings/frequencies, atomic incremental maintenance, external-writer dirty guards/reindex, SQL method grammar, actual indexed LIKE plans/diagnostics and the required ≥10,000 indexed-versus-scan differential cases. Current SELECT still scans. ADR0005 is proposed design, not implementation evidence.
+- Next: build registry/storage adapter, persistent posting lifecycle and truthful planner integration; retain all crash-consistency gates as conditional.
+
+### M5–M10
+- Status: NOT_STARTED.
 - Deliverables/tests/oracle evidence: no fresh implementation/acceptance evidence yet.
 - Limits and risks: all remaining required code and acceptance gates stay open. Independent native-OS, security, crypto/legal and long-soak acceptance cannot be fabricated.
-- Next: finish required M3 shared-concurrency code while developing genuinely independent later components; every meaningful checkpoint stays remotely committed and independently backed up.
+- Every meaningful checkpoint stays remotely committed and independently backed up.

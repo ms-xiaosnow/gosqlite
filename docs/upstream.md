@@ -95,3 +95,20 @@ The native record/B-tree implementation follows the official file format and the
 - https://www.sqlite.org/lang_expr.html
 - https://www.sqlite.org/datatype3.html
 
+
+
+## M4 Unicode dependency: golang.org/x/text v0.43.0
+
+Downloaded and verified 2026-10-10 using Go1.27.2 with GOPROXY=https://proxy.golang.org and GOSUMDB=sum.golang.org. Exact downloaded module checksum and origin matched independently retrieved official metadata:
+
+- Release timestamp:2026-10-09T15:18:32Z
+- Origin: https://go.googlesource.com/text, tag refs/tags/v0.43.0, commit ac40b0f06c159afb5bfca4d1860f8b4b60dbc160
+- Module h1:1QivrlhwAsnMOcqgOdl9my7s9OyZl8O5/UGUTJVXoWc=
+- go.mod h1:hbSIYA/amXcRXTFSZqh8tWHEoqRvvbKPJ2uz/KU+a+s=
+- Independently recomputed downloaded module ZIP SHA256:b75131f628f6e2e4892fd638d33127e952a5027775e0162b94ba069cb4e13863 (not an upstream-published ZIP hash claim)
+- Required Go1.26.0; project uses1.27.2
+- License:BSD-3-Clause, unmodified notice retained under third_party/
+
+Primary metadata: [official proxy version](https://proxy.golang.org/golang.org/x/text/@v/v0.43.0.info), [Go checksum database](https://sum.golang.org/lookup/golang.org/x/text@v0.43.0), [tagged go.mod](https://raw.githubusercontent.com/golang/text/v0.43.0/go.mod), [tagged license](https://raw.githubusercontent.com/golang/text/v0.43.0/LICENSE), [normalization package](https://pkg.go.dev/golang.org/x/text/unicode/norm), [casefold package](https://pkg.go.dev/golang.org/x/text/cases).
+
+The normalization implementation is stream-safe and may insert U+034F after long nonstarter runs; grams13 must explicitly reject such insertions or persist that policy rather than mislabeling unrestricted canonical equivalence. Casefold can change normalization form, so normalize again afterward. Actual versioned behavior belongs to tokenizer tests and config metadata.

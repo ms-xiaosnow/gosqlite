@@ -51,6 +51,7 @@ type IndexCursor struct {
 	info      KeyInfo
 	stack     []indexCursorFrame
 	visited   map[uint32]struct{}
+	overflow  map[uint32]indexOverflowOwner
 	last      []any
 	done      bool
 	terminal  error
@@ -76,6 +77,12 @@ func validateIndexKey(info KeyInfo, key []any) error {
 	if _, ok := key[len(key)-1].(int64); !ok {
 		return fmt.Errorf("%w: index rowid must be int64", record.ErrUnsupported)
 	}
+	return validateIndexFields(key)
+}
+
+// validateIndexFields also validates partial range keys without padding them
+// with invented values. Callers validate the field count and rowid position.
+func validateIndexFields(key []any) error {
 	// Compute the encoded size without allocating an encoding. In particular,
 	// small integers use fewer than eight bytes, and NaN is encoded as NULL.
 	size, header := 0, len(key)
@@ -446,7 +453,8 @@ func (c *IndexCursor) payload(f *indexFrame, item indexCell) ([]byte, error) {
 		if next == 0 {
 			return nil, corrupt("truncated index overflow chain on page %d", f.number)
 		}
-		p, err := c.readPage(next)
+		owner := indexOverflowOwner{page: f.number, offset: uint32(item.offset), position: uint32(at - item.local)}
+		p, err := c.readOverflowPage(next, owner)
 		if err != nil {
 			return nil, err
 		}
@@ -505,6 +513,7 @@ func (c *IndexCursor) Next() (key []any, err error) {
 		if err != nil {
 			c.terminal = err
 			c.stack, c.visited, c.last = nil, nil, nil
+			c.overflow = nil
 		}
 	}()
 	for len(c.stack) > 0 {
@@ -559,6 +568,7 @@ func (c *IndexCursor) Next() (key []any, err error) {
 func (c *IndexCursor) Close() error {
 	c.done, c.terminal = true, nil
 	c.stack, c.visited, c.last = nil, nil, nil
+	c.overflow = nil
 	return nil
 }
 

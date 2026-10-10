@@ -24,17 +24,18 @@ func runContext(ctx context.Context, args []string, out io.Writer) (resultErr er
 		return err
 	}
 	if len(args) == 0 || (len(args) == 1 && args[0] == "help") {
-		_, err := fmt.Fprintln(out, "usage: gosqlite version\n       gosqlite query [--wal-exclusive] <db> '<sql>'\n       gosqlite inspect <db>\nSQLite SQL MVP. One statement per invocation; SELECT emits JSON Lines, writes emit a result.")
+		_, err := fmt.Fprintln(out, "usage: gosqlite version\n       gosqlite query [--wal-exclusive|--wal-shared] <db> '<sql>'\n       gosqlite inspect <db>\nSQLite SQL MVP. One statement per invocation; SELECT emits JSON Lines, writes emit a result.")
 		return err
 	}
 	switch args[0] {
 	case "query":
 		walExclusive := len(args) > 1 && args[1] == "--wal-exclusive"
-		if walExclusive {
+		walShared := len(args) > 1 && args[1] == "--wal-shared"
+		if walExclusive || walShared {
 			args = append([]string{args[0]}, args[2:]...)
 		}
 		if len(args) != 3 {
-			return fmt.Errorf("usage: gosqlite query [--wal-exclusive] <db> '<sql>'")
+			return fmt.Errorf("usage: gosqlite query [--wal-exclusive|--wal-shared] <db> '<sql>'")
 		}
 		stmt, err := sqlast.Parse(args[2])
 		if err != nil {
@@ -44,7 +45,7 @@ func runContext(ctx context.Context, args []string, out io.Writer) (resultErr er
 			return fmt.Errorf("CLI executes one statement per connection; use the Go API for explicit transactions")
 		}
 		_, selectOnly := stmt.(*sqlast.Select)
-		db, err := sqlite.OpenContext(ctx, args[1], sqlite.Options{ReadOnly: selectOnly && !walExclusive, NoCreate: selectOnly, WALExclusive: walExclusive})
+		db, err := sqlite.OpenContext(ctx, args[1], sqlite.Options{ReadOnly: selectOnly && !walExclusive && !walShared, NoCreate: selectOnly, WALExclusive: walExclusive, WALShared: walShared})
 		if err != nil {
 			return err
 		}

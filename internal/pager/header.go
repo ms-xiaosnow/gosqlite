@@ -43,7 +43,7 @@ func ParseHeader(p []byte, fileSize int64) (Header, error) {
 }
 
 // parseHeader keeps the physical main-file extent distinct from a committed
-// WAL snapshot's logical extent. Only an exclusive Session may enable WAL.
+// WAL snapshot's logical extent. Only a locked WAL session may enable WAL.
 // A nonzero logicalPages comes from a validated WAL commit marker.
 func parseHeader(p []byte, fileSize int64, allowWAL bool, logicalPages uint32) (Header, error) {
 	var h Header

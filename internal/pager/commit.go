@@ -91,6 +91,9 @@ func (t *Tx) Commit(ctx context.Context) error {
 	if t.statement {
 		return fmt.Errorf("%w: commit inside statement", ErrMisuse)
 	}
+	if t.shared != nil {
+		return t.commitSharedWALLocked(ctx)
+	}
 	if t.session != nil {
 		return t.commitWALLocked(ctx)
 	}

@@ -17,9 +17,10 @@ var (
 	ErrRecoveryRequired = errors.New("SQLite database requires rollback-journal recovery")
 	ErrCommitUncertain  = errors.New("SQLite commit durability is uncertain")
 	ErrMisuse           = errors.New("invalid SQLite transaction operation")
+	ErrBusySnapshot     = fmt.Errorf("%w: WAL read snapshot is no longer current", ErrBusy)
 )
 
-// Options controls native rollback transactions and exclusive WAL sessions.
+// Options controls native rollback transactions and WAL sessions.
 // A zero PageSize chooses
 // 4096 for a newly created database; existing databases retain their page size.
 // SectorSize is a conservative storage-sector assumption, not autodetection.
@@ -37,10 +38,15 @@ type Options struct {
 	// KeepWALOnClose retains a synced WAL on normal Session.Close. It has no
 	// effect on the default rollback-mode OpenTx API.
 	KeepWALOnClose bool
+	// WALPowersafeOverwrite explicitly asserts that WAL/main writes cannot
+	// damage bytes outside the requested range. Shared WAL alone uses this
+	// opt-in when an imported WAL lacks conservative sector protection.
+	// This is a storage assumption, not a durability qualification.
+	WALPowersafeOverwrite bool
 }
 
 // Tx owns either a writable descriptor with its SHARED snapshot lock, or the
-// sole transaction lease on an exclusive WAL Session. Rollback-mode promotion
+// sole transaction lease on an exclusive or shared WAL session. Rollback-mode promotion
 // obtains RESERVED on that same descriptor. Each method is data-race safe, but
 // callers must serialize transaction-level operations, including Statement's
 // callback. A successful Commit or Rollback closes the transaction. BUSY from
@@ -60,9 +66,11 @@ type Tx struct {
 	statement      bool
 	poisoned       error
 	session        *Session
+	shared         *SharedSession
+	sharedRead     sharedRead
 	readOnly       bool
 	// keepFile is private to the rollback-journal WAL-mode transition. The
-	// Session already holds EXCLUSIVE and retains the same descriptor.
+	// WAL session already holds EXCLUSIVE and retains the same descriptor.
 	keepFile bool
 }
 
@@ -224,6 +232,9 @@ func (t *Tx) checkOpen() error {
 func (t *Tx) checkSidecars() error { return checkSidecars(t.path) }
 
 func (t *Tx) checkStable() error {
+	if t.shared != nil {
+		return t.shared.checkStable()
+	}
 	if t.session != nil {
 		return t.session.checkStable()
 	}
@@ -271,6 +282,9 @@ func (t *Tx) readLocked(ctx context.Context, n uint32) ([]byte, error) {
 	if err := t.checkStable(); err != nil {
 		return nil, err
 	}
+	if t.shared != nil {
+		return t.shared.readPage(ctx, t.sharedRead, t.header, n)
+	}
 	if t.session != nil {
 		return t.session.readPage(ctx, n)
 	}
@@ -301,6 +315,9 @@ func (t *Tx) promoteLocked(ctx context.Context) error {
 	}
 	if t.reserved {
 		return nil
+	}
+	if t.shared != nil {
+		return t.shared.promote(ctx, t)
 	}
 	if err := lockReserved(t.file); err != nil {
 		return err
@@ -447,6 +464,11 @@ func (t *Tx) Rollback() error {
 	}
 	if t.file == nil {
 		return t.poisoned
+	}
+	if t.shared != nil {
+		err := t.shared.release(t)
+		t.file, t.dirty, t.free = nil, nil, nil
+		return errors.Join(t.poisoned, err)
 	}
 	if t.session != nil {
 		t.session.release(t)

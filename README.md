@@ -1,6 +1,6 @@
 # gosqlite
 
-A native Go database kernel targeting tested subsets of SQLite 3.54.0 files and SQL. Current development milestone: M3 restricted WAL/recovery development (ordinary M2 SQL/write MVP verified). It is not production-ready. No CGO, SQLite subprocess, C ABI, or remote SQL engine is used in production.
+A native Go database kernel targeting tested subsets of SQLite 3.54.0 files and SQL. Current development milestone: M3 shared WAL and M4 indexing prerequisites (ordinary M2 SQL/write MVP verified). It is not production-ready. No CGO, SQLite subprocess, C ABI, or remote SQL engine is used in production.
 
 ## Try the implemented SQL path
 
@@ -50,7 +50,7 @@ The read-only example requires an existing database and docs table. For writes, 
 
 CREATE TABLE, nonunique BINARY ASC CREATE INDEX, INSERT, UPDATE, DELETE and explicit Go/driver transactions are implemented for the documented subset. Secondary indices are maintained on disk, but SELECT currently scans. Unsupported schema objects/constraints reject writes to the database rather than being ignored. Existing journals require recovery and are refused. Existing zero-byte files are conservatively rejected. Normal successful commit tests do not qualify crash durability; use only disposable data.
 
-If home is read-only, set GOCACHE and GOPATH to writable directories. There are no external Go module dependencies, so no go.sum is needed. Official SQLite is a separately built test oracle only:
+If home is read-only, set GOCACHE and GOPATH to writable directories. The Unicode tokenizer uses pinned pure-Go golang.org/x/text; go.sum records verified module checksums and third_party/ retains its license. Official SQLite is a separately built test oracle only:
 
 ```sh
 SQLITE_ORACLE=/absolute/path/to/verified/sqlite3 ./scripts/test-oracle.sh
@@ -58,7 +58,7 @@ SQLITE_ORACLE=/absolute/path/to/verified/sqlite3 ./scripts/test-oracle.sh
 
 See [progress](docs/progress.md), [compatibility](docs/compatibility.md), [architecture](docs/architecture.md), [sources](docs/upstream.md), and [manual verification](docs/manual-verification.md). The unchanged [original goal](goal.md) remains the contract. [Restart protocol](docs/restart.md) and checkpoint records preserve durable development history.
 
-Shared concurrent WAL, qualified crash recovery, grams13 indices, similarity, vectors, independent authenticated encryption and pg_embedding migration remain unfinished milestones. Full SQLite/PostgreSQL semantics, SEE file compatibility and production security are not claimed.
+Qualified crash recovery, persistent grams13 indices, similarity, vectors, independent authenticated encryption and pg_embedding migration remain unfinished milestones. Full SQLite/PostgreSQL semantics, SEE file compatibility and production security are not claimed.
 
 
 ## Explicit exclusive WAL
@@ -71,3 +71,14 @@ CGO_ENABLED=0 go run ./cmd/gosqlite query --wal-exclusive disposable-wal.db 'SEL
 ```
 
 Native DB.Checkpoint(ctx) performs an explicit normal checkpoint. Default Close checkpoints; KeepWALOnClose retains successful committed frames after normal close. A WAL connection requires writable file access even for SELECT. Plain read-only Open/CLI inspect still refuse mode2. Unsupported WAL tails and existing journals fail closed. Hot rollback-recovery code is isolated and source-only; no crash/fault durability gate has passed. See ADR0004 and manual-verification.md.
+
+## Explicit shared WAL
+
+Use sqlite.Options{WALShared:true}, or driver.NewConnector with that option for pooled concurrent connections. Each connection permits one active lease; independent connections retain read snapshots while a single writer commits. Stale deferred writer promotion returns ErrBusySnapshot (also matches ErrBusy).
+
+```sh
+CGO_ENABLED=0 go run ./cmd/gosqlite query --wal-shared disposable-shared.db 'CREATE TABLE notes(id INTEGER PRIMARY KEY, text TEXT)'
+CGO_ENABLED=0 go run ./cmd/gosqlite query --wal-shared disposable-shared.db "INSERT INTO notes VALUES(1,'共享 WAL')"
+```
+
+DB.Checkpoint is nonblocking and may safely backfill some frames before returning BUSY for readers. Close attempts a checkpoint unless KeepWALOnClose and retains WAL/SHM inodes. Writable access is required, including for read transactions. Conservative storage-sector protection defaults on; WALPowersafeOverwrite is an explicit storage assertion and is never autodetected. Live official SQLite reader/writer interoperability is tested, but crash/fault durability and broader cold recovery remain unqualified. See ADR0006 and the compatibility matrix.

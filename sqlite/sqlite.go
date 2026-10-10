@@ -24,6 +24,7 @@ var (
 	ErrMemoryLimit      = errors.New("SQLite query memory limit exceeded")
 	ErrCorrupt          = pager.ErrCorrupt
 	ErrBusy             = pager.ErrBusy
+	ErrBusySnapshot     = pager.ErrBusySnapshot
 	ErrChanged          = pager.ErrChanged
 	ErrFull             = errors.New("SQLite database is full")
 	ErrMismatch         = errors.New("SQLite datatype mismatch")
@@ -113,9 +114,17 @@ type Options struct {
 	// EXCLUSIVE database lock for the connection lifetime and allows one active
 	// query or transaction lease. It requires writable access even for reads.
 	WALExclusive bool
+	// WALShared requests native shared-memory WAL coordination. Independent
+	// connections may retain read snapshots while one writer commits.
+	WALShared bool
+	// WALPowersafeOverwrite is an explicit storage assertion for shared WAL:
+	// writes cannot damage bytes outside their requested range. Default false
+	// keeps conservative append/checkpoint gates. It is not autodetection.
+	WALPowersafeOverwrite bool
 	// KeepWALOnClose retains normally committed, synced WAL data without an
-	// implicit checkpoint. Only meaningful with WALExclusive; default Close
-	// checkpoints and removes the WAL. This is not a crash-safety guarantee.
+	// implicit checkpoint. Only meaningful in a WAL mode; default Close
+	// attempts a checkpoint. WALExclusive then removes sidecars; WALShared
+	// retains their inodes. This is not a crash-safety guarantee.
 	KeepWALOnClose bool
 	// MaxSortBytes bounds retained ORDER BY rows and UPDATE/DELETE rowid lists.
 	// Zero selects 64 MiB. Sorting never spills plaintext to disk.
@@ -156,7 +165,7 @@ type DB struct {
 	closed  bool
 	tx      *Tx
 	rows    map[*Rows]struct{}
-	session *pager.Session
+	session pageSession
 }
 
 // Open opens a SQLite-format file. An absent file is created unless ReadOnly
@@ -173,11 +182,17 @@ func OpenContext(ctx context.Context, path string, opts Options) (*DB, error) {
 	if err := checkContext(ctx); err != nil {
 		return nil, wrap("open", err)
 	}
-	if opts.ReadOnly && opts.WALExclusive {
-		return nil, wrap("open", fmt.Errorf("%w: exclusive WAL requires writable access", ErrUnsupported))
+	if opts.WALExclusive && opts.WALShared {
+		return nil, wrap("open", fmt.Errorf("WALExclusive and WALShared are mutually exclusive"))
 	}
-	if opts.KeepWALOnClose && !opts.WALExclusive {
-		return nil, wrap("open", fmt.Errorf("KeepWALOnClose requires WALExclusive"))
+	if opts.WALPowersafeOverwrite && !opts.WALShared {
+		return nil, wrap("open", fmt.Errorf("WALPowersafeOverwrite requires WALShared"))
+	}
+	if opts.ReadOnly && (opts.WALExclusive || opts.WALShared) {
+		return nil, wrap("open", fmt.Errorf("%w: native WAL modes currently require writable access", ErrUnsupported))
+	}
+	if opts.KeepWALOnClose && !opts.WALExclusive && !opts.WALShared {
+		return nil, wrap("open", fmt.Errorf("KeepWALOnClose requires a WAL mode"))
 	}
 	if opts.MaxSortBytes < 0 {
 		return nil, wrap("open", fmt.Errorf("MaxSortBytes must not be negative"))
@@ -217,8 +232,14 @@ func OpenContext(ctx context.Context, path string, opts Options) (*DB, error) {
 			return nil, wrap("open", err)
 		}
 	}
-	if opts.WALExclusive {
-		session, err := pager.OpenSession(ctx, path, d.pagerOptions())
+	if opts.WALExclusive || opts.WALShared {
+		var session pageSession
+		var err error
+		if opts.WALShared {
+			session, err = pager.OpenSharedSession(ctx, path, d.pagerOptions())
+		} else {
+			session, err = pager.OpenSession(ctx, path, d.pagerOptions())
+		}
 		if err != nil {
 			return nil, wrap("open", err)
 		}
@@ -252,7 +273,7 @@ func fileInfo(h pager.Header) FileInfo {
 	return FileInfo{PageSize: h.PageSize, UsableSize: h.UsableSize, PageCount: h.PageCount, SchemaCookie: h.SchemaCookie, SchemaFormat: h.SchemaFormat, TextEncoding: h.TextEncoding, ReadVersion: h.ReadVersion, WriteVersion: h.WriteVersion}
 }
 func (d *DB) pagerOptions() pager.Options {
-	return pager.Options{Create: !d.opts.NoCreate && !d.opts.ReadOnly, PageSize: d.opts.PageSize, MaxDirtyPages: d.opts.MaxTransactionPages, SectorSize: d.opts.SectorSize, KeepWALOnClose: d.opts.KeepWALOnClose}
+	return pager.Options{Create: !d.opts.NoCreate && !d.opts.ReadOnly, PageSize: d.opts.PageSize, MaxDirtyPages: d.opts.MaxTransactionPages, SectorSize: d.opts.SectorSize, KeepWALOnClose: d.opts.KeepWALOnClose, WALPowersafeOverwrite: d.opts.WALPowersafeOverwrite}
 }
 
 // Info returns the most recently observed header metadata.
@@ -397,7 +418,7 @@ func (d *DB) openReader(ctx context.Context) (*pager.Reader, error) {
 }
 
 // Checkpoint copies committed WAL images into the main file and durably ends
-// that WAL generation. It requires WALExclusive and no active query/Tx lease.
+// that WAL generation. It requires a WAL mode and no active local query/Tx lease.
 // Normal-success tests do not establish interrupted-checkpoint durability.
 func (d *DB) Checkpoint(ctx context.Context) error {
 	if err := checkContext(ctx); err != nil {
@@ -409,7 +430,7 @@ func (d *DB) Checkpoint(ctx context.Context) error {
 		return wrap("checkpoint", ErrClosed)
 	}
 	if d.session == nil {
-		return wrap("checkpoint", fmt.Errorf("%w: checkpoint requires WALExclusive", ErrUnsupported))
+		return wrap("checkpoint", fmt.Errorf("%w: checkpoint requires a WAL mode", ErrUnsupported))
 	}
 	if d.tx != nil || len(d.rows) != 0 {
 		return wrap("checkpoint", ErrBusy)
@@ -419,4 +440,14 @@ func (d *DB) Checkpoint(ctx context.Context) error {
 		d.info = fileInfo(d.session.Header())
 	}
 	return wrap("checkpoint", err)
+}
+
+// pageSession lets public connections share lifetime/lease semantics without
+// treating exclusive locking as shared-WAL coordination.
+type pageSession interface {
+	Header() pager.Header
+	Begin(context.Context) (*pager.Tx, error)
+	Reader(context.Context) (*pager.Reader, error)
+	Checkpoint(context.Context) error
+	Close() error
 }

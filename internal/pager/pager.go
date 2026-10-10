@@ -11,7 +11,7 @@ import (
 )
 
 // Reader owns either a read-only descriptor with a SQLite-compatible SHARED
-// lock, or a read-only lease on an exclusive WAL Session. It has no write
+// lock, or a read-only lease on a WAL session. It has no write
 // method, page cache, or rollback-journal recovery.
 // Concurrent ReadPage and Close are safe; each page returned is caller-owned.
 type Reader struct {

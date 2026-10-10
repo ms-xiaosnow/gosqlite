@@ -97,3 +97,17 @@ func TestCLIExclusiveWAL(t *testing.T) {
 		t.Fatal(b.String())
 	}
 }
+
+func TestCLISharedWAL(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "shared-cli.db")
+	var b bytes.Buffer
+	for _, q := range []string{"CREATE TABLE t(id INTEGER PRIMARY KEY,title TEXT)", "INSERT INTO t VALUES(1,'shared')", "SELECT title FROM t"} {
+		b.Reset()
+		if err := run([]string{"query", "--wal-shared", path, q}, &b); err != nil {
+			t.Fatal(q, err)
+		}
+	}
+	if !strings.Contains(b.String(), `{"row":["shared"]}`) {
+		t.Fatal(b.String())
+	}
+}
