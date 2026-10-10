@@ -129,7 +129,7 @@ Fresh restart, 2026-10-10 UTC. Historical work and test results are not acceptan
 - Review initially caught two grams fallback-reason regressions; move equality extraction before safety classification fixed them without changing scan results. Final component logs retained. Physical durability remains excluded.
 
 ### M9: Migration and extended vector types
-- Status: checkpoint A inspector, checkpoint B typed SQL converter, checkpoint E BIT, F HALFVEC and G SPARSEVEC integration plus extended memory primitives implemented. Resumable mapped import is implemented; transition tooling and all extended ANN remain incomplete code.
+- Status: checkpoint A inspector, checkpoint B typed SQL converter, checkpoint E BIT, F HALFVEC and G SPARSEVEC integration plus extended memory primitives implemented. Resumable mapped import and offline retained-array/shadow-column transition bundles are implemented; full-table/online transition and all extended ANN remain incomplete code.
 - Inspector: strict bounded exact-schema JSON, extension/type/method/operator/function identity chain, dependency/shape/default findings, direct finite binary32 real[] conversion, deterministic JSON/Markdown and CLI reports. Reports do not execute SQL or authorize changes. Invalid legacy defaults100/16 and example3/5 are review findings with no usable proposed target. Programmatic structs receive aggregate preflight; canonical inspected-facts hashes and optional unchanged-source hashes are distinguished.
 - Component checks: CGO0 unit/vet/build, separate race, CLI and bounded memory fuzz pass (real-array62076, catalog194 inputs). Independent tests include201 finite binary32 roundtrips, NULL/shape/redaction, duplicate/unknown/UTF8 JSON, ownership spoofing, nonfinite profile numbers, mutated catalog provenance and deterministic cancellation. Initial invalid-parameter proposal assertion failed and was fixed; logs retained. See m9-inspector-components.txt and review evidence.
 - Public references: old embedding0.3.6 commit5d48508aeaeb86b9e9c630468ada7a124b905795, exact Apache2 LICENSE/NOTICE and source manifest. Current Neon page was retrieved but lacks the requested chapter; the historical official2024 chapter is linked, not mislabeled current. Export SQL is source-reviewed but not PostgreSQL-executed. Synthetic catalogs are explicitly synthetic.
@@ -373,3 +373,28 @@ importer, expression and Windows-encrypted code; native runtime remains Linux.
 S2 isolated full CGO0 unit/vet/build has passed by15:01:56Z; full race/oracle
 phases remain running. See s2-expressions-lead-unit.txt. No terminal aggregate
 or restored/remote result is inferred before observation.
+
+### M9 checkpoint D: review-only transition bundles and CLI
+- Delivered: strict bounded explicit options, catalog/identity-bound offline
+  generator and13 deterministic artifacts. Retained real[]/cast and typed shadow
+  column, single transaction and explicit resumable batch plans, global hnsw AM
+  collision checks, capability/dependency gates, explicit index retuning and
+  exhaustive binary32/count/NULL verification references are represented.
+- All mutation and post-install SQL remains commented. Approval gates remain
+  unresolved/blocked; the CLI only emits JSON review artifacts. It has no server,
+  SQL execution, apply or resume path. Optional reports use exclusive creation
+  and can remain partial on write errors; atomic publication is not claimed.
+- Independent review corrected float32 verification alias capture and refuses
+  known inherited parents. Fourteen core review tests and separate CLI/decoder
+  review pass. Missing inventory remains a gate; no observed absence is invented.
+- Full-table/dependency recreation, online/dual-write operation, privilege changes,
+  live PostgreSQL/Neon capability verification and interrupted-operation acceptance
+  remain open. Shadow-column copy does not satisfy full-table copy requirements.
+- Evidence: migration-transition.md, migration-transition-cli.md, standalone
+  example with two golden bundles, core and CLI independent-review reports. Lead
+  first source13f6b73b2f0a87fe6fe6410736465d5b3b7c8242 passed focused migration/CLI
+  unit/race, full vet/build and four cross-builds at15:03:29Z. Final isolated source
+  415de5f50dbb6060befb52955208cbf5aeec7588 excludes unpublished platform/ANN code;
+  focused migration/CLI/example unit/race, full vet/build, four cross-builds,
+  synthetic CLI output, modules and unchanged source inventory passed exit0 at
+  2026-10-10T15:10:56Z. No live SQL execution occurred.

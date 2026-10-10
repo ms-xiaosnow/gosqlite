@@ -24,7 +24,7 @@ func runContext(ctx context.Context, args []string, out io.Writer) (resultErr er
 		return err
 	}
 	if len(args) == 0 || (len(args) == 1 && args[0] == "help") {
-		_, err := fmt.Fprintln(out, "usage: gosqlite version\n       gosqlite query [--wal-exclusive|--wal-shared] <db> '<sql>'\n       gosqlite inspect <db>\n       gosqlite migrate pgembedding inspect --catalog <catalog.json> [--format json|markdown]\n       gosqlite migrate pgembedding --input <export> --manifest <manifest.json> [--output <new.db> --apply [--resume]]\n       gosqlite migrate pgembedding verify --input <export> --manifest <manifest.json> --output <db>\n       gosqlite check [--wal-exclusive|--wal-shared] <db> <index>\nSQLite SQL MVP. One statement per invocation; SELECT emits JSON Lines, writes emit a result.")
+		_, err := fmt.Fprintln(out, "usage: gosqlite version\n       gosqlite query [--wal-exclusive|--wal-shared] <db> '<sql>'\n       gosqlite inspect <db>\n       gosqlite migrate pgembedding inspect --catalog <catalog.json> [--format json|markdown]\n       gosqlite migrate pgembedding --input <export> --manifest <manifest.json> [--output <new.db> --apply [--resume]]\n       gosqlite migrate pgembedding verify --input <export> --manifest <manifest.json> --output <db>\n       gosqlite migrate pgembedding transition --catalog <catalog.json> --options <options.json> [--report <new.json>]\n       gosqlite check [--wal-exclusive|--wal-shared] <db> <index>\nSQLite SQL MVP. One statement per invocation; SELECT emits JSON Lines, writes emit a result.")
 		return err
 	}
 	switch args[0] {

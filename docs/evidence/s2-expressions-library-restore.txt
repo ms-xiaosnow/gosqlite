@@ -1,0 +1,40 @@
+Exact Library restore c902d514856656a83e2345b5340cc0b28f31b4b3; focused expression unit/race/oracle, full vet/build.
+2026-10-10T15:08:49Z
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.032s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.045s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.016s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	1.208s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	1.135s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.049s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+--- FAIL: TestDiffSQLiteExpressions (0.00s)
+    differential_test.go:26: SQLITE_ORACLE must identify the pinned official executable
+--- FAIL: TestDiffSQLiteExpressionFeatures (0.00s)
+    expression_features_oracle_test.go:16: SQLITE_ORACLE required
+--- FAIL: TestDiffSQLiteExpressionFeatureAffinity (0.00s)
+    expression_features_oracle_test.go:42: SQLITE_ORACLE required
+--- FAIL: TestExpressionReviewOracleNested (0.00s)
+    expression_review_oracle_test.go:22: SQLITE_ORACLE required
+--- FAIL: TestExpressionReviewOracleCastTextPrefixes (0.00s)
+    expression_review_oracle_test.go:88: oracle version/source mismatch:  (exec: no command)
+--- FAIL: TestExpressionReviewOracleCastKeywordGrammar (0.00s)
+    expression_review_oracle_test.go:95: oracle identity:  exec: no command
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/sql	0.008s
+--- FAIL: TestOracleExpressionFeaturesQueries (0.00s)
+    expression_features_conformance_test.go:16: oracle acceptance requires an explicit SQLITE_ORACLE path; tests must not silently skip
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/testkit	0.008s
+FAIL
+
+--- corrected oracle invocation, no source changes ---
+Correction: prior restored unit/race/vet/build passed, but oracle invocation used SQLITE3_ORACLE instead of required SQLITE_ORACLE and failed before queries. Prior output preserved. No source changed.
+2026-10-10T15:09:57Z
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	3.340s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	0.172s
+all modules verified
+2026-10-10T15:10:02Z
+RESTORED S2 CORRECTED ORACLE AND FINAL CHECKS PASS

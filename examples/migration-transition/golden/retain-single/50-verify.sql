@@ -1,0 +1,58 @@
+-- REVIEW ONLY. NOT AN EXECUTABLE MIGRATION. All approvals remain unresolved.
+-- Remove no comment prefixes until an operator has reviewed each phase and gate.
+-- GATES: data_and_training, target_capabilities. Keep writes paused. Source identity/profile must still match.
+-- -- STOP unless exact installed version/schema, method ownership, type/casts, operators, functions and opclasses match pinned source.
+-- SELECT e.oid,e.extversion,n.nspname FROM pg_catalog.pg_extension AS e JOIN pg_catalog.pg_namespace AS n ON n.oid=e.extnamespace
+-- WHERE e.extname='vector' AND e.extversion='0.8.7' AND n.nspname=E'public';
+-- SELECT am.amname,am.amhandler,e.extname FROM pg_catalog.pg_am AS am JOIN pg_catalog.pg_depend AS d
+--  ON d.classid='pg_catalog.pg_am'::pg_catalog.regclass AND d.objid=am.oid AND d.deptype='e'
+-- JOIN pg_catalog.pg_extension AS e ON d.refclassid='pg_catalog.pg_extension'::pg_catalog.regclass AND d.refobjid=e.oid
+-- WHERE am.amname IN ('hnsw','ivfflat') ORDER BY am.amname;
+-- SELECT t.oid,n.nspname,t.typname,t.typtype,d.refobjid AS owning_extension FROM pg_catalog.pg_type AS t
+-- JOIN pg_catalog.pg_namespace AS n ON n.oid=t.typnamespace LEFT JOIN pg_catalog.pg_depend AS d
+--  ON d.classid='pg_catalog.pg_type'::pg_catalog.regclass AND d.objid=t.oid AND d.deptype='e'
+-- WHERE n.nspname=E'public' AND t.typname='vector';
+-- SELECT c.castsource,c.casttarget,c.castfunc,c.castcontext,c.castmethod
+-- FROM pg_catalog.pg_cast AS c JOIN pg_catalog.pg_type AS t ON t.oid=c.casttarget OR t.oid=c.castsource
+-- JOIN pg_catalog.pg_namespace AS n ON n.oid=t.typnamespace
+-- WHERE n.nspname=E'public' AND t.typname='vector' AND (c.castsource=1021 OR c.casttarget=1021) ORDER BY c.castsource,c.casttarget;
+-- SELECT oc.oid,n.nspname,oc.opcname,am.amname,oc.opcintype,e.extname,ao.amopstrategy,ao.amopopr,ap.amprocnum,ap.amproc
+-- FROM pg_catalog.pg_opclass AS oc JOIN pg_catalog.pg_namespace AS n ON n.oid=oc.opcnamespace
+-- JOIN pg_catalog.pg_am AS am ON am.oid=oc.opcmethod LEFT JOIN pg_catalog.pg_depend AS d
+--  ON d.classid='pg_catalog.pg_opclass'::pg_catalog.regclass AND d.objid=oc.oid AND d.deptype='e'
+-- LEFT JOIN pg_catalog.pg_extension AS e ON d.refclassid='pg_catalog.pg_extension'::pg_catalog.regclass AND d.refobjid=e.oid
+-- LEFT JOIN pg_catalog.pg_amop AS ao ON ao.amopfamily=oc.opcfamily
+-- LEFT JOIN pg_catalog.pg_amproc AS ap ON ap.amprocfamily=oc.opcfamily
+-- WHERE n.nspname=E'public' AND oc.opcname IN ('vector_l2_ops','vector_cosine_ops','vector_l1_ops')
+-- ORDER BY am.amname,oc.opcname,ao.amopstrategy,ap.amprocnum;
+-- SELECT o.oid,o.oprname,o.oprleft,o.oprright,o.oprcode,o.oprresult,e.extname
+-- FROM pg_catalog.pg_operator AS o JOIN pg_catalog.pg_namespace AS n ON n.oid=o.oprnamespace
+-- LEFT JOIN pg_catalog.pg_depend AS d ON d.classid='pg_catalog.pg_operator'::pg_catalog.regclass AND d.objid=o.oid AND d.deptype='e'
+-- LEFT JOIN pg_catalog.pg_extension AS e ON d.refclassid='pg_catalog.pg_extension'::pg_catalog.regclass AND d.refobjid=e.oid
+-- WHERE n.nspname=E'public' AND o.oprname IN ('<->','<=>','<+>') ORDER BY o.oid;
+-- SELECT p.oid,p.proname,p.proargtypes,p.prorettype,p.provolatile,p.proisstrict,e.extname
+-- FROM pg_catalog.pg_proc AS p JOIN pg_catalog.pg_namespace AS n ON n.oid=p.pronamespace
+-- LEFT JOIN pg_catalog.pg_depend AS d ON d.classid='pg_catalog.pg_proc'::pg_catalog.regclass AND d.objid=p.oid AND d.deptype='e'
+-- LEFT JOIN pg_catalog.pg_extension AS e ON d.refclassid='pg_catalog.pg_extension'::pg_catalog.regclass AND d.refobjid=e.oid
+-- WHERE n.nspname=E'public' AND p.proname IN ('vector','array_to_vector','vector_to_float4','vector_dims','vector_norm','l2_distance','cosine_distance','l1_distance') ORDER BY p.oid;
+-- SELECT pg_catalog.count(*) AS rows,pg_catalog.count(*) FILTER (WHERE src."embedding" IS NULL) AS source_null_rows,
+--  pg_catalog.count(*) FILTER (WHERE (src."embedding" IS NULL) IS DISTINCT FROM ((src."embedding"::"public"."vector"(3)) IS NULL)) AS null_mismatches,
+--  pg_catalog.count(*) FILTER (WHERE (src."embedding"::"public"."vector"(3)) IS NOT NULL AND "public"."vector_dims"((src."embedding"::"public"."vector"(3))) IS DISTINCT FROM 3) AS dimension_mismatches,
+--  pg_catalog.count(*) FILTER (WHERE CASE WHEN src."embedding" IS NULL THEN false ELSE EXISTS (
+--   SELECT 1 FROM pg_catalog.unnest(src."embedding") WITH ORDINALITY AS a(x,n)
+--   FULL JOIN pg_catalog.unnest(((src."embedding"::"public"."vector"(3)))::pg_catalog.float4[]) WITH ORDINALITY AS b(x,n) USING(n)
+--   WHERE pg_catalog.float4send(a.x) IS DISTINCT FROM pg_catalog.float4send(b.x)
+--  ) END) AS float32_bit_mismatches
+-- FROM "public"."documents" AS src;
+-- -- Norm tolerance is explicitly 1e-6 absolute plus 1e-6 relative. Not legacy float32 output-bit equivalence.
+-- SELECT pg_catalog.count(*) AS norm_mismatches FROM "public"."documents" AS src
+-- WHERE CASE WHEN src."embedding" IS NULL THEN false ELSE
+--  pg_catalog.abs("public"."vector_norm"((src."embedding"::"public"."vector"(3))) - (SELECT pg_catalog.sqrt(pg_catalog.sum(x::pg_catalog.float8*x::pg_catalog.float8)) FROM pg_catalog.unnest(src."embedding") AS v(x)))
+--  > 0.000001 + 0.000001 * pg_catalog.abs("public"."vector_norm"((src."embedding"::"public"."vector"(3)))) END;
+-- SELECT i.indexrelid,n.nspname,c.relname,i.indisvalid,i.indisready,pg_catalog.pg_get_indexdef(i.indexrelid) AS definition
+-- FROM pg_catalog.pg_index AS i JOIN pg_catalog.pg_class AS c ON c.oid=i.indexrelid JOIN pg_catalog.pg_namespace AS n ON n.oid=c.relnamespace
+-- WHERE i.indrelid=30000 ORDER BY i.indexrelid;
+-- -- Require exact PK/row/NULL counts and zero mismatches, plus zero-policy approval.
+-- -- Compare captured legacy and target exact distance fixtures with declared tolerances (legacy float32 is architecture-sensitive).
+-- -- Measure ANN recall separately on a fixed query set against exact target scans; do not require identical ANN row order.
+-- -- Verify actual staging query plans, filters, NULL handling and tie behavior. No live PostgreSQL evidence is supplied by this file.

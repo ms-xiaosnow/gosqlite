@@ -1,0 +1,47 @@
+{
+  "relation_oid": 30000,
+  "attnum": 3,
+  "dimensions": 3,
+  "approach": "retain_real_array_cast",
+  "mode": "single_transaction",
+  "vector_schema": "public",
+  "target_version": "0.8.7",
+  "indexes": [
+    {
+      "source_index_oid": 30100,
+      "name": "new_l2",
+      "method": "hnsw",
+      "m": 16,
+      "ef_construction": 64,
+      "ef_search": 64,
+      "lists": 0,
+      "probes": 0
+    },
+    {
+      "source_index_oid": 30101,
+      "name": "new_cos",
+      "method": "hnsw",
+      "m": 16,
+      "ef_construction": 64,
+      "ef_search": 64,
+      "lists": 0,
+      "probes": 0
+    },
+    {
+      "source_index_oid": 30102,
+      "name": "new_l1",
+      "method": "hnsw",
+      "m": 16,
+      "ef_construction": 64,
+      "ef_search": 64,
+      "lists": 0,
+      "probes": 0
+    }
+  ],
+  "shadow_column": "",
+  "state_schema": "",
+  "state_table": "",
+  "batch_size": 0,
+  "concurrent_indexes": false,
+  "max_bytes": 0
+}

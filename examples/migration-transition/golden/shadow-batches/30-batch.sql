@@ -1,0 +1,32 @@
+-- REVIEW ONLY. NOT AN EXECUTABLE MIGRATION. All approvals remain unresolved.
+-- Remove no comment prefixes until an operator has reviewed each phase and gate.
+-- Single-worker batch. Application writes and PK changes MUST remain paused between all commits.
+-- Inspect state before retrying after an ambiguous client result. Reuse only this exact plan, never regenerate over in-progress state.
+-- BEGIN;
+-- SET LOCAL search_path = pg_catalog;
+-- SET LOCAL lock_timeout = '5s';
+-- SET LOCAL statement_timeout = '60s';
+-- WITH prior AS MATERIALIZED (
+--  SELECT plan_sha256,last_id,rows_done,expected_rows,batches FROM "public"."documents_vector_migration"
+--  WHERE plan_sha256=E'4578adcc9988ed515bb68ecb63ddd47c25665f35c9ea2f1713a2484c1d6e5953' AND NOT complete FOR UPDATE
+-- ), batch AS MATERIALIZED (
+--  SELECT src."id" AS id FROM "public"."documents" AS src CROSS JOIN prior AS p
+--  WHERE (p.last_id IS NULL OR src."id" > p.last_id)
+--  ORDER BY src."id" LIMIT 2 FOR UPDATE OF src
+-- ), changed AS (
+--  UPDATE "public"."documents" AS dst SET "embedding_vector"=dst."embedding"::"public"."vector"(3)
+--  FROM batch AS b WHERE dst."id"=b.id RETURNING dst."id" AS id
+-- ), progress AS (
+--  SELECT pg_catalog.count(*) AS n,pg_catalog.max(id) AS hi FROM changed
+-- )
+-- UPDATE "public"."documents_vector_migration" AS state
+-- SET last_id=CASE WHEN progress.n=0 THEN state.last_id ELSE progress.hi END,
+--  rows_done=state.rows_done+progress.n,batches=state.batches+1,
+--  complete=(progress.n=0 AND state.rows_done=state.expected_rows)
+-- FROM progress,prior
+-- WHERE state.plan_sha256=prior.plan_sha256 AND state.last_id IS NOT DISTINCT FROM prior.last_id
+--  AND state.rows_done=prior.rows_done AND state.batches=prior.batches AND NOT state.complete
+-- RETURNING state.plan_sha256,state.last_id,state.rows_done,state.expected_rows,state.batches,state.complete,progress.n AS batch_rows;
+-- -- Require exactly one returned state row, then COMMIT success. Zero rows means inspect state; never assume data is complete.
+-- -- An empty batch without complete=true is a count mismatch and must stop. Source NULL rows are included in changed/count.
+-- COMMIT;

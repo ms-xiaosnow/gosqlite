@@ -19,6 +19,9 @@ func runMigrate(ctx context.Context, args []string, out io.Writer) error {
 		return fmt.Errorf("usage: gosqlite migrate pgembedding inspect --catalog <catalog.json> [--format json|markdown]; inspection is always read-only")
 	}
 	args = args[1:]
+	if len(args) > 0 && args[0] == "transition" {
+		return runMigrateTransition(ctx, args[1:], out)
+	}
 	if len(args) > 0 && (args[0] == "import" || args[0] == "verify") {
 		return runMigrateImport(ctx, args[1:], out, args[0] == "verify")
 	}

@@ -1,0 +1,289 @@
+M9D independent contract review — 2026-10-10 UTC
+
+Result: the bounded, offline review-bundle slice passed the named ordinary and
+separate race checks below after two narrow source-review corrections. This is
+NOT PostgreSQL execution evidence, complete M9 qualification, or release approval.
+No live database, PostgreSQL SQL, destructive statement, or external system was
+operated. PostgreSQL behavior was checked against official source/documentation.
+
+Reviewed input and change boundary
+---------------------------------
+Read goal.md sections 9/10, ../m9-design.md section 7/checkpoint D, the full
+docs/migration-transition.md guide, transition.go, transition_render.go,
+transition_sql.go, transition_test.go, standalone example, both golden bundles,
+and the inspector/catalog/helper code on the generator's call path.
+
+The original frozen list contained 35 paths; its source manifest contained
+34 payload entries, excluding itself. Original manifest SHA-256:
+c4d5e34837676ec23fd9c211e80394d8fa3195f2f091e094a7a00d58440d075e
+Every original manifest entry matched before changes. The original manifest,
+two original production files and failing-regression output were also preserved
+locally before edits; the reproducible diagnoses below do not depend on those
+temporary copies being retained.
+
+Original production SHA-256:
+55759173297470ef6aeff0afe04d049fcefd7ea9091fb49e9171fb3dbe38eb39  transition.go
+054c2f8c68372e889ad9c9b0d74966fe195c98043be22bf4b33004233ea296e0  transition_sql.go
+
+Only two production changes were made, both explicitly authorized by the lead
+after notifying the original implementation owner. No features were broadened.
+Four generated files changed: 50-verify.sql and manifest.json in each golden
+bundle. Other golden artifacts remained byte-identical. Added review test and
+this evidence file are separate from the original frozen 35-path manifest.
+
+Final production/review-test SHA-256:
+17c35115e8a4f03ed6ee95a9b0b797593758efe8facd79c90d0b8eb079a7d007  migration/postgres/transition.go
+373942abd75aae9057d9a218ee8ce02d8798d47d23ba5bb64447936088dda991  migration/postgres/transition_sql.go
+ddb8cf5540bb3a40e952257f5639fe813689b55e9151fb4ac457f44c5c87ec30  migration/postgres/transition_review_test.go
+
+Finding 1 — corrected: correlated verification name capture
+---------------------------------------------------------
+The old float32 fidelity SELECT used unqualified source/shadow column names in
+the second unnest table function, after the first function's a(x,n) alias.
+PostgreSQL table functions implicitly see preceding FROM items. A valid source
+or shadow named x/n could resolve to that local scalar/ordinality rather than
+the outer table value, producing an invalid cast/lateral reference. Quoting
+identifiers alone did not prevent this semantic identity capture.
+
+Correction: bind the outer table AS src and qualify every source/shadow use in
+that exhaustive comparison SELECT. The norm SELECT was already qualified and
+was not changed. Regression covers retained-array and typed-shadow approaches
+with x, n, a, b and an embedded quote in the column name.
+
+Official basis: PostgreSQL table expressions, especially implicit LATERAL for
+table-function arguments and table/column aliases:
+https://www.postgresql.org/docs/18/queries-table-expressions.html
+
+Finding 2 — corrected: selected inheritance parent was eligible
+------------------------------------------------------------
+The inspector rejects a selected relation whose own Parents is nonempty, but
+that does not identify a selected parent with an inventoried child. A synthetic
+child with Parents=[30000] still yielded review_required for parent 30000.
+PostgreSQL queries/updates/column ALTER normally recurse into descendants, and
+a parent's PK does not enforce uniqueness over its inheritance children.
+This contradicts the generator's one-heap/keyset subset and can affect rows
+outside the intended physical heap and defeat keyset uniqueness assumptions.
+
+Correction: GenerateTransition scans supplied relation parent links and emits
+source_inheritance_unsupported when any inventoried relation directly inherits
+from the selected source. All proposed phase bodies are then withheld. It does
+not emit ONLY or pretend to implement inheritance migration. Existing selected
+child/partition-parent rejection remains in the inspector. Fresh complete
+inventory/quiescence gates still apply: this guard cannot prove the absence of
+unreported children. No transitive traversal is needed to reject a hierarchy
+whose complete inventory contains the selected source's direct child.
+
+Official basis:
+https://www.postgresql.org/docs/18/ddl-inherit.html
+https://www.postgresql.org/docs/18/sql-altertable.html
+
+Before-fix regression evidence
+------------------------------
+The guard passed, then this exact named invocation failed against the preserved
+original production sources:
+go test ./migration/postgres -run '^TestTransitionReview(CorrelatedColumnIdentity|InheritanceParentBlocked)$' -count=1
+
+Representative actual output:
+--- FAIL: TestTransitionReviewCorrelatedColumnIdentity
+    outer identity is not explicitly qualified: FROM "public"."documents" AS src;
+    outer identity is not explicitly qualified: pg_catalog.unnest(src."x") WITH ORDINALITY AS a(x,n)
+--- FAIL: TestTransitionReviewInheritanceParentBlocked
+    retain_real_array_cast accepted an inheritance parent: review_required
+FAIL github.com/ms-xiaosnow/gosqlite/migration/postgres 0.026s
+
+The full before-fix output SHA-256 was:
+6bab4e27c08c6dc3002b2f5bfa32c12426c5ccd2cc5655736f03657b1a52ca31
+The same invocation passed after the narrow changes (0.035s). These failures
+and passes are text/catalog regressions, not observed PostgreSQL runtime errors.
+
+Contract conclusions
+--------------------
+1. Approach distinction: retained REAL[] uses qualified vector(n) expression
+   casts for indexes/queries without backfill. Typed copy creates one nullable
+   shadow on the same table and preserves source arrays. Historical full-table
+   typed copy, recreation of defaults/grants/constraints/dependencies, and table
+   replacement are explicitly not implemented. No source rename/drop is emitted.
+
+2. Extension/dependency scope: both pinned SQL sources define global hnsw;
+   changing extension schema cannot provide coexistence. All inventoried old
+   ANN indexes must have verified mappings on the selected column. Unplanned
+   legacy indexes, incomplete required coverage and unhandled dependencies
+   block phase bodies. Dependency definitions and corpus text remain JSON.
+   Preflight walks transitive pg_depend object addresses and separately lists
+   inheritance, triggers, constraints, policies and rewrite rules. Coverage
+   claims are supplied evidence, not independently verified completeness;
+   catalog/dependency fingerprint comparison remains an unresolved human gate.
+   The baseline collector's direct-only inventory is not accepted as complete.
+
+3. Safe SQL generation: names have a 63-byte UTF-8 bound, embedded quotes are
+   doubled, control/line-separator names are rejected, and comparison literals
+   use E-string escaping independent of standard_conforming_strings. Methods,
+   opclasses/operators, types and numeric options come from closed mappings or
+   bounded integers. No raw index/function/dependency definition is interpolated
+   into SQL. Every physical line of phases 10..70 is commented, including
+   BEGIN/COMMIT/ROLLBACK and read queries. Bare CR cannot escape that boundary.
+   00-preflight.sql alone contains active SQL, with a READ ONLY REPEATABLE READ
+   transaction, trusted pg_catalog path, timeouts and catalog/row diagnostics.
+
+4. Capabilities: exact source embedding 0.3.6 and requested target vector 0.8.7
+   are pinned. Existing vector installation and unknown requested/server
+   versions block. Post-install queries expose version/schema, AM/type/cast/
+   operator/function/opclass ownership/signatures; they do not automatically
+   approve actual capability or installation availability. Target HNSW/IVF
+   options are explicit and bounded. Source option errors cannot be waived by
+   target choices. Manhattan maps to dense <+>/vector_l1_ops, never bit Hamming
+   or unsupported IVF L1. Dense storage/index limits remain distinct.
+
+5. Transaction boundaries: single mode retains one connection/transaction from
+   extension transition through ordinary indexes/validation and gated cutover
+   commit. Concurrent builds are rejected in single mode; in multi mode they
+   carry outside-explicit-transaction metadata and no BEGIN/COMMIT wrapper.
+   Invalid concurrent-index remnants require inspection and separately reviewed
+   retry. The generator never runs these operations or uses IF NOT EXISTS to
+   adopt an object with unverified identity.
+
+6. Cursor/state: typed multi-batch state is newly created, plan-bound and locked
+   before ordered key selection. Initial SQL NULL cursor includes MinInt64;
+   source SQL NULL arrays still produce changed/RETURNING rows. Progress uses
+   those returned rows in the same statement/transaction and compares prior
+   cursor, count and batch number. No OFFSET, SKIP LOCKED, shadow-NULL progress
+   predicate or synthetic minimum sentinel exists. Completion requires an empty
+   batch and exact expected count. Missing progress/empty incomplete batch is
+   explicitly a stop condition. Returned text is not proof of COMMIT.
+
+7. State identity limitation: plan SHA binds all supplied canonical catalog
+   facts and normalized choices, including batch size; artifact hashes bind
+   the generated bytes separately. It is not a generator-version upgrade or
+   state-adoption protocol. Reuse the original approved bundle; do not regenerate
+   over in-progress state or treat matching data/options as permission to do so.
+
+8. Write fencing: single mode takes ACCESS EXCLUSIVE on the selected source.
+   Multi-mode row locks do not fence writers between commits. External write,
+   DDL and PK-change quiescence is mandatory from validation through cutover,
+   explicit in batch text and unresolved maintenance_window/fresh_catalog gates.
+   Online dual-write or parallel scheduling is not implemented/certified.
+
+9. Fidelity/NULL/zero: preflight diagnoses shape, lower bounds, dimension, NULL
+   elements, nonfinite values, zero norm, counts and PK distinct/min/max. Full
+   verification aligns NULLs and dimensions, compares float4send bytes per
+   ordinality and uses an explicit 1e-6 absolute + 1e-6 relative norm tolerance.
+   Source NULL remains target NULL. Inspector rejects cosine zero-norm source
+   profiles. These checks do not establish legacy distance-bit equivalence:
+   old float32 arithmetic differs from modern/local arithmetic. Exact/business
+   baselines, actual plans and ANN recall remain separate unresolved checks;
+   ANN/NULL membership and tie behavior must be tested under the deployed plan.
+
+10. Rollback: only the still-open single transaction can be rolled back as one
+    database transaction. Later ROLLBACK cannot reverse an earlier extension
+    transition/index/backfill commit. Retained source data does not restore old
+    functions/operators/ANN; after cutover it must be maintained/reconciled for
+    source-reader rollback. Old-service restore needs available old binaries,
+    backup/branch restore or reviewed reverse migration, and reconciliation of
+    new vector-owned dependencies/global hnsw. No instant old-service rollback,
+    cleanup, CASCADE or automatic reverse migration is claimed.
+
+Test-source audit and exact final checks
+---------------------------------------
+Read both transition test files and fixtureCatalog/fixtureBytes before running.
+Tests only read synthetic/golden bytes, alter in-memory catalogs/options,
+generate/scan strings, compare hashes/manifests, and check canceled contexts
+before generation. The new cursor illustration is a pure Go ordered-key model;
+it is supplementary boundary reasoning, not an SQL execution/oracle test.
+No database operation, subprocess, injected disk fault, namespace mutation,
+corruption, wrong-key/missing-selected scenario, crash/process-exit/recovery,
+interrupted migration/publication/rekey or other restricted test was run.
+
+From the repository root, exact offline environment:
+export GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off CGO_ENABLED=0
+export GOCACHE="$PWD/../gocache" GOPATH="$PWD/../go-path"
+GO=../toolchains/go1.27.2/bin/go
+
+go version: go1.27.2 linux/amd64
+
+RUN='^TestTransition(ModesAndCommentBoundary|DeterminismAndGoldenPhases|BatchAtomicCursorAndNullRows|MetricMethodsAndTransactionBoundaries|BlockedCatalogFacts|SchemaAndDependencyDrift|QuotedIdentifiersAndEvidenceIsolation|LimitsCancellationAndBadOptions|ReviewCorrelatedColumnIdentity|ReviewInheritanceParentBlocked|ReviewCompleteGoldenManifest|ReviewBatchStateAndRollbackContracts|ReviewUnsafeEvidenceAndCoverage|ReviewPinnedCapabilitiesAndIdentifierBounds)$'
+
+"$GO" run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
+"$GO" test ./migration/postgres -run "$RUN" -count=1
+ok github.com/ms-xiaosnow/gosqlite/migration/postgres 0.118s
+"$GO" vet ./migration/postgres ./examples/migration-transition
+PASS (exit 0, no diagnostics)
+"$GO" build ./migration/postgres ./examples/migration-transition
+PASS (exit 0, CGO_ENABLED=0)
+
+"$GO" run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
+CGO_ENABLED=1 "$GO" test -race ./migration/postgres -run "$RUN" -count=1
+ok github.com/ms-xiaosnow/gosqlite/migration/postgres 2.520s
+
+The separate CGO-enabled race detector build does not establish a production
+CGO dependency. No aggregate/full-repository tests, staging or commits were run.
+
+Executed synthetic example, text output only:
+"$GO" run ./examples/migration-transition -approach retain -mode single
+"$GO" run ./examples/migration-transition -approach shadow -mode batches
+Each produced a 13-artifact JSON envelope. Compared every emitted content hash,
+then updated only changed golden files. The new CompleteGoldenManifest test
+byte-compares all 13 artifacts per bundle (including JSON/reports/README) and
+checks every manifest member's name, kind, transaction boundary, length and hash.
+
+Primary evidence consulted
+--------------------------
+PostgreSQL 18 official pages were fetched during this review on 2026-10-10:
+https://www.postgresql.org/docs/18/queries-table-expressions.html
+https://www.postgresql.org/docs/18/ddl-inherit.html
+https://www.postgresql.org/docs/18/sql-altertable.html
+https://www.postgresql.org/docs/18/queries-with.html
+https://www.postgresql.org/docs/18/sql-createindex.html
+https://www.postgresql.org/docs/18/sql-syntax-lexical.html
+https://www.postgresql.org/docs/18/catalog-pg-am.html
+https://www.postgresql.org/docs/18/sql-dropextension.html
+
+Pinned pgvector source was also read in the existing upstream-reference tree;
+it was neither compiled nor executed, and no upstream implementation was copied
+into production. Exact pin: f37c13f68b57d2c3472b2214fbcff699d6d34876.
+The SQL source confirms real[]/vector casts, strict function signatures, global
+hnsw, modern Manhattan and HNSW-only L1. vector.c directly preserves FLOAT4
+coordinates and returns FLOAT8 norm. Headers/build source confirm separate
+storage/index dimension limits and HNSW/IVF option bounds.
+
+Locally computed source SHA-256 (not upstream-published checksum claims):
+a4ceca5931cb614b40bec09ce6994a57058513d9af612c15b1458a338134609d  sql/vector.sql
+d97ce73c3e3977be2b086e01d39352376f3b064f3eef30efe12b28042c7fd1f1  src/vector.c
+a67272ea44553d174968f575a91da71dfe82b8278ec2c70d51e37c154e2f0049  src/vector.h
+c57af43d484ac0406bee00a7092f655f53c4b14f05f76c3a289baa34bdaf9647  src/hnsw.h
+7f2564af813a06775a22e89d106a1e83ff1e951ea834fb16f93a35ab399f57fa  src/hnswbuild.c
+652309192fdd909048371ed24f5026ae0ebd1eecf253ca6512820ce114ea71e0  src/ivfflat.c
+be00dd3383cc4921fa3e252c16b7bf1f6e418f32b8c8b08f2a0070cb76af399b  src/ivfflat.h
+e167cfc2ffe6ac29aa8a6984441725f02a6351adc2c823b3bc0ffe6b470c7e22  legacy embedding--0.3.6.sql
+
+Official pinned source URLs:
+https://github.com/pgvector/pgvector/blob/f37c13f68b57d2c3472b2214fbcff699d6d34876/sql/vector.sql
+https://github.com/pgvector/pgvector/blob/f37c13f68b57d2c3472b2214fbcff699d6d34876/src/vector.c
+https://github.com/pgvector/pgvector/blob/f37c13f68b57d2c3472b2214fbcff699d6d34876/src/hnsw.h
+https://github.com/pgvector/pgvector/blob/f37c13f68b57d2c3472b2214fbcff699d6d34876/src/hnswbuild.c
+https://github.com/pgvector/pgvector/blob/f37c13f68b57d2c3472b2214fbcff699d6d34876/src/ivfflat.c
+https://github.com/pgvector/pgvector/blob/f37c13f68b57d2c3472b2214fbcff699d6d34876/src/ivfflat.h
+https://github.com/neondatabase/pg_embedding/blob/5d48508aeaeb86b9e9c630468ada7a124b905795/embedding--0.3.6.sql
+
+Some GitHub/raw browser fetches returned internal/cache-miss errors; they were
+not counted as retrieval evidence. Existing pinned local files supplied those
+checks. The requested current Neon migration chapter's absence and historical
+chapter distinction are inherited from the documented earlier snapshot, not a
+new current-Neon availability claim from this review.
+
+Remaining boundaries
+--------------------
+PostgreSQL parser/server syntax, transactions and rollback were NOT executed.
+No actual version installation, provider privilege, complete live dependency
+inventory, writer pause, operational restore, business validation, ANN recall,
+or deployed-plan NULL/tie behavior was demonstrated. Privileges are exposed as
+read-only diagnostics/unresolved gates; the catalog input has no authenticated
+grant evidence that could approve them offline. SQL/source review is useful
+evidence but not a substitute for a separately authorized staging exercise.
+
+Still missing: full typed-table copy, arbitrary dependency recreation/rebinding,
+online dual-write migration, parallel backfill/state adoption, main CLI exposure,
+and real remote execution. Restricted durability/security workflows and M10
+independent qualification remain separate/open. The lead owns final frozen-tree
+integration/publication review; no entire-M9 or entire-goal completion is claimed.

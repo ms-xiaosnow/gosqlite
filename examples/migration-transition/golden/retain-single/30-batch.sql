@@ -1,0 +1,3 @@
+-- REVIEW ONLY. NOT AN EXECUTABLE MIGRATION. All approvals remain unresolved.
+-- Remove no comment prefixes until an operator has reviewed each phase and gate.
+-- Not used by this approach/mode. No batch cursor or synthetic MinInt64 sentinel is needed.

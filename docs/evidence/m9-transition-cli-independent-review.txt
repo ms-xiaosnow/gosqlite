@@ -1,0 +1,108 @@
+M9D CLI integration — independent review appendix, 2026-10-10 UTC
+
+Scope and result
+----------------
+Reviewed the new bounded DecodeTransitionOptions API, transition CLI handler,
+their two named tests, and the three-line dispatch/one-line help integration.
+No new correctness defect identified within the documented trusted-local-input,
+review-only output boundary. No production edits were made by this follow-on
+review. The earlier core review/manifest remains a separate frozen boundary;
+its statement that main CLI exposure was absent describes that earlier boundary.
+
+Source identity at review/test completion (SHA-256)
+-------------------------------------------------
+a2e3478b564896dcd750adcee443c10e7d6bc9a6b38c39878cc7c1349f9d0521  migration/postgres/transition_options.go
+0a3a38a65b9bcedeac8b6155b425097d726382510bf3ed23648eb7acb74b7e07  migration/postgres/transition_options_test.go
+5b489b39b21ca7d218b4bf126bc6db1ceb1368842c5e92d6f067af085bcd27b3  cmd/gosqlite/migrate_transition.go
+2085ae89e180bdd88e782a2d8f94d4e40efbb7eb40904e0e98b80a49e4bb0bfa  cmd/gosqlite/migrate_transition_test.go
+ecacd163af1855ec34166e0104c9c1cb3257915758418c36d0dba23cefad8177  cmd/gosqlite/migrate.go
+d6073bd68f23a0865e50082e292bb73400f265a2ec664a39933185f8c1e15924  cmd/gosqlite/main.go
+07c446f09de6b0e93eb174635f55a07d4957f59e8656e8f00cd0027534b29ae9  examples/migration-transition/options.json
+
+Reviewed contracts
+------------------
+- Dispatch: explicit pgembedding transition is handled before the local-import
+  fallback. Unknown --apply/--resume/--input flags cannot switch this handler to
+  an import/apply path. Required catalog/options paths, duplicate flags, unknown
+  flags and unexpected positional arguments fail before output publication.
+- Input decoding: at most 64 KiB + one sentinel byte is read for options; larger
+  input fails. Existing strictJSON rejects duplicate keys, unknown/exact-case
+  fields, invalid UTF-8/NUL/Unicode escapes, wrong scalar kinds, trailing values,
+  required null values, token excess and excessive nesting. Bounds are 8192
+  tokens and depth 8. GenerateTransition retains responsibility for numeric,
+  method, version, object-identity and other semantic checks.
+- Required fields are explicit: every non-omitempty JSON field must be present,
+  including zero/empty inapplicable options and lists/probes for HNSW mappings.
+  The initially incomplete test fixtures were corrected by the owner; the
+  decoder contract was not weakened. The supplied options.json is complete.
+- Reads/output: the handler reads local catalog/options, calls only the offline
+  generator/renderer, and fully renders the JSON envelope into a memory buffer
+  before creating any requested report. Source catalog has its established
+  16 MiB bound. Generated artifact content has the existing 8 MiB aggregate cap;
+  bounded JSON escaping/envelope overhead is additional, not silently claimed
+  to fit that same artifact-byte cap.
+- No database/SQL execution: there is no database open/exec, DSN, network,
+  subprocess or apply API on this dispatch path. The report is a JSON envelope
+  of named text artifacts; core comment/read-only safety remains unchanged.
+- Report preservation: optional report creation uses O_CREATE|O_EXCL, mode 0600.
+  Existing files are refused rather than truncated/reused. This is an ordinary
+  trusted local artifact workflow, not hostile ancestor-path/namespace-race
+  protection. No namespace or symlink race was induced or certified.
+- Context: an already-canceled context is checked before source opens; generation
+  checks context and the handler checks again after rendering/before output.
+  Ordinary synchronous local reads/writes are not an interruptible publication
+  protocol. No claim is made that cancellation racing a final write prevents
+  every possible output artifact.
+- Errors: both source files are closed; read/decode and close errors are joined.
+  Report write and close errors are joined; stdout/status writer errors return
+  to the caller. A write/close failure may leave a partial report, and a later
+  status-output failure may occur after the report is already written. No
+  atomic publication, fsync durability, rollback cleanup or overwrite retry is
+  implemented. These limits were reported to the owner for the CLI guide.
+
+Source audit and actual checks
+------------------------------
+Both tests were read before invocation, including fixture helpers and dispatch.
+Options tests use strings/readers only. The CLI test writes ordinary JSON inputs
+and a new report in t.TempDir, checks fully commented mutation-phase lines,
+refuses a second report write while preserving its bytes, rejects invalid flags,
+and checks a context canceled before the invocation. It verifies only the two
+expected JSON files exist. It does not open a database, execute generated SQL,
+run subprocesses, manipulate filesystem namespaces, inject I/O faults or test
+interrupted publication. No restricted crash/recovery/security workflow ran.
+
+Repository-root environment:
+export GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off CGO_ENABLED=0
+export GOCACHE="$PWD/../gocache" GOPATH="$PWD/../go-path"
+GO=../toolchains/go1.27.2/bin/go
+
+Exact ordinary invocations/results:
+"$GO" run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
+"$GO" test ./migration/postgres -run '^TestTransitionOptionsStrictBoundedDecode$' -count=1
+ok github.com/ms-xiaosnow/gosqlite/migration/postgres 0.004s
+"$GO" run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
+"$GO" test ./cmd/gosqlite -run '^TestMigrateTransitionReviewOnlyArtifacts$' -count=1
+ok github.com/ms-xiaosnow/gosqlite/cmd/gosqlite 0.014s
+"$GO" vet ./migration/postgres ./cmd/gosqlite
+PASS (exit 0, no diagnostics)
+"$GO" build -o /tmp/m9-transition-cli-reviewed ./cmd/gosqlite
+PASS (exit 0, CGO_ENABLED=0; binary compiled, not executed by this review)
+
+Separate race invocations/results:
+"$GO" run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
+CGO_ENABLED=1 "$GO" test -race ./migration/postgres -run '^TestTransitionOptionsStrictBoundedDecode$' -count=1
+ok github.com/ms-xiaosnow/gosqlite/migration/postgres 1.025s
+"$GO" run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
+CGO_ENABLED=1 "$GO" test -race ./cmd/gosqlite -run '^TestMigrateTransitionReviewOnlyArtifacts$' -count=1
+ok github.com/ms-xiaosnow/gosqlite/cmd/gosqlite 1.101s
+
+The CGO-enabled race build is separate from CGO-disabled production build.
+No aggregate/full-repository suite, live PostgreSQL, remote action, staging,
+commit or publication was performed. The earlier core review remains the
+evidence for its 14 named generator tests. CLI access adds no permission to
+execute generated SQL and does not close full-table/dependency/online migration
+or operational validation gaps.

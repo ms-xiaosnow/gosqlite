@@ -1,0 +1,93 @@
+{
+  "format_version": 1,
+  "plan_sha256": "4578adcc9988ed515bb68ecb63ddd47c25665f35c9ea2f1713a2484c1d6e5953",
+  "catalog_sha256": "bdb6e93d8e95112231c892ad5a6653ca72ccd66297efa99446ac0f2610b8f804",
+  "status": "review_required",
+  "mutation_mode": "commented_review_only_never_executed",
+  "files": [
+    {
+      "Name": "00-preflight.sql",
+      "Kind": "read_only_reference",
+      "Transaction": "independent_read_only",
+      "SHA256": "81a4a42a68395bf24d67e5b45f78f47b68e947a3fc12140b639b67cceae55382",
+      "Bytes": 6734
+    },
+    {
+      "Name": "10-extension-transition.sql",
+      "Kind": "review_only_sql",
+      "Transaction": "separate_transactions",
+      "SHA256": "9653f7adcf31f57b91c3d65922027a42aa9c474a08c8c3421863b33d6b2b0efc",
+      "Bytes": 4544
+    },
+    {
+      "Name": "20-shadow-copy.sql",
+      "Kind": "review_only_sql",
+      "Transaction": "separate_transactions",
+      "SHA256": "95cb7e81f8a3b4e63d7e74a579eabedf68744b0530a32598057c6fedbc30da80",
+      "Bytes": 1199
+    },
+    {
+      "Name": "30-batch.sql",
+      "Kind": "review_only_sql",
+      "Transaction": "separate_transactions",
+      "SHA256": "2f0dddbad2149a97c8e83086d50f7dab6a614a7edfea09fed942b4692b7a1884",
+      "Bytes": 2157
+    },
+    {
+      "Name": "40-indexes.sql",
+      "Kind": "review_only_sql",
+      "Transaction": "separate_transactions",
+      "SHA256": "caec0c7a81366fab67b26165b6ffa2cf02ee821a188d8896d1da5adee1769a88",
+      "Bytes": 959
+    },
+    {
+      "Name": "50-verify.sql",
+      "Kind": "review_only_sql",
+      "Transaction": "separate_transactions",
+      "SHA256": "33270f95f1dea4ed7051ad84faba33824e0d4cd69906f1dc4b37921609eb3d94",
+      "Bytes": 6323
+    },
+    {
+      "Name": "60-application-cutover.sql",
+      "Kind": "review_only_sql",
+      "Transaction": "separate_transactions",
+      "SHA256": "583e23bd6ed8fffb9a261e064739e35aa52a744951cf591ec68487be40a57e61",
+      "Bytes": 2040
+    },
+    {
+      "Name": "70-rollback.sql",
+      "Kind": "review_only_sql",
+      "Transaction": "separate_transactions",
+      "SHA256": "efe45fb262cece576e568ee61eb3e383832cda543425d7c255e8ec7fad1d45ca",
+      "Bytes": 1084
+    },
+    {
+      "Name": "README.md",
+      "Kind": "review_instructions",
+      "Transaction": "none",
+      "SHA256": "a7e343b20f2490c0be8950677e654aac92d58ec7a6e6fff80cefc408d887cf51",
+      "Bytes": 5607
+    },
+    {
+      "Name": "inventory.json",
+      "Kind": "evidence_only",
+      "Transaction": "none",
+      "SHA256": "baa94226736472736d664a84362a5182c0ed807e017274b5c6a0526f95600a26",
+      "Bytes": 9591
+    },
+    {
+      "Name": "report.json",
+      "Kind": "report",
+      "Transaction": "none",
+      "SHA256": "f41a609d8a33f384c94a1b3542ca5fb425a8439c63e36c649b18b7f13ef0aa0d",
+      "Bytes": 11694
+    },
+    {
+      "Name": "report.md",
+      "Kind": "report",
+      "Transaction": "none",
+      "SHA256": "517bbfa6fdbfa7132e0e198df2a7cb992d5f72d20f996722beffbb0dcd5beb15",
+      "Bytes": 5135
+    }
+  ]
+}

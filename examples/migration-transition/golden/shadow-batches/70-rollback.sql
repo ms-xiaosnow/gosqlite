@@ -1,0 +1,10 @@
+-- REVIEW ONLY. NOT AN EXECUTABLE MIGRATION. All approvals remain unresolved.
+-- Remove no comment prefixes until an operator has reviewed each phase and gate.
+-- DATA ROLLBACK versus SERVICE ROLLBACK:
+-- Before the still-open single transaction commits, the operator can issue ROLLBACK on that SAME connection.
+-- ROLLBACK;
+-- After any earlier COMMIT, this statement cannot reverse that transaction, committed batches or the extension transition.
+-- Before cutover, abandoning shadow reads leaves source arrays retained but does not restore old operators/HNSW.
+-- After cutover, pause writes and reconcile all new writes with retained arrays before reverting readers. A stale retained array is not a rollback guarantee.
+-- Old-ANN service restoration requires separately approved reverse migration or database/branch restore, available old binaries and dependency reconciliation. Modern vector owns hnsw and may be referenced by shadow columns/indexes.
+-- No DROP of target extension, target column, old column, table, backup or state is generated. No CASCADE or automatic cleanup.

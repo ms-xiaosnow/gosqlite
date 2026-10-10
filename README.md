@@ -60,7 +60,7 @@ SQLITE_ORACLE=/absolute/path/to/verified/sqlite3 ./scripts/test-oracle.sh
 
 See [progress](docs/progress.md), [compatibility](docs/compatibility.md), [architecture](docs/architecture.md), [sources](docs/upstream.md), and [manual verification](docs/manual-verification.md). The unchanged [original goal](goal.md) remains the contract. [Restart protocol](docs/restart.md) and checkpoint records preserve durable development history.
 
-Qualified crash recovery, non-Linux encrypted coordination, broader SQL and all extended-vector ANN integration, and pg_embedding transition tooling remain unfinished implementation work. Full SQLite/PostgreSQL semantics, SEE file compatibility and production security are not claimed.
+Qualified crash recovery, non-Linux encrypted coordination, broader SQL and all extended-vector ANN integration, and full-table/online pg_embedding transition work remain unfinished implementation work. Full SQLite/PostgreSQL semantics, SEE file compatibility and production security are not claimed.
 
 
 ## Explicit exclusive WAL
@@ -175,8 +175,10 @@ native engine; PostgreSQL output is review-only and has not been run remotely.
 Unknown identities or unsupported semantics block the entire apply-ready script.
 Runtime bind adapters and query-setting artifacts are part of the contract,
 including NULL/width/range checks. See [converter boundaries](docs/migration-converter.md)
-and the runnable examples/migrate-pgembedding. CSV/NDJSON import and transition
-bundles remain separate unfinished implementations.
+and the runnable examples/migrate-pgembedding. Bounded native CSV/NDJSON import
+and offline review-only transition bundles are separate implemented workflows;
+see [import](docs/import-pgembedding.md) and [transition CLI](docs/migration-transition-cli.md).
+Full-table recreation, online cutover and live PostgreSQL qualification remain open.
 
 ## Half-precision vectors
 
@@ -229,3 +231,14 @@ Vector representations remain distinct through supported value-preserving trees;
 CAST is not a replacement for explicit vector constructors/conversion. See
 [expression scope](docs/sql-expressions.md). JOIN, subqueries, COLLATE, aggregates
 and the full relational binder still require implementation.
+
+## Review-only PostgreSQL transition bundles
+
+The bounded offline generator and `migrate pgembedding transition` CLI emit
+13 deterministic review artifacts for retained real-array casts or a typed shadow
+column, with single-transaction or explicit batch plans. Mutation and post-install
+SQL stays commented; all human/capability/dependency gates remain open. No generated
+SQL is executed. Explicit target index retuning, global hnsw access-method collision,
+PK cursor state, exhaustive binary32 verification and rollback limits are included.
+See [transition contracts](docs/migration-transition.md). Full-table/dependency
+recreation, online operation and actual PostgreSQL validation remain required work.

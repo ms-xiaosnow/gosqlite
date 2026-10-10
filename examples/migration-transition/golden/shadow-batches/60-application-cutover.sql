@@ -1,0 +1,26 @@
+-- REVIEW ONLY. NOT AN EXECUTABLE MIGRATION. All approvals remain unresolved.
+-- Remove no comment prefixes until an operator has reviewed each phase and gate.
+-- GATE: application_cutover. Review the concrete application deployment separately.
+-- No column/table rename or app deployment is automated. Bind $1 as finite vector text with exact dimensions; $2 is a reviewed nonnegative bigint LIMIT.
+-- Old Manhattan <~> becomes dense <+>; do not apply this rule to bit Hamming or arbitrary text.
+-- NULL vectors preserve NULL; explicit ASC NULLS LAST and primary-key tie order are shown. Validate their actual plan effects.
+-- -- Independent prepared-query example for source index OID 30100; choose per-query setting, not a global overwrite.
+-- BEGIN;
+-- SET LOCAL search_path = pg_catalog;
+-- SET LOCAL hnsw.ef_search = 64;
+-- SELECT "id" FROM "public"."documents" ORDER BY "embedding_vector" OPERATOR("public".<->) $1::"public"."vector"(3) ASC NULLS LAST, "id" ASC LIMIT $2::pg_catalog.int8;
+-- COMMIT;
+-- -- Independent prepared-query example for source index OID 30101; choose per-query setting, not a global overwrite.
+-- BEGIN;
+-- SET LOCAL search_path = pg_catalog;
+-- SET LOCAL hnsw.ef_search = 64;
+-- SELECT "id" FROM "public"."documents" ORDER BY "embedding_vector" OPERATOR("public".<=>) $1::"public"."vector"(3) ASC NULLS LAST, "id" ASC LIMIT $2::pg_catalog.int8;
+-- COMMIT;
+-- -- Independent prepared-query example for source index OID 30102; choose per-query setting, not a global overwrite.
+-- BEGIN;
+-- SET LOCAL search_path = pg_catalog;
+-- SET LOCAL hnsw.ef_search = 64;
+-- SELECT "id" FROM "public"."documents" ORDER BY "embedding_vector" OPERATOR("public".<+>) $1::"public"."vector"(3) ASC NULLS LAST, "id" ASC LIMIT $2::pg_catalog.int8;
+-- COMMIT;
+-- -- Update all application INSERT/UPDATE/parameter paths, not only SELECT. Keep source arrays current through the rollback window.
+-- -- The separate Convert API supports bounded AST/source-span transformations; arbitrary SQL/functions/triggers require manual review.

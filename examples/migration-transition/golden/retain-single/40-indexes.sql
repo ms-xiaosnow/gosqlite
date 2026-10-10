@@ -1,0 +1,7 @@
+-- REVIEW ONLY. NOT AN EXECUTABLE MIGRATION. All approvals remain unresolved.
+-- Remove no comment prefixes until an operator has reviewed each phase and gate.
+-- GATES: data_and_training, target_capabilities, privileges_capacity_locks. Use populated, validated data.
+-- Verify intended retuning/IVF training/list/probe choices; no default option substitution.
+-- CREATE INDEX "documents_vector_l2" ON "public"."documents" USING hnsw (("embedding"::"public"."vector"(3)) "public"."vector_l2_ops") WITH (m=16, ef_construction=64);
+-- CREATE INDEX "documents_vector_cosine" ON "public"."documents" USING hnsw (("embedding"::"public"."vector"(3)) "public"."vector_cosine_ops") WITH (m=16, ef_construction=64);
+-- CREATE INDEX "documents_vector_l1" ON "public"."documents" USING hnsw (("embedding"::"public"."vector"(3)) "public"."vector_l1_ops") WITH (m=16, ef_construction=64);

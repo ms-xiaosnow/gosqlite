@@ -1,0 +1,298 @@
+{
+  "format_version": 1,
+  "status": "review_required",
+  "validation": "offline_generated_not_postgresql_executed",
+  "plan_sha256": "fe8daaa375ab4e5a2fe42619d7d9c96a92c857a454e47c35ba0af554b37a0a3b",
+  "catalog_sha256": "bdb6e93d8e95112231c892ad5a6653ca72ccd66297efa99446ac0f2610b8f804",
+  "dependency_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+  "source_profile": "pg_embedding-0.3.6@5d48508aeaeb86b9e9c630468ada7a124b905795",
+  "target_profile": "pgvector-0.8.7@f37c13f68b57d2c3472b2214fbcff699d6d34876",
+  "options": {
+    "relation_oid": 30000,
+    "attnum": 3,
+    "dimensions": 3,
+    "approach": "retain_real_array_cast",
+    "mode": "single_transaction",
+    "vector_schema": "public",
+    "target_version": "0.8.7",
+    "shadow_column": "",
+    "state_schema": "",
+    "state_table": "",
+    "batch_size": 0,
+    "concurrent_indexes": false,
+    "indexes": [
+      {
+        "source_index_oid": 30100,
+        "name": "documents_vector_l2",
+        "method": "hnsw",
+        "m": 16,
+        "ef_construction": 64,
+        "ef_search": 64,
+        "lists": 0,
+        "probes": 0
+      },
+      {
+        "source_index_oid": 30101,
+        "name": "documents_vector_cosine",
+        "method": "hnsw",
+        "m": 16,
+        "ef_construction": 64,
+        "ef_search": 64,
+        "lists": 0,
+        "probes": 0
+      },
+      {
+        "source_index_oid": 30102,
+        "name": "documents_vector_l1",
+        "method": "hnsw",
+        "m": 16,
+        "ef_construction": 64,
+        "ef_search": 64,
+        "lists": 0,
+        "probes": 0
+      }
+    ],
+    "max_bytes": 8388608
+  },
+  "inspection": {
+    "format_version": 1,
+    "source_profile": "pg_embedding-0.3.6@5d48508aeaeb86b9e9c630468ada7a124b905795",
+    "target_profile": "pgvector-0.8.7@f37c13f68b57d2c3472b2214fbcff699d6d34876",
+    "catalog_sha256": "bdb6e93d8e95112231c892ad5a6653ca72ccd66297efa99446ac0f2610b8f804",
+    "catalog_hash_kind": "canonical_json_v1",
+    "source_bytes_sha256": "71b9009a84cd30fb9b92cc16dd618805e62ec85d268ca2e13904f2c5588b8a9c",
+    "extracted_at": "2026-10-10T00:00:00Z",
+    "status": "review_required",
+    "scope": {
+      "schemas": [
+        "public"
+      ],
+      "coverage": [
+        {
+          "category": "columns",
+          "complete": true,
+          "reason": "Synthetic complete fixture, not a live PostgreSQL capture."
+        },
+        {
+          "category": "dependencies",
+          "complete": true,
+          "reason": "Synthetic complete fixture, not a live PostgreSQL capture."
+        },
+        {
+          "category": "extension_membership",
+          "complete": true,
+          "reason": "Synthetic complete fixture, not a live PostgreSQL capture."
+        },
+        {
+          "category": "indexes",
+          "complete": true,
+          "reason": "Synthetic complete fixture, not a live PostgreSQL capture."
+        },
+        {
+          "category": "policies",
+          "complete": true,
+          "reason": "Synthetic complete fixture, not a live PostgreSQL capture."
+        },
+        {
+          "category": "relations",
+          "complete": true,
+          "reason": "Synthetic complete fixture, not a live PostgreSQL capture."
+        },
+        {
+          "category": "types",
+          "complete": true,
+          "reason": "Synthetic complete fixture, not a live PostgreSQL capture."
+        }
+      ]
+    },
+    "columns": [
+      {
+        "object": "\"public\".\"documents\".\"embedding\"",
+        "relation_oid": 30000,
+        "attnum": 3,
+        "classification": "legacy_vector",
+        "selected": true,
+        "dimensions": 3,
+        "status": "safe",
+        "validation": "exhaustive"
+      },
+      {
+        "object": "\"public\".\"documents\".\"ordinary_samples\"",
+        "relation_oid": 30000,
+        "attnum": 4,
+        "classification": "unrelated_real_array_candidate",
+        "selected": false,
+        "dimensions": 0,
+        "status": "safe",
+        "validation": "not_run"
+      }
+    ],
+    "indexes": [
+      {
+        "object": "\"public\".\"custom nearest\"",
+        "oid": 30100,
+        "column": "\"public\".\"documents\".\"embedding\"",
+        "status": "safe",
+        "identity_verified": true,
+        "legacy": {
+          "dims": 3,
+          "m": 16,
+          "efconstruction": 64,
+          "efsearch": 64
+        },
+        "proposed_target": {
+          "dimensions": 3,
+          "m": 16,
+          "ef_construction": 64,
+          "opclass": "vector_l2_ops",
+          "metric": "l2"
+        },
+        "query_ef_search": 64
+      },
+      {
+        "object": "\"public\".\"documents_cosine\"",
+        "oid": 30101,
+        "column": "\"public\".\"documents\".\"embedding\"",
+        "status": "safe",
+        "identity_verified": true,
+        "legacy": {
+          "dims": 3,
+          "m": 16,
+          "efconstruction": 64,
+          "efsearch": 64
+        },
+        "proposed_target": {
+          "dimensions": 3,
+          "m": 16,
+          "ef_construction": 64,
+          "opclass": "vector_cosine_ops",
+          "metric": "cosine"
+        },
+        "query_ef_search": 64
+      },
+      {
+        "object": "\"public\".\"documents_manhattan\"",
+        "oid": 30102,
+        "column": "\"public\".\"documents\".\"embedding\"",
+        "status": "safe",
+        "identity_verified": true,
+        "legacy": {
+          "dims": 3,
+          "m": 16,
+          "efconstruction": 64,
+          "efsearch": 64
+        },
+        "proposed_target": {
+          "dimensions": 3,
+          "m": 16,
+          "ef_construction": 64,
+          "opclass": "vector_l1_ops",
+          "metric": "l1"
+        },
+        "query_ef_search": 64
+      }
+    ],
+    "findings": [
+      {
+        "severity": "warning",
+        "code": "efsearch_scope_change",
+        "object": "\"public\".\"custom nearest\"",
+        "message": "Legacy per-index efsearch becomes an explicit PostgreSQL session/transaction setting or local VectorSearchOptions.EFSearch, never a CREATE INDEX option."
+      },
+      {
+        "severity": "warning",
+        "code": "efsearch_scope_change",
+        "object": "\"public\".\"documents_cosine\"",
+        "message": "Legacy per-index efsearch becomes an explicit PostgreSQL session/transaction setting or local VectorSearchOptions.EFSearch, never a CREATE INDEX option."
+      },
+      {
+        "severity": "warning",
+        "code": "efsearch_scope_change",
+        "object": "\"public\".\"documents_manhattan\"",
+        "message": "Legacy per-index efsearch becomes an explicit PostgreSQL session/transaction setting or local VectorSearchOptions.EFSearch, never a CREATE INDEX option."
+      },
+      {
+        "severity": "warning",
+        "code": "hnsw_access_method_collision",
+        "object": "access_method.hnsw",
+        "message": "Both pinned extensions own database-wide hnsw. A side-by-side unmodified extension installation is not a valid in-place migration plan."
+      },
+      {
+        "severity": "warning",
+        "code": "application_sql_inventory_incomplete",
+        "object": "scope",
+        "message": "Catalog inspection cannot discover arbitrary application or dynamic SQL; supplied SQL corpus is not yet converted by this inspector."
+      },
+      {
+        "severity": "warning",
+        "code": "current_neon_chapter_absent",
+        "object": "source",
+        "message": "Current Neon target page was retrieved on 2026-10-10; its requested migration chapter is absent. The official historical 2024-01-23 chapter is a separate reference, not current-page conformance."
+      },
+      {
+        "severity": "warning",
+        "code": "numeric_semantics_difference",
+        "object": "source",
+        "message": "Legacy distances return architecture-sensitive float32; local metrics use compensated float64, and cosine rejects zero norms. Exact result-bit equality is not claimed."
+      }
+    ],
+    "approval_points": [
+      "Retain source arrays and immutable export; retuning index parameters requires explicit review and new recall measurements.",
+      "Review maintenance-window or separate-database strategy for the database-wide hnsw access-method collision.",
+      "Review target installation/version, privileges, dependency inventory and application query changes before PostgreSQL execution."
+    ]
+  },
+  "gates": [
+    {
+      "code": "application_cutover",
+      "state": "unresolved",
+      "requirement": "Approve query/parameter/operator/column/settings/NULL/zero/tie/filter changes together, then cut over explicitly. Maintain retained arrays on every later write or reconcile before rollback."
+    },
+    {
+      "code": "cleanup_separate",
+      "state": "unresolved",
+      "requirement": "Keep source arrays, export and migration state through an agreed rollback window. Cleanup and post-cutover old-service restoration require new operational plans; no cleanup statements are generated."
+    },
+    {
+      "code": "data_and_training",
+      "state": "unresolved",
+      "requirement": "Revalidate all source rows and PK identity, then full NULL/value/norm alignment and exact distance/business fixtures. Review IVF training/list/probe choices or HNSW retuning; evaluate ANN recall separately."
+    },
+    {
+      "code": "extension_transition",
+      "state": "unresolved",
+      "requirement": "Approve each inventoried index drop and DROP EXTENSION embedding RESTRICT individually. Both extensions own database-wide hnsw. Unexpected dependencies mean stop, never CASCADE or catalog/AM renaming hacks."
+    },
+    {
+      "code": "fresh_catalog",
+      "state": "unresolved",
+      "requirement": "Recollect the complete catalog and dependencies under write quiescence; compare canonical_json_v1 catalog and dependency hashes. Any drift requires regeneration. Preflight diagnostics do not compute the full Go catalog hash."
+    },
+    {
+      "code": "maintenance_window",
+      "state": "unresolved",
+      "requirement": "Approve a maintenance window with all application writes, DDL and primary-key changes paused from validation through cutover. Row locks between batches do not enforce this contract. Separate-database/branch transition is a different plan."
+    },
+    {
+      "code": "privileges_capacity_locks",
+      "state": "unresolved",
+      "requirement": "Verify table/extension ownership and required CREATE/USAGE/SELECT/UPDATE rights, RLS visibility, disk/WAL headroom, lock and downtime budgets; extension installation may require a provider administrator."
+    },
+    {
+      "code": "snapshot_and_old_service",
+      "state": "unresolved",
+      "requirement": "Verify immutable export/backup, restoration procedure, original definitions, and actual availability of embedding 0.3.6 binaries before promising old-ANN rollback."
+    },
+    {
+      "code": "target_capabilities",
+      "state": "unresolved",
+      "requirement": "Verify exact available and installed vector 0.8.7, extension schema, extension-owned hnsw/ivfflat, real[] casts, vector type, operators/functions/opclasses and option bounds before copy/index/application use."
+    }
+  ],
+  "unsupported": [
+    "Full-table typed copy, arbitrary dependency recreation, online/dual-write maintenance and parallel backfill are not implemented.",
+    "Actual target availability, privileges, storage headroom, fresh catalog identity and application behavior are not verified offline.",
+    "PostgreSQL execution, query-plan verification, ANN recall and operational rollback have not been exercised.",
+    "No cleanup, CASCADE, source rename/drop, live connector, credentials or remote execution interface is provided."
+  ]
+}

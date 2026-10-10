@@ -256,5 +256,19 @@
     "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38060963458",
     "remote_ci_status": "COMPLETED SUCCESS for exact SHA, updated2026-10-10T14:57:37Z, observed2026-10-10T15:00:27Z.",
     "open_gates": "Server schema/dependency behavior, transition tooling/full-table migration and extended ANN/broad SQL/recovery/native-platform code remain; crash/physical and independent acceptance gates stay open."
+  },
+  {
+    "stage": "S2 scalar SQL prerequisites and review regressions",
+    "remote_commit": "c902d514856656a83e2345b5340cc0b28f31b4b3",
+    "local_commit": "c902d514856656a83e2345b5340cc0b28f31b4b3",
+    "tree": "82f6129fa8c9ab7a45bf063bb0f9dd3a217a6325",
+    "bundle_sha256": "0d40e220f31bb7bfea3ad943d3736c46d301d1daab3cb6265a1c461f29f14775",
+    "bundle_bytes": 1560682,
+    "library_file_id": "libfile_6b4a9e8063288191926006a86bf8478f",
+    "library_version": 0,
+    "verified": "Expected-SHA remote ref readback and exact local mirror verified2026-10-10T15:08:13Z; full-history bundle byte-identical Library readback, clean clone/fsck and unchanged goal hash verified15:08:48Z. Exact restored focused expression CGO0 unit/full vet/build and separate CGO1 race passed. Initial oracle invocation used incorrect SQLITE3_ORACLE env and failed before queries; preserved output. Corrected SQLITE_ORACLE focused scalar/ordinary database oracle, module and clean-tree checks passed exit0 at15:10:02Z with no source changes. Frozen full aggregate db470d2ec208a690202253db840620b219a6abdc is tracked separately.",
+    "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38062386078",
+    "remote_ci_status": "IN_PROGRESS observed2026-10-10T15:08:57Z; not yet a terminal pass.",
+    "open_gates": "Full relational S2/scoped binder/pull operators, broad SQL/planner/recovery/native-platform and extended ANN code remain open. This checkpoint also documents the plain-Windows metadata ownership correction; no native platform, restricted physical or independent release acceptance is claimed."
   }
 ]

@@ -1,0 +1,3 @@
+-- REVIEW ONLY. NOT AN EXECUTABLE MIGRATION. All approvals remain unresolved.
+-- Remove no comment prefixes until an operator has reviewed each phase and gate.
+-- No copy: source real[] retained. Queries/indexes use explicit vector(n) casts after validated target installation.

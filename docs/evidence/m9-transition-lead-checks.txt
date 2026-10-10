@@ -1,0 +1,41 @@
+Lead verification of frozen tree13f6b73b2f0a87fe6fe6410736465d5b3b7c8242.
+The archive also contained unpublished Windows encrypted-backend files; these are excluded from the D publication. A second check against published S2 plus D only follows before publication.
+The owner core manifest describes its pre-CLI boundary. The final guide now links the reviewed CLI; production core bytes remain identical.
+
+Frozen D core+CLI13f6b73b2f0a87fe6fe6410736465d5b3b7c8242; offline text only, no PostgreSQL SQL execution.
+2026-10-10T15:02:24Z
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	3.018s
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.409s
+?   	github.com/ms-xiaosnow/gosqlite/examples/migration-transition	[no test files]
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	18.886s
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	1.325s
+?   	github.com/ms-xiaosnow/gosqlite/examples/migration-transition	[no test files]
+cross-build linux/amd64 PASS
+cross-build linux/arm64 PASS
+cross-build darwin/arm64 PASS
+cross-build windows/amd64 PASS
+all modules verified
+2026-10-10T15:03:29Z
+TRANSITION FROZEN CORE+CLI CHECKS PASS
+
+--- exact published-S2 plus D boundary ---
+Published S2 plus D core/CLI only; no unpublished native-platform/ANN changes.
+415de5f50dbb6060befb52955208cbf5aeec7588
+2026-10-10T15:09:39Z
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	5.350s
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.071s
+?   	github.com/ms-xiaosnow/gosqlite/examples/migration-transition	[no test files]
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	19.333s
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	1.342s
+?   	github.com/ms-xiaosnow/gosqlite/examples/migration-transition	[no test files]
+cross-build linux/amd64 PASS
+cross-build linux/arm64 PASS
+cross-build darwin/arm64 PASS
+cross-build windows/amd64 PASS
+all modules verified
+2026-10-10T15:10:56Z
+FINAL D SOURCE CHECKS PASS

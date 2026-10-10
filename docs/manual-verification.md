@@ -344,3 +344,27 @@ recovery tags. Logs separately record owner cases, independent review and later
 lead full aggregate; their totals are not independent certifications or full
 SQLite coverage. No physical/native error injection or external DB migration is
 executed. Broad relational S2 and other unsupported SQL remain implementation work.
+
+## M9 D offline transition verification
+
+The exact commands in m9-transition-ordinary.md and the two independent-review
+reports exercise bounded in-memory generation/decoding and ordinary synthetic
+local review-artifact output. All mutation phases remain line-commented; no
+PostgreSQL connection or generated SQL executes. Core/CLI unit and separate race
+checks, production vet/build, synthetic CLI output and cross-builds are recorded
+for immutable archives. Windows/Darwin cross-builds are not native execution.
+
+For an ordinary offline CLI check from the repository root:
+
+```sh
+go run ./internal/testscope
+go test ./migration/postgres ./cmd/gosqlite ./examples/migration-transition
+go run ./cmd/gosqlite migrate pgembedding transition \
+  --catalog testdata/pgembedding-0.3.6/catalog.json \
+  --options examples/migration-transition/options.json
+```
+
+Use the pinned toolchain/environment documented above. Source-faithful actual
+PostgreSQL version/extension/dependency/privilege validation and user-reviewed
+cutover/rollback remain pending. Fault/interrupted-publication testing remains
+manual pending and is not moved to another environment or CI.

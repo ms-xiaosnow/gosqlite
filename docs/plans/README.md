@@ -53,8 +53,10 @@ remain code work; unsupported is a safe interim behavior, not removal from goal.
   mapping. Extend supported migration shapes without weakening source underflow,
   identity or bind contracts; no
   global operator replacement or automatic source-error coercion.
-- Generate review-only PostgreSQL/Neon transition templates separately from local
-  import. Both old embedding and modern pgvector own a database-wide hnsw access
+- Review-only retained-array/shadow-column transition templates and CLI now exist.
+  Implement full-table/dependency recreation and supported online workflows,
+  then qualify actual PostgreSQL/Neon operation separately from local import.
+  Both old embedding and modern pgvector own a database-wide hnsw access
   method, so naïve side-by-side installation is invalid. Old m100/efconstruction16
   defaults and the old3/5 example violate modern ef_construction>=2*m; report
   retuning rather than silently changing values. Inventory dependencies and avoid

@@ -1,0 +1,19 @@
+-- REVIEW ONLY. NOT AN EXECUTABLE MIGRATION. All approvals remain unresolved.
+-- Remove no comment prefixes until an operator has reviewed each phase and gate.
+-- GATES: target_capabilities, data_and_training, maintenance_window. New shadow remains nullable; source is unchanged.
+-- BEGIN;
+-- SET LOCAL search_path = pg_catalog;
+-- SET LOCAL lock_timeout = '5s';
+-- SET LOCAL statement_timeout = '60s';
+-- ALTER TABLE "public"."documents" ADD COLUMN "embedding_vector" "public"."vector"(3);
+-- CREATE TABLE "public"."documents_vector_migration" (
+--  plan_sha256 pg_catalog.text PRIMARY KEY CHECK (plan_sha256=E'4578adcc9988ed515bb68ecb63ddd47c25665f35c9ea2f1713a2484c1d6e5953'),
+--  last_id pg_catalog.int8 NULL,
+--  rows_done pg_catalog.int8 NOT NULL CHECK (rows_done>=0 AND rows_done<=expected_rows),
+--  expected_rows pg_catalog.int8 NOT NULL CHECK (expected_rows>=0),
+--  batches pg_catalog.int8 NOT NULL CHECK (batches>=0),
+--  complete pg_catalog.bool NOT NULL
+-- );
+-- INSERT INTO "public"."documents_vector_migration" (plan_sha256,last_id,rows_done,expected_rows,batches,complete)
+-- VALUES (E'4578adcc9988ed515bb68ecb63ddd47c25665f35c9ea2f1713a2484c1d6e5953',NULL,0,4,0,false);
+-- COMMIT;

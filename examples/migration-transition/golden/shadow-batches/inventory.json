@@ -1,0 +1,409 @@
+{
+  "catalog_sha256": "bdb6e93d8e95112231c892ad5a6653ca72ccd66297efa99446ac0f2610b8f804",
+  "dependency_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+  "snapshot": {
+    "format_version": 1,
+    "collector": "gosqlite-pgembedding-catalog-v1",
+    "extracted_at": "2026-10-10T00:00:00Z",
+    "server_version_num": 180000,
+    "scope": {
+      "schemas": [
+        "public"
+      ],
+      "coverage": [
+        {
+          "category": "relations",
+          "complete": true,
+          "reason": "Synthetic complete fixture, not a live PostgreSQL capture."
+        },
+        {
+          "category": "columns",
+          "complete": true,
+          "reason": "Synthetic complete fixture, not a live PostgreSQL capture."
+        },
+        {
+          "category": "indexes",
+          "complete": true,
+          "reason": "Synthetic complete fixture, not a live PostgreSQL capture."
+        },
+        {
+          "category": "types",
+          "complete": true,
+          "reason": "Synthetic complete fixture, not a live PostgreSQL capture."
+        },
+        {
+          "category": "extension_membership",
+          "complete": true,
+          "reason": "Synthetic complete fixture, not a live PostgreSQL capture."
+        },
+        {
+          "category": "dependencies",
+          "complete": true,
+          "reason": "Synthetic complete fixture, not a live PostgreSQL capture."
+        },
+        {
+          "category": "policies",
+          "complete": true,
+          "reason": "Synthetic complete fixture, not a live PostgreSQL capture."
+        }
+      ]
+    },
+    "extensions": [
+      {
+        "oid": 20000,
+        "name": "embedding",
+        "version": "0.3.6",
+        "schema": "legacy"
+      }
+    ],
+    "types": [
+      {
+        "oid": 20,
+        "schema": "pg_catalog",
+        "name": "int8",
+        "kind": "b",
+        "element_oid": 0,
+        "base_oid": 0
+      },
+      {
+        "oid": 23,
+        "schema": "pg_catalog",
+        "name": "int4",
+        "kind": "b",
+        "element_oid": 0,
+        "base_oid": 0
+      },
+      {
+        "oid": 700,
+        "schema": "pg_catalog",
+        "name": "float4",
+        "kind": "b",
+        "element_oid": 0,
+        "base_oid": 0
+      },
+      {
+        "oid": 1021,
+        "schema": "pg_catalog",
+        "name": "_float4",
+        "kind": "b",
+        "element_oid": 700,
+        "base_oid": 0
+      },
+      {
+        "oid": 2281,
+        "schema": "pg_catalog",
+        "name": "internal",
+        "kind": "p",
+        "element_oid": 0,
+        "base_oid": 0
+      },
+      {
+        "oid": 325,
+        "schema": "pg_catalog",
+        "name": "index_am_handler",
+        "kind": "p",
+        "element_oid": 0,
+        "base_oid": 0
+      }
+    ],
+    "access_methods": [
+      {
+        "oid": 20001,
+        "name": "hnsw",
+        "extension_oid": 20000,
+        "handler_oid": 20010
+      }
+    ],
+    "functions": [
+      {
+        "oid": 20010,
+        "schema": "legacy",
+        "name": "hnsw_handler",
+        "argument_oids": [
+          2281
+        ],
+        "return_oid": 325,
+        "extension_oid": 20000
+      },
+      {
+        "oid": 20100,
+        "schema": "legacy",
+        "name": "l2_distance",
+        "argument_oids": [
+          1021,
+          1021
+        ],
+        "return_oid": 700,
+        "extension_oid": 20000
+      },
+      {
+        "oid": 20101,
+        "schema": "legacy",
+        "name": "cosine_distance",
+        "argument_oids": [
+          1021,
+          1021
+        ],
+        "return_oid": 700,
+        "extension_oid": 20000
+      },
+      {
+        "oid": 20102,
+        "schema": "legacy",
+        "name": "manhattan_distance",
+        "argument_oids": [
+          1021,
+          1021
+        ],
+        "return_oid": 700,
+        "extension_oid": 20000
+      }
+    ],
+    "operators": [
+      {
+        "oid": 20200,
+        "schema": "legacy",
+        "name": "\u003c-\u003e",
+        "left_oid": 1021,
+        "right_oid": 1021,
+        "function_oid": 20100,
+        "extension_oid": 20000
+      },
+      {
+        "oid": 20201,
+        "schema": "legacy",
+        "name": "\u003c=\u003e",
+        "left_oid": 1021,
+        "right_oid": 1021,
+        "function_oid": 20101,
+        "extension_oid": 20000
+      },
+      {
+        "oid": 20202,
+        "schema": "legacy",
+        "name": "\u003c~\u003e",
+        "left_oid": 1021,
+        "right_oid": 1021,
+        "function_oid": 20102,
+        "extension_oid": 20000
+      }
+    ],
+    "opclasses": [
+      {
+        "oid": 20300,
+        "schema": "legacy",
+        "name": "ann_l2_ops",
+        "method_oid": 20001,
+        "input_oid": 1021,
+        "default": true,
+        "extension_oid": 20000,
+        "operator_oid": 20200,
+        "function_oid": 20100
+      },
+      {
+        "oid": 20301,
+        "schema": "legacy",
+        "name": "ann_cos_ops",
+        "method_oid": 20001,
+        "input_oid": 1021,
+        "default": false,
+        "extension_oid": 20000,
+        "operator_oid": 20201,
+        "function_oid": 20101
+      },
+      {
+        "oid": 20302,
+        "schema": "legacy",
+        "name": "ann_manhattan_ops",
+        "method_oid": 20001,
+        "input_oid": 1021,
+        "default": false,
+        "extension_oid": 20000,
+        "operator_oid": 20202,
+        "function_oid": 20102
+      }
+    ],
+    "relations": [
+      {
+        "oid": 30000,
+        "schema": "public",
+        "name": "documents",
+        "kind": "r",
+        "persistence": "p",
+        "rls": false,
+        "parents": [],
+        "primary_key": [
+          1
+        ],
+        "columns": [
+          {
+            "attnum": 1,
+            "name": "id",
+            "type_oid": 23,
+            "typmod": -1,
+            "array_dimensions": 0,
+            "not_null": true,
+            "default": "",
+            "generated": "",
+            "identity": "",
+            "dropped": false
+          },
+          {
+            "attnum": 2,
+            "name": "flags",
+            "type_oid": 23,
+            "typmod": -1,
+            "array_dimensions": 0,
+            "not_null": true,
+            "default": "",
+            "generated": "",
+            "identity": "",
+            "dropped": false
+          },
+          {
+            "attnum": 3,
+            "name": "embedding",
+            "type_oid": 1021,
+            "typmod": -1,
+            "array_dimensions": 1,
+            "not_null": false,
+            "default": "",
+            "generated": "",
+            "identity": "",
+            "dropped": false
+          },
+          {
+            "attnum": 4,
+            "name": "ordinary_samples",
+            "type_oid": 1021,
+            "typmod": -1,
+            "array_dimensions": 1,
+            "not_null": false,
+            "default": "",
+            "generated": "",
+            "identity": "",
+            "dropped": false
+          }
+        ]
+      }
+    ],
+    "indexes": [
+      {
+        "oid": 30100,
+        "schema": "public",
+        "name": "custom nearest",
+        "table_oid": 30000,
+        "method_oid": 20001,
+        "keys": [
+          3
+        ],
+        "opclasses": [
+          20300
+        ],
+        "collations": [
+          0
+        ],
+        "options": [
+          "dims=3",
+          "m=16",
+          "efconstruction=64",
+          "efsearch=64"
+        ],
+        "expression": "",
+        "predicate": "",
+        "valid": true,
+        "ready": true,
+        "definition": "Synthetic source definition, inventoried only; never executed."
+      },
+      {
+        "oid": 30101,
+        "schema": "public",
+        "name": "documents_cosine",
+        "table_oid": 30000,
+        "method_oid": 20001,
+        "keys": [
+          3
+        ],
+        "opclasses": [
+          20301
+        ],
+        "collations": [
+          0
+        ],
+        "options": [
+          "dims=3",
+          "m=16",
+          "efconstruction=64",
+          "efsearch=64"
+        ],
+        "expression": "",
+        "predicate": "",
+        "valid": true,
+        "ready": true,
+        "definition": "Synthetic source definition, inventoried only; never executed."
+      },
+      {
+        "oid": 30102,
+        "schema": "public",
+        "name": "documents_manhattan",
+        "table_oid": 30000,
+        "method_oid": 20001,
+        "keys": [
+          3
+        ],
+        "opclasses": [
+          20302
+        ],
+        "collations": [
+          0
+        ],
+        "options": [
+          "dims=3",
+          "m=16",
+          "efconstruction=64",
+          "efsearch=64"
+        ],
+        "expression": "",
+        "predicate": "",
+        "valid": true,
+        "ready": true,
+        "definition": "Synthetic source definition, inventoried only; never executed."
+      }
+    ],
+    "dependencies": [],
+    "profiles": [
+      {
+        "relation_oid": 30000,
+        "attnum": 3,
+        "exhaustive": true,
+        "rows": 4,
+        "null_rows": 1,
+        "null_element_rows": 0,
+        "nonfinite_rows": 0,
+        "zero_norm_rows": 0,
+        "shapes": [
+          {
+            "dimensions": [
+              3
+            ],
+            "lower_bounds": [
+              1
+            ],
+            "rows": 3
+          }
+        ],
+        "min_norm": 1,
+        "max_norm": 5,
+        "export_id": "synthetic-checkpoint-a-v1",
+        "primary_key_unique": true,
+        "primary_key_ordered": true
+      }
+    ],
+    "sql_corpus": [
+      {
+        "name": "example.sql",
+        "sql": "SELECT id FROM public.documents ORDER BY embedding \u003c~\u003e ARRAY[1,2,3] LIMIT 10;"
+      }
+    ]
+  }
+}
