@@ -1,0 +1,14 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+# github.com/ms-xiaosnow/gosqlite/sqlite [github.com/ms-xiaosnow/gosqlite/sqlite.test]
+sqlite/boolean_test.go:160:20: too many arguments in call to tx.Rollback
+	have (context.Context)
+	want ()
+sqlite/boolean_test.go:169:24: too many arguments in call to tx.Rollback
+	have (context.Context)
+	want ()
+FAIL	github.com/ms-xiaosnow/gosqlite/sqlite [build failed]
+=== RUN   TestDriverBooleanPreparedAndTransactions
+--- PASS: TestDriverBooleanPreparedAndTransactions (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.012s
+FAIL

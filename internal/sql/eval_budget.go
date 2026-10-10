@@ -181,3 +181,17 @@ func scalarTreeWork(ctx *EvalContext, e Expr) error {
 	}
 	return Walk(e, func(e Expr) error { return scalarStep(ctx, e) })
 }
+
+// The predicate compiler shares the scalar operation's cancellation and quota
+// instead of doing unbounded metadata walks outside the owning query budget.
+func ChargeExpression(ctx *EvalContext, e Expr) error {
+	if ctx != nil && ctx.Context != nil {
+		if err := ctx.Context.Err(); err != nil {
+			return err
+		}
+	}
+	return scalarStep(ctx, e)
+}
+func ChargeExpressionTree(ctx *EvalContext, e Expr) error {
+	return Walk(e, func(e Expr) error { return ChargeExpression(ctx, e) })
+}

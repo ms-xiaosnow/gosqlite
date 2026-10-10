@@ -48,9 +48,10 @@ func (d *DB) planOrdinarySource(ctx context.Context, reader btree.PageReader, r 
 	}
 	// Unrelated grams/MATCH rejection reasons remain intact when there is no
 	// ordinary equality to consider.
-	// The scalar evaluator eagerly evaluates AND. Filtering on one conjunct
-	// would hide errors in another on excluded rows unless the entire WHERE is
-	// total over ordinary storage classes. Keep error-capable functions, LIKE,
+	// Predicate evaluation is branch-lazy, but pushing a later conjunct ahead
+	// of an earlier error-capable term can still hide errors on excluded rows.
+	// Keep the conservative total-residual admission rule; startup constant
+	// predicates execute even when a seek has zero candidates. Functions, LIKE,
 	// typed-vector interpretation and unknown expression shapes on their old
 	// path. Projection errors retain the same matching rows and rowid order.
 	if !ordinarySafeWhere(r, r.sel.Where) || !ordinarySafeDefaults(ctx, r.table) {

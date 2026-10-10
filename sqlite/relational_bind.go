@@ -318,6 +318,7 @@ func (d *DB) planRelational(ctx context.Context, reader btree.PageReader, origin
 	// ON are explicitly excluded for now, including through result aliases.
 	n := 0
 	var onExprs []sqlast.Expr
+	var onPrograms []*predicateProgram
 	var build func(sqlast.Relation) (relationalFactory, int, error)
 	build = func(relation sqlast.Relation) (relationalFactory, int, error) {
 		if _, ok := relation.(*sqlast.TableRelation); ok {
@@ -355,12 +356,14 @@ func (d *DB) planRelational(ctx context.Context, reader btree.PageReader, origin
 			return nil, 0, e
 		}
 		onExprs = append(onExprs, on)
+		onProgram := &predicateProgram{outerON: j.Kind == "LEFT"}
+		onPrograms = append(onPrograms, onProgram)
 		return func() (source, error) {
 			l, e := left()
 			if e != nil {
 				return nil, e
 			}
-			return &relationalJoin{left: l, rightFactory: right, leftWidth: lw, rightWidth: rw, kind: j.Kind, on: on, rows: r, budget: budget}, nil
+			return &relationalJoin{left: l, rightFactory: right, leftWidth: lw, rightWidth: rw, kind: j.Kind, on: onProgram, rows: r, budget: budget}, nil
 		}, lw + rw, nil
 	}
 	factory, _, err := build(original.Relation)
@@ -386,6 +389,40 @@ func (d *DB) planRelational(ctx context.Context, reader btree.PageReader, origin
 	r.exprs = projections
 	if err != nil {
 		return nil, err
+	}
+	sel.Where, err = r.clonePredicate(sel.Where)
+	if err != nil {
+		return nil, err
+	}
+	for i, on := range onExprs {
+		onExprs[i], err = r.clonePredicate(on)
+		if err != nil {
+			return nil, err
+		}
+	}
+	constantScope := []sqlast.Expr{sel.Where}
+	for i, on := range onExprs {
+		if !onPrograms[i].outerON {
+			constantScope = append(constantScope, on)
+		}
+	}
+	if err = r.fixPredicateConstants(constantScope); err != nil {
+		return nil, err
+	}
+	if err = r.prepareWhere(); err != nil {
+		return nil, err
+	}
+	for i, on := range onExprs {
+		ec := r.predicateContext()
+		if onPrograms[i].outerON {
+			ec.FixedColumns = nil
+		}
+		p, e := compilePredicate(on, ec, onPrograms[i].outerON, budget)
+		if e != nil {
+			return nil, e
+		}
+		*onPrograms[i] = *p
+		r.startupPredicates = append(r.startupPredicates, p.constant...)
 	}
 	var tables []string
 	for _, b := range scope.leaves {

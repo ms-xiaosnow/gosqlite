@@ -1,0 +1,298 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestBooleanOracleContexts
+    boolean_conformance_test.go:118: SELECT 0 AND abs(-9223372036854775808) FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t WHERE 0 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t NOT INDEXED WHERE 0 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN 0 AND abs(-9223372036854775808) THEN 7 ELSE 9 END FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t JOIN u ON 0 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id,u.y FROM t LEFT JOIN u ON 0 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t,u WHERE 0 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT 0 AND abs(-9223372036854775808) AS z FROM t WHERE z [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT abs(-9223372036854775808) AND 0 FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN abs(-9223372036854775808) AND 0 THEN 7 ELSE 9 END FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT 1 OR abs(-9223372036854775808) FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t WHERE 1 OR abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t NOT INDEXED WHERE 1 OR abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN 1 OR abs(-9223372036854775808) THEN 7 ELSE 9 END FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t JOIN u ON 1 OR abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id,u.y FROM t LEFT JOIN u ON 1 OR abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t,u WHERE 1 OR abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT 1 OR abs(-9223372036854775808) AS z FROM t WHERE z [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT abs(-9223372036854775808) OR 1 FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t WHERE abs(-9223372036854775808) OR 1 [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t NOT INDEXED WHERE abs(-9223372036854775808) OR 1 [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN abs(-9223372036854775808) OR 1 THEN 7 ELSE 9 END FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t JOIN u ON abs(-9223372036854775808) OR 1 [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t,u WHERE abs(-9223372036854775808) OR 1 [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT abs(-9223372036854775808) OR 1 AS z FROM t WHERE z [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT 2 OR abs(-9223372036854775808) FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t WHERE 2 OR abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t NOT INDEXED WHERE 2 OR abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN 2 OR abs(-9223372036854775808) THEN 7 ELSE 9 END FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t JOIN u ON 2 OR abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id,u.y FROM t LEFT JOIN u ON 2 OR abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t,u WHERE 2 OR abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT 2 OR abs(-9223372036854775808) AS z FROM t WHERE z [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT abs(-9223372036854775808) OR 2 FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t WHERE abs(-9223372036854775808) OR 2 [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t NOT INDEXED WHERE abs(-9223372036854775808) OR 2 [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN abs(-9223372036854775808) OR 2 THEN 7 ELSE 9 END FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t JOIN u ON abs(-9223372036854775808) OR 2 [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t,u WHERE abs(-9223372036854775808) OR 2 [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT abs(-9223372036854775808) OR 2 AS z FROM t WHERE z [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT false AND abs(-9223372036854775808) FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t WHERE false AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t NOT INDEXED WHERE false AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN false AND abs(-9223372036854775808) THEN 7 ELSE 9 END FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t JOIN u ON false AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id,u.y FROM t LEFT JOIN u ON false AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t,u WHERE false AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT false AND abs(-9223372036854775808) AS z FROM t WHERE z [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT abs(-9223372036854775808) AND false FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN abs(-9223372036854775808) AND false THEN 7 ELSE 9 END FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT true OR abs(-9223372036854775808) FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t WHERE true OR abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t NOT INDEXED WHERE true OR abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN true OR abs(-9223372036854775808) THEN 7 ELSE 9 END FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t JOIN u ON true OR abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id,u.y FROM t LEFT JOIN u ON true OR abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t,u WHERE true OR abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT true OR abs(-9223372036854775808) AS z FROM t WHERE z [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT abs(-9223372036854775808) OR true FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t WHERE abs(-9223372036854775808) OR true [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t NOT INDEXED WHERE abs(-9223372036854775808) OR true [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN abs(-9223372036854775808) OR true THEN 7 ELSE 9 END FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t JOIN u ON abs(-9223372036854775808) OR true [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t,u WHERE abs(-9223372036854775808) OR true [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT abs(-9223372036854775808) OR true AS z FROM t WHERE z [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t WHERE 0.0 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t NOT INDEXED WHERE 0.0 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN 0.0 AND abs(-9223372036854775808) THEN 7 ELSE 9 END FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t JOIN u ON 0.0 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id,u.y FROM t LEFT JOIN u ON 0.0 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t,u WHERE 0.0 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT 0.0 AND abs(-9223372036854775808) AS z FROM t WHERE z [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t WHERE 1.0 OR abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t NOT INDEXED WHERE 1.0 OR abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN 1.0 OR abs(-9223372036854775808) THEN 7 ELSE 9 END FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t JOIN u ON 1.0 OR abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id,u.y FROM t LEFT JOIN u ON 1.0 OR abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t,u WHERE 1.0 OR abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t WHERE +0 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t NOT INDEXED WHERE +0 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN +0 AND abs(-9223372036854775808) THEN 7 ELSE 9 END FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t JOIN u ON +0 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id,u.y FROM t LEFT JOIN u ON +0 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t,u WHERE +0 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT +0 AND abs(-9223372036854775808) AS z FROM t WHERE z [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t WHERE -1 OR abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t NOT INDEXED WHERE -1 OR abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN -1 OR abs(-9223372036854775808) THEN 7 ELSE 9 END FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t JOIN u ON -1 OR abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id,u.y FROM t LEFT JOIN u ON -1 OR abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t,u WHERE -1 OR abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t WHERE 2147483648 OR abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t NOT INDEXED WHERE 2147483648 OR abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN 2147483648 OR abs(-9223372036854775808) THEN 7 ELSE 9 END FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t JOIN u ON 2147483648 OR abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id,u.y FROM t LEFT JOIN u ON 2147483648 OR abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t,u WHERE 2147483648 OR abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t WHERE 0_0 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t NOT INDEXED WHERE 0_0 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN 0_0 AND abs(-9223372036854775808) THEN 7 ELSE 9 END FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t JOIN u ON 0_0 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id,u.y FROM t LEFT JOIN u ON 0_0 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t,u WHERE 0_0 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT 0_0 AND abs(-9223372036854775808) AS z FROM t WHERE z [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t WHERE 1_0 OR abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t NOT INDEXED WHERE 1_0 OR abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN 1_0 OR abs(-9223372036854775808) THEN 7 ELSE 9 END FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t JOIN u ON 1_0 OR abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id,u.y FROM t LEFT JOIN u ON 1_0 OR abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t,u WHERE 1_0 OR abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT 0x0 AND abs(-9223372036854775808) FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t WHERE 0x0 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t NOT INDEXED WHERE 0x0 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN 0x0 AND abs(-9223372036854775808) THEN 7 ELSE 9 END FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t JOIN u ON 0x0 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id,u.y FROM t LEFT JOIN u ON 0x0 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t,u WHERE 0x0 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT 0x0 AND abs(-9223372036854775808) AS z FROM t WHERE z [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT abs(-9223372036854775808) AND 0x0 FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN abs(-9223372036854775808) AND 0x0 THEN 7 ELSE 9 END FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT 0x1 OR abs(-9223372036854775808) FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t WHERE 0x1 OR abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t NOT INDEXED WHERE 0x1 OR abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN 0x1 OR abs(-9223372036854775808) THEN 7 ELSE 9 END FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t JOIN u ON 0x1 OR abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id,u.y FROM t LEFT JOIN u ON 0x1 OR abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t,u WHERE 0x1 OR abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT 0x1 OR abs(-9223372036854775808) AS z FROM t WHERE z [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT abs(-9223372036854775808) OR 0x1 FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t WHERE abs(-9223372036854775808) OR 0x1 [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t NOT INDEXED WHERE abs(-9223372036854775808) OR 0x1 [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN abs(-9223372036854775808) OR 0x1 THEN 7 ELSE 9 END FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t JOIN u ON abs(-9223372036854775808) OR 0x1 [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t,u WHERE abs(-9223372036854775808) OR 0x1 [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT abs(-9223372036854775808) OR 0x1 AS z FROM t WHERE z [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t WHERE '0' AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t NOT INDEXED WHERE '0' AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN '0' AND abs(-9223372036854775808) THEN 7 ELSE 9 END FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t JOIN u ON '0' AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id,u.y FROM t LEFT JOIN u ON '0' AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t,u WHERE '0' AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT '0' AND abs(-9223372036854775808) AS z FROM t WHERE z [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t WHERE '1' OR abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t NOT INDEXED WHERE '1' OR abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN '1' OR abs(-9223372036854775808) THEN 7 ELSE 9 END FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t JOIN u ON '1' OR abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id,u.y FROM t LEFT JOIN u ON '1' OR abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t,u WHERE '1' OR abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t WHERE NULL AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t NOT INDEXED WHERE NULL AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN NULL AND abs(-9223372036854775808) THEN 7 ELSE 9 END FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t JOIN u ON NULL AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id,u.y FROM t LEFT JOIN u ON NULL AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t,u WHERE NULL AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT NULL AND abs(-9223372036854775808) AS z FROM t WHERE z [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t WHERE ?1 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t WHERE ?1 AND abs(-9223372036854775808) [?1=NULL]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t NOT INDEXED WHERE ?1 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t NOT INDEXED WHERE ?1 AND abs(-9223372036854775808) [?1=NULL]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN ?1 AND abs(-9223372036854775808) THEN 7 ELSE 9 END FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN ?1 AND abs(-9223372036854775808) THEN 7 ELSE 9 END FROM t [?1=NULL]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t JOIN u ON ?1 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t JOIN u ON ?1 AND abs(-9223372036854775808) [?1=NULL]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id,u.y FROM t LEFT JOIN u ON ?1 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id,u.y FROM t LEFT JOIN u ON ?1 AND abs(-9223372036854775808) [?1=NULL]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t,u WHERE ?1 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t,u WHERE ?1 AND abs(-9223372036854775808) [?1=NULL]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT ?1 AND abs(-9223372036854775808) AS z FROM t WHERE z [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT ?1 AND abs(-9223372036854775808) AS z FROM t WHERE z [?1=NULL]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t WHERE ?1 OR abs(-9223372036854775808) [?1=1]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t NOT INDEXED WHERE ?1 OR abs(-9223372036854775808) [?1=1]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN ?1 OR abs(-9223372036854775808) THEN 7 ELSE 9 END FROM t [?1=1]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t JOIN u ON ?1 OR abs(-9223372036854775808) [?1=1]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id,u.y FROM t LEFT JOIN u ON ?1 OR abs(-9223372036854775808) [?1=1]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t,u WHERE ?1 OR abs(-9223372036854775808) [?1=1]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN flag AND abs(-9223372036854775808) THEN 7 ELSE 9 END FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id,u.y FROM t LEFT JOIN u ON flag AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t WHERE flag AND abs(v) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t NOT INDEXED WHERE flag AND abs(v) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN flag AND abs(v) THEN 7 ELSE 9 END FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t JOIN u ON flag AND abs(v) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id,u.y FROM t LEFT JOIN u ON flag AND abs(v) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t,u WHERE flag AND abs(v) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT flag AND abs(v) AS z FROM t WHERE z [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t WHERE (flag AND abs(v)) IS FALSE [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t NOT INDEXED WHERE (flag AND abs(v)) IS FALSE [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN (flag AND abs(v)) IS FALSE THEN 7 ELSE 9 END FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t JOIN u ON (flag AND abs(v)) IS FALSE [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id,u.y FROM t LEFT JOIN u ON (flag AND abs(v)) IS FALSE [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t,u WHERE (flag AND abs(v)) IS FALSE [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t WHERE (flag AND abs(v)) IS NOT TRUE [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t NOT INDEXED WHERE (flag AND abs(v)) IS NOT TRUE [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN (flag AND abs(v)) IS NOT TRUE THEN 7 ELSE 9 END FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t JOIN u ON (flag AND abs(v)) IS NOT TRUE [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id,u.y FROM t LEFT JOIN u ON (flag AND abs(v)) IS NOT TRUE [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t,u WHERE (flag AND abs(v)) IS NOT TRUE [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t WHERE NOT (NULL OR abs(-9223372036854775808)) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t NOT INDEXED WHERE NOT (NULL OR abs(-9223372036854775808)) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN NOT (NULL OR abs(-9223372036854775808)) THEN 7 ELSE 9 END FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t JOIN u ON NOT (NULL OR abs(-9223372036854775808)) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id,u.y FROM t LEFT JOIN u ON NOT (NULL OR abs(-9223372036854775808)) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t,u WHERE NOT (NULL OR abs(-9223372036854775808)) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT NOT (NULL OR abs(-9223372036854775808)) AS z FROM t WHERE z [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t WHERE (NULL AND abs(-9223372036854775808)) IS TRUE [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t NOT INDEXED WHERE (NULL AND abs(-9223372036854775808)) IS TRUE [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN (NULL AND abs(-9223372036854775808)) IS TRUE THEN 7 ELSE 9 END FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t JOIN u ON (NULL AND abs(-9223372036854775808)) IS TRUE [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id,u.y FROM t LEFT JOIN u ON (NULL AND abs(-9223372036854775808)) IS TRUE [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t,u WHERE (NULL AND abs(-9223372036854775808)) IS TRUE [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT (NULL AND abs(-9223372036854775808)) IS TRUE AS z FROM t WHERE z [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t WHERE (NULL AND abs(-9223372036854775808)) IS NOT TRUE [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t NOT INDEXED WHERE (NULL AND abs(-9223372036854775808)) IS NOT TRUE [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN (NULL AND abs(-9223372036854775808)) IS NOT TRUE THEN 7 ELSE 9 END FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t JOIN u ON (NULL AND abs(-9223372036854775808)) IS NOT TRUE [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id,u.y FROM t LEFT JOIN u ON (NULL AND abs(-9223372036854775808)) IS NOT TRUE [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t,u WHERE (NULL AND abs(-9223372036854775808)) IS NOT TRUE [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t WHERE flag BETWEEN 1 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t NOT INDEXED WHERE flag BETWEEN 1 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN flag BETWEEN 1 AND abs(-9223372036854775808) THEN 7 ELSE 9 END FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t JOIN u ON flag BETWEEN 1 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id,u.y FROM t LEFT JOIN u ON flag BETWEEN 1 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t,u WHERE flag BETWEEN 1 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT flag BETWEEN 1 AND abs(-9223372036854775808) AS z FROM t WHERE z [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t WHERE flag NOT BETWEEN 1 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t NOT INDEXED WHERE flag NOT BETWEEN 1 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN flag NOT BETWEEN 1 AND abs(-9223372036854775808) THEN 7 ELSE 9 END FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t JOIN u ON flag NOT BETWEEN 1 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id,u.y FROM t LEFT JOIN u ON flag NOT BETWEEN 1 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t,u WHERE flag NOT BETWEEN 1 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t WHERE NULL BETWEEN 1 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t NOT INDEXED WHERE NULL BETWEEN 1 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN NULL BETWEEN 1 AND abs(-9223372036854775808) THEN 7 ELSE 9 END FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t JOIN u ON NULL BETWEEN 1 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id,u.y FROM t LEFT JOIN u ON NULL BETWEEN 1 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t,u WHERE NULL BETWEEN 1 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT NULL BETWEEN 1 AND abs(-9223372036854775808) AS z FROM t WHERE z [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t WHERE 1/0 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t NOT INDEXED WHERE 1/0 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN 1/0 AND abs(-9223372036854775808) THEN 7 ELSE 9 END FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t JOIN u ON 1/0 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id,u.y FROM t LEFT JOIN u ON 1/0 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t,u WHERE 1/0 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT 1/0 AND abs(-9223372036854775808) AS z FROM t WHERE z [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT 0 AND ('x' LIKE 'x' ESCAPE 'ab') FROM t [?1=0]: native=sqlite next: ESCAPE expression must be a single character rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t WHERE 0 AND ('x' LIKE 'x' ESCAPE 'ab') [?1=0]: native=sqlite next: ESCAPE expression must be a single character rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t NOT INDEXED WHERE 0 AND ('x' LIKE 'x' ESCAPE 'ab') [?1=0]: native=sqlite next: ESCAPE expression must be a single character rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN 0 AND ('x' LIKE 'x' ESCAPE 'ab') THEN 7 ELSE 9 END FROM t [?1=0]: native=sqlite next: ESCAPE expression must be a single character rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t JOIN u ON 0 AND ('x' LIKE 'x' ESCAPE 'ab') [?1=0]: native=sqlite next: ESCAPE expression must be a single character rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id,u.y FROM t LEFT JOIN u ON 0 AND ('x' LIKE 'x' ESCAPE 'ab') [?1=0]: native=sqlite next: ESCAPE expression must be a single character rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t,u WHERE 0 AND ('x' LIKE 'x' ESCAPE 'ab') [?1=0]: native=sqlite next: ESCAPE expression must be a single character rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT 0 AND ('x' LIKE 'x' ESCAPE 'ab') AS z FROM t WHERE z [?1=0]: native=sqlite next: ESCAPE expression must be a single character rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT 1 OR ('x' LIKE 'x' ESCAPE 'ab') FROM t [?1=0]: native=sqlite next: ESCAPE expression must be a single character rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t WHERE 1 OR ('x' LIKE 'x' ESCAPE 'ab') [?1=0]: native=sqlite next: ESCAPE expression must be a single character rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t NOT INDEXED WHERE 1 OR ('x' LIKE 'x' ESCAPE 'ab') [?1=0]: native=sqlite next: ESCAPE expression must be a single character rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN 1 OR ('x' LIKE 'x' ESCAPE 'ab') THEN 7 ELSE 9 END FROM t [?1=0]: native=sqlite next: ESCAPE expression must be a single character rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t JOIN u ON 1 OR ('x' LIKE 'x' ESCAPE 'ab') [?1=0]: native=sqlite next: ESCAPE expression must be a single character rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id,u.y FROM t LEFT JOIN u ON 1 OR ('x' LIKE 'x' ESCAPE 'ab') [?1=0]: native=sqlite next: ESCAPE expression must be a single character rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t,u WHERE 1 OR ('x' LIKE 'x' ESCAPE 'ab') [?1=0]: native=sqlite next: ESCAPE expression must be a single character rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT 1 OR ('x' LIKE 'x' ESCAPE 'ab') AS z FROM t WHERE z [?1=0]: native=sqlite next: ESCAPE expression must be a single character rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t WHERE flag AND (flag LIKE 'x' ESCAPE 'ab') [?1=0]: native=sqlite next: ESCAPE expression must be a single character rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t NOT INDEXED WHERE flag AND (flag LIKE 'x' ESCAPE 'ab') [?1=0]: native=sqlite next: ESCAPE expression must be a single character rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN flag AND (flag LIKE 'x' ESCAPE 'ab') THEN 7 ELSE 9 END FROM t [?1=0]: native=sqlite next: ESCAPE expression must be a single character rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t JOIN u ON flag AND (flag LIKE 'x' ESCAPE 'ab') [?1=0]: native=sqlite next: ESCAPE expression must be a single character rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id,u.y FROM t LEFT JOIN u ON flag AND (flag LIKE 'x' ESCAPE 'ab') [?1=0]: native=sqlite next: ESCAPE expression must be a single character rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t,u WHERE flag AND (flag LIKE 'x' ESCAPE 'ab') [?1=0]: native=sqlite next: ESCAPE expression must be a single character rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT flag AND (flag LIKE 'x' ESCAPE 'ab') AS z FROM t WHERE z [?1=0]: native=sqlite next: ESCAPE expression must be a single character rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN flag=99 AND abs(-9223372036854775808) THEN 7 ELSE 9 END FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id,u.y FROM t LEFT JOIN u ON flag=99 AND abs(-9223372036854775808) [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN flag=99 AND (flag LIKE 'x' ESCAPE 'ab') THEN 7 ELSE 9 END FROM t [?1=0]: native=sqlite next: ESCAPE expression must be a single character rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id,u.y FROM t LEFT JOIN u ON flag=99 AND (flag LIKE 'x' ESCAPE 'ab') [?1=0]: native=sqlite next: ESCAPE expression must be a single character rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT 0 AND missing FROM t [?1=0]: native=sqlite query: no such column: missing rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t WHERE 0 AND missing [?1=0]: native=sqlite query: no such column: missing rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t NOT INDEXED WHERE 0 AND missing [?1=0]: native=sqlite query: no such column: missing rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN 0 AND missing THEN 7 ELSE 9 END FROM t [?1=0]: native=sqlite query: no such column: missing rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t JOIN u ON 0 AND missing [?1=0]: native=sqlite query: no such column: missing rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id,u.y FROM t LEFT JOIN u ON 0 AND missing [?1=0]: native=sqlite query: no such column: missing rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t,u WHERE 0 AND missing [?1=0]: native=sqlite query: no such column: missing rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT 0 AND missing AS z FROM t WHERE z [?1=0]: native=sqlite query: no such column: missing rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN flag AND abs(v) THEN 7 ELSE 9 END FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t WHERE CASE WHEN flag AND abs(v) THEN 7 ELSE 9 END [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT id FROM t NOT INDEXED WHERE CASE WHEN flag AND abs(v) THEN 7 ELSE 9 END [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN CASE WHEN flag AND abs(v) THEN 7 ELSE 9 END THEN 7 ELSE 9 END FROM t [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t JOIN u ON CASE WHEN flag AND abs(v) THEN 7 ELSE 9 END [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id,u.y FROM t LEFT JOIN u ON CASE WHEN flag AND abs(v) THEN 7 ELSE 9 END [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT t.id FROM t,u WHERE CASE WHEN flag AND abs(v) THEN 7 ELSE 9 END [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:118: SELECT CASE WHEN flag AND abs(v) THEN 7 ELSE 9 END AS z FROM t WHERE z [?1=0]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:136: SELECT flag FROM empty WHERE flag AND abs(-9223372036854775808) [?1=NULL]: native=<nil> rows=[][]interface {}(nil); SQLite=exit status 1 Error near line 3: integer overflow
+    boolean_conformance_test.go:136: SELECT flag FROM empty WHERE abs(-9223372036854775808) AND 0 [?1=NULL]: native=<nil> rows=[][]interface {}(nil); SQLite=exit status 1 Error near line 3: integer overflow
+    boolean_conformance_test.go:136: SELECT t.id FROM empty JOIN t ON abs(-9223372036854775808) [?1=NULL]: native=<nil> rows=[][]interface {}(nil); SQLite=exit status 1 Error near line 3: integer overflow
+    boolean_conformance_test.go:136: SELECT 0 AS z FROM t WHERE z AND abs(-9223372036854775808) [?1=NULL]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:136: SELECT 1 AS z FROM t WHERE abs(-9223372036854775808) OR z [?1=NULL]: native=sqlite next: integer overflow rows=[][]interface {}(nil); SQLite=<nil> 
+    boolean_conformance_test.go:139: 923 Boolean context/error/value cases matched pinned SQLite
+--- FAIL: TestBooleanOracleContexts (3.12s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/testkit	3.122s
+FAIL

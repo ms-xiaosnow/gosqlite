@@ -457,7 +457,16 @@ func (d *DB) similarityFilter(ctx context.Context, reader btree.PageReader, tab 
 	if err := d.prepareGramFunctions(ctx, reader, r); err != nil {
 		return nil, err
 	}
+	if err := r.prepareWhere(); err != nil {
+		return nil, err
+	}
 	return func(id int64, values []any) (bool, error) {
+		if err := r.startPredicates(); err != nil {
+			if err == io.EOF {
+				return false, nil
+			}
+			return false, err
+		}
 		ec := &sqlast.EvalContext{Context: ctx, Params: params, Functions: r.functions, DeclaredType: declaredTypeFor(tab)}
 		ec.Resolver = func(q, name string) (any, error) {
 			i, err := tab.column(q, name)
@@ -479,12 +488,7 @@ func (d *DB) similarityFilter(ctx context.Context, reader btree.PageReader, tab 
 			}
 			return affinity(tab.columns[i].Type)
 		}
-		value, err := sqlast.Eval(sel.Where, ec)
-		if err != nil {
-			return false, err
-		}
-		truth, null := sqlast.Truth(value)
-		return truth && !null, nil
+		return r.where.evaluate(ec)
 	}, nil
 }
 

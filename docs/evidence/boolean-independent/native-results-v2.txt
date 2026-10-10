@@ -1,0 +1,13 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestBooleanIndependentTypedAndBudget
+--- PASS: TestBooleanIndependentTypedAndBudget (0.02s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.035s
+=== RUN   TestBooleanIndependentDriver
+--- PASS: TestBooleanIndependentDriver (0.02s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.034s
+=== RUN   TestBooleanIndependentFunctionArguments
+--- PASS: TestBooleanIndependentFunctionArguments (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.006s

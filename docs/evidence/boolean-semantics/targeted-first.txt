@@ -1,0 +1,8 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.088s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+--- FAIL: TestOrdinaryIndexBudgetsCancellationAndResidualErrors (0.08s)
+    plan_index_test.go:193: error suppressed for id=9999 AND k LIKE 'x' ESCAPE 'ab'
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/sqlite	4.918s
+FAIL

@@ -1,0 +1,47 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestAffinityIndependentCrossValuesOracle
+=== RUN   TestAffinityIndependentCrossValuesOracle/shared=false
+    affinity_independent_review_test.go:149: independent cross-value matrix: 288 queries, 28800 native rows, 0 mismatches
+    affinity_independent_review_test.go:168: independent cross-value matrix: 360 queries, 3286 native rows, 0 mismatches
+    affinity_independent_review_test.go:175: independent cross-value matrix: 360 queries, 3286 native rows, 0 mismatches
+=== RUN   TestAffinityIndependentCrossValuesOracle/shared=true
+    affinity_independent_review_test.go:149: independent cross-value matrix: 288 queries, 28800 native rows, 0 mismatches
+    affinity_independent_review_test.go:168: independent cross-value matrix: 360 queries, 3286 native rows, 0 mismatches
+    affinity_independent_review_test.go:175: independent cross-value matrix: 360 queries, 3286 native rows, 0 mismatches
+--- PASS: TestAffinityIndependentCrossValuesOracle (10.44s)
+    --- PASS: TestAffinityIndependentCrossValuesOracle/shared=false (3.30s)
+    --- PASS: TestAffinityIndependentCrossValuesOracle/shared=true (7.13s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	10.440s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestAffinityComparisonMatrixOracle
+=== RUN   TestAffinityComparisonMatrixOracle/false
+    affinity_comparison_oracle_test.go:167: affinity complete-value/class matrix: 2676 queries, 0 mismatches
+    affinity_comparison_oracle_test.go:179: affinity complete-value/class matrix: 1308 queries, 0 mismatches
+=== RUN   TestAffinityComparisonMatrixOracle/true
+    affinity_comparison_oracle_test.go:167: affinity complete-value/class matrix: 2676 queries, 0 mismatches
+    affinity_comparison_oracle_test.go:179: affinity complete-value/class matrix: 1308 queries, 0 mismatches
+--- PASS: TestAffinityComparisonMatrixOracle (7.84s)
+    --- PASS: TestAffinityComparisonMatrixOracle/false (1.97s)
+    --- PASS: TestAffinityComparisonMatrixOracle/true (5.86s)
+=== RUN   TestAffinityComparisonWritesOracle
+--- PASS: TestAffinityComparisonWritesOracle (0.45s)
+=== RUN   TestAffinityInheritedMatrixOracle
+    affinity_substitution_conformance_test.go:101: independent affinity: 2160 cases, 0 mismatches
+--- PASS: TestAffinityInheritedMatrixOracle (11.72s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	20.016s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestAffinityDeclaredVersusAbsent
+--- PASS: TestAffinityDeclaredVersusAbsent (0.00s)
+=== RUN   TestAffinityComparisonContextAndBudget
+--- PASS: TestAffinityComparisonContextAndBudget (0.00s)
+=== RUN   TestAffinityAndIntegerComparison
+--- PASS: TestAffinityAndIntegerComparison (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	1.028s
+=== RUN   TestAffinityComparisonPublicRows
+--- PASS: TestAffinityComparisonPublicRows (0.06s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	1.076s

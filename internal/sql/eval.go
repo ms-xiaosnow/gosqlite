@@ -20,6 +20,8 @@ type EvalContext struct {
 	Row      map[string]any
 	Params   []any
 	Resolver func(table, name string) (any, error)
+	// Affinity returns a declared affinity for physical columns (including
+	// "BLOB" for a typeless column), or "" for an affinity-less result alias.
 	Affinity func(table, name string) string
 	// ConstantColumn reports a bound constant result alias, never a physical
 	// column whose current row value happens to be known. Used by IN-list
@@ -29,6 +31,12 @@ type EvalContext struct {
 	// Derived aliases may return a closed vector/halfvec/bit/mixed kind tag.
 	DeclaredType func(table, name string) string
 	Functions    map[string]Function
+	// LEFT JOIN ON terms cannot use SQLite's literal Boolean simplification.
+	DisableBooleanSimplification bool
+	// FixedColumns contains immutable, acyclic, compiler-certified deterministic
+	// statement constants, never arbitrary row expressions. The Column itself
+	// keeps its source affinity and declared type.
+	FixedColumns map[*Column]Expr
 }
 
 func Eval(e Expr, ctx *EvalContext) (any, error) {
@@ -47,6 +55,19 @@ func Eval(e Expr, ctx *EvalContext) (any, error) {
 	case *Literal:
 		return normalize(x.Value)
 	case *Column:
+		if fixed, ok := ctx.FixedColumns[x]; ok {
+			v, err := Eval(fixed, ctx)
+			if err != nil {
+				return nil, err
+			}
+			if ctx.Affinity != nil {
+				if err := scalarPreflight(ctx, "fixed column affinity", v); err != nil {
+					return nil, err
+				}
+				return ApplyAffinity(v, ctx.Affinity(x.Table, x.Name))
+			}
+			return v, nil
+		}
 		if ctx.Resolver != nil {
 			v, err := ctx.Resolver(x.Table, x.Name)
 			if err != nil {
@@ -96,6 +117,23 @@ func Eval(e Expr, ctx *EvalContext) (any, error) {
 		}
 		return nil, &ErrUnsupported{Feature: "unary operator " + x.Op}
 	case *Binary:
+		if x.Op == "AND" || x.Op == "OR" {
+			alt, err := simplifyBoolean(e, ctx)
+			if err != nil {
+				return nil, err
+			}
+			if alt != e {
+				v, err := Eval(alt, ctx)
+				if err != nil {
+					return nil, err
+				}
+				truth, null, err := TruthContext(ctx.Context, v)
+				if null || err != nil {
+					return nil, err
+				}
+				return boolean(truth), nil
+			}
+		}
 		a, err := Eval(x.Left, ctx)
 		if err != nil {
 			return nil, err
@@ -674,6 +712,10 @@ func comparisonAffinity(ae, be Expr, a, b any, ctx *EvalContext) (any, any, erro
 		}
 		return AffinityType(a)
 	}
+	// A declared BLOB affinity is distinct from no expression affinity.
+	// Two declared nonnumeric operands compare without coercion; TEXT applies
+	// only when the other expression has no affinity (SQLite expr.c,
+	// sqlite3CompareAffinity). Unary + and IN-list RHS deliberately remove it.
 	aa, ba := affinity(ae), affinity(be)
 	num := func(s string) bool { return s == "INTEGER" || s == "REAL" || s == "NUMERIC" }
 	var err error
@@ -681,9 +723,9 @@ func comparisonAffinity(ae, be Expr, a, b any, ctx *EvalContext) (any, any, erro
 		b, err = ApplyAffinity(b, "NUMERIC")
 	} else if num(ba) && !num(aa) {
 		a, err = ApplyAffinity(a, "NUMERIC")
-	} else if aa == "TEXT" && (ba == "" || ba == "BLOB") {
+	} else if aa == "TEXT" && ba == "" {
 		b, err = ApplyAffinity(b, "TEXT")
-	} else if ba == "TEXT" && (aa == "" || aa == "BLOB") {
+	} else if ba == "TEXT" && aa == "" {
 		a, err = ApplyAffinity(a, "TEXT")
 	}
 	return a, b, err

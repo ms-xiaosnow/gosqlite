@@ -1,0 +1,34 @@
+Behavior audit: focused new tests use intact ordinary SQL/HNSW/grams, pure typed-invalid memory cells, context cancellation and logical quotas. New oracle uses read-only pinned SQLite and ordinary EOF; no restricted physical workflow.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestBooleanRankMemoryEntrypoints
+--- PASS: TestBooleanRankMemoryEntrypoints (0.00s)
+=== RUN   TestBooleanRankSQLStartupAcrossRepresentations
+=== RUN   TestBooleanRankSQLStartupAcrossRepresentations/dense
+=== RUN   TestBooleanRankSQLStartupAcrossRepresentations/half
+=== RUN   TestBooleanRankSQLStartupAcrossRepresentations/sparse
+=== RUN   TestBooleanRankSQLStartupAcrossRepresentations/bit
+--- PASS: TestBooleanRankSQLStartupAcrossRepresentations (0.23s)
+    --- PASS: TestBooleanRankSQLStartupAcrossRepresentations/dense (0.07s)
+    --- PASS: TestBooleanRankSQLStartupAcrossRepresentations/half (0.05s)
+    --- PASS: TestBooleanRankSQLStartupAcrossRepresentations/sparse (0.06s)
+    --- PASS: TestBooleanRankSQLStartupAcrossRepresentations/bit (0.06s)
+=== RUN   TestBooleanPublicFilterTypedLazinessAndTerminalStartup
+--- PASS: TestBooleanPublicFilterTypedLazinessAndTerminalStartup (0.00s)
+=== RUN   TestBooleanPublicVectorFiltersAndBudgets
+--- PASS: TestBooleanPublicVectorFiltersAndBudgets (0.06s)
+=== RUN   TestBooleanPublicSimilarityFilter
+--- PASS: TestBooleanPublicSimilarityFilter (0.03s)
+=== RUN   TestSparseReviewMemoryLazyNullAndSupportBudgets
+--- PASS: TestSparseReviewMemoryLazyNullAndSupportBudgets (0.00s)
+=== RUN   TestSparseReviewMemoryExternalDefaultsAndAliases
+--- PASS: TestSparseReviewMemoryExternalDefaultsAndAliases (0.00s)
+=== RUN   TestANNReviewEmptyIndexAndAllFilteredSQL
+--- PASS: TestANNReviewEmptyIndexAndAllFilteredSQL (0.03s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.370s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestBooleanRankFilterOracle
+    boolean_rank_filter_oracle_test.go:117: 21 predicates checked through exact SQL, ANN SQL, exact public and ANN public ranking against SQLite
+--- PASS: TestBooleanRankFilterOracle (0.27s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	0.275s

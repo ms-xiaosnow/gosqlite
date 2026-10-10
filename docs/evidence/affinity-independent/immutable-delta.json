@@ -1,0 +1,224 @@
+{
+  "base_manifest_sha256": "be6ece6401dca41264cc1846ba4674db0977626724af25798d26351aa6bdc96a",
+  "candidate_manifest_sha256": "8b060026749d944fc027840e834a840659566789668292a93902e6b1cc5728be",
+  "patch_sha256": "04cfa743469f0205f26ee5339ac340e5ee5609678484c6e800cb2b35970be04a",
+  "base_file_count": 846,
+  "candidate_file_count": 879,
+  "declared_path_count": 35,
+  "actual_delta_count": 35,
+  "undeclared_changes": [],
+  "declared_but_unchanged": [],
+  "failures": [],
+  "delta": [
+    {
+      "path": "docs/affinity-comparisons.md",
+      "base_sha256": null,
+      "candidate_sha256": "d9dce47e2ab428c0d437e133e5fa971a9b88a9f180012845938e2790a986ccc1",
+      "status": "added"
+    },
+    {
+      "path": "docs/boolean-expressions.md",
+      "base_sha256": "dcebfd9de98945cd6978a3bdd4cd7bd88ddffcb725270621c4788337353f9eec",
+      "candidate_sha256": "36e9f35c6f7fa34a300efdfaa9b2c12d103ceefd743864175d57ce5398ac4b45",
+      "status": "changed"
+    },
+    {
+      "path": "docs/evidence/affinity-substitution/aggregate-checks-final.exit",
+      "base_sha256": null,
+      "candidate_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "status": "added"
+    },
+    {
+      "path": "docs/evidence/affinity-substitution/aggregate-checks-final.txt",
+      "base_sha256": null,
+      "candidate_sha256": "13c04673958b265b07b4cd3337452cfb9efd1ed731d1ee133fb2f7fd062f3d4e",
+      "status": "added"
+    },
+    {
+      "path": "docs/evidence/affinity-substitution/aggregate-checks.exit",
+      "base_sha256": null,
+      "candidate_sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+      "status": "added"
+    },
+    {
+      "path": "docs/evidence/affinity-substitution/aggregate-checks.txt",
+      "base_sha256": null,
+      "candidate_sha256": "a6606f96f33717e2c86c184ba5791c8e998c853a34727eb78ec520878db0f9e4",
+      "status": "added"
+    },
+    {
+      "path": "docs/evidence/affinity-substitution/base-hash-verification.txt",
+      "base_sha256": null,
+      "candidate_sha256": "04516625b2bfaedd6635c40ad841aab16c0c98e454d60f5fdc1536b7c7bd8cc8",
+      "status": "added"
+    },
+    {
+      "path": "docs/evidence/affinity-substitution/baseline-overlay.json",
+      "base_sha256": null,
+      "candidate_sha256": "130092563921b444e8b3307f731d11f791449f3ac2342edc2d0653e07af6895d",
+      "status": "added"
+    },
+    {
+      "path": "docs/evidence/affinity-substitution/baseline-red-regression.exit",
+      "base_sha256": null,
+      "candidate_sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+      "status": "added"
+    },
+    {
+      "path": "docs/evidence/affinity-substitution/baseline-red-regression.txt",
+      "base_sha256": null,
+      "candidate_sha256": "cb97a891083310afeeff249f23b3d581a0dbd29cef68ed70493041bf93b216d9",
+      "status": "added"
+    },
+    {
+      "path": "docs/evidence/affinity-substitution/expanded-oracle.exit",
+      "base_sha256": null,
+      "candidate_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "status": "added"
+    },
+    {
+      "path": "docs/evidence/affinity-substitution/expanded-oracle.txt",
+      "base_sha256": null,
+      "candidate_sha256": "fccd0ec801d7fb416e7b56b41fbe15854b6370cc024e044d482186eb7dc2c57b",
+      "status": "added"
+    },
+    {
+      "path": "docs/evidence/affinity-substitution/historical-baseline-affinity-corrected-results.txt",
+      "base_sha256": null,
+      "candidate_sha256": "1be8897ca80a82504cefce3226f0afa0249a8eba32c55dc2b02ac45e3f571417",
+      "status": "added"
+    },
+    {
+      "path": "docs/evidence/affinity-substitution/historical-baseline-affinity-results.txt",
+      "base_sha256": null,
+      "candidate_sha256": "4cf16580144f103db1933cd571e71f51cf34ea9c0e9fe0c59da875f4dec2be4c",
+      "status": "added"
+    },
+    {
+      "path": "docs/evidence/affinity-substitution/historical-differential-classification.json",
+      "base_sha256": null,
+      "candidate_sha256": "019fa3156acd9923135e17f74395beb3708e6400f87cfb3a64b1fed496132f3b",
+      "status": "added"
+    },
+    {
+      "path": "docs/evidence/affinity-substitution/historical-final-oracle-probes.go.txt",
+      "base_sha256": null,
+      "candidate_sha256": "87def736a20e8568658f2b28617c1220d797f0cc24c4c61a40bbf174e33b0151",
+      "status": "added"
+    },
+    {
+      "path": "docs/evidence/affinity-substitution/historical-initial-probes.go.txt",
+      "base_sha256": null,
+      "candidate_sha256": "90badc509380d877d310f804d9f6521ac312b4ec9efacdc440bd92c1ede093dc",
+      "status": "added"
+    },
+    {
+      "path": "docs/evidence/affinity-substitution/historical-matrix-preservation.txt",
+      "base_sha256": null,
+      "candidate_sha256": "0d08e51e938cb4106cdec3b815ca199d5828e4a6c30bd97318d6c3af0bd4fa09",
+      "status": "added"
+    },
+    {
+      "path": "docs/evidence/affinity-substitution/historical-v2-affinity-isolation.txt",
+      "base_sha256": null,
+      "candidate_sha256": "4747f80a7255c2e4b17bc0a801c38274fc018e7603d3b8d6f6f40d1725c7bf5e",
+      "status": "added"
+    },
+    {
+      "path": "docs/evidence/affinity-substitution/historical-v2-expanded-oracle-results.txt",
+      "base_sha256": null,
+      "candidate_sha256": "09cccce7a1965185e53d55df94668d3580dcd8ff650b20d90ca74a9e6a3a06d8",
+      "status": "added"
+    },
+    {
+      "path": "docs/evidence/affinity-substitution/inherited-matrix-candidate.exit",
+      "base_sha256": null,
+      "candidate_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "status": "added"
+    },
+    {
+      "path": "docs/evidence/affinity-substitution/inherited-matrix-candidate.txt",
+      "base_sha256": null,
+      "candidate_sha256": "b0449cc61d5f698fafad99c4c9430032111118a24e0858770f3379ac537f845c",
+      "status": "added"
+    },
+    {
+      "path": "docs/evidence/affinity-substitution/native-regressions.exit",
+      "base_sha256": null,
+      "candidate_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "status": "added"
+    },
+    {
+      "path": "docs/evidence/affinity-substitution/native-regressions.txt",
+      "base_sha256": null,
+      "candidate_sha256": "fe68a21d32b8526487a5aafd6fd8f3061835cdbfe2130dfcfb3d9fae3b4b572c",
+      "status": "added"
+    },
+    {
+      "path": "docs/evidence/affinity-substitution/oracle-isolation.sql",
+      "base_sha256": null,
+      "candidate_sha256": "a80a92d58411fd3a8217b2a12cd2f9ea5a487e51c25f772c79c012ef07560f24",
+      "status": "added"
+    },
+    {
+      "path": "docs/evidence/affinity-substitution/oracle-isolation.txt",
+      "base_sha256": null,
+      "candidate_sha256": "c6dd6ba2bbe288c1c0868f3999255edb4a30eb3128b19f966f189b8203b2af30",
+      "status": "added"
+    },
+    {
+      "path": "docs/evidence/affinity-substitution/pinned-source-evidence.txt",
+      "base_sha256": null,
+      "candidate_sha256": "97b0dcad67231c476a313cffd1009bb4d8c1d894464747edb810797d281caf7c",
+      "status": "added"
+    },
+    {
+      "path": "docs/evidence/affinity-substitution/run-checks.sh",
+      "base_sha256": null,
+      "candidate_sha256": "5c26afe3ee2784c3019d1c7a86bc71807888c2dfc80961494bfdcd90c7f0efd6",
+      "status": "added"
+    },
+    {
+      "path": "docs/evidence/affinity-substitution/scope-audit.md",
+      "base_sha256": null,
+      "candidate_sha256": "90464f39bef2f8fe1b1f053e6ecb0312cc450d8e3a1f440edee527d8a391c582",
+      "status": "added"
+    },
+    {
+      "path": "docs/evidence/affinity-substitution/verification-summary.md",
+      "base_sha256": null,
+      "candidate_sha256": "d8ee2a68e291e329d8f8d348d12c3b9ad4aecb9a84f1f5dbd695dded0e52d7d8",
+      "status": "added"
+    },
+    {
+      "path": "internal/sql/affinity_comparison_test.go",
+      "base_sha256": null,
+      "candidate_sha256": "496fc0afc867749634c558416e3df55c00d8c868db39356a43696d2b601e1b2e",
+      "status": "added"
+    },
+    {
+      "path": "internal/sql/eval.go",
+      "base_sha256": "b889ea85977c721ae3b8bf42e13164be035cac0af400a2cc7c8d3797968001a6",
+      "candidate_sha256": "58d59db04058658f2b4f71a793ca2188dd719b991799bc66131f21e750ce5c64",
+      "status": "changed"
+    },
+    {
+      "path": "internal/testkit/affinity_comparison_oracle_test.go",
+      "base_sha256": null,
+      "candidate_sha256": "0992d558bd77813f46f11a40dca7c229a8d314a504f0bc83d7c1e6127a96f355",
+      "status": "added"
+    },
+    {
+      "path": "internal/testkit/affinity_substitution_conformance_test.go",
+      "base_sha256": null,
+      "candidate_sha256": "336cb5d1c9db80aa84f032adec722745f92e2ecce8271e0d6d365e5ffc3bebfd",
+      "status": "added"
+    },
+    {
+      "path": "sqlite/affinity_comparison_test.go",
+      "base_sha256": null,
+      "candidate_sha256": "470f13347252d6f86d23311c34818e2ffdedda7c4a3d7df9540e0e5213918cf5",
+      "status": "added"
+    }
+  ]
+}

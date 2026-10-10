@@ -1,0 +1,4 @@
+65b8d575b7295e7f4e1130d5539751c86d51b86d029154d81ea9f37f761c1ce7  ../boolean-affinity-lead-verify/sqlite/predicate.go
+c4eccf745e63b48ab04cae1fe1d21929adc406fa662807525a049f7993583c55  ../boolean-affinity-lead-verify/sqlite/rows.go
+5c405a5be079463b0c0ad3eea471ad9977a1d95d05e65092ea37102f706ef3d4  ../boolean-affinity-lead-verify/sqlite/plan_vector.go
+06b6cd10e10d89d46bfb4323c63f92f4a0d41f888a34fa6db95687939b92a9eb  ../boolean-affinity-lead-verify/sqlite/similarity_search.go

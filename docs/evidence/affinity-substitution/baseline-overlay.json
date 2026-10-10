@@ -1,0 +1,5 @@
+{
+  "Replace": {
+    "/workspace/scratch/5e06a74e5f65/durable-restart/affinity-substitution-work/internal/sql/eval.go": "/workspace/scratch/5e06a74e5f65/durable-restart/boolean-semantics-freeze-v2/internal/sql/eval.go"
+  }
+}

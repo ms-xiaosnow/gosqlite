@@ -1,0 +1,12 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestBooleanOracleContexts
+    boolean_conformance_test.go:118: SELECT id FROM t WHERE flag=99 AND (flag LIKE 'x' ESCAPE 'ab') [?1=0]: native=<nil> rows=[][]interface {}(nil); SQLite=exit status 1 Error near line 3: ESCAPE expression must be a single character
+    boolean_conformance_test.go:118: SELECT id FROM t NOT INDEXED WHERE flag=99 AND (flag LIKE 'x' ESCAPE 'ab') [?1=0]: native=<nil> rows=[][]interface {}(nil); SQLite=exit status 1 Error near line 3: ESCAPE expression must be a single character
+    boolean_conformance_test.go:118: SELECT t.id FROM t JOIN u ON flag=99 AND (flag LIKE 'x' ESCAPE 'ab') [?1=0]: native=<nil> rows=[][]interface {}(nil); SQLite=exit status 1 Error near line 3: ESCAPE expression must be a single character
+    boolean_conformance_test.go:118: SELECT t.id FROM t,u WHERE flag=99 AND (flag LIKE 'x' ESCAPE 'ab') [?1=0]: native=<nil> rows=[][]interface {}(nil); SQLite=exit status 1 Error near line 3: ESCAPE expression must be a single character
+    boolean_conformance_test.go:118: SELECT flag=99 AND (flag LIKE 'x' ESCAPE 'ab') AS z FROM t WHERE z [?1=0]: native=<nil> rows=[][]interface {}(nil); SQLite=exit status 1 Error near line 3: ESCAPE expression must be a single character
+    boolean_conformance_test.go:139: 923 Boolean context/error/value cases matched pinned SQLite
+--- FAIL: TestBooleanOracleContexts (2.43s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/testkit	2.439s
+FAIL

@@ -1,0 +1,34 @@
+--- boolean-semantics-freeze-v2/internal/sql/eval.go
++++ affinity-substitution-freeze-v1/internal/sql/eval.go
+@@ -20,6 +20,8 @@
+ 	Row      map[string]any
+ 	Params   []any
+ 	Resolver func(table, name string) (any, error)
++	// Affinity returns a declared affinity for physical columns (including
++	// "BLOB" for a typeless column), or "" for an affinity-less result alias.
+ 	Affinity func(table, name string) string
+ 	// ConstantColumn reports a bound constant result alias, never a physical
+ 	// column whose current row value happens to be known. Used by IN-list
+@@ -710,6 +712,10 @@
+ 		}
+ 		return AffinityType(a)
+ 	}
++	// A declared BLOB affinity is distinct from no expression affinity.
++	// Two declared nonnumeric operands compare without coercion; TEXT applies
++	// only when the other expression has no affinity (SQLite expr.c,
++	// sqlite3CompareAffinity). Unary + and IN-list RHS deliberately remove it.
+ 	aa, ba := affinity(ae), affinity(be)
+ 	num := func(s string) bool { return s == "INTEGER" || s == "REAL" || s == "NUMERIC" }
+ 	var err error
+@@ -717,9 +723,9 @@
+ 		b, err = ApplyAffinity(b, "NUMERIC")
+ 	} else if num(ba) && !num(aa) {
+ 		a, err = ApplyAffinity(a, "NUMERIC")
+-	} else if aa == "TEXT" && (ba == "" || ba == "BLOB") {
++	} else if aa == "TEXT" && ba == "" {
+ 		b, err = ApplyAffinity(b, "TEXT")
+-	} else if ba == "TEXT" && (aa == "" || aa == "BLOB") {
++	} else if ba == "TEXT" && aa == "" {
+ 		a, err = ApplyAffinity(a, "TEXT")
+ 	}
+ 	return a, b, err

@@ -252,6 +252,14 @@ func (t *Tx) matchRows(ctx context.Context, tab *writeTable, where sqlast.Expr, 
 	if err := validate(where, tab.table, nil); err != nil {
 		return nil, err
 	}
+	predicate, err := compilePredicate(where, &sqlast.EvalContext{Context: ctx, Params: params}, false, nil)
+	if err != nil {
+		return nil, err
+	}
+	keep, err := constantPredicates(ctx, predicate, params)
+	if err != nil || !keep {
+		return nil, err
+	}
 	cursor, err := btree.NewCursor(ctx, t.reader, tab.root)
 	if err != nil {
 		return nil, err
@@ -271,12 +279,11 @@ func (t *Tx) matchRows(ctx context.Context, tab *writeTable, where sqlast.Expr, 
 			return nil, err
 		}
 		if where != nil {
-			v, err := sqlast.Eval(where, tab.evalContext(ctx, params, id, values))
+			keep, err := predicate.evaluate(tab.evalContext(ctx, params, id, values))
 			if err != nil {
 				return nil, err
 			}
-			truth, null := sqlast.Truth(v)
-			if null || !truth {
+			if !keep {
 				continue
 			}
 		}

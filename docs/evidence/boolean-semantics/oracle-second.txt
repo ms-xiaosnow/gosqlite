@@ -1,0 +1,6 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestBooleanOracleContexts
+    boolean_conformance_test.go:139: 923 Boolean context/error/value cases matched pinned SQLite
+--- PASS: TestBooleanOracleContexts (2.61s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	2.611s

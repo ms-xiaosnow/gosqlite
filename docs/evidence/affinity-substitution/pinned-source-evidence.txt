@@ -1,0 +1,115 @@
+25cd7d766086512d6c7f3f612bb0fa6d4057b8ac79c3d20c1d8c924b9440361e  ../toolchains/sqlite-src-3540000/src/expr.c
+27c9f1c83ca24c3be09d0082fdf2761a582da2dc5e8604a8218ddb097646a1d6  ../toolchains/sqlite-src-3540000/src/sqliteInt.h
+470775f6ada29ccfb2d3046ac2b4c975df95a9c20b782332d4e8ba6b6233e6c6  ../toolchains/sqlite-build-3540000/sqlite3
+3.54.0|2026-10-09 15:46:58 be8d059e9a49089ab2dce5ed26dd87aaf598fdc5fbe0b107c0dd758464bcd5e3
+*/
+char sqlite3TableColumnAffinity(const Table *pTab, int iCol){
+  if( iCol<0 || NEVER(iCol>=pTab->nCol) ) return SQLITE_AFF_INTEGER;
+  return pTab->aCol[iCol].affinity;
+}
+
+/*
+** Return the 'affinity' of the expression pExpr if any.
+**
+** If pExpr is a column, a reference to a column via an 'AS' alias,
+** or a sub-select with a column as the return value, then the
+** affinity of that column is returned. Otherwise, 0x00 is returned,
+** indicating no affinity for the expression.
+**
+** i.e. the WHERE clause expressions in the following statements all
+** have an affinity:
+**
+** CREATE TABLE t1(a);
+** SELECT * FROM t1 WHERE a;
+** SELECT a AS b FROM t1 WHERE b;
+** SELECT * FROM t1 WHERE (select a from t1);
+*/
+char sqlite3ExprAffinity(const Expr *pExpr){
+  int op;
+  op = pExpr->op;
+  while( 1 /* exit-by-break */ ){
+    if( op==TK_COLUMN || (op==TK_AGG_COLUMN && pExpr->y.pTab!=0) ){
+      assert( ExprUseYTab(pExpr) );
+      assert( pExpr->y.pTab!=0 );
+      return sqlite3TableColumnAffinity(pExpr->y.pTab, pExpr->iColumn);
+    }
+    if( op==TK_SELECT ){
+      assert( ExprUseXSelect(pExpr) );
+      assert( pExpr->x.pSelect!=0 );
+      assert( pExpr->x.pSelect->pEList!=0 );
+      assert( pExpr->x.pSelect->pEList->a[0].pExpr!=0 );
+      return sqlite3ExprAffinity(pExpr->x.pSelect->pEList->a[0].pExpr);
+    }
+#ifndef SQLITE_OMIT_CAST
+    if( op==TK_CAST ){
+      assert( !ExprHasProperty(pExpr, EP_IntValue) );
+      return sqlite3AffinityType(pExpr->u.zToken, 0);
+    }
+#endif
+    if( op==TK_SELECT_COLUMN ){
+      assert( pExpr->pLeft!=0 && ExprUseXSelect(pExpr->pLeft) );
+      assert( pExpr->iColumn < pExpr->iTable );
+      assert( pExpr->iColumn >= 0 );
+      assert( pExpr->iTable==pExpr->pLeft->x.pSelect->pEList->nExpr );
+      return sqlite3ExprAffinity(
+          pExpr->pLeft->x.pSelect->pEList->a[pExpr->iColumn].pExpr
+      );
+    }
+    if( op==TK_VECTOR
+     || (op==TK_FUNCTION && pExpr->affExpr==SQLITE_AFF_DEFER)
+
+/*
+** pExpr is an operand of a comparison operator.  aff2 is the
+** type affinity of the other operand.  This routine returns the
+** type affinity that should be used for the comparison operator.
+*/
+char sqlite3CompareAffinity(const Expr *pExpr, char aff2){
+  char aff1 = sqlite3ExprAffinity(pExpr);
+  if( aff1>SQLITE_AFF_NONE && aff2>SQLITE_AFF_NONE ){
+    /* Both sides of the comparison are columns. If one has numeric
+    ** affinity, use that. Otherwise use no affinity.
+    */
+    if( sqlite3IsNumericAffinity(aff1) || sqlite3IsNumericAffinity(aff2) ){
+      return SQLITE_AFF_NUMERIC;
+    }else{
+      return SQLITE_AFF_BLOB;
+    }
+  }else{
+    /* One side is a column, the other is not. Use the columns affinity. */
+    assert( aff1<=SQLITE_AFF_NONE || aff2<=SQLITE_AFF_NONE );
+    return (aff1<=SQLITE_AFF_NONE ? aff2 : aff1) | SQLITE_AFF_NONE;
+  }
+}
+
+/*
+** pExpr is a comparison operator.  Return the type affinity that should
+** be applied to both operands prior to doing the comparison.
+*/
+static char comparisonAffinity(const Expr *pExpr){
+  char aff;
+  assert( pExpr->op==TK_EQ || pExpr->op==TK_IN || pExpr->op==TK_LT ||
+          pExpr->op==TK_GT || pExpr->op==TK_GE || pExpr->op==TK_LE ||
+          pExpr->op==TK_NE || pExpr->op==TK_IS || pExpr->op==TK_ISNOT );
+  assert( pExpr->pLeft );
+  aff = sqlite3ExprAffinity(pExpr->pLeft);
+  if( pExpr->pRight ){
+    aff = sqlite3CompareAffinity(pExpr->pRight, aff);
+  }else if( ExprUseXSelect(pExpr) ){
+    aff = sqlite3CompareAffinity(pExpr->x.pSelect->pEList->a[0].pExpr, aff);
+  }else if( aff==0 ){
+    aff = SQLITE_AFF_BLOB;
+  }
+  return aff;
+}
+
+/*
+** pExpr is a comparison expression, eg. '=', '<', IN(...) etc.
+2370:#define SQLITE_AFF_NONE     0x40  /* '@' */
+2371:#define SQLITE_AFF_BLOB     0x41  /* 'A' */
+2372:#define SQLITE_AFF_TEXT     0x42  /* 'B' */
+2373:#define SQLITE_AFF_NUMERIC  0x43  /* 'C' */
+2374:#define SQLITE_AFF_INTEGER  0x44  /* 'D' */
+2375:#define SQLITE_AFF_REAL     0x45  /* 'E' */
+2376:#define SQLITE_AFF_FLEXNUM  0x46  /* 'F' */
+2377:#define SQLITE_AFF_DEFER    0x58  /* 'X'  - defer computation until later */
+2385:#define SQLITE_AFF_MASK     0x47

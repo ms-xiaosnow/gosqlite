@@ -1,0 +1,12 @@
+=== RUN   TestAffinityDeclaredVersusAbsent
+--- PASS: TestAffinityDeclaredVersusAbsent (0.00s)
+=== RUN   TestAffinityComparisonContextAndBudget
+--- PASS: TestAffinityComparisonContextAndBudget (0.00s)
+=== RUN   TestAffinityAndIntegerComparison
+--- PASS: TestAffinityAndIntegerComparison (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.008s
+=== RUN   TestAffinityComparisonPublicRows
+--- PASS: TestAffinityComparisonPublicRows (0.01s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.012s

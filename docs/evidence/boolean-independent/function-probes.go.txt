@@ -1,0 +1,46 @@
+package sql
+
+import (
+	"errors"
+	"reflect"
+	"testing"
+)
+
+func TestBooleanIndependentFunctionArguments(t *testing.T) {
+	sentinel := errors.New("ordinary pure memory sentinel")
+	for _, tc := range []struct {
+		expr           string
+		predicate, bad bool
+		calls          []string
+	}{
+		{"0 AND boom()", false, false, nil},
+		{"0.0 AND boom()", false, true, []string{"boom"}},
+		{"1.0 OR boom()", false, true, []string{"boom"}},
+		{"0.0 AND boom()", true, false, nil},
+		{"1.0 OR boom()", true, false, nil},
+		{"NULL AND boom()", true, false, nil},
+		{"NOT (NULL AND boom())", true, true, []string{"boom"}},
+		{"NULL OR boom()", true, true, []string{"boom"}},
+		{"NOT (NULL OR boom())", true, false, nil},
+		{"nullif(first(),boom())", false, true, []string{"first", "boom"}},
+		{"nullif(first(),boom())", true, true, []string{"first", "boom"}},
+		{"coalesce(first(),boom())", false, false, []string{"first"}},
+		{"CASE first() WHEN 0.0 AND boom() THEN 1 END", false, true, []string{"first", "boom"}},
+		{"CASE WHEN 0.0 AND boom() THEN 1 ELSE first() END", false, false, []string{"first"}},
+	} {
+		var calls []string
+		expr, e := ParseExpr(tc.expr)
+		if e != nil {
+			t.Fatal(e)
+		}
+		ec := &EvalContext{Functions: map[string]Function{"first": func([]any) (any, error) { calls = append(calls, "first"); return int64(1), nil }, "boom": func([]any) (any, error) { calls = append(calls, "boom"); return nil, sentinel }}}
+		if tc.predicate {
+			_, e = EvalPredicate(expr, ec)
+		} else {
+			_, e = Eval(expr, ec)
+		}
+		if errors.Is(e, sentinel) != tc.bad || !reflect.DeepEqual(calls, tc.calls) {
+			t.Errorf("%s predicate=%t: err=%v calls=%v want bad=%t calls=%v", tc.expr, tc.predicate, e, calls, tc.bad, tc.calls)
+		}
+	}
+}

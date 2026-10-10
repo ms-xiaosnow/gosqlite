@@ -1,0 +1,14 @@
+=== RUN   TestAffinityComparisonMatrixOracle
+=== RUN   TestAffinityComparisonMatrixOracle/false
+    affinity_comparison_oracle_test.go:165: affinity complete-value/class matrix: 2676 queries, 0 mismatches
+    affinity_comparison_oracle_test.go:177: affinity complete-value/class matrix: 1308 queries, 0 mismatches
+=== RUN   TestAffinityComparisonMatrixOracle/true
+    affinity_comparison_oracle_test.go:165: affinity complete-value/class matrix: 2676 queries, 0 mismatches
+    affinity_comparison_oracle_test.go:177: affinity complete-value/class matrix: 1308 queries, 0 mismatches
+--- PASS: TestAffinityComparisonMatrixOracle (3.15s)
+    --- PASS: TestAffinityComparisonMatrixOracle/false (1.28s)
+    --- PASS: TestAffinityComparisonMatrixOracle/true (1.88s)
+=== RUN   TestAffinityComparisonWritesOracle
+--- PASS: TestAffinityComparisonWritesOracle (0.10s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	3.255s

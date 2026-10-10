@@ -1,0 +1,15 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestBooleanQueryContextsAndPreflight
+--- PASS: TestBooleanQueryContextsAndPreflight (0.01s)
+=== RUN   TestBooleanLazyTypedCellsAndProjection
+--- PASS: TestBooleanLazyTypedCellsAndProjection (0.00s)
+=== RUN   TestBooleanConservativeIndexErrorBoundary
+--- PASS: TestBooleanConservativeIndexErrorBoundary (0.00s)
+=== RUN   TestBooleanDMLPredicatesAndRollback
+--- PASS: TestBooleanDMLPredicatesAndRollback (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.019s
+=== RUN   TestDriverBooleanPreparedAndTransactions
+--- PASS: TestDriverBooleanPreparedAndTransactions (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.008s

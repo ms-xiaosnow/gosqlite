@@ -1,0 +1,32 @@
+{
+  "owner_manifest_sha256": "be6ece6401dca41264cc1846ba4674db0977626724af25798d26351aa6bdc96a",
+  "all_owner_files_match": true,
+  "owner_file_count": 846,
+  "reviewer_test_additions": [
+    [
+      "internal/testkit/boolean_independent_test.go",
+      "87def736a20e8568658f2b28617c1220d797f0cc24c4c61a40bbf174e33b0151"
+    ],
+    [
+      "sqlite/boolean_independent_test.go",
+      "a4de6937f60b231a7fe6f062d80008cb5eff702a612e1ad626b7e8f50f75b4db"
+    ],
+    [
+      "driver/boolean_independent_test.go",
+      "249cb995ab8651115f63bf1e09c7885afc96ab6aaf3791b27811eec8651eac00"
+    ],
+    [
+      "internal/sql/boolean_independent_test.go",
+      "927070e512b17b39deb06c8241c7468b95776d9cba2d4243abe30c12c7806140"
+    ],
+    [
+      "internal/sql/boolean_independent_work_probe_test.go",
+      "01dfefaa58f849f67582f08d8ae76006ee64813843cbed3d4200701530cb7fe5"
+    ],
+    [
+      "sqlite/boolean_independent_work_probe_test.go",
+      "db29bf657f6107f764e5e35ca14fc88ef46d219a0dc861ab1be610675e3cb344"
+    ]
+  ],
+  "only_additional_files_are_reviewer_tests": true
+}

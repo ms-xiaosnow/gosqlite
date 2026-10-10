@@ -1,0 +1,1 @@
+PASS: exact function bytes match after test-name normalization. Extraction uses function start through its first unindented closing brace. Initial scratch comparison accidentally included the following historical isolation function; bounded function extraction corrects that harness mistake. No source or tests changed.

@@ -1,0 +1,3 @@
+Behavioral audit: three historical failing cases use descriptor-free typed-invalid values and normal intact native SQL plus HNSW construction; no restricted physical workflow. Selected Boolean tests use ordinary SQL/rollback/read cancellation and pure in-memory AST/value quotas.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.037s

@@ -1,0 +1,15 @@
+CREATE TABLE f(t TEXT,b BLOB,u);
+INSERT INTO f VALUES(1.0,1.0,1.0);
+SELECT t,b,u,typeof(t),typeof(b),typeof(u),CAST(b AS TEXT),t=b,b=t,t=u,u=t,t=+b,+b=t FROM f;
+SELECT t,b FROM f WHERE t=1.0 AND t=b;
+SELECT t,b FROM f WHERE b=1 AND t=b;
+SELECT t,b FROM f WHERE b=1 AND b=t;
+SELECT t,b FROM f WHERE b=1 AND b!=t;
+EXPLAIN SELECT t,b FROM f WHERE t=b;
+EXPLAIN SELECT t,b FROM f WHERE t=u;
+EXPLAIN SELECT t,b FROM f WHERE t=+b;
+EXPLAIN SELECT t,b FROM f WHERE b=1 AND b=t;
+EXPLAIN SELECT t,b FROM f WHERE b=1 AND t=b;
+EXPLAIN SELECT t,b FROM f WHERE t=?1;
+EXPLAIN SELECT b AS alias FROM f WHERE t=alias;
+EXPLAIN SELECT +b AS alias FROM f WHERE t=alias;

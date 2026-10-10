@@ -703,7 +703,7 @@ func (p *parser) expression(min int) (Expr, error) {
 		if err != nil {
 			return nil, err
 		}
-		left = &Literal{Value: v, hexLiteral: strings.HasPrefix(FoldName(t.Text), "0x")}
+		left = &Literal{Value: v, hexLiteral: strings.HasPrefix(FoldName(t.Text), "0x"), truthLiteral: integerTruthLiteral(v, t.Text)}
 	case t.Kind == Bind:
 		n, err := p.parameter(t.Text)
 		if err != nil {
@@ -840,7 +840,7 @@ func (p *parser) expression(min int) (Expr, error) {
 				// SQLite folds a function-free empty IN before name binding,
 				// so even an unresolved column disappears. Function-bearing
 				// operands still need validation, but are not evaluated.
-				left = &Literal{Value: boolean(in.Not)}
+				left = &Literal{Value: boolean(in.Not), truthLiteral: true}
 			}
 			continue
 		}
@@ -867,7 +867,7 @@ func (p *parser) expression(min int) (Expr, error) {
 			if op == "NOTNULL" {
 				name = "IS NOT"
 			}
-			left = &Binary{Op: name, Left: left, Right: &Literal{}}
+			left = parseNullCheck(&Binary{Op: name, Left: left, Right: &Literal{}})
 			if err = p.checkExpr(left); err != nil {
 				return nil, err
 			}
@@ -890,10 +890,21 @@ func (p *parser) expression(min int) (Expr, error) {
 			}
 			left = x
 		} else {
-			left = &Binary{Op: op, Left: left, Right: right}
+			left = parseNullCheck(&Binary{Op: op, Left: left, Right: right})
 		}
 		if err = p.checkExpr(left); err != nil {
 			return nil, err
+		}
+		if op == "AND" {
+			x := left.(*Binary)
+			lt, lk := literalTruth(x.Left)
+			rt, rk := literalTruth(x.Right)
+			// Match parse-time false-AND folding only when no function needs
+			// name/arity validation. Bound TRUE/FALSE names are not constants
+			// yet: a physical column with that name may shadow them.
+			if ((lk && !lt && !booleanName(x.Left)) || (rk && !rt && !booleanName(x.Right))) && !containsCall(left) {
+				left = &Literal{Value: int64(0), truthLiteral: true}
+			}
 		}
 	}
 	return left, nil

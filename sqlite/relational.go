@@ -144,7 +144,7 @@ type relationalJoin struct {
 	rightFactory          relationalFactory
 	leftWidth, rightWidth int
 	kind                  string
-	on                    sqlast.Expr
+	on                    *predicateProgram
 	rows                  *Rows
 	budget                *relationalBudget
 	outer                 []any
@@ -248,7 +248,7 @@ func (s *relationalJoin) Close() error {
 	return err
 }
 
-func (r *Rows) relationalPredicate(e sqlast.Expr, values []any) (bool, error) {
+func (r *Rows) relationalPredicate(p *predicateProgram, values []any) (bool, error) {
 	defer r.relational.clearScalar()
 	ec := &sqlast.EvalContext{Context: r.ctx, Params: r.params, Functions: r.functions, DeclaredType: declaredTypeFor(r.table)}
 	ec.Resolver = func(q, name string) (any, error) {
@@ -268,12 +268,7 @@ func (r *Rows) relationalPredicate(e sqlast.Expr, values []any) (bool, error) {
 		}
 		return affinity(r.table.columns[i].Type)
 	}
-	value, err := sqlast.Eval(e, ec)
-	if err != nil {
-		return false, err
-	}
-	truth, null, err := sqlast.TruthContext(r.ctx, value)
-	return truth && !null, err
+	return p.evaluate(ec)
 }
 
 // Validation of a referenced typed value is lazy, but charged before its codec

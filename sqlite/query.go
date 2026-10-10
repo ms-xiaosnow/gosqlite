@@ -249,6 +249,9 @@ func (d *DB) plan(ctx context.Context, reader btree.PageReader, sel *sqlast.Sele
 	if err = d.prepareGramFunctions(ctx, reader, r); err != nil {
 		return nil, err
 	}
+	if err = r.prepareWhere(); err != nil {
+		return nil, err
+	}
 	if err = d.planSource(ctx, reader, r); err != nil {
 		return nil, err
 	}

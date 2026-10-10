@@ -1,0 +1,22 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestBooleanIndependentOracle
+    boolean_independent_test.go:120: SQL SELECT t.id FROM t0 t WHERE (t.flag LIKE 'x' ESCAPE 'ab') AND t.flag=CAST('1' AS INTEGER)
+        native=sqlite next: ESCAPE expression must be a single character rows=[][]interface {}(nil)
+        SQLite=<nil> 
+    boolean_independent_test.go:121: SQL SELECT t.id,u.y FROM t0 t,u WHERE (t.flag LIKE 'x' ESCAPE 'ab') AND t.flag=CAST('1' AS INTEGER)
+        native=sqlite next: ESCAPE expression must be a single character rows=[][]interface {}(nil)
+        SQLite=<nil> 
+    boolean_independent_test.go:155: SQL SELECT t.id,u.y FROM t0 t LEFT JOIN u ON abs(t.v) AND t.flag WHERE t.flag=99
+        native=sqlite next: integer overflow rows=[][]interface {}(nil)
+        SQLite=<nil> 
+    boolean_independent_test.go:155: SQL SELECT 0 AS true FROM t0 t WHERE true AND abs(t.v)
+        native=sqlite query: unsupported SQLite feature: unsupported SQL: reserved identifier true at byte 12 rows=[][]interface {}(nil)
+        SQLite=<nil> 
+    boolean_independent_test.go:155: SQL SELECT 1 AS false FROM t0 t WHERE false OR abs(t.v)
+        native=sqlite query: unsupported SQLite feature: unsupported SQL: reserved identifier false at byte 12 rows=[][]interface {}(nil)
+        SQLite=<nil> 
+    boolean_independent_test.go:157: independent: 4962 cases, 5 mismatches
+--- FAIL: TestBooleanIndependentOracle (12.63s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/testkit	12.641s
+FAIL

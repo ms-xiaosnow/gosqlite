@@ -1,0 +1,25 @@
+{
+  "expanded_context_cases": 5332,
+  "expanded_context_mismatches": 5,
+  "affinity_cases": 2160,
+  "affinity_mismatches": 36,
+  "affinity_baseline_mismatches": 44,
+  "new_affinity_mismatches": [],
+  "resolved_affinity_mismatches": [
+    "SELECT id,b,typeof(b) FROM vals WHERE b=1 AND (b IS t) ORDER BY id",
+    "SELECT id,b,typeof(b) FROM vals WHERE b=1 AND (b=t) ORDER BY id",
+    "SELECT id,b,typeof(b) FROM vals,one WHERE b=1 AND (b IS t) ORDER BY id",
+    "SELECT id,b,typeof(b) FROM vals,one WHERE b=1 AND (b=t) ORDER BY id",
+    "SELECT id,u,typeof(u) FROM vals WHERE u=1 AND (u IS t) ORDER BY id",
+    "SELECT id,u,typeof(u) FROM vals WHERE u=1 AND (u=t) ORDER BY id",
+    "SELECT id,u,typeof(u) FROM vals,one WHERE u=1 AND (u IS t) ORDER BY id",
+    "SELECT id,u,typeof(u) FROM vals,one WHERE u=1 AND (u=t) ORDER BY id"
+  ],
+  "known_other_mismatches": [
+    "SELECT 0 AS true FROM t0 t WHERE true AND abs(t.v)",
+    "SELECT 1 AS false FROM t0 t WHERE false OR abs(t.v)",
+    "SELECT t.id FROM t0 t WHERE (t.flag LIKE 'x' ESCAPE 'ab') AND t.flag=CAST('1' AS INTEGER)",
+    "SELECT t.id,u.y FROM t0 t LEFT JOIN u ON abs(t.v) AND t.flag WHERE t.flag=99",
+    "SELECT t.id,u.y FROM t0 t,u WHERE (t.flag LIKE 'x' ESCAPE 'ab') AND t.flag=CAST('1' AS INTEGER)"
+  ]
+}

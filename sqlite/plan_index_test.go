@@ -176,7 +176,9 @@ func TestOrdinaryIndexBudgetsCancellationAndResidualErrors(t *testing.T) {
 	if r.Next() || !errors.Is(r.Err(), context.Canceled) || r.Stats().RowIDSeeks != 0 {
 		t.Fatal(r.Err(), r.Stats())
 	}
-	for _, where := range []string{"id=9999 AND abs(-9223372036854775808)>0", "id=9999 AND l2_distance('bad','[0]')>0", "id=9999 AND k LIKE 'x' ESCAPE 'ab'"} {
+	// Constant error terms run before source access, even after a rejecting
+	// equality. A row-dependent LIKE after that equality is branch-lazy.
+	for _, where := range []string{"id=9999 AND abs(-9223372036854775808)>0", "id=9999 AND l2_distance('bad','[0]')>0"} {
 		var messages []string
 		for _, modifier := range []string{"", " NOT INDEXED"} {
 			r, err := db.Query(context.Background(), "SELECT id FROM t"+modifier+" WHERE "+where)
@@ -196,6 +198,23 @@ func TestOrdinaryIndexBudgetsCancellationAndResidualErrors(t *testing.T) {
 		}
 		if messages[0] != messages[1] {
 			t.Fatal(where, messages)
+		}
+	}
+	// Pinned SQLite returns zero rows without evaluating this dead residual.
+	// Retain the prior failing query and assert the corrected result directly.
+	for _, modifier := range []string{"", " NOT INDEXED"} {
+		r, err := db.Query(context.Background(), "SELECT id FROM t"+modifier+" WHERE id=9999 AND k LIKE 'x' ESCAPE 'ab'")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if r.Plan().Access != "SCAN" {
+			t.Fatal("conservative residual admission changed", r.Plan())
+		}
+		if r.Next() || r.Err() != nil {
+			t.Fatal("dead row-dependent residual evaluated", r.Err())
+		}
+		if err := r.Close(); err != nil {
+			t.Fatal(err)
 		}
 	}
 }

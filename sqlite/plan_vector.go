@@ -273,6 +273,20 @@ func (h *vectorRowHeap) Pop() any {
 }
 
 func (r *Rows) materializeVector() error {
+	// ANN does not fetch through the scan pipeline. Run constant WHERE terms
+	// before query decoding, graph work or representation-specific scratch.
+	if err := r.startPredicates(); err != nil {
+		if err != io.EOF {
+			return err
+		}
+		if r.source != nil {
+			if err := r.source.Close(); err != nil {
+				return err
+			}
+			r.source = nil
+		}
+		return nil
+	}
 	if r.vectorRank.ann != nil {
 		return r.materializeANNVector()
 	}

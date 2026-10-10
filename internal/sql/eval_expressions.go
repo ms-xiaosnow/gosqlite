@@ -12,26 +12,28 @@ func evalCase(x *Case, ctx *EvalContext) (any, error) {
 		}
 	}
 	for _, arm := range x.Arms {
-		v, err := Eval(arm.When, ctx)
-		if err != nil {
-			return nil, err
-		}
 		var match bool
 		if x.Base == nil {
-			match, _, err = TruthContext(ctx.Context, v)
+			match, err = EvalPredicate(arm.When, ctx)
 			if err != nil {
 				return nil, err
 			}
-		} else if base != nil && v != nil {
-			a, b, err := comparisonAffinity(x.Base, arm.When, base, v, ctx)
+		} else {
+			v, err := Eval(arm.When, ctx)
 			if err != nil {
 				return nil, err
 			}
-			cmp, err := Compare(a, b)
-			if err != nil {
-				return nil, err
+			if base != nil && v != nil {
+				a, b, err := comparisonAffinity(x.Base, arm.When, base, v, ctx)
+				if err != nil {
+					return nil, err
+				}
+				cmp, err := Compare(a, b)
+				if err != nil {
+					return nil, err
+				}
+				match = cmp == 0
 			}
-			match = cmp == 0
 		}
 		if match {
 			return Eval(arm.Then, ctx)
@@ -168,6 +170,14 @@ func ConstantExpression(e Expr, ctx *EvalContext) bool {
 	case *Literal, *Parameter:
 		return true
 	case *Column:
+		if ctx != nil {
+			if _, ok := ctx.FixedColumns[x]; ok {
+				// The predicate compiler certifies this invariant before adding
+				// an entry. Rewalking the substitution graph here could turn a
+				// linear chain of doubled columns into exponential planning.
+				return true
+			}
+		}
 		return ctx != nil && ctx.ConstantColumn != nil && ctx.ConstantColumn(x.Table, x.Name)
 	case *Call:
 		name := FoldName(x.Name)

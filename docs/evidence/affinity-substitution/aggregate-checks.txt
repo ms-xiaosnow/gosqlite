@@ -1,0 +1,387 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.090s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	77.715s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.061s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	1.257s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestAffinityComparisonMatrixOracle
+=== RUN   TestAffinityComparisonMatrixOracle/false
+    affinity_comparison_oracle_test.go:165: affinity complete-value/class matrix: 2676 queries, 0 mismatches
+    affinity_comparison_oracle_test.go:177: affinity complete-value/class matrix: 1308 queries, 0 mismatches
+=== RUN   TestAffinityComparisonMatrixOracle/true
+    affinity_comparison_oracle_test.go:165: affinity complete-value/class matrix: 2676 queries, 0 mismatches
+    affinity_comparison_oracle_test.go:177: affinity complete-value/class matrix: 1308 queries, 0 mismatches
+--- PASS: TestAffinityComparisonMatrixOracle (7.31s)
+    --- PASS: TestAffinityComparisonMatrixOracle/false (2.14s)
+    --- PASS: TestAffinityComparisonMatrixOracle/true (5.16s)
+=== RUN   TestAffinityComparisonWritesOracle
+--- PASS: TestAffinityComparisonWritesOracle (0.29s)
+=== RUN   TestAffinityInheritedMatrixOracle
+    affinity_substitution_conformance_test.go:101: independent affinity: 2160 cases, 0 mismatches
+--- PASS: TestAffinityInheritedMatrixOracle (8.68s)
+=== RUN   TestBooleanOracleContexts
+    boolean_conformance_test.go:141: 1053 Boolean context/error/value cases checked against pinned SQLite
+--- PASS: TestBooleanOracleContexts (4.09s)
+=== RUN   TestOracleExpressionFeaturesQueries
+=== RUN   TestOracleExpressionFeaturesQueries/false
+=== RUN   TestOracleExpressionFeaturesQueries/true
+--- PASS: TestOracleExpressionFeaturesQueries (0.11s)
+    --- PASS: TestOracleExpressionFeaturesQueries/false (0.06s)
+    --- PASS: TestOracleExpressionFeaturesQueries/true (0.06s)
+=== RUN   TestRelationalOracleJoins
+=== RUN   TestRelationalOracleJoins/shared_false
+=== RUN   TestRelationalOracleJoins/shared_false/inner_duplicates
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid,a.k,b.k FROM lhs a JOIN rhs b ON a.k=b.k ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_false/explicit_inner
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid FROM lhs AS a INNER JOIN rhs AS b ON a.k=b.k ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_false/reversed_affinity
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid,a.k=b.k,b.k=a.k FROM lhs a JOIN rhs b ON b.k=a.k ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_false/unary_removes_affinity
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid,+a.k=b.k,a.k=+b.k,+a.k=+b.k FROM lhs a CROSS JOIN rhs b ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_false/comma_where
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid FROM lhs a,rhs b WHERE a.k=b.k ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_false/cross_where
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid FROM lhs a CROSS JOIN rhs b WHERE a.lid<3 AND b.rid<13 ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_false/cross_on
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid FROM lhs a CROSS JOIN rhs b ON a.k=b.k ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_false/comma_on
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid FROM lhs a,rhs b ON a.k=b.k ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_false/join_without_on
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid FROM lhs a JOIN rhs b ORDER BY a.lid,b.rid LIMIT 5 OFFSET 3
+=== RUN   TestRelationalOracleJoins/shared_false/left_duplicates_and_null
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid,a.k,b.k,typeof(b.score) FROM lhs a LEFT JOIN rhs b ON a.k=b.k ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_false/left_outer
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid FROM lhs a LEFT OUTER JOIN rhs b ON a.k=b.k ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_false/null_is_match
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid FROM lhs a LEFT JOIN rhs b ON a.k IS b.k ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_false/null_on
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid,b.rowid FROM lhs a LEFT JOIN rhs b ON NULL ORDER BY a.lid
+=== RUN   TestRelationalOracleJoins/shared_false/on_filter_before_extension
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid FROM lhs a LEFT JOIN rhs b ON a.k=b.k AND b.rid=10 ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_false/where_filter_after_extension
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid FROM lhs a LEFT JOIN rhs b ON a.k=b.k WHERE b.rid=10 ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_false/where_null_finds_unmatched
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid FROM lhs a LEFT JOIN rhs b ON a.k=b.k WHERE b.rid IS NULL ORDER BY a.lid
+=== RUN   TestRelationalOracleJoins/shared_false/three_way_inner
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid,c.cid FROM lhs a JOIN rhs b ON a.k=b.k JOIN third c ON b.rid=c.rid ORDER BY a.lid,b.rid,c.cid
+=== RUN   TestRelationalOracleJoins/shared_false/three_way_left
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid,c.cid,c.caption FROM lhs a LEFT JOIN rhs b ON a.k=b.k LEFT JOIN third c ON b.rid=c.rid ORDER BY a.lid,b.rid,c.cid
+=== RUN   TestRelationalOracleJoins/shared_false/mixed_comma_left_associative
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid,c.cid FROM lhs a,rhs b LEFT JOIN third c ON c.rid=b.rid WHERE a.lid=1 AND b.rid<14 ORDER BY a.lid,b.rid,c.cid
+=== RUN   TestRelationalOracleJoins/shared_false/third_references_first
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid,c.cid FROM lhs a JOIN rhs b ON a.k=b.k JOIN third c ON c.rid=b.rid AND a.flag=1 ORDER BY a.lid,b.rid,c.cid
+=== RUN   TestRelationalOracleJoins/shared_false/star_duplicate_labels
+    relational_conformance_test.go:107: SQL: SELECT * FROM lhs a JOIN rhs b ON a.k=b.k ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_false/qualified_stars
+    relational_conformance_test.go:107: SQL: SELECT b.*,a.*,b.rid AS rid FROM lhs a LEFT JOIN rhs b ON a.k=b.k ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_false/duplicate_alias_disjoint_qualified_star
+    relational_conformance_test.go:107: SQL: SELECT x.* FROM lhs x,third x ORDER BY lid,cid
+=== RUN   TestRelationalOracleJoins/shared_false/duplicate_alias_disjoint_unqualified_star
+    relational_conformance_test.go:107: SQL: SELECT * FROM lhs x,third x ORDER BY lid,cid
+=== RUN   TestRelationalOracleJoins/shared_false/label_spellings
+    relational_conformance_test.go:107: SQL: SELECT a.LID,b.RID,a.lid+1,a.txt AS "Mixed Case",a.lid AS same,b.rid AS same FROM lhs a JOIN rhs b ON a.k=b.k ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_false/rowid_aliases
+    relational_conformance_test.go:107: SQL: SELECT a.rowid,a._rowid_,a.oid,b.rowid,b._rowid_,b.oid FROM lhs a LEFT JOIN rhs b ON a.k=b.k ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_false/rowid_shadows
+    relational_conformance_test.go:107: SQL: SELECT s.id,s.rowid,s._rowid_,s.oid,p.rowid,p._rowid_,p.oid FROM shadows s CROSS JOIN plain p ORDER BY p.rowid
+=== RUN   TestRelationalOracleJoins/shared_false/null_rowid_shadows
+    relational_conformance_test.go:107: SQL: SELECT a.lid,s.*,s.rowid,s._rowid_,s.oid FROM lhs a LEFT JOIN shadows s ON a.lid=s.id ORDER BY a.lid
+=== RUN   TestRelationalOracleJoins/shared_false/where_output_alias
+    relational_conformance_test.go:107: SQL: SELECT a.lid+10 AS shifted,b.rid FROM lhs a JOIN rhs b ON a.k=b.k WHERE shifted=11 ORDER BY b.rid
+=== RUN   TestRelationalOracleJoins/shared_false/on_output_alias
+    relational_conformance_test.go:107: SQL: SELECT a.lid+9 AS target,b.rid FROM lhs a LEFT JOIN rhs b ON b.rid=target ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_false/where_physical_before_alias
+    relational_conformance_test.go:107: SQL: SELECT -a.lid AS lid,b.rid FROM lhs a JOIN rhs b ON a.k=b.k WHERE lid=1 ORDER BY b.rid
+=== RUN   TestRelationalOracleJoins/shared_false/on_physical_before_alias
+    relational_conformance_test.go:107: SQL: SELECT a.lid+100 AS lid,b.rid FROM lhs a LEFT JOIN rhs b ON lid=1 AND b.rid=10 ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_false/order_bare_alias_first
+    relational_conformance_test.go:107: SQL: SELECT -a.lid AS lid,b.rid FROM lhs a JOIN rhs b ON a.k=b.k ORDER BY lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_false/order_expression_physical_first
+    relational_conformance_test.go:107: SQL: SELECT -a.lid AS lid,b.rid FROM lhs a JOIN rhs b ON a.k=b.k ORDER BY lid+0,b.rid
+=== RUN   TestRelationalOracleJoins/shared_false/order_alias_expression
+    relational_conformance_test.go:107: SQL: SELECT -a.lid AS backwards,b.rid FROM lhs a JOIN rhs b ON a.k=b.k ORDER BY backwards+0,b.rid
+=== RUN   TestRelationalOracleJoins/shared_false/order_alias_over_ambiguous_physical
+    relational_conformance_test.go:107: SQL: SELECT a.lid AS k,b.rid FROM lhs a JOIN rhs b ON a.k=b.k ORDER BY k,b.rid
+=== RUN   TestRelationalOracleJoins/shared_false/storage_classes
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid,a.r,b.score,a.payload,b.payload,typeof(a.r),typeof(b.score),typeof(a.payload),typeof(b.payload) FROM lhs a LEFT JOIN rhs b ON a.k=b.k ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_false/ordinal_nulls_limit
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid,b.score FROM lhs a LEFT JOIN rhs b ON a.k=b.k ORDER BY 3 DESC NULLS FIRST,1,2 LIMIT 5 OFFSET 1
+=== RUN   TestRelationalOracleJoins/shared_false/empty_right_inner
+    relational_conformance_test.go:107: SQL: SELECT a.lid,e.eid FROM lhs a JOIN empty_source e ON a.k=e.k
+=== RUN   TestRelationalOracleJoins/shared_false/empty_right_left
+    relational_conformance_test.go:107: SQL: SELECT a.lid,e.*,typeof(e.eid),e.rowid FROM lhs a LEFT JOIN empty_source e ON a.k=e.k ORDER BY a.lid
+=== RUN   TestRelationalOracleJoins/shared_false/empty_left
+    relational_conformance_test.go:107: SQL: SELECT e.eid,b.rid FROM empty_source e LEFT JOIN rhs b ON e.k=b.k
+=== RUN   TestRelationalOracleJoins/shared_false/both_empty
+    relational_conformance_test.go:107: SQL: SELECT a.eid,b.eid FROM empty_source a CROSS JOIN empty_source b
+=== RUN   TestRelationalOracleJoins/shared_false/zero_limit_labels
+    relational_conformance_test.go:107: SQL: SELECT a.*,b.* FROM lhs a LEFT JOIN rhs b ON a.k=b.k LIMIT 0
+=== RUN   TestRelationalOracleJoins/shared_false/lazy_projection_case
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE CASE WHEN b.rid>0 THEN b.tag ELSE abs(-9223372036854775808) END END AS chosen FROM lhs a LEFT JOIN rhs b ON a.k=b.k ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_false/lazy_on_case
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid FROM lhs a LEFT JOIN rhs b ON CASE WHEN a.lid>0 THEN a.k=b.k ELSE abs(-9223372036854775808) END ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_false/lazy_where_case
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid FROM lhs a JOIN rhs b ON a.k=b.k WHERE CASE WHEN b.rid>0 THEN 1 ELSE abs(-9223372036854775808) END ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_false/empty_skips_projection_error
+    relational_conformance_test.go:107: SQL: SELECT abs(-9223372036854775808) AS bad FROM empty_source a CROSS JOIN rhs b
+=== RUN   TestRelationalOracleJoins/shared_false/empty_skips_on_error
+    relational_conformance_test.go:107: SQL: SELECT a.lid,e.eid FROM lhs a LEFT JOIN empty_source e ON abs(-9223372036854775808) ORDER BY a.lid
+=== RUN   TestRelationalOracleJoins/shared_false/parameters
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid FROM lhs a LEFT JOIN rhs b ON a.k=b.k AND b.rid>=? WHERE a.lid<=? ORDER BY a.lid,b.rid LIMIT ?
+=== RUN   TestRelationalOracleJoins/shared_true
+=== RUN   TestRelationalOracleJoins/shared_true/inner_duplicates
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid,a.k,b.k FROM lhs a JOIN rhs b ON a.k=b.k ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_true/explicit_inner
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid FROM lhs AS a INNER JOIN rhs AS b ON a.k=b.k ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_true/reversed_affinity
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid,a.k=b.k,b.k=a.k FROM lhs a JOIN rhs b ON b.k=a.k ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_true/unary_removes_affinity
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid,+a.k=b.k,a.k=+b.k,+a.k=+b.k FROM lhs a CROSS JOIN rhs b ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_true/comma_where
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid FROM lhs a,rhs b WHERE a.k=b.k ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_true/cross_where
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid FROM lhs a CROSS JOIN rhs b WHERE a.lid<3 AND b.rid<13 ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_true/cross_on
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid FROM lhs a CROSS JOIN rhs b ON a.k=b.k ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_true/comma_on
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid FROM lhs a,rhs b ON a.k=b.k ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_true/join_without_on
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid FROM lhs a JOIN rhs b ORDER BY a.lid,b.rid LIMIT 5 OFFSET 3
+=== RUN   TestRelationalOracleJoins/shared_true/left_duplicates_and_null
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid,a.k,b.k,typeof(b.score) FROM lhs a LEFT JOIN rhs b ON a.k=b.k ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_true/left_outer
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid FROM lhs a LEFT OUTER JOIN rhs b ON a.k=b.k ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_true/null_is_match
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid FROM lhs a LEFT JOIN rhs b ON a.k IS b.k ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_true/null_on
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid,b.rowid FROM lhs a LEFT JOIN rhs b ON NULL ORDER BY a.lid
+=== RUN   TestRelationalOracleJoins/shared_true/on_filter_before_extension
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid FROM lhs a LEFT JOIN rhs b ON a.k=b.k AND b.rid=10 ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_true/where_filter_after_extension
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid FROM lhs a LEFT JOIN rhs b ON a.k=b.k WHERE b.rid=10 ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_true/where_null_finds_unmatched
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid FROM lhs a LEFT JOIN rhs b ON a.k=b.k WHERE b.rid IS NULL ORDER BY a.lid
+=== RUN   TestRelationalOracleJoins/shared_true/three_way_inner
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid,c.cid FROM lhs a JOIN rhs b ON a.k=b.k JOIN third c ON b.rid=c.rid ORDER BY a.lid,b.rid,c.cid
+=== RUN   TestRelationalOracleJoins/shared_true/three_way_left
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid,c.cid,c.caption FROM lhs a LEFT JOIN rhs b ON a.k=b.k LEFT JOIN third c ON b.rid=c.rid ORDER BY a.lid,b.rid,c.cid
+=== RUN   TestRelationalOracleJoins/shared_true/mixed_comma_left_associative
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid,c.cid FROM lhs a,rhs b LEFT JOIN third c ON c.rid=b.rid WHERE a.lid=1 AND b.rid<14 ORDER BY a.lid,b.rid,c.cid
+=== RUN   TestRelationalOracleJoins/shared_true/third_references_first
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid,c.cid FROM lhs a JOIN rhs b ON a.k=b.k JOIN third c ON c.rid=b.rid AND a.flag=1 ORDER BY a.lid,b.rid,c.cid
+=== RUN   TestRelationalOracleJoins/shared_true/star_duplicate_labels
+    relational_conformance_test.go:107: SQL: SELECT * FROM lhs a JOIN rhs b ON a.k=b.k ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_true/qualified_stars
+    relational_conformance_test.go:107: SQL: SELECT b.*,a.*,b.rid AS rid FROM lhs a LEFT JOIN rhs b ON a.k=b.k ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_true/duplicate_alias_disjoint_qualified_star
+    relational_conformance_test.go:107: SQL: SELECT x.* FROM lhs x,third x ORDER BY lid,cid
+=== RUN   TestRelationalOracleJoins/shared_true/duplicate_alias_disjoint_unqualified_star
+    relational_conformance_test.go:107: SQL: SELECT * FROM lhs x,third x ORDER BY lid,cid
+=== RUN   TestRelationalOracleJoins/shared_true/label_spellings
+    relational_conformance_test.go:107: SQL: SELECT a.LID,b.RID,a.lid+1,a.txt AS "Mixed Case",a.lid AS same,b.rid AS same FROM lhs a JOIN rhs b ON a.k=b.k ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_true/rowid_aliases
+    relational_conformance_test.go:107: SQL: SELECT a.rowid,a._rowid_,a.oid,b.rowid,b._rowid_,b.oid FROM lhs a LEFT JOIN rhs b ON a.k=b.k ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_true/rowid_shadows
+    relational_conformance_test.go:107: SQL: SELECT s.id,s.rowid,s._rowid_,s.oid,p.rowid,p._rowid_,p.oid FROM shadows s CROSS JOIN plain p ORDER BY p.rowid
+=== RUN   TestRelationalOracleJoins/shared_true/null_rowid_shadows
+    relational_conformance_test.go:107: SQL: SELECT a.lid,s.*,s.rowid,s._rowid_,s.oid FROM lhs a LEFT JOIN shadows s ON a.lid=s.id ORDER BY a.lid
+=== RUN   TestRelationalOracleJoins/shared_true/where_output_alias
+    relational_conformance_test.go:107: SQL: SELECT a.lid+10 AS shifted,b.rid FROM lhs a JOIN rhs b ON a.k=b.k WHERE shifted=11 ORDER BY b.rid
+=== RUN   TestRelationalOracleJoins/shared_true/on_output_alias
+    relational_conformance_test.go:107: SQL: SELECT a.lid+9 AS target,b.rid FROM lhs a LEFT JOIN rhs b ON b.rid=target ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_true/where_physical_before_alias
+    relational_conformance_test.go:107: SQL: SELECT -a.lid AS lid,b.rid FROM lhs a JOIN rhs b ON a.k=b.k WHERE lid=1 ORDER BY b.rid
+=== RUN   TestRelationalOracleJoins/shared_true/on_physical_before_alias
+    relational_conformance_test.go:107: SQL: SELECT a.lid+100 AS lid,b.rid FROM lhs a LEFT JOIN rhs b ON lid=1 AND b.rid=10 ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_true/order_bare_alias_first
+    relational_conformance_test.go:107: SQL: SELECT -a.lid AS lid,b.rid FROM lhs a JOIN rhs b ON a.k=b.k ORDER BY lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_true/order_expression_physical_first
+    relational_conformance_test.go:107: SQL: SELECT -a.lid AS lid,b.rid FROM lhs a JOIN rhs b ON a.k=b.k ORDER BY lid+0,b.rid
+=== RUN   TestRelationalOracleJoins/shared_true/order_alias_expression
+    relational_conformance_test.go:107: SQL: SELECT -a.lid AS backwards,b.rid FROM lhs a JOIN rhs b ON a.k=b.k ORDER BY backwards+0,b.rid
+=== RUN   TestRelationalOracleJoins/shared_true/order_alias_over_ambiguous_physical
+    relational_conformance_test.go:107: SQL: SELECT a.lid AS k,b.rid FROM lhs a JOIN rhs b ON a.k=b.k ORDER BY k,b.rid
+=== RUN   TestRelationalOracleJoins/shared_true/storage_classes
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid,a.r,b.score,a.payload,b.payload,typeof(a.r),typeof(b.score),typeof(a.payload),typeof(b.payload) FROM lhs a LEFT JOIN rhs b ON a.k=b.k ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_true/ordinal_nulls_limit
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid,b.score FROM lhs a LEFT JOIN rhs b ON a.k=b.k ORDER BY 3 DESC NULLS FIRST,1,2 LIMIT 5 OFFSET 1
+=== RUN   TestRelationalOracleJoins/shared_true/empty_right_inner
+    relational_conformance_test.go:107: SQL: SELECT a.lid,e.eid FROM lhs a JOIN empty_source e ON a.k=e.k
+=== RUN   TestRelationalOracleJoins/shared_true/empty_right_left
+    relational_conformance_test.go:107: SQL: SELECT a.lid,e.*,typeof(e.eid),e.rowid FROM lhs a LEFT JOIN empty_source e ON a.k=e.k ORDER BY a.lid
+=== RUN   TestRelationalOracleJoins/shared_true/empty_left
+    relational_conformance_test.go:107: SQL: SELECT e.eid,b.rid FROM empty_source e LEFT JOIN rhs b ON e.k=b.k
+=== RUN   TestRelationalOracleJoins/shared_true/both_empty
+    relational_conformance_test.go:107: SQL: SELECT a.eid,b.eid FROM empty_source a CROSS JOIN empty_source b
+=== RUN   TestRelationalOracleJoins/shared_true/zero_limit_labels
+    relational_conformance_test.go:107: SQL: SELECT a.*,b.* FROM lhs a LEFT JOIN rhs b ON a.k=b.k LIMIT 0
+=== RUN   TestRelationalOracleJoins/shared_true/lazy_projection_case
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE CASE WHEN b.rid>0 THEN b.tag ELSE abs(-9223372036854775808) END END AS chosen FROM lhs a LEFT JOIN rhs b ON a.k=b.k ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_true/lazy_on_case
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid FROM lhs a LEFT JOIN rhs b ON CASE WHEN a.lid>0 THEN a.k=b.k ELSE abs(-9223372036854775808) END ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_true/lazy_where_case
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid FROM lhs a JOIN rhs b ON a.k=b.k WHERE CASE WHEN b.rid>0 THEN 1 ELSE abs(-9223372036854775808) END ORDER BY a.lid,b.rid
+=== RUN   TestRelationalOracleJoins/shared_true/empty_skips_projection_error
+    relational_conformance_test.go:107: SQL: SELECT abs(-9223372036854775808) AS bad FROM empty_source a CROSS JOIN rhs b
+=== RUN   TestRelationalOracleJoins/shared_true/empty_skips_on_error
+    relational_conformance_test.go:107: SQL: SELECT a.lid,e.eid FROM lhs a LEFT JOIN empty_source e ON abs(-9223372036854775808) ORDER BY a.lid
+=== RUN   TestRelationalOracleJoins/shared_true/parameters
+    relational_conformance_test.go:107: SQL: SELECT a.lid,b.rid FROM lhs a LEFT JOIN rhs b ON a.k=b.k AND b.rid>=? WHERE a.lid<=? ORDER BY a.lid,b.rid LIMIT ?
+--- PASS: TestRelationalOracleJoins (0.47s)
+    --- PASS: TestRelationalOracleJoins/shared_false (0.18s)
+        --- PASS: TestRelationalOracleJoins/shared_false/inner_duplicates (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_false/explicit_inner (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_false/reversed_affinity (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_false/unary_removes_affinity (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_false/comma_where (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_false/cross_where (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_false/cross_on (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_false/comma_on (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_false/join_without_on (0.01s)
+        --- PASS: TestRelationalOracleJoins/shared_false/left_duplicates_and_null (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_false/left_outer (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_false/null_is_match (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_false/null_on (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_false/on_filter_before_extension (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_false/where_filter_after_extension (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_false/where_null_finds_unmatched (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_false/three_way_inner (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_false/three_way_left (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_false/mixed_comma_left_associative (0.01s)
+        --- PASS: TestRelationalOracleJoins/shared_false/third_references_first (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_false/star_duplicate_labels (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_false/qualified_stars (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_false/duplicate_alias_disjoint_qualified_star (0.01s)
+        --- PASS: TestRelationalOracleJoins/shared_false/duplicate_alias_disjoint_unqualified_star (0.01s)
+        --- PASS: TestRelationalOracleJoins/shared_false/label_spellings (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_false/rowid_aliases (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_false/rowid_shadows (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_false/null_rowid_shadows (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_false/where_output_alias (0.01s)
+        --- PASS: TestRelationalOracleJoins/shared_false/on_output_alias (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_false/where_physical_before_alias (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_false/on_physical_before_alias (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_false/order_bare_alias_first (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_false/order_expression_physical_first (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_false/order_alias_expression (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_false/order_alias_over_ambiguous_physical (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_false/storage_classes (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_false/ordinal_nulls_limit (0.01s)
+        --- PASS: TestRelationalOracleJoins/shared_false/empty_right_inner (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_false/empty_right_left (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_false/empty_left (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_false/both_empty (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_false/zero_limit_labels (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_false/lazy_projection_case (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_false/lazy_on_case (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_false/lazy_where_case (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_false/empty_skips_projection_error (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_false/empty_skips_on_error (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_false/parameters (0.00s)
+    --- PASS: TestRelationalOracleJoins/shared_true (0.28s)
+        --- PASS: TestRelationalOracleJoins/shared_true/inner_duplicates (0.01s)
+        --- PASS: TestRelationalOracleJoins/shared_true/explicit_inner (0.01s)
+        --- PASS: TestRelationalOracleJoins/shared_true/reversed_affinity (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_true/unary_removes_affinity (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_true/comma_where (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_true/cross_where (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_true/cross_on (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_true/comma_on (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_true/join_without_on (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_true/left_duplicates_and_null (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_true/left_outer (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_true/null_is_match (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_true/null_on (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_true/on_filter_before_extension (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_true/where_filter_after_extension (0.01s)
+        --- PASS: TestRelationalOracleJoins/shared_true/where_null_finds_unmatched (0.01s)
+        --- PASS: TestRelationalOracleJoins/shared_true/three_way_inner (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_true/three_way_left (0.01s)
+        --- PASS: TestRelationalOracleJoins/shared_true/mixed_comma_left_associative (0.01s)
+        --- PASS: TestRelationalOracleJoins/shared_true/third_references_first (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_true/star_duplicate_labels (0.01s)
+        --- PASS: TestRelationalOracleJoins/shared_true/qualified_stars (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_true/duplicate_alias_disjoint_qualified_star (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_true/duplicate_alias_disjoint_unqualified_star (0.01s)
+        --- PASS: TestRelationalOracleJoins/shared_true/label_spellings (0.01s)
+        --- PASS: TestRelationalOracleJoins/shared_true/rowid_aliases (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_true/rowid_shadows (0.01s)
+        --- PASS: TestRelationalOracleJoins/shared_true/null_rowid_shadows (0.01s)
+        --- PASS: TestRelationalOracleJoins/shared_true/where_output_alias (0.01s)
+        --- PASS: TestRelationalOracleJoins/shared_true/on_output_alias (0.01s)
+        --- PASS: TestRelationalOracleJoins/shared_true/where_physical_before_alias (0.01s)
+        --- PASS: TestRelationalOracleJoins/shared_true/on_physical_before_alias (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_true/order_bare_alias_first (0.01s)
+        --- PASS: TestRelationalOracleJoins/shared_true/order_expression_physical_first (0.01s)
+        --- PASS: TestRelationalOracleJoins/shared_true/order_alias_expression (0.01s)
+        --- PASS: TestRelationalOracleJoins/shared_true/order_alias_over_ambiguous_physical (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_true/storage_classes (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_true/ordinal_nulls_limit (0.01s)
+        --- PASS: TestRelationalOracleJoins/shared_true/empty_right_inner (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_true/empty_right_left (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_true/empty_left (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_true/both_empty (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_true/zero_limit_labels (0.01s)
+        --- PASS: TestRelationalOracleJoins/shared_true/lazy_projection_case (0.01s)
+        --- PASS: TestRelationalOracleJoins/shared_true/lazy_on_case (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_true/lazy_where_case (0.02s)
+        --- PASS: TestRelationalOracleJoins/shared_true/empty_skips_projection_error (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_true/empty_skips_on_error (0.00s)
+        --- PASS: TestRelationalOracleJoins/shared_true/parameters (0.00s)
+=== RUN   TestRelationalOracleAddedDefaults
+=== RUN   TestRelationalOracleAddedDefaults/inner_defaults
+    readonly_conformance_test.go:286: SQL: SELECT k.id,c.*,typeof(c.text_default),typeof(c.numeric_default),typeof(c.real_default) FROM keys k JOIN changed c ON k.id=c.id ORDER BY k.id
+=== RUN   TestRelationalOracleAddedDefaults/left_defaults
+    readonly_conformance_test.go:286: SQL: SELECT k.id,c.*,typeof(c.text_default),typeof(c.numeric_default),typeof(c.real_default) FROM keys k LEFT JOIN changed c ON k.id=c.id ORDER BY k.id
+=== RUN   TestRelationalOracleAddedDefaults/defaults_in_on
+    readonly_conformance_test.go:286: SQL: SELECT k.id,c.id FROM keys k LEFT JOIN changed c ON c.numeric_default='12' AND c.real_default='7' ORDER BY k.id,c.id
+--- PASS: TestRelationalOracleAddedDefaults (0.02s)
+    --- PASS: TestRelationalOracleAddedDefaults/inner_defaults (0.00s)
+    --- PASS: TestRelationalOracleAddedDefaults/left_defaults (0.00s)
+    --- PASS: TestRelationalOracleAddedDefaults/defaults_in_on (0.00s)
+=== RUN   TestRelationalOracleBindingAndEvaluationErrors
+=== RUN   TestRelationalOracleBindingAndEvaluationErrors/SELECT_k_FROM_lhs_a_JOIN_rhs_b_ON_a.k=b.k
+=== RUN   TestRelationalOracleBindingAndEvaluationErrors/SELECT_a.lid_AS_k_FROM_lhs_a_JOIN_rhs_b_ON_a.k=b.k_WHERE_k=1
+=== RUN   TestRelationalOracleBindingAndEvaluationErrors/SELECT_a.lid_AS_k_FROM_lhs_a_JOIN_rhs_b_ON_a.k=b.k_ORDER_BY_k+0
+=== RUN   TestRelationalOracleBindingAndEvaluationErrors/SELECT_rowid_FROM_lhs_a_JOIN_rhs_b_ON_a.k=b.k
+=== RUN   TestRelationalOracleBindingAndEvaluationErrors/SELECT_lhs.lid_FROM_lhs_a_JOIN_rhs_b_ON_a.k=b.k
+=== RUN   TestRelationalOracleBindingAndEvaluationErrors/SELECT_missing.*_FROM_lhs_a_JOIN_rhs_b_ON_a.k=b.k
+=== RUN   TestRelationalOracleBindingAndEvaluationErrors/SELECT_x.*_FROM_lhs_x,rhs_x
+=== RUN   TestRelationalOracleBindingAndEvaluationErrors/SELECT_*_FROM_lhs_x,rhs_x
+=== RUN   TestRelationalOracleBindingAndEvaluationErrors/SELECT_a.lid_FROM_lhs_a_JOIN_plain_b_ON_k=1_JOIN_rhs_c_ON_c.k=a.k
+=== RUN   TestRelationalOracleBindingAndEvaluationErrors/SELECT_a.eid_FROM_empty_source_a_JOIN_plain_b_ON_k=1_JOIN_rhs_c_ON_c.k=a.k
+=== RUN   TestRelationalOracleBindingAndEvaluationErrors/SELECT_a.lid_FROM_lhs_a_JOIN_rhs_b_ON_missing=1
+=== RUN   TestRelationalOracleBindingAndEvaluationErrors/SELECT_a.eid_FROM_empty_source_a_JOIN_rhs_b_ON_missing=1
+=== RUN   TestRelationalOracleBindingAndEvaluationErrors/SELECT_a.eid,abs()_FROM_empty_source_a_CROSS_JOIN_rhs_b
+=== RUN   TestRelationalOracleBindingAndEvaluationErrors/SELECT_a.lid_FROM_lhs_a_JOIN_rhs_b_ON_abs(-9223372036854775808)
+=== RUN   TestRelationalOracleBindingAndEvaluationErrors/SELECT_abs(-9223372036854775808)_FROM_lhs_a_CROSS_JOIN_rhs_b
+--- PASS: TestRelationalOracleBindingAndEvaluationErrors (0.05s)
+    --- PASS: TestRelationalOracleBindingAndEvaluationErrors/SELECT_k_FROM_lhs_a_JOIN_rhs_b_ON_a.k=b.k (0.00s)
+    --- PASS: TestRelationalOracleBindingAndEvaluationErrors/SELECT_a.lid_AS_k_FROM_lhs_a_JOIN_rhs_b_ON_a.k=b.k_WHERE_k=1 (0.00s)
+    --- PASS: TestRelationalOracleBindingAndEvaluationErrors/SELECT_a.lid_AS_k_FROM_lhs_a_JOIN_rhs_b_ON_a.k=b.k_ORDER_BY_k+0 (0.00s)
+    --- PASS: TestRelationalOracleBindingAndEvaluationErrors/SELECT_rowid_FROM_lhs_a_JOIN_rhs_b_ON_a.k=b.k (0.00s)
+    --- PASS: TestRelationalOracleBindingAndEvaluationErrors/SELECT_lhs.lid_FROM_lhs_a_JOIN_rhs_b_ON_a.k=b.k (0.00s)
+    --- PASS: TestRelationalOracleBindingAndEvaluationErrors/SELECT_missing.*_FROM_lhs_a_JOIN_rhs_b_ON_a.k=b.k (0.01s)
+    --- PASS: TestRelationalOracleBindingAndEvaluationErrors/SELECT_x.*_FROM_lhs_x,rhs_x (0.00s)
+    --- PASS: TestRelationalOracleBindingAndEvaluationErrors/SELECT_*_FROM_lhs_x,rhs_x (0.00s)
+    --- PASS: TestRelationalOracleBindingAndEvaluationErrors/SELECT_a.lid_FROM_lhs_a_JOIN_plain_b_ON_k=1_JOIN_rhs_c_ON_c.k=a.k (0.00s)
+    --- PASS: TestRelationalOracleBindingAndEvaluationErrors/SELECT_a.eid_FROM_empty_source_a_JOIN_plain_b_ON_k=1_JOIN_rhs_c_ON_c.k=a.k (0.00s)
+    --- PASS: TestRelationalOracleBindingAndEvaluationErrors/SELECT_a.lid_FROM_lhs_a_JOIN_rhs_b_ON_missing=1 (0.00s)
+    --- PASS: TestRelationalOracleBindingAndEvaluationErrors/SELECT_a.eid_FROM_empty_source_a_JOIN_rhs_b_ON_missing=1 (0.00s)
+    --- PASS: TestRelationalOracleBindingAndEvaluationErrors/SELECT_a.eid,abs()_FROM_empty_source_a_CROSS_JOIN_rhs_b (0.00s)
+    --- PASS: TestRelationalOracleBindingAndEvaluationErrors/SELECT_a.lid_FROM_lhs_a_JOIN_rhs_b_ON_abs(-9223372036854775808) (0.00s)
+    --- PASS: TestRelationalOracleBindingAndEvaluationErrors/SELECT_abs(-9223372036854775808)_FROM_lhs_a_CROSS_JOIN_rhs_b (0.00s)
+=== RUN   TestRelationalOracleBooleanNamesAndOrdinals
+--- PASS: TestRelationalOracleBooleanNamesAndOrdinals (0.11s)
+=== RUN   TestRelationalOracleBooleanResultAliases
+--- PASS: TestRelationalOracleBooleanResultAliases (0.16s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	21.289s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	1.175s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	16.844s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.233s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+package github.com/ms-xiaosnow/gosqlite/internal/testkit: build constraints exclude all Go files in /workspace/scratch/5e06a74e5f65/durable-restart/affinity-substitution-work/internal/testkit

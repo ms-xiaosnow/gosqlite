@@ -1,0 +1,4 @@
+boolean-affinity-lead-verify: all 1046 paths and SHA256 values unchanged before/after independent tests.
+boolean-rank-filter-freeze-v1: all 1048 paths and SHA256 values unchanged before/after independent tests.
+boolean-rank-independent-copy-v1: all original 1048 files match immutable source; only addition is independent probe.
+boolean-rank-independent-baseline-v1: all original 1046 files match immutable source; only addition is independent probe.

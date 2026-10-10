@@ -368,5 +368,19 @@
     "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38077225523",
     "remote_ci_status": "COMPLETED SUCCESS for exact SHA, updated2026-10-10T19:00:52Z, observed19:02:08Z. Historical default unit/vet/build/race job only; broader tagged-oracle correction is separate.",
     "open_gates": "Offline PG16 bounded all-column copy/swap review profile only, with fully commented mutations and unresolved human gates. FK/views/functions/triggers/RLS/partition/custom expressions/collations/ACL chains/other dependency families and online/batched swap remain required code. Live PostgreSQL/Neon, privilege/capacity/source completeness/application OID and release qualification NOT_RUN."
+  },
+  {
+    "stage": "Encrypted managed acquisition/retirement and complete ordinary oracle CI",
+    "remote_commit": "ed4a38e4738a6906027a87cf42dc9f9ac84bc32b",
+    "local_commit": "ed4a38e4738a6906027a87cf42dc9f9ac84bc32b",
+    "tree": "ce884395c946a4aaf94c821922d42e5902cb216a",
+    "bundle_sha256": "0d1cf77917b2c3216f8f645c2963c11412027de34ce5fd5f55af4900438365ff",
+    "bundle_bytes": 2285015,
+    "library_file_id": "libfile_20f7a7e29dbc8191b2e623c4cf837575",
+    "library_version": 0,
+    "verified": "Expected-SHA main readback and exact local mirror2026-10-10T19:24:33Z; full-history bundle byte-identical Library readback, clean clone/fsck and original goal19:25:07Z. All published non-document bytes equal sourcecd80bbc80228e1970f8d7e465799cc674eede3fb: full CGO0 unit/vet/build19:09:35Z, complete pinned ordinary oracle19:13:56Z (testkit254.059s), full race (SQLite392.800s), five target crossbuilds, modules and unchanged inventory all passed/exit0 at19:21:45Z. Original relational and encrypted-only obsolete-JOIN full-oracle FAIL logs remain preserved. Exact restored full unit/vet/build/oracle plus focused encrypted-race checks started19:25:08Z; pending at this record. Exact restored full CGO0 unit/vet/build, focused encrypted/driver race, complete pinned tagged ordinary oracle, five crossbuilds, module verification and clean worktree all passed exit0 at2026-10-10T19:38:52Z.",
+    "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38079679118",
+    "remote_ci_status": "COMPLETED SUCCESS for exact SHA, updated2026-10-10T19:37:11Z, observed19:39:30Z. Both ordinary and newly added complete pinned-oracle jobs succeeded.",
+    "open_gates": "Plain Reader/Tx/exclusive-WAL ownership corrections and remaining SQL/planner/migration/platform code are separate pending work. Future Boolean/affinity code excluded after its full ordinary suite exposed genuine alternate-predicate regressions. Native Windows/Darwin execution, physical failure/recovery and independent M3/M8/M10 security/legal/release acceptance remain NOT_RUN."
   }
 ]

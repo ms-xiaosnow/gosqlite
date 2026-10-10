@@ -1,0 +1,365 @@
+Pinned source and executable SHA-256
+25cd7d766086512d6c7f3f612bb0fa6d4057b8ac79c3d20c1d8c924b9440361e  ../toolchains/sqlite-src-3540000/src/expr.c
+2585ff31b8fe80784eda1446904bb8fc30e202291cc8de8f20d2b8145d24f307  ../toolchains/sqlite-src-3540000/src/build.c
+5412c2b35f52b458aada282b905547cdea69b9a2afb50243c0f697d977ef6240  ../toolchains/sqlite-src-3540000/src/select.c
+27c9f1c83ca24c3be09d0082fdf2761a582da2dc5e8604a8218ddb097646a1d6  ../toolchains/sqlite-src-3540000/src/sqliteInt.h
+470775f6ada29ccfb2d3046ac2b4c975df95a9c20b782332d4e8ba6b6233e6c6  ../toolchains/sqlite-build-3540000/sqlite3
+
+expr.c: physical/expression and comparison affinity
+    20	
+    21	/*
+    22	** Return the affinity character for a single column of a table.
+    23	*/
+    24	char sqlite3TableColumnAffinity(const Table *pTab, int iCol){
+    25	  if( iCol<0 || NEVER(iCol>=pTab->nCol) ) return SQLITE_AFF_INTEGER;
+    26	  return pTab->aCol[iCol].affinity;
+    27	}
+    28	
+    29	/*
+    30	** Return the 'affinity' of the expression pExpr if any.
+    31	**
+    32	** If pExpr is a column, a reference to a column via an 'AS' alias,
+    33	** or a sub-select with a column as the return value, then the
+    34	** affinity of that column is returned. Otherwise, 0x00 is returned,
+    35	** indicating no affinity for the expression.
+    36	**
+    37	** i.e. the WHERE clause expressions in the following statements all
+    38	** have an affinity:
+    39	**
+    40	** CREATE TABLE t1(a);
+    41	** SELECT * FROM t1 WHERE a;
+    42	** SELECT a AS b FROM t1 WHERE b;
+    43	** SELECT * FROM t1 WHERE (select a from t1);
+    44	*/
+    45	char sqlite3ExprAffinity(const Expr *pExpr){
+    46	  int op;
+    47	  op = pExpr->op;
+    48	  while( 1 /* exit-by-break */ ){
+    49	    if( op==TK_COLUMN || (op==TK_AGG_COLUMN && pExpr->y.pTab!=0) ){
+    50	      assert( ExprUseYTab(pExpr) );
+    51	      assert( pExpr->y.pTab!=0 );
+    52	      return sqlite3TableColumnAffinity(pExpr->y.pTab, pExpr->iColumn);
+    53	    }
+    54	    if( op==TK_SELECT ){
+    55	      assert( ExprUseXSelect(pExpr) );
+    56	      assert( pExpr->x.pSelect!=0 );
+    57	      assert( pExpr->x.pSelect->pEList!=0 );
+    58	      assert( pExpr->x.pSelect->pEList->a[0].pExpr!=0 );
+    59	      return sqlite3ExprAffinity(pExpr->x.pSelect->pEList->a[0].pExpr);
+    60	    }
+    61	#ifndef SQLITE_OMIT_CAST
+    62	    if( op==TK_CAST ){
+    63	      assert( !ExprHasProperty(pExpr, EP_IntValue) );
+    64	      return sqlite3AffinityType(pExpr->u.zToken, 0);
+    65	    }
+    66	#endif
+    67	    if( op==TK_SELECT_COLUMN ){
+    68	      assert( pExpr->pLeft!=0 && ExprUseXSelect(pExpr->pLeft) );
+    69	      assert( pExpr->iColumn < pExpr->iTable );
+    70	      assert( pExpr->iColumn >= 0 );
+    71	      assert( pExpr->iTable==pExpr->pLeft->x.pSelect->pEList->nExpr );
+    72	      return sqlite3ExprAffinity(
+    73	          pExpr->pLeft->x.pSelect->pEList->a[pExpr->iColumn].pExpr
+    74	      );
+    75	    }
+    76	    if( op==TK_VECTOR
+    77	     || (op==TK_FUNCTION && pExpr->affExpr==SQLITE_AFF_DEFER)
+    78	    ){
+    79	      assert( ExprUseXList(pExpr) );
+    80	      return sqlite3ExprAffinity(pExpr->x.pList->a[0].pExpr);
+    81	    }
+    82	    if( ExprHasProperty(pExpr, EP_Skip|EP_IfNullRow) ){
+    83	      assert( pExpr->op==TK_COLLATE
+    84	           || pExpr->op==TK_IF_NULL_ROW
+    85	           || (pExpr->op==TK_REGISTER && pExpr->op2==TK_IF_NULL_ROW) );
+    86	      pExpr = pExpr->pLeft;
+    87	      op = pExpr->op;
+    88	      continue;
+    89	    }
+    90	    if( op!=TK_REGISTER ) break;
+    91	    op = pExpr->op2;
+    92	    if( NEVER( op==TK_REGISTER ) ) break;
+    93	  }
+    94	  return pExpr->affExpr;
+    95	}
+    96	
+    97	/*
+    98	** Make a guess at all the possible datatypes of the result that could
+   344	
+   345	/*
+   346	** pExpr is an operand of a comparison operator.  aff2 is the
+   347	** type affinity of the other operand.  This routine returns the
+   348	** type affinity that should be used for the comparison operator.
+   349	*/
+   350	char sqlite3CompareAffinity(const Expr *pExpr, char aff2){
+   351	  char aff1 = sqlite3ExprAffinity(pExpr);
+   352	  if( aff1>SQLITE_AFF_NONE && aff2>SQLITE_AFF_NONE ){
+   353	    /* Both sides of the comparison are columns. If one has numeric
+   354	    ** affinity, use that. Otherwise use no affinity.
+   355	    */
+   356	    if( sqlite3IsNumericAffinity(aff1) || sqlite3IsNumericAffinity(aff2) ){
+   357	      return SQLITE_AFF_NUMERIC;
+   358	    }else{
+   359	      return SQLITE_AFF_BLOB;
+   360	    }
+   361	  }else{
+   362	    /* One side is a column, the other is not. Use the columns affinity. */
+   363	    assert( aff1<=SQLITE_AFF_NONE || aff2<=SQLITE_AFF_NONE );
+   364	    return (aff1<=SQLITE_AFF_NONE ? aff2 : aff1) | SQLITE_AFF_NONE;
+   365	  }
+   366	}
+   367	
+   368	/*
+   369	** pExpr is a comparison operator.  Return the type affinity that should
+   370	** be applied to both operands prior to doing the comparison.
+   371	*/
+   372	static char comparisonAffinity(const Expr *pExpr){
+   373	  char aff;
+   374	  assert( pExpr->op==TK_EQ || pExpr->op==TK_IN || pExpr->op==TK_LT ||
+   375	          pExpr->op==TK_GT || pExpr->op==TK_GE || pExpr->op==TK_LE ||
+   376	          pExpr->op==TK_NE || pExpr->op==TK_IS || pExpr->op==TK_ISNOT );
+   377	  assert( pExpr->pLeft );
+   378	  aff = sqlite3ExprAffinity(pExpr->pLeft);
+   379	  if( pExpr->pRight ){
+   380	    aff = sqlite3CompareAffinity(pExpr->pRight, aff);
+   381	  }else if( ExprUseXSelect(pExpr) ){
+   382	    aff = sqlite3CompareAffinity(pExpr->x.pSelect->pEList->a[0].pExpr, aff);
+   383	  }else if( aff==0 ){
+   384	    aff = SQLITE_AFF_BLOB;
+   385	  }
+   386	  return aff;
+   387	}
+   388	
+   389	/*
+   390	** pExpr is a comparison expression, eg. '=', '<', IN(...) etc.
+   391	** idx_affinity is the affinity of an indexed column. Return true
+   392	** if the index with affinity idx_affinity may be used to implement
+   393	** the comparison in pExpr.
+   394	*/
+   395	int sqlite3IndexAffinityOk(const Expr *pExpr, char idx_affinity){
+   396	  char aff = comparisonAffinity(pExpr);
+   397	  if( aff<SQLITE_AFF_TEXT ){
+   398	    return 1;
+   399	  }
+   400	  if( aff==SQLITE_AFF_TEXT ){
+   401	    return idx_affinity==SQLITE_AFF_TEXT;
+   402	  }
+   403	  return sqlite3IsNumericAffinity(idx_affinity);
+   404	}
+   405	
+   406	/*
+   407	** Return the P5 value that should be used for a binary comparison
+   408	** opcode (OP_Eq, OP_Ge etc.) used to compare pExpr1 and pExpr2.
+   409	*/
+   410	static u8 binaryCompareP5(
+   411	  const Expr *pExpr1,   /* Left operand */
+   412	  const Expr *pExpr2,   /* Right operand */
+   413	  int jumpIfNull        /* Extra flags added to P5 */
+   414	){
+   415	  u8 aff = (char)sqlite3ExprAffinity(pExpr2);
+   416	  aff = (u8)sqlite3CompareAffinity(pExpr1, aff) | (u8)jumpIfNull;
+   417	  return aff;
+   418	}
+   419	
+   420	/*
+   421	** Return a pointer to the collation sequence that should be used by
+   422	** a binary comparison operator comparing pLeft and pRight.
+   423	**
+   424	** If the left hand expression has a collating sequence type, then it is
+   425	** used. Otherwise the collation sequence for the right hand expression
+
+build.c: omitted type is BLOB
+  1550	  Table *p;
+  1551	  int i;
+  1552	  char *z;
+  1553	  char *zType;
+  1554	  Column *pCol;
+  1555	  sqlite3 *db = pParse->db;
+  1556	  Column *aNew;
+  1557	  u8 eType = COLTYPE_CUSTOM;
+  1558	  u8 szEst = 1;
+  1559	  char affinity = SQLITE_AFF_BLOB;
+  1560	
+  1561	  if( (p = pParse->pNewTable)==0 ) return;
+  1562	  if( p->nCol+1>db->aLimit[SQLITE_LIMIT_COLUMN] ){
+  1624	  sqlite3ColumnPropertiesFromName(p, pCol);
+  1625	
+  1626	  if( sType.n==0 ){
+  1627	    /* If there is no type specified, columns have the default affinity
+  1628	    ** 'BLOB' with a default size of 4 bytes. */
+  1629	    pCol->affinity = affinity;
+  1630	    pCol->eCType = eType;
+  1631	    pCol->szEst = szEst;
+  1632	#ifdef SQLITE_ENABLE_SORTER_REFERENCES
+  1633	    if( affinity==SQLITE_AFF_BLOB ){
+  1634	      if( 4>=sqlite3GlobalConfig.szSorterRef ){
+  1635	        pCol->colFlags |= COLFLAG_SORTERREF;
+  1636	      }
+  1637	    }
+  1638	#endif
+  1639	  }else{
+  1640	    zType = z + sqlite3Strlen30(z) + 1;
+  1641	    memcpy(zType, sType.z, sType.n);
+  1642	    zType[sType.n] = 0;
+  1643	    sqlite3Dequote(zType);
+  1644	    pCol->affinity = sqlite3AffinityType(zType, pCol);
+  1645	    pCol->colFlags |= COLFLAG_HASTYPE;
+
+sqliteInt.h: distinct NONE and BLOB markers
+  2368	** for a numeric type is a single comparison.  And the BLOB type is first.
+  2369	*/
+  2370	#define SQLITE_AFF_NONE     0x40  /* '@' */
+  2371	#define SQLITE_AFF_BLOB     0x41  /* 'A' */
+  2372	#define SQLITE_AFF_TEXT     0x42  /* 'B' */
+  2373	#define SQLITE_AFF_NUMERIC  0x43  /* 'C' */
+  2374	#define SQLITE_AFF_INTEGER  0x44  /* 'D' */
+  2375	#define SQLITE_AFF_REAL     0x45  /* 'E' */
+  2376	#define SQLITE_AFF_FLEXNUM  0x46  /* 'F' */
+  2377	#define SQLITE_AFF_DEFER    0x58  /* 'X'  - defer computation until later */
+  2378	
+  2379	#define sqlite3IsNumericAffinity(X)  ((X)>=SQLITE_AFF_NUMERIC)
+  2380	
+  2381	/*
+  2382	** The SQLITE_AFF_MASK values masks off the significant bits of an
+  2383	** affinity value.
+  2384	*/
+
+select.c: fixed columns retain original affinity
+  4923	** This is a helper function for Walker callback propagateConstantExprRewrite().
+  4924	**
+  4925	** Argument pExpr is a candidate expression to be replaced by a value. If
+  4926	** pExpr is equivalent to one of the columns named in pWalker->u.pConst,
+  4927	** then overwrite it with the corresponding value. Except, do not do so
+  4928	** if argument bIgnoreAffBlob is non-zero and the affinity of pExpr
+  4929	** is SQLITE_AFF_BLOB.
+  4930	*/
+  4931	static int propagateConstantExprRewriteOne(
+  4932	  WhereConst *pConst,
+  4933	  Expr *pExpr,
+  4934	  int bIgnoreAffBlob
+  4935	){
+  4936	  int i;
+  4937	  if( pConst->pOomFault[0] ) return WRC_Prune;
+  4938	  if( pExpr->op!=TK_COLUMN ) return WRC_Continue;
+  4939	  if( ExprHasProperty(pExpr, EP_FixedCol|pConst->mExcludeOn) ){
+  4940	    testcase( ExprHasProperty(pExpr, EP_FixedCol) );
+  4941	    testcase( ExprHasProperty(pExpr, EP_OuterON) );
+  4942	    testcase( ExprHasProperty(pExpr, EP_InnerON) );
+  4943	    return WRC_Continue;
+  4944	  }
+  4945	  for(i=0; i<pConst->nConst; i++){
+  4946	    Expr *pColumn = pConst->apExpr[i*2];
+  4947	    if( pColumn==pExpr ) continue;
+  4948	    if( pColumn->iTable!=pExpr->iTable ) continue;
+  4949	    if( pColumn->iColumn!=pExpr->iColumn ) continue;
+  4950	    assert( SQLITE_AFF_NONE<SQLITE_AFF_BLOB );
+  4951	    if( bIgnoreAffBlob && sqlite3ExprAffinity(pColumn)<=SQLITE_AFF_BLOB ){
+  4952	      break;
+  4953	    }
+  4954	    /* A match is found.  Add the EP_FixedCol property */
+  4955	    pConst->nChng++;
+  4956	    ExprClearProperty(pExpr, EP_Leaf);
+  4957	    ExprSetProperty(pExpr, EP_FixedCol);
+  4958	    assert( pExpr->pLeft==0 );
+  4959	    pExpr->pLeft = sqlite3ExprDup(pConst->pParse->db, pConst->apExpr[i*2+1], 0);
+  4960	    if( pConst->pParse->db->mallocFailed ) return WRC_Prune;
+  4961	    break;
+  4962	  }
+  4963	  return WRC_Prune;
+  4964	}
+  4965	
+  4966	/*
+  4967	** This is a Walker expression callback. pExpr is a node from the WHERE
+  4968	** clause of a SELECT statement. This function examines pExpr to see if
+  4969	** any substitutions based on the contents of pWalker->u.pConst should
+  4970	** be made to pExpr or its immediate children.
+  4971	**
+  4972	** A substitution is made if:
+  4973	**
+  4974	**   + pExpr is a column with an affinity other than BLOB that matches
+  4975	**     one of the columns in pWalker->u.pConst, or
+  4976	**
+  4977	**   + pExpr is a binary comparison operator (=, <=, >=, <, >) that
+  4978	**     uses an affinity other than TEXT and one of its immediate
+  4979	**     children is a column that matches one of the columns in
+  4980	**     pWalker->u.pConst.
+  4981	*/
+  4982	static int propagateConstantExprRewrite(Walker *pWalker, Expr *pExpr){
+  4983	  WhereConst *pConst = pWalker->u.pConst;
+  4984	  assert( TK_GT==TK_EQ+1 );
+  4985	  assert( TK_LE==TK_EQ+2 );
+  4986	  assert( TK_LT==TK_EQ+3 );
+  4987	  assert( TK_GE==TK_EQ+4 );
+  4988	  if( pConst->bHasAffBlob ){
+  4989	    if( (pExpr->op>=TK_EQ && pExpr->op<=TK_GE)
+  4990	     || pExpr->op==TK_IS
+  4991	    ){
+  4992	      propagateConstantExprRewriteOne(pConst, pExpr->pLeft, 0);
+  4993	      if( pConst->pOomFault[0] ) return WRC_Prune;
+  4994	      if( sqlite3ExprAffinity(pExpr->pLeft)!=SQLITE_AFF_TEXT ){
+  4995	        propagateConstantExprRewriteOne(pConst, pExpr->pRight, 0);
+  4996	      }
+  4997	    }
+  4998	  }
+  4999	  return propagateConstantExprRewriteOne(pConst, pExpr, pConst->bHasAffBlob);
+  5000	}
+  5001	
+  5002	/*
+  5003	** The WHERE-clause constant propagation optimization.
+  5004	**
+  5005	** If the WHERE clause contains terms of the form COLUMN=CONSTANT or
+  5006	** CONSTANT=COLUMN that are top-level AND-connected terms that are not
+  5007	** part of a ON clause from a LEFT JOIN, then throughout the query
+  5008	** replace all other occurrences of COLUMN with CONSTANT.
+  5009	**
+  5010	** For example, the query:
+  5011	**
+  5012	**      SELECT * FROM t1, t2, t3 WHERE t1.a=39 AND t2.b=t1.a AND t3.c=t2.b
+  5013	**
+  5014	** Is transformed into
+  5015	**
+  5016	**      SELECT * FROM t1, t2, t3 WHERE t1.a=39 AND t2.b=39 AND t3.c=39
+  5017	**
+  5018	** Return true if any transformations where made and false if not.
+  5019	**
+  5020	** Implementation note:  Constant propagation is tricky due to affinity
+  5021	** and collating sequence interactions.  Consider this example:
+  5022	**
+  5023	**    CREATE TABLE t1(a INT,b TEXT);
+  5024	**    INSERT INTO t1 VALUES(123,'0123');
+  5025	**    SELECT * FROM t1 WHERE a=123 AND b=a;
+  5026	**    SELECT * FROM t1 WHERE a=123 AND b=123;
+  5027	**
+  5028	** The two SELECT statements above should return different answers.  b=a
+  5029	** is always true because the comparison uses numeric affinity, but b=123
+  5030	** is false because it uses text affinity and '0123' is not the same as '123'.
+  5031	** To work around this, the expression tree is not actually changed from
+  5032	** "b=a" to "b=123" but rather the "a" in "b=a" is tagged with EP_FixedCol
+  5033	** and the "123" value is hung off of the pLeft pointer.  Code generator
+  5034	** routines know to generate the constant "123" instead of looking up the
+  5035	** column value.  Also, to avoid collation problems, this optimization is
+  5036	** only attempted if the "a=123" term uses the default BINARY collation.
+  5037	**
+  5038	** 2021-05-25 forum post 6a06202608: Another troublesome case is...
+  5039	**
+  5040	**    CREATE TABLE t1(x);
+  5041	**    INSERT INTO t1 VALUES(10.0);
+  5042	**    SELECT 1 FROM t1 WHERE x=10 AND x LIKE 10;
+  5043	**
+  5044	** The query should return no rows, because the t1.x value is '10.0' not '10'
+  5045	** and '10.0' is not LIKE '10'.  But if we are not careful, the first WHERE
+  5046	** term "x=10" will cause the second WHERE term to become "10 LIKE 10",
+  5047	** resulting in a false positive.  To avoid this, constant propagation for
+  5048	** columns with BLOB affinity is only allowed if the constant is used with
+  5049	** operators ==, <=, <, >=, >, or IS in a way that will cause the correct
+  5050	** type conversions to occur.  See logic associated with the bHasAffBlob flag
+  5051	** for details.
+  5052	*/
+  5053	static int propagateConstants(
+  5054	  Parse *pParse,   /* The parsing context */
+  5055	  Select *p        /* The query in which to propagate constants */
+  5056	){
+  5057	  WhereConst x;
+  5058	  Walker w;
+  5059	  int nChng = 0;
+  5060	  x.pParse = pParse;

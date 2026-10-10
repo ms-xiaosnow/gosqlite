@@ -1,0 +1,23 @@
+=== RUN   TestAffinityDeclaredVersusAbsent
+    affinity_comparison_test.go:53: t=b: got int64(1), <nil>; want int64(0)
+    affinity_comparison_test.go:53: b=t: got int64(1), <nil>; want int64(0)
+    affinity_comparison_test.go:53: t=u: got int64(1), <nil>; want int64(0)
+    affinity_comparison_test.go:53: u=t: got int64(1), <nil>; want int64(0)
+    affinity_comparison_test.go:53: t IS b: got int64(1), <nil>; want int64(0)
+    affinity_comparison_test.go:53: b IS NOT t: got int64(0), <nil>; want int64(1)
+    affinity_comparison_test.go:53: t!=b: got int64(0), <nil>; want int64(1)
+    affinity_comparison_test.go:53: t>b: got int64(0), <nil>; want int64(1)
+    affinity_comparison_test.go:53: b<t: got int64(0), <nil>; want int64(1)
+    affinity_comparison_test.go:53: t<=b: got int64(1), <nil>; want int64(0)
+    affinity_comparison_test.go:53: b>=t: got int64(1), <nil>; want int64(0)
+    affinity_comparison_test.go:53: t=physical_alias: got int64(1), <nil>; want int64(0)
+    affinity_comparison_test.go:53: physical_alias=t: got int64(1), <nil>; want int64(0)
+    affinity_comparison_test.go:53: CAST(1.0 AS TEXT)=b: got int64(1), <nil>; want int64(0)
+    affinity_comparison_test.go:53: b=CAST(1.0 AS TEXT): got int64(1), <nil>; want int64(0)
+    affinity_comparison_test.go:53: CASE t WHEN b THEN 1 ELSE 0 END: got int64(1), <nil>; want int64(0)
+    affinity_comparison_test.go:53: t BETWEEN b AND b: got int64(1), <nil>; want int64(0)
+    affinity_comparison_test.go:53: t NOT BETWEEN b AND b: got int64(0), <nil>; want int64(1)
+--- FAIL: TestAffinityDeclaredVersusAbsent (0.00s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/sql	0.004s
+FAIL

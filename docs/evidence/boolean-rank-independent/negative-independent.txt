@@ -1,0 +1,28 @@
+Unchanged baseline 1336a5d + independent review tests only; expected failing negative control.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestIndependentRankTerminalAndFunctionState
+    boolean_rank_independent_test.go:53: 0 <nil>
+--- FAIL: TestIndependentRankTerminalAndFunctionState (0.00s)
+=== RUN   TestIndependentRankSQLAliasesAndExecutionShapes
+--- PASS: TestIndependentRankSQLAliasesAndExecutionShapes (0.01s)
+=== RUN   TestIndependentRankPublicTimingAndAffinity
+--- PASS: TestIndependentRankPublicTimingAndAffinity (0.28s)
+=== RUN   TestIndependentRankTypedIVFStartup
+=== RUN   TestIndependentRankTypedIVFStartup/HALFVEC(2)/1
+=== RUN   TestIndependentRankTypedIVFStartup/HALFVEC(2)/2
+    boolean_rank_independent_test.go:254: <nil>
+=== RUN   TestIndependentRankTypedIVFStartup/HALFVEC(2)/4
+=== RUN   TestIndependentRankTypedIVFStartup/BIT(2)/1
+=== RUN   TestIndependentRankTypedIVFStartup/BIT(2)/2
+    boolean_rank_independent_test.go:254: <nil>
+=== RUN   TestIndependentRankTypedIVFStartup/BIT(2)/4
+--- FAIL: TestIndependentRankTypedIVFStartup (0.19s)
+    --- PASS: TestIndependentRankTypedIVFStartup/HALFVEC(2)/1 (0.02s)
+    --- FAIL: TestIndependentRankTypedIVFStartup/HALFVEC(2)/2 (0.05s)
+    --- PASS: TestIndependentRankTypedIVFStartup/HALFVEC(2)/4 (0.01s)
+    --- PASS: TestIndependentRankTypedIVFStartup/BIT(2)/1 (0.03s)
+    --- FAIL: TestIndependentRankTypedIVFStartup/BIT(2)/2 (0.05s)
+    --- PASS: TestIndependentRankTypedIVFStartup/BIT(2)/4 (0.02s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/sqlite	0.507s
+FAIL

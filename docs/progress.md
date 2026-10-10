@@ -688,3 +688,37 @@ unpublished encrypted patch while that gate runs; it is not a remote milestone
 or final delivery. Plain rollback Reader/Tx/import-source and exclusive-WAL
 ownership remain required code. Native failure/runtime and M3/M8/M10 acceptance
 remain NOT_RUN. See encrypted-cleanup.md and its independent review.
+
+
+## Predicate, affinity and ranking correction checkpoint
+
+Source `816e84d58da57b537376bcff461776474c1759a4` combines the independently
+reviewed Boolean-context compiler, comparison-affinity repair and corrected
+ranking predicate entry points on durable ed4a38e. Scalar expressions remain
+eager where SQLite requires it; WHERE/ON/searched CASE use context-sensitive
+three-valued branching. Constant startup and fixed-column substitution preserve
+binding, affinity and bounded compilation/runtime work. Declared BLOB affinity
+is distinguished from no affinity when applying numeric/text conversions.
+
+The first combined source1336a5d failed three unchanged ordinary tests: false
+WHERE still decoded sparse values/defaults, and WHERE0 admitted an ANN result.
+That genuine failure is preserved. The repaired common predicate startup now
+covers cached terminal EOF/errors, fallback memory rows and typed/vector/ANN/
+similarity entry points before unnecessary value decoding or graph work. The
+original assertions remain unchanged; owner and independent negative controls
+fail on the old source and pass on the repaired source.
+
+Exact frozen complete CGO0 unit/vet/build passed2026-10-10T19:30:17Z; complete
+pinned ordinary SQLite3.54 oracle passed19:39:38Z; complete race (SQLite396.812s),
+five target cross-builds, module verification and every frozen hash passed with
+exit0 at19:47:07Z. Independent affinity comparisons include10,128 owner and2,016
+additional queries with full value/type checks. Historical broader Boolean
+matrix failures remain recorded; unquoted Boolean alias/LEFT-ON provenance,
+rowid-range planning and aggregate extensions are separate unpublished work.
+This scoped correction does not establish broad SQLite equivalence or M10.
+
+The preceding exact encrypted checkpoint ed4a38e4738a6906027a87cf42dc9f9ac84bc32b
+has both complete ordinary and pinned-oracle CI jobs SUCCESS in run38079679118
+at19:37:11Z; its exact Library-restored full unit/vet/build/oracle, focused race,
+five cross-builds and clean-tree checks passed19:38:52Z. This records terminal
+evidence without changing the earlier pre-correction failures.

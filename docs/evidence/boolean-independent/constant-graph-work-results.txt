@@ -1,0 +1,18 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestBooleanIndependentPlanningGraphWork
+    boolean_independent_work_probe_test.go:45: depth=4 query-duration=326.763µs accounted-work=18287 source-opens=0
+    boolean_independent_work_probe_test.go:45: depth=8 query-duration=431.861µs accounted-work=35347 source-opens=0
+    boolean_independent_work_probe_test.go:45: depth=12 query-duration=1.361143ms accounted-work=61747 source-opens=0
+    boolean_independent_work_probe_test.go:45: depth=16 query-duration=14.280896ms accounted-work=97479 source-opens=0
+    boolean_independent_work_probe_test.go:45: depth=18 query-duration=43.286385ms accounted-work=118837 source-opens=0
+--- PASS: TestBooleanIndependentPlanningGraphWork (0.06s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.064s
+=== RUN   TestBooleanIndependentConstantGraphWork
+    boolean_independent_work_probe_test.go:24: depth=4 constant=true expanded-leaf-visits=16 remaining-work=1
+    boolean_independent_work_probe_test.go:24: depth=8 constant=true expanded-leaf-visits=256 remaining-work=1
+    boolean_independent_work_probe_test.go:24: depth=12 constant=true expanded-leaf-visits=4096 remaining-work=1
+    boolean_independent_work_probe_test.go:24: depth=16 constant=true expanded-leaf-visits=65536 remaining-work=1
+--- PASS: TestBooleanIndependentConstantGraphWork (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.008s

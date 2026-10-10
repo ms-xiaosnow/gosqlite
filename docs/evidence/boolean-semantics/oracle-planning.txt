@@ -1,0 +1,86 @@
+SELECT x FROM t WHERE x AND abs(-9223372036854775808)	=>	1		Error in 3rd command line argument: integer overflow
+SELECT x FROM e WHERE x AND abs(-9223372036854775808)	=>	1		Error in 3rd command line argument: integer overflow
+SELECT x FROM t JOIN u ON x AND abs(-9223372036854775808)	=>	1		Error in 3rd command line argument: integer overflow
+SELECT x FROM t LEFT JOIN u ON x AND abs(-9223372036854775808)	=>	0	0	
+SELECT x FROM t LEFT JOIN e ON x AND abs(-9223372036854775808)	=>	1		Parse error in 3rd command line argument: ambiguous column name: x
+  SELECT x FROM t LEFT JOIN e ON x AND abs(-9223372036854775808)
+         ^--- error here
+SELECT x FROM t WHERE abs(-9223372036854775808) AND x	=>	1		Error in 3rd command line argument: integer overflow
+SELECT x FROM e WHERE abs(-9223372036854775808) AND x	=>	1		Error in 3rd command line argument: integer overflow
+SELECT x FROM t JOIN u ON abs(-9223372036854775808) AND x	=>	1		Error in 3rd command line argument: integer overflow
+SELECT x FROM t LEFT JOIN u ON abs(-9223372036854775808) AND x	=>	1		Error in 3rd command line argument: integer overflow
+SELECT x FROM t LEFT JOIN e ON abs(-9223372036854775808) AND x	=>	1		Parse error in 3rd command line argument: ambiguous column name: x
+  SELECT x FROM t LEFT JOIN e ON abs(-9223372036854775808) AND x
+         ^--- error here
+SELECT x FROM t WHERE abs(-9223372036854775808) AND 0	=>	1		Error in 3rd command line argument: integer overflow
+SELECT x FROM e WHERE abs(-9223372036854775808) AND 0	=>	1		Error in 3rd command line argument: integer overflow
+SELECT x FROM t JOIN u ON abs(-9223372036854775808) AND 0	=>	1		Error in 3rd command line argument: integer overflow
+SELECT x FROM t LEFT JOIN u ON abs(-9223372036854775808) AND 0	=>	1		Error in 3rd command line argument: integer overflow
+SELECT x FROM t LEFT JOIN e ON abs(-9223372036854775808) AND 0	=>	1		Parse error in 3rd command line argument: ambiguous column name: x
+  SELECT x FROM t LEFT JOIN e ON abs(-9223372036854775808) AND 0
+         ^--- error here
+SELECT x FROM t WHERE abs(-9223372036854775808) OR 1	=>	0	0	
+SELECT x FROM e WHERE abs(-9223372036854775808) OR 1	=>	0		
+SELECT x FROM t JOIN u ON abs(-9223372036854775808) OR 1	=>	0	0	
+SELECT x FROM t LEFT JOIN u ON abs(-9223372036854775808) OR 1	=>	1		Error in 3rd command line argument: integer overflow
+SELECT x FROM t LEFT JOIN e ON abs(-9223372036854775808) OR 1	=>	1		Parse error in 3rd command line argument: ambiguous column name: x
+  SELECT x FROM t LEFT JOIN e ON abs(-9223372036854775808) OR 1
+         ^--- error here
+SELECT x FROM t WHERE abs(-9223372036854775808) AND 0.0	=>	1		Error in 3rd command line argument: integer overflow
+SELECT x FROM e WHERE abs(-9223372036854775808) AND 0.0	=>	1		Error in 3rd command line argument: integer overflow
+SELECT x FROM t JOIN u ON abs(-9223372036854775808) AND 0.0	=>	1		Error in 3rd command line argument: integer overflow
+SELECT x FROM t LEFT JOIN u ON abs(-9223372036854775808) AND 0.0	=>	1		Error in 3rd command line argument: integer overflow
+SELECT x FROM t LEFT JOIN e ON abs(-9223372036854775808) AND 0.0	=>	1		Parse error in 3rd command line argument: ambiguous column name: x
+  SELECT x FROM t LEFT JOIN e ON abs(-9223372036854775808) AND 0.0
+         ^--- error here
+SELECT x FROM t WHERE 0.0 AND abs(-9223372036854775808)	=>	0		
+SELECT x FROM e WHERE 0.0 AND abs(-9223372036854775808)	=>	0		
+SELECT x FROM t JOIN u ON 0.0 AND abs(-9223372036854775808)	=>	0		
+SELECT x FROM t LEFT JOIN u ON 0.0 AND abs(-9223372036854775808)	=>	0	0	
+SELECT x FROM t LEFT JOIN e ON 0.0 AND abs(-9223372036854775808)	=>	1		Parse error in 3rd command line argument: ambiguous column name: x
+  SELECT x FROM t LEFT JOIN e ON 0.0 AND abs(-9223372036854775808)
+         ^--- error here
+SELECT x FROM t WHERE x OR abs(-9223372036854775808)	=>	1		Error in 3rd command line argument: integer overflow
+SELECT x FROM e WHERE x OR abs(-9223372036854775808)	=>	0		
+SELECT x FROM t JOIN u ON x OR abs(-9223372036854775808)	=>	1		Error in 3rd command line argument: integer overflow
+SELECT x FROM t LEFT JOIN u ON x OR abs(-9223372036854775808)	=>	1		Error in 3rd command line argument: integer overflow
+SELECT x FROM t LEFT JOIN e ON x OR abs(-9223372036854775808)	=>	1		Parse error in 3rd command line argument: ambiguous column name: x
+  SELECT x FROM t LEFT JOIN e ON x OR abs(-9223372036854775808)
+         ^--- error here
+SELECT x FROM t WHERE NULL AND abs(-9223372036854775808)	=>	0		
+SELECT x FROM e WHERE NULL AND abs(-9223372036854775808)	=>	0		
+SELECT x FROM t JOIN u ON NULL AND abs(-9223372036854775808)	=>	0		
+SELECT x FROM t LEFT JOIN u ON NULL AND abs(-9223372036854775808)	=>	0	0	
+SELECT x FROM t LEFT JOIN e ON NULL AND abs(-9223372036854775808)	=>	1		Parse error in 3rd command line argument: ambiguous column name: x
+  SELECT x FROM t LEFT JOIN e ON NULL AND abs(-9223372036854775808)
+         ^--- error here
+SELECT x FROM t WHERE NOT (NULL OR abs(-9223372036854775808))	=>	0		
+SELECT x FROM e WHERE NOT (NULL OR abs(-9223372036854775808))	=>	0		
+SELECT x FROM t JOIN u ON NOT (NULL OR abs(-9223372036854775808))	=>	0		
+SELECT x FROM t LEFT JOIN u ON NOT (NULL OR abs(-9223372036854775808))	=>	0	0	
+SELECT x FROM t LEFT JOIN e ON NOT (NULL OR abs(-9223372036854775808))	=>	1		Parse error in 3rd command line argument: ambiguous column name: x
+  SELECT x FROM t LEFT JOIN e ON NOT (NULL OR abs(-9223372036854775808))
+         ^--- error here
+SELECT x FROM t WHERE (abs(-9223372036854775808) AND 0) IS FALSE	=>	0	0	
+SELECT x FROM e WHERE (abs(-9223372036854775808) AND 0) IS FALSE	=>	0		
+SELECT x FROM t JOIN u ON (abs(-9223372036854775808) AND 0) IS FALSE	=>	0	0	
+SELECT x FROM t LEFT JOIN u ON (abs(-9223372036854775808) AND 0) IS FALSE	=>	1		Error in 3rd command line argument: integer overflow
+SELECT x FROM t LEFT JOIN e ON (abs(-9223372036854775808) AND 0) IS FALSE	=>	1		Parse error in 3rd command line argument: ambiguous column name: x
+  SELECT x FROM t LEFT JOIN e ON (abs(-9223372036854775808) AND 0) IS FALSE
+         ^--- error here
+SELECT x FROM t WHERE x<0 AND abs(-9223372036854775808)	=>	1		Error in 3rd command line argument: integer overflow
+SELECT x FROM t WHERE x<0 AND abs(-9223372036854775808)>0	=>	1		Error in 3rd command line argument: integer overflow
+SELECT x FROM t WHERE x<0 AND abs(x-9223372036854775808)>0	=>	0		
+SELECT x FROM t WHERE x<0 AND x LIKE 'x' ESCAPE 'ab'	=>	0		
+SELECT x FROM t WHERE x=99 AND abs(-9223372036854775808)	=>	1		Error in 3rd command line argument: integer overflow
+SELECT x FROM t WHERE x=99 AND abs(-9223372036854775808)>0	=>	1		Error in 3rd command line argument: integer overflow
+SELECT x FROM t WHERE x=99 AND abs(x-9223372036854775808)>0	=>	0		
+SELECT x FROM t WHERE x=99 AND x LIKE 'x' ESCAPE 'ab'	=>	0		
+SELECT x FROM t WHERE x IS NULL AND abs(-9223372036854775808)	=>	1		Error in 3rd command line argument: integer overflow
+SELECT x FROM t WHERE x IS NULL AND abs(-9223372036854775808)>0	=>	1		Error in 3rd command line argument: integer overflow
+SELECT x FROM t WHERE x IS NULL AND abs(x-9223372036854775808)>0	=>	0		
+SELECT x FROM t WHERE x IS NULL AND x LIKE 'x' ESCAPE 'ab'	=>	0		
+SELECT x FROM t WHERE x AND abs(-9223372036854775808)	=>	1		Error in 3rd command line argument: integer overflow
+SELECT x FROM t WHERE x AND abs(-9223372036854775808)>0	=>	1		Error in 3rd command line argument: integer overflow
+SELECT x FROM t WHERE x AND abs(x-9223372036854775808)>0	=>	0		
+SELECT x FROM t WHERE x AND x LIKE 'x' ESCAPE 'ab'	=>	0		

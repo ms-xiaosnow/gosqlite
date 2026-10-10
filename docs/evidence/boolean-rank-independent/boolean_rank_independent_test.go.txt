@@ -1,0 +1,263 @@
+package sqlite
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"io"
+	"reflect"
+	"strings"
+	"testing"
+
+	sqlast "github.com/ms-xiaosnow/gosqlite/internal/sql"
+)
+
+// Independent review probes: only descriptor-free evaluator objects and intact
+// ordinary SQL fixtures. No physical faults, mutated file bytes or recovery.
+type rankIndependentSource struct{ next, close int }
+
+func (s *rankIndependentSource) Next() (int64, []any, error) { s.next++; return 0, nil, io.EOF }
+func (s *rankIndependentSource) Close() error                { s.close++; return nil }
+func rankIndependentExpr(t *testing.T, text string) sqlast.Expr {
+	t.Helper()
+	e, err := sqlast.ParseExpr(text)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return e
+}
+
+type rankIndependentBudget struct {
+	left int64
+	err  error
+}
+
+func (b *rankIndependentBudget) Step(n int64) error {
+	if n > b.left {
+		return b.err
+	}
+	b.left -= n
+	return nil
+}
+func (b *rankIndependentBudget) Allocate(n int64) error { return nil }
+
+func TestIndependentRankTerminalAndFunctionState(t *testing.T) {
+	const boom = "abs(-9223372036854775808)"
+	for _, where := range []string{"0", boom + " AND 0"} {
+		r := sparseReviewMemoryRows(t, "invalid", "invalid", true)
+		r.sel.Where = rankIndependentExpr(t, where)
+		src := &rankIndependentSource{}
+		r.source = src
+		first := r.startPredicates()
+		if first == nil || (where == "0" && first != io.EOF) || (where != "0" && !strings.Contains(first.Error(), "overflow")) {
+			t.Fatal(where, first)
+		}
+		for i := 0; i < 3; i++ {
+			if got := r.startPredicates(); got != first {
+				t.Fatal("terminal result lost", where, got, first)
+			}
+		}
+		if src.next != 0 || r.queryStats.BaseRowFetches != 0 {
+			t.Fatal("startup accessed source")
+		}
+		ctx, cancel := context.WithCancel(context.Background())
+		cancel()
+		r.ctx = ctx
+		if err := r.startPredicates(); !errors.Is(err, context.Canceled) {
+			t.Fatal(err)
+		}
+	}
+	r := sparseReviewMemoryRows(t, "invalid", "invalid", true)
+	r.sel.Where = rankIndependentExpr(t, "0")
+	src := &rankIndependentSource{}
+	r.source = src
+	if err := r.materialize(); err != nil || src.next != 0 || src.close != 1 || r.source != nil {
+		t.Fatal(err, src, r.source)
+	}
+	if err := r.materialize(); err != nil || src.close != 1 {
+		t.Fatal("repeated false gate", err, src)
+	}
+	// A compiler quota failure is cached just like a runtime startup failure.
+	r = sparseReviewMemoryRows(t, nil, nil, false)
+	r.sel.Where = rankIndependentExpr(t, "active AND 1")
+	sentinel := errors.New("independent scalar work limit")
+	r.ctx = sqlast.WithEvalBudget(context.Background(), &rankIndependentBudget{left: 0, err: sentinel})
+	if err := r.startPredicates(); !errors.Is(err, sentinel) {
+		t.Fatal(err)
+	}
+	r.ctx = context.Background()
+	if err := r.startPredicates(); !errors.Is(err, sentinel) {
+		t.Fatal("compile error forgotten", err)
+	}
+	// Context-supplied functions remain residual and are evaluated once per row.
+	r = sparseReviewMemoryRows(t, nil, nil, false)
+	r.order = nil
+	r.sel.Where = rankIndependentExpr(t, "abs(7)")
+	calls := 0
+	r.functions = map[string]sqlast.Function{"abs": func([]any) (any, error) { calls++; return int64(1), nil }}
+	if err := r.startPredicates(); err != nil || calls != 0 {
+		t.Fatal(err, calls)
+	}
+	for i := 0; i < 3; i++ {
+		_, _, keep, err := r.evaluateSourceRow(int64(i), []any{nil, nil, int64(1)})
+		if err != nil || !keep {
+			t.Fatal(err, keep)
+		}
+	}
+	if calls != 3 {
+		t.Fatal("context function hoisted or repeated", calls)
+	}
+}
+
+func TestIndependentRankSQLAliasesAndExecutionShapes(t *testing.T) {
+	db, _ := reviewVectorDB(t, Options{})
+	reviewVectorExec(t, db, "CREATE TABLE items(id INTEGER PRIMARY KEY,v VECTOR(2) NOT NULL,active INTEGER)")
+	reviewVectorExec(t, db, "INSERT INTO items VALUES(1,'[1,1]',0),(2,'[1,1]',1)")
+	if err := db.CreateHNSWIndex(context.Background(), "knn", "items", "v"); err != nil {
+		t.Fatal(err)
+	}
+	const boom = "abs(-9223372036854775808)"
+	for _, shape := range []struct{ from, tail string }{
+		{"items", ""}, {"items", " ORDER BY v <-> 'invalid' LIMIT 2"},
+		{"items NOT INDEXED", " ORDER BY v <-> 'invalid' LIMIT 2"},
+		{"items", " ORDER BY v <-> 'invalid' DESC LIMIT 2"},
+		{"items", " ORDER BY v <-> 'invalid',id LIMIT 2"},
+		{"items", " ORDER BY v <-> 'invalid'"},
+	} {
+		q := "SELECT id,0 AS keep FROM " + shape.from + " WHERE keep AND " + boom + shape.tail
+		got, _, stats := reviewVectorQuery(t, db, q)
+		if len(got) != 0 || stats.BaseRowFetches != 0 || stats.ANNNodeReads != 0 || stats.VectorRankComponents != 0 {
+			t.Fatal(q, got, stats)
+		}
+	}
+	// A physical column wins over a same-named result alias, including ANN.
+	got, plan, _ := reviewVectorQuery(t, db, "SELECT id,0 AS active FROM items WHERE active ORDER BY v <-> '[1,1]' LIMIT 2")
+	if !reflect.DeepEqual(got, [][]any{{int64(2), int64(0)}}) || plan.Method != "hnsw" {
+		t.Fatal(got, plan)
+	}
+	for _, suffix := range []string{" LIMIT 0", " ORDER BY v <-> 'invalid' LIMIT 0"} {
+		got, _, stats := reviewVectorQuery(t, db, "SELECT id FROM items WHERE "+boom+suffix)
+		if len(got) != 0 || stats.BaseRowFetches != 0 {
+			t.Fatal(got, stats)
+		}
+	}
+	got, _, stats := reviewVectorQuery(t, db, "EXPLAIN QUERY PLAN SELECT id FROM items WHERE "+boom+" ORDER BY v <-> 'invalid' LIMIT 2")
+	if len(got) != 1 || stats.BaseRowFetches != 0 || stats.ANNNodeReads != 0 {
+		t.Fatal(got, stats)
+	}
+	for _, where := range []string{"0 AND abs()", "0 AND absent()", "0 AND abs(missing)"} {
+		rows, err := db.Query(context.Background(), "SELECT id FROM items WHERE "+where+" ORDER BY v <-> '[1,1]' LIMIT 2")
+		if rows != nil {
+			rows.Close()
+		}
+		if err == nil {
+			t.Fatal("validation suppressed", where)
+		}
+	}
+}
+
+func TestIndependentRankPublicTimingAndAffinity(t *testing.T) {
+	db, _ := reviewVectorDB(t, Options{})
+	ctx := context.Background()
+	reviewVectorExec(t, db, "CREATE TABLE items(id INTEGER PRIMARY KEY,v VECTOR(2) NOT NULL,h HALFVEC(2) NOT NULL,s SPARSEVEC(20) NOT NULL,b BIT(2) NOT NULL,body TEXT,t TEXT,u BLOB)")
+	for _, field := range []string{"v", "h", "s", "b"} {
+		if err := db.CreateHNSWIndex(ctx, "knn_"+field, "items", field); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := db.CreateGramsIndex(ctx, "grams", "items", []string{"body"}); err != nil {
+		t.Fatal(err)
+	}
+	search := func(kind string, mode VectorSearchMode, where string, query any, limit int) (int, error) {
+		switch kind {
+		case "v":
+			r, e := db.VectorSearch(ctx, "items", "v", query, VectorSearchOptions{Mode: mode, Where: where, Limit: limit})
+			return len(r.Hits), e
+		case "h":
+			r, e := db.HalfSearch(ctx, "items", "h", query, HalfSearchOptions{Mode: mode, Where: where, Limit: limit})
+			return len(r.Hits), e
+		case "s":
+			r, e := db.SparseSearch(ctx, "items", "s", query, SparseSearchOptions{Mode: mode, Where: where, Limit: limit})
+			return len(r.Hits), e
+		case "b":
+			r, e := db.BitSearch(ctx, "items", "b", query, BitSearchOptions{Mode: mode, Where: where, Limit: limit})
+			return len(r.Hits), e
+		default:
+			r, e := db.SimilaritySearch(ctx, "grams", "body", query, SimilarityOptions{Where: where, Limit: limit, Threshold: 0.1, ForceScan: mode == VectorModeExact})
+			return len(r.Hits), e
+		}
+	}
+	const boom = "abs(-9223372036854775808)"
+	for _, nonempty := range []bool{false, true} {
+		if nonempty {
+			reviewVectorExec(t, db, "INSERT INTO items VALUES(1,'[1,1]','[1,1]','{1:1}/20','01','abc',1.0,1.0)")
+		}
+		for _, mode := range []VectorSearchMode{VectorModeExact, VectorModeApproximate} {
+			for _, tc := range []struct{ kind, value string }{{"v", "[1,1]"}, {"h", "[1,1]"}, {"s", "{1:1}/20"}, {"b", "01"}, {"text", "abc"}} {
+				for _, limit := range []int{0, 1} {
+					for _, query := range []any{nil, tc.value} {
+						n, err := search(tc.kind, mode, boom, query, limit)
+						wantErr := nonempty && query != nil && limit != 0
+						if n != 0 || (err != nil) != wantErr || err != nil && !strings.Contains(err.Error(), "overflow") {
+							t.Fatal(tc.kind, mode, nonempty, query, limit, n, err)
+						}
+					}
+				}
+				for _, where := range []string{"0 AND abs()", "0 AND absent()", "0 AND abs(missing)"} {
+					if _, err := search(tc.kind, mode, where, nil, 0); err == nil {
+						t.Fatal("public validation suppressed", tc.kind, where)
+					}
+				}
+				if nonempty {
+					for _, where := range []string{"t=u", "u=t", "t=1.0 AND t=u", "t=u AND t=1.0"} {
+						if n, err := search(tc.kind, mode, where, tc.value, 1); err != nil || n != 0 {
+							t.Fatal("affinity", tc.kind, mode, where, n, err)
+						}
+					}
+					if n, err := search(tc.kind, mode, "t=+u", tc.value, 1); err != nil || n != 1 {
+						t.Fatal("expression affinity", tc.kind, mode, n, err)
+					}
+				}
+			}
+		}
+	}
+	// A false public filter does not change its eager query-input validation.
+	for _, kind := range []string{"v", "h", "s", "b"} {
+		if _, err := search(kind, VectorModeExact, "0", "invalid", 0); err == nil {
+			t.Fatal("query validation skipped", kind)
+		}
+	}
+}
+
+func TestIndependentRankTypedIVFStartup(t *testing.T) {
+	const boom = "abs(-9223372036854775808)"
+	for _, tc := range []struct{ decl, value, op, opclass string }{{"HALFVEC(2)", "[1,1]", "<->", "halfvec_l2_ops"}, {"BIT(2)", "01", "<~>", "bit_hamming_ops"}} {
+		for _, lists := range []int{1, 2, 4} {
+			t.Run(fmt.Sprintf("%s/%d", tc.decl, lists), func(t *testing.T) {
+				db, _ := reviewVectorDB(t, Options{})
+				reviewVectorExec(t, db, "CREATE TABLE items(id INTEGER PRIMARY KEY,v "+tc.decl+" NOT NULL,active INTEGER)")
+				reviewVectorExec(t, db, "INSERT INTO items VALUES(1,?,0),(2,?,1)", tc.value, tc.value)
+				if err := db.CreateIVFFlatIndex(context.Background(), "ivf", "items", "v", IVFFlatIndexOptions{Lists: lists, Opclass: tc.opclass}); err != nil {
+					t.Fatal(err)
+				}
+				for _, where := range []string{"0", "NULL", "active AND 0"} {
+					got, _, stats := reviewVectorQuery(t, db, "SELECT id FROM items WHERE "+where+" ORDER BY v "+tc.op+" 'invalid' LIMIT 2")
+					if len(got) != 0 || stats.BaseRowFetches != 0 || stats.ANNCentroidReads != 0 || stats.ANNMemberKeysRead != 0 || stats.VectorRankComponents != 0 || stats.VectorRankPackedBytes != 0 {
+						t.Fatal(where, got, stats)
+					}
+				}
+				rows, err := db.Query(context.Background(), "SELECT id FROM items WHERE "+boom+" AND 0 ORDER BY v "+tc.op+" ? LIMIT 2", tc.value)
+				if rows != nil {
+					rows.Close()
+				}
+				if err == nil || !strings.Contains(err.Error(), "overflow") {
+					t.Fatal(err)
+				}
+				got, _, _ := reviewVectorQuery(t, db, "SELECT id FROM items WHERE active ORDER BY v "+tc.op+" ? LIMIT 2", tc.value)
+				if !reflect.DeepEqual(got, [][]any{{int64(2)}}) {
+					t.Fatal(got)
+				}
+			})
+		}
+	}
+}

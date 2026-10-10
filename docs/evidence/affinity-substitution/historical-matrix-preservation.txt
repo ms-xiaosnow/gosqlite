@@ -1,0 +1,1 @@
+PASS: TestBooleanIndependentAffinityOracle function tokens unchanged from accepted reviewer final source, apart from TestAffinityInheritedMatrixOracle name. All 2160 expressions and full-value assertions retained.

@@ -1,0 +1,32 @@
+{
+  "base_tree": "1336a5d7b5e1a336fb01e012334cec776a61c4a7",
+  "base_source": "boolean-affinity-lead-verify",
+  "frozen_source": "boolean-rank-filter-freeze-v1",
+  "owned": {
+    "sqlite/predicate.go": {
+      "base_sha256": "65b8d575b7295e7f4e1130d5539751c86d51b86d029154d81ea9f37f761c1ce7",
+      "sha256": "b2bfea3d36f536edf1a1b8cacefc96ce92d7774ffae8433be458a7cc1bf69d75"
+    },
+    "sqlite/rows.go": {
+      "base_sha256": "c4eccf745e63b48ab04cae1fe1d21929adc406fa662807525a049f7993583c55",
+      "sha256": "020994e243e4498a426b5ee7651128e0e074665a4cd6fd13739a78da66b15978"
+    },
+    "sqlite/plan_vector.go": {
+      "base_sha256": "5c405a5be079463b0c0ad3eea471ad9977a1d95d05e65092ea37102f706ef3d4",
+      "sha256": "d0b24de824fa8b7717c030d09a3594ba95df5ddbb9dc095902dc068378afbcfb"
+    },
+    "sqlite/similarity_search.go": {
+      "base_sha256": "06b6cd10e10d89d46bfb4323c63f92f4a0d41f888a34fa6db95687939b92a9eb",
+      "sha256": "330a3f415cac2da36ce80bff7690abf85ffdc8a9120cadc21d0909d4541ade18"
+    },
+    "sqlite/boolean_rank_filter_test.go": {
+      "base_sha256": null,
+      "sha256": "1941b13f46ffb2bd55c845a21e837ee8cbc7df813f592a8c2e58680069bdff7e"
+    },
+    "internal/testkit/boolean_rank_filter_oracle_test.go": {
+      "base_sha256": null,
+      "sha256": "9a6d64e65141ec3f828e7f37344d38ad176318ff656b828db1c5df902ea0cc35"
+    }
+  },
+  "full_file_manifest_sha256": "c6a97ba00dbc2ed114ed5979aeb0317fabd203278c09cf6c33854e3fb2e993ff"
+}

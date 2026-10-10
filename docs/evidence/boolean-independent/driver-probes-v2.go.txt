@@ -1,0 +1,112 @@
+package driver_test
+
+import (
+	"context"
+	"database/sql"
+	"errors"
+	"path/filepath"
+	"reflect"
+	"strings"
+	"testing"
+
+	gosqldriver "github.com/ms-xiaosnow/gosqlite/driver"
+	"github.com/ms-xiaosnow/gosqlite/sqlite"
+)
+
+// Public database/sql path; normal prepared reads, ordinary rollback,
+// cancellation and close. No helper injects physical or process failures.
+func TestBooleanIndependentDriver(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "driver.db")
+	connector, e := gosqldriver.NewConnector(path, sqlite.Options{})
+	if e != nil {
+		t.Fatal(e)
+	}
+	db := sql.OpenDB(connector)
+	db.SetMaxOpenConns(1)
+	defer db.Close()
+	for _, q := range []string{"CREATE TABLE t(id INTEGER PRIMARY KEY,flag INTEGER,v INTEGER)", "CREATE TABLE u(y INTEGER)", "INSERT INTO t VALUES(1,0,-9223372036854775808),(2,1,-9223372036854775808)", "INSERT INTO u VALUES(3)"} {
+		if _, e := db.Exec(q); e != nil {
+			t.Fatal(e)
+		}
+	}
+	for _, template := range []string{"SELECT ?1 AND abs(v) FROM t WHERE id=1", "SELECT id FROM t WHERE ?1 AND abs(v)", "SELECT t.id FROM t,u WHERE ?1 AND abs(v)", "SELECT CASE WHEN ?1 AND abs(v) THEN 8 ELSE 9 END FROM t WHERE id=1"} {
+		stmt, e := db.Prepare(template)
+		if e != nil {
+			t.Fatal(e)
+		}
+		for _, arg := range []any{int64(0), int64(1), nil, int64(0)} {
+			r, e := stmt.Query(arg)
+			var got []int64
+			if e == nil {
+				for r.Next() {
+					var v int64
+					if e = r.Scan(&v); e != nil {
+						break
+					}
+					got = append(got, v)
+				}
+				if e == nil {
+					e = r.Err()
+				}
+				r.Close()
+			}
+			scalar := strings.HasPrefix(template, "SELECT ?1")
+			wantErr := scalar || arg == int64(1)
+			if (e != nil) != wantErr {
+				t.Errorf("%s arg=%v got=%v err=%v", template, arg, got, e)
+			}
+			if !wantErr && strings.Contains(template, "CASE") && !reflect.DeepEqual(got, []int64{9}) {
+				t.Fatal(got, e)
+			}
+		}
+		stmt.Close()
+	}
+	for _, q := range []string{"SELECT id FROM t WHERE 0 AND ?1 LIMIT 0", "SELECT id FROM t WHERE 0.0 AND missing LIMIT 0"} {
+		r, e := db.Query(q)
+		if e == nil {
+			r.Close()
+			t.Fatal("unbound/invalid accepted:", q)
+		}
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	r, e := db.QueryContext(ctx, "SELECT t.id FROM t,u WHERE 1 OR abs(v)")
+	if e != nil {
+		t.Fatal(e)
+	}
+	if !r.Next() {
+		t.Fatal(r.Err())
+	}
+	cancel()
+	for r.Next() {
+	}
+	if !errors.Is(r.Err(), context.Canceled) {
+		t.Fatal(r.Err())
+	}
+	r.Close()
+	tx, e := db.Begin()
+	if e != nil {
+		t.Fatal(e)
+	}
+	if _, e = tx.Exec("UPDATE t SET flag=7 WHERE 0 AND abs(v)"); e != nil {
+		t.Fatal(e)
+	}
+	if _, e = tx.Exec("DELETE FROM t WHERE 0.0 AND abs(v)"); e != nil {
+		t.Fatal(e)
+	}
+	if e = tx.Rollback(); e != nil {
+		t.Fatal(e)
+	}
+	var flag int64
+	if e = db.QueryRow("SELECT flag FROM t WHERE id=1").Scan(&flag); e != nil || flag != 0 {
+		t.Fatal(flag, e)
+	}
+	if e = db.Close(); e != nil {
+		t.Fatal(e)
+	}
+	reopen := sql.OpenDB(connector)
+	reopen.SetMaxOpenConns(1)
+	defer reopen.Close()
+	if e = reopen.QueryRow("SELECT flag FROM t WHERE id=1").Scan(&flag); e != nil || flag != 0 {
+		t.Fatal(flag, e)
+	}
+}

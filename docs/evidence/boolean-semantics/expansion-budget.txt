@@ -1,0 +1,5 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestBooleanTransitiveConstantExpansionIsBounded
+--- PASS: TestBooleanTransitiveConstantExpansionIsBounded (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.048s

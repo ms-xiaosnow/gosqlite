@@ -1,0 +1,179 @@
+//go:build oracle
+
+package testkit_test
+
+import (
+	"bytes"
+	"context"
+	"fmt"
+	"os/exec"
+	"path/filepath"
+	"reflect"
+	"strconv"
+	"strings"
+	"testing"
+
+	"github.com/ms-xiaosnow/gosqlite/sqlite"
+)
+
+// Independent reviewer matrix. Only ordinary intact SQL-created databases,
+// normally completing read-only pinned CLI children, and normal SQL lifecycle.
+// Unlike the owner's same-input fixture, every left input is paired with every
+// right input. No injected failures, process control, or raw database writes.
+func independentAffinityRows(t *testing.T, db *sqlite.DB, path string, queries []string) {
+	t.Helper()
+	var script strings.Builder
+	for i, query := range queries {
+		fmt.Fprintf(&script, "SELECT 'independent-affinity-%d';\n%s;\n", i, query)
+	}
+	cmd := exec.Command(confOracle(t), "-batch", "-bail", "-noheader", "-quote", "-readonly", path)
+	cmd.Stdin = strings.NewReader(script.String())
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
+	out, err := cmd.Output()
+	if err != nil {
+		t.Fatalf("pinned oracle: %v: %s", err, stderr.String())
+	}
+	decoded, err := confQuoted(out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	wants := make([][][]any, len(queries))
+	current := -1
+	for _, row := range decoded {
+		if len(row) == 1 {
+			marker, ok := row[0].(string)
+			if !ok || marker != "independent-affinity-"+strconv.Itoa(current+1) {
+				t.Fatalf("unexpected oracle marker: %#v after %d", row, current)
+			}
+			current++
+			if current >= len(queries) {
+				t.Fatal("too many oracle markers")
+			}
+			continue
+		}
+		if current < 0 {
+			t.Fatal("oracle row before marker")
+		}
+		wants[current] = append(wants[current], row)
+	}
+	if current+1 != len(queries) {
+		t.Fatalf("oracle returned %d/%d cases", current+1, len(queries))
+	}
+	rowCount, failed := 0, 0
+	for i, query := range queries {
+		rows, err := db.Query(context.Background(), query)
+		if err != nil {
+			t.Errorf("query %d %s: %v", i, query, err)
+			failed++
+			continue
+		}
+		var got [][]any
+		for rows.Next() {
+			got = append(got, rows.Values())
+		}
+		readErr, closeErr := rows.Err(), rows.Close()
+		rowCount += len(got)
+		if readErr != nil || closeErr != nil {
+			t.Errorf("query %d errors: %v, %v", i, readErr, closeErr)
+			failed++
+			continue
+		}
+		if !reflect.DeepEqual(got, wants[i]) {
+			failed++
+			t.Errorf("query %d %s: native rows=%d oracle rows=%d", i, query, len(got), len(wants[i]))
+			for j := 0; j < len(got) && j < len(wants[i]); j++ {
+				if !reflect.DeepEqual(got[j], wants[i][j]) {
+					t.Logf("first differing row %d: native=%#v oracle=%#v", j, got[j], wants[i][j])
+					break
+				}
+			}
+		}
+	}
+	t.Logf("independent cross-value matrix: %d queries, %d native rows, %d mismatches", len(queries), rowCount, failed)
+}
+
+func TestAffinityIndependentCrossValuesOracle(t *testing.T) {
+	confOracle(t)
+	for _, shared := range []bool{false, true} {
+		t.Run(fmt.Sprintf("shared=%t", shared), func(t *testing.T) {
+			path := filepath.Join(t.TempDir(), "pairs.db")
+			db, err := sqlite.Open(path, sqlite.Options{WALShared: shared})
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer func() {
+				if err := db.Close(); err != nil {
+					t.Error(err)
+				}
+			}()
+			writeExec(t, db, "CREATE TABLE pairs(id INTEGER PRIMARY KEY,lt TEXT,lb BLOB,lu,ln NUMERIC,li INTEGER,lr REAL,rt TEXT,rb BLOB,ru,rn NUMERIC,ri INTEGER,rr REAL)")
+			values := []string{"NULL", "0", "1", "1.0", "-1.5", "'01'", "'1.0'", "'x'", "X'31'", "X''"}
+			id := 0
+			for _, left := range values {
+				for _, right := range values {
+					id++
+					writeExec(t, db, fmt.Sprintf("INSERT INTO pairs VALUES(%d,%s%s)", id, strings.Repeat(left+",", 6), strings.TrimSuffix(strings.Repeat(right+",", 6), ",")))
+				}
+			}
+			var scalar []string
+			cols := []string{"t", "b", "u", "n", "i", "r"}
+			for _, l := range cols {
+				for _, r := range cols {
+					left, right := "l"+l, "r"+r
+					for _, pair := range [][2]string{
+						{left, right}, {"((" + left + "))", "((" + right + "))"},
+						{left, "+" + right}, {"+" + left, right},
+						{left, "coalesce(" + right + ",NULL)"},
+						{left, "CASE WHEN 1 THEN " + right + " END"},
+						{left, "CAST(" + right + " AS BLOB)"},
+						{left, "CAST(" + right + " AS NUMERIC)"},
+					} {
+						a, b := "("+pair[0]+")", "("+pair[1]+")"
+						project := []string{"id", a, b, "typeof(" + a + ")", "typeof(" + b + ")"}
+						var exprs []string
+						for _, op := range []string{"=", "!=", "<", "<=", ">", ">=", "IS", "IS NOT"} {
+							exprs = append(exprs, a+op+b)
+						}
+						exprs = append(exprs, a+" IN ("+b+")", a+" IN ("+b+",NULL)", a+" NOT IN ("+b+")",
+							"CASE "+a+" WHEN "+b+" THEN 1 ELSE 0 END",
+							a+" BETWEEN "+b+" AND +"+b, a+" BETWEEN +"+b+" AND "+b,
+							a+" NOT BETWEEN "+b+" AND "+b)
+						for _, expr := range exprs {
+							project = append(project, expr, "typeof("+expr+")")
+						}
+						scalar = append(scalar, "SELECT "+strings.Join(project, ",")+" FROM pairs ORDER BY id")
+					}
+				}
+			}
+			independentAffinityRows(t, db, path, scalar)
+			var predicates []string
+			for _, l := range cols {
+				for _, r := range cols {
+					a, b := "l"+l, "r"+r
+					for _, value := range []string{"1", "1.0", "'01'", "NULL"} {
+						for _, pred := range []string{a + "=" + value + " AND " + a + "=" + b, a + "=" + value + " AND " + b + "=" + a} {
+							predicates = append(predicates, "SELECT id,"+a+","+b+",typeof("+a+"),typeof("+b+") FROM pairs WHERE "+pred+" ORDER BY id")
+						}
+					}
+				}
+			}
+			for _, source := range []string{"rb", "ru", "((rb))", "+rb", "coalesce(rb,NULL)", "CASE WHEN 1 THEN rb END"} {
+				for _, target := range cols {
+					for _, pred := range []string{"alias=l" + target, "l" + target + "=alias"} {
+						predicates = append(predicates, "SELECT id,"+source+" AS alias,typeof("+source+") FROM pairs WHERE "+pred+" ORDER BY id")
+					}
+				}
+			}
+			independentAffinityRows(t, db, path, predicates)
+			for _, prefix := range []string{"l", "r"} {
+				for _, column := range cols {
+					name := prefix + column
+					writeExec(t, db, "CREATE INDEX pairs_"+name+" ON pairs("+name+")")
+				}
+			}
+			independentAffinityRows(t, db, path, predicates)
+			writeIntegrity(t, path)
+		})
+	}
+}

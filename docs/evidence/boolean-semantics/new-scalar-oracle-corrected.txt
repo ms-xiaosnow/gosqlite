@@ -1,0 +1,15 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestBooleanScalarVersusPredicate
+--- PASS: TestBooleanScalarVersusPredicate (0.00s)
+=== RUN   TestBooleanThreeValuedTruthTables
+--- PASS: TestBooleanThreeValuedTruthTables (0.00s)
+=== RUN   TestBooleanCustomFunctionsCancellationAndQuotas
+--- PASS: TestBooleanCustomFunctionsCancellationAndQuotas (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.008s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestBooleanOracleContexts
+    boolean_conformance_test.go:141: 1053 Boolean context/error/value cases checked against pinned SQLite
+--- PASS: TestBooleanOracleContexts (4.10s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	4.112s

@@ -1,0 +1,43 @@
+Negative baseline: unchanged 1336a5d production plus only the two new audited tests; original lead log untouched. Pure memory and ordinary intact native fixture behavior per ../boolean-rank-filter-evidence/scope-audit.md.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestBooleanRankMemoryEntrypoints
+    boolean_rank_filter_test.go:33: 0 heap=false: SQLite datatype mismatch: vector: invalid text syntax []sqlite.resultRow(nil)
+--- FAIL: TestBooleanRankMemoryEntrypoints (0.00s)
+=== RUN   TestBooleanRankSQLStartupAcrossRepresentations
+=== RUN   TestBooleanRankSQLStartupAcrossRepresentations/dense
+    boolean_rank_filter_test.go:94: SELECT id FROM items WHERE 0 ORDER BY v <-> ? LIMIT 2 [1,1] [[1] [2]] {0 0 0 1 4 2 2 2 2 0 0 0 0 1 2 2304 2 0 0 6 0 0 0 0 2 2 2}
+=== RUN   TestBooleanRankSQLStartupAcrossRepresentations/half
+    boolean_rank_filter_test.go:94: SELECT id FROM items WHERE 0 ORDER BY v <-> ? LIMIT 2 [1,1] [[1] [2]] {0 0 0 1 4 2 2 2 2 0 0 0 0 1 2 2280 2 0 0 6 0 0 0 0 2 2 2}
+=== RUN   TestBooleanRankSQLStartupAcrossRepresentations/sparse
+    boolean_rank_filter_test.go:94: SELECT id FROM items WHERE 0 ORDER BY v <-> ? LIMIT 2 {1:1,2:1}/20 [[1] [2]] {0 0 0 1 4 2 2 2 2 0 0 0 0 1 2 2368 2 0 0 0 10 0 0 0 2 2 2}
+=== RUN   TestBooleanRankSQLStartupAcrossRepresentations/bit
+    boolean_rank_filter_test.go:94: SELECT id FROM items WHERE 0 ORDER BY v <~> ? LIMIT 2 01 [[1] [2]] {0 0 0 1 4 2 2 2 2 0 0 0 0 1 2 2262 2 0 0 0 0 3 0 0 2 2 2}
+--- FAIL: TestBooleanRankSQLStartupAcrossRepresentations (0.02s)
+    --- FAIL: TestBooleanRankSQLStartupAcrossRepresentations/dense (0.00s)
+    --- FAIL: TestBooleanRankSQLStartupAcrossRepresentations/half (0.01s)
+    --- FAIL: TestBooleanRankSQLStartupAcrossRepresentations/sparse (0.00s)
+    --- FAIL: TestBooleanRankSQLStartupAcrossRepresentations/bit (0.01s)
+=== RUN   TestBooleanPublicFilterTypedLazinessAndTerminalStartup
+    boolean_rank_filter_test.go:145: abs(-9223372036854775808) AND 0 0 false <nil>
+--- FAIL: TestBooleanPublicFilterTypedLazinessAndTerminalStartup (0.00s)
+=== RUN   TestBooleanPublicVectorFiltersAndBudgets
+    boolean_rank_filter_test.go:190: exact active AND abs(-9223372036854775808+id-1) {0 0x26aa884f5710}
+--- FAIL: TestBooleanPublicVectorFiltersAndBudgets (0.01s)
+=== RUN   TestBooleanPublicSimilarityFilter
+    boolean_rank_filter_test.go:218: false active AND abs(n) {[] {{ 0 0  0 0 0 0 0 0       0 0 false    []  0 []  [] 0 false }  0   0 0 0  0 0 false} {{0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0} 0 0 0 0}} sqlite similarity search: integer overflow
+--- FAIL: TestBooleanPublicSimilarityFilter (0.01s)
+=== RUN   TestBooleanRankIVFStartupAndFallback
+=== RUN   TestBooleanRankIVFStartupAndFallback/1
+    boolean_rank_filter_test.go:237: 1 [1,1] [] {0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 8 0 0 0 2 0 0 0 0 0 0 0}
+=== RUN   TestBooleanRankIVFStartupAndFallback/2
+    boolean_rank_filter_test.go:237: 2 [1,1] [[1] [2]] {0 0 0 1 0 0 2 0 2 2 2 2 2 2 2 2856 2 0 0 6 0 0 0 0 2 2 2}
+=== RUN   TestBooleanRankIVFStartupAndFallback/4
+    boolean_rank_filter_test.go:237: 4 [1,1] [] {0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 8 0 0 0 2 0 0 0 0 0 0 0}
+--- FAIL: TestBooleanRankIVFStartupAndFallback (0.01s)
+    --- FAIL: TestBooleanRankIVFStartupAndFallback/1 (0.01s)
+    --- FAIL: TestBooleanRankIVFStartupAndFallback/2 (0.00s)
+    --- FAIL: TestBooleanRankIVFStartupAndFallback/4 (0.00s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/sqlite	0.054s
+FAIL
+Expected pre-repair regression exit: 1

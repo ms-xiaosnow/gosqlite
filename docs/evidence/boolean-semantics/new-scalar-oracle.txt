@@ -1,0 +1,11 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestBooleanScalarVersusPredicate
+    eval_predicate_test.go:43: predicate NULL NOT BETWEEN 1 AND abs(-9223372036854775808): true integer overflow
+--- FAIL: TestBooleanScalarVersusPredicate (0.00s)
+=== RUN   TestBooleanThreeValuedTruthTables
+--- PASS: TestBooleanThreeValuedTruthTables (0.00s)
+=== RUN   TestBooleanCustomFunctionsCancellationAndQuotas
+--- PASS: TestBooleanCustomFunctionsCancellationAndQuotas (0.00s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/sql	0.006s
+FAIL

@@ -1,0 +1,4 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	1.022s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	1.083s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.056s

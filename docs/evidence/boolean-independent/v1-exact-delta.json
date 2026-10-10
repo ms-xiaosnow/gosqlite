@@ -1,0 +1,111 @@
+{
+  "base_tree": "ad73b8d6425cd86d1c15caccb0f858048df63ef9",
+  "owner_manifest_sha256": "6ff9b4d3f70041838321bba34e4229d0f5f19629932073f6997311f43918357f",
+  "delta": [
+    {
+      "path": "docs/boolean-expressions.md",
+      "base_sha256": null,
+      "candidate_sha256": "5629da66867c86f4bcd1e32bfe04fed9b5d03269d224f2016e93cd257b3fec5a"
+    },
+    {
+      "path": "docs/evidence/boolean-semantics/scope-audit.md",
+      "base_sha256": null,
+      "candidate_sha256": "a089fc35968b6a15bd261c84a71e169faae7ccaa61bf11f453e9d7bb591a7360"
+    },
+    {
+      "path": "driver/boolean_test.go",
+      "base_sha256": null,
+      "candidate_sha256": "2c780bed736c6486e3ee8913596490123a2ad0a9a5eacca6d0f65061376f7a21"
+    },
+    {
+      "path": "internal/sql/ast.go",
+      "base_sha256": "f1a56e20a98c9f9ac49080b2ce289f3e9993b11911b45ac8424a416cdc5b5aa3",
+      "candidate_sha256": "a2841d5a0123046fbc127e89fc0f00ea39f14521efb38f8d419372f63632e343"
+    },
+    {
+      "path": "internal/sql/eval.go",
+      "base_sha256": "a6a9efa9b7acc9d441ac3fe859b9606f8b77ac4426f8f52dfb85cca452ff077d",
+      "candidate_sha256": "5640dc627c5269af7c82087037a3a31a4de220e51f0341fdd69e5a3407589050"
+    },
+    {
+      "path": "internal/sql/eval_budget.go",
+      "base_sha256": "46ba979b51d9966675c9041d297f2b8195d26713931ec9043067680767fac867",
+      "candidate_sha256": "18bdb07a26424a9184578071e4b8313aa7b77c6b79d8c228978525e686d7f39e"
+    },
+    {
+      "path": "internal/sql/eval_expressions.go",
+      "base_sha256": "58b23c2942a98d79703461f56d01c5b5861dfa4d9acb292a9dc8e9b9842bc274",
+      "candidate_sha256": "69ac9ead02315005644d5ac9f30c0f16892a696b0b6847b3598f4426c0fe0d07"
+    },
+    {
+      "path": "internal/sql/eval_predicate.go",
+      "base_sha256": null,
+      "candidate_sha256": "948b07f688a4064b3d55d1c8b0644f0c5db44a31357d556072be12bd382787f8"
+    },
+    {
+      "path": "internal/sql/eval_predicate_test.go",
+      "base_sha256": null,
+      "candidate_sha256": "0c79c9f8d4d0d164f6e90d5e5d794163f0a22a51d86a1ef6ad26f33f86ff6a89"
+    },
+    {
+      "path": "internal/sql/parser.go",
+      "base_sha256": "e5c2c66997a789ad4f367378518c7e677a989dae35b706238a2861a708cae37e",
+      "candidate_sha256": "757e937acd5253bb41f4ad8e012b3963d440d944721273a4d3609af33914833a"
+    },
+    {
+      "path": "internal/testkit/boolean_conformance_test.go",
+      "base_sha256": null,
+      "candidate_sha256": "2625a305a428bff82403e735588db73c06074e3eb88300d2c9fc8bb82a49b96c"
+    },
+    {
+      "path": "sqlite/boolean_test.go",
+      "base_sha256": null,
+      "candidate_sha256": "2259f48788033b012d2a5820a32a6a2696e3c122f1d0e927e6156fa3cce420b2"
+    },
+    {
+      "path": "sqlite/plan_index.go",
+      "base_sha256": "aac6605ca4043e4efbdee35accb2d65bcc50b1a87a17650149fe8d86a0796ca8",
+      "candidate_sha256": "cf48c884ea5dd3ecb3da47bb5072b3f3a2a545692305530a08994be794dabd02"
+    },
+    {
+      "path": "sqlite/plan_index_test.go",
+      "base_sha256": "4c03496b44785d351dcab43c1cbb3c2293c57cb0b040639a515be566f8d54637",
+      "candidate_sha256": "1194e724947ac8cf1cf59bd5b4eba850ca77cd1f84bb87b71f68f67678d18cb7"
+    },
+    {
+      "path": "sqlite/predicate.go",
+      "base_sha256": null,
+      "candidate_sha256": "65b8d575b7295e7f4e1130d5539751c86d51b86d029154d81ea9f37f761c1ce7"
+    },
+    {
+      "path": "sqlite/predicate_constants.go",
+      "base_sha256": null,
+      "candidate_sha256": "ce4a1c7c2ba55bf9faa16f035af5df2ecd352f1673c6edebad642d4526e24739"
+    },
+    {
+      "path": "sqlite/query.go",
+      "base_sha256": "c1d77c5e82b6db0f8773014e880e085ec3159a110d028723aaed6bea1567bf0c",
+      "candidate_sha256": "2f33759d933f82bd49208803619d7180fc69a5a11db79f78a07176a7f6eca6da"
+    },
+    {
+      "path": "sqlite/relational.go",
+      "base_sha256": "cf153d3211ad4a94d828327ed56c8e9b219b668c9810050a8cee4aff1f6e6ed6",
+      "candidate_sha256": "0db815f507333eb013ddb005348fcc06fecf635c45b05023e935d2e8cb014575"
+    },
+    {
+      "path": "sqlite/relational_bind.go",
+      "base_sha256": "bd1aafd0175dbb7683450173c020bacee052faf158717d4a454efcd2fae07f9a",
+      "candidate_sha256": "c37fc7f056e9b7bf0c43e48effdfc2d9e0d0784dba01698ee66095dc88e89599"
+    },
+    {
+      "path": "sqlite/rows.go",
+      "base_sha256": "97ab413b7df23991f14af28a9f7203a66f5acbb609ebce638bf60096dcd44dad",
+      "candidate_sha256": "c4eccf745e63b48ab04cae1fe1d21929adc406fa662807525a049f7993583c55"
+    },
+    {
+      "path": "sqlite/write_rows.go",
+      "base_sha256": "20659e880b8dd57389e8369c42c8247f556aca9a97f2f0d1beca0dacbbc227ac",
+      "candidate_sha256": "fcaaea72411f006d5045253e0a169fcffa5c0959ceedfcff285efe27cf2fcd36"
+    }
+  ]
+}

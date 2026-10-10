@@ -1,0 +1,57 @@
+Exact source1336a5d includes corrected encrypted/oracle sourcecd80bbc plus reviewed Boolean v2 and affinity v1. Range/planner/identifier/plain Reader changes excluded.
+Audited Boolean/affinity new tests use valid ordinary SQL fixtures, read-only pinned CLI normal EOF, pure-memory typed/AST/quota errors. Behavioral owner and independent reports inspected. Prior default/oracle source audit retained.
+Behavior audit: intact correct-key ordinary read/write/rollback/BUSY/cancel/close/reopen/checkpoint/successful rekey/copies; memory parser/math/ownership laws. No restricted physical/native-fault/namespace/crash/hot-recovery/interrupted-rekey workflow.
+1336a5d7b5e1a336fb01e012334cec776a61c4a7
+2026-10-10T19:14:13Z
+Ordinary test source-reference guard PASS; behavioral review is still required.
+?   	github.com/ms-xiaosnow/gosqlite/benchmarks/ann	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.490s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	10.208s
+ok  	github.com/ms-xiaosnow/gosqlite/encryption	2.192s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ann	3.113s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/bit-rerank	0.021s
+?   	github.com/ms-xiaosnow/gosqlite/examples/encrypted	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-shared	0.033s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-wal	0.028s
+?   	github.com/ms-xiaosnow/gosqlite/examples/grams	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/half-rerank	0.037s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ivfflat	1.085s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/migrate-pgembedding	0.163s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/migration-full-table	0.154s
+?   	github.com/ms-xiaosnow/gosqlite/examples/migration-transition	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/pgembedding-import	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/readonly	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/similarity	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/sparse-exact	0.012s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/typed-ann-rerank	1.489s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/vector	0.285s
+?   	github.com/ms-xiaosnow/gosqlite/examples/wal	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/write	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/extension/grams13	3.027s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/registry	0.136s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/similarity	6.857s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	1.514s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector/ann	18.650s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	28.024s
+?   	github.com/ms-xiaosnow/gosqlite/internal/buildinfo	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/darwinfile	0.174s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	0.560s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/journal	0.116s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.884s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/record	0.017s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.408s
+?   	github.com/ms-xiaosnow/gosqlite/internal/testkit/fileview	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testscope	0.016s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.281s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/wal	1.843s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	0.254s
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	7.881s
+--- FAIL: TestSparseReviewMemoryLazyNullAndSupportBudgets (0.00s)
+    sparse_review_test.go:99: false SQLite datatype mismatch: vector: invalid text syntax []
+--- FAIL: TestSparseReviewMemoryExternalDefaultsAndAliases (0.00s)
+    sparse_review_test.go:124: SQLite datatype mismatch: vector: invalid zero value: SQL sparsevec requires text or a versioned GSS BLOB, got int64
+--- FAIL: TestANNReviewEmptyIndexAndAllFilteredSQL (0.00s)
+    ann_review_test.go:141: '[0,0]' [[1]]
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/sqlite	104.814s
+FAIL

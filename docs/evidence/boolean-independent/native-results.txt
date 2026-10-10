@@ -1,0 +1,12 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestBooleanIndependentTypedAndBudget
+    boolean_independent_test.go:72: binding skipped: SELECT t.id FROM t,u WHERE 0 AND missing LIMIT 0
+--- FAIL: TestBooleanIndependentTypedAndBudget (0.01s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/sqlite	0.009s
+=== RUN   TestBooleanIndependentDriver
+    boolean_independent_test.go:68: unbound/invalid accepted: SELECT id FROM t WHERE 0 AND missing LIMIT 0
+--- FAIL: TestBooleanIndependentDriver (0.01s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/driver	0.009s
+FAIL

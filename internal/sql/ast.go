@@ -135,9 +135,10 @@ func (*Transaction) statement() {}
 // Expr is a scalar expression. Star is valid only in SELECT result lists.
 type Expr interface{ expr() }
 type Literal struct {
-	Value      any
-	Boolean    bool
-	hexLiteral bool
+	Value        any
+	Boolean      bool
+	hexLiteral   bool
+	truthLiteral bool // Pinned SQLite syntactic integer truth annotation.
 }
 
 func (*Literal) expr() {}

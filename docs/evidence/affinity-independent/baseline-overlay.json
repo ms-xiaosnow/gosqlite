@@ -1,0 +1,7 @@
+{
+  "intent": "Negative control; reviewer matrix unchanged; only evaluator restored to accepted Boolean-v2 bytes",
+  "baseline_eval_sha256": "b889ea85977c721ae3b8bf42e13164be035cac0af400a2cc7c8d3797968001a6",
+  "overlay_eval_sha256": "b889ea85977c721ae3b8bf42e13164be035cac0af400a2cc7c8d3797968001a6",
+  "candidate_eval_sha256": "58d59db04058658f2b4f71a793ca2188dd719b991799bc66131f21e750ce5c64",
+  "same_base_bytes": true
+}

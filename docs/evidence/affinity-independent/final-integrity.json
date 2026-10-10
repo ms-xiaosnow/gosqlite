@@ -1,0 +1,9 @@
+{
+  "historical_2160_matrix_function_identical_except_test_name": true,
+  "baseline_candidate_independent_test_identical": true,
+  "base_final_manifest_bad_files": [],
+  "candidate_final_manifest_bad_files": [],
+  "isolated_candidate_freeze_byte_mismatches": [],
+  "historical_normalized_function_sha256": "4a7870ee3a3f0563bea958c315fe192d210814de50a77bd11ccd0a63a594f9dd",
+  "candidate_normalized_function_sha256": "4a7870ee3a3f0563bea958c315fe192d210814de50a77bd11ccd0a63a594f9dd"
+}

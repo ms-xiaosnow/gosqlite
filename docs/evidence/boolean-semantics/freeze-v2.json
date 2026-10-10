@@ -1,0 +1,29 @@
+{
+  "base_tree": "ad73b8d6425cd86d1c15caccb0f858048df63ef9",
+  "base_initial_tree": "2f1ab3df86cdf5aaf97143d6ad53d186da836b3f",
+  "path": "/workspace/scratch/5e06a74e5f65/durable-restart/boolean-semantics-freeze-v2",
+  "manifest_sha256": "be6ece6401dca41264cc1846ba4674db0977626724af25798d26351aa6bdc96a",
+  "changed_files": {
+    "docs/boolean-expressions.md": "dcebfd9de98945cd6978a3bdd4cd7bd88ddffcb725270621c4788337353f9eec",
+    "docs/evidence/boolean-semantics/scope-audit.md": "a089fc35968b6a15bd261c84a71e169faae7ccaa61bf11f453e9d7bb591a7360",
+    "driver/boolean_test.go": "2c780bed736c6486e3ee8913596490123a2ad0a9a5eacca6d0f65061376f7a21",
+    "internal/sql/ast.go": "a2841d5a0123046fbc127e89fc0f00ea39f14521efb38f8d419372f63632e343",
+    "internal/sql/eval.go": "b889ea85977c721ae3b8bf42e13164be035cac0af400a2cc7c8d3797968001a6",
+    "internal/sql/eval_budget.go": "18bdb07a26424a9184578071e4b8313aa7b77c6b79d8c228978525e686d7f39e",
+    "internal/sql/eval_expressions.go": "b6a47fb00f153efe39350708bbbf0194e7f465356dfd0c497ab9fd5c8a636de8",
+    "internal/sql/eval_predicate.go": "948b07f688a4064b3d55d1c8b0644f0c5db44a31357d556072be12bd382787f8",
+    "internal/sql/eval_predicate_test.go": "0c79c9f8d4d0d164f6e90d5e5d794163f0a22a51d86a1ef6ad26f33f86ff6a89",
+    "internal/sql/parser.go": "757e937acd5253bb41f4ad8e012b3963d440d944721273a4d3609af33914833a",
+    "internal/testkit/boolean_conformance_test.go": "2625a305a428bff82403e735588db73c06074e3eb88300d2c9fc8bb82a49b96c",
+    "sqlite/boolean_test.go": "e22032967cba8753bd830b3b09f8046faac0b6df650b7a6fe1db0a1b7e4742a2",
+    "sqlite/plan_index.go": "cf48c884ea5dd3ecb3da47bb5072b3f3a2a545692305530a08994be794dabd02",
+    "sqlite/plan_index_test.go": "1194e724947ac8cf1cf59bd5b4eba850ca77cd1f84bb87b71f68f67678d18cb7",
+    "sqlite/predicate.go": "65b8d575b7295e7f4e1130d5539751c86d51b86d029154d81ea9f37f761c1ce7",
+    "sqlite/predicate_constants.go": "e206aafdc1153a9e5808a7a8ee297e1ea3176f56589ad3e436f0223e9b9b6ac3",
+    "sqlite/query.go": "2f33759d933f82bd49208803619d7180fc69a5a11db79f78a07176a7f6eca6da",
+    "sqlite/relational.go": "0db815f507333eb013ddb005348fcc06fecf635c45b05023e935d2e8cb014575",
+    "sqlite/relational_bind.go": "c37fc7f056e9b7bf0c43e48effdfc2d9e0d0784dba01698ee66095dc88e89599",
+    "sqlite/rows.go": "c4eccf745e63b48ab04cae1fe1d21929adc406fa662807525a049f7993583c55",
+    "sqlite/write_rows.go": "fcaaea72411f006d5045253e0a169fcffa5c0959ceedfcff285efe27cf2fcd36"
+  }
+}

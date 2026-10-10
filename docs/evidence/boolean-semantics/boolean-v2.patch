@@ -1,0 +1,1782 @@
+--- /dev/null
++++ b/docs/boolean-expressions.md
+@@ -0,0 +1,113 @@
++# Boolean execution increment
++
++Status: PARTIAL. Baseline: official SQLite 3.54.0, source ID
++2026-10-09 15:46:58 be8d059e9a49089ab2dce5ed26dd87aaf598fdc5fbe0b107c0dd758464bcd5e3.
++This increment corrects the inherited eager AND/OR gap documented in
++`relational-sql.md`. It does not claim complete SQLite planner/error ordering.
++Production execution remains native Go. No storage format or exported public
++SQLite Options/Rows/QueryPlan layout changes are introduced.
++
++## Execution contexts
++
++- Scalar AND/OR retains eager evaluation of non-folded operands. `0.0 AND
++  abs(minint)` and `? AND abs(minint)` are not universally lazy. Small integer
++  tokens and bound TRUE/FALSE permit syntactic Boolean simplification in either
++  operand order. Unary signs, numeric separators, REAL/TEXT literals, parameters
++  and current physical row values are not treated as such syntax constants.
++- Function-free false AND folding happens at parse time, matching SQLite's
++  validation exception (`0 AND missing` is zero). Function-bearing dead branches
++  still undergo full name and arity validation. Non-NULL literal IS [NOT] NULL
++  folding and empty-IN Boolean annotations follow the pinned parser as well.
++- WHERE, ON and searched CASE use branch evaluation. NULL rejection is propagated
++  through NOT, IS TRUE/FALSE and BETWEEN instead of manufacturing an intermediate
++  scalar Boolean. Scalar comparison/function operands stay in scalar context;
++  simple CASE WHEN operands stay scalar. BETWEEN evaluates its lhs once.
++- WHERE is split into top-level AND terms. Deterministic row-independent terms
++  run in source order before the first row fetch, even on empty tables/empty
++  candidate sets. Thus `WHERE flag AND abs(minint)` still errors, even if flag is
++  false everywhere; `CASE WHEN flag AND abs(minint)` can skip the error.
++  `WHERE abs(minint) AND 0` errors, whereas scalar `abs(minint) AND 0` is zero.
++- INNER/CROSS ON constant terms participate in that startup pass. LEFT ON is
++  evaluated only on real candidate pairs; it disables the pinned literal
++  simplifier throughout its expression and does not hoist terms. Empty right
++  sources still null-extend without evaluating ON.
++- WHERE aliases are expanded before predicate compilation. Each occurrence owns
++  its own column identity, so fixed-column substitution cannot mutate a prepared
++  expression or leak into its projection. Physical name precedence is retained.
++- Equality-based constant propagation is predicate-local and preserves the
++  original column affinity, including SQLite's BLOB-affinity restrictions and
++  transitive equality handling. LEFT ON and extension representation-bearing
++  columns/results are excluded. Unknown/context-supplied functions do not gain
++  a determinism guarantee. Extension functions remain bound to their owning
++  operation context and snapshot.
++
++LIMIT 0 and EXPLAIN do not execute startup terms. Unsorted startup failures are
++reported by Rows.Err; ORDER BY retains its eager Query error behavior. Context
++cancellation, lazy typed-cell interpretation and scalar work/memory budgets
++remain effective. Fixed-column constancy is compiler-certified without walking
++an exponentially expanded substitution graph. Propagation computes expanded
++node weights and rejects any single expanded constant above 1,048,576 nodes
++with ErrQueryWorkLimit, including legacy single-source queries. New predicate metadata is conservatively charged to relational
++work/retained-memory limits. No index admission expansion or new join pushdown
++is included.
++
++## Explicit remaining planner boundary
++
++The native ordinary-index planner retains its conservative total-residual
++admission gate. It may scan where SQLite seeks, including SQLite's INTEGER
++PRIMARY KEY seek even under NOT INDEXED. On intact `t(id INTEGER PRIMARY KEY,
++k INTEGER)` containing `(1,1)`:
++
++    SELECT id FROM t [NOT INDEXED]
++    WHERE k LIKE 'x' ESCAPE 'ab' AND id=9999
++
++Native retains a scan and reports the preceding row-dependent ESCAPE error;
++pinned SQLite returns no rows. Reversing those terms now returns no rows in both
++engines. The explicit regression retains the actual native contract and does not
++label it oracle equivalence. Equality/CAST/index choices can similarly change
++row-dependent error visibility. A separate planner-admission increment is needed.
++
++Join reordering/WHERE pushdown remains absent. For a LEFT JOIN with ON
++`abs(t.v) AND t.flag`, row `(flag=0,v=minint)`, and WHERE `t.flag=99`, native ON
++runs before that later WHERE and errors; SQLite can reject the left row first.
++The reviewer also retained inherited wrong-row counterexamples involving TEXT
++and BLOB/untyped values: on row `(t='1.0', b=1.0)`, predicates such as
++`t=1.0 AND t=b` or `b=1 AND b=t` can disagree with the pinned optimizer.
++These cases already fail on the pre-increment durable source. The precise
++constant-substitution/storage-class/affinity interaction remains to be resolved;
++this guide does not attribute them to a generic formatting bug.
++
++Full error-order equivalence requires matching those planner transformations,
++not more universal laziness in the evaluator. Existing unsupported SQL forms
++and unquoted reserved-word alias boundaries are unchanged.
++
++## Sources and checks
++
++Pinned public-domain source references:
++
++- `src/expr.c`: sqlite3ExprAnd; sqlite3ExprSimplifiedAndOr;
++  exprCodeTargetAndOr; sqlite3ExprIfTrue/sqlite3ExprIfFalse; exprCodeBetween;
++  fixed-column affinity handling in TK_COLUMN.
++- `src/parse.y`: INTEGER annotation and sqlite3PExprIsNull.
++- `src/where.c`: false-WHERE-term bypass after sqlite3WhereSplit(TK_AND).
++- `src/select.c`: findConstInWhere, propagateConstantExprRewrite,
++  propagateConstants; BLOB-affinity and outer-ON exclusions.
++
++New regressions: internal/sql/eval_predicate_test.go, sqlite/boolean_test.go,
++driver/boolean_test.go and the tagged internal/testkit/boolean_conformance_test.go.
++The original 923-case harness was run unchanged against exact pre-increment
++source tree 2f1ab3df86cdf5aaf97143d6ad53d186da836b3f: 291 mismatches were recorded.
++The expanded matrix currently checks 1,053 cases. Actual frozen-source commands,
++hashes and outcomes accompany this guide; intermediate failures are preserved.
++
++One legacy ordinary-index assertion changed with direct oracle evidence:
++`id=9999 AND k LIKE 'x' ESCAPE 'ab'` must return zero rows rather than error.
++The exact historical query remains in a stronger result assertion, and both
++constant overflow and typed-error assertions remain. No assertion was removed
++to hide a mismatch.
++
++All executed checks use pure-memory parser/math/evaluator inputs or intact
++ordinary create/read/write/rollback/cancel/close fixtures. The CLI is a test-only
++oracle and finishes normally. No physical corruption, wrong-key, missing-file,
++namespace mutation, crash/kill/process-exit/hot-recovery/native-I/O-fault work is
++qualified. Full database acceptance and non-Linux runtime validation remain open.
+--- /dev/null
++++ b/docs/evidence/boolean-semantics/scope-audit.md
+@@ -0,0 +1,32 @@
++# Selected test behavioral audit
++
++Every suite command is preceded by `go run ./internal/testscope`; no manual tags.
++The reference guard alone is not considered a behavioral audit.
++
++New internal/sql tests only construct ASTs, values, mock scalar functions and
++memory-only quota/canceled-context objects. Existing internal/sql tests and
++oracle differential helpers were reviewed: parser/codec/math/affinity tests are
++in memory; `runDiff` launches only the pinned CLI on `:memory:` and waits normally.
++No process-termination/corruption controls are used.
++
++New sqlite tests use reviewVectorDB/reviewVectorExec (owned TempDir, normal Open,
++ordinary SQL and Close), direct descriptor-free typed-cell evaluator inputs,
++normal read cancellation and rollback. New driver test owns one ordinary temp
++file through NewConnector/database/sql, prepared parameters, rollback and a
++canceled query context. Existing selected Relational/OrdinaryIndex/Expression/
++SQLExpression tests use the same intact normal fixtures. The ordinary-index
++internal PageReader/cursor budgets use valid in-memory encoded pages and canceled
++read contexts; no physical descriptor fault is injected.
++
++The new tagged Boolean oracle test uses confOracle's exact version/source-ID
++check; normal SQL creates all fixtures, then the CLI uses readonly quote-mode
++reads and temporary parameter bindings. Error comparisons use ordinary SQL
++expression errors only. Helpers confQuoted/writeExec are parsing and normal
++transaction SQL, respectively. No CLI interrupt or timeout kill is used.
++
++Selected existing relational/driver oracle tests are normal writes, reads,
++rollback/snapshot/cancel/close or unsupported syntax, using the same pinned
++ordinary CLI. Existing vector-rank and grams planner checks, if run, are intact
++normal SQL/index fixtures and conservative memory/cancellation budgets. Ordinary
++index/row source ordering limitations are reported explicitly, not concealed
++by omitting the source-order regression.
+--- /dev/null
++++ b/driver/boolean_test.go
+@@ -0,0 +1,77 @@
++package driver_test
++
++import (
++	"context"
++	"database/sql"
++	"errors"
++	gosqldriver "github.com/ms-xiaosnow/gosqlite/driver"
++	"github.com/ms-xiaosnow/gosqlite/sqlite"
++	"path/filepath"
++	"strings"
++	"testing"
++)
++
++// Only normal SQL, prepared bindings, rollback and cancellation on intact files.
++func TestDriverBooleanPreparedAndTransactions(t *testing.T) {
++	connector, err := gosqldriver.NewConnector(filepath.Join(t.TempDir(), "boolean.db"), sqlite.Options{})
++	if err != nil {
++		t.Fatal(err)
++	}
++	db := sql.OpenDB(connector)
++	defer db.Close()
++	db.SetMaxOpenConns(1)
++	for _, q := range []string{"CREATE TABLE t(id INTEGER PRIMARY KEY,flag INTEGER)", "CREATE TABLE u(y INTEGER)", "INSERT INTO t VALUES(1,0)", "INSERT INTO u VALUES(2)"} {
++		if _, err = db.Exec(q); err != nil {
++			t.Fatal(err)
++		}
++	}
++	stmt, err := db.Prepare("SELECT t.id FROM t,u WHERE ?1 AND abs(-9223372036854775808)")
++	if err != nil {
++		t.Fatal(err)
++	}
++	defer stmt.Close()
++	for _, v := range []any{int64(0), int64(1), nil, int64(0)} {
++		rows, err := stmt.Query(v)
++		if err == nil {
++			if rows.Next() {
++				t.Fatal("unexpected result")
++			}
++			err = rows.Err()
++			rows.Close()
++		}
++		if (err != nil) != (v == int64(1)) {
++			t.Fatalf("bound %v: %v", v, err)
++		}
++		if err != nil && !strings.Contains(err.Error(), "integer overflow") {
++			t.Fatal(err)
++		}
++	}
++	var value int64
++	if err = db.QueryRow("SELECT CASE WHEN flag AND abs(-9223372036854775808) THEN 7 ELSE 9 END FROM t").Scan(&value); err != nil || value != 9 {
++		t.Fatal(value, err)
++	}
++	if err = db.QueryRow("SELECT flag AND abs(-9223372036854775808) FROM t").Scan(&value); err == nil {
++		t.Fatal("scalar unexpectedly lazy")
++	}
++	tx, err := db.BeginTx(context.Background(), nil)
++	if err != nil {
++		t.Fatal(err)
++	}
++	if _, err = tx.Exec("UPDATE t SET flag=1 WHERE 0 AND abs(-9223372036854775808)"); err != nil {
++		t.Fatal(err)
++	}
++	if _, err = tx.Exec("DELETE FROM t WHERE 0 AND abs(-9223372036854775808)"); err != nil {
++		t.Fatal(err)
++	}
++	if err = tx.Rollback(); err != nil {
++		t.Fatal(err)
++	}
++	if err = db.QueryRow("SELECT flag FROM t").Scan(&value); err != nil || value != 0 {
++		t.Fatal(value, err)
++	}
++	ctx, cancel := context.WithCancel(context.Background())
++	cancel()
++	if _, err = stmt.QueryContext(ctx, 0); !errors.Is(err, context.Canceled) {
++		t.Fatal(err)
++	}
++}
+--- a/internal/sql/ast.go
++++ b/internal/sql/ast.go
+@@ -135,9 +135,10 @@
+ // Expr is a scalar expression. Star is valid only in SELECT result lists.
+ type Expr interface{ expr() }
+ type Literal struct {
+-	Value      any
+-	Boolean    bool
+-	hexLiteral bool
++	Value        any
++	Boolean      bool
++	hexLiteral   bool
++	truthLiteral bool // Pinned SQLite syntactic integer truth annotation.
+ }
+ 
+ func (*Literal) expr() {}
+--- a/internal/sql/eval.go
++++ b/internal/sql/eval.go
+@@ -29,6 +29,12 @@
+ 	// Derived aliases may return a closed vector/halfvec/bit/mixed kind tag.
+ 	DeclaredType func(table, name string) string
+ 	Functions    map[string]Function
++	// LEFT JOIN ON terms cannot use SQLite's literal Boolean simplification.
++	DisableBooleanSimplification bool
++	// FixedColumns contains immutable, acyclic, compiler-certified deterministic
++	// statement constants, never arbitrary row expressions. The Column itself
++	// keeps its source affinity and declared type.
++	FixedColumns map[*Column]Expr
+ }
+ 
+ func Eval(e Expr, ctx *EvalContext) (any, error) {
+@@ -47,6 +53,19 @@
+ 	case *Literal:
+ 		return normalize(x.Value)
+ 	case *Column:
++		if fixed, ok := ctx.FixedColumns[x]; ok {
++			v, err := Eval(fixed, ctx)
++			if err != nil {
++				return nil, err
++			}
++			if ctx.Affinity != nil {
++				if err := scalarPreflight(ctx, "fixed column affinity", v); err != nil {
++					return nil, err
++				}
++				return ApplyAffinity(v, ctx.Affinity(x.Table, x.Name))
++			}
++			return v, nil
++		}
+ 		if ctx.Resolver != nil {
+ 			v, err := ctx.Resolver(x.Table, x.Name)
+ 			if err != nil {
+@@ -96,6 +115,23 @@
+ 		}
+ 		return nil, &ErrUnsupported{Feature: "unary operator " + x.Op}
+ 	case *Binary:
++		if x.Op == "AND" || x.Op == "OR" {
++			alt, err := simplifyBoolean(e, ctx)
++			if err != nil {
++				return nil, err
++			}
++			if alt != e {
++				v, err := Eval(alt, ctx)
++				if err != nil {
++					return nil, err
++				}
++				truth, null, err := TruthContext(ctx.Context, v)
++				if null || err != nil {
++					return nil, err
++				}
++				return boolean(truth), nil
++			}
++		}
+ 		a, err := Eval(x.Left, ctx)
+ 		if err != nil {
+ 			return nil, err
+--- a/internal/sql/eval_budget.go
++++ b/internal/sql/eval_budget.go
+@@ -181,3 +181,17 @@
+ 	}
+ 	return Walk(e, func(e Expr) error { return scalarStep(ctx, e) })
+ }
++
++// The predicate compiler shares the scalar operation's cancellation and quota
++// instead of doing unbounded metadata walks outside the owning query budget.
++func ChargeExpression(ctx *EvalContext, e Expr) error {
++	if ctx != nil && ctx.Context != nil {
++		if err := ctx.Context.Err(); err != nil {
++			return err
++		}
++	}
++	return scalarStep(ctx, e)
++}
++func ChargeExpressionTree(ctx *EvalContext, e Expr) error {
++	return Walk(e, func(e Expr) error { return ChargeExpression(ctx, e) })
++}
+--- a/internal/sql/eval_expressions.go
++++ b/internal/sql/eval_expressions.go
+@@ -12,26 +12,28 @@
+ 		}
+ 	}
+ 	for _, arm := range x.Arms {
+-		v, err := Eval(arm.When, ctx)
+-		if err != nil {
+-			return nil, err
+-		}
+ 		var match bool
+ 		if x.Base == nil {
+-			match, _, err = TruthContext(ctx.Context, v)
++			match, err = EvalPredicate(arm.When, ctx)
+ 			if err != nil {
+ 				return nil, err
+ 			}
+-		} else if base != nil && v != nil {
+-			a, b, err := comparisonAffinity(x.Base, arm.When, base, v, ctx)
++		} else {
++			v, err := Eval(arm.When, ctx)
+ 			if err != nil {
+ 				return nil, err
+ 			}
+-			cmp, err := Compare(a, b)
+-			if err != nil {
+-				return nil, err
+-			}
+-			match = cmp == 0
++			if base != nil && v != nil {
++				a, b, err := comparisonAffinity(x.Base, arm.When, base, v, ctx)
++				if err != nil {
++					return nil, err
++				}
++				cmp, err := Compare(a, b)
++				if err != nil {
++					return nil, err
++				}
++				match = cmp == 0
++			}
+ 		}
+ 		if match {
+ 			return Eval(arm.Then, ctx)
+@@ -168,6 +170,14 @@
+ 	case *Literal, *Parameter:
+ 		return true
+ 	case *Column:
++		if ctx != nil {
++			if _, ok := ctx.FixedColumns[x]; ok {
++				// The predicate compiler certifies this invariant before adding
++				// an entry. Rewalking the substitution graph here could turn a
++				// linear chain of doubled columns into exponential planning.
++				return true
++			}
++		}
+ 		return ctx != nil && ctx.ConstantColumn != nil && ctx.ConstantColumn(x.Table, x.Name)
+ 	case *Call:
+ 		name := FoldName(x.Name)
+--- /dev/null
++++ b/internal/sql/eval_predicate.go
+@@ -0,0 +1,197 @@
++package sql
++
++import "math"
++
++// literalTruth is deliberately syntactic. SQLite 3.54 annotates small integer
++// tokens and bound TRUE/FALSE, not floating literals, parameters, unary signs,
++// arithmetic, or physical columns, with EP_IsTrue/EP_IsFalse.
++func literalTruth(e Expr) (truth bool, known bool) {
++	x, ok := e.(*Literal)
++	if !ok || !(x.truthLiteral || x.Boolean) {
++		return false, false
++	}
++	i, ok := x.Value.(int64)
++	return i != 0, ok
++}
++
++func integerTruthLiteral(value any, raw string) bool {
++	i, ok := value.(int64)
++	if !ok || i < 0 || i > math.MaxInt32 {
++		return false
++	}
++	for _, c := range raw {
++		if c == '_' {
++			return false
++		}
++	}
++	return true
++}
++
++// simplifyBoolean follows sqlite3ExprSimplifiedAndOr without modifying the
++// bound tree. It never evaluates an operand or assumes a function is pure.
++func simplifyBoolean(e Expr, ctx *EvalContext) (Expr, error) {
++	if ctx.DisableBooleanSimplification {
++		return e, nil
++	}
++	x, ok := e.(*Binary)
++	if !ok || x.Op != "AND" && x.Op != "OR" {
++		return e, nil
++	}
++	if err := scalarStep(ctx, e); err != nil {
++		return nil, err
++	}
++	right, err := simplifyBoolean(x.Right, ctx)
++	if err != nil {
++		return nil, err
++	}
++	left, err := simplifyBoolean(x.Left, ctx)
++	if err != nil {
++		return nil, err
++	}
++	lt, lk := literalTruth(left)
++	rt, rk := literalTruth(right)
++	if lk && lt || rk && !rt {
++		if x.Op == "AND" {
++			return right, nil
++		}
++		return left, nil
++	}
++	if rk && rt || lk && !lt {
++		if x.Op == "AND" {
++			return left, nil
++		}
++		return right, nil
++	}
++	return e, nil
++}
++
++// EvalPredicate is the branch-code context used by WHERE, ON and searched
++// CASE. It does not compute a scalar AND/OR value: false and NULL both reject
++// a row, so a NULL left conjunct can skip its right operand. NOT and IS TRUE/
++// FALSE carry the branch polarity and NULL destination down the expression.
++// The caller must bind/validate the complete expression before executing it.
++func EvalPredicate(e Expr, ctx *EvalContext) (bool, error) {
++	if ctx == nil {
++		ctx = &EvalContext{}
++	}
++	reject, err := evalJump(e, ctx, false, true)
++	return !reject, err
++}
++
++func evalJump(e Expr, ctx *EvalContext, want, jumpNull bool) (bool, error) {
++	if ctx.Context != nil {
++		if err := ctx.Context.Err(); err != nil {
++			return false, err
++		}
++	}
++	if err := scalarStep(ctx, e); err != nil {
++		return false, err
++	}
++	switch x := e.(type) {
++	case *Binary:
++		if x.Op == "AND" || x.Op == "OR" {
++			alt, err := simplifyBoolean(e, ctx)
++			if err != nil {
++				return false, err
++			}
++			if alt != e {
++				return evalJump(alt, ctx, want, jumpNull)
++			}
++			firstWant, firstNull := want, jumpNull
++			if (x.Op == "AND") == want {
++				firstWant, firstNull = !want, !jumpNull
++			}
++			jump, err := evalJump(x.Left, ctx, firstWant, firstNull)
++			if err != nil || jump {
++				return firstWant == want && jump, err
++			}
++			return evalJump(x.Right, ctx, want, jumpNull)
++		}
++		if lit, ok := x.Right.(*Literal); ok && lit.Boolean && (x.Op == "IS" || x.Op == "IS NOT") {
++			target := lit.Value == int64(1)
++			negate := x.Op == "IS NOT"
++			if want != negate {
++				return evalJump(x.Left, ctx, target, false)
++			}
++			return evalJump(x.Left, ctx, !target, true)
++		}
++	case *Unary:
++		if x.Op == "NOT" {
++			return evalJump(x.Expr, ctx, !want, jumpNull)
++		}
++	case *Between:
++		return evalBetweenJump(x, ctx, want, jumpNull)
++	}
++	v, err := Eval(e, ctx)
++	if err != nil {
++		return false, err
++	}
++	truth, null, err := TruthContext(ctx.Context, v)
++	return null && jumpNull || !null && truth == want, err
++}
++
++// The BETWEEN lhs is evaluated once, but each comparison independently uses
++// the original expression's affinity. Its second bound is branch-lazy only in
++// predicate context; scalar BETWEEN remains eager.
++func evalBetweenJump(x *Between, ctx *EvalContext, want, jumpNull bool) (bool, error) {
++	if x.Not {
++		want = !want
++	}
++	a, err := Eval(x.Expr, ctx)
++	if err != nil {
++		return false, err
++	}
++	compare := func(bound Expr, lower, target, nullTarget bool) (bool, error) {
++		b, err := Eval(bound, ctx)
++		if err != nil {
++			return false, err
++		}
++		if a == nil || b == nil {
++			return nullTarget, nil
++		}
++		av, bv, err := comparisonAffinity(x.Expr, bound, a, b, ctx)
++		if err != nil {
++			return false, err
++		}
++		cmp, err := Compare(av, bv)
++		truth := cmp <= 0
++		if lower {
++			truth = cmp >= 0
++		}
++		return truth == target, err
++	}
++	jump, err := compare(x.Lower, true, false, jumpNull != want)
++	if err != nil || jump {
++		return !want && jump, err
++	}
++	return compare(x.Upper, false, want, jumpNull)
++}
++
++func booleanName(e Expr) bool {
++	x, ok := e.(*Literal)
++	return ok && x.Boolean
++}
++
++// sqlite3PExprIsNull folds known non-NULL literal tokens (including unary
++// signs) before binding. NULL and fallback Boolean names are not folded here.
++func parseNullCheck(x *Binary) Expr {
++	if x.Op != "IS" && x.Op != "IS NOT" {
++		return x
++	}
++	right, ok := x.Right.(*Literal)
++	if !ok || right.Value != nil {
++		return x
++	}
++	left := x.Left
++	for {
++		u, ok := left.(*Unary)
++		if !ok || (u.Op != "+" && u.Op != "-") {
++			break
++		}
++		left = u.Expr
++	}
++	if lit, ok := left.(*Literal); ok && lit.Value != nil && !lit.Boolean {
++		return &Literal{Value: boolean(x.Op == "IS NOT"), truthLiteral: true}
++	}
++	return x
++}
+--- /dev/null
++++ b/internal/sql/eval_predicate_test.go
+@@ -0,0 +1,140 @@
++package sql
++
++import (
++	"context"
++	"errors"
++	"reflect"
++	"strings"
++	"testing"
++)
++
++// Pure memory expressions and custom functions; no database fault injection.
++func TestBooleanScalarVersusPredicate(t *testing.T) {
++	const boom = "abs(-9223372036854775808)"
++	for _, tc := range []struct {
++		expression                         string
++		scalar                             any
++		scalarErr, predicate, predicateErr bool
++	}{
++		{"0 AND " + boom, int64(0), false, false, false}, {boom + " AND 0", int64(0), false, false, false},
++		{"1 OR " + boom, int64(1), false, true, false}, {boom + " OR 1", int64(1), false, true, false},
++		{"0.0 AND " + boom, nil, true, false, false}, {"?1 AND " + boom, nil, true, false, false},
++		{"x AND " + boom, nil, true, false, false}, {"NULL AND " + boom, nil, true, false, false},
++		{"NOT(NULL OR " + boom + ")", nil, true, false, false},
++		{"(NULL AND " + boom + ") IS NOT TRUE", nil, true, true, false},
++		{"(x AND " + boom + ")=0", nil, true, false, true},
++		{"x BETWEEN 1 AND " + boom, nil, true, false, false},
++		{"x NOT BETWEEN 1 AND " + boom, nil, true, true, false},
++		{"NULL NOT BETWEEN 1 AND " + boom, nil, true, false, true},
++		{"+1 OR " + boom, nil, true, true, false},
++		{"0_0 AND " + boom, nil, true, false, false},
++	} {
++		e, err := ParseExpr(tc.expression)
++		if err != nil {
++			t.Fatal(err)
++		}
++		ec := &EvalContext{Params: []any{int64(0)}, Row: map[string]any{"x": int64(0)}}
++		got, err := Eval(e, ec)
++		if (err != nil) != tc.scalarErr || err == nil && !reflect.DeepEqual(got, tc.scalar) {
++			t.Errorf("scalar %s: %#v %v", tc.expression, got, err)
++		}
++		match, err := EvalPredicate(e, ec)
++		if (err != nil) != tc.predicateErr || err == nil && match != tc.predicate {
++			t.Errorf("predicate %s: %v %v", tc.expression, match, err)
++		}
++	}
++}
++
++func TestBooleanThreeValuedTruthTables(t *testing.T) {
++	values := []any{int64(0), int64(1), nil}
++	for _, op := range []string{"AND", "OR"} {
++		for _, a := range values {
++			for _, b := range values {
++				e, err := ParseExpr("?1 " + op + " ?2")
++				if err != nil {
++					t.Fatal(err)
++				}
++				ec := &EvalContext{Params: []any{a, b}}
++				v, err := Eval(e, ec)
++				if err != nil {
++					t.Fatal(err)
++				}
++				truth, null := Truth(v)
++				for _, wrapper := range []string{"%s", "NOT(%s)", "(%s) IS TRUE", "(%s) IS FALSE", "(%s) IS NOT TRUE", "(%s) IS NOT FALSE"} {
++					text := strings.Replace(wrapper, "%s", "?1 "+op+" ?2", 1)
++					expr, err := ParseExpr(text)
++					if err != nil {
++						t.Fatal(err)
++					}
++					expected := truth && !null
++					switch wrapper {
++					case "NOT(%s)":
++						expected = !truth && !null
++					case "(%s) IS FALSE":
++						expected = !truth && !null
++					case "(%s) IS NOT TRUE":
++						expected = !truth || null
++					case "(%s) IS NOT FALSE":
++						expected = truth || null
++					}
++					got, err := EvalPredicate(expr, ec)
++					if err != nil || got != expected {
++						t.Errorf("%s %v/%v: %v %v expected %v", text, a, b, got, err, expected)
++					}
++				}
++			}
++		}
++	}
++}
++
++func TestBooleanCustomFunctionsCancellationAndQuotas(t *testing.T) {
++	sentinel := errors.New("ordinary scalar failure")
++	calls := 0
++	ec := &EvalContext{Functions: map[string]Function{
++		"bad":  func([]any) (any, error) { calls++; return nil, sentinel },
++		"zero": func([]any) (any, error) { calls++; return int64(0), nil },
++	}}
++	for _, q := range []string{"0 AND bad()", "1 OR bad()", "CASE WHEN zero() AND bad() THEN 1 ELSE 7 END", "CASE WHEN zero() BETWEEN 1 AND bad() THEN 1 ELSE 7 END"} {
++		calls = 0
++		e, err := ParseExpr(q)
++		if err != nil {
++			t.Fatal(err)
++		}
++		if _, err = Eval(e, ec); err != nil {
++			t.Fatal(q, err)
++		}
++		expected := 0
++		if strings.Contains(q, "zero()") {
++			expected = 1
++		}
++		if calls != expected {
++			t.Fatal(q, calls)
++		}
++	}
++	e, _ := ParseExpr("zero() AND bad()")
++	if _, err := Eval(e, ec); !errors.Is(err, sentinel) {
++		t.Fatal("scalar custom function must remain eager", err)
++	}
++	if ConstantExpression(e, ec) {
++		t.Fatal("custom functions acquired a purity guarantee")
++	}
++	ctx, cancel := context.WithCancel(context.Background())
++	cancel()
++	if _, err := EvalPredicate(e, &EvalContext{Context: ctx}); !errors.Is(err, context.Canceled) {
++		t.Fatal(err)
++	}
++	e, _ = ParseExpr("?1 AND bad()")
++	budget := &scalarTestBudget{work: 100, bytes: 1 << 20}
++	ec.Context = WithEvalBudget(context.Background(), budget)
++	ec.Params = []any{strings.Repeat("0", 10000)}
++	if _, err := EvalPredicate(e, ec); !errors.Is(err, errScalarTestWork) {
++		t.Fatal("predicate truth coercion escaped quota", err)
++	}
++	// LEFT ON cannot simplify a trailing literal around an error-producing lhs.
++	e, _ = ParseExpr("bad() OR 1")
++	ec.Context = nil
++	ec.DisableBooleanSimplification = true
++	if _, err := EvalPredicate(e, ec); !errors.Is(err, sentinel) {
++		t.Fatal(err)
++	}
++}
+--- a/internal/sql/parser.go
++++ b/internal/sql/parser.go
+@@ -703,7 +703,7 @@
+ 		if err != nil {
+ 			return nil, err
+ 		}
+-		left = &Literal{Value: v, hexLiteral: strings.HasPrefix(FoldName(t.Text), "0x")}
++		left = &Literal{Value: v, hexLiteral: strings.HasPrefix(FoldName(t.Text), "0x"), truthLiteral: integerTruthLiteral(v, t.Text)}
+ 	case t.Kind == Bind:
+ 		n, err := p.parameter(t.Text)
+ 		if err != nil {
+@@ -840,7 +840,7 @@
+ 				// SQLite folds a function-free empty IN before name binding,
+ 				// so even an unresolved column disappears. Function-bearing
+ 				// operands still need validation, but are not evaluated.
+-				left = &Literal{Value: boolean(in.Not)}
++				left = &Literal{Value: boolean(in.Not), truthLiteral: true}
+ 			}
+ 			continue
+ 		}
+@@ -867,7 +867,7 @@
+ 			if op == "NOTNULL" {
+ 				name = "IS NOT"
+ 			}
+-			left = &Binary{Op: name, Left: left, Right: &Literal{}}
++			left = parseNullCheck(&Binary{Op: name, Left: left, Right: &Literal{}})
+ 			if err = p.checkExpr(left); err != nil {
+ 				return nil, err
+ 			}
+@@ -890,10 +890,21 @@
+ 			}
+ 			left = x
+ 		} else {
+-			left = &Binary{Op: op, Left: left, Right: right}
++			left = parseNullCheck(&Binary{Op: op, Left: left, Right: right})
+ 		}
+ 		if err = p.checkExpr(left); err != nil {
+ 			return nil, err
++		}
++		if op == "AND" {
++			x := left.(*Binary)
++			lt, lk := literalTruth(x.Left)
++			rt, rk := literalTruth(x.Right)
++			// Match parse-time false-AND folding only when no function needs
++			// name/arity validation. Bound TRUE/FALSE names are not constants
++			// yet: a physical column with that name may shadow them.
++			if ((lk && !lt && !booleanName(x.Left)) || (rk && !rt && !booleanName(x.Right))) && !containsCall(left) {
++				left = &Literal{Value: int64(0), truthLiteral: true}
++			}
+ 		}
+ 	}
+ 	return left, nil
+--- /dev/null
++++ b/internal/testkit/boolean_conformance_test.go
+@@ -0,0 +1,142 @@
++//go:build oracle
++
++package testkit_test
++
++import (
++	"bytes"
++	"context"
++	"fmt"
++	"os/exec"
++	"path/filepath"
++	"reflect"
++	"strings"
++	"testing"
++
++	"github.com/ms-xiaosnow/gosqlite/sqlite"
++)
++
++// Pinned CLI only, intact ordinary SQL fixtures, normal process completion.
++// Both values/storage classes and error presence are compared. Parameters use
++// real bindings: substituting a literal would change the behavior being tested.
++func TestBooleanOracleContexts(t *testing.T) {
++	cli := confOracle(t)
++	path := filepath.Join(t.TempDir(), "boolean.db")
++	db, err := sqlite.Open(path, sqlite.Options{})
++	if err != nil {
++		t.Fatal(err)
++	}
++	defer db.Close()
++	for _, q := range []string{
++		"CREATE TABLE t(id INTEGER PRIMARY KEY,flag INTEGER,v INTEGER)",
++		"CREATE TABLE u(y INTEGER)", "CREATE TABLE empty(flag INTEGER,v INTEGER)",
++		"CREATE INDEX bool_flag ON t(flag)",
++		"INSERT INTO t VALUES(1,0,-9223372036854775808)", "INSERT INTO u VALUES(2)",
++	} {
++		writeExec(t, db, q)
++	}
++	const boom = "abs(-9223372036854775808)"
++	expressions := []string{}
++	for _, flag := range []string{"0", "1", "2", "false", "true", "0.0", "1.0", "+0", "-1", "2147483648", "0_0", "1_0", "0x0", "0x1", "(1 IS NULL)", "(1 NOTNULL)", "(NULL IS NULL)", "(NULL IN ())", "'0'", "'1'", "NULL", "?1", "flag"} {
++		for _, op := range []string{"AND", "OR"} {
++			expressions = append(expressions, flag+" "+op+" "+boom, boom+" "+op+" "+flag)
++		}
++	}
++	expressions = append(expressions,
++		"flag AND abs(v)", "abs(v) AND flag", "flag OR abs(v)", "abs(v) OR flag",
++		"(flag AND abs(v))=0", "(flag AND abs(v)) IS FALSE", "(flag AND abs(v)) IS NOT TRUE",
++		"NOT (NULL OR "+boom+")", "NOT(NULL AND "+boom+")",
++		"(NULL AND "+boom+") IS TRUE", "(NULL AND "+boom+") IS NOT TRUE",
++		"flag BETWEEN 1 AND "+boom, "flag NOT BETWEEN 1 AND "+boom,
++		"NULL BETWEEN 1 AND "+boom, "NULL NOT BETWEEN 1 AND "+boom,
++		"1/0 AND "+boom, "1/0 OR "+boom,
++		"0 AND ('x' LIKE 'x' ESCAPE 'ab')", "1 OR ('x' LIKE 'x' ESCAPE 'ab')",
++		"flag AND (flag LIKE 'x' ESCAPE 'ab')", "(flag LIKE 'x' ESCAPE 'ab') AND flag",
++		"flag=99 AND "+boom, "flag=99 AND (flag LIKE 'x' ESCAPE 'ab')",
++		"0 AND missing", "0 AND abs(missing)", "1 OR missing", "0 AND absent()", "1 OR abs()",
++		"CASE WHEN flag AND abs(v) THEN 7 ELSE 9 END", "CASE flag WHEN flag AND abs(v) THEN 7 ELSE 9 END",
++	)
++	templates := []string{
++		"SELECT %s FROM t", "SELECT id FROM t WHERE %s", "SELECT id FROM t NOT INDEXED WHERE %s",
++		"SELECT CASE WHEN %s THEN 7 ELSE 9 END FROM t",
++		"SELECT t.id FROM t JOIN u ON %s", "SELECT t.id,u.y FROM t LEFT JOIN u ON %s",
++		"SELECT t.id FROM t,u WHERE %s", "SELECT %s AS z FROM t WHERE z",
++	}
++	cases := 0
++	compare := func(q string, arg any, binding string) {
++		t.Helper()
++		cmd := exec.Command(cli, "-batch", "-bail", "-noheader", "-quote", "-readonly", path)
++		cmd.Stdin = strings.NewReader(".parameter init\n.parameter set ?1 " + binding + "\n" + q + ";\n")
++		var stderr bytes.Buffer
++		cmd.Stderr = &stderr
++		output, wantErr := cmd.Output()
++		args := []any(nil)
++		if strings.Contains(q, "?1") {
++			args = []any{arg}
++		}
++		rows, gotErr := db.Query(context.Background(), q, args...)
++		var got [][]any
++		if gotErr == nil {
++			for rows.Next() {
++				got = append(got, rows.Values())
++			}
++			gotErr = rows.Err()
++			rows.Close()
++		}
++		if (gotErr == nil) != (wantErr == nil) {
++			t.Errorf("%s [?1=%s]: native=%v rows=%#v; SQLite=%v %s", q, binding, gotErr, got, wantErr, stderr.String())
++			return
++		}
++		if wantErr != nil {
++			for _, kind := range []string{"integer overflow", "no such column", "no such function", "wrong number", "ESCAPE expression"} {
++				if strings.Contains(stderr.String(), kind) && !strings.Contains(fmt.Sprint(gotErr), kind) && !(kind == "no such function" && strings.Contains(fmt.Sprint(gotErr), "unsupported SQL: function")) {
++					t.Errorf("%s: native error %v; SQLite %s", q, gotErr, stderr.String())
++				}
++			}
++			return
++		}
++		want, err := confQuoted(output)
++		if err != nil {
++			t.Fatal(err)
++		}
++		if len(want) == 0 && len(got) == 0 {
++			return
++		}
++		if !reflect.DeepEqual(want, got) {
++			t.Errorf("%s [?1=%s]: got %#v; SQLite %#v", q, binding, got, want)
++		}
++	}
++	for _, expression := range expressions {
++		for _, template := range templates {
++			q := fmt.Sprintf(template, expression)
++			for _, p := range []struct {
++				v    any
++				text string
++			}{{int64(0), "0"}, {int64(1), "1"}, {nil, "NULL"}} {
++				if p.text != "0" && !strings.Contains(q, "?1") {
++					continue
++				}
++				compare(q, p.v, p.text)
++				cases++
++			}
++		}
++	}
++	for _, q := range []string{
++		"SELECT flag FROM empty WHERE flag AND " + boom,
++		"SELECT flag FROM empty WHERE 0 AND " + boom,
++		"SELECT flag FROM empty WHERE " + boom + " AND 0",
++		"SELECT " + boom + " FROM empty",
++		"SELECT t.id FROM empty JOIN t ON " + boom,
++		"SELECT t.id FROM t LEFT JOIN empty ON " + boom,
++		"SELECT t.id FROM t LEFT JOIN empty ON 0 AND " + boom,
++		"SELECT 0 AS z FROM t WHERE z AND " + boom,
++		"SELECT 1 AS z FROM t WHERE " + boom + " OR z",
++		"SELECT flag AS z FROM t WHERE z=99 AND z LIKE 'x' ESCAPE 'ab'",
++		"SELECT t.flag AS z FROM t,u WHERE z=99 AND z LIKE 'x' ESCAPE 'ab'",
++		"SELECT t.id FROM t WHERE " + boom + " LIMIT 0",
++		"SELECT t.id FROM t,u WHERE " + boom + " LIMIT 0",
++	} {
++		compare(q, nil, "NULL")
++		cases++
++	}
++	t.Logf("%d Boolean context/error/value cases checked against pinned SQLite", cases)
++}
+--- /dev/null
++++ b/sqlite/boolean_test.go
+@@ -0,0 +1,214 @@
++package sqlite
++
++import (
++	"context"
++	"errors"
++	"fmt"
++	sqlast "github.com/ms-xiaosnow/gosqlite/internal/sql"
++	"reflect"
++	"strings"
++	"testing"
++)
++
++// All files are intact normal SQL fixtures. Typed-invalid cells below are
++// descriptor-free evaluator inputs, never bytes written into a database.
++func TestBooleanQueryContextsAndPreflight(t *testing.T) {
++	db, _ := reviewVectorDB(t, Options{})
++	for _, q := range []string{"CREATE TABLE t(id INTEGER PRIMARY KEY,flag INTEGER,v INTEGER)", "CREATE TABLE u(y INTEGER)", "CREATE TABLE empty(flag INTEGER)", "INSERT INTO t VALUES(1,0,-9223372036854775808)", "INSERT INTO u VALUES(2)", "CREATE INDEX bool_flag ON t(flag)"} {
++		reviewVectorExec(t, db, q)
++	}
++	const boom = "abs(-9223372036854775808)"
++	for _, tc := range []struct {
++		q       string
++		count   int
++		bad     bool
++		noFetch bool
++	}{
++		{"SELECT t.id FROM t,u WHERE 0 AND " + boom, 0, false, true},
++		{"SELECT t.id FROM t JOIN u ON 0 AND " + boom, 0, false, true},
++		{"SELECT t.id FROM t,u WHERE 1 OR " + boom, 1, false, false},
++		{"SELECT t.id FROM t,u WHERE " + boom + " OR 1", 1, false, false},
++		{"SELECT id FROM t WHERE flag AND " + boom, 0, true, true},
++		{"SELECT flag FROM empty WHERE " + boom, 0, true, true},
++		{"SELECT t.id FROM empty JOIN t ON " + boom, 0, true, true},
++		{"SELECT t.id FROM t LEFT JOIN empty ON " + boom, 1, false, false},
++		{"SELECT id FROM t WHERE flag AND abs(v)", 0, false, false},
++		{"SELECT flag AND abs(v) FROM t", 0, true, false},
++		{"SELECT 0.0 AND " + boom + " FROM t", 0, true, false},
++		{"SELECT CASE WHEN flag AND abs(v) THEN 7 ELSE 9 END FROM t", 1, false, false},
++		{"SELECT id FROM t WHERE " + boom + " AND 0", 0, true, true},
++		{"SELECT id FROM t WHERE " + boom + " LIMIT 0", 0, false, true},
++		{"SELECT flag AS z FROM t WHERE z=99 AND z LIKE 'x' ESCAPE 'ab'", 0, true, true},
++		{"SELECT 0 AS z FROM t WHERE z AND " + boom, 0, false, true},
++		{"SELECT t.id,u.y FROM t LEFT JOIN u ON " + boom + " OR 1", 0, true, false},
++		{"SELECT t.id,u.y FROM t LEFT JOIN u ON 1 OR " + boom, 1, false, false},
++	} {
++		r, err := db.Query(context.Background(), tc.q)
++		if err != nil {
++			t.Fatal(tc.q, err)
++		}
++		n := 0
++		for r.Next() {
++			n++
++		}
++		err = r.Err()
++		if (err != nil) != tc.bad || n != tc.count {
++			t.Errorf("%s: %d rows, %v", tc.q, n, err)
++		}
++		if tc.noFetch && r.Stats().BaseRowFetches != 0 {
++			t.Errorf("preflight fetched rows for %s: %+v", tc.q, r.Stats())
++		}
++		r.Close()
++	}
++	// Name/arity/parameter validation precedes runtime branch suppression.
++	for _, q := range []string{"SELECT 0 AND abs(missing) FROM t", "SELECT 1 OR missing FROM t", "SELECT 0 AND abs() FROM t", "SELECT 0 AND absent() FROM t", "SELECT 0 AND ?1 FROM t"} {
++		r, err := db.Query(context.Background(), q)
++		if err == nil {
++			r.Close()
++			t.Fatal("validation bypassed", q)
++		}
++	}
++	// The sole historical parser exception is false AND a function-free tree.
++	got, _, _ := reviewVectorQuery(t, db, "SELECT 0 AND missing FROM t")
++	if !reflect.DeepEqual(got, [][]any{{int64(0)}}) {
++		t.Fatal(got)
++	}
++	// Ordered queries retain eager startup-error reporting.
++	r, err := db.Query(context.Background(), "SELECT id FROM t WHERE "+boom+" ORDER BY id")
++	if err == nil {
++		r.Close()
++		t.Fatal("ordered startup error disappeared")
++	}
++	ctx, cancel := context.WithCancel(context.Background())
++	r, err = db.Query(ctx, "SELECT id FROM t WHERE 0 AND "+boom)
++	if err != nil {
++		t.Fatal(err)
++	}
++	cancel()
++	if r.Next() || !errors.Is(r.Err(), context.Canceled) {
++		t.Fatal(r.Err())
++	}
++	r.Close()
++}
++
++func TestBooleanLazyTypedCellsAndProjection(t *testing.T) {
++	tab := &table{name: "t", ipk: -1, columns: []sqlast.ColumnDef{{Name: "flag", Type: "INTEGER"}, {Name: "v", Type: "VECTOR(2)"}}, index: map[string]int{"flag": 0, "v": 1}}
++	for _, tc := range []struct {
++		where     string
++		keep, bad bool
++	}{
++		{"flag AND v", false, false}, {"flag OR v", false, true}, {"1 OR v", true, false}, {"0 AND v", false, false},
++		{"flag AND l2_distance(v,'[0,0]')>0", false, false}, {"l2_distance(v,'[0,0]')>0 AND flag", false, true},
++	} {
++		e, err := sqlast.ParseExpr(tc.where)
++		if err != nil {
++			t.Fatal(err)
++		}
++		r := &Rows{ctx: context.Background(), table: tab, sel: &sqlast.Select{Where: e}, exprs: []sqlast.Expr{&sqlast.Literal{Value: int64(7)}}, aliases: map[string]int{}}
++		if err = r.prepareWhere(); err != nil {
++			t.Fatal(err)
++		}
++		// No descriptor/source exists in this evaluator-only regression.
++		if err = r.startPredicates(); err != nil {
++			if tc.keep || tc.bad {
++				t.Fatal(tc.where, err)
++			}
++			continue
++		}
++		_, _, keep, err := r.evaluateSourceRow(1, []any{int64(0), "invalid vector text"})
++		if (err != nil) != tc.bad || err == nil && keep != tc.keep {
++			t.Fatal(tc.where, keep, err)
++		}
++	}
++}
++
++func TestBooleanConservativeIndexErrorBoundary(t *testing.T) {
++	db, _ := reviewVectorDB(t, Options{})
++	for _, q := range []string{"CREATE TABLE t(id INTEGER PRIMARY KEY,k INTEGER)", "INSERT INTO t VALUES(1,1)", "CREATE INDEX bool_k ON t(k)"} {
++		reviewVectorExec(t, db, q)
++	}
++	// Explicit remaining boundary: the native total-residual gate retains scan
++	// order. SQLite's IPK seek suppresses this earlier row-dependent error even
++	// with NOT INDEXED. Do not present this native contract as oracle equality.
++	for _, modifier := range []string{"", " NOT INDEXED"} {
++		r, err := db.Query(context.Background(), "SELECT id FROM t"+modifier+" WHERE k LIKE 'x' ESCAPE 'ab' AND id=9999")
++		if err != nil {
++			t.Fatal(err)
++		}
++		if r.Plan().Access != "SCAN" {
++			t.Fatal("separate index admission contract changed", r.Plan())
++		}
++		if r.Next() || r.Err() == nil || !strings.Contains(r.Err().Error(), "ESCAPE") {
++			t.Fatal(r.Err())
++		}
++		r.Close()
++		// Reversing source order makes the row-dependent error unreachable.
++		got, _, _ := reviewVectorQuery(t, db, "SELECT id FROM t"+modifier+" WHERE id=9999 AND k LIKE 'x' ESCAPE 'ab'")
++		if len(got) != 0 {
++			t.Fatal(got)
++		}
++	}
++}
++
++func TestBooleanDMLPredicatesAndRollback(t *testing.T) {
++	db, _ := reviewVectorDB(t, Options{})
++	reviewVectorExec(t, db, "CREATE TABLE t(id INTEGER PRIMARY KEY,flag INTEGER,v INTEGER)")
++	reviewVectorExec(t, db, "INSERT INTO t VALUES(1,0,-9223372036854775808)")
++	tx, err := db.Begin(context.Background())
++	if err != nil {
++		t.Fatal(err)
++	}
++	defer tx.Rollback()
++	for _, q := range []string{"UPDATE t SET flag=1 WHERE 0 AND abs(-9223372036854775808)", "DELETE FROM t WHERE flag AND abs(v)"} {
++		if _, err := tx.Exec(context.Background(), q); err != nil {
++			t.Fatal(q, err)
++		}
++	}
++	if _, err := tx.Exec(context.Background(), "UPDATE t SET flag=1 WHERE 1 OR abs(-9223372036854775808)"); err != nil {
++		t.Fatal(err)
++	}
++	if err := tx.Rollback(); err != nil {
++		t.Fatal(err)
++	}
++	got, _, _ := reviewVectorQuery(t, db, "SELECT flag FROM t")
++	if !reflect.DeepEqual(got, [][]any{{int64(0)}}) {
++		t.Fatal(got)
++	}
++}
++
++func TestBooleanTransitiveConstantExpansionIsBounded(t *testing.T) {
++	// Descriptor-free planner table, with a linear SQL tree whose naive fixed
++	// substitution proof would expand exponentially. No database file is used.
++	columns := []sqlast.ColumnDef{}
++	index := map[string]int{}
++	var terms []string
++	for i := 0; i < 24; i++ {
++		name := fmt.Sprintf("n%d", i)
++		index[name] = i
++		columns = append(columns, sqlast.ColumnDef{Name: name, Type: "INTEGER"})
++		value := "1"
++		if i > 0 {
++			value = fmt.Sprintf("n%d+n%d", i-1, i-1)
++		}
++		terms = append(terms, name+"="+value)
++	}
++	e, err := sqlast.ParseExpr(strings.Join(terms, " AND "))
++	if err != nil {
++		t.Fatal(err)
++	}
++	r := &Rows{ctx: context.Background(), table: &table{name: "t", ipk: -1, columns: columns, index: index}, sel: &sqlast.Select{Where: e}, aliases: map[string]int{}}
++	if err = r.prepareWhere(); !errors.Is(err, ErrQueryWorkLimit) {
++		t.Fatal("unbounded expanded predicate accepted", err)
++	}
++	// The same shape must also stop under the owning relational work budget,
++	// rather than doing an uncharged recursive constancy proof.
++	budget, err := newRelationalBudget(WithRelationalLimits(context.Background(), RelationalLimits{MaxWork: 5000}), 1<<20)
++	if err != nil {
++		t.Fatal(err)
++	}
++	r.relational = budget
++	r.ctx = sqlast.WithEvalBudget(context.Background(), budget)
++	if err = r.fixPredicateConstants([]sqlast.Expr{e}); !errors.Is(err, ErrQueryWorkLimit) {
++		t.Fatal("planning work quota escaped", err)
++	}
++}
+--- a/sqlite/plan_index.go
++++ b/sqlite/plan_index.go
+@@ -48,9 +48,10 @@
+ 	}
+ 	// Unrelated grams/MATCH rejection reasons remain intact when there is no
+ 	// ordinary equality to consider.
+-	// The scalar evaluator eagerly evaluates AND. Filtering on one conjunct
+-	// would hide errors in another on excluded rows unless the entire WHERE is
+-	// total over ordinary storage classes. Keep error-capable functions, LIKE,
++	// Predicate evaluation is branch-lazy, but pushing a later conjunct ahead
++	// of an earlier error-capable term can still hide errors on excluded rows.
++	// Keep the conservative total-residual admission rule; startup constant
++	// predicates execute even when a seek has zero candidates. Functions, LIKE,
+ 	// typed-vector interpretation and unknown expression shapes on their old
+ 	// path. Projection errors retain the same matching rows and rowid order.
+ 	if !ordinarySafeWhere(r, r.sel.Where) || !ordinarySafeDefaults(ctx, r.table) {
+--- a/sqlite/plan_index_test.go
++++ b/sqlite/plan_index_test.go
+@@ -176,7 +176,9 @@
+ 	if r.Next() || !errors.Is(r.Err(), context.Canceled) || r.Stats().RowIDSeeks != 0 {
+ 		t.Fatal(r.Err(), r.Stats())
+ 	}
+-	for _, where := range []string{"id=9999 AND abs(-9223372036854775808)>0", "id=9999 AND l2_distance('bad','[0]')>0", "id=9999 AND k LIKE 'x' ESCAPE 'ab'"} {
++	// Constant error terms run before source access, even after a rejecting
++	// equality. A row-dependent LIKE after that equality is branch-lazy.
++	for _, where := range []string{"id=9999 AND abs(-9223372036854775808)>0", "id=9999 AND l2_distance('bad','[0]')>0"} {
+ 		var messages []string
+ 		for _, modifier := range []string{"", " NOT INDEXED"} {
+ 			r, err := db.Query(context.Background(), "SELECT id FROM t"+modifier+" WHERE "+where)
+@@ -196,6 +198,23 @@
+ 		}
+ 		if messages[0] != messages[1] {
+ 			t.Fatal(where, messages)
++		}
++	}
++	// Pinned SQLite returns zero rows without evaluating this dead residual.
++	// Retain the prior failing query and assert the corrected result directly.
++	for _, modifier := range []string{"", " NOT INDEXED"} {
++		r, err := db.Query(context.Background(), "SELECT id FROM t"+modifier+" WHERE id=9999 AND k LIKE 'x' ESCAPE 'ab'")
++		if err != nil {
++			t.Fatal(err)
++		}
++		if r.Plan().Access != "SCAN" {
++			t.Fatal("conservative residual admission changed", r.Plan())
++		}
++		if r.Next() || r.Err() != nil {
++			t.Fatal("dead row-dependent residual evaluated", r.Err())
++		}
++		if err := r.Close(); err != nil {
++			t.Fatal(err)
+ 		}
+ 	}
+ }
+--- /dev/null
++++ b/sqlite/predicate.go
+@@ -0,0 +1,158 @@
++package sqlite
++
++import (
++	"context"
++	"io"
++
++	sqlast "github.com/ms-xiaosnow/gosqlite/internal/sql"
++)
++
++// A WHERE clause is a sequence of top-level AND terms, not one scalar Boolean
++// value. SQLite's false-WHERE bypass evaluates deterministic row-independent
++// terms first, in source order, even for an empty source or an empty index seek.
++// Do not simplify across those term boundaries: err() AND 0 must still error.
++type predicateProgram struct {
++	constant, residual []sqlast.Expr
++	outerON            bool
++	fixedColumns       map[*sqlast.Column]sqlast.Expr
++}
++
++func compilePredicate(e sqlast.Expr, ec *sqlast.EvalContext, outerON bool, budget *relationalBudget) (*predicateProgram, error) {
++	p := &predicateProgram{outerON: outerON, fixedColumns: ec.FixedColumns}
++	var add func(sqlast.Expr) error
++	add = func(e sqlast.Expr) error {
++		if e == nil {
++			return nil
++		}
++		if err := sqlast.ChargeExpression(ec, e); err != nil {
++			return err
++		}
++		if x, ok := e.(*sqlast.Binary); ok && x.Op == "AND" {
++			if err := add(x.Left); err != nil {
++				return err
++			}
++			return add(x.Right)
++		}
++		// The full structural walk remains visible to budgets; determining
++		// constancy never invokes functions or decodes typed values.
++		if err := sqlast.ChargeExpressionTree(ec, e); err != nil {
++			return err
++		}
++		if budget != nil {
++			if err := budget.reserve(32); err != nil {
++				return err
++			}
++		}
++		if !outerON && sqlast.ConstantExpression(e, ec) {
++			p.constant = append(p.constant, e)
++		} else {
++			p.residual = append(p.residual, e)
++		}
++		return nil
++	}
++	return p, add(e)
++}
++
++func (p *predicateProgram) evaluate(ec *sqlast.EvalContext) (bool, error) {
++	copy := *ec
++	copy.DisableBooleanSimplification = p.outerON
++	copy.FixedColumns = p.fixedColumns
++	for _, e := range p.residual {
++		keep, err := sqlast.EvalPredicate(e, &copy)
++		if err != nil || !keep {
++			return false, err
++		}
++	}
++	return true, nil
++}
++
++func (r *Rows) prepareWhere() error {
++	// Single-source aliases are expanded after full binding/validation, just
++	// as relational aliases already are. A WHERE alias must retain predicate
++	// context rather than force its expression through the scalar resolver.
++	if r.relational == nil {
++		r.sel.Where = sqlast.Rewrite(r.sel.Where, func(e sqlast.Expr) sqlast.Expr {
++			c, ok := e.(*sqlast.Column)
++			if !ok || c.Table != "" {
++				return e
++			}
++			if _, err := r.table.column(c.Table, c.Name); err == nil {
++				return e
++			}
++			if i, ok := r.aliases[fold(c.Name)]; ok {
++				return r.exprs[i]
++			}
++			return e
++		})
++	}
++	if r.relational == nil {
++		var err error
++		r.sel.Where, err = r.clonePredicate(r.sel.Where)
++		if err != nil {
++			return err
++		}
++		if err := r.fixPredicateConstants([]sqlast.Expr{r.sel.Where}); err != nil {
++			return err
++		}
++	}
++	var err error
++	r.where, err = compilePredicate(r.sel.Where, r.predicateContext(), false, r.relational)
++	if err == nil {
++		r.startupPredicates = append(r.startupPredicates, r.where.constant...)
++	}
++	return err
++}
++
++func (r *Rows) startPredicates() error {
++	if r.predicatesStarted {
++		return nil
++	}
++	r.predicatesStarted = true
++	if r.relational != nil {
++		defer r.relational.clearScalar()
++	}
++	ec := r.predicateContext()
++	for _, e := range r.startupPredicates {
++		keep, err := sqlast.EvalPredicate(e, ec)
++		if err != nil {
++			return err
++		}
++		if !keep {
++			return io.EOF
++		}
++	}
++	return nil
++}
++
++// DML uses the same false-WHERE bypass, before touching the first source row.
++func constantPredicates(ctx context.Context, p *predicateProgram, params []any) (bool, error) {
++	ec := &sqlast.EvalContext{Context: ctx, Params: params}
++	for _, e := range p.constant {
++		keep, err := sqlast.EvalPredicate(e, ec)
++		if err != nil || !keep {
++			return false, err
++		}
++	}
++	return true, nil
++}
++
++// Every predicate occurrence gets its own Column identity. Alias expansion may
++// otherwise share the same leaf with another occurrence or the projection.
++func (r *Rows) clonePredicate(e sqlast.Expr) (sqlast.Expr, error) {
++	ec := r.predicateContext()
++	return sqlast.RewriteChecked(e, func(e sqlast.Expr) error {
++		if err := sqlast.ChargeExpression(ec, e); err != nil {
++			return err
++		}
++		if r.relational != nil {
++			return r.relational.reserve(80)
++		}
++		return nil
++	}, func(e sqlast.Expr) (sqlast.Expr, error) {
++		if c, ok := e.(*sqlast.Column); ok {
++			copy := *c
++			return &copy, nil
++		}
++		return e, nil
++	})
++}
+--- /dev/null
++++ b/sqlite/predicate_constants.go
+@@ -0,0 +1,228 @@
++package sqlite
++
++import (
++	"fmt"
++	sqlast "github.com/ms-xiaosnow/gosqlite/internal/sql"
++)
++
++// Maximum expanded nodes for any one propagated constant. This is an
++// expression-expansion bound, in addition to runtime operation quotas.
++const maxPredicateExpansionWork int64 = 1 << 20
++
++// SQLite's EP_FixedCol retains column affinity while substituting a WHERE
++// equality constant. A context-local map has the same separation without
++// mutating the parser tree, aliases, projection expressions, or schema nodes.
++func (r *Rows) predicateContext() *sqlast.EvalContext {
++	ec := &sqlast.EvalContext{Context: r.ctx, Params: r.params, Functions: r.functions, FixedColumns: r.fixedColumns, DeclaredType: declaredTypeFor(r.table)}
++	ec.Affinity = func(q, n string) string {
++		i, err := r.table.column(q, n)
++		if err != nil {
++			return ""
++		}
++		if i < 0 {
++			return "INTEGER"
++		}
++		return affinity(r.table.columns[i].Type)
++	}
++	return ec
++}
++
++func (r *Rows) fixPredicateConstants(expressions []sqlast.Expr) error {
++	ec := r.predicateContext()
++	fixed := map[*sqlast.Column]sqlast.Expr{}
++	weights := map[*sqlast.Column]int64{}
++	ec.FixedColumns = fixed
++	type equality struct {
++		column *sqlast.Column
++		value  sqlast.Expr
++		weight int64
++	}
++	ordinal := func(c *sqlast.Column) (int, bool) {
++		i, err := r.table.column(c.Table, c.Name)
++		if err != nil {
++			return 0, false
++		}
++		if i >= 0 && sqlast.IsVectorDeclaration(r.table.columns[i].Type) {
++			return 0, false
++		}
++		if i == r.table.ipk {
++			i = -1
++		}
++		return i, true
++	}
++	// Repeated passes expose transitive equalities. Each pass must fix at
++	// least one previously-unfixed node; the bounded statement tree terminates.
++	for pass := 0; ; pass++ {
++		if pass > sqlast.MaxColumns {
++			return fmt.Errorf("%w: predicate constant propagation", ErrQueryWorkLimit)
++		}
++		known := map[int]equality{}
++		var collect func(sqlast.Expr) error
++		collect = func(e sqlast.Expr) error {
++			if e == nil {
++				return nil
++			}
++			if err := sqlast.ChargeExpression(ec, e); err != nil {
++				return err
++			}
++			b, ok := e.(*sqlast.Binary)
++			if !ok {
++				return nil
++			}
++			if b.Op == "AND" {
++				if err := collect(b.Right); err != nil {
++					return err
++				}
++				return collect(b.Left)
++			}
++			if b.Op != "=" && b.Op != "==" {
++				return nil
++			}
++			insert := func(cExpr, value sqlast.Expr) error {
++				c, ok := cExpr.(*sqlast.Column)
++				if !ok || fixed[c] != nil {
++					return nil
++				}
++				id, ok := ordinal(c)
++				if !ok {
++					return nil
++				}
++				if _, ok := known[id]; ok {
++					return nil
++				}
++				if err := sqlast.ChargeExpressionTree(ec, value); err != nil {
++					return err
++				}
++				if !sqlast.ConstantExpression(value, ec) || sqlast.ExpressionAffinity(value, ec.Affinity) != "" || !ordinaryConstantResult(value) {
++					return nil
++				}
++				if r.relational != nil {
++					if err := r.relational.reserve(192); err != nil {
++						return err
++					}
++				}
++				// Account for the expanded evaluator graph without traversing it.
++				// Even legacy single-source queries must not acquire exponential
++				// work merely because of this planner transformation.
++				var weight int64
++				if err := sqlast.Walk(value, func(node sqlast.Expr) error {
++					n := int64(1)
++					if col, ok := node.(*sqlast.Column); ok && weights[col] != 0 {
++						n = weights[col]
++					}
++					if n > maxPredicateExpansionWork-weight {
++						return fmt.Errorf("%w: predicate constant expansion", ErrQueryWorkLimit)
++					}
++					weight += n
++					return nil
++				}); err != nil {
++					return err
++				}
++				known[id] = equality{c, value, weight}
++				return nil
++			}
++			if err := insert(b.Right, b.Left); err != nil {
++				return err
++			}
++			return insert(b.Left, b.Right)
++		}
++		// SQLite visits the right side of the combined AND tree first.
++		for i := len(expressions) - 1; i >= 0; i-- {
++			if err := collect(expressions[i]); err != nil {
++				return err
++			}
++		}
++		if len(known) == 0 {
++			break
++		}
++		changed := 0
++		mark := func(c *sqlast.Column, allowBlob bool) error {
++			if fixed[c] != nil {
++				return nil
++			}
++			id, ok := ordinal(c)
++			if !ok {
++				return nil
++			}
++			eq, ok := known[id]
++			if !ok || eq.column == c {
++				return nil
++			}
++			if !allowBlob && ec.Affinity(c.Table, c.Name) == "BLOB" {
++				return nil
++			}
++			if r.relational != nil {
++				if err := r.relational.reserve(192); err != nil {
++					return err
++				}
++			}
++			if eq.weight >= maxPredicateExpansionWork {
++				return fmt.Errorf("%w: predicate constant expansion", ErrQueryWorkLimit)
++			}
++			fixed[c] = eq.value
++			weights[c] = eq.weight + 1
++			changed++
++			return nil
++		}
++		for _, e := range expressions {
++			if err := sqlast.Walk(e, func(e sqlast.Expr) error {
++				if err := sqlast.ChargeExpression(ec, e); err != nil {
++					return err
++				}
++				if b, ok := e.(*sqlast.Binary); ok {
++					switch b.Op {
++					case "=", "==", "<", "<=", ">", ">=", "IS":
++						if c, ok := b.Left.(*sqlast.Column); ok {
++							if err := mark(c, true); err != nil {
++								return err
++							}
++						}
++						if sqlast.ExpressionAffinity(b.Left, ec.Affinity) != "TEXT" {
++							if c, ok := b.Right.(*sqlast.Column); ok {
++								if err := mark(c, true); err != nil {
++									return err
++								}
++							}
++						}
++					}
++				}
++				if c, ok := e.(*sqlast.Column); ok {
++					return mark(c, false)
++				}
++				return nil
++			}); err != nil {
++				return err
++			}
++		}
++		if changed == 0 {
++			break
++		}
++	}
++	if len(fixed) > 0 {
++		r.fixedColumns = fixed
++	}
++	return nil
++}
++
++// Extension representations are intentionally not propagated as ordinary SQL
++// constants: doing so could erase their representation/subtype validation.
++func ordinaryConstantResult(e sqlast.Expr) bool {
++	safe := true
++	_ = sqlast.Walk(e, func(e sqlast.Expr) error {
++		switch x := e.(type) {
++		case *sqlast.Call:
++			switch sqlast.FoldName(x.Name) {
++			case "abs", "length", "lower", "upper", "typeof", "hex", "nullif", "ifnull", "coalesce":
++			default:
++				safe = false
++			}
++		case *sqlast.Binary:
++			switch x.Op {
++			case "<->", "<#>", "<=>", "<+>", "<~>", "<%>":
++				safe = false
++			}
++		}
++		return nil
++	})
++	return safe
++}
+--- a/sqlite/query.go
++++ b/sqlite/query.go
+@@ -249,6 +249,9 @@
+ 	if err = d.prepareGramFunctions(ctx, reader, r); err != nil {
+ 		return nil, err
+ 	}
++	if err = r.prepareWhere(); err != nil {
++		return nil, err
++	}
+ 	if err = d.planSource(ctx, reader, r); err != nil {
+ 		return nil, err
+ 	}
+--- a/sqlite/relational.go
++++ b/sqlite/relational.go
+@@ -144,7 +144,7 @@
+ 	rightFactory          relationalFactory
+ 	leftWidth, rightWidth int
+ 	kind                  string
+-	on                    sqlast.Expr
++	on                    *predicateProgram
+ 	rows                  *Rows
+ 	budget                *relationalBudget
+ 	outer                 []any
+@@ -248,7 +248,7 @@
+ 	return err
+ }
+ 
+-func (r *Rows) relationalPredicate(e sqlast.Expr, values []any) (bool, error) {
++func (r *Rows) relationalPredicate(p *predicateProgram, values []any) (bool, error) {
+ 	defer r.relational.clearScalar()
+ 	ec := &sqlast.EvalContext{Context: r.ctx, Params: r.params, Functions: r.functions, DeclaredType: declaredTypeFor(r.table)}
+ 	ec.Resolver = func(q, name string) (any, error) {
+@@ -268,12 +268,7 @@
+ 		}
+ 		return affinity(r.table.columns[i].Type)
+ 	}
+-	value, err := sqlast.Eval(e, ec)
+-	if err != nil {
+-		return false, err
+-	}
+-	truth, null, err := sqlast.TruthContext(r.ctx, value)
+-	return truth && !null, err
++	return p.evaluate(ec)
+ }
+ 
+ // Validation of a referenced typed value is lazy, but charged before its codec
+--- a/sqlite/relational_bind.go
++++ b/sqlite/relational_bind.go
+@@ -318,6 +318,7 @@
+ 	// ON are explicitly excluded for now, including through result aliases.
+ 	n := 0
+ 	var onExprs []sqlast.Expr
++	var onPrograms []*predicateProgram
+ 	var build func(sqlast.Relation) (relationalFactory, int, error)
+ 	build = func(relation sqlast.Relation) (relationalFactory, int, error) {
+ 		if _, ok := relation.(*sqlast.TableRelation); ok {
+@@ -355,12 +356,14 @@
+ 			return nil, 0, e
+ 		}
+ 		onExprs = append(onExprs, on)
++		onProgram := &predicateProgram{outerON: j.Kind == "LEFT"}
++		onPrograms = append(onPrograms, onProgram)
+ 		return func() (source, error) {
+ 			l, e := left()
+ 			if e != nil {
+ 				return nil, e
+ 			}
+-			return &relationalJoin{left: l, rightFactory: right, leftWidth: lw, rightWidth: rw, kind: j.Kind, on: on, rows: r, budget: budget}, nil
++			return &relationalJoin{left: l, rightFactory: right, leftWidth: lw, rightWidth: rw, kind: j.Kind, on: onProgram, rows: r, budget: budget}, nil
+ 		}, lw + rw, nil
+ 	}
+ 	factory, _, err := build(original.Relation)
+@@ -386,6 +389,40 @@
+ 	r.exprs = projections
+ 	if err != nil {
+ 		return nil, err
++	}
++	sel.Where, err = r.clonePredicate(sel.Where)
++	if err != nil {
++		return nil, err
++	}
++	for i, on := range onExprs {
++		onExprs[i], err = r.clonePredicate(on)
++		if err != nil {
++			return nil, err
++		}
++	}
++	constantScope := []sqlast.Expr{sel.Where}
++	for i, on := range onExprs {
++		if !onPrograms[i].outerON {
++			constantScope = append(constantScope, on)
++		}
++	}
++	if err = r.fixPredicateConstants(constantScope); err != nil {
++		return nil, err
++	}
++	if err = r.prepareWhere(); err != nil {
++		return nil, err
++	}
++	for i, on := range onExprs {
++		ec := r.predicateContext()
++		if onPrograms[i].outerON {
++			ec.FixedColumns = nil
++		}
++		p, e := compilePredicate(on, ec, onPrograms[i].outerON, budget)
++		if e != nil {
++			return nil, e
++		}
++		*onPrograms[i] = *p
++		r.startupPredicates = append(r.startupPredicates, p.constant...)
+ 	}
+ 	var tables []string
+ 	for _, b := range scope.leaves {
+--- a/sqlite/rows.go
++++ b/sqlite/rows.go
+@@ -29,6 +29,10 @@
+ // multiple consumers because their logical Next/Values pair is not atomic.
+ type Rows struct {
+ 	relational                      *relationalBudget
++	where                           *predicateProgram
++	fixedColumns                    map[*sqlast.Column]sqlast.Expr
++	startupPredicates               []sqlast.Expr
++	predicatesStarted               bool
+ 	annWork                         ANNWorkStats
+ 	vectorRank                      *vectorRank
+ 	queryPlan                       QueryPlan
+@@ -92,6 +96,7 @@
+ 	r.sorted = nil
+ 	r.params = nil
+ 	r.functions = nil
++	r.where, r.startupPredicates, r.fixedColumns = nil, nil, nil
+ 	r.vectorRank = nil
+ 	var err error
+ 	if r.source != nil {
+@@ -182,6 +187,9 @@
+ }
+ 
+ func (r *Rows) fetch() (resultRow, int64, error) {
++	if err := r.startPredicates(); err != nil {
++		return resultRow{}, 0, err
++	}
+ 	if r.relational != nil {
+ 		r.relational.clearResult()
+ 	}
+@@ -328,16 +336,12 @@
+ 		}
+ 		return ""
+ 	}
+-	if r.sel.Where != nil {
+-		value, err := sqlast.Eval(r.sel.Where, ec)
++	if r.where != nil {
++		keep, err := r.where.evaluate(ec)
+ 		if err != nil {
+ 			return resultRow{}, 0, false, err
+ 		}
+-		truth, isNull, err := sqlast.TruthContext(r.ctx, value)
+-		if err != nil {
+-			return resultRow{}, 0, false, err
+-		}
+-		if isNull || !truth {
++		if !keep {
+ 			if r.vectorRank != nil {
+ 				r.queryStats.VectorFilteredRows++
+ 			}
+--- a/sqlite/write_rows.go
++++ b/sqlite/write_rows.go
+@@ -252,6 +252,14 @@
+ 	if err := validate(where, tab.table, nil); err != nil {
+ 		return nil, err
+ 	}
++	predicate, err := compilePredicate(where, &sqlast.EvalContext{Context: ctx, Params: params}, false, nil)
++	if err != nil {
++		return nil, err
++	}
++	keep, err := constantPredicates(ctx, predicate, params)
++	if err != nil || !keep {
++		return nil, err
++	}
+ 	cursor, err := btree.NewCursor(ctx, t.reader, tab.root)
+ 	if err != nil {
+ 		return nil, err
+@@ -271,12 +279,11 @@
+ 			return nil, err
+ 		}
+ 		if where != nil {
+-			v, err := sqlast.Eval(where, tab.evalContext(ctx, params, id, values))
++			keep, err := predicate.evaluate(tab.evalContext(ctx, params, id, values))
+ 			if err != nil {
+ 				return nil, err
+ 			}
+-			truth, null := sqlast.Truth(v)
+-			if null || !truth {
++			if !keep {
+ 				continue
+ 			}
+ 		}

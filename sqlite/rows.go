@@ -29,6 +29,11 @@ type resultRow struct {
 // multiple consumers because their logical Next/Values pair is not atomic.
 type Rows struct {
 	relational                      *relationalBudget
+	where                           *predicateProgram
+	fixedColumns                    map[*sqlast.Column]sqlast.Expr
+	startupPredicates               []sqlast.Expr
+	predicatesStarted               bool
+	predicateStartErr               error
 	annWork                         ANNWorkStats
 	vectorRank                      *vectorRank
 	queryPlan                       QueryPlan
@@ -92,6 +97,7 @@ func (r *Rows) close() error {
 	r.sorted = nil
 	r.params = nil
 	r.functions = nil
+	r.where, r.startupPredicates, r.fixedColumns = nil, nil, nil
 	r.vectorRank = nil
 	var err error
 	if r.source != nil {
@@ -182,6 +188,9 @@ func (r *Rows) Next() bool {
 }
 
 func (r *Rows) fetch() (resultRow, int64, error) {
+	if err := r.startPredicates(); err != nil {
+		return resultRow{}, 0, err
+	}
 	if r.relational != nil {
 		r.relational.clearResult()
 	}
@@ -212,6 +221,12 @@ func (r *Rows) fetch() (resultRow, int64, error) {
 // evaluateSourceRow is shared by scans and ANN base-row rechecks. WHERE runs
 // before vector decoding/scoring; aliases and projection retain one pipeline.
 func (r *Rows) evaluateSourceRow(rowid int64, values []any) (resultRow, int64, bool, error) {
+	if err := r.startPredicates(); err != nil {
+		if err == io.EOF {
+			return resultRow{}, 0, false, nil
+		}
+		return resultRow{}, 0, false, err
+	}
 	if r.relational != nil {
 		defer r.relational.clearScalar()
 		if err := r.relational.Allocate(int64(len(r.exprs)+len(r.order))*16 + 192); err != nil {
@@ -328,16 +343,12 @@ func (r *Rows) evaluateSourceRow(rowid int64, values []any) (resultRow, int64, b
 		}
 		return ""
 	}
-	if r.sel.Where != nil {
-		value, err := sqlast.Eval(r.sel.Where, ec)
+	if r.where != nil {
+		keep, err := r.where.evaluate(ec)
 		if err != nil {
 			return resultRow{}, 0, false, err
 		}
-		truth, isNull, err := sqlast.TruthContext(r.ctx, value)
-		if err != nil {
-			return resultRow{}, 0, false, err
-		}
-		if isNull || !truth {
+		if !keep {
 			if r.vectorRank != nil {
 				r.queryStats.VectorFilteredRows++
 			}

@@ -1,0 +1,29 @@
+package sql
+
+import (
+	"context"
+	"fmt"
+	"testing"
+)
+
+// Pure-memory diagnostic: the shared substitution graph models repeated
+// occurrences of a fixed predecessor column. No descriptor/database/process.
+func TestBooleanIndependentConstantGraphWork(t *testing.T) {
+	for _, depth := range []int{4, 8, 12, 16} {
+		fixed := map[*Column]Expr{}
+		var root Expr = &Column{Name: "leaf"}
+		for i := 0; i < depth; i++ {
+			c := &Column{Name: fmt.Sprint(i)}
+			fixed[c] = &Binary{Op: "+", Left: root, Right: root}
+			root = c
+		}
+		count := 0
+		b := &scalarTestBudget{work: 1, bytes: 1}
+		ec := &EvalContext{Context: WithEvalBudget(context.Background(), b), FixedColumns: fixed, ConstantColumn: func(string, string) bool { count++; return true }}
+		constant := ConstantExpression(root, ec)
+		t.Logf("depth=%d constant=%t expanded-leaf-visits=%d remaining-work=%d", depth, constant, count, b.work)
+		if !constant || count != 0 || b.work != 1 {
+			t.Fatal("certified constant graph re-expanded", constant, count, b.work)
+		}
+	}
+}

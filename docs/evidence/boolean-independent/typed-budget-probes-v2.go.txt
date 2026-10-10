@@ -1,0 +1,115 @@
+package sqlite_test
+
+import (
+	"context"
+	"errors"
+	"path/filepath"
+	"reflect"
+	"strings"
+	"testing"
+
+	"github.com/ms-xiaosnow/gosqlite/sqlite"
+)
+
+// Only intact, ordinarily created data and normal query cancellation/quota
+// exhaustion. Wrong representation means legal HALFVEC passed to a VECTOR
+// scalar, never malformed bytes or a tampered database.
+func TestBooleanIndependentTypedAndBudget(t *testing.T) {
+	db, err := sqlite.Open(filepath.Join(t.TempDir(), "typed.db"), sqlite.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	for _, q := range []string{"CREATE TABLE t(id INTEGER PRIMARY KEY,flag INTEGER,v VECTOR(3),h HALFVEC(3))", "CREATE TABLE u(y INTEGER)", "INSERT INTO t VALUES(1,0,'[1,2,3]','[1,2,3]'),(2,1,'[1,2,3]','[1,2,3]')", "INSERT INTO u VALUES(1),(2)"} {
+		if _, err := db.Exec(context.Background(), q); err != nil {
+			t.Fatal(q, err)
+		}
+	}
+	read := func(ctx context.Context, q string, args ...any) ([][]any, error, sqlite.RelationalStats) {
+		rows, err := db.Query(ctx, q, args...)
+		if err != nil {
+			return nil, err, sqlite.RelationalStats{}
+		}
+		var got [][]any
+		for rows.Next() {
+			got = append(got, rows.Values())
+		}
+		err = rows.Err()
+		rows.Close()
+		return got, err, rows.RelationalStats()
+	}
+	for _, tc := range []struct {
+		q    string
+		want [][]any
+		bad  bool
+	}{
+		{"SELECT flag AND vector_dims(h) FROM t", nil, true},
+		{"SELECT 0.0 AND vector_dims(h) FROM t", nil, true},
+		{"SELECT 0 AND vector_dims(h) FROM t", [][]any{{int64(0)}, {int64(0)}}, false},
+		{"SELECT CASE WHEN flag AND vector_dims(h) THEN 8 ELSE 9 END FROM t WHERE id=1", [][]any{{int64(9)}}, false},
+		{"SELECT CASE flag WHEN flag AND vector_dims(h) THEN 8 ELSE 9 END FROM t WHERE id=1", nil, true},
+		{"SELECT id FROM t WHERE flag AND vector_dims(h)", nil, true},
+		{"SELECT id FROM t WHERE flag=0 AND (flag AND vector_dims(h))", nil, false},
+		{"SELECT t.id,u.y FROM t LEFT JOIN u ON flag=0 AND flag AND vector_dims(h)", [][]any{{int64(1), nil}, {int64(2), nil}}, false},
+		{"SELECT t.id,u.y FROM t LEFT JOIN u ON (0 AND vector_dims(h))=0", nil, true},
+		{"SELECT t.id,u.y FROM t LEFT JOIN u ON CASE WHEN 0 AND vector_dims(h) THEN 1 ELSE 0 END", [][]any{{int64(1), nil}, {int64(2), nil}}, false},
+		{"SELECT t.id FROM t,u WHERE 0 AND vector_dims(h)", nil, false},
+		{"SELECT t.id FROM t,u WHERE 1 OR vector_dims(h)", [][]any{{int64(1)}, {int64(1)}, {int64(2)}, {int64(2)}}, false},
+		{"SELECT t.id FROM t,u WHERE flag=0 AND vector_dims(v)=3", [][]any{{int64(1)}, {int64(1)}}, false},
+	} {
+		got, err, stats := read(context.Background(), tc.q)
+		if (err != nil) != tc.bad || !tc.bad && !reflect.DeepEqual(got, tc.want) {
+			t.Errorf("%s: got=%#v err=%v want=%#v bad=%v", tc.q, got, err, tc.want, tc.bad)
+		}
+		if stats.CurrentBytes != 0 {
+			t.Fatal("retained bytes", stats)
+		}
+	}
+	for _, q := range []string{"SELECT t.id FROM t,u WHERE 0 AND ?1", "SELECT t.id FROM t,u WHERE 1 OR abs() LIMIT 0", "SELECT t.id FROM t,u WHERE 0.0 AND missing LIMIT 0"} {
+		r, e := db.Query(context.Background(), q)
+		if e == nil {
+			r.Close()
+			t.Error("binding skipped:", q)
+		}
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	if _, e, _ := read(ctx, "SELECT t.id FROM t,u WHERE 0 AND vector_dims(h)"); !errors.Is(e, context.Canceled) {
+		t.Fatal(e)
+	}
+	ctx, cancel = context.WithCancel(context.Background())
+	rows, e := db.Query(ctx, "SELECT t.id,u.y FROM t,u WHERE 1 OR vector_dims(h)")
+	if e != nil {
+		t.Fatal(e)
+	}
+	if !rows.Next() {
+		t.Fatal(rows.Err())
+	}
+	cancel()
+	if rows.Next() || !errors.Is(rows.Err(), context.Canceled) {
+		t.Fatal(rows.Err())
+	}
+	rows.Close()
+	if rows.RelationalStats().CurrentBytes != 0 {
+		t.Fatal(rows.RelationalStats())
+	}
+	for _, limits := range []sqlite.RelationalLimits{{MaxWork: 1}, {MaxBytes: 1}, {MaxWork: 800}, {MaxBytes: 5000}} {
+		_, e, stats := read(sqlite.WithRelationalLimits(context.Background(), limits), "SELECT t.id,u.y FROM t,u WHERE (flag=0 OR flag=1) AND 1 OR 0")
+		if e != nil && !errors.Is(e, sqlite.ErrQueryWorkLimit) && !errors.Is(e, sqlite.ErrMemoryLimit) {
+			t.Fatal(e)
+		}
+		if stats.CurrentBytes != 0 {
+			t.Fatal(stats)
+		}
+	}
+	_, e, stats := read(sqlite.WithRelationalLimits(context.Background(), sqlite.RelationalLimits{MaxWork: 1000}), "SELECT t.id FROM t,u WHERE 0 AND length(?)", strings.Repeat("a", 10000))
+	if !errors.Is(e, sqlite.ErrQueryWorkLimit) {
+		t.Fatalf("large bind admission ignored quota: %v", e)
+	}
+	if stats.CurrentBytes != 0 {
+		t.Fatal(stats)
+	}
+	if got, e, _ := read(context.Background(), "SELECT id FROM t ORDER BY id"); e != nil || len(got) != 2 {
+		t.Fatal(got, e)
+	}
+}

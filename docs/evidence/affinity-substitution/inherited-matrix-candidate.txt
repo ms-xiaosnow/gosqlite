@@ -1,0 +1,5 @@
+=== RUN   TestAffinityInheritedMatrixOracle
+    affinity_substitution_conformance_test.go:101: independent affinity: 2160 cases, 0 mismatches
+--- PASS: TestAffinityInheritedMatrixOracle (4.84s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	4.843s

@@ -1,0 +1,31 @@
+Behavior audit: new boolean_rank_filter tests use intact ordinary CREATE/INSERT/DELETE/HNSW and public searches; invalid typed inputs exist only in descriptor-free Rows and filter evaluators, cancellation is a memory context, work errors are pure quotas. No restricted physical workflow.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestBooleanRankMemoryEntrypoints
+--- PASS: TestBooleanRankMemoryEntrypoints (0.00s)
+=== RUN   TestBooleanRankSQLStartupAcrossRepresentations
+=== RUN   TestBooleanRankSQLStartupAcrossRepresentations/dense
+    boolean_rank_filter_test.go:112: [[2 1]] {vector_l2_ops 1 0  40 1000 40 0 0 0 all_live_identities_rechecked  l2  vector v 2 2 false ann_exact_rescore SEARCH items [knn] hnsw 1 [v]  [] -1 true lazy HNSW traversal with original WHERE and exact base-row rescoring} {0 0 0 1 4 2 2 2 2 0 0 0 0 1 1 2136 1 1 0 4 0 0 0 0 2 2 1}
+=== RUN   TestBooleanRankSQLStartupAcrossRepresentations/half
+    boolean_rank_filter_test.go:112: [[2 1]] {halfvec_l2_ops 1 0  40 1000 40 0 0 0 all_live_identities_rechecked  l2  halfvec v 2 2 false ann_exact_rescore SEARCH items [knn] hnsw 2 [v]  [] -1 true lazy HNSW traversal with original WHERE and exact base-row rescoring} {0 0 0 1 4 2 2 2 2 0 0 0 0 1 1 2124 1 1 0 4 0 0 0 0 2 2 1}
+=== RUN   TestBooleanRankSQLStartupAcrossRepresentations/sparse
+    boolean_rank_filter_test.go:112: [[2 1]] {sparsevec_l2_ops 1 0  40 1000 40 0 0 0 all_live_identities_rechecked  l2  sparsevec v 20 2 false ann_exact_rescore SEARCH items [knn] hnsw 2 [v]  [] -1 true lazy HNSW traversal with original WHERE and exact base-row rescoring} {0 0 0 1 4 2 2 2 2 0 0 0 0 1 1 2160 1 1 0 0 6 0 0 0 2 2 1}
+=== RUN   TestBooleanRankSQLStartupAcrossRepresentations/bit
+    boolean_rank_filter_test.go:112: [[2 1]] {bit_hamming_ops 1 0  40 1000 40 0 0 0 all_live_identities_rechecked   hamming bit v 2 2 false ann_exact_rescore SEARCH items [knn] hnsw 2 [v]  [] -1 true lazy HNSW traversal with original WHERE and exact base-row rescoring} {0 0 0 1 4 2 2 2 2 0 0 0 0 1 1 2115 1 1 0 0 0 2 0 0 2 2 1}
+--- FAIL: TestBooleanRankSQLStartupAcrossRepresentations (0.07s)
+    --- FAIL: TestBooleanRankSQLStartupAcrossRepresentations/dense (0.02s)
+    --- FAIL: TestBooleanRankSQLStartupAcrossRepresentations/half (0.02s)
+    --- FAIL: TestBooleanRankSQLStartupAcrossRepresentations/sparse (0.02s)
+    --- FAIL: TestBooleanRankSQLStartupAcrossRepresentations/bit (0.01s)
+=== RUN   TestBooleanPublicFilterTypedLazinessAndTerminalStartup
+--- PASS: TestBooleanPublicFilterTypedLazinessAndTerminalStartup (0.00s)
+=== RUN   TestBooleanPublicVectorFiltersAndBudgets
+--- PASS: TestBooleanPublicVectorFiltersAndBudgets (0.02s)
+=== RUN   TestSparseReviewMemoryLazyNullAndSupportBudgets
+--- PASS: TestSparseReviewMemoryLazyNullAndSupportBudgets (0.00s)
+=== RUN   TestSparseReviewMemoryExternalDefaultsAndAliases
+--- PASS: TestSparseReviewMemoryExternalDefaultsAndAliases (0.00s)
+=== RUN   TestANNReviewEmptyIndexAndAllFilteredSQL
+--- PASS: TestANNReviewEmptyIndexAndAllFilteredSQL (0.01s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/sqlite	0.108s
+FAIL

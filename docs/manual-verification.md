@@ -455,3 +455,20 @@ unchanged inventory. Hosted CI and exact restored commit results are recorded
 separately when terminal; no result from a different tree is substituted.
 Native platform runtime, restricted physical recovery/failure, independent
 security/cryptography/legal and complete M10 acceptance remain NOT_RUN.
+
+
+## Predicate and affinity ordinary qualification
+
+Exact source816e84d58da57b537376bcff461776474c1759a4 passed the complete guarded
+CGO0 unit/vet/build, pinned ordinary oracle, separate full race, five cross-builds,
+module and inventory checks at2026-10-10T19:47:07Z. Exact commands/logs are
+`evidence/boolean-rank-lead-commands.txt` and `boolean-rank-lead-checks.txt`.
+The first combined source's three genuine sparse/ANN false-predicate failures
+are retained with exit1. Existing assertions were not weakened; independent
+memory/ordinary negative controls prove the correction. All new executed
+fixtures were intact ordinary SQL/read-write/rollback/BUSY/cancel/close/reopen,
+correct-key inherited lifecycle checks, or descriptor-free AST/quota/math laws.
+No restricted manual tag, physical corruption/tamper/wrong-key/namespace/crash/
+hot-recovery/native-failure/interrupted-publication workflow was run. Target
+cross-compilation is not native runtime acceptance. Plain ownership, broader
+SQL/planner/migration code and independent M10 gates remain separately open.

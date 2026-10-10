@@ -1,0 +1,133 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestBooleanIndependentOracle
+    boolean_independent_test.go:126: SQL SELECT t.id FROM t0 t WHERE (t.flag LIKE 'x' ESCAPE 'ab') AND t.flag=CAST('1' AS INTEGER)
+        native=sqlite next: ESCAPE expression must be a single character rows=[][]interface {}(nil)
+        SQLite=<nil> 
+    boolean_independent_test.go:127: SQL SELECT t.id,u.y FROM t0 t,u WHERE (t.flag LIKE 'x' ESCAPE 'ab') AND t.flag=CAST('1' AS INTEGER)
+        native=sqlite next: ESCAPE expression must be a single character rows=[][]interface {}(nil)
+        SQLite=<nil> 
+    boolean_independent_test.go:161: SQL SELECT t.id,u.y FROM t0 t LEFT JOIN u ON abs(t.v) AND t.flag WHERE t.flag=99
+        native=sqlite next: integer overflow rows=[][]interface {}(nil)
+        SQLite=<nil> 
+    boolean_independent_test.go:161: SQL SELECT 0 AS true FROM t0 t WHERE true AND abs(t.v)
+        native=sqlite query: unsupported SQLite feature: unsupported SQL: reserved identifier true at byte 12 rows=[][]interface {}(nil)
+        SQLite=<nil> 
+    boolean_independent_test.go:161: SQL SELECT 1 AS false FROM t0 t WHERE false OR abs(t.v)
+        native=sqlite query: unsupported SQLite feature: unsupported SQL: reserved identifier false at byte 12 rows=[][]interface {}(nil)
+        SQLite=<nil> 
+    boolean_independent_test.go:183: independent: 5332 cases, 5 mismatches
+--- FAIL: TestBooleanIndependentOracle (13.43s)
+=== RUN   TestBooleanIndependentAffinityOracle
+    boolean_independent_test.go:256: SQL SELECT id,t,typeof(t) FROM vals WHERE t=1.0 AND (t=b) ORDER BY id
+        native=[][]interface {}{[]interface {}{2, "1.0", "text"}}
+        SQLite=[][]interface {}(nil)
+    boolean_independent_test.go:256: SQL SELECT id,t,typeof(t) FROM vals,one WHERE t=1.0 AND (t=b) ORDER BY id
+        native=[][]interface {}{[]interface {}{2, "1.0", "text"}}
+        SQLite=[][]interface {}(nil)
+    boolean_independent_test.go:256: SQL SELECT id,t,typeof(t) FROM vals WHERE t=1.0 AND (b=t) ORDER BY id
+        native=[][]interface {}{[]interface {}{2, "1.0", "text"}}
+        SQLite=[][]interface {}(nil)
+    boolean_independent_test.go:256: SQL SELECT id,t,typeof(t) FROM vals,one WHERE t=1.0 AND (b=t) ORDER BY id
+        native=[][]interface {}{[]interface {}{2, "1.0", "text"}}
+        SQLite=[][]interface {}(nil)
+    boolean_independent_test.go:256: SQL SELECT id,b,typeof(b) FROM vals WHERE b=1 AND (t=b) ORDER BY id
+        native=[][]interface {}{[]interface {}{2, 1, "real"}}
+        SQLite=[][]interface {}(nil)
+    boolean_independent_test.go:256: SQL SELECT id,b,typeof(b) FROM vals,one WHERE b=1 AND (t=b) ORDER BY id
+        native=[][]interface {}{[]interface {}{2, 1, "real"}}
+        SQLite=[][]interface {}(nil)
+    boolean_independent_test.go:256: SQL SELECT id,b,typeof(b) FROM vals WHERE b=1 AND (t IS b) ORDER BY id
+        native=[][]interface {}{[]interface {}{2, 1, "real"}}
+        SQLite=[][]interface {}(nil)
+    boolean_independent_test.go:256: SQL SELECT id,b,typeof(b) FROM vals,one WHERE b=1 AND (t IS b) ORDER BY id
+        native=[][]interface {}{[]interface {}{2, 1, "real"}}
+        SQLite=[][]interface {}(nil)
+    boolean_independent_test.go:256: SQL SELECT id,b,typeof(b) FROM vals WHERE b=1 AND (b != t) ORDER BY id
+        native=[][]interface {}(nil)
+        SQLite=[][]interface {}{[]interface {}{2, 1, "real"}}
+    boolean_independent_test.go:256: SQL SELECT id,b,typeof(b) FROM vals,one WHERE b=1 AND (b != t) ORDER BY id
+        native=[][]interface {}(nil)
+        SQLite=[][]interface {}{[]interface {}{2, 1, "real"}}
+    boolean_independent_test.go:256: SQL SELECT id,b,typeof(b) FROM vals WHERE b=1.0 AND (b=t) ORDER BY id
+        native=[][]interface {}{[]interface {}{2, 1, "real"}}
+        SQLite=[][]interface {}(nil)
+    boolean_independent_test.go:256: SQL SELECT id,b,typeof(b) FROM vals,one WHERE b=1.0 AND (b=t) ORDER BY id
+        native=[][]interface {}{[]interface {}{2, 1, "real"}}
+        SQLite=[][]interface {}(nil)
+    boolean_independent_test.go:256: SQL SELECT id,b,typeof(b) FROM vals WHERE b=1.0 AND (t=b) ORDER BY id
+        native=[][]interface {}{[]interface {}{2, 1, "real"}}
+        SQLite=[][]interface {}(nil)
+    boolean_independent_test.go:256: SQL SELECT id,b,typeof(b) FROM vals,one WHERE b=1.0 AND (t=b) ORDER BY id
+        native=[][]interface {}{[]interface {}{2, 1, "real"}}
+        SQLite=[][]interface {}(nil)
+    boolean_independent_test.go:256: SQL SELECT id,b,typeof(b) FROM vals WHERE b=1.0 AND (b IS t) ORDER BY id
+        native=[][]interface {}{[]interface {}{2, 1, "real"}}
+        SQLite=[][]interface {}(nil)
+    boolean_independent_test.go:256: SQL SELECT id,b,typeof(b) FROM vals,one WHERE b=1.0 AND (b IS t) ORDER BY id
+        native=[][]interface {}{[]interface {}{2, 1, "real"}}
+        SQLite=[][]interface {}(nil)
+    boolean_independent_test.go:256: SQL SELECT id,b,typeof(b) FROM vals WHERE b=1.0 AND (t IS b) ORDER BY id
+        native=[][]interface {}{[]interface {}{2, 1, "real"}}
+        SQLite=[][]interface {}(nil)
+    boolean_independent_test.go:256: SQL SELECT id,b,typeof(b) FROM vals,one WHERE b=1.0 AND (t IS b) ORDER BY id
+        native=[][]interface {}{[]interface {}{2, 1, "real"}}
+        SQLite=[][]interface {}(nil)
+    boolean_independent_test.go:256: SQL SELECT id,b,typeof(b) FROM vals WHERE b=1.0 AND (b != t) ORDER BY id
+        native=[][]interface {}(nil)
+        SQLite=[][]interface {}{[]interface {}{2, 1, "real"}}
+    boolean_independent_test.go:256: SQL SELECT id,b,typeof(b) FROM vals,one WHERE b=1.0 AND (b != t) ORDER BY id
+        native=[][]interface {}(nil)
+        SQLite=[][]interface {}{[]interface {}{2, 1, "real"}}
+    boolean_independent_test.go:256: SQL SELECT id,u,typeof(u) FROM vals WHERE u=1 AND (t=u) ORDER BY id
+        native=[][]interface {}{[]interface {}{2, 1, "real"}}
+        SQLite=[][]interface {}(nil)
+    boolean_independent_test.go:256: SQL SELECT id,u,typeof(u) FROM vals,one WHERE u=1 AND (t=u) ORDER BY id
+        native=[][]interface {}{[]interface {}{2, 1, "real"}}
+        SQLite=[][]interface {}(nil)
+    boolean_independent_test.go:256: SQL SELECT id,u,typeof(u) FROM vals WHERE u=1 AND (t IS u) ORDER BY id
+        native=[][]interface {}{[]interface {}{2, 1, "real"}}
+        SQLite=[][]interface {}(nil)
+    boolean_independent_test.go:256: SQL SELECT id,u,typeof(u) FROM vals,one WHERE u=1 AND (t IS u) ORDER BY id
+        native=[][]interface {}{[]interface {}{2, 1, "real"}}
+        SQLite=[][]interface {}(nil)
+    boolean_independent_test.go:256: SQL SELECT id,u,typeof(u) FROM vals WHERE u=1 AND (u != t) ORDER BY id
+        native=[][]interface {}(nil)
+        SQLite=[][]interface {}{[]interface {}{2, 1, "real"}}
+    boolean_independent_test.go:256: SQL SELECT id,u,typeof(u) FROM vals,one WHERE u=1 AND (u != t) ORDER BY id
+        native=[][]interface {}(nil)
+        SQLite=[][]interface {}{[]interface {}{2, 1, "real"}}
+    boolean_independent_test.go:256: SQL SELECT id,u,typeof(u) FROM vals WHERE u=1.0 AND (u=t) ORDER BY id
+        native=[][]interface {}{[]interface {}{2, 1, "real"}}
+        SQLite=[][]interface {}(nil)
+    boolean_independent_test.go:256: SQL SELECT id,u,typeof(u) FROM vals,one WHERE u=1.0 AND (u=t) ORDER BY id
+        native=[][]interface {}{[]interface {}{2, 1, "real"}}
+        SQLite=[][]interface {}(nil)
+    boolean_independent_test.go:256: SQL SELECT id,u,typeof(u) FROM vals WHERE u=1.0 AND (t=u) ORDER BY id
+        native=[][]interface {}{[]interface {}{2, 1, "real"}}
+        SQLite=[][]interface {}(nil)
+    boolean_independent_test.go:256: SQL SELECT id,u,typeof(u) FROM vals,one WHERE u=1.0 AND (t=u) ORDER BY id
+        native=[][]interface {}{[]interface {}{2, 1, "real"}}
+        SQLite=[][]interface {}(nil)
+    boolean_independent_test.go:256: SQL SELECT id,u,typeof(u) FROM vals WHERE u=1.0 AND (u IS t) ORDER BY id
+        native=[][]interface {}{[]interface {}{2, 1, "real"}}
+        SQLite=[][]interface {}(nil)
+    boolean_independent_test.go:256: SQL SELECT id,u,typeof(u) FROM vals,one WHERE u=1.0 AND (u IS t) ORDER BY id
+        native=[][]interface {}{[]interface {}{2, 1, "real"}}
+        SQLite=[][]interface {}(nil)
+    boolean_independent_test.go:256: SQL SELECT id,u,typeof(u) FROM vals WHERE u=1.0 AND (t IS u) ORDER BY id
+        native=[][]interface {}{[]interface {}{2, 1, "real"}}
+        SQLite=[][]interface {}(nil)
+    boolean_independent_test.go:256: SQL SELECT id,u,typeof(u) FROM vals,one WHERE u=1.0 AND (t IS u) ORDER BY id
+        native=[][]interface {}{[]interface {}{2, 1, "real"}}
+        SQLite=[][]interface {}(nil)
+    boolean_independent_test.go:256: SQL SELECT id,u,typeof(u) FROM vals WHERE u=1.0 AND (u != t) ORDER BY id
+        native=[][]interface {}(nil)
+        SQLite=[][]interface {}{[]interface {}{2, 1, "real"}}
+    boolean_independent_test.go:256: SQL SELECT id,u,typeof(u) FROM vals,one WHERE u=1.0 AND (u != t) ORDER BY id
+        native=[][]interface {}(nil)
+        SQLite=[][]interface {}{[]interface {}{2, 1, "real"}}
+    boolean_independent_test.go:268: independent affinity: 2160 cases, 36 mismatches
+--- FAIL: TestBooleanIndependentAffinityOracle (8.12s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/testkit	21.552s
+FAIL

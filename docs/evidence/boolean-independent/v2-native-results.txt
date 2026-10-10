@@ -1,0 +1,27 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+=== RUN   TestBooleanIndependentTypedAndBudget
+--- PASS: TestBooleanIndependentTypedAndBudget (0.01s)
+=== RUN   TestBooleanIndependentPlanningGraphWork
+    boolean_independent_work_probe_test.go:56: depth=4 query-duration=267.153µs accounted-work=18431 source-opens=0
+    boolean_independent_work_probe_test.go:56: depth=8 query-duration=328.846µs accounted-work=35491 source-opens=0
+    boolean_independent_work_probe_test.go:56: depth=12 query-duration=587.948µs accounted-work=61891 source-opens=0
+    boolean_independent_work_probe_test.go:56: depth=16 query-duration=756.641µs accounted-work=97623 source-opens=0
+    boolean_independent_work_probe_test.go:56: depth=18 query-duration=802.972µs accounted-work=118981 source-opens=0
+    boolean_independent_work_probe_test.go:48: depth=24 bounded failure=sqlite query: relational query work limit exceeded: predicate constant expansion duration=1.067971ms
+--- PASS: TestBooleanIndependentPlanningGraphWork (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.022s
+=== RUN   TestBooleanIndependentDriver
+--- PASS: TestBooleanIndependentDriver (0.01s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.013s
+=== RUN   TestBooleanIndependentFunctionArguments
+--- PASS: TestBooleanIndependentFunctionArguments (0.00s)
+=== RUN   TestBooleanIndependentConstantGraphWork
+    boolean_independent_work_probe_test.go:24: depth=4 constant=true expanded-leaf-visits=0 remaining-work=1
+    boolean_independent_work_probe_test.go:24: depth=8 constant=true expanded-leaf-visits=0 remaining-work=1
+    boolean_independent_work_probe_test.go:24: depth=12 constant=true expanded-leaf-visits=0 remaining-work=1
+    boolean_independent_work_probe_test.go:24: depth=16 constant=true expanded-leaf-visits=0 remaining-work=1
+--- PASS: TestBooleanIndependentConstantGraphWork (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.008s

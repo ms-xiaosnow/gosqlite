@@ -1,0 +1,3 @@
+internal/sql/eval_predicate.go
+internal/sql/parser.go
+sqlite/predicate_constants.go

@@ -1,0 +1,316 @@
+//go:build oracle
+
+package testkit_test
+
+import (
+	"bytes"
+	"context"
+	"fmt"
+	"os/exec"
+	"path/filepath"
+	"reflect"
+	"strings"
+	"testing"
+
+	"github.com/ms-xiaosnow/gosqlite/sqlite"
+)
+
+// Independent review uses intact SQL-created databases, pinned read-only CLI
+// oracle processes that end normally, and public native Query/Rows. No storage
+// injection, namespace mutation, faulting helpers, or process interruption.
+func TestBooleanIndependentOracle(t *testing.T) {
+	cli := confOracle(t)
+	path := filepath.Join(t.TempDir(), "independent.db")
+	db, err := sqlite.Open(path, sqlite.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	for _, q := range []string{
+		"CREATE TABLE t0(id INTEGER PRIMARY KEY,flag INTEGER,v INTEGER,txt TEXT,raw BLOB)",
+		"CREATE TABLE t1(id INTEGER PRIMARY KEY,flag INTEGER,v INTEGER,txt TEXT,raw BLOB)",
+		"CREATE TABLE tn(id INTEGER PRIMARY KEY,flag INTEGER,v INTEGER,txt TEXT,raw BLOB)",
+		"CREATE TABLE u(y INTEGER)", "CREATE TABLE empty(y INTEGER)",
+		`CREATE TABLE names(id INTEGER PRIMARY KEY,"true" INTEGER,"false" INTEGER,v INTEGER)`,
+		"INSERT INTO t0 VALUES(1,0,-9223372036854775808,'01','01')",
+		"INSERT INTO t1 VALUES(1,1,-9223372036854775808,'01','01')",
+		"INSERT INTO tn VALUES(1,NULL,-9223372036854775808,'01','01')",
+		"INSERT INTO u VALUES(2)", "INSERT INTO names VALUES(1,0,1,-9223372036854775808)",
+		"CREATE INDEX fi0 ON t0(flag)", "CREATE INDEX fi1 ON t1(flag)", "CREATE INDEX fin ON tn(flag)",
+	} {
+		writeExec(t, db, q)
+	}
+	cases, failed := 0, 0
+	compare := func(q string) {
+		t.Helper()
+		cases++
+		cmd := exec.Command(cli, "-batch", "-bail", "-noheader", "-quote", "-readonly", path)
+		cmd.Stdin = strings.NewReader(q + ";\n")
+		var stderr bytes.Buffer
+		cmd.Stderr = &stderr
+		out, werr := cmd.Output()
+		rows, gerr := db.Query(context.Background(), q)
+		var got [][]any
+		if gerr == nil {
+			for rows.Next() {
+				got = append(got, rows.Values())
+			}
+			gerr = rows.Err()
+			rows.Close()
+		}
+		if (gerr == nil) != (werr == nil) {
+			failed++
+			t.Errorf("SQL %s\nnative=%v rows=%#v\nSQLite=%v %s", q, gerr, got, werr, stderr.String())
+			return
+		}
+		if werr != nil {
+			for _, kind := range []string{"integer overflow", "ESCAPE expression", "no such column", "wrong number"} {
+				if strings.Contains(stderr.String(), kind) && !strings.Contains(fmt.Sprint(gerr), kind) {
+					failed++
+					t.Errorf("SQL %s: native=%v SQLite=%s", q, gerr, stderr.String())
+				}
+			}
+			return
+		}
+		want, err := confQuoted(out)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(got) == 0 && len(want) == 0 {
+			return
+		}
+		if !reflect.DeepEqual(got, want) {
+			failed++
+			t.Errorf("SQL %s\nnative=%#v\nSQLite=%#v", q, got, want)
+		}
+	}
+	boom := "abs(t.v)"
+	exprs := []string{}
+	for _, e := range []string{
+		"NULL AND " + boom, "NULL OR " + boom, "t.flag AND " + boom, "t.flag OR " + boom,
+		boom + " AND t.flag", boom + " OR t.flag", "0.0 AND " + boom, "1.0 OR " + boom,
+		"0 AND " + boom, "1 OR " + boom, "t.flag BETWEEN 1 AND " + boom,
+		"t.flag NOT BETWEEN 1 AND " + boom, "NULL BETWEEN 0 AND " + boom,
+		"t.flag IN (1," + boom + ")", "t.flag NOT IN (1," + boom + ")",
+		"NULL IN (t.flag," + boom + ")", "NULL NOT IN (t.flag," + boom + ")",
+	} {
+		for _, wrap := range []string{"%s", "NOT (%s)", "NOT NOT (%s)", "(%s) IS TRUE", "(%s) IS FALSE", "(%s) IS NOT TRUE", "(%s) IS NOT FALSE", "(%s) IS NULL", "(%s) IS NOT NULL", "+(%s)", "CAST((%s) AS INTEGER)", "typeof(%s)", "nullif(%s,0)", "(%s)=0", "(%s) IN (0,1)", "(%s) BETWEEN 0 AND 1"} {
+			exprs = append(exprs, fmt.Sprintf(wrap, e))
+		}
+	}
+	exprs = append(exprs,
+		"coalesce(t.flag,"+boom+")", "ifnull(t.flag,"+boom+")", "nullif(t.flag,"+boom+")",
+		"(t.flag AND "+boom+") OR NULL", "NULL OR (t.flag AND "+boom+")",
+		"(t.flag OR "+boom+") AND NULL", "NULL AND (t.flag OR "+boom+")",
+		"CASE WHEN t.flag AND "+boom+" THEN 8 ELSE 9 END", "CASE t.flag WHEN t.flag AND "+boom+" THEN 8 ELSE 9 END",
+	)
+	for _, name := range []string{"t0", "t1", "tn"} {
+		for _, e := range exprs {
+			for _, templ := range []string{
+				"SELECT %s FROM " + name + " t",
+				"SELECT t.id FROM " + name + " t WHERE %s",
+				"SELECT CASE WHEN %s THEN 8 ELSE 9 END FROM " + name + " t",
+				"SELECT t.id FROM " + name + " t JOIN u ON %s",
+				"SELECT t.id,u.y FROM " + name + " t LEFT JOIN u ON %s",
+			} {
+				compare(fmt.Sprintf(templ, e))
+			}
+		}
+	}
+	for _, col := range []string{"t.flag", "t.id", "t.txt", "t.raw"} {
+		for _, value := range []string{"0", "1", "'01'", "NULL", "0.0", "1.0", "CAST('1' AS INTEGER)", "abs(1)", "1+0"} {
+			for _, condition := range []string{col + "=" + value + " AND (" + col + " LIKE 'x' ESCAPE 'ab')", "(" + col + " LIKE 'x' ESCAPE 'ab') AND " + col + "=" + value,
+				col + "=" + value + " AND (" + col + " AND abs(-9223372036854775808))", col + "=" + value + " AND (" + col + " OR abs(-9223372036854775808))",
+				col + "=" + value + " AND NOT (" + col + " AND abs(-9223372036854775808))"} {
+				compare("SELECT t.id FROM t0 t NOT INDEXED WHERE " + condition)
+				compare("SELECT t.id FROM t0 t WHERE " + condition)
+				compare("SELECT t.id,u.y FROM t0 t,u WHERE " + condition)
+				compare("SELECT t.id,u.y FROM t0 t LEFT JOIN u ON " + condition)
+			}
+		}
+	}
+	for _, q := range []string{
+		"SELECT t.id,u.y FROM t0 t LEFT JOIN u ON t.flag=u.y WHERE u.y=99 AND u.y LIKE 'x' ESCAPE 'ab'",
+		"SELECT t.id,u.y FROM t0 t LEFT JOIN u ON t.flag=u.y WHERE u.y=99 AND t.flag LIKE 'x' ESCAPE 'ab'",
+		"SELECT t.id,u.y FROM t0 t LEFT JOIN u ON abs(t.v) AND t.flag WHERE t.flag=99",
+		"SELECT t.id,u.y FROM t0 t LEFT JOIN u ON abs(t.v) AND t.flag WHERE t.flag=0",
+		"SELECT t.id,u.y FROM t0 t LEFT JOIN empty u ON abs(t.v) AND t.flag WHERE t.flag=99",
+		"SELECT t.id,u.y FROM t0 t LEFT JOIN empty u ON 1 OR abs(t.v) WHERE u.y IS NULL",
+		"SELECT t.id FROM t0 t,empty u WHERE t.flag AND abs(-9223372036854775808)",
+		"SELECT t.id FROM t0 t,empty u WHERE abs(t.v) AND t.flag=99",
+		"SELECT t.id FROM t0 t LEFT JOIN u ON t.flag=99 WHERE abs(-9223372036854775808) OR t.flag",
+		"SELECT t.id FROM t0 t JOIN u ON abs(-9223372036854775808) WHERE 0",
+		"SELECT t.id FROM t0 t JOIN u ON 0 WHERE abs(-9223372036854775808)",
+		"SELECT t.id FROM t0 t JOIN u ON 0 WHERE abs(t.v)",
+		"SELECT t.id FROM t0 t JOIN u ON t.flag WHERE abs(-9223372036854775808)",
+		"SELECT t.id FROM t0 t LEFT JOIN u ON t.flag WHERE abs(-9223372036854775808)",
+		"SELECT 0 AS flag FROM t1 t WHERE flag AND abs(t.v)",
+		"SELECT 0 AS true FROM t0 t WHERE true AND abs(t.v)",
+		"SELECT 1 AS false FROM t0 t WHERE false OR abs(t.v)",
+		"SELECT id FROM names WHERE true AND abs(v)",
+		"SELECT id FROM names WHERE false OR abs(v)",
+		"SELECT false OR abs(v) FROM names",
+		"SELECT 0 AND missing FROM t0 LIMIT 0",
+		"SELECT 1 FROM t0 WHERE 0 AND missing LIMIT 0",
+		"SELECT 1 FROM t0 JOIN u ON 0 AND missing LIMIT 0",
+		"SELECT 1 FROM t0 LEFT JOIN u ON 1 OR absent() LIMIT 0",
+		"SELECT 1 FROM t0,tn WHERE 0 AND flag",
+		"SELECT 1 FROM t0,tn WHERE 1 OR flag",
+		"SELECT 1 FROM t0 JOIN u ON 0 AND z.flag JOIN tn z ON 1",
+	} {
+		compare(q)
+	}
+
+	for _, kind := range []string{"JOIN", "LEFT JOIN"} {
+		for _, first := range []string{"0", "1", "NULL", "abs(-9223372036854775808)", "'x' LIKE 'x' ESCAPE 'ab'"} {
+			for _, second := range []string{"0", "1", "NULL", "abs(-9223372036854775808)", "'x' LIKE 'x' ESCAPE 'ab'"} {
+				for _, where := range []string{"0", "1", "NULL", "abs(-9223372036854775808)", "'x' LIKE 'x' ESCAPE 'ab'"} {
+					compare("SELECT t.id,a.y,b.y FROM t0 t JOIN u a ON " + first + " " + kind + " u b ON " + second + " WHERE " + where)
+				}
+			}
+		}
+	}
+	for _, literal := range []string{"0", "0.0", "0_0", "00", "0x0", "+0", "NULL", "'0'", "x'00'", "false"} {
+		for _, op := range []string{"IS NULL", "IS NOT NULL"} {
+			for _, boolop := range []string{"AND", "OR"} {
+				e := "(" + literal + " " + op + ") " + boolop + " abs(-9223372036854775808)"
+				compare("SELECT " + e + " FROM t0")
+				compare("SELECT id FROM t0 WHERE " + e)
+				compare("SELECT CASE WHEN " + e + " THEN 1 ELSE 0 END FROM t0")
+			}
+		}
+	}
+	t.Logf("independent: %d cases, %d mismatches", cases, failed)
+}
+
+// Value-focused constant propagation independently exercises all affinities,
+// aliases, transitivity, contradictory constraints and projection isolation.
+func TestBooleanIndependentAffinityOracle(t *testing.T) {
+	cli := confOracle(t)
+	path := filepath.Join(t.TempDir(), "affinity.db")
+	db, err := sqlite.Open(path, sqlite.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	for _, q := range []string{
+		"CREATE TABLE vals(id INTEGER PRIMARY KEY,n NUMERIC,i INTEGER,r REAL,t TEXT,b BLOB,u)",
+		"CREATE TABLE one(y INTEGER)", "INSERT INTO one VALUES(1)",
+		"INSERT INTO vals VALUES(1,'01','01','01','01','01','01'),(2,1.0,1.0,1.0,1.0,1.0,1.0),(3,NULL,NULL,NULL,NULL,NULL,NULL),(4,'x','x','x','x','x','x'),(5,x'31',x'31',x'31',x'31',x'31',x'31')",
+	} {
+		writeExec(t, db, q)
+	}
+	cases, failed := 0, 0
+	compare := func(q string) {
+		t.Helper()
+		cases++
+		cmd := exec.Command(cli, "-batch", "-bail", "-noheader", "-quote", "-readonly", path, q)
+		var stderr bytes.Buffer
+		cmd.Stderr = &stderr
+		out, werr := cmd.Output()
+		rows, gerr := db.Query(context.Background(), q)
+		var got [][]any
+		if gerr == nil {
+			for rows.Next() {
+				got = append(got, rows.Values())
+			}
+			gerr = rows.Err()
+			rows.Close()
+		}
+		if (gerr == nil) != (werr == nil) {
+			failed++
+			t.Errorf("SQL %s\nnative=%v %#v\nSQLite=%v %s", q, gerr, got, werr, stderr.String())
+			return
+		}
+		if werr != nil {
+			for _, kind := range []string{"integer overflow", "ESCAPE expression", "no such column", "wrong number"} {
+				if strings.Contains(stderr.String(), kind) && !strings.Contains(fmt.Sprint(gerr), kind) {
+					failed++
+					t.Errorf("SQL %s: native=%v SQLite=%s", q, gerr, stderr.String())
+				}
+			}
+			return
+		}
+		want, e := confQuoted(out)
+		if e != nil {
+			t.Fatal(e)
+		}
+		if len(want) == 0 && len(got) == 0 {
+			return
+		}
+		if !reflect.DeepEqual(got, want) {
+			failed++
+			t.Errorf("SQL %s\nnative=%#v\nSQLite=%#v", q, got, want)
+		}
+	}
+	for _, column := range []string{"n", "i", "r", "t", "b", "u"} {
+		for _, value := range []string{"1", "1.0", "'01'", "'1'", "x'31'", "NULL", "0", "'x'"} {
+			for _, probe := range []string{"typeof(C)='integer'", "typeof(C)='real'", "typeof(C)='text'", "C LIKE '1'", "C LIKE '01'", "C LIKE '1.0'", "hex(C)='31'", "C=t", "t=C", "C=b", "b=C", "C=+t", "+t=C", "C IS t", "t IS C", "C != t", "C NOT BETWEEN 0 AND 2", "C IN (t,b)", "CASE WHEN {c} THEN 1 ELSE 0 END"} {
+				if strings.Contains(probe, "{c}") {
+					probe = strings.ReplaceAll(probe, "{c}", column)
+				} else {
+					probe = strings.ReplaceAll(probe, "C", column)
+				}
+				where := column + "=" + value + " AND (" + probe + ")"
+				for _, from := range []string{"vals", "vals,one"} {
+					compare("SELECT id," + column + ",typeof(" + column + ") FROM " + from + " WHERE " + where + " ORDER BY id")
+				}
+			}
+			for _, where := range []string{column + "=" + value + " AND " + column + "=1", column + "=1 AND " + column + "=" + value,
+				column + "=" + value + " AND n=" + column + " AND t=n", column + "=" + value + " AND n=" + column + " AND n LIKE '01'"} {
+				compare("SELECT id," + column + " FROM vals WHERE " + where + " ORDER BY id")
+			}
+			for _, where := range []string{"alias=" + value + " AND alias LIKE '01'", "alias=" + value + " AND alias=" + column, "alias=" + value + " AND " + column + " LIKE '01'"} {
+				compare("SELECT id," + column + " AS alias FROM vals WHERE " + where + " ORDER BY id")
+			}
+		}
+	}
+	t.Logf("independent affinity: %d cases, %d mismatches", cases, failed)
+}
+
+func TestBooleanIndependentAffinityIsolation(t *testing.T) {
+	cli := confOracle(t)
+	path := filepath.Join(t.TempDir(), "isolation.db")
+	db, e := sqlite.Open(path, sqlite.Options{})
+	if e != nil {
+		t.Fatal(e)
+	}
+	defer db.Close()
+	for _, q := range []string{"CREATE TABLE f(t TEXT,b BLOB)", "INSERT INTO f VALUES(1.0,1.0)"} {
+		writeExec(t, db, q)
+	}
+	for _, q := range []string{
+		"SELECT t,b,typeof(t),typeof(b),CAST(b AS TEXT),t=b,b=t FROM f",
+		"SELECT t,b FROM f WHERE t=b", "SELECT t,b FROM f WHERE b=t",
+		"SELECT t,b FROM f WHERE t=1.0 AND t=b", "SELECT t,b FROM f WHERE t=1.0 AND b=t",
+		"SELECT t,b FROM f WHERE b=1 AND t=b", "SELECT t,b FROM f WHERE b=1 AND b=t",
+		"SELECT t,b FROM f WHERE b=1 AND b!=t", "SELECT t,b FROM f WHERE b=1 AND NOT(b=t)",
+		"SELECT t,b FROM f WHERE b=1 AND +b=t", "SELECT t,b FROM f WHERE b=1 AND t=+b",
+	} {
+		cmd := exec.Command(cli, "-batch", "-bail", "-noheader", "-quote", "-readonly", path, q)
+		out, e := cmd.CombinedOutput()
+		if e != nil {
+			t.Fatal(q, e, string(out))
+		}
+		rows, e := db.Query(context.Background(), q)
+		if e != nil {
+			t.Fatal(e)
+		}
+		var got [][]any
+		for rows.Next() {
+			got = append(got, rows.Values())
+		}
+		if rows.Err() != nil {
+			t.Fatal(rows.Err())
+		}
+		rows.Close()
+		t.Logf("SQL %s\nnative=%#v\nSQLite=%s", q, got, strings.TrimSpace(string(out)))
+	}
+	for _, q := range []string{"EXPLAIN SELECT t,b FROM f WHERE t=b", "EXPLAIN SELECT t,b FROM f WHERE b=1 AND t=b"} {
+		out, e := exec.Command(cli, "-batch", "-bail", "-noheader", "-readonly", path, q).CombinedOutput()
+		if e != nil {
+			t.Fatal(e)
+		}
+		t.Logf("SQL %s\n%s", q, out)
+	}
+}

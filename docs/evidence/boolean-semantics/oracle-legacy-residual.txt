@@ -1,0 +1,8 @@
+SELECT id FROM t WHERE id=9999 AND k LIKE 'x' ESCAPE 'ab'
+exit=0; stdout=''; stderr=''
+SELECT id FROM t NOT INDEXED WHERE id=9999 AND k LIKE 'x' ESCAPE 'ab'
+exit=0; stdout=''; stderr=''
+SELECT id FROM t WHERE k LIKE 'x' ESCAPE 'ab' AND id=9999
+exit=0; stdout=''; stderr=''
+SELECT id FROM t NOT INDEXED WHERE k LIKE 'x' ESCAPE 'ab' AND id=9999
+exit=0; stdout=''; stderr=''

@@ -1,0 +1,23 @@
+{
+  "decision": "accept narrow comparison-affinity correction",
+  "candidate_manifest_sha256": "8b060026749d944fc027840e834a840659566789668292a93902e6b1cc5728be",
+  "base_manifest_sha256": "be6ece6401dca41264cc1846ba4674db0977626724af25798d26351aa6bdc96a",
+  "owned_delta_paths": 35,
+  "changed_production_files": ["internal/sql/eval.go"],
+  "new_independent_queries": 2016,
+  "new_independent_complete_typed_rows": 70744,
+  "new_independent_mismatches": 0,
+  "owner_matrices_rerun_queries": 10128,
+  "owner_matrices_rerun_mismatches": 0,
+  "negative_control_queries": 1008,
+  "negative_control_mismatch_queries": 52,
+  "negative_control_expected_exit": 1,
+  "candidate_regressions_exit": 0,
+  "candidate_aggregate_exit": 0,
+  "pinned_probe_exit": 0,
+  "vet": "pass",
+  "race": "pass",
+  "blocking_findings": [],
+  "main_production_changed_by_reviewer": false,
+  "full_sql_compatibility_claim": false
+}
