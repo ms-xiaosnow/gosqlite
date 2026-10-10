@@ -246,3 +246,24 @@ They do not qualify failed native locking/unmap/close, hostile namespace changes
 interrupted publication, physical fault/recovery or native Darwin/Windows runtime.
 Darwin/Windows production backends are still required implementation work.
 Combined-tree aggregate and restored/remote gates are reported separately.
+
+## M9 B final isolated converter verification
+
+The converter's final source was exported into a separate complete Git tree,
+8e4808e09fcd45666bb2efb60d96bbf0033eeb91, excluding later half/native-platform
+work. With the pinned offline Go environment and GOFLAGS=-buildvcs=false for the
+standalone archive, these actual commands passed after the source-scope guard:
+
+```sh
+go run ./internal/testscope
+CGO_ENABLED=0 go test ./migration/postgres ./cmd/gosqlite ./examples/migrate-pgembedding -count=1
+CGO_ENABLED=0 go vet ./migration/postgres ./cmd/gosqlite ./examples/migrate-pgembedding
+CGO_ENABLED=1 go test -race ./migration/postgres ./cmd/gosqlite ./examples/migrate-pgembedding -count=1
+CGO_ENABLED=0 go run ./examples/migrate-pgembedding
+```
+
+Production builds and Linux amd64/arm64, Darwin arm64, Windows amd64 cross-builds
+also passed; no non-Linux runtime was executed. The example uses a new synthetic
+local database, valid SQL and normal close/reopen. No supplied SQL is executed
+by the converter CLI, and no PostgreSQL server was used. Exact outputs, source
+identity and unchanged-tree checks are in evidence/m9-converter-isolated-final.txt.

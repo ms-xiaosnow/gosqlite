@@ -172,5 +172,19 @@
     "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38056050522",
     "remote_ci_status": "COMPLETED SUCCESS for exact SHA; ordinary job completed2026-10-10T13:40:14Z, observed13:41:30Z. Guarded unit/vet/build/race only; oracle separately restored.",
     "open_gates": "Scope guard is a source-reference prevention aid, not complete helper/callgraph analysis. Historical PASS logs remain factual with corrected scope. Broader implementation and restricted/independent acceptance gates remain open."
+  },
+  {
+    "stage": "S1 nested transactions, M9 BIT exact SQL/search and managed Linux native ownership",
+    "remote_commit": "718e3109fccc0f4d728d6f95b555cf4fd6e3e282",
+    "local_commit": "718e3109fccc0f4d728d6f95b555cf4fd6e3e282",
+    "tree": "441dfbc18bad52a3fe8726804ca5ed95a1ab005e",
+    "bundle_sha256": "458f79593696568c83987baddd65cafe64f7613f9a8f18b530326f8a6cfeb654",
+    "bundle_bytes": 1171835,
+    "library_file_id": "libfile_a2e7be4289308191896d1abf730de740",
+    "library_version": 0,
+    "verified": "Guarded remote readback/exact local mirror; full-history bundle; byte-identical Library readback, clean clone/fsck and unchanged goal hash verified. Frozen source full guarded CGO0 unit/vet/build, CGO1 race, pinned SQLite oracle, four cross-builds, module/no-CGO closure and unchanged source/fixtures passed exit0 at2026-10-10T14:02:38Z. Restored full checks began14:02:47Z and remain running.",
+    "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38057793162",
+    "remote_ci_status": "IN_PROGRESS for exact SHA, observed2026-10-10T13:59:18Z.",
+    "open_gates": "Active-Rows cursor parity, exceptional failed-open resource retirement, half/sparse SQL and all typed ANN, migration importer/templates, encrypted shared sessions, native platform/recovery/broader SQL code and restricted/independent acceptance remain separately open."
   }
 ]

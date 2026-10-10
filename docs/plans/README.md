@@ -46,10 +46,11 @@ remain code work; unsupported is a safe interim behavior, not removal from goal.
 
 ## Migration and extended vector types
 
-- Bounded strict catalog/real-array inspection and deterministic identity-aware
-  reports now exist. Add a typed PostgreSQL-subset SQL converter using AST/source
-  spans, local resumable CSV/NDJSON import and exhaustive value verification.
-  No global operator replace.
+- Bounded strict catalog/real-array inspection and typed PostgreSQL-subset
+  AST/source-span conversion now exist, with explicit local and review-only
+  PostgreSQL targets. Add resumable CSV/NDJSON import and exhaustive value
+  verification. Preserve strict source underflow/identity/bind contracts; no
+  global operator replacement or automatic source-error coercion.
 - Generate review-only PostgreSQL/Neon transition templates separately from local
   import. Both old embedding and modern pgvector own a database-wide hnsw access
   method, so naïve side-by-side installation is invalid. Old m100/efconstruction16

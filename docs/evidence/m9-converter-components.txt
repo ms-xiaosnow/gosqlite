@@ -1,0 +1,63 @@
+UTC 2026-10-10T13:51:36Z
+go version go1.27.2 linux/amd64
+
+CGO0 focused converter/scanner/CLI/example tests
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	0.126s
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.022s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/migrate-pgembedding	0.019s
+
+CGO0 go vet scoped packages
+
+CGO0 production CLI build
+
+Executable conversion example
+id=3 distance=0
+id=1 distance=5
+id=2 distance=6
+id=4 distance=<nil>
+Verified: five converted statements, genuine local HNSW build, exact Manhattan results and normal reopen.
+Application setting: native VectorSearchOptions.EFSearch=64; no SQL SET or transaction wrapper was generated.
+Source SHA-256: 294644487abf8c956bcfced9d21c56fb00a4fdf567833ed3014147871cafa372
+Converted SQL SHA-256: 23ed91559d2b290762855b60922e4065a07ee2b670422b8d63ccdb8da281be8d
+
+Pure-memory converter fuzz 10s two workers
+fuzz: elapsed: 0s, gathering baseline coverage: 0/7 completed
+fuzz: elapsed: 0s, gathering baseline coverage: 7/7 completed, now fuzzing with 2 workers
+fuzz: elapsed: 3s, execs: 6114 (2037/sec), new interesting: 16 (total: 23)
+fuzz: elapsed: 6s, execs: 26590 (6826/sec), new interesting: 26 (total: 33)
+fuzz: elapsed: 9s, execs: 26590 (0/sec), new interesting: 26 (total: 33)
+fuzz: elapsed: 11s, execs: 26590 (0/sec), new interesting: 26 (total: 33)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	11.145s
+
+Pure-memory scanner/parser fuzz 10s two workers
+fuzz: elapsed: 0s, gathering baseline coverage: 0/55 completed
+fuzz: elapsed: 0s, gathering baseline coverage: 55/55 completed, now fuzzing with 2 workers
+fuzz: elapsed: 3s, execs: 32883 (10958/sec), new interesting: 85 (total: 140)
+fuzz: elapsed: 6s, execs: 33419 (179/sec), new interesting: 86 (total: 141)
+fuzz: elapsed: 9s, execs: 33419 (0/sec), new interesting: 86 (total: 141)
+fuzz: elapsed: 11s, execs: 33419 (0/sec), new interesting: 86 (total: 141)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	11.035s
+
+FINAL FROZEN-SOURCE RECHECK
+UTC 2026-10-10T13:53:20Z
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	0.096s
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.017s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/migrate-pgembedding	0.014s
+id=3 distance=0
+id=1 distance=5
+id=2 distance=6
+id=4 distance=<nil>
+Verified: five converted statements, genuine local HNSW build, exact Manhattan results and normal reopen.
+Application setting: native VectorSearchOptions.EFSearch=64; no SQL SET or transaction wrapper was generated.
+Source SHA-256: 294644487abf8c956bcfced9d21c56fb00a4fdf567833ed3014147871cafa372
+Converted SQL SHA-256: 23ed91559d2b290762855b60922e4065a07ee2b670422b8d63ccdb8da281be8d
+fuzz: elapsed: 0s, gathering baseline coverage: 0/33 completed
+fuzz: elapsed: 0s, gathering baseline coverage: 33/33 completed, now fuzzing with 2 workers
+fuzz: elapsed: 3s, execs: 6359 (2119/sec), new interesting: 19 (total: 52)
+fuzz: elapsed: 6s, execs: 6359 (0/sec), new interesting: 19 (total: 52)
+fuzz: elapsed: 9s, execs: 6359 (0/sec), new interesting: 19 (total: 52)
+fuzz: elapsed: 11s, execs: 6359 (0/sec), new interesting: 19 (total: 52)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	11.040s

@@ -1,0 +1,233 @@
+{
+  "format_version": 1,
+  "target": "postgres",
+  "source_profile": "pg_embedding-0.3.6@5d48508aeaeb86b9e9c630468ada7a124b905795",
+  "target_profile": "pgvector-0.8.7@f37c13f68b57d2c3472b2214fbcff699d6d34876",
+  "source_sha256": "294644487abf8c956bcfced9d21c56fb00a4fdf567833ed3014147871cafa372",
+  "catalog_sha256": "a3a2d5ce1428c610a184c8abc11130bc9af9072f90dd500d7ae58e5e17cc01ed",
+  "target_sha256": "83e2329068d94ca6643aa05bf0ceea8c69e88412ce2dc3f22ed84f2b45df0cbc",
+  "status": "converted",
+  "validation": "postgresql_source_review_only_not_executed",
+  "statements": [
+    {
+      "ordinal": 1,
+      "kind": "create_table",
+      "span": {
+        "Start": 0,
+        "End": 147
+      },
+      "status": "converted",
+      "original_sql": "-- literal \u003c~\u003e and ARRAY[9,9,9] are comment bytes.\nCREATE TABLE public.documents(id INTEGER PRIMARY KEY, flags INTEGER NOT NULL, embedding REAL[]);",
+      "converted_sql": "-- literal \u003c~\u003e and ARRAY[9,9,9] are comment bytes.\nCREATE TABLE \"public\".\"documents\"(id INTEGER PRIMARY KEY, flags INTEGER NOT NULL, embedding \"public\".vector(3));",
+      "edits": [
+        {
+          "span": {
+            "Start": 64,
+            "End": 80
+          },
+          "replacement": "\"public\".\"documents\""
+        },
+        {
+          "span": {
+            "Start": 139,
+            "End": 145
+          },
+          "replacement": "\"public\".vector(3)"
+        }
+      ],
+      "bindings": [],
+      "settings": [],
+      "findings": []
+    },
+    {
+      "ordinal": 2,
+      "kind": "insert",
+      "span": {
+        "Start": 147,
+        "End": 277
+      },
+      "status": "converted",
+      "original_sql": "\nINSERT INTO public.documents(id,flags,embedding) VALUES (1,1,ARRAY[1,0,0]),(2,1,'{0,1,0}'::real[]),(3,1,ARRAY[1,2,3]),(4,1,NULL);",
+      "converted_sql": "\nINSERT INTO \"public\".\"documents\"(id,flags,embedding) VALUES (1,1,'[1,0,0]'::\"public\".vector(3)),(2,1,'[0,1,0]'::\"public\".vector(3)),(3,1,'[1,2,3]'::\"public\".vector(3)),(4,1,NULL);",
+      "edits": [
+        {
+          "span": {
+            "Start": 160,
+            "End": 176
+          },
+          "replacement": "\"public\".\"documents\""
+        },
+        {
+          "span": {
+            "Start": 209,
+            "End": 221
+          },
+          "replacement": "'[1,0,0]'::\"public\".vector(3)"
+        },
+        {
+          "span": {
+            "Start": 228,
+            "End": 245
+          },
+          "replacement": "'[0,1,0]'::\"public\".vector(3)"
+        },
+        {
+          "span": {
+            "Start": 252,
+            "End": 264
+          },
+          "replacement": "'[1,2,3]'::\"public\".vector(3)"
+        }
+      ],
+      "bindings": [],
+      "settings": [],
+      "findings": []
+    },
+    {
+      "ordinal": 3,
+      "kind": "update",
+      "span": {
+        "Start": 277,
+        "End": 345
+      },
+      "status": "converted",
+      "original_sql": "\nUPDATE public.documents SET embedding='{3,1,0}'::real[] WHERE id=2;",
+      "converted_sql": "\nUPDATE \"public\".\"documents\" SET embedding='[3,1,0]'::\"public\".vector(3) WHERE (id=2);",
+      "edits": [
+        {
+          "span": {
+            "Start": 285,
+            "End": 301
+          },
+          "replacement": "\"public\".\"documents\""
+        },
+        {
+          "span": {
+            "Start": 316,
+            "End": 333
+          },
+          "replacement": "'[3,1,0]'::\"public\".vector(3)"
+        },
+        {
+          "span": {
+            "Start": 340,
+            "End": 344
+          },
+          "replacement": "(id=2)"
+        }
+      ],
+      "bindings": [],
+      "settings": [],
+      "findings": []
+    },
+    {
+      "ordinal": 4,
+      "kind": "create_index",
+      "span": {
+        "Start": 345,
+        "End": 494
+      },
+      "status": "converted",
+      "original_sql": "\nCREATE INDEX documents_manhattan ON public.documents USING hnsw(embedding legacy.ann_manhattan_ops) WITH(dims=3,m=16,efconstruction=64,efsearch=64);",
+      "converted_sql": "\nCREATE INDEX \"documents_manhattan\" ON \"public\".\"documents\" USING hnsw (\"embedding\" \"public\".\"vector_l1_ops\") WITH (m=16,ef_construction=64)        ;",
+      "edits": [
+        {
+          "span": {
+            "Start": 346,
+            "End": 493
+          },
+          "replacement": "CREATE INDEX \"documents_manhattan\" ON \"public\".\"documents\" USING hnsw (\"embedding\" \"public\".\"vector_l1_ops\") WITH (m=16,ef_construction=64)        "
+        }
+      ],
+      "bindings": [],
+      "settings": [
+        {
+          "index": "documents_manhattan",
+          "name": "hnsw.ef_search",
+          "value": 64,
+          "application": "Review session/transaction scope for queries using this index; apply SET LOCAL only inside the application's existing transaction.",
+          "review_sql": "SET LOCAL hnsw.ef_search = 64;"
+        }
+      ],
+      "findings": [
+        {
+          "code": "efsearch_application_setting",
+          "span": {
+            "Start": 346,
+            "End": 493
+          },
+          "message": "Legacy per-index efsearch becomes a separate application query setting; it is not a target CREATE INDEX option."
+        },
+        {
+          "code": "postgresql_index_review_only",
+          "span": {
+            "Start": 346,
+            "End": 493
+          },
+          "message": "Review target extension ownership/version, hnsw access-method transition and namespace before execution; no PostgreSQL statement was executed."
+        }
+      ]
+    },
+    {
+      "ordinal": 5,
+      "kind": "select",
+      "span": {
+        "Start": 494,
+        "End": 673
+      },
+      "status": "converted",
+      "original_sql": "\nSELECT id, embedding \u003c~\u003e ARRAY[1,2,3] AS distance, 'literal \u003c~\u003e ARRAY[9,9,9]' AS note FROM public.documents WHERE flags \u0026 3 = 1 ORDER BY embedding \u003c~\u003e ARRAY[1,2,3], id LIMIT 10;\n",
+      "converted_sql": "\nSELECT id, (embedding OPERATOR(\"public\".\u003c+\u003e) '[1,2,3]'::\"public\".vector(3)) AS distance, 'literal \u003c~\u003e ARRAY[9,9,9]' AS note FROM \"public\".\"documents\" WHERE ((flags \u0026 3) = 1) ORDER BY (embedding OPERATOR(\"public\".\u003c+\u003e) '[1,2,3]'::\"public\".vector(3)), id LIMIT 10;\n",
+      "edits": [
+        {
+          "span": {
+            "Start": 506,
+            "End": 532
+          },
+          "replacement": "(embedding OPERATOR(\"public\".\u003c+\u003e) '[1,2,3]'::\"public\".vector(3))"
+        },
+        {
+          "span": {
+            "Start": 586,
+            "End": 602
+          },
+          "replacement": "\"public\".\"documents\""
+        },
+        {
+          "span": {
+            "Start": 609,
+            "End": 622
+          },
+          "replacement": "((flags \u0026 3) = 1)"
+        },
+        {
+          "span": {
+            "Start": 632,
+            "End": 658
+          },
+          "replacement": "(embedding OPERATOR(\"public\".\u003c+\u003e) '[1,2,3]'::\"public\".vector(3))"
+        }
+      ],
+      "bindings": [],
+      "settings": [],
+      "findings": [
+        {
+          "code": "numeric_semantics_difference",
+          "span": {
+            "Start": 506,
+            "End": 532
+          },
+          "message": "Target distance arithmetic differs from legacy float32 accumulation; local calculations use compensated float64."
+        },
+        {
+          "code": "numeric_semantics_difference",
+          "span": {
+            "Start": 632,
+            "End": 658
+          },
+          "message": "Target distance arithmetic differs from legacy float32 accumulation; local calculations use compensated float64."
+        }
+      ]
+    }
+  ]
+}

@@ -129,7 +129,7 @@ Fresh restart, 2026-10-10 UTC. Historical work and test results are not acceptan
 - Review initially caught two grams fallback-reason regressions; move equality extraction before safety classification fixed them without changing scan results. Final component logs retained. Physical durability remains excluded.
 
 ### M9: Migration and extended vector types
-- Status: checkpoint A catalog/real-array inspector and extended memory primitives implemented. Full migration and extended typed SQL/ANN remain incomplete code.
+- Status: checkpoint A inspector, checkpoint B typed SQL converter, checkpoint E BIT integration and extended memory primitives implemented. Resumable import/transition tooling, half/sparse SQL and all extended ANN remain incomplete code.
 - Inspector: strict bounded exact-schema JSON, extension/type/method/operator/function identity chain, dependency/shape/default findings, direct finite binary32 real[] conversion, deterministic JSON/Markdown and CLI reports. Reports do not execute SQL or authorize changes. Invalid legacy defaults100/16 and example3/5 are review findings with no usable proposed target. Programmatic structs receive aggregate preflight; canonical inspected-facts hashes and optional unchanged-source hashes are distinguished.
 - Component checks: CGO0 unit/vet/build, separate race, CLI and bounded memory fuzz pass (real-array62076, catalog194 inputs). Independent tests include201 finite binary32 roundtrips, NULL/shape/redaction, duplicate/unknown/UTF8 JSON, ownership spoofing, nonfinite profile numbers, mutated catalog provenance and deterministic cancellation. Initial invalid-parameter proposal assertion failed and was fixed; logs retained. See m9-inspector-components.txt and review evidence.
 - Public references: old embedding0.3.6 commit5d48508aeaeb86b9e9c630468ada7a124b905795, exact Apache2 LICENSE/NOTICE and source manifest. Current Neon page was retrieved but lacks the requested chapter; the historical official2024 chapter is linked, not mislabeled current. Export SQL is source-reviewed but not PostgreSQL-executed. Synthetic catalogs are explicitly synthetic.
@@ -195,3 +195,36 @@ Fresh restart, 2026-10-10 UTC. Historical work and test results are not acceptan
   Byte-identical clean restore passed guarded unit/vet/build/race and complete
   pinned SQLite oracle, exit0 at13:46:19Z; restored tree stayed clean. The earlier
   namespace-test findings and their historical scope qualifications remain.
+
+### M9 checkpoint B: typed offline SQL converter
+- Delivered: bounded PostgreSQL scanner/AST/catalog binder, typed source-span
+  rewrites, deterministic complete-script reports, local executable and separate
+  review-only PostgreSQL output, runtime bind contracts, CLI and real local HNSW
+  conversion example. Unsupported statements have no converted SQL/edits; an
+  unsupported member blocks the whole apply-ready script. See migration-converter.md.
+- Review fixed reproduced alias/result-label, primary-key NULL, scalar/source
+  type-width, arithmetic/error, LIMIT, collation, type-shadow, bind-inference and
+  decimal-underflow hazards through explicit validation or narrower refusal.
+  Nil LIMIT was already guarded; an additional regression confirms that contract.
+  A inspector/parser semantics and dense GSV bytes are unchanged.
+- Actual final isolated snapshot tree8e4808e09fcd45666bb2efb60d96bbf0033eeb91
+  passed guard, complete migration/CLI/example CGO0 tests0.185/0.055/0.021s,
+  vet/build, separate race3.031/1.282/1.109s, executable example and four target
+  cross-builds. All snapshot file hashes remained unchanged; exit0 at13:56:16Z.
+  Final converter fuzz6359 and scanner/parser33419 executions passed; independent
+  scanner fuzz15114 passed. See m9-converter components/review/isolated evidence.
+- Example source29464448... produces raw local SQL23ed9155..., IDs3/1/2/4 with
+  L1 distances0/5/6/NULL and normal reopen. Query EFSearch64 remains explicit
+  application metadata, with no fake SQL setting or transaction wrapper.
+- Limits: no live PostgreSQL execution, resumable data importer, remote application
+  deployment or extension-transition bundle. General PostgreSQL compatibility is
+  not claimed. Full shared core aggregate/CI/restored evidence and physical or
+  independent release acceptance are separate; this is a conditional code slice.
+
+S1/BIT/Linux-ownership frozen-source full aggregate completed exit0 at14:02:38Z,
+including guarded CGO0 unit/vet/build, CGO1 race, pinned oracle, four cross-builds,
+modules/no-CGO closure and complete unchanged-tree/fixture verification. SQLite
+unit81.243s/race406.026s; oracle testkit301.806s/sqlite97.002s. The exact durable
+718e3109fccc0f4d728d6f95b555cf4fd6e3e282 and Library
+libfile_a2e7be4289308191896d1abf730de740 were already verified; its restored full
+checks and CI38057793162 are tracked independently.

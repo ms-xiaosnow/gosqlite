@@ -26,7 +26,7 @@ Behavior baseline: official SQLite 3.54.0. M2 implements a deliberately bounded 
 | IVFFlat | conditional ordinary implementation | deterministic bounded training, fixed-centroid transactional membership, real selected-list reads, exact rescoring/fallback and diagnostics; no universal recall/speedup claim |
 | encrypted snapshot / rekey / backup | experimental ordinary slice | authenticated root/base, Linux stable locks, full snapshot publication, correct-key rekey/backup/restore and plaintext import/export; retained history and namespace/freshness limitations |
 | encrypted WAL | experimental ordinary slice | immutable authenticated final-dirty-page segments, bounded complete-head replay, checkpoint/rekey/copy and explicit snapshot upgrade; concurrent encrypted writer/readers remain required code |
-| pg_embedding migration inspector | partial | bounded local catalog/real-array inspection and deterministic identity-aware reports; converter/import/transition templates remain required code; no live PostgreSQL execution |
+| pg_embedding migration tooling | partial | bounded catalog/real-array inspector and typed source-span SQL converter with local execution fixtures and review-only PostgreSQL text; resumable import/transition templates remain required code; no live PostgreSQL execution |
 | extended vector values | partial | distinct half/bit/sparse memory codecs and metrics; BIT(n) SQL/storage/driver/exact ranking plus dense subvector/quantization implemented; half/sparse SQL and all extended ANN remain required code |
 | release audits / native OS evidence | unsupported | M10 not started; cross-build success is not native-runtime evidence |
 
@@ -108,3 +108,14 @@ locks for retry. If shared-session construction itself fails and cleanup cannot
 retire a mapping, the resources are retained fail-closed without a reachable
 session retry API; process-lifetime retention is a remaining lifecycle code gap.
 No native lock/unmap failure execution is claimed.
+
+
+The offline converter accepts only a typed, identity-proven PostgreSQL subset.
+It preserves bound legacy distance identity, comments and source spans, explicit
+parameter conversion and NULL ordering, and blocks unsupported scripts rather
+than mixing original statements into executable output. Local scalar arithmetic,
+unverified text collation, ambiguous coercions/labels and unadapted bit binds
+are refused. LIMIT binds must be non-NULL and nonnegative: PostgreSQL NULL-limit
+behavior is outside this narrow conversion contract. Source-SQL array conversion
+rejects nonzero decimal underflow; A's general dense-value parser retains its
+separately documented rounding policy. See migration-converter.md.

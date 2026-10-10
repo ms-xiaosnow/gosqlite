@@ -32,3 +32,10 @@ s1-bit-vfs-aggregate-in-progress.txt is not a completed aggregate. Focused S1,
 BIT and native-ownership oracle/race gates had already passed separately.
 Publication preserves this coherent reviewed slice while those final gates are
 monitored; no full aggregate or release acceptance is asserted at that point.
+
+The corrected frozen-source aggregate subsequently completed exit0 at
+2026-10-10T14:02:38Z: full pinned oracle passed (testkit301.806s/sqlite97.002s),
+four cross-builds passed, module and empty-CGO closure verified, and every frozen
+source/fixture hash stayed unchanged. See s1-bit-vfs-aggregate-final.txt. This
+closes that aggregate only; remote and Library-restored gates remain separately
+tracked. Native Darwin/Windows code was still excluded from this checkpoint.

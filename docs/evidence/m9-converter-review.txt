@@ -1,0 +1,76 @@
+Independent M9 B converter review, 2026-10-10
+
+Reviewer-owned files: migration/postgres/converter_review_test.go and this report.
+Production fixes were reported to and implemented by the converter owner.
+Nineteen review regressions cover explicit mapping, typed identities/shadows,
+quoted/implicit aliases and labels, NULL ordering, source-error preservation,
+PK allocation prevention, LIMIT/bind constraints, source-width rounding,
+binary32 zero/subnormal/extreme bits, collation fail-closed behavior,
+comment/literal retention, source-span overlap/replay, and atomic reports.
+Initial failing regressions demonstrated alias ordering, PK NULL allocation,
+negative LIMIT, missing collation contract, division-error allocation, false
+quoted/qualified type identities, unqualified type shadow, implicit-label
+ambiguity, lost comparison-bind width, real-array underflow and mixed real-bind
+width. The owner fixed these, plus follow-on implicit-alias NULL ordering and
+integer-spelled float4 assignment rounding before the final run below.
+
+No live PostgreSQL connection or execution; PostgreSQL output is source/text
+review only. Local execution used ordinary new intact temporary databases and
+normal close/reopen. No physical corruption/tamper/fault, namespace mutation,
+forced-exit/recovery or manually tagged workflow was executed by this review.
+This is component review evidence, not independent legal/security release
+acceptance or a full M9 migration/import/cutover qualification.
+
+Environment: GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off
+GOCACHE=$PWD/../go-cache GOPATH=$PWD/../go-path
+Go: ../toolchains/go1.27.2/bin/go
+Final commands/results:
+UTC 2026-10-10T13:51:55Z
+go version go1.27.2 linux/amd64
+$ CGO_ENABLED=0 go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
+$ CGO_ENABLED=0 go test ./migration/postgres -run "^(TestPG|TestConvert)" -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	0.140s
+$ CGO_ENABLED=0 go test ./cmd/gosqlite -run "^TestMigrateConverter" -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.028s
+$ CGO_ENABLED=0 go test ./examples/migrate-pgembedding -run "^TestConverterExample$" -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/examples/migrate-pgembedding	0.024s
+$ CGO_ENABLED=0 go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
+$ CGO_ENABLED=1 go test -race ./migration/postgres ./cmd/gosqlite ./examples/migrate-pgembedding -run "^(TestPG|TestConvert|TestMigrateConverter)" -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	1.874s
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	1.147s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/migrate-pgembedding	1.089s
+
+Reviewed-file SHA-256 values (identical before and after final run):
+2216077672914fe6a2c9c0b954c91d8fea049bef21c972796baacc7c61b91265  migration/postgres/convert.go
+29f7471e7e66f54bade75e2a076fca0ad4f2387ef3ca4e7d57e566fc32f431bc  migration/postgres/convert_bind.go
+f1cf08625fca60cfa7da02da7bc8350a29972904e5c4189fe5073d73144c5a42  migration/postgres/convert_expr.go
+3d6ef3264aa3a305706e489d80733b4cacecf190af36144ab0391747a36be84d  migration/postgres/convert_lexer.go
+9c76ac9ca8d9783d805f382aeb2be293180ff3279ffb643ee8eb9baef609f664  migration/postgres/convert_parser.go
+c12a0188c9a0ee890b997d84e6f94b291ff0ac122d156b2b87b3f93ad4b04c60  migration/postgres/convert_values.go
+d067d74377f9576172884618d02a907a27a1319c3e4a1e5171861136e10422a8  migration/postgres/convert_test.go
+38b75fc5787cbb9a176ccd578f2ba8b0587829035535fdfefd4fa7be638ac545  migration/postgres/convert_parser_test.go
+6e37cf5e36d2cd0035bb6692f855ccd4ce1c84a79871d595db77b8d447bf3628  migration/postgres/converter_review_test.go
+33dfab29c888d3de87622c989ee42e3ba432789d5c778dddc2a9ccb16bb6a4f6  cmd/gosqlite/migrate.go
+76a6ab9361c351d4f207dab10682799c3a9f70ecdb666aae76cbc7847794490d  cmd/gosqlite/migrate_converter_test.go
+c52f81224cabe3c36136af19c1cd5deea25ac93670b862a04ce845ac018f64b3  docs/migration-converter.md
+8630761a66e3ea96f135ee083019ee321fee70cc0ea3a492fdd06cd161c62b2d  examples/migrate-pgembedding/main.go
+04619d92b81de206b11dad569955e182481f026334fdb9cd5dcddd1fb0c1b1ad  examples/migrate-pgembedding/main_test.go
+294644487abf8c956bcfced9d21c56fb00a4fdf567833ed3014147871cafa372  examples/migrate-pgembedding/source.sql
+72a6077013f07861a870980b832ac45063b672e2ce67f636ab3a7be4d79ba987  examples/migrate-pgembedding/converter-catalog.json
+23ed91559d2b290762855b60922e4065a07ee2b670422b8d63ccdb8da281be8d  migration/postgres/testdata/converter/local.sql
+d757453057f9408448c8c6120f3bd6b8c5c38aaf1c13ae5e21fa9112ab838121  migration/postgres/testdata/converter/local.json
+83e2329068d94ca6643aa05bf0ceea8c69e88412ce2dc3f22ed84f2b45df0cbc  migration/postgres/testdata/converter/postgres.sql
+54900b3655868061b42dd63a8c27206a3cfc5e9586fc056f71f6c72dadeea9fd  migration/postgres/testdata/converter/postgres.json
+
+Additional pure-memory scanner fuzz: CGO_ENABLED=0 go test ./migration/postgres -run "^$" -fuzz "^FuzzPGScannerParser$" -fuzztime=3s -parallel=1
+PASS: 15,114 executions, 3.065s; preceded by testscope guard. Scanner/parser sources were unchanged afterward.
+One intermediate named run was compilation-blocked by concurrent internal/sql/functions.go edits; the separate owner fixed them before the successful final run.
+
+After this recorded snapshot, the owner announced a final fail-closed BIT-bind
+guard and scalar-bind comment/test clarifications. The hashes above remain exact
+historical review results; the integration lead owns validation of that final
+isolated snapshot. An extra focused nil-LIMIT bind check passed: the existing
+nullable=false context already derives RejectNull=true. No nil-LIMIT production
+defect was found; the owner owns its permanent supplemental regression.
