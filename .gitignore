@@ -1,0 +1,5 @@
+/bin/
+/.cache/
+/benchmarks/results/
+*.test
+*.prof

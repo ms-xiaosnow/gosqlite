@@ -1,0 +1,12 @@
+[
+  {
+    "stage": "initial specification",
+    "remote_commit": "e9bbca6ec0af54f2901bb7705168a816a8e275d0",
+    "local_commit": "e9bbca6ec0af54f2901bb7705168a816a8e275d0",
+    "tree": "e88aef5741bb43d02b6965991aba5abf537231a1",
+    "bundle_sha256": "81fe2323e705d12168a43877237550fcb7fcb0b1f25eddb16da523280694c5cb",
+    "library_file_id": "libfile_66bb6a432a108191b80a5d2bfa6f031d",
+    "library_version": 0,
+    "verified": "Remote ref/trees/blobs and exact commit reconstruction; complete-history git bundle verify; persisted Library readback identical; clean clone/fsck; original goal SHA-256 unchanged"
+  }
+]
