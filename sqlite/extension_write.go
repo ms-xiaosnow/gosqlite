@@ -147,7 +147,7 @@ func (t *Tx) createMethodIndex(ctx context.Context, c *writeCatalog, name, table
 	var instance registry.Index
 	var annConfig *ann.Config
 	var err error
-	if methodName == ann.HNSW {
+	if methodName == ann.HNSW || methodName == ann.IVFFlat {
 		if version != ann.MethodVersion {
 			return fmt.Errorf("%w: ANN method version", ErrUnsupported)
 		}
@@ -254,6 +254,9 @@ func (t *Tx) ensureExtensionGuards(ctx context.Context, x *extensionIndex) error
 	return nil
 }
 func (t *Tx) buildExtension(ctx context.Context, c *writeCatalog, x *extensionIndex, tab *writeTable) error {
+	if x.ann != nil && x.method == ann.IVFFlat {
+		return t.buildIVF(ctx, c, x, tab)
+	}
 	if x.ann != nil {
 		if err := t.validateANNField(x, tab); err != nil {
 			return err

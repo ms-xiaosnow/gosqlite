@@ -1,11 +1,14 @@
-// Package ann implements independently written, deterministic HNSW algorithms
-// over transaction-owned storage ports. It owns no files, commits, or SQL.
+// Package ann implements independently written, deterministic HNSW and
+// IVFFlat algorithms over transaction-owned storage ports. It owns no files,
+// commits, or SQL.
 //
-// Configuration and bounds follow pgvector v0.8.7's dense HNSW parameters, but
+// Dense method parameters follow pgvector v0.8.7, but
 // topology, floating-point arithmetic, deletion policy and storage are local.
 // Version 1 fixes geometric levels, a maximum level of 32, signed rowid ties,
 // and rejection of zero-norm values for cosine indexes. Tombstones retain
 // their original vectors and remain traversable until a caller-owned rebuild.
+// IVFFlat adds seeded bottom-hash sampling and real Lloyd/spherical training,
+// explicit untrained state and fixed-centroid assignment/probing; see README.md.
 package ann
 
 import (
@@ -19,6 +22,10 @@ import (
 
 const (
 	HNSW                   = "hnsw"
+	IVFFlat                = "ivfflat"
+	DefaultLists           = 100
+	MaxLists               = 32768
+	DefaultProbes          = 1
 	MethodVersion          = 1
 	MaxLevel               = 32
 	DefaultEFSearch        = 40
@@ -48,6 +55,12 @@ type Config struct {
 	MaxVisited             int               `json:"max_visited"`
 	MaxDistanceEvaluations int               `json:"max_distance_evaluations"`
 	MaxMemoryBytes         int64             `json:"max_memory_bytes"`
+	// IVF fields are encoded only by the method-specific envelope. Keeping
+	// them out of Config JSON preserves every existing HNSW canonical byte.
+	Lists              int   `json:"-"`
+	TrainingSamples    int   `json:"-"`
+	TrainingIterations int   `json:"-"`
+	MaxTrainingWork    int64 `json:"-"`
 }
 
 func Opclass(metric vector.MetricKind) (string, error) {
@@ -71,6 +84,11 @@ func DefaultConfig(method string, dimensions int, metric vector.MetricKind) (Con
 		return Config{}, err
 	}
 	c := Config{Method: method, Version: MethodVersion, Dimensions: dimensions, Metric: metric, Opclass: opclass, Seed: DefaultSeed, M: 16, EFConstruction: 64, MaxNodes: 100000, MaxTombstones: 25000, MaxVisited: 4096, MaxDistanceEvaluations: 1000000, MaxMemoryBytes: 32 << 20}
+	if method == IVFFlat {
+		c.M, c.EFConstruction, c.MaxTombstones = 0, 0, 0
+		c.MaxVisited = MaxLists
+		c.Lists, c.TrainingSamples, c.TrainingIterations, c.MaxTrainingWork = DefaultLists, 10000, 20, 1<<28
+	}
 	return c, c.Validate()
 }
 
@@ -118,12 +136,39 @@ func (c Config) Normalize() (Config, error) {
 	if c.MaxMemoryBytes == 0 {
 		c.MaxMemoryBytes = d.MaxMemoryBytes
 	}
+	if c.Lists == 0 {
+		c.Lists = d.Lists
+	}
+	if c.TrainingSamples == 0 {
+		c.TrainingSamples = d.TrainingSamples
+		if c.Method == IVFFlat && c.TrainingSamples < c.Lists {
+			c.TrainingSamples = c.Lists
+		}
+	}
+	if c.TrainingIterations == 0 {
+		c.TrainingIterations = d.TrainingIterations
+	}
+	if c.MaxTrainingWork == 0 {
+		c.MaxTrainingWork = d.MaxTrainingWork
+	}
 	return c, c.Validate()
 }
 
 func (c Config) Validate() error {
 	opclass, err := Opclass(c.Metric)
-	if err != nil || c.Method != HNSW || c.Version != MethodVersion || c.Opclass != opclass || c.Dimensions < 1 || c.Dimensions > vector.ANNMaxDimensions || c.M < 2 || c.M > 100 || c.EFConstruction < 4 || c.EFConstruction > 1000 || c.EFConstruction < 2*c.M || c.MaxNodes < 1 || c.MaxNodes > 1<<30 || c.MaxTombstones < 0 || c.MaxTombstones > c.MaxNodes || c.MaxVisited < 1 || c.MaxVisited > 1<<20 || c.MaxDistanceEvaluations < 1 || c.MaxDistanceEvaluations > 1<<30 || c.MaxMemoryBytes < 1024 || c.MaxMemoryBytes > 1<<30 {
+	if err != nil || c.Version != MethodVersion || c.Opclass != opclass || c.Dimensions < 1 || c.Dimensions > vector.ANNMaxDimensions || c.MaxNodes < 1 || c.MaxNodes > 1<<30 || c.MaxVisited < 1 || c.MaxVisited > 1<<20 || c.MaxDistanceEvaluations < 1 || c.MaxDistanceEvaluations > 1<<30 || c.MaxMemoryBytes < 1024 || c.MaxMemoryBytes > 1<<30 {
+		return ErrConfig
+	}
+	switch c.Method {
+	case HNSW:
+		if c.M < 2 || c.M > 100 || c.EFConstruction < 4 || c.EFConstruction > 1000 || c.EFConstruction < 2*c.M || c.MaxTombstones < 0 || c.MaxTombstones > c.MaxNodes || c.Lists != 0 || c.TrainingSamples != 0 || c.TrainingIterations != 0 || c.MaxTrainingWork != 0 {
+			return ErrConfig
+		}
+	case IVFFlat:
+		if c.Metric == vector.L1 || c.M != 0 || c.EFConstruction != 0 || c.MaxTombstones != 0 || c.Lists < 1 || c.Lists > MaxLists || c.TrainingSamples < c.Lists || c.TrainingSamples > 1<<20 || c.TrainingIterations < 1 || c.TrainingIterations > 1000 || c.MaxTrainingWork < 1 || c.MaxTrainingWork > 1<<40 {
+			return ErrConfig
+		}
+	default:
 		return ErrConfig
 	}
 	return nil
@@ -140,6 +185,9 @@ func (c Config) Canonical() ([]byte, error) {
 	if err := c.Validate(); err != nil {
 		return nil, err
 	}
+	if c.Method == IVFFlat {
+		return json.Marshal(newIVFConfigEnvelope(c))
+	}
 	return json.Marshal(configEnvelope{c, "splitmix64-geometric-v1", "reject-cosine-zero", MaxLevel})
 }
 
@@ -149,6 +197,15 @@ func (c Config) Canonical() ([]byte, error) {
 func ParseConfig(data []byte) (Config, error) {
 	if len(data) > 4096 {
 		return Config{}, ErrConfig
+	}
+	var method struct {
+		Method string `json:"method"`
+	}
+	if err := json.Unmarshal(data, &method); err != nil {
+		return Config{}, ErrConfig
+	}
+	if method.Method == IVFFlat {
+		return parseIVFConfig(data)
 	}
 	var envelope configEnvelope
 	d := json.NewDecoder(bytes.NewReader(data))

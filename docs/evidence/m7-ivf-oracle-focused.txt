@@ -1,0 +1,16 @@
+=== RUN   TestOracleIVFFlatStorageInterop
+=== RUN   TestOracleIVFFlatStorageInterop/page512/sharedfalse
+=== RUN   TestOracleIVFFlatStorageInterop/page512/sharedtrue
+=== RUN   TestOracleIVFFlatStorageInterop/page4096/sharedfalse
+=== RUN   TestOracleIVFFlatStorageInterop/page4096/sharedtrue
+=== RUN   TestOracleIVFFlatStorageInterop/page65536/sharedfalse
+=== RUN   TestOracleIVFFlatStorageInterop/page65536/sharedtrue
+--- PASS: TestOracleIVFFlatStorageInterop (3.05s)
+    --- PASS: TestOracleIVFFlatStorageInterop/page512/sharedfalse (0.19s)
+    --- PASS: TestOracleIVFFlatStorageInterop/page512/sharedtrue (0.28s)
+    --- PASS: TestOracleIVFFlatStorageInterop/page4096/sharedfalse (0.18s)
+    --- PASS: TestOracleIVFFlatStorageInterop/page4096/sharedtrue (0.20s)
+    --- PASS: TestOracleIVFFlatStorageInterop/page65536/sharedfalse (1.18s)
+    --- PASS: TestOracleIVFFlatStorageInterop/page65536/sharedtrue (1.01s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	3.053s

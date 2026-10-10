@@ -51,4 +51,8 @@ bounded widening, base identity/WHERE/vector rechecks and exact rescoring; the
 planner exposes approximate recall separately from exact distance. Native exact
 remains default; supported SQL may select ANN with NOT INDEXED as exact override.
 The standalone full consistency checker is intentionally distinct from lazy
-querying. See ADR0009 and ann.md. IVFFlat is not implemented in this slice.
+querying. See ADR0009 and ann.md. IVFFlat now shares the optional ANN family with a distinct canonical envelope, persistent centroid and covering membership B-trees. Training is bounded/deterministic; queries read selected lists and exactly rescore base values. See ann.md.
+
+## Experimental encrypted snapshot storage
+
+internal/encstore supplies independent authenticated root/base objects below the logical SQLite pager. internal/pager.EncryptedSession reuses transactional page overlays and statement undo while bypassing plaintext journal/WAL publication. Fresh file identities and fully authenticated object completeness precede page parsing. sqlite owns code KeyProvider configuration and rekey/backup/restore/import/export, and driver.NewConnector snapshots options. This first mode publishes a whole immutable base per changed transaction and retains history. Encrypted WAL and concurrent writer/readers are separate required work. See encryption-storage.md for exact authority/locking, quotas and namespace/security limitations.

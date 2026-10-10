@@ -35,6 +35,9 @@ func annWriteError(err error) error {
 	return err
 }
 func (t *Tx) applyANNDelta(ctx context.Context, c *writeCatalog, x *extensionIndex, oldID int64, old []any, newID int64, next []any) error {
+	if x.method == ann.IVFFlat {
+		return t.applyIVFDelta(ctx, c, x, oldID, old, newID, next)
+	}
 	ordinal := x.fields[0].ordinal
 	var before, after vector.Vector
 	var beforeNull, afterNull = true, true

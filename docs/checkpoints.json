@@ -109,5 +109,18 @@
     "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38048914433",
     "remote_ci_status": "PASSED for exact SHA, observed 2026-10-10T11:41:14Z; ordinary-only",
     "open_gates": "HNSW/IVFFlat, authenticated encrypted storage, migration and broader recovery/platform implementations remain required code; restricted physical durability and independent release gates remain open"
+  },
+  {
+    "stage": "M7 first persistent HNSW ordinary slice; M8 memory-only authenticated-record prerequisite",
+    "remote_commit": "5a794e5d9fd6e04a3e488c1ad4fd82de74641d6f",
+    "local_commit": "5a794e5d9fd6e04a3e488c1ad4fd82de74641d6f",
+    "tree": "f73e2cb5f4cb005cd34d98bbf8d442965e1c1346",
+    "bundle_sha256": "10a08f1c9ad20d14993516cecf1b90605ff16b40eddf0b22c7317fa532c651a3",
+    "library_file_id": "libfile_aed7ff62fdf081919ae2c03043d27d58",
+    "library_version": 0,
+    "verified": "Guarded remote ref/commit readback; exact local mirror; full-history bundle; Library byte-identical readback; clean restore/fsck; restored ordinary unit/vet/build/race and full pinned SQLite oracle passed exit0 at2026-10-10T12:12:46Z",
+    "remote_ci_status": "PASSED for exact SHA, observed2026-10-10T12:09:58Z; ordinary-only",
+    "open_gates": "IVFFlat, encrypted database/storage/WAL/rekey/backup, migration and broader SQL/recovery/native-platform code remain; physical durability and independent release gates remain blocked/unverified",
+    "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38050546401"
   }
 ]

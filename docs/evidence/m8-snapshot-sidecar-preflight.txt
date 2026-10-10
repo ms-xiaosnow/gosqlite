@@ -1,0 +1,17 @@
+M8a sidecar-preflight supplement; source change limited to internal/encstore/store.go
+Sat Oct 10 12:30:57 UTC 2026
+The sidecar-refusal branch was source-reviewed only; no disk-negative fixture or restricted workflow was run.
+CGO_ENABLED=0 ../toolchains/go1.27.2/bin/go test ./internal/encstore ./internal/pager ./sqlite ./driver -run '^TestEncrypt|^TestSnapshotManifestCanonicalMemory$|^TestInventoryAccountingMemory$' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	0.004s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.011s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.426s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.006s
+unit_exit=0
+CGO_ENABLED=1 ../toolchains/go1.27.2/bin/go test -race ./internal/encstore ./internal/pager ./sqlite ./driver -run '^TestEncrypt|^TestSnapshotManifestCanonicalMemory$|^TestInventoryAccountingMemory$' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	1.018s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.029s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	2.326s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.035s
+race_exit=0
+CGO_ENABLED=0 ../toolchains/go1.27.2/bin/go vet ./internal/encstore ./internal/pager ./sqlite ./driver
+vet_exit=0

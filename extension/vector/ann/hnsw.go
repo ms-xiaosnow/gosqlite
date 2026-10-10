@@ -93,6 +93,9 @@ func nilPort(v any) bool {
 }
 
 func newOperation(ctx context.Context, r Reader, state State, cfg Config, limits Limits) (*operation, error) {
+	if cfg.Method != HNSW {
+		return nil, ErrConfig
+	}
 	if ctx == nil {
 		return nil, vector.ErrContext
 	}

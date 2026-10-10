@@ -181,7 +181,7 @@ func (d *DB) loadExtensionsEntries(ctx context.Context, reader btree.PageReader,
 		configHashMismatch := extensionHash(strs[4]) != strs[5]
 		var instance registry.Index
 		var annConfig *ann.Config
-		if strs[3] == ann.HNSW {
+		if strs[3] == ann.HNSW || strs[3] == ann.IVFFlat {
 			if mv != ann.MethodVersion || c.roots[annStateName] == 0 {
 				return fmt.Errorf("%w: ANN method/storage version", ErrUnsupported)
 			}

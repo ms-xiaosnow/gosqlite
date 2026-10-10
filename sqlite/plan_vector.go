@@ -15,6 +15,7 @@ import (
 type vectorRank struct {
 	ann                 *annCandidateQuery
 	expected            *vector.Vector
+	annCandidate        bool
 	ordinal, dimensions int
 	query               any
 	metric              vector.MetricKind
@@ -130,16 +131,16 @@ func (r *Rows) prepareVectorRank() error {
 
 func (v *vectorRank) score(r *Rows, value any) (any, error) {
 	if value == nil {
-		if v.expected != nil {
-			return nil, extensionCorrupt("live ANN node refers to NULL source vector")
+		if v.annCandidate {
+			return nil, extensionCorrupt("ANN candidate refers to NULL source vector")
 		}
 		r.queryStats.VectorNullRows++
 		return nil, nil
 	}
 	var candidate vector.Vector
 	var err error
-	if v.expected != nil {
-		candidate, err = decodeANNVector(value, v.dimensions, *v.expected)
+	if v.annCandidate {
+		candidate, err = decodeANNCandidate(value, v.dimensions, v.expected)
 	} else {
 		candidate, _, err = decodeVectorColumn(value, v.dimensions)
 	}
@@ -166,7 +167,7 @@ func (v *vectorRank) score(r *Rows, value any) (any, error) {
 		v.prepared = true
 		r.queryStats.VectorRankComponents = int64(q.Dims())
 	}
-	used := uint64(r.queryStats.VectorRankComponents) + uint64(r.queryStats.ANNDistanceEvaluations)*uint64(v.dimensions)
+	used := uint64(r.queryStats.VectorRankComponents) + annDistanceComponents(&r.queryStats, v.dimensions)
 	if used > v.limits.MaxComponents || uint64(v.dimensions) > v.limits.MaxComponents-used {
 		return nil, fmt.Errorf("%w: vector components", vector.ErrLimit)
 	}
@@ -177,7 +178,7 @@ func (v *vectorRank) score(r *Rows, value any) (any, error) {
 	if err = r.ctx.Err(); err != nil {
 		return nil, err
 	}
-	if v.expected != nil {
+	if v.annCandidate {
 		r.queryStats.ANNExactRescores++
 	}
 	r.queryStats.VectorRankedRows++

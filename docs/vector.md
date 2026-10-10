@@ -1,6 +1,6 @@
 # Dense vectors and exact KNN (M6 ordinary implementation)
 
-The engine implements finite float32 VECTOR(n), native/SQL exact search and text/vector hybrid examples. It does not yet implement HNSW or IVFFlat. Ordinary successful persistence is tested; physical recovery/crash qualification remains blocked. See vector-primitives.md for the pinned pgvector reference, deliberate arithmetic differences and binary codec.
+The engine implements finite float32 VECTOR(n), native/SQL exact search and text/vector hybrid examples. The first M7 slice now also implements persistent HNSW; IVFFlat remains open. This page describes the exact path; see ann.md for explicit native approximate mode and automatic eligible SQL ANN planning. Ordinary successful persistence is tested; physical recovery/crash qualification remains blocked. See vector-primitives.md for the pinned pgvector reference, deliberate arithmetic differences and binary codec.
 
 ## Real SQL surface
 
@@ -57,7 +57,7 @@ result, err := db.VectorSearch(ctx, "items", "embedding", v,
 
 DB and Tx expose VectorSearch. A physical VECTOR(n) column is required; arbitrary BLOB columns do not acquire a guessed dimension. Empty Metric means L2. Only built-in MetricKind identities are accepted, not arbitrary names from callbacks. Limit is explicit and nonnegative; zero validates the query/options but reads no source rows. NULL query yields EMPTY. Normal SQL value conversion supports Vector/NullVector and checks cancellation after Valuer callbacks before reporting success.
 
-The operation owns one snapshot; a transaction sees its own writes. It scans each source row, evaluates one supported bound WHERE expression, then decodes/scores eligible vectors. NULL candidates are excluded. Any eligible zero-norm cosine candidate errors, as does a zero-norm cosine query; no undefined value is silently skipped. Hits are distance ASC,signed rowid ASC. Errors/cancellation return a zero result, never partial hits. The whole source is searched within quotas; this is not ANN.
+In the default exact mode, the operation owns one snapshot; a transaction sees its own writes. It scans each source row, evaluates one supported bound WHERE expression, then decodes/scores eligible vectors. NULL candidates are excluded. Any eligible zero-norm cosine candidate errors, as does a zero-norm cosine query; no undefined value is silently skipped. Hits are distance ASC,signed rowid ASC. Errors/cancellation return a zero result, never partial hits. The whole source is searched within quotas; this is not ANN.
 
 VectorPlan embeds QueryPlan and adds Field, Metric, Dimensions, Limit and Exact. Its inherited Vector* fields describe the separate SQL ranking stage and remain unset for native calls; use its own Metric/Dimensions/Exact fields for native semantics. Access is SCAN or EMPTY and Detail states exact mode, NULL policy and reason. VectorStats embeds QueryStats and adds FilteredRows, ScoredRows, NullRows and ScoredComponents. BaseRowFetches counts every visited row, including excluded/NULL rows. ScoredComponents charges the query once plus every scored vector dimension; it does not claim to count arbitrary WHERE/scalar work or B-tree pages.
 
@@ -81,6 +81,6 @@ CGO_ENABLED=0 go run ./examples/vector /new/disposable/hybrid.db
 
 The executable example obtains text SimilaritySearch and cosine VectorSearch lists within one read transaction and the same business filter, then computes weighted RRF. Output preserves raw text scores/cardinalities, vector distances, fields/metric and one-based rank/weight contributions. Missing source measures are explicit NULL. Fusion is exact for the supplied Top-K lists, not a claim of global recall beyond those lists.
 
-The same snapshot also executes a SQL query combining grams13 LIKE candidates, a business predicate, bigram text scoring and exact vector ORDER BY/LIMIT. Its actual source and ranking plans/counters are returned separately. This supplies the ordinary M5 vector/text integration; restricted durability and later ANN/security/release gates remain open.
+The same snapshot also executes a SQL query combining grams13 LIKE candidates, a business predicate, bigram text scoring and exact vector ORDER BY/LIMIT. Its actual source and ranking plans/counters are returned separately. This supplies the ordinary M5 vector/text integration; restricted durability, remaining ANN implementation and security/release gates remain open.
 
-Evidence: evidence/m6-review.md, m6-driver-oracle-example.txt and m6-aggregate.txt. No PostgreSQL/pgvector executable, ANN index or independent release audit is implied.
+Evidence: evidence/m6-review.md, m6-driver-oracle-example.txt and m6-aggregate.txt. These M6 evidence files do not imply a PostgreSQL/pgvector execution or independent release audit. The later HNSW evidence is documented separately in ann.md.

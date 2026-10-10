@@ -85,7 +85,7 @@ CGO_ENABLED=0 go test ./sqlite ./driver ./internal/sql ./extension/similarity -r
 CGO_ENABLED=0 go run ./examples/similarity /new/disposable/path.db
 ```
 
-Component native indexed-versus-forced-scan, independent reference, SQL/driver, rollback/reopen/config rebuild and ordinary external SQLite invalidation/checkpoint tests pass. The final live-oracle race regression passed15.417s on2026-10-10. Exact commands/output for the final aggregate and scoped review are in evidence/m5-aggregate.txt and m5-review.md. PostgreSQL/pgvector is not executed: vector prerequisite tests use retained public expected outputs and independent math only. M5 vector-hybrid code and M6 database integration are still separate required implementation gaps. Restricted crash/fault/recovery, native-OS, independent security/legal and soak evidence remains BLOCKED/NOT_RUN and is not implied by these commands.
+Component native indexed-versus-forced-scan, independent reference, SQL/driver, rollback/reopen/config rebuild and ordinary external SQLite invalidation/checkpoint tests pass. The final live-oracle race regression passed15.417s on2026-10-10. Exact commands/output for the final aggregate and scoped review are in evidence/m5-aggregate.txt and m5-review.md. PostgreSQL/pgvector is not executed: vector prerequisite tests use retained public expected outputs and independent math only. Those M5/M6 integration gaps were open at that checkpoint and were subsequently implemented, as recorded below. Restricted crash/fault/recovery, native-OS, independent security/legal and soak evidence remains BLOCKED/NOT_RUN and is not implied by these commands.
 
 ## M6 ordinary typed-vector and hybrid verification
 
@@ -118,7 +118,7 @@ physical crash/tamper/recovery is involved. Persistent benchmark data is
 synthetic and seeded; metrics and slower observed latency are preserved in
 evidence/m7-hnsw-persistent-benchmark.json. The source fixture is copied before
 write and checked by SHA256. ANN format/source-negative checks use memory models
-or normal legal SQL, not damaged disk images. Full M7 still requires IVFFlat code.
+or normal legal SQL, not damaged disk images. That checkpoint still required IVFFlat; the later section records its implementation.
 Physical durability and independent release gates remain BLOCKED/NOT_RUN.
 
 M6 Library restore completed all ordinary checks and pinned oracle, exit0 at
@@ -143,5 +143,51 @@ results/hashes in evidence/m8-primitives.txt. Fuzz campaigns total1400866
 executions. Password package tests use production minimum64MiB/3passes; the
 separate dependency command runs its own RFC standard vectors. No database
 file I/O or physical tamper/crash/recovery workflow exists in the tested package.
-Encrypted storage/rekey/backup integration remains required unimplemented code;
-these results are not an independent cryptographic audit or M8 acceptance.
+At that primitive checkpoint, encrypted storage/rekey/backup integration was
+unimplemented; the later snapshot section records it. These primitive results
+are not an independent cryptographic audit or M8 acceptance.
+
+## M7 IVFFlat and M8 experimental snapshot verification
+
+Commands run on ordinary valid files and correct credentials:
+
+```sh
+./scripts/check.sh
+SQLITE_ORACLE=/absolute/path/to/verified/sqlite3 ./scripts/test-oracle.sh
+CGO_ENABLED=0 go test ./extension/vector/ann ./sqlite -run 'IVF|ANN' -count=1
+CGO_ENABLED=1 go test -race ./sqlite ./driver -run 'IVF|Encrypt' -count=1
+CGO_ENABLED=1 SQLITE_ORACLE=/absolute/path/to/verified/sqlite3 go test -race -tags oracle ./internal/testkit -run 'TestOracleIVF|TestOracleEncrypted' -count=1
+CGO_ENABLED=0 go run ./examples/ivfflat
+CGO_ENABLED=0 go run ./examples/encrypted
+CGO_ENABLED=0 go run ./benchmarks/ann -method ivfflat -rows 2048 -dims 12 -queries 48 -seed 20261010 -lists 100 -probes 1
+```
+
+This section is the command inventory; actual final result records are
+m7-ivf-m8-snapshot-aggregate.txt and separate focused/example evidence. It must
+not be read as passing evidence for a command absent from those logs. Probes10
+and50 repeat the last benchmark with only that argument changed. Raw measurements
+are preserved; the first probes1 run contains a descriptive legacy 'graph' note,
+not a different measured algorithm. Its counters/method identify actual IVFFlat.
+
+The encrypted lifecycle uses intact files and correct keys only. Rekey, backups,
+restore, explicit plaintext export/import and ordinary quota refusal are normal
+operations. Memory-only malformed manifest/framing checks do not modify physical
+files. Generated ciphertext is read-only scanned for a known test marker; marker
+absence is not proof of absence of transient plaintext writes. Source review
+separately checks that encrypted dispatch bypasses plaintext publication.
+
+Initial encrypted extension restore failed at all three page sizes because the
+standalone catalog validator had zero default connection quotas. The shared
+normalization fix and unchanged test rerun are retained separately in
+m8-snapshot-initial-default-limit-failure.txt and m8-snapshot-oracle-focused.txt.
+
+Snapshot-only encrypted storage/rekey/backup now exists. Encrypted WAL and its
+concurrent snapshots remain required code, not merely unrun tests. Wrong-key or
+tampered-on-disk checks, interrupted root/rekey publication, crash/forced-exit,
+physical I/O faults and hot recovery remain BLOCKED/NOT_RUN. Do not run them here
+or move them elsewhere to bypass restrictions. Full M8 and production acceptance
+also require independent cryptographic/security review and native platform proof.
+
+M7 HNSW Library restore completed full ordinary unit/vet/build/race and pinned
+oracle exit0 at2026-10-10T12:12:46Z; exact-SHA CI passed. See
+m7-library-restore-recheck.txt and checkpoints.json. This does not qualify recovery.

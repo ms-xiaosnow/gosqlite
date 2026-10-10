@@ -21,6 +21,8 @@ import (
 type QueryPlan struct {
 	ANNOpclass                                  string
 	ANNGeneration                               int64
+	ANNLists                                    int
+	ANNTrainingState                            string
 	ANNEFSearch, ANNMaxEFSearch, ANNEffectiveEF int
 	ANNProbes, ANNMaxProbes, ANNEffectiveProbes int
 	ANNStopReason, ANNFallback                  string
@@ -52,8 +54,15 @@ type QueryPlan struct {
 // FrequencyLookups counts planning probes and also applies to EXPLAIN.
 // ANN counters count logical shadow-record operations and metric calls, not
 // physical page I/O. They include every abandoned/widened search. Exact base
-// rescores are separate from graph distance evaluations. PeakBytes is logical
-// conservative retained-memory accounting, not an allocator/RSS measurement.
+// rescores are separate from graph distance evaluations and centroid scores.
+// ANNVisited counts distinct graph nodes or the bounded centroid set, according
+// to the selected method; IVF member visits have their own counter.
+// CentroidReads counts decoded centroid shadow rows. MemberKeysRead counts
+// only keys returned by selected covering list ranges, excluding reverse-key
+// probes. Each IdentityLookups operation covers a member-table recheck plus
+// a reverse-key identity probe (or a HNSW live-mapping lookup). These counts
+// are logical records/keys/probes, never total shadow I/O or B-tree page I/O.
+// PeakBytes is conservative retained-memory accounting, not allocator/RSS use.
 type QueryStats struct {
 	ANNStateReads          int64
 	ANNNodeReads           int64
@@ -62,6 +71,7 @@ type QueryStats struct {
 	ANNDistanceEvaluations int64
 	ANNIdentityLookups     int64
 	ANNCentroidScores      int64
+	ANNCentroidReads       int64
 	ANNListsOpened         int64
 	ANNMemberKeysRead      int64
 	ANNIterations          int64

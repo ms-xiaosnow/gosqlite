@@ -1,0 +1,10 @@
+=== RUN   TestOracleEncryptedSnapshotExportImport
+=== RUN   TestOracleEncryptedSnapshotExportImport/512
+=== RUN   TestOracleEncryptedSnapshotExportImport/4096
+=== RUN   TestOracleEncryptedSnapshotExportImport/65536
+--- PASS: TestOracleEncryptedSnapshotExportImport (77.49s)
+    --- PASS: TestOracleEncryptedSnapshotExportImport/512 (9.34s)
+    --- PASS: TestOracleEncryptedSnapshotExportImport/4096 (10.13s)
+    --- PASS: TestOracleEncryptedSnapshotExportImport/65536 (58.01s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	77.501s

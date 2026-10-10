@@ -202,8 +202,8 @@ func TestANNStorageConfigSQLAndOptionalFamily(t *testing.T) {
 	if _, err := db.Exec(ctx, "CREATE INDEX bad ON items(v) USING hnsw WITH(unknown=2)"); !errors.Is(err, sqlite.ErrUnsupported) {
 		t.Fatalf("unknown SQL option %v", err)
 	}
-	if _, err := db.Exec(ctx, "CREATE INDEX bad ON items(v) USING ivfflat WITH(lists=2)"); !errors.Is(err, sqlite.ErrUnsupported) {
-		t.Fatalf("premature IVF %v", err)
+	if _, err := db.Exec(ctx, "CREATE INDEX bad ON items(v) USING ivfflat WITH(opclass='vector_l1_ops',lists=2)"); !errors.Is(err, sqlite.ErrUnsupported) {
+		t.Fatalf("unsupported IVF L1 %v", err)
 	}
 }
 

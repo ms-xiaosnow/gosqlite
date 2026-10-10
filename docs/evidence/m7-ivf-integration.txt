@@ -1,0 +1,281 @@
+M7 IVFFlat focused ordinary integration evidence; 2026-10-10 UTC
+No physical fault, crash, forced-exit, hot-recovery or damaged-database workflows executed.
+CGO_ENABLED=0 go test -count=1 -v ./extension/vector/ann
+=== RUN   TestConfigCanonicalAndClosedIdentity
+--- PASS: TestConfigCanonicalAndClosedIdentity (0.00s)
+=== RUN   TestAdjacencyValidationAndRoundtrip
+--- PASS: TestAdjacencyValidationAndRoundtrip (0.00s)
+=== RUN   TestDeterministicMultilayerAndSignedTies
+--- PASS: TestDeterministicMultilayerAndSignedTies (0.06s)
+=== RUN   TestTombstonesTraverseAndRowidReuse
+--- PASS: TestTombstonesTraverseAndRowidReuse (0.00s)
+=== RUN   TestAllMetricsAndCosineZeroPolicy
+=== RUN   TestAllMetricsAndCosineZeroPolicy/l2
+=== RUN   TestAllMetricsAndCosineZeroPolicy/l1
+=== RUN   TestAllMetricsAndCosineZeroPolicy/cosine
+=== RUN   TestAllMetricsAndCosineZeroPolicy/negative_inner_product
+--- PASS: TestAllMetricsAndCosineZeroPolicy (0.00s)
+    --- PASS: TestAllMetricsAndCosineZeroPolicy/l2 (0.00s)
+    --- PASS: TestAllMetricsAndCosineZeroPolicy/l1 (0.00s)
+    --- PASS: TestAllMetricsAndCosineZeroPolicy/cosine (0.00s)
+    --- PASS: TestAllMetricsAndCosineZeroPolicy/negative_inner_product (0.00s)
+=== RUN   TestLimitsCancellationAndFailedWriteState
+--- PASS: TestLimitsCancellationAndFailedWriteState (0.00s)
+=== RUN   TestMalformedNodesFailClosed
+--- PASS: TestMalformedNodesFailClosed (0.00s)
+=== RUN   TestDefaultRecallAndReducedDistancePath
+    hnsw_test.go:488: seeded independent Gaussian dataset: rows=2048 dims=12 held_out=48 recall@10=0.997917 mean graph distances=557.67 mean node reads=524.73 exact candidate distances=2048 max_level=3
+    hnsw_test.go:491: memory-store algorithm only: recall@1(ef40)=1.000000 recall@100(ef100)=1.000000 mean ef100 distances=929.08 build=1.76111367s logical vector+adjacency bytes=586724; ANN p50=1.028209ms p95=2.998038ms; M6 exact k10 p50=498.641µs p95=5.397339ms (wall times are observations, not asserted speedup)
+--- PASS: TestDefaultRecallAndReducedDistancePath (2.07s)
+=== RUN   TestIVFLloydObjectiveImprovesAcrossRealIterations
+--- PASS: TestIVFLloydObjectiveImprovesAcrossRealIterations (0.01s)
+=== RUN   TestIVFSubsetListQualityAndOriginalRescoring
+=== RUN   TestIVFSubsetListQualityAndOriginalRescoring/l2
+    ivf_quality_test.go:147: memory-only IVF quality: rows=1024 dims=8 held_out=24 lists=32 probes=8 metric=l2 recall@1=0.958333 @10=0.962500 @100=0.740417 mean_original_candidate_scores=264.38 centroid_scores=32 exact_scores=1024 training_iterations=20 component_work=5670528 peak_logical_bytes=377088
+=== RUN   TestIVFSubsetListQualityAndOriginalRescoring/cosine
+    ivf_quality_test.go:147: memory-only IVF quality: rows=1024 dims=8 held_out=24 lists=32 probes=8 metric=cosine recall@1=1.000000 @10=0.983333 @100=0.812083 mean_original_candidate_scores=255.96 centroid_scores=32 exact_scores=1024 training_iterations=14 component_work=4066432 peak_logical_bytes=377088
+=== RUN   TestIVFSubsetListQualityAndOriginalRescoring/negative_inner_product
+    ivf_quality_test.go:147: memory-only IVF quality: rows=1024 dims=8 held_out=24 lists=32 probes=8 metric=negative_inner_product recall@1=1.000000 @10=0.900000 @100=0.777083 mean_original_candidate_scores=255.96 centroid_scores=32 exact_scores=1024 training_iterations=14 component_work=4066432 peak_logical_bytes=377088
+--- PASS: TestIVFSubsetListQualityAndOriginalRescoring (0.21s)
+    --- PASS: TestIVFSubsetListQualityAndOriginalRescoring/l2 (0.07s)
+    --- PASS: TestIVFSubsetListQualityAndOriginalRescoring/cosine (0.07s)
+    --- PASS: TestIVFSubsetListQualityAndOriginalRescoring/negative_inner_product (0.07s)
+=== RUN   TestIVFConfigAndLegacyHNSWCanonical
+--- PASS: TestIVFConfigAndLegacyHNSWCanonical (0.00s)
+=== RUN   TestIVFSamplerBoundedDeterministicAndValidation
+--- PASS: TestIVFSamplerBoundedDeterministicAndValidation (0.00s)
+=== RUN   TestIVFLloydMeansConvergenceAndOrderInvariance
+--- PASS: TestIVFLloydMeansConvergenceAndOrderInvariance (0.00s)
+=== RUN   TestIVFSphericalTrainingOriginalIPAndCancellationPolicy
+--- PASS: TestIVFSphericalTrainingOriginalIPAndCancellationPolicy (0.00s)
+=== RUN   TestIVFUntrainedDuplicateEmptyAndExtremeValues
+--- PASS: TestIVFUntrainedDuplicateEmptyAndExtremeValues (0.00s)
+=== RUN   TestIVFResourceAndCancellationNoPartialResults
+--- PASS: TestIVFResourceAndCancellationNoPartialResults (0.00s)
+=== RUN   TestIVFProbeValidationExactMetricAndStableTies
+--- PASS: TestIVFProbeValidationExactMetricAndStableTies (0.00s)
+=== RUN   TestIVFConcurrentImmutableTrainingAndProbing
+--- PASS: TestIVFConcurrentImmutableTrainingAndProbing (0.00s)
+=== RUN   TestConcurrentSnapshotSearch
+--- PASS: TestConcurrentSnapshotSearch (0.04s)
+=== RUN   TestRejectedConstructionPreservesStateAndStore
+--- PASS: TestRejectedConstructionPreservesStateAndStore (0.00s)
+=== RUN   TestUpdateDeleteAndRebuildRecall
+    mutation_test.go:191: after_mutations: live=659 tombstones=169 recall@10=1.000000 mean graph distances=402.28
+    mutation_test.go:191: after_rebuild: live=659 tombstones=0 recall@10=1.000000 mean graph distances=340.56
+--- PASS: TestUpdateDeleteAndRebuildRecall (0.91s)
+=== RUN   FuzzAdjacencyDecode
+=== RUN   FuzzAdjacencyDecode/seed#0
+--- PASS: FuzzAdjacencyDecode (0.00s)
+    --- PASS: FuzzAdjacencyDecode/seed#0 (0.00s)
+=== RUN   FuzzIVFTrainingAndProbe
+=== RUN   FuzzIVFTrainingAndProbe/seed#0
+=== RUN   FuzzIVFTrainingAndProbe/seed#1
+--- PASS: FuzzIVFTrainingAndProbe (0.00s)
+    --- PASS: FuzzIVFTrainingAndProbe/seed#0 (0.00s)
+    --- PASS: FuzzIVFTrainingAndProbe/seed#1 (0.00s)
+=== RUN   FuzzConfigCanonical
+=== RUN   FuzzConfigCanonical/seed#0
+=== RUN   FuzzConfigCanonical/seed#1
+=== RUN   FuzzConfigCanonical/seed#2
+=== RUN   FuzzConfigCanonical/seed#3
+=== RUN   FuzzConfigCanonical/seed#4
+=== RUN   FuzzConfigCanonical/seed#5
+--- PASS: FuzzConfigCanonical (0.00s)
+    --- PASS: FuzzConfigCanonical/seed#0 (0.00s)
+    --- PASS: FuzzConfigCanonical/seed#1 (0.00s)
+    --- PASS: FuzzConfigCanonical/seed#2 (0.00s)
+    --- PASS: FuzzConfigCanonical/seed#3 (0.00s)
+    --- PASS: FuzzConfigCanonical/seed#4 (0.00s)
+    --- PASS: FuzzConfigCanonical/seed#5 (0.00s)
+=== RUN   FuzzBoundedGraphOperations
+=== RUN   FuzzBoundedGraphOperations/seed#0
+--- PASS: FuzzBoundedGraphOperations (0.00s)
+    --- PASS: FuzzBoundedGraphOperations/seed#0 (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector/ann	3.314s
+CGO_ENABLED=0 go test ./sqlite -run '^Test(ANN|IVF|Vector)' -count=1 -v
+=== RUN   TestANNQueryTypedIdentityRecheck
+--- PASS: TestANNQueryTypedIdentityRecheck (0.00s)
+=== RUN   TestIVFQueryTypedMemberRecheck
+--- PASS: TestIVFQueryTypedMemberRecheck (0.00s)
+=== RUN   TestIVFQueryPersistedMemoryAdmissionBeforeCentroidRead
+--- PASS: TestIVFQueryPersistedMemoryAdmissionBeforeCentroidRead (0.00s)
+=== RUN   TestIVFQueryExactFallbackSourceAdmission
+--- PASS: TestIVFQueryExactFallbackSourceAdmission (0.00s)
+=== RUN   TestVectorReviewHeapAndNativeIndependentReference
+--- PASS: TestVectorReviewHeapAndNativeIndependentReference (0.12s)
+=== RUN   TestVectorReviewTypedNullOperandParity
+--- PASS: TestVectorReviewTypedNullOperandParity (0.00s)
+=== RUN   TestVectorReviewSQLHeapBudgetsCountNullAndFilteredRows
+--- PASS: TestVectorReviewSQLHeapBudgetsCountNullAndFilteredRows (0.00s)
+=== RUN   TestVectorReviewHeapCancellationReleasesSnapshot
+--- PASS: TestVectorReviewHeapCancellationReleasesSnapshot (0.01s)
+=== RUN   TestVectorReviewHeapSnapshotRowsRemainStable
+--- PASS: TestVectorReviewHeapSnapshotRowsRemainStable (0.00s)
+=== RUN   TestVectorReviewCloseReleasesRankStorage
+--- PASS: TestVectorReviewCloseReleasesRankStorage (0.00s)
+=== RUN   TestANNQueryNativeExactDefaultAndRealSearch
+--- PASS: TestANNQueryNativeExactDefaultAndRealSearch (0.71s)
+=== RUN   TestANNQueryNativeWideningFallbackAndCumulativeBudgets
+--- PASS: TestANNQueryNativeWideningFallbackAndCumulativeBudgets (0.94s)
+=== RUN   TestANNQueryIndexIdentityAndOptions
+--- PASS: TestANNQueryIndexIdentityAndOptions (0.23s)
+=== RUN   TestANNQuerySQLAliasesOffsetsAndExplain
+--- PASS: TestANNQuerySQLAliasesOffsetsAndExplain (1.20s)
+=== RUN   TestANNQuerySQLNullsFallbackShapesAndLazyErrors
+--- PASS: TestANNQuerySQLNullsFallbackShapesAndLazyErrors (0.51s)
+=== RUN   TestANNQueryAllMetricsAndSignedTies
+--- PASS: TestANNQueryAllMetricsAndSignedTies (0.04s)
+=== RUN   TestANNQueryFallbackComponentsAndRuntimeFailure
+--- PASS: TestANNQueryFallbackComponentsAndRuntimeFailure (0.28s)
+=== RUN   TestANNQuerySmallSourceRetentionLimitAndOffset
+--- PASS: TestANNQuerySmallSourceRetentionLimitAndOffset (0.01s)
+=== RUN   TestANNReviewReadOwnWritesAndRollback
+--- PASS: TestANNReviewReadOwnWritesAndRollback (0.06s)
+=== RUN   TestANNReviewSignedExtremaTies
+--- PASS: TestANNReviewSignedExtremaTies (0.01s)
+=== RUN   TestANNReviewSQLSmallTableLargeLimitMemory
+--- PASS: TestANNReviewSQLSmallTableLargeLimitMemory (0.00s)
+=== RUN   TestANNReviewEmptyIndexAndAllFilteredSQL
+--- PASS: TestANNReviewEmptyIndexAndAllFilteredSQL (0.01s)
+=== RUN   TestANNStorageHNSWLifecycleAndReopen
+--- PASS: TestANNStorageHNSWLifecycleAndReopen (1.47s)
+=== RUN   TestANNStorageLimitsAndStatementRollback
+--- PASS: TestANNStorageLimitsAndStatementRollback (0.02s)
+=== RUN   TestANNStorageFailedBuildAndCosineConstraint
+--- PASS: TestANNStorageFailedBuildAndCosineConstraint (0.01s)
+=== RUN   TestANNStorageConfigSQLAndOptionalFamily
+--- PASS: TestANNStorageConfigSQLAndOptionalFamily (0.03s)
+=== RUN   TestANNStorageConstructionQuotaAtomic
+--- PASS: TestANNStorageConstructionQuotaAtomic (0.00s)
+=== RUN   TestANNStorageNormalSharedWALSnapshot
+--- PASS: TestANNStorageNormalSharedWALSnapshot (0.01s)
+=== RUN   TestANNStorageEmptyTombstoneQuotaAndVectorBits
+--- PASS: TestANNStorageEmptyTombstoneQuotaAndVectorBits (0.02s)
+=== RUN   TestANNStorageFailedReindexPreservesPriorStatement
+--- PASS: TestANNStorageFailedReindexPreservesPriorStatement (0.17s)
+=== RUN   TestANNStorageAllMetricsMultipleIndexes
+--- PASS: TestANNStorageAllMetricsMultipleIndexes (0.03s)
+=== RUN   TestIVFQueryRealSelectedListAndExactDefault
+--- PASS: TestIVFQueryRealSelectedListAndExactDefault (0.06s)
+=== RUN   TestIVFQueryFilterCompensationAndCumulativeFallback
+--- PASS: TestIVFQueryFilterCompensationAndCumulativeFallback (0.12s)
+=== RUN   TestIVFQuerySQLAliasesOffsetsExplainAndLaziness
+--- PASS: TestIVFQuerySQLAliasesOffsetsExplainAndLaziness (0.08s)
+=== RUN   TestIVFQueryNullsAndUntrainedFallback
+--- PASS: TestIVFQueryNullsAndUntrainedFallback (0.05s)
+=== RUN   TestIVFQueryMetricsOriginalIPAndSignedTies
+=== RUN   TestIVFQueryMetricsOriginalIPAndSignedTies/l2
+=== RUN   TestIVFQueryMetricsOriginalIPAndSignedTies/cosine
+=== RUN   TestIVFQueryMetricsOriginalIPAndSignedTies/negative_inner_product
+--- PASS: TestIVFQueryMetricsOriginalIPAndSignedTies (0.02s)
+    --- PASS: TestIVFQueryMetricsOriginalIPAndSignedTies/l2 (0.01s)
+    --- PASS: TestIVFQueryMetricsOriginalIPAndSignedTies/cosine (0.01s)
+    --- PASS: TestIVFQueryMetricsOriginalIPAndSignedTies/negative_inner_product (0.00s)
+=== RUN   TestIVFQueryFailureHasNoPartialResult
+--- PASS: TestIVFQueryFailureHasNoPartialResult (0.04s)
+=== RUN   TestIVFQuerySmallSourceRetentionAndSingleListExact
+--- PASS: TestIVFQuerySmallSourceRetentionAndSingleListExact (0.02s)
+=== RUN   TestIVFQueryZeroIPAndCosineQueries
+--- PASS: TestIVFQueryZeroIPAndCosineQueries (0.02s)
+=== RUN   TestIVFReviewIndependentMembershipExtremeRowIDsAndStatementUndo
+--- PASS: TestIVFReviewIndependentMembershipExtremeRowIDsAndStatementUndo (0.17s)
+=== RUN   TestIVFStorageTrainedLifecycleAndReopen
+--- PASS: TestIVFStorageTrainedLifecycleAndReopen (0.12s)
+=== RUN   TestIVFStorageUntrainedNeedsExplicitReindex
+--- PASS: TestIVFStorageUntrainedNeedsExplicitReindex (0.03s)
+=== RUN   TestIVFStorageBuildLimitsAndDMLAtomicity
+--- PASS: TestIVFStorageBuildLimitsAndDMLAtomicity (0.01s)
+=== RUN   TestIVFStorageMetricsZeroPolicyAndSQL
+--- PASS: TestIVFStorageMetricsZeroPolicyAndSQL (0.06s)
+=== RUN   TestIVFStorageOldHNSWCanonicalSurvives
+--- PASS: TestIVFStorageOldHNSWCanonicalSurvives (1.96s)
+=== RUN   TestIVFStorageEmptyWideMemoryAndReindexUndo
+--- PASS: TestIVFStorageEmptyWideMemoryAndReindexUndo (0.08s)
+=== RUN   TestIVFStorageSharedWALSnapshot
+--- PASS: TestIVFStorageSharedWALSnapshot (0.02s)
+=== RUN   TestVectorNativeRandomizedIndependentRanking
+=== RUN   TestVectorNativeRandomizedIndependentRanking/1
+=== RUN   TestVectorNativeRandomizedIndependentRanking/3
+=== RUN   TestVectorNativeRandomizedIndependentRanking/17
+--- PASS: TestVectorNativeRandomizedIndependentRanking (0.15s)
+    --- PASS: TestVectorNativeRandomizedIndependentRanking/1 (0.05s)
+    --- PASS: TestVectorNativeRandomizedIndependentRanking/3 (0.05s)
+    --- PASS: TestVectorNativeRandomizedIndependentRanking/17 (0.05s)
+=== RUN   TestVectorNativeSignedTiesNullAndQueryForms
+--- PASS: TestVectorNativeSignedTiesNullAndQueryForms (0.00s)
+=== RUN   TestVectorNativeWhereMatchesSQL
+=== RUN   TestVectorNativeWhereMatchesSQL/active
+=== RUN   TestVectorNativeWhereMatchesSQL/active=TRUE
+=== RUN   TestVectorNativeWhereMatchesSQL/active_IS_FALSE
+=== RUN   TestVectorNativeWhereMatchesSQL/active_IS_NULL
+=== RUN   TestVectorNativeWhereMatchesSQL/flag=1
+=== RUN   TestVectorNativeWhereMatchesSQL/items.active=?2_AND_id>=?1
+=== RUN   TestVectorNativeWhereMatchesSQL/items.active=:value_OR_items.id=@value
+=== RUN   TestVectorNativeWhereMatchesSQL/_rowid_>=?_AND_oid<?
+=== RUN   TestVectorNativeWhereMatchesSQL/active=1_/*_trailing_comment_*/
+=== RUN   TestVectorNativeWhereMatchesSQL/active=1_--_trailing_comment
+=== RUN   TestVectorNativeWhereMatchesSQL/active=?_--_trailing_parameter_comment
+--- PASS: TestVectorNativeWhereMatchesSQL (0.01s)
+    --- PASS: TestVectorNativeWhereMatchesSQL/active (0.00s)
+    --- PASS: TestVectorNativeWhereMatchesSQL/active=TRUE (0.00s)
+    --- PASS: TestVectorNativeWhereMatchesSQL/active_IS_FALSE (0.00s)
+    --- PASS: TestVectorNativeWhereMatchesSQL/active_IS_NULL (0.00s)
+    --- PASS: TestVectorNativeWhereMatchesSQL/flag=1 (0.00s)
+    --- PASS: TestVectorNativeWhereMatchesSQL/items.active=?2_AND_id>=?1 (0.00s)
+    --- PASS: TestVectorNativeWhereMatchesSQL/items.active=:value_OR_items.id=@value (0.00s)
+    --- PASS: TestVectorNativeWhereMatchesSQL/_rowid_>=?_AND_oid<? (0.00s)
+    --- PASS: TestVectorNativeWhereMatchesSQL/active=1_/*_trailing_comment_*/ (0.00s)
+    --- PASS: TestVectorNativeWhereMatchesSQL/active=1_--_trailing_comment (0.00s)
+    --- PASS: TestVectorNativeWhereMatchesSQL/active=?_--_trailing_parameter_comment (0.00s)
+=== RUN   TestVectorNativeCosineFilterBeforeScoring
+--- PASS: TestVectorNativeCosineFilterBeforeScoring (0.00s)
+=== RUN   TestVectorNativeRejectsInvalidOptionsAndQueries
+--- PASS: TestVectorNativeRejectsInvalidOptionsAndQueries (0.00s)
+=== RUN   TestVectorNativeBudgetsCountEveryVisitedRow
+--- PASS: TestVectorNativeBudgetsCountEveryVisitedRow (0.00s)
+=== RUN   TestVectorNativeCancellationAndReaderRelease
+--- PASS: TestVectorNativeCancellationAndReaderRelease (0.01s)
+=== RUN   TestVectorNativeRuntimeFilterFailureDiscardsHits
+--- PASS: TestVectorNativeRuntimeFilterFailureDiscardsHits (0.00s)
+=== RUN   TestVectorNativeTransactionsRollbackAndOrdinaryReopen
+=== RUN   TestVectorNativeTransactionsRollbackAndOrdinaryReopen/wal=false
+=== RUN   TestVectorNativeTransactionsRollbackAndOrdinaryReopen/wal=true
+--- PASS: TestVectorNativeTransactionsRollbackAndOrdinaryReopen (0.01s)
+    --- PASS: TestVectorNativeTransactionsRollbackAndOrdinaryReopen/wal=false (0.00s)
+    --- PASS: TestVectorNativeTransactionsRollbackAndOrdinaryReopen/wal=true (0.00s)
+=== RUN   TestVectorNativeSharedWALSnapshotVisibility
+--- PASS: TestVectorNativeSharedWALSnapshotVisibility (0.00s)
+=== RUN   TestVectorSQLRankShapesNullOffsetAndTies
+--- PASS: TestVectorSQLRankShapesNullOffsetAndTies (0.00s)
+=== RUN   TestVectorSQLBoundedHeapAgainstGeneralSort
+--- PASS: TestVectorSQLBoundedHeapAgainstGeneralSort (0.01s)
+=== RUN   TestVectorSQLHybridActualAccessAndExplain
+--- PASS: TestVectorSQLHybridActualAccessAndExplain (0.86s)
+=== RUN   TestVectorStorageCanonicalBitsAndOrdinaryReopen
+=== RUN   TestVectorStorageCanonicalBitsAndOrdinaryReopen/wal=false/page=512
+=== RUN   TestVectorStorageCanonicalBitsAndOrdinaryReopen/wal=false/page=4096
+=== RUN   TestVectorStorageCanonicalBitsAndOrdinaryReopen/wal=true/page=512
+=== RUN   TestVectorStorageCanonicalBitsAndOrdinaryReopen/wal=true/page=4096
+--- PASS: TestVectorStorageCanonicalBitsAndOrdinaryReopen (0.01s)
+    --- PASS: TestVectorStorageCanonicalBitsAndOrdinaryReopen/wal=false/page=512 (0.00s)
+    --- PASS: TestVectorStorageCanonicalBitsAndOrdinaryReopen/wal=false/page=4096 (0.00s)
+    --- PASS: TestVectorStorageCanonicalBitsAndOrdinaryReopen/wal=true/page=512 (0.00s)
+    --- PASS: TestVectorStorageCanonicalBitsAndOrdinaryReopen/wal=true/page=4096 (0.00s)
+=== RUN   TestVectorStorageLargeDenseOverflowAndExactSearch
+--- PASS: TestVectorStorageLargeDenseOverflowAndExactSearch (0.02s)
+=== RUN   TestVectorStorageDefaultsNullAndNotNull
+--- PASS: TestVectorStorageDefaultsNullAndNotNull (0.00s)
+=== RUN   TestVectorStorageRejectsInvalidDeclarationsAndDefaults
+--- PASS: TestVectorStorageRejectsInvalidDeclarationsAndDefaults (0.00s)
+=== RUN   TestVectorStorageInvalidInputsDoNotChangeRows
+--- PASS: TestVectorStorageInvalidInputsDoNotChangeRows (0.01s)
+=== RUN   TestVectorStorageLateUpdateFailureIsStatementAtomic
+--- PASS: TestVectorStorageLateUpdateFailureIsStatementAtomic (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	9.840s
+CGO_ENABLED=0 go vet ./sqlite ./extension/vector/ann
+CGO_ENABLED=1 go test -race ./sqlite -run '^TestIVF' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	9.167s
+FOCUSED_IVF_GATES_PASSED

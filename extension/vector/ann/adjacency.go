@@ -32,6 +32,9 @@ func EncodeAdjacency(n Node, c Config) ([]byte, error) {
 // DecodeAdjacency validates all counts, exact length and IDs before allocating
 // adjacency storage. The caller verifies each referenced node and its layer.
 func DecodeAdjacency(b []byte, nodeID int64, level int, c Config) ([][]int64, error) {
+	if c.Method != HNSW {
+		return nil, ErrConfig
+	}
 	if err := c.Validate(); err != nil {
 		return nil, err
 	}

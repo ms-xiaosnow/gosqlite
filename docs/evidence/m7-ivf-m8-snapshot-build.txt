@@ -1,0 +1,12 @@
++ CGO_ENABLED=0
++ go build -trimpath -o ../gosqlite-m8-build-a ./cmd/gosqlite
++ CGO_ENABLED=0
++ go build -trimpath -o ../gosqlite-m8-build-b ./cmd/gosqlite
++ cmp ../gosqlite-m8-build-a ../gosqlite-m8-build-b
++ sha256sum ../gosqlite-m8-build-a
+24182fbd0381d2134efa63f92c79fc58dfa9c5575c56ff0a07b4a812c29a8b51  ../gosqlite-m8-build-a
++ file ../gosqlite-m8-build-a
+../gosqlite-m8-build-a: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), statically linked, Go BuildID=h0RBT0hwYKchlUaFHrAQ/Ry9Prd3xhMKmeCQI06xF/KHxGRJJ7brlClW3lP1Kk/aN7AcfCz8SyzRXMpgXsD, BuildID[sha1]=a97837718bbaddea28a939b5f9b9d6ae45a063a9, with debug_info, not stripped
++ ../gosqlite-m8-build-a version
+gosqlite 0.0.0-dev; Go 1.27.2; SQLite behavior baseline 3.54.0
++ git diff --check

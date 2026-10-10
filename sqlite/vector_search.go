@@ -21,12 +21,14 @@ import (
 // query/options without reading source rows. A zero Limits uses the bounded
 // defaults; other limits must be complete. All fetched rows, including filtered
 // and NULL rows, count against MaxCandidates, including an abandoned ANN
-// attempt before an exact fallback. MaxComponents also charges graph distances.
+// attempt before an exact fallback. MaxComponents also charges graph and centroid distances.
 type VectorSearchOptions struct {
 	Mode                  VectorSearchMode
 	Index                 string
 	EFSearch, MaxEFSearch int
-	// Probes are reserved for IVFFlat and currently return unsupported.
+	// Probes defaults to 1 for IVF. MaxProbes defaults to the index list count.
+	// Explicit probes must be 1..lists; probes=lists selects exact scanning.
+	// These options are rejected when the selected index is HNSW.
 	Probes, MaxProbes int
 	ANNLimits         ANNWorkLimits
 	Metric            vector.MetricKind
@@ -54,7 +56,8 @@ func (p VectorPlan) Detail() string {
 
 // VectorStats reports actual source/ranking work, not B-tree page I/O.
 // ScoredComponents charges the validated query once and every scored candidate.
-// ANNDistanceEvaluations * Dimensions reports additional graph components.
+// (ANNDistanceEvaluations + ANNCentroidScores) * Dimensions reports additional
+// graph and centroid components.
 // Both are charged against Limits.MaxComponents. Where evaluation and scalar
 // projection work are outside this ranking counter.
 type VectorStats struct {
@@ -234,8 +237,9 @@ func (d *DB) vectorSearch(ctx context.Context, reader btree.PageReader, tableNam
 		result.Plan.Access, result.Plan.Reason = "EMPTY", "zero limit; query validated without source reads"
 		return result, nil
 	}
+	exactSourceBound := int64(-1)
 	if options.Mode == VectorModeApproximate {
-		done, err := d.vectorSearchANN(ctx, reader, tab, ordinal, q, options, limits, filter, &result)
+		done, err := d.vectorSearchANN(ctx, reader, tab, ordinal, q, options, limits, filter, &result, &exactSourceBound)
 		if err != nil {
 			return VectorResult{}, err
 		}
@@ -245,7 +249,11 @@ func (d *DB) vectorSearch(ctx context.Context, reader btree.PageReader, tableNam
 	}
 	// Reserve result/query memory, then bound duplicate-row identity storage.
 	// This conservative retained-memory accounting never silently truncates rows.
-	reserve := int64(options.Limit)*128 + int64(dims)*4
+	exactRetain := options.Limit
+	if exactSourceBound >= 0 && exactSourceBound < int64(exactRetain) {
+		exactRetain = int(exactSourceBound)
+	}
+	reserve := int64(exactRetain)*128 + int64(dims)*4
 	if reserve >= d.opts.MaxSortBytes {
 		return VectorResult{}, fmt.Errorf("%w: vector result memory", ErrMemoryLimit)
 	}
@@ -261,20 +269,25 @@ func (d *DB) vectorSearch(ctx context.Context, reader btree.PageReader, tableNam
 	valuesHelper := &writeTable{table: tab}
 	remaining := limits
 	remaining.MaxCandidates -= int(result.Stats.BaseRowFetches)
-	usedComponents := uint64(result.Stats.ScoredComponents) + uint64(result.Stats.ANNDistanceEvaluations)*uint64(dims)
+	usedComponents := uint64(result.Stats.ScoredComponents) + annDistanceComponents(&result.Stats.QueryStats, dims)
 	if remaining.MaxCandidates < 1 || usedComponents > limits.MaxComponents {
 		return VectorResult{}, fmt.Errorf("%w: cumulative vector work", vector.ErrLimit)
 	}
 	remaining.MaxComponents = limits.MaxComponents - usedComponents + uint64(dims)
+	var scanSourceRows int64
 	scanned, err := vector.Scan(ctx, q, func(ctx context.Context) (vector.Row, bool, error) {
 		id, raw, err := src.Next()
 		if err == io.EOF {
-			return vector.Row{}, false, nil
+			return vector.Row{}, false, checkANNExactSourceCount(scanSourceRows, exactSourceBound, true)
 		}
 		if err != nil {
 			return vector.Row{}, false, err
 		}
 		result.Stats.BaseRowFetches++
+		scanSourceRows++
+		if err := checkANNExactSourceCount(scanSourceRows, exactSourceBound, false); err != nil {
+			return vector.Row{}, false, err
+		}
 		if result.Stats.BaseRowFetches > int64(limits.MaxCandidates) {
 			return vector.Row{}, false, fmt.Errorf("%w: source candidates", vector.ErrLimit)
 		}

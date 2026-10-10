@@ -175,6 +175,9 @@ func (t *Tx) checkWriteOwnership(ctx context.Context, c *writeCatalog) error {
 	return nil
 }
 func (t *Tx) createSQLMethodIndex(ctx context.Context, c *writeCatalog, s *sqlast.CreateIndex) error {
+	if fold(s.Method) == "ivfflat" {
+		return t.createSQLIVFIndex(ctx, c, s)
+	}
 	if fold(s.Method) == "hnsw" {
 		return t.createSQLHNSWIndex(ctx, c, s)
 	}

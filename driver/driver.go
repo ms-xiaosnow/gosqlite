@@ -63,6 +63,10 @@ func NewConnector(dsn string, opts sqlite.Options) (*Connector, error) {
 	if mode == "rw" {
 		opts.NoCreate = true
 	}
+	if opts.Encryption != nil {
+		cfg := *opts.Encryption
+		opts.Encryption = &cfg
+	}
 	return &Connector{path: path, opts: opts}, nil
 }
 func (c *Connector) Driver() sqldriver.Driver { return &Driver{} }

@@ -12,6 +12,9 @@ import (
 )
 
 func (d *DB) checkANNIndex(ctx context.Context, reader btree.PageReader, x *extensionIndex) error {
+	if x.method == ann.IVFFlat {
+		return d.checkIVFIndex(ctx, reader, x)
+	}
 	source := x.catalog.entries[fold(x.sourceTable)]
 	parsed, err := sqlast.Parse(source.SQL)
 	if err != nil {

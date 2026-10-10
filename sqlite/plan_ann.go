@@ -51,8 +51,27 @@ func (r *Rows) prepareANNVector(reader btree.PageReader) error {
 	if err != nil {
 		return err
 	}
+	options, err = annIndexQueryOptions(x, options)
+	if err != nil {
+		return err
+	}
 	applyANNPlan(&r.queryPlan, x, options)
 	v.ann = &annCandidateQuery{db: r.db, reader: reader, table: r.table, index: x, retain: v.retain, options: options, limits: v.limits, plan: &r.queryPlan, stats: &r.queryStats, components: func() int64 { return r.queryStats.VectorRankComponents }}
+	if x.method == ann.IVFFlat {
+		// State is eligibility metadata. EXPLAIN never reads centroids or lists.
+		state, err := newANNStore(reader, x).GetState(r.ctx)
+		r.queryStats.ANNStateReads++
+		if err != nil {
+			return err
+		}
+		v.ann.state = &state
+		r.queryPlan.ANNTrainingState = state.TrainingState
+		if state.TrainingState != "ready" {
+			exactANNFallback(&r.queryPlan, "index is untrained; REINDEX required to train")
+		} else if options.Probes == x.ann.Lists {
+			exactANNFallback(&r.queryPlan, "probes equals lists")
+		}
+	}
 	return nil
 }
 
@@ -61,6 +80,7 @@ func (r *Rows) fallbackANNVector(reason string) error {
 	reader := a.reader
 	r.vectorRank.ann = nil
 	r.vectorRank.expected = nil
+	r.vectorRank.annCandidate = false
 	exactANNFallback(&r.queryPlan, reason)
 	if r.source != nil {
 		if err := r.source.Close(); err != nil {
@@ -104,10 +124,12 @@ func (r *Rows) materializeANNVector() error {
 	retained := vectorRowHeap{}
 	var used int64
 	a.retainedBytes = func() int64 { return used }
-	_, why, err := a.run(r.ctx, func(id int64, raw []any, expected vector.Vector) (float64, bool, error) {
-		v.expected = &expected
+	_, why, err := a.run(r.ctx, func(id int64, raw []any, expected *vector.Vector) (float64, bool, error) {
+		v.expected = expected
+		v.annCandidate = true
 		row, cost, keep, err := r.evaluateSourceRow(id, raw)
 		v.expected = nil
+		v.annCandidate = false
 		if err != nil || !keep {
 			return 0, false, err
 		}

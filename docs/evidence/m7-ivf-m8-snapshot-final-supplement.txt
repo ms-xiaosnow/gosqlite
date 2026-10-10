@@ -1,0 +1,508 @@
++ date -u
+Sat Oct 10 12:31:30 UTC 2026
++ CGO_ENABLED=0
++ go test ./...
+?   	github.com/ms-xiaosnow/gosqlite/benchmarks/ann	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.050s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	2.050s
+ok  	github.com/ms-xiaosnow/gosqlite/encryption	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ann	1.295s
+?   	github.com/ms-xiaosnow/gosqlite/examples/encrypted	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/grams	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ivfflat	0.568s
+?   	github.com/ms-xiaosnow/gosqlite/examples/readonly	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/similarity	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/vector	0.210s
+?   	github.com/ms-xiaosnow/gosqlite/examples/wal	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/write	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/extension/grams13	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/extension/registry	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/extension/similarity	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector/ann	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	12.981s
+?   	github.com/ms-xiaosnow/gosqlite/internal/buildinfo	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	0.011s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/journal	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.194s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/record	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/internal/wal	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	62.338s
++ CGO_ENABLED=0
++ go vet ./...
++ CGO_ENABLED=0
++ go build -trimpath ./...
++ CGO_ENABLED=1
++ go test -race ./internal/encstore ./internal/pager ./sqlite ./driver -run 'TestEncrypt|TestSnapshotManifest|TestInventoryAccounting|TestDriverIVFFlat' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	1.023s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.032s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	2.269s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	2.066s
++ CGO_ENABLED=1
++ go test -race ./driver -run '^TestDriverIVFFlat' -count=3
+ok  	github.com/ms-xiaosnow/gosqlite/driver	3.085s
++ CGO_ENABLED=0
++ go run ./examples/encrypted
+Created, wrote, queried, and authenticated an encrypted snapshot.
+Rekeyed and reopened with the new key; old ciphertext is retained.
+Created a portable encrypted backup and verified a fresh restored family.
+Keys stayed in memory; disposable files will now be removed (not securely erased).
++ CGO_ENABLED=0
++ go run ./examples/ivfflat
+{
+  "note": "Logical record/key counters, not page I/O or latency. Exact candidate distances do not guarantee approximate recall. This clustered example is not a recall benchmark.",
+  "searches": [
+    {
+      "stage": "inserted_but_still_untrained",
+      "access": "SCAN",
+      "method": "exact_vector",
+      "exact": true,
+      "training_state": "untrained",
+      "generation": 1,
+      "requested_probes": 1,
+      "stop_reason": "untrained",
+      "fallback": "index is untrained; REINDEX required to train",
+      "rowids": [
+        1,
+        2,
+        3
+      ],
+      "distances": [
+        0,
+        0.011180339637598877,
+        0.022360679275197755
+      ],
+      "state_reads": 1,
+      "centroid_reads": 0,
+      "centroid_scores": 0,
+      "lists_opened": 0,
+      "member_keys_read": 0,
+      "identity_lookups": 0,
+      "base_rows_fetched": 128,
+      "filtered_rows": 0,
+      "ann_exact_rescores": 0,
+      "graph_node_reads": 0,
+      "graph_distance_evaluations": 0,
+      "iterations": 0
+    },
+    {
+      "stage": "native_default_exact",
+      "access": "SCAN",
+      "method": "exact_vector",
+      "exact": true,
+      "rowids": [
+        1,
+        2,
+        3
+      ],
+      "distances": [
+        0,
+        0.011180339637598877,
+        0.022360679275197755
+      ],
+      "state_reads": 0,
+      "centroid_reads": 0,
+      "centroid_scores": 0,
+      "lists_opened": 0,
+      "member_keys_read": 0,
+      "identity_lookups": 0,
+      "base_rows_fetched": 128,
+      "filtered_rows": 0,
+      "ann_exact_rescores": 0,
+      "graph_node_reads": 0,
+      "graph_distance_evaluations": 0,
+      "iterations": 0
+    },
+    {
+      "stage": "trained_one_probe",
+      "access": "SEARCH",
+      "method": "ivfflat",
+      "exact": false,
+      "training_state": "ready",
+      "generation": 2,
+      "requested_probes": 1,
+      "effective_probes": 1,
+      "stop_reason": "eligible_limit_satisfied",
+      "rowids": [
+        1,
+        2,
+        3
+      ],
+      "distances": [
+        0,
+        0.011180339637598877,
+        0.022360679275197755
+      ],
+      "state_reads": 1,
+      "centroid_reads": 4,
+      "centroid_scores": 4,
+      "lists_opened": 1,
+      "member_keys_read": 32,
+      "identity_lookups": 32,
+      "base_rows_fetched": 32,
+      "filtered_rows": 0,
+      "ann_exact_rescores": 32,
+      "graph_node_reads": 0,
+      "graph_distance_evaluations": 0,
+      "iterations": 1
+    },
+    {
+      "stage": "filter_compensation",
+      "access": "SEARCH",
+      "method": "ivfflat",
+      "exact": false,
+      "training_state": "ready",
+      "generation": 2,
+      "requested_probes": 1,
+      "effective_probes": 4,
+      "stop_reason": "eligible_limit_satisfied",
+      "rowids": [
+        97,
+        98,
+        99
+      ],
+      "distances": [
+        3354.1019662496847,
+        3354.1131575078725,
+        3354.124348766061
+      ],
+      "state_reads": 1,
+      "centroid_reads": 4,
+      "centroid_scores": 4,
+      "lists_opened": 4,
+      "member_keys_read": 128,
+      "identity_lookups": 128,
+      "base_rows_fetched": 128,
+      "filtered_rows": 96,
+      "ann_exact_rescores": 32,
+      "graph_node_reads": 0,
+      "graph_distance_evaluations": 0,
+      "iterations": 3
+    },
+    {
+      "stage": "max_probes_exact_fallback",
+      "access": "SCAN",
+      "method": "exact_vector",
+      "exact": true,
+      "training_state": "ready",
+      "generation": 2,
+      "requested_probes": 1,
+      "effective_probes": 1,
+      "stop_reason": "max_probes",
+      "fallback": "insufficient eligible IVF hits at max_probes",
+      "rowids": [
+        97,
+        98,
+        99
+      ],
+      "distances": [
+        3354.1019662496847,
+        3354.1131575078725,
+        3354.124348766061
+      ],
+      "state_reads": 1,
+      "centroid_reads": 4,
+      "centroid_scores": 4,
+      "lists_opened": 1,
+      "member_keys_read": 32,
+      "identity_lookups": 32,
+      "base_rows_fetched": 160,
+      "filtered_rows": 128,
+      "ann_exact_rescores": 0,
+      "graph_node_reads": 0,
+      "graph_distance_evaluations": 0,
+      "iterations": 1
+    },
+    {
+      "stage": "all_probes_exact_scan",
+      "access": "SCAN",
+      "method": "exact_vector",
+      "exact": true,
+      "training_state": "ready",
+      "generation": 2,
+      "requested_probes": 4,
+      "stop_reason": "all_lists_requested",
+      "fallback": "probes equals lists",
+      "rowids": [
+        1,
+        2,
+        3
+      ],
+      "distances": [
+        0,
+        0.011180339637598877,
+        0.022360679275197755
+      ],
+      "state_reads": 1,
+      "centroid_reads": 0,
+      "centroid_scores": 0,
+      "lists_opened": 0,
+      "member_keys_read": 0,
+      "identity_lookups": 0,
+      "base_rows_fetched": 128,
+      "filtered_rows": 0,
+      "ann_exact_rescores": 0,
+      "graph_node_reads": 0,
+      "graph_distance_evaluations": 0,
+      "iterations": 0
+    },
+    {
+      "stage": "after_transactional_dml",
+      "access": "SEARCH",
+      "method": "ivfflat",
+      "exact": false,
+      "training_state": "ready",
+      "generation": 2,
+      "requested_probes": 1,
+      "effective_probes": 1,
+      "stop_reason": "eligible_limit_satisfied",
+      "rowids": [
+        129,
+        3,
+        4
+      ],
+      "distances": [
+        0,
+        0.022360679275197755,
+        0.033541018912796636
+      ],
+      "state_reads": 1,
+      "centroid_reads": 4,
+      "centroid_scores": 4,
+      "lists_opened": 1,
+      "member_keys_read": 31,
+      "identity_lookups": 31,
+      "base_rows_fetched": 31,
+      "filtered_rows": 0,
+      "ann_exact_rescores": 31,
+      "graph_node_reads": 0,
+      "graph_distance_evaluations": 0,
+      "iterations": 1
+    },
+    {
+      "stage": "after_explicit_reindex",
+      "access": "SEARCH",
+      "method": "ivfflat",
+      "exact": false,
+      "training_state": "ready",
+      "generation": 3,
+      "requested_probes": 1,
+      "effective_probes": 1,
+      "stop_reason": "eligible_limit_satisfied",
+      "rowids": [
+        129,
+        3,
+        4
+      ],
+      "distances": [
+        0,
+        0.022360679275197755,
+        0.033541018912796636
+      ],
+      "state_reads": 1,
+      "centroid_reads": 4,
+      "centroid_scores": 4,
+      "lists_opened": 1,
+      "member_keys_read": 31,
+      "identity_lookups": 31,
+      "base_rows_fetched": 31,
+      "filtered_rows": 0,
+      "ann_exact_rescores": 31,
+      "graph_node_reads": 0,
+      "graph_distance_evaluations": 0,
+      "iterations": 1
+    },
+    {
+      "stage": "ordinary_close_and_reopen",
+      "access": "SEARCH",
+      "method": "ivfflat",
+      "exact": false,
+      "training_state": "ready",
+      "generation": 3,
+      "requested_probes": 1,
+      "effective_probes": 1,
+      "stop_reason": "eligible_limit_satisfied",
+      "rowids": [
+        129,
+        3,
+        4
+      ],
+      "distances": [
+        0,
+        0.022360679275197755,
+        0.033541018912796636
+      ],
+      "state_reads": 1,
+      "centroid_reads": 4,
+      "centroid_scores": 4,
+      "lists_opened": 1,
+      "member_keys_read": 31,
+      "identity_lookups": 31,
+      "base_rows_fetched": 31,
+      "filtered_rows": 0,
+      "ann_exact_rescores": 31,
+      "graph_node_reads": 0,
+      "graph_distance_evaluations": 0,
+      "iterations": 1
+    }
+  ],
+  "sql": [
+    {
+      "sql": "SELECT id,embedding \u003c-\u003e '[0,0,1]' AS distance FROM items ORDER BY distance LIMIT 3",
+      "plan": {
+        "ANNOpclass": "vector_l2_ops",
+        "ANNGeneration": 2,
+        "ANNLists": 4,
+        "ANNTrainingState": "ready",
+        "ANNEFSearch": 0,
+        "ANNMaxEFSearch": 0,
+        "ANNEffectiveEF": 0,
+        "ANNProbes": 1,
+        "ANNMaxProbes": 4,
+        "ANNEffectiveProbes": 1,
+        "ANNStopReason": "eligible_limit_satisfied",
+        "ANNFallback": "",
+        "VectorMetric": "l2",
+        "VectorColumn": "embedding",
+        "VectorDimensions": 3,
+        "VectorTopK": 3,
+        "VectorExact": false,
+        "VectorRanking": "ann_exact_rescore",
+        "Access": "SEARCH",
+        "Table": "items",
+        "Indexes": [
+          "items_ivf"
+        ],
+        "Method": "ivfflat",
+        "MethodVersion": 1,
+        "Fields": [
+          "embedding"
+        ],
+        "Namespace": "",
+        "GramLengths": null,
+        "EstimatedCandidates": -1,
+        "Recheck": true,
+        "Reason": "lazy IVFFlat selected-list ranges with original WHERE and exact base-row rescoring"
+      },
+      "stats": {
+        "ANNStateReads": 1,
+        "ANNNodeReads": 0,
+        "ANNEdgeReads": 0,
+        "ANNVisited": 4,
+        "ANNDistanceEvaluations": 0,
+        "ANNIdentityLookups": 32,
+        "ANNCentroidScores": 4,
+        "ANNCentroidReads": 4,
+        "ANNListsOpened": 1,
+        "ANNMemberKeysRead": 32,
+        "ANNIterations": 1,
+        "ANNExactRescores": 32,
+        "ANNPeakBytes": 7372,
+        "VectorRankedRows": 32,
+        "VectorFilteredRows": 0,
+        "VectorNullRows": 0,
+        "VectorRankComponents": 99,
+        "FrequencyLookups": 0,
+        "PostingKeysRead": 0,
+        "Candidates": 32,
+        "BaseRowFetches": 32,
+        "ReturnedRows": 3
+      },
+      "rows": [
+        [
+          1,
+          0
+        ],
+        [
+          2,
+          0.011180339637598877
+        ],
+        [
+          3,
+          0.022360679275197755
+        ]
+      ]
+    },
+    {
+      "sql": "SELECT id,embedding \u003c-\u003e '[0,0,1]' AS distance FROM items NOT INDEXED ORDER BY distance LIMIT 3",
+      "plan": {
+        "ANNOpclass": "",
+        "ANNGeneration": 0,
+        "ANNLists": 0,
+        "ANNTrainingState": "",
+        "ANNEFSearch": 0,
+        "ANNMaxEFSearch": 0,
+        "ANNEffectiveEF": 0,
+        "ANNProbes": 0,
+        "ANNMaxProbes": 0,
+        "ANNEffectiveProbes": 0,
+        "ANNStopReason": "",
+        "ANNFallback": "NOT INDEXED requested",
+        "VectorMetric": "l2",
+        "VectorColumn": "embedding",
+        "VectorDimensions": 3,
+        "VectorTopK": 3,
+        "VectorExact": true,
+        "VectorRanking": "bounded_heap",
+        "Access": "SCAN",
+        "Table": "items",
+        "Indexes": null,
+        "Method": "",
+        "MethodVersion": 0,
+        "Fields": null,
+        "Namespace": "",
+        "GramLengths": null,
+        "EstimatedCandidates": 0,
+        "Recheck": false,
+        "Reason": "NOT INDEXED requested"
+      },
+      "stats": {
+        "ANNStateReads": 0,
+        "ANNNodeReads": 0,
+        "ANNEdgeReads": 0,
+        "ANNVisited": 0,
+        "ANNDistanceEvaluations": 0,
+        "ANNIdentityLookups": 0,
+        "ANNCentroidScores": 0,
+        "ANNCentroidReads": 0,
+        "ANNListsOpened": 0,
+        "ANNMemberKeysRead": 0,
+        "ANNIterations": 0,
+        "ANNExactRescores": 0,
+        "ANNPeakBytes": 0,
+        "VectorRankedRows": 128,
+        "VectorFilteredRows": 0,
+        "VectorNullRows": 0,
+        "VectorRankComponents": 387,
+        "FrequencyLookups": 0,
+        "PostingKeysRead": 0,
+        "Candidates": 0,
+        "BaseRowFetches": 128,
+        "ReturnedRows": 3
+      },
+      "rows": [
+        [
+          1,
+          0
+        ],
+        [
+          2,
+          0.011180339637598877
+        ],
+        [
+          3,
+          0.022360679275197755
+        ]
+      ]
+    }
+  ]
+}
++ CGO_ENABLED=1
++ go test -race -tags oracle ./internal/testkit -run 'TestOracleIVFFlatStorageInterop|TestOracleEncryptedSnapshotExportImport/4096' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	53.702s
++ date -u
+Sat Oct 10 12:33:59 UTC 2026
++ echo FINAL_SNAPSHOT_SUPPLEMENT_PASSED
+FINAL_SNAPSHOT_SUPPLEMENT_PASSED

@@ -1,0 +1,30 @@
+M8a worker evidence: ordinary correct-key and pure-memory tests only
+Sat Oct 10 12:20:14 UTC 2026
+ACTUAL INVOCATION (expanded from original descriptive caption): CGO_ENABLED=0 ../toolchains/go1.27.2/bin/go test ./internal/encstore ./internal/pager ./sqlite ./driver -run '^TestEncrypt|^TestSnapshotManifestCanonicalMemory$|^TestInventoryAccountingMemory$' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	0.004s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.014s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.525s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.012s
+ACTUAL INVOCATION (expanded from original descriptive caption): CGO_ENABLED=1 ../toolchains/go1.27.2/bin/go test -race ./internal/encstore ./internal/pager ./sqlite ./driver -run '^TestEncrypt|^TestSnapshotManifestCanonicalMemory$|^TestInventoryAccountingMemory$' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	1.020s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.052s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	2.404s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.043s
+ACTUAL INVOCATION (expanded from original descriptive caption): CGO_ENABLED=0 ../toolchains/go1.27.2/bin/go vet ./internal/encstore ./internal/pager ./sqlite ./driver
+
+Evidence clarification, 2026-10-10 12:26 UTC:
+The three original human-readable echo captions abbreviated the command lines.
+They were not the shell invocations. The ACTUAL INVOCATION lines above reproduce
+the executed shell command strings from this worker's retained tool-call context.
+Recorded test/vet output and original execution timestamp are unchanged. No rerun
+is asserted by this clarification.
+
+Working directory:
+/workspace/scratch/5e06a74e5f65/durable-restart/gosqlite
+
+Environment exported for the recorded run:
+export GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off GOPATH=/workspace/scratch/5e06a74e5f65/durable-restart/go-path GOCACHE=/workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go-cache
+
+The recording shell used set -o pipefail and piped the command group through
+tee ../m8a-worker-evidence.txt. Each test command reported its package passes;
+vet emitted no diagnostics and the completed shell tool reported exit code 0.

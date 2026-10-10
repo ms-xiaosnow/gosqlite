@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"sync"
 
+	"github.com/ms-xiaosnow/gosqlite/encryption"
 	"github.com/ms-xiaosnow/gosqlite/extension/grams13"
 	"github.com/ms-xiaosnow/gosqlite/extension/registry"
 	"github.com/ms-xiaosnow/gosqlite/extension/similarity"
@@ -23,6 +24,7 @@ import (
 )
 
 var (
+	ErrAuthentication   = encryption.ErrAuthentication
 	ErrUnsupported      = errors.New("unsupported SQLite feature")
 	ErrReadOnly         = errors.New("SQLite database is read-only")
 	ErrClosed           = errors.New("SQLite database is closed")
@@ -44,6 +46,7 @@ var (
 type Code int
 
 const (
+	CodeNotADB     Code = 26
 	CodeOK         Code = 0
 	CodeError      Code = 1
 	CodeBusy       Code = 5
@@ -72,13 +75,13 @@ func wrap(op string, err error) error {
 		return nil
 	}
 	var unsupported *sqlast.ErrUnsupported
-	if errors.Is(err, record.ErrCorrupt) || errors.Is(err, ann.ErrCorrupt) {
+	if errors.Is(err, record.ErrCorrupt) || errors.Is(err, ann.ErrCorrupt) || errors.Is(err, encryption.ErrFormat) || errors.Is(err, encryption.ErrIdentity) {
 		err = fmt.Errorf("%w: %w", ErrCorrupt, err)
 	}
-	if errors.Is(err, record.ErrLimit) || errors.Is(err, pager.ErrLimit) || errors.Is(err, grams13.ErrLimit) || errors.Is(err, similarity.ErrLimit) || errors.Is(err, vector.ErrLimit) || errors.Is(err, ann.ErrLimit) {
+	if errors.Is(err, record.ErrLimit) || errors.Is(err, pager.ErrLimit) || errors.Is(err, grams13.ErrLimit) || errors.Is(err, similarity.ErrLimit) || errors.Is(err, vector.ErrLimit) || errors.Is(err, ann.ErrLimit) || errors.Is(err, encryption.ErrLimit) {
 		err = fmt.Errorf("%w: %w", ErrMemoryLimit, err)
 	}
-	if errors.As(err, &unsupported) || errors.Is(err, pager.ErrUnsupported) || errors.Is(err, record.ErrUnsupported) {
+	if errors.As(err, &unsupported) || errors.Is(err, pager.ErrUnsupported) || errors.Is(err, record.ErrUnsupported) || errors.Is(err, encryption.ErrUnsupported) || errors.Is(err, encryption.ErrUnsupportedConfiguration) {
 		err = fmt.Errorf("%w: %w", ErrUnsupported, err)
 	}
 	if errors.Is(err, btree.ErrDuplicate) {
@@ -100,6 +103,11 @@ func wrap(op string, err error) error {
 		code = CodeReadOnly
 	case errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded):
 		code = CodeInterrupt
+	case errors.Is(err, encryption.ErrAuthentication):
+		code = CodeCorrupt
+		if op == "open" {
+			code = CodeNotADB
+		}
 	case errors.Is(err, ErrCorrupt):
 		code = CodeCorrupt
 	case errors.Is(err, ErrConstraint) || errors.Is(err, btree.ErrDuplicate):
@@ -113,6 +121,9 @@ func wrap(op string, err error) error {
 // Options configures a connection. Zero-value options open read/write and
 // create an absent database. ReadOnly never creates or modifies files.
 type Options struct {
+	// Encryption explicitly selects the independent authenticated snapshot container.
+	// Nil preserves the ordinary plaintext engine. Native WAL options are incompatible.
+	Encryption *EncryptionOptions
 	// IndexMethods selects an immutable snapshot of registered native index
 	// methods. Nil installs the built-in grams13 method. Stored metadata never
 	// loads code or changes this connection registry.
@@ -192,6 +203,16 @@ func OpenContext(ctx context.Context, path string, opts Options) (*DB, error) {
 	if err := checkContext(ctx); err != nil {
 		return nil, wrap("open", err)
 	}
+	if opts.Encryption != nil {
+		cfg := *opts.Encryption
+		opts.Encryption = &cfg
+		if err := cfg.validate(); err != nil {
+			return nil, wrap("open", err)
+		}
+		if opts.WALExclusive || opts.WALShared || opts.WALPowersafeOverwrite || opts.KeepWALOnClose {
+			return nil, wrap("open", fmt.Errorf("%w: encrypted snapshot rejects native WAL options", ErrUnsupported))
+		}
+	}
 	if opts.WALExclusive && opts.WALShared {
 		return nil, wrap("open", fmt.Errorf("WALExclusive and WALShared are mutually exclusive"))
 	}
@@ -204,20 +225,22 @@ func OpenContext(ctx context.Context, path string, opts Options) (*DB, error) {
 	if opts.KeepWALOnClose && !opts.WALExclusive && !opts.WALShared {
 		return nil, wrap("open", fmt.Errorf("KeepWALOnClose requires a WAL mode"))
 	}
-	if opts.MaxSortBytes < 0 {
-		return nil, wrap("open", fmt.Errorf("MaxSortBytes must not be negative"))
-	}
-	if opts.MaxSortBytes == 0 {
-		opts.MaxSortBytes = 64 << 20
-	}
-	if opts.MaxTransactionPages == 0 {
-		opts.MaxTransactionPages = 4096
+	opts, err := normalizeConnectionLimits(opts)
+	if err != nil {
+		return nil, wrap("open", err)
 	}
 	// A connection must keep naming the same path across working-directory
 	// changes and symlink retargeting while idle between snapshots.
 	absolute, err := filepath.Abs(path)
 	if err != nil {
 		return nil, wrap("open", err)
+	}
+	if opts.Encryption != nil {
+		if info, e := os.Lstat(absolute); e == nil && !info.Mode().IsRegular() {
+			return nil, wrap("open", ErrUnsupported)
+		} else if e != nil && !os.IsNotExist(e) {
+			return nil, wrap("open", e)
+		}
 	}
 	canonical, err := filepath.EvalSymlinks(absolute)
 	if err != nil {
@@ -251,6 +274,15 @@ func OpenContext(ctx context.Context, path string, opts Options) (*DB, error) {
 		if err := pager.ValidateOptions(d.pagerOptions()); err != nil {
 			return nil, wrap("open", err)
 		}
+	}
+	if opts.Encryption != nil {
+		session, e := pager.OpenEncryptedSession(ctx, path, d.pagerOptions(), opts.Encryption.storageOptions(), opts.ReadOnly)
+		if e != nil {
+			return nil, wrap("open", e)
+		}
+		d.session = session
+		d.info = fileInfo(session.Header())
+		return d, nil
 	}
 	if opts.WALExclusive || opts.WALShared {
 		var session pageSession
@@ -470,4 +502,19 @@ type pageSession interface {
 	Reader(context.Context) (*pager.Reader, error)
 	Checkpoint(context.Context) error
 	Close() error
+}
+
+// normalizeConnectionLimits is shared by opening and standalone copy validators
+// so a restored catalog receives the same bounded defaults as a connection.
+func normalizeConnectionLimits(opts Options) (Options, error) {
+	if opts.MaxSortBytes < 0 {
+		return opts, fmt.Errorf("MaxSortBytes must not be negative")
+	}
+	if opts.MaxSortBytes == 0 {
+		opts.MaxSortBytes = 64 << 20
+	}
+	if opts.MaxTransactionPages == 0 {
+		opts.MaxTransactionPages = 4096
+	}
+	return opts, nil
 }

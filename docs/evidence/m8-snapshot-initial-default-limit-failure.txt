@@ -1,0 +1,14 @@
+=== RUN   TestOracleEncryptedSnapshotExportImport
+=== RUN   TestOracleEncryptedSnapshotExportImport/512
+    encryption_conformance_test.go:176: sqlite encrypted restore: SQLite query memory limit exceeded
+=== RUN   TestOracleEncryptedSnapshotExportImport/4096
+    encryption_conformance_test.go:176: sqlite encrypted restore: SQLite query memory limit exceeded
+=== RUN   TestOracleEncryptedSnapshotExportImport/65536
+    encryption_conformance_test.go:176: sqlite encrypted restore: SQLite query memory limit exceeded
+--- FAIL: TestOracleEncryptedSnapshotExportImport (79.34s)
+    --- FAIL: TestOracleEncryptedSnapshotExportImport/512 (8.53s)
+    --- FAIL: TestOracleEncryptedSnapshotExportImport/4096 (10.38s)
+    --- FAIL: TestOracleEncryptedSnapshotExportImport/65536 (60.42s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/testkit	79.342s
+FAIL

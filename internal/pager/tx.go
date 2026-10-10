@@ -67,6 +67,7 @@ type Tx struct {
 	poisoned       error
 	session        *Session
 	shared         *SharedSession
+	encrypted      *EncryptedSession
 	sharedRead     sharedRead
 	readOnly       bool
 	// keepFile is private to the rollback-journal WAL-mode transition. The
@@ -224,7 +225,7 @@ func (t *Tx) checkOpen() error {
 	if t.poisoned != nil {
 		return t.poisoned
 	}
-	if t.file == nil {
+	if t.file == nil && t.encrypted == nil {
 		return ErrClosed
 	}
 	return nil
@@ -232,6 +233,9 @@ func (t *Tx) checkOpen() error {
 func (t *Tx) checkSidecars() error { return checkSidecars(t.path) }
 
 func (t *Tx) checkStable() error {
+	if t.encrypted != nil {
+		return t.encrypted.checkStable()
+	}
 	if t.shared != nil {
 		return t.shared.checkStable()
 	}
@@ -282,6 +286,9 @@ func (t *Tx) readLocked(ctx context.Context, n uint32) ([]byte, error) {
 	if err := t.checkStable(); err != nil {
 		return nil, err
 	}
+	if t.encrypted != nil {
+		return t.encrypted.readPage(ctx, n)
+	}
 	if t.shared != nil {
 		return t.shared.readPage(ctx, t.sharedRead, t.header, n)
 	}
@@ -314,6 +321,10 @@ func (t *Tx) promoteLocked(ctx context.Context) error {
 		return fmt.Errorf("%w: read-only snapshot", ErrMisuse)
 	}
 	if t.reserved {
+		return nil
+	}
+	if t.encrypted != nil {
+		t.reserved = true
 		return nil
 	}
 	if t.shared != nil {
@@ -461,6 +472,11 @@ func (t *Tx) Rollback() error {
 	defer t.mu.Unlock()
 	if t.statement {
 		return fmt.Errorf("%w: rollback inside statement", ErrMisuse)
+	}
+	if t.encrypted != nil {
+		t.encrypted.release(t)
+		t.clearEncrypted()
+		return t.poisoned
 	}
 	if t.file == nil {
 		return t.poisoned

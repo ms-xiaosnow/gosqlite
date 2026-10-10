@@ -42,6 +42,12 @@ func (s State) Validate(c Config) error {
 	if err := c.Validate(); err != nil {
 		return err
 	}
+	if c.Method == IVFFlat {
+		if s.Entry != 0 || s.MaxLevel != -1 || s.NextID != 1 || s.Tombstones != 0 || s.Live < 0 || s.Live > c.MaxNodes || (s.TrainingState != "ready" && s.TrainingState != "untrained") {
+			return ErrCorrupt
+		}
+		return nil
+	}
 	if s.Live < 0 || s.Tombstones < 0 || s.Live > c.MaxNodes || s.Tombstones > c.MaxTombstones || s.Live+s.Tombstones > c.MaxNodes || s.NextID != s.Live+s.Tombstones+1 || s.TrainingState != "" {
 		return ErrCorrupt
 	}
@@ -119,6 +125,9 @@ func layerCapacity(c Config, layer int) int {
 }
 
 func ValidateNode(n Node, c Config) error {
+	if c.Method != HNSW {
+		return ErrConfig
+	}
 	if err := ValidateVector(n.Vector, c); err != nil {
 		return fmt.Errorf("%w: node vector: %w", ErrCorrupt, err)
 	}

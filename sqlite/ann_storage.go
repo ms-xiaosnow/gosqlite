@@ -139,10 +139,14 @@ func (s *annStore) GetState(ctx context.Context) (ann.State, error) {
 	dead, dok := v[5].(int64)
 	next, nok := v[6].(int64)
 	training, tok := v[7].(string)
-	if !eok || !mok || !lok || !dok || !nok || !tok || ml < -1 || ml > ann.MaxLevel || live < 0 || dead < 0 || next < 1 || next > s.x.ann.MaxNodes+1 || live > s.x.ann.MaxNodes || dead > s.x.ann.MaxTombstones || live+dead != next-1 || e < 0 || e >= next || ((next == 1) != (e == 0)) || ((e == 0) != (ml == -1)) || training != "" {
-		return ann.State{}, extensionCorrupt("ANN state values")
+	if !eok || !mok || !lok || !dok || !nok || !tok || ml < -1 || ml > ann.MaxLevel {
+		return ann.State{}, extensionCorrupt("ANN state field types")
 	}
-	return ann.State{Entry: e, MaxLevel: int(ml), Live: live, Tombstones: dead, NextID: next, TrainingState: training}, nil
+	state := ann.State{Entry: e, MaxLevel: int(ml), Live: live, Tombstones: dead, NextID: next, TrainingState: training}
+	if err := state.Validate(*s.x.ann); err != nil {
+		return ann.State{}, fmt.Errorf("%w: ANN state values: %w", ErrCorrupt, err)
+	}
+	return state, nil
 }
 func (s *annStore) putState(ctx context.Context, state ann.State) error {
 	values := []any{nil, s.x.id, state.Entry, int64(state.MaxLevel), state.Live, state.Tombstones, state.NextID, state.TrainingState}

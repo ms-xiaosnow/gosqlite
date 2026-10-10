@@ -174,6 +174,8 @@ ZIP hashes. No automatic toolchain switching, private crypto source or credentia
 - Both retained BSD3 licenses SHA256:
   `911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad`.
 
-Actual extra import closure: x/crypto/argon2, x/crypto/blake2b and x/sys/cpu; all
-CgoFiles empty. The cryptographic package remains unintegrated with database
-storage. Known-answer/reference tests do not constitute an independent audit.
+Actual added import closure: x/crypto/argon2, x/crypto/blake2b, x/sys/cpu and
+x/sys/unix (the latter added by Linux encrypted storage); all CgoFiles empty.
+The same pinned x/sys module is now a direct dependency. Experimental encrypted
+snapshot integration is documented separately. Known-answer/reference tests do
+not constitute an independent audit.

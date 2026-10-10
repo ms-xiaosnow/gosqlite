@@ -15,8 +15,10 @@
 // geometry or an authenticated directory. A successful record authentication
 // does not establish file completeness, root-manifest authority, currentness,
 // database structural validity, or protection against whole-snapshot rollback.
-// Those checks belong to the future storage adapter. Metadata/footer payloads
-// are opaque here; no root manifest or WAL directory format is implemented.
+// The experimental snapshot adapter implements completeness and structural
+// checks separately; external expected identity/freshness is still required to
+// address whole-family substitution or historical rollback. Metadata/footer
+// payloads are opaque here; root and segment formats belong to storage adapters.
 //
 // The versioned byte encoding is experimental and has not been reviewed or
 // frozen for release. Headers disclose identity, KDF costs and logical extent.

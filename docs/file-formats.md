@@ -2,7 +2,7 @@
 
 M2 reads and writes the tested rowid-table and BINARY ASC secondary-index subset of SQLite format 3, according to the [official specification](https://www.sqlite.org/fileformat2.html), with tested subsets recorded in compatibility.md. Future extension data must occupy legal transactional SQLite structures. Unknown feature bits, container versions, encodings, and index versions must be rejected instead of guessed.
 
-Encrypted target: independent authenticated container, distinct from SQLite plaintext and SEE. A memory-only experimental record codec now exists, but no encrypted database format is frozen or supported. Every format change requires an ADR, preserved snapshot, explicit migration and round-trip verification.
+The experimental encrypted snapshot format is an independent authenticated root/base container, distinct from SQLite plaintext and SEE. It now supports snapshot storage; encrypted WAL and a stable encrypted-format promise remain open. See [encryption-storage.md](encryption-storage.md). Every format change requires an ADR, preserved snapshot, explicit migration and round-trip verification.
 
 ## M2 plaintext writes
 
@@ -19,7 +19,7 @@ WAL uses SQLite's32-byte header and24-byte frame header plus a complete page. St
 
 The committed overlay selects the newest page image through the last complete commit marker, with logical extent from that marker and strict bounded scanning. Invalid, incomplete, uncommitted and salt-mismatching tails are classified and refused; this does not implement SQLite's full recovery policy. Checkpoint retains synced WAL images for every extant main-file sector neighbor before overwriting pages. Header mode2 remains after normal checkpoint/close, even when the WAL is removed.
 
-Rollback replay plans support one finite-count header/record segment, page geometry, nonce-seeded sparse checksums, exact original extent and complete missing-original coverage if the current extent is shorter. Physical replay is deliberately isolated and unqualified. See ADR0004 and the source-only manual harness; no encrypted format exists yet.
+Rollback replay plans support one finite-count header/record segment, page geometry, nonce-seeded sparse checksums, exact original extent and complete missing-original coverage if the current extent is shorter. Physical replay is deliberately isolated and unqualified. See ADR0004 and the source-only manual harness. The separate [experimental authenticated snapshot format](encryption-storage.md) does not implement encrypted WAL.
 
 ## M3 shared WAL-index
 
@@ -42,7 +42,7 @@ The pure mathematical vector package encodes one value as12+4×dimension bytes: 
 The original seven grams schemas are unchanged. The optional complete eleven-
 object ANN family consists of state/nodes/live/centroids/members tables and six
 lookup B-trees. Absent family is legal for older grams-only files; partial or
-unrecognized owned objects reject. First HNSW creation initializes the family
+unrecognized owned objects reject. First HNSW or IVFFlat creation initializes the family
 transactionally. Catalog config binds method/version, dimensions, metric/opclass,
 seed, construction policy and limits with strict canonical bytes. State tracks
 entry, top level, next immutable identity, live/tombstone counts. Each node stores
@@ -51,17 +51,79 @@ separate. Physical table rowids are not content rowids or graph identities.
 Centroids/members remain empty in HNSW and are checked accordingly.
 
 No custom SQLite page type is introduced. Ordinary official SQLite can preserve
-these structures and execute their source invalidation guards, but cannot query
-HNSW itself. Normal creation/mutation/rebuild/rollback/reopen/checkpoint and actual
+these structures and execute their source invalidation guards, but cannot execute
+the native ANN methods itself. Normal creation/mutation/rebuild/rollback/reopen/checkpoint and actual
 pre-ANN file upgrade are tested. Interrupted publication/recovery and future
-format migration are not qualified. Reindex keeps the immutable configuration;
-future IVF support must preserve HNSW canonical serialization exactly.
+format migration are not qualified. Reindex keeps the immutable configuration.
+IVFFlat now uses the centroid/member tables already reserved in this family and
+preserves HNSW canonical serialization exactly.
 
-## M8 experimental memory-only records
+### M7 IVFFlat version1 state, centroids and membership
 
-The encryption package defines an experimental512-byte GSQLENC1 bootstrap and
-24-byte authenticated-record header plus AES256GCM ciphertext/tag. This is not
-a supported encrypted database container: root manifest, complete file layout,
-WAL directory/commit authority, backup/rekey/publication remain unimplemented.
-See encryption-primitives.md for exact scope and source-format offsets. No
-existing plaintext database is transformed or encrypted by this package.
+All rows are keyed by logical index ID within the same optional ANN family.
+The exact schema definitions remain in `sqlite/ann_storage.go`; no private page
+types or PostgreSQL binary-index structures are introduced.
+
+- `__gosqlite_ext_ann_state` contains one row per index. IVF stores entry 0,
+  maximum level -1, next node ID 1, tombstones 0, a bounded non-NULL eligible
+  source count, and training state exactly `untrained` or `ready`. The ordinary
+  catalog separately counts all source rows, including NULL vectors, and binds
+  generation, schema cookie, source SQL hash and configuration hash.
+- `__gosqlite_ext_ann_centroids` stores physical ID, index ID, list ID, canonical
+  GSV-encoded float32 centroid and member count. A ready index has exactly one
+  centroid for every list ID 1..lists. The `(index_id,list_id)` lookup locates its
+  bounded centroid range. Vector dimensions/finite values and spherical unit
+  norms are checked; per-list counts are reconciled by the full checker.
+- `__gosqlite_ext_ann_members` stores physical ID, index ID, list ID and signed
+  content rowid. It does not duplicate the source vector. The covering
+  `(index_id,list_id,content_rowid)` B-tree supplies each selected list's range;
+  `(index_id,content_rowid)` supplies the reverse identity lookup. Search checks
+  both against the physical membership row before fetching the source record.
+  Physical rowids are neither source rowids nor list IDs.
+- An untrained index has no centroid or member rows. Inserts/updates/deletes
+  maintain eligible/source counts but never implicitly train it. Ready IVF
+  indexes have one membership for every non-NULL source vector and no graph
+  nodes, live mappings or tombstones. Cosine zeros reject; IP zeros are valid
+  members assigned to list 1, but excluded from spherical training.
+
+Creation/REINDEX first performs bounded deterministic bottom-hash sampling and
+Lloyd training, then assigns every eligible source vector to the nearest stored
+centroid. Readiness is published only with the complete centroid/member/count
+state. Insufficient trainable samples persist `untrained` instead. Source rows,
+all shadow records and catalog metadata share statement/transaction rollback.
+Ordinary trained DML maintains membership under fixed centroids; only explicit
+REINDEX retrains and atomically replaces that state with an advanced generation.
+The full checker validates source-to-nearest-centroid assignment, both lookup
+directions, list counts and absence of orphan/unexpected owned records.
+
+IVF configuration has its own closed canonical JSON envelope, separate from
+HNSW-v1's byte-for-byte preserved encoding. Its ordered fields are method,
+version, dimensions, metric, opclass, seed, lists, training_samples,
+training_iterations, max_training_work, max_nodes, max_visited,
+max_distance_evaluations, max_memory_bytes, build_policy, sample_policy,
+zero_policy and empty_policy. The version-1 policy strings are:
+
+- `build_policy`: `farthest-first-lloyd-f64-spherical-v1`
+- `sample_policy`: `splitmix64-bottom-hash-rowid-v1`
+- `zero_policy`: `reject-cosine-zero-skip-ip-zero-training`
+- `empty_policy`: `retain-prior-empty-or-zero-sum`
+
+Parser acceptance requires exact equality to canonical serialization, not merely
+equivalent JSON. Unknown/missing/duplicate fields, alternate ordering, altered
+policy strings, noncanonical bytes, trailing data or unsupported versions reject.
+No IVF field is added to the persisted HNSW envelope, so existing HNSW hashes do
+not change. See [ann.md](ann.md) and the
+[algorithm contract](../extension/vector/ann/README.md) for deterministic
+training, resource bounds, probes, fallback and compatibility limits.
+
+## M8 authenticated records and experimental snapshots
+
+The encryption package defines an experimental 512-byte GSQLENC1 bootstrap and
+24-byte authenticated-record header plus AES256GCM ciphertext/tag. The snapshot
+storage layer now uses authenticated root/base objects for database publication,
+rekey, encrypted backup/restore and explicit plaintext import/export. Existing
+plaintext files are not silently transformed. Encrypted WAL, a stable format
+promise and physical crash/security qualification remain open. See
+[encryption-storage.md](encryption-storage.md) for the root/base snapshot format
+and [encryption-primitives.md](encryption-primitives.md) for record-codec offsets
+and cryptographic scope.

@@ -196,9 +196,13 @@ func TestUpdateDeleteAndRebuildRecall(t *testing.T) {
 }
 
 func FuzzConfigCanonical(f *testing.F) {
-	c, _ := DefaultConfig(HNSW, 2, vector.L2)
-	b, _ := c.Canonical()
-	f.Add(b)
+	for _, method := range []string{HNSW, IVFFlat} {
+		for _, metric := range []vector.MetricKind{vector.L2, vector.Cosine, vector.NegativeIP} {
+			c, _ := DefaultConfig(method, 2, metric)
+			b, _ := c.Canonical()
+			f.Add(b)
+		}
+	}
 	f.Fuzz(func(t *testing.T, data []byte) {
 		cfg, err := ParseConfig(data)
 		if err != nil {

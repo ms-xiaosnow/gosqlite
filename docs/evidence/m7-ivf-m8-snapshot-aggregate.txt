@@ -1,0 +1,125 @@
++ date -u
+Sat Oct 10 12:26:16 UTC 2026
++ ./scripts/check.sh
+?   	github.com/ms-xiaosnow/gosqlite/benchmarks/ann	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.025s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	2.146s
+ok  	github.com/ms-xiaosnow/gosqlite/encryption	1.086s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ann	1.301s
+?   	github.com/ms-xiaosnow/gosqlite/examples/grams	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/readonly	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/similarity	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/vector	0.181s
+?   	github.com/ms-xiaosnow/gosqlite/examples/wal	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/write	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/extension/grams13	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/extension/registry	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/extension/similarity	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector/ann	4.863s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	13.416s
+?   	github.com/ms-xiaosnow/gosqlite/internal/buildinfo	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	0.033s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/journal	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.260s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/record	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/internal/wal	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	52.620s
+?   	github.com/ms-xiaosnow/gosqlite/benchmarks/ann	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	1.085s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	7.100s
+ok  	github.com/ms-xiaosnow/gosqlite/encryption	4.140s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ann	4.477s
+?   	github.com/ms-xiaosnow/gosqlite/examples/encrypted	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/grams	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/ivfflat	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/readonly	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/similarity	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/vector	1.474s
+?   	github.com/ms-xiaosnow/gosqlite/examples/wal	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/write	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/extension/grams13	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/extension/registry	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/extension/similarity	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector/ann	26.024s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	43.658s
+?   	github.com/ms-xiaosnow/gosqlite/internal/buildinfo	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	1.049s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/journal	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.697s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/record	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/internal/wal	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	305.030s
++ SQLITE_ORACLE=/workspace/scratch/5e06a74e5f65/durable-restart/gosqlite/../toolchains/sqlite-build-3540000/sqlite3
++ ./scripts/test-oracle.sh
+?   	github.com/ms-xiaosnow/gosqlite/benchmarks/ann	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.071s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	3.606s
+ok  	github.com/ms-xiaosnow/gosqlite/encryption	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ann	2.075s
+?   	github.com/ms-xiaosnow/gosqlite/examples/encrypted	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/grams	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ivfflat	0.978s
+?   	github.com/ms-xiaosnow/gosqlite/examples/readonly	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/similarity	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/vector	0.274s
+?   	github.com/ms-xiaosnow/gosqlite/examples/wal	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/write	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/extension/grams13	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/extension/registry	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/extension/similarity	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector/ann	7.059s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	22.369s
+?   	github.com/ms-xiaosnow/gosqlite/internal/buildinfo	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	0.030s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/journal	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.586s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/record	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	201.560s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/wal	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	(cached)
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	79.728s
++ for target in linux/amd64 linux/arm64 darwin/arm64 windows/amd64
++ GOOS=linux
++ GOARCH=amd64
++ CGO_ENABLED=0
++ go build ./...
++ for target in linux/amd64 linux/arm64 darwin/arm64 windows/amd64
++ GOOS=linux
++ GOARCH=arm64
++ CGO_ENABLED=0
++ go build ./...
++ for target in linux/amd64 linux/arm64 darwin/arm64 windows/amd64
++ GOOS=darwin
++ GOARCH=arm64
++ CGO_ENABLED=0
++ go build ./...
++ for target in linux/amd64 linux/arm64 darwin/arm64 windows/amd64
++ GOOS=windows
++ GOARCH=amd64
++ CGO_ENABLED=0
++ go build ./...
++ CGO_ENABLED=0
++ go mod verify
+all modules verified
++ CGO_ENABLED=0
++ go list -deps -f '{{if .CgoFiles}}{{.ImportPath}}:{{.CgoFiles}}{{end}}' ./cmd/gosqlite ./sqlite ./driver
++ sha256sum goal.md testdata/readonly/page4096.db testdata/readonly/page512.db testdata/readonly/page65536.db testdata/readonly/schema512.db testdata/ann/hnsw-v1.db testdata/ann/legacy-grams.db
+9ae7b1d776856669a10eb753408c7754d015d266f8783240165450e96e4bac81  goal.md
+6b822f68ed1fa2d7c7a9d9211a89a1c0fb08e70de1eb2fe50c44ae164dd258e9  testdata/readonly/page4096.db
+737fb6403a1ccba56404ba55f2531510881b3207a6f8c4062783850ffc23d571  testdata/readonly/page512.db
+e0aa2d57493afbed7a57a1da805919f65846ebcdc896423f97ed336532052c77  testdata/readonly/page65536.db
+d42c2118b49f99452515298fed09b439017e1fe3923214033b481f30f9bd36c5  testdata/readonly/schema512.db
+5e11c357723a134217b2f3f110c1e80770d758dad1ab2efc8cf4a9d503817401  testdata/ann/hnsw-v1.db
+5dd3237ecaeddb4b94c0019e4a21c7e851996c4438e3dfbe0bae8ec7cd3f92a8  testdata/ann/legacy-grams.db
++ date -u
+Sat Oct 10 12:37:41 UTC 2026
++ echo M7_IVF_M8_SNAPSHOT_AGGREGATE_PASSED
+M7_IVF_M8_SNAPSHOT_AGGREGATE_PASSED

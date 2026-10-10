@@ -22,12 +22,18 @@ const (
 
 // ANNWorkLimits are cumulative operation limits, including repeated widening
 // searches. Node reads include graph and identity-validation node fetches.
+// IVF separately bounds centroid records and selected covering member keys;
+// each member additionally receives a table/reverse-key identity recheck.
+// These limits count logical records/keys, not total shadow or page I/O. Distance
+// evaluations share one allowance across graph distances and centroid scores.
 // MaxBytes bounds the current algorithm cache; source/result bookkeeping also
 // shares DB.MaxSortBytes. Zero fields use bounded defaults, never infinity.
 // Existing vector.SearchLimits separately bound cumulative source fetches and
-// all query, graph-distance, and base-row-rescoring vector components.
+// all query, graph-distance, centroid-distance, and base-row-rescoring components.
 type ANNWorkLimits struct {
 	MaxNodeReads           int
+	MaxCentroidReads       int
+	MaxMemberKeysRead      int
 	MaxDistanceEvaluations int
 	MaxIterations          int
 	MaxBytes               int64
@@ -35,7 +41,7 @@ type ANNWorkLimits struct {
 
 // DefaultANNWorkLimits returns the bounded cumulative query defaults.
 func DefaultANNWorkLimits() ANNWorkLimits {
-	return ANNWorkLimits{MaxNodeReads: 100000, MaxDistanceEvaluations: 1000000, MaxIterations: 16, MaxBytes: 32 << 20}
+	return ANNWorkLimits{MaxNodeReads: 100000, MaxCentroidReads: 32768, MaxMemberKeysRead: 1 << 20, MaxDistanceEvaluations: 1000000, MaxIterations: 16, MaxBytes: 32 << 20}
 }
 func normalizeVectorANNOptions(o VectorSearchOptions) (VectorSearchOptions, error) {
 	if o.Mode == "" {
@@ -44,8 +50,8 @@ func normalizeVectorANNOptions(o VectorSearchOptions) (VectorSearchOptions, erro
 	if o.Mode != VectorModeExact && o.Mode != VectorModeApproximate {
 		return o, vector.ErrOptions
 	}
-	if o.Probes != 0 || o.MaxProbes != 0 {
-		return o, fmt.Errorf("%w: IVFFlat query parameters", ErrUnsupported)
+	if o.Probes < 0 || o.Probes > 32768 || o.MaxProbes < 0 || o.MaxProbes > 32768 || (o.MaxProbes != 0 && o.MaxProbes < o.Probes) {
+		return o, vector.ErrOptions
 	}
 	if o.EFSearch == 0 {
 		o.EFSearch = 40
@@ -60,6 +66,12 @@ func normalizeVectorANNOptions(o VectorSearchOptions) (VectorSearchOptions, erro
 	if o.ANNLimits.MaxNodeReads == 0 {
 		o.ANNLimits.MaxNodeReads = defaults.MaxNodeReads
 	}
+	if o.ANNLimits.MaxCentroidReads == 0 {
+		o.ANNLimits.MaxCentroidReads = defaults.MaxCentroidReads
+	}
+	if o.ANNLimits.MaxMemberKeysRead == 0 {
+		o.ANNLimits.MaxMemberKeysRead = defaults.MaxMemberKeysRead
+	}
 	if o.ANNLimits.MaxDistanceEvaluations == 0 {
 		o.ANNLimits.MaxDistanceEvaluations = defaults.MaxDistanceEvaluations
 	}
@@ -70,7 +82,7 @@ func normalizeVectorANNOptions(o VectorSearchOptions) (VectorSearchOptions, erro
 		o.ANNLimits.MaxBytes = defaults.MaxBytes
 	}
 	w := o.ANNLimits
-	if w.MaxNodeReads < 1 || w.MaxNodeReads > 1<<24 || w.MaxDistanceEvaluations < 1 || w.MaxDistanceEvaluations > 1<<28 || w.MaxIterations < 1 || w.MaxIterations > 64 || w.MaxBytes < 1 || w.MaxBytes > 1<<34 {
+	if w.MaxNodeReads < 1 || w.MaxNodeReads > 1<<24 || w.MaxCentroidReads < 1 || w.MaxCentroidReads > 1<<24 || w.MaxMemberKeysRead < 1 || w.MaxMemberKeysRead > 1<<24 || w.MaxDistanceEvaluations < 1 || w.MaxDistanceEvaluations > 1<<28 || w.MaxIterations < 1 || w.MaxIterations > 64 || w.MaxBytes < 1 || w.MaxBytes > 1<<34 {
 		return o, vector.ErrOptions
 	}
 	return o, nil
@@ -79,7 +91,7 @@ func (p QueryPlan) annDetail() string {
 	if p.ANNOpclass == "" && p.ANNFallback == "" {
 		return ""
 	}
-	return fmt.Sprintf("; ann_opclass=%s; ann_generation=%d; ef_search=%d; max_ef_search=%d; effective_ef=%d; probes=%d; effective_probes=%d; ann_stop=%s; ann_fallback=%s", p.ANNOpclass, p.ANNGeneration, p.ANNEFSearch, p.ANNMaxEFSearch, p.ANNEffectiveEF, p.ANNProbes, p.ANNEffectiveProbes, p.ANNStopReason, p.ANNFallback)
+	return fmt.Sprintf("; ann_opclass=%s; ann_generation=%d; ef_search=%d; max_ef_search=%d; effective_ef=%d; lists=%d; probes=%d; max_probes=%d; effective_probes=%d; training_state=%s; ann_stop=%s; ann_fallback=%s", p.ANNOpclass, p.ANNGeneration, p.ANNEFSearch, p.ANNMaxEFSearch, p.ANNEffectiveEF, p.ANNLists, p.ANNProbes, p.ANNMaxProbes, p.ANNEffectiveProbes, p.ANNTrainingState, p.ANNStopReason, p.ANNFallback)
 }
 
 // selectANNIndex resolves only immutable metadata in the caller's snapshot.
@@ -118,7 +130,7 @@ func (d *DB) selectANNIndex(ctx context.Context, reader btree.PageReader, tab *t
 			reason = x.fallback
 			continue
 		}
-		if x.method != "hnsw" {
+		if x.method != ann.HNSW && x.method != ann.IVFFlat {
 			reason = "ANN method is not supported for this query"
 			continue
 		}
@@ -143,6 +155,11 @@ func applyANNPlan(p *QueryPlan, x *extensionIndex, o VectorSearchOptions) {
 	p.ANNGeneration = x.generation
 	p.ANNEFSearch = o.EFSearch
 	p.ANNMaxEFSearch = o.MaxEFSearch
+	if x.method == ann.IVFFlat {
+		p.Reason = "lazy IVFFlat selected-list ranges with original WHERE and exact base-row rescoring"
+		p.ANNEFSearch, p.ANNMaxEFSearch = 0, 0
+		p.ANNLists, p.ANNProbes, p.ANNMaxProbes = x.ann.Lists, o.Probes, o.MaxProbes
+	}
 }
 func exactANNFallback(p *QueryPlan, reason string) {
 	p.Access = "SCAN"
@@ -194,6 +211,7 @@ type annCandidateQuery struct {
 	limits  vector.SearchLimits
 	plan    *QueryPlan
 	stats   *QueryStats
+	state   *ann.State // optional state metadata already read by the SQL planner
 	// Components already consumed by query validation and exact rescoring.
 	components func() int64
 	// Caller-owned result memory retained in addition to query/hit bookkeeping.
@@ -227,18 +245,29 @@ func annHitBetter(a, b vector.Hit) bool {
 // run does not filter traversal. Repeated graph searches charge every actual
 // read/distance; source rechecks are deduplicated by immutable node identity.
 // A short discovered frontier is not proof of exact source exhaustion.
-func (a *annCandidateQuery) run(ctx context.Context, visit func(int64, []any, vector.Vector) (float64, bool, error)) ([]vector.Hit, string, error) {
+func (a *annCandidateQuery) run(ctx context.Context, visit func(int64, []any, *vector.Vector) (float64, bool, error)) ([]vector.Hit, string, error) {
 	store := newANNStore(a.reader, a.index)
-	state, err := store.GetState(ctx)
-	a.stats.ANNStateReads++
-	if err != nil {
-		return nil, "", err
+	var state ann.State
+	var err error
+	if a.state != nil {
+		state = *a.state
+	} else {
+		state, err = store.GetState(ctx)
+		a.stats.ANNStateReads++
+		if err != nil {
+			return nil, "", err
+		}
 	}
+	a.plan.ANNTrainingState = state.TrainingState
 	if state.Live > a.index.documentCount || (a.table.columns[a.index.fields[0].ordinal].NotNull && state.Live != a.index.documentCount) {
 		return nil, "", extensionCorrupt("ANN live count does not match source cardinality")
 	}
 	if state.TrainingState != "" && state.TrainingState != "ready" {
-		return nil, "index is untrained", nil
+		a.plan.ANNStopReason = "untrained"
+		return nil, "index is untrained; REINDEX required to train", nil
+	}
+	if a.index.method == ann.IVFFlat {
+		return a.runIVF(ctx, store, state, visit)
 	}
 	if state.Live == 0 {
 		a.plan.ANNStopReason = "empty"
@@ -347,7 +376,7 @@ func (a *annCandidateQuery) run(ctx context.Context, visit func(int64, []any, ve
 			if !found {
 				return nil, "", extensionCorrupt("ANN candidate refers to missing source row")
 			}
-			distance, keep, err := visit(candidate.RowID, raw, node.Vector)
+			distance, keep, err := visit(candidate.RowID, raw, &node.Vector)
 			if err != nil {
 				return nil, "", err
 			}
@@ -393,7 +422,7 @@ func (a *annCandidateQuery) run(ctx context.Context, visit func(int64, []any, ve
 	return hits, "", ctx.Err()
 }
 
-func (d *DB) vectorSearchANN(ctx context.Context, reader btree.PageReader, tab *table, ordinal int, q vector.Vector, options VectorSearchOptions, limits vector.SearchLimits, filter func(int64, []any) (bool, error), result *VectorResult) (bool, error) {
+func (d *DB) vectorSearchANN(ctx context.Context, reader btree.PageReader, tab *table, ordinal int, q vector.Vector, options VectorSearchOptions, limits vector.SearchLimits, filter func(int64, []any) (bool, error), result *VectorResult, exactSourceBound *int64) (bool, error) {
 	x, why, err := d.selectANNIndex(ctx, reader, tab, ordinal, result.Plan.Metric, q.Dims(), options.Index)
 	if err != nil {
 		return false, err
@@ -402,11 +431,18 @@ func (d *DB) vectorSearchANN(ctx context.Context, reader btree.PageReader, tab *
 		exactANNFallback(&result.Plan.QueryPlan, why)
 		return false, nil
 	}
+	options, err = annIndexQueryOptions(x, options)
+	if err != nil {
+		return false, err
+	}
 	applyANNPlan(&result.Plan.QueryPlan, x, options)
+	// A clean, snapshot-bound catalog provides an upper bound on all eligible
+	// exact-fallback hits. LIMIT is a ceiling, not a preallocated row count.
+	*exactSourceBound = x.documentCount
 	result.Plan.Exact = false
 	helper := &writeTable{table: tab}
 	run := annCandidateQuery{db: d, reader: reader, table: tab, index: x, query: q, retain: options.Limit, options: options, limits: limits, plan: &result.Plan.QueryPlan, stats: &result.Stats.QueryStats, components: func() int64 { return result.Stats.ScoredComponents }, retainedBytes: func() int64 { return 0 }}
-	hits, why, err := run.run(ctx, func(id int64, raw []any, expected vector.Vector) (float64, bool, error) {
+	hits, why, err := run.run(ctx, func(id int64, raw []any, expected *vector.Vector) (float64, bool, error) {
 		result.Stats.BaseRowFetches++
 		values, err := helper.values(id, raw)
 		if err != nil {
@@ -425,11 +461,11 @@ func (d *DB) vectorSearchANN(ctx context.Context, reader btree.PageReader, tab *
 				return 0, false, nil
 			}
 		}
-		v, err := decodeANNVector(values[ordinal], q.Dims(), expected)
+		v, err := decodeANNCandidate(values[ordinal], q.Dims(), expected)
 		if err != nil {
 			return 0, false, err
 		}
-		used := uint64(result.Stats.ScoredComponents) + uint64(result.Stats.ANNDistanceEvaluations)*uint64(q.Dims())
+		used := uint64(result.Stats.ScoredComponents) + annDistanceComponents(&result.Stats.QueryStats, q.Dims())
 		if used > limits.MaxComponents || uint64(q.Dims()) > limits.MaxComponents-used {
 			return 0, false, fmt.Errorf("%w: cumulative vector components", vector.ErrLimit)
 		}

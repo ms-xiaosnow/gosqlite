@@ -91,6 +91,9 @@ func (t *Tx) Commit(ctx context.Context) error {
 	if t.statement {
 		return fmt.Errorf("%w: commit inside statement", ErrMisuse)
 	}
+	if t.encrypted != nil {
+		return t.commitEncryptedLocked(ctx)
+	}
 	if t.shared != nil {
 		return t.commitSharedWALLocked(ctx)
 	}
@@ -256,6 +259,16 @@ func (t *Tx) Commit(ctx context.Context) error {
 	return nil
 }
 func (t *Tx) poison(cause error, recovery bool) error {
+	if t.encrypted != nil {
+		s := t.encrypted
+		s.mu.Lock()
+		s.poisoned = errors.Join(ErrPoisoned, cause)
+		t.poisoned = s.poisoned
+		s.active = nil
+		s.mu.Unlock()
+		t.clearEncrypted()
+		return t.poisoned
+	}
 	if t.session != nil {
 		t.session.mu.Lock()
 		t.poisoned = t.session.poisonLocked(cause)
