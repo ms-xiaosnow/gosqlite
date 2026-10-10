@@ -8,6 +8,7 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"fmt"
+	"github.com/ms-xiaosnow/gosqlite/internal/testkit/fileview"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -165,7 +166,7 @@ func TestOracleEncryptedSnapshotExportImport(t *testing.T) {
 			}
 			writeSame(t, db, plain, "SELECT id,title,hex(embedding) FROM documents ORDER BY id")
 			writeIntegrity(t, plain)
-			before, err := os.ReadFile(plain)
+			before, err := fileview.ReadFile(plain)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -198,7 +199,7 @@ func TestOracleEncryptedSnapshotExportImport(t *testing.T) {
 			if e = idb.Close(); e != nil {
 				t.Fatal(e)
 			}
-			after, err := os.ReadFile(plain)
+			after, err := fileview.ReadFile(plain)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -215,7 +216,7 @@ func TestOracleEncryptedSnapshotExportImport(t *testing.T) {
 				if e.IsDir() {
 					return nil
 				}
-				b, readErr := os.ReadFile(p)
+				b, readErr := fileview.ReadFile(p)
 				if readErr != nil {
 					return readErr
 				}
@@ -233,7 +234,7 @@ func TestOracleEncryptedSnapshotExportImport(t *testing.T) {
 			if files < 2 {
 				t.Fatal("no encrypted object/lock family")
 			}
-			root, err := os.ReadFile(path)
+			root, err := fileview.ReadFile(path)
 			if err != nil {
 				t.Fatal(err)
 			}

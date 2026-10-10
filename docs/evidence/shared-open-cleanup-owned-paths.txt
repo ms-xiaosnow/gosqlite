@@ -1,0 +1,68 @@
+Shared-WAL failed-open pending-retirement owned paths
+Date: 2026-10-10 UTC
+
+Direct production changes:
+  internal/vfs/cleanup.go
+    Error-held managed/terminal obligations; identity graph and child-first
+    collection for every wrapped/joined nested-constructor obligation.
+  internal/vfs/file.go
+    Failed managed Close carries its File; pre-File poisoned rejection carries
+    an opaque terminal obligation when no precise lower owner was returned.
+  internal/vfs/metadata_owners.go
+    Existing permanent metadata tombstones carry a terminal cleanup marker.
+  internal/pager/shared_open_cleanup.go
+    Bounded strong group reservation; managed-owner adapters; ordered retirement;
+    immutable original failure causes, nested owner adoption, bounded all-group
+    error traversal and per-group synchronous retry route.
+  internal/pager/shared_session.go
+    Reservation before native probes; immediate acquisition ownership;
+    success transfer; failed-open defer; index error cause-preserving wrapping.
+  sqlite/open_cleanup.go
+    Public pending marker and RetryOpenCleanup helper, with precise scope.
+
+Direct tests (no native negative scenarios):
+  internal/vfs/cleanup_test.go
+    Memory-only File placeholders and synthetic metadata-owner callbacks cover
+    nested construction, all identity dependencies and opaque terminal state.
+  internal/pager/shared_open_cleanup_test.go
+    Fake-owner memory laws, nested obligations, bounded joined-error discovery,
+    concurrency and ordinary successful 65-session cycle.
+  sqlite/open_cleanup_test.go
+    No-pending helper, cyclic error traversal refusal and already-canceled public
+    open before file/path access.
+
+Direct documentation/evidence:
+  docs/shared-open-cleanup.md
+  docs/evidence/shared-open-cleanup-owned-paths.txt
+  docs/evidence/shared-open-cleanup-components.txt
+  docs/evidence/shared-open-cleanup-source-sha256.txt
+
+Source-review dependencies, not owned edits in this slice:
+  internal/vfs/mapping.go: strong managed ownership, view-first close.
+  internal/vfs/native_linux.go: consumed os.File.Close is not retried by File.
+  internal/vfs/native_darwin.go: process-inode managed descriptor retirement.
+  internal/vfs/native_windows.go: file closeUnknown is terminal; the discovered
+    mapping-handle raw-close retry defect was corrected and independently
+    source/memory/race/compile reviewed in the separate three-path Windows
+    mapping-retirement increment. It is outside this cleanup manifest.
+  internal/darwinfile/registry.go: separate first-poison retention delta passed
+    independent isolated memory/race review, outside this cleanup manifest.
+  internal/walindex/index.go and native_file.go: no mappings during Open; failed
+    Index.Close retains the File; explicit later Close delegates managed state.
+  internal/pager/native_file.go: close/error adapters preserve ownership cause.
+  sqlite/sqlite.go and path_windows.go: public wrapping and earlier separately
+    bounded native metadata probes, outside this group scope.
+  driver/driver.go: Connect returns failed public Open error unchanged; separate
+    post-success cancellation branch drops db.Close error (remaining code gap).
+
+Current worktree contains unrelated concurrent implementation. No staging or
+commit is performed by this worker. Parent owns snapshot/publication integration.
+
+Final dependency-status follow-through:
+  docs/evidence/shared-open-cleanup-independent-review.txt records no remaining
+  scoped blocker after independent isolated source/memory/ordinary/race/compile
+  checks and the separate Windows/Darwin corrections. Its original eleven-path
+  manifest remains historical; this final documentation-only follow-through
+  updates two explanatory documents without changing nine production/test hashes.
+  Native Windows/Darwin runtime and all restricted failure/interruption cases
+  remain NOT_RUN. Full M3 and release acceptance are not claimed.

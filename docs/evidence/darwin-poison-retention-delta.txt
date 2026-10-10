@@ -1,0 +1,17 @@
+Darwin bounded poison-retention correction, 2026-10-10
+
+A later source review of deliberate represented-resource cleanup found Registry.Poison recursively retained prior errors on every failed lock-retirement retry. No native failure was executed. The registry now retains only its first poison graph and returns first plus current operation causes without storing later joins. One-time close/hook records remain bounded.
+
+This is a delta after the separately preserved22-path Darwin manifest d11f32c0bd01d51e2ff6f0682ff449e5d52948a8318aefbf0b92010e5ef0fba5. The earlier component and independent-review outputs describe that prior frozen boundary; they are not rewritten.
+
+Lead commands: mandatory source guard; CGO0 go test -count=1 ./internal/darwinfile; go vet ./internal/darwinfile; mandatory guard; separate CGO1 go test -race -count=1 ./internal/darwinfile. Pinned Go1.27.2/offline module environment. Test uses only memory, no descriptor/syscall/fault simulation.
+
+2026-10-10T15:32:20Z
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/darwinfile	0.036s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/darwinfile	1.266s
+04444c1423a6c3a4ac453eeb4d58387721ee65890f3f3b474e33a1196c199960  internal/darwinfile/registry.go
+37c2a431cdc6da757609dff148b89d94832de333c26abab38f1fddc712c8884e  internal/darwinfile/poison_test.go
+
+Independent source review and isolated TestRegistryMemory* CGO0/race checks separately passed; exact command record is in shared-open-cleanup-independent-review.txt when finalized. Native Darwin execution remains NOT_RUN. No whole-backend failure qualification follows from bounded memory state.

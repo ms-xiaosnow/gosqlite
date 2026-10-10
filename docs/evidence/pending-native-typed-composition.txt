@@ -1,0 +1,41 @@
+Local composition validation of already-reviewed, not-yet-published increments.
+This file is not part of the fixed Windows source tree540fa8ef1679cbd4e5fbc1c3eb9b86560a82193a awaiting user confirmation.
+Composite source tree49f2749ffb838f936cc6066fb3496a4914cb1626 adds only88 explicitly inventoried Darwin/poison/cleanup/typed source paths to that fixed tree.
+This source-tree result does not claim a remote commit, exact Library restore, whole-suite rerun, native Windows/Darwin runtime, restricted physical gate or full acceptance.
+
+Local pending-increment composition only: corrected Windows + Darwin/poison latch + failed-open cleanup + typed ANN. No remote publication or native platform/physical acceptance.
+49f2749ffb838f936cc6066fb3496a4914cb1626
+2026-10-10T15:47:35Z
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/darwinfile	0.052s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.150s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	0.208s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	0.105s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.239s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector/ann	6.950s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	14.050s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.921s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-shared	0.018s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/typed-ann-rerank	0.454s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/darwinfile	1.210s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	1.443s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	2.814s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	1.498s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.906s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	46.429s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	9.070s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-shared	1.059s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/typed-ann-rerank	3.259s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	10.891s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.162s
+cross-build linux/amd64 PASS
+cross-build linux/arm64 PASS
+cross-build darwin/amd64 PASS
+cross-build darwin/arm64 PASS
+cross-build windows/amd64 PASS
+cross-build windows/arm64 PASS
+all modules verified
+2026-10-10T15:49:53Z
+PENDING INCREMENT COMPOSITION CHECKS PASS

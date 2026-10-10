@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"github.com/ms-xiaosnow/gosqlite/encryption"
+	"github.com/ms-xiaosnow/gosqlite/internal/testkit/fileview"
 	"github.com/ms-xiaosnow/gosqlite/sqlite"
 	"os"
 	"path/filepath"
@@ -26,7 +27,7 @@ func TestEncryptionWALPasswordOrdinaryReopenAndCancellation(t *testing.T) {
 	sentinel := "wal-private-最终图像-unique-password-178"
 	encryptedExec(t, db, "CREATE TABLE records(id INTEGER PRIMARY KEY,body TEXT)")
 	encryptedExec(t, db, "INSERT INTO records VALUES(1,?)", sentinel)
-	before, e := os.ReadFile(path)
+	before, e := fileview.ReadFile(path)
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -49,7 +50,7 @@ func TestEncryptionWALPasswordOrdinaryReopenAndCancellation(t *testing.T) {
 	if e = tx.Rollback(); e != nil {
 		t.Fatal(e)
 	}
-	after, e := os.ReadFile(path)
+	after, e := fileview.ReadFile(path)
 	if e != nil || !bytes.Equal(before, after) {
 		t.Fatal("cancelled commit changed root", e)
 	}
@@ -113,7 +114,7 @@ func TestEncryptionWALPasswordOrdinaryReopenAndCancellation(t *testing.T) {
 		t.Fatal(e)
 	}
 	for _, name := range names {
-		b, e := os.ReadFile(filepath.Join(dir, name.Name()))
+		b, e := fileview.ReadFile(filepath.Join(dir, name.Name()))
 		if e != nil {
 			t.Fatal(e)
 		}

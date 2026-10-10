@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/rand"
 	"errors"
+	"github.com/ms-xiaosnow/gosqlite/internal/testkit/fileview"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -155,7 +156,7 @@ func TestEncryptionOrdinaryLifecycleAndCopies(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, file := range files {
-		data, err := os.ReadFile(filepath.Join(dir, file.Name()))
+		data, err := fileview.ReadFile(filepath.Join(dir, file.Name()))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -294,7 +295,7 @@ func TestEncryptionRetainedGenerationQuota(t *testing.T) {
 	defer db.Close()
 	encryptedExec(t, db, "CREATE TABLE entries(id INTEGER PRIMARY KEY)")
 	encryptedExec(t, db, "INSERT INTO entries VALUES(1)")
-	before, err := os.ReadFile(path)
+	before, err := fileview.ReadFile(path)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -305,7 +306,7 @@ func TestEncryptionRetainedGenerationQuota(t *testing.T) {
 	if _, err = db.Exec(ctx, "INSERT INTO entries VALUES(2)"); !errors.Is(err, sqlite.ErrMemoryLimit) {
 		t.Fatal("missing publication quota", err)
 	}
-	after, err := os.ReadFile(path)
+	after, err := fileview.ReadFile(path)
 	if err != nil || !bytes.Equal(before, after) {
 		t.Fatal("quota changed committed root", err)
 	}

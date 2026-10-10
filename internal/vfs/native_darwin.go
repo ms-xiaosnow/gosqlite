@@ -7,23 +7,21 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"sync"
 
+	"github.com/ms-xiaosnow/gosqlite/internal/darwinfile"
 	"golang.org/x/sys/unix"
 )
 
 // Darwin fcntl locks belong to the PROCESS, not a descriptor. Closing ANY
 // descriptor of an inode drops ALL of this process's locks on that inode.
+// The common darwinfile gate also covers encrypted storage and its probes.
 // Consequently the gate covers raw open/registration, every lock transition,
 // and every physical close. All library descriptors (including rejected opens,
 // read-only probes and sidecars) enter this registry before they can be closed.
 // File.mu is acquired before the gate; the gate never acquires any File.mu.
 // Data I/O and query evaluation do not hold the gate.
 // Unmanaged descriptors/another SQLite library in this process are unsupported.
-type darwinIdentity struct {
-	device int32
-	inode  uint64
-}
+type darwinIdentity = darwinfile.Identity
 
 type darwinRange struct{ start, length int64 }
 
@@ -40,17 +38,18 @@ const (
 	// Bound descriptors retained while peers keep POSIX locks. Repeated probes
 	// reuse idle descriptors; exhausting different simultaneous leases fails
 	// before another raw open, rather than silently growing deferred storage.
-	darwinMaxDescriptorsPerInode = 256
-	darwinMaxManagedDescriptors  = 16384
+	darwinMaxDescriptorsPerInode = darwinfile.MaxPerInode
 )
 
 type darwinDescriptor struct {
-	raw    *os.File
-	node   *darwinNode
-	access int
-	role   Role
-	idle   bool
-	holds  map[darwinRange]uint8
+	raw          *os.File
+	node         *darwinNode
+	access       int
+	role         Role
+	idle         bool
+	holds        map[darwinRange]uint8
+	record       *darwinfile.Record
+	admissionErr error
 }
 
 type darwinNode struct {
@@ -65,16 +64,12 @@ type darwinNode struct {
 type nativeFile struct{ descriptor *darwinDescriptor }
 
 var darwinRegistry = struct {
-	sync.Mutex
+	*darwinfile.Registry
 	nodes       map[darwinIdentity]*darwinNode
 	descriptors map[*os.File]*darwinDescriptor
-	// An fstat failure after open cannot justify closing an unknown inode:
-	// it may alias any locked node. One raw descriptor (without a finalizer)
-	// is quarantined, and further physical opens stop until locks drain.
-	quarantine []int
-}{nodes: make(map[darwinIdentity]*darwinNode), descriptors: make(map[*os.File]*darwinDescriptor)}
+}{Registry: darwinfile.Process, nodes: make(map[darwinIdentity]*darwinNode), descriptors: make(map[*os.File]*darwinDescriptor)}
 
-func darwinID(st *unix.Stat_t) darwinIdentity { return darwinIdentity{st.Dev, st.Ino} }
+func darwinID(st *unix.Stat_t) darwinIdentity { return darwinIdentity{Device: st.Dev, Inode: st.Ino} }
 
 func darwinStatFD(fd int, st *unix.Stat_t) error {
 	for {
@@ -88,9 +83,7 @@ func darwinStatFD(fd int, st *unix.Stat_t) error {
 func nativeOpen(path string, opts OpenOptions) (*os.File, error) {
 	darwinRegistry.Lock()
 	defer darwinRegistry.Unlock()
-	if len(darwinRegistry.quarantine) != 0 {
-		return nil, fmt.Errorf("%w: unresolved native descriptor identity", ErrPoisoned)
-	}
+
 	access := opts.Flags & (os.O_WRONLY | os.O_RDWR)
 	// lstat is descriptor-free on Darwin. It is only a cache hint: the
 	// descriptor's identity is checked again by the managed Open path.
@@ -103,9 +96,12 @@ func nativeOpen(path string, opts OpenOptions) (*os.File, error) {
 			if opts.Flags&os.O_EXCL == 0 && named.Mode&unix.S_IFMT != unix.S_IFLNK {
 				for _, d := range n.descriptors {
 					if d.idle && d.access == access && d.role == opts.Role {
+						if !darwinRegistry.Reuse(d.record) {
+							continue
+						}
 						if opts.Role != Directory {
 							if _, err := d.raw.Seek(0, io.SeekStart); err != nil {
-								return nil, err
+								return nil, errors.Join(err, darwinOwnerError(darwinRegistry.Retire(d.record)))
 							}
 						}
 						d.idle = false
@@ -118,11 +114,15 @@ func nativeOpen(path string, opts OpenOptions) (*os.File, error) {
 			}
 		}
 	}
-	// This process-wide bound also contains raced cache hints without ever
-	// closing a newly discovered alias underneath a live process lock.
-	if len(darwinRegistry.descriptors) >= darwinMaxManagedDescriptors {
-		return nil, fmt.Errorf("%w: managed process descriptor limit", ErrUnsupported)
+	var hint *darwinIdentity
+	if named.Ino != 0 {
+		id := darwinID(&named)
+		hint = &id
 	}
+	if err := darwinRegistry.Admit(hint); err != nil {
+		return nil, darwinOwnerError(err)
+	}
+
 	flags := opts.Flags | unix.O_NOFOLLOW | unix.O_NONBLOCK | unix.O_CLOEXEC
 	if opts.Role == Directory {
 		flags |= unix.O_DIRECTORY
@@ -133,9 +133,7 @@ func nativeOpen(path string, opts OpenOptions) (*os.File, error) {
 	}
 	var st unix.Stat_t
 	if err = darwinStatFD(fd, &st); err != nil {
-		darwinRegistry.quarantine = append(darwinRegistry.quarantine, fd)
-		// Drain now only if no managed process lock can be affected.
-		cleanup := darwinDrainQuarantine()
+		cleanup := darwinRegistry.Quarantine(func() error { return unix.Close(fd) }, nil)
 		return nil, errors.Join(ErrPoisoned, err, cleanup)
 	}
 	id := darwinID(&st)
@@ -147,6 +145,18 @@ func nativeOpen(path string, opts OpenOptions) (*os.File, error) {
 	raw := os.NewFile(uintptr(fd), path)
 	d := &darwinDescriptor{raw: raw, node: n, access: access, role: opts.Role, holds: make(map[darwinRange]uint8)}
 	n.descriptors[raw], darwinRegistry.descriptors[raw] = d, d
+	d.record, d.admissionErr = darwinRegistry.Register(id, raw.Close, func(err error) error {
+		if err != nil {
+			n.poisoned = true
+			return nil
+		}
+		delete(n.descriptors, raw)
+		delete(darwinRegistry.descriptors, raw)
+		if len(n.descriptors) == 0 {
+			delete(darwinRegistry.nodes, id)
+		}
+		return nil
+	})
 	// Even a raced pathname must enter the registry before any rejection.
 	// Validation below is performed by nativeOpened and common Open.
 	return raw, nil
@@ -160,7 +170,13 @@ func nativeOpened(f *File) error {
 		return ErrPoisoned
 	}
 	f.native.descriptor = d
-	if d.node.poisoned {
+	if d.admissionErr != nil {
+		return darwinOwnerError(d.admissionErr)
+	}
+	if err := darwinRegistry.Check(d.record); err != nil {
+		return darwinOwnerError(err)
+	}
+	if d.node.poisoned || darwinRegistry.Error(d.node.identity) != nil {
 		return ErrPoisoned
 	}
 	if len(d.node.descriptors) > darwinMaxDescriptorsPerInode {
@@ -188,7 +204,7 @@ func nativeCheck(f *File) error {
 	if d == nil || d.idle || d.node.poisoned {
 		return ErrPoisoned
 	}
-	return nil
+	return darwinOwnerError(darwinRegistry.Check(d.record))
 }
 
 func nativeValidatePath(f *File) error {
@@ -263,6 +279,7 @@ func darwinAcquire(d *darwinDescriptor, r darwinRange, mode uint8) error {
 			return err
 		}
 		d.node.kernel[r] = mode
+		darwinRegistry.SetLocks(d.node.identity, "vfs", true)
 	}
 	d.holds[r] = mode
 	return nil
@@ -284,11 +301,13 @@ func darwinRelease(d *darwinDescriptor, r darwinRange) error {
 		}
 	}
 	delete(d.holds, r)
-	return nil
+	darwinRegistry.SetLocks(d.node.identity, "vfs", len(d.node.kernel) != 0)
+	return darwinOwnerError(darwinRegistry.Drain(d.node.identity))
 }
 
 func darwinPoison(d *darwinDescriptor, errs ...error) error {
 	d.node.poisoned = true
+	darwinRegistry.Poison(d.node.identity, errors.Join(errs...))
 	return errors.Join(append([]error{ErrPoisoned}, errs...)...)
 }
 
@@ -296,7 +315,7 @@ func nativeShared(f *File) error {
 	darwinRegistry.Lock()
 	defer darwinRegistry.Unlock()
 	d := f.native.descriptor
-	if d.node.poisoned {
+	if d.node.poisoned || darwinRegistry.Error(d.node.identity) != nil {
 		return ErrPoisoned
 	}
 	if err := darwinAcquire(d, darwinPending, darwinRead); err != nil {
@@ -318,7 +337,7 @@ func nativeReserved(f *File) error {
 	darwinRegistry.Lock()
 	defer darwinRegistry.Unlock()
 	d := f.native.descriptor
-	if d.node.poisoned {
+	if d.node.poisoned || darwinRegistry.Error(d.node.identity) != nil {
 		return ErrPoisoned
 	}
 	return darwinAcquire(d, darwinReserved, darwinWrite)
@@ -328,7 +347,7 @@ func nativeExclusive(f *File) error {
 	darwinRegistry.Lock()
 	defer darwinRegistry.Unlock()
 	d := f.native.descriptor
-	if d.node.poisoned {
+	if d.node.poisoned || darwinRegistry.Error(d.node.identity) != nil {
 		return ErrPoisoned
 	}
 	if err := darwinAcquire(d, darwinPending, darwinWrite); err != nil {
@@ -348,7 +367,7 @@ func nativeDowngrade(f *File) error {
 	darwinRegistry.Lock()
 	defer darwinRegistry.Unlock()
 	d := f.native.descriptor
-	if d.node.poisoned {
+	if d.node.poisoned || darwinRegistry.Error(d.node.identity) != nil {
 		return ErrPoisoned
 	}
 	if err := darwinAcquire(d, darwinShared, darwinRead); err != nil {
@@ -372,7 +391,7 @@ func nativeReservedHeld(f *File) (bool, error) {
 	darwinRegistry.Lock()
 	defer darwinRegistry.Unlock()
 	d := f.native.descriptor
-	if d.node.poisoned {
+	if d.node.poisoned || darwinRegistry.Error(d.node.identity) != nil {
 		return false, ErrPoisoned
 	}
 	// F_GETLK deliberately omits this process's own locks.
@@ -387,7 +406,7 @@ func nativeAttachDMS(f *File) error {
 	darwinRegistry.Lock()
 	defer darwinRegistry.Unlock()
 	d := f.native.descriptor
-	if d.node.poisoned {
+	if d.node.poisoned || darwinRegistry.Error(d.node.identity) != nil {
 		return ErrPoisoned
 	}
 	if d.node.kernel[darwinDMS] == darwinRead {
@@ -427,7 +446,7 @@ func nativeSHMLock(f *File, slot, n int, exclusive, unlock bool) error {
 	darwinRegistry.Lock()
 	defer darwinRegistry.Unlock()
 	d := f.native.descriptor
-	if d.node.poisoned {
+	if d.node.poisoned || darwinRegistry.Error(d.node.identity) != nil {
 		return ErrPoisoned
 	}
 	mode := darwinRead
@@ -476,23 +495,15 @@ func nativeSHMLock(f *File, slot, n int, exclusive, unlock bool) error {
 	return nil
 }
 
-// darwinDrainQuarantine is called only under the lifecycle gate. No unknown
-// descriptor is physically closed until ALL managed process locks have drained.
-func darwinDrainQuarantine() error {
-	for _, n := range darwinRegistry.nodes {
-		if len(n.kernel) != 0 {
-			return nil
-		}
+// darwinOwnerError preserves the public VFS error classification.
+func darwinOwnerError(err error) error {
+	if err == nil {
+		return nil
 	}
-	var errs []error
-	for _, fd := range darwinRegistry.quarantine {
-		// Never retry close(EINTR): an fd number may already be reusable.
-		if err := unix.Close(fd); err != nil {
-			errs = append(errs, err)
-		}
+	if errors.Is(err, darwinfile.ErrLimit) {
+		return errors.Join(ErrUnsupported, err)
 	}
-	darwinRegistry.quarantine = nil
-	return errors.Join(errs...)
+	return errors.Join(ErrPoisoned, err)
 }
 
 func nativeClose(f *File) error {
@@ -505,7 +516,7 @@ func nativeClose(f *File) error {
 		return ErrPoisoned
 	}
 	if d.idle {
-		return nil
+		return darwinOwnerError(darwinRegistry.Retire(d.record))
 	}
 	// All mappings of this owner were already retired by common Close. Release
 	// slots before DMS, and main SHARED before PENDING. Other owners' aggregate
@@ -521,31 +532,7 @@ func nativeClose(f *File) error {
 		}
 	}
 	d.idle = true
-	if len(d.node.kernel) != 0 {
-		// Keep the raw descriptor strongly reachable. Repeated probes can
-		// borrow it again; no physical Close may remove peers' process locks.
-		return nil
-	}
-	var errs []error
-	for raw, retired := range d.node.descriptors {
-		if !retired.idle {
-			continue
-		}
-		if err := raw.Close(); err != nil {
-			errs = append(errs, err)
-		}
-		// os.File.Close consumes the Go descriptor even when reporting an I/O
-		// error. Do not retry an fd number which may have been reassigned.
-		delete(d.node.descriptors, raw)
-		delete(darwinRegistry.descriptors, raw)
-	}
-	if len(d.node.descriptors) == 0 {
-		delete(darwinRegistry.nodes, d.node.identity)
-	}
-	if err := darwinDrainQuarantine(); err != nil {
-		errs = append(errs, err)
-	}
-	return errors.Join(errs...)
+	return darwinOwnerError(darwinRegistry.Retire(d.record))
 }
 
 type nativeMapping struct{ view []byte }

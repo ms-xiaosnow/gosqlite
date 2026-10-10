@@ -184,7 +184,10 @@ mode2 read/write/refresh/checkpoint plus explicit legacy-to-shared upgrade. The
 format bytes and Linux backend remain unchanged. Native Windows execution is
 NOT_RUN; target tests compile only. Shared-mode rekey remains unsupported code
 because the current lifecycle protocol requires atomic shared-to-exclusive
-conversion. Darwin encrypted storage remains a separate code increment.
+conversion. Darwin encrypted modes0/1/2 now have native coordination code with a shared
+plain/encrypted descriptor registry. Native Darwin runtime remains NOT_RUN; its
+ASCII basename and whole-directory ASCII inventory policy are temporary code
+limits, not full Unicode support.
 
 Public plain paths now use managed metadata snapshots with complete volume and
 128-bit IDs, bounded reservations and terminal uncertain-close tombstones.
@@ -193,3 +196,12 @@ Source review repaired poison/cause propagation through pager reads, scans and
 close paths. Earlier ownership results remain historical scoped evidence. The
 separate failed-OpenSharedSession retry group is still missing in this checkpoint.
 See native-windows-metadata.md and native-encrypted-windows.md for exact limits.
+
+## Failed-open cleanup scope
+
+Shared-WAL OpenSharedSession reserves one of64 groups before native acquisitions;
+all represented nested owners retire before index/DMS, WAL and main. The public
+RetryOpenCleanup handles wrapped/joined groups with bounded discovery. Successful
+sessions release this admission slot. It therefore does not cover successful
+session Close, public DB.Close retry or driver disposal. Those remain code gaps.
+Native cleanup-error behavior is not qualified by memory-only laws.

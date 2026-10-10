@@ -6,7 +6,7 @@ A native Go database kernel targeting tested subsets of SQLite 3.54.0 files and 
 
 ## Try the implemented SQL path
 
-Use Go 1.27.2. Plain-file native backends are implemented for Linux, Darwin and Windows/amd64. Only Linux/amd64 ordinary runtime is verified here; Darwin/Windows evidence is source review and cross-compilation, with platform limits documented in ADR0015. Encrypted storage currently runs on Linux only.
+Use Go 1.27.2. Plain-file native backends are implemented for Linux, Darwin and Windows/amd64. Only Linux/amd64 ordinary runtime is verified here; Darwin/Windows evidence is source review and cross-compilation, with platform limits documented in ADR0015. Encrypted native backends are implemented for Linux, Darwin and Windows/amd64; only Linux ordinary runtime is verified.
 
 ```sh
 CGO_ENABLED=0 go test ./...
@@ -60,7 +60,7 @@ SQLITE_ORACLE=/absolute/path/to/verified/sqlite3 ./scripts/test-oracle.sh
 
 See [progress](docs/progress.md), [compatibility](docs/compatibility.md), [architecture](docs/architecture.md), [sources](docs/upstream.md), and [manual verification](docs/manual-verification.md). The unchanged [original goal](goal.md) remains the contract. [Restart protocol](docs/restart.md) and checkpoint records preserve durable development history.
 
-Qualified crash recovery, Darwin encrypted coordination and Windows shared rekey, broader SQL and all extended-vector ANN integration, and full-table/online pg_embedding transition work remain unfinished implementation work. Full SQLite/PostgreSQL semantics, SEE file compatibility and production security are not claimed.
+Qualified crash recovery, Windows shared rekey and Darwin Unicode inventory, broader SQL and extended-vector ANN integration, and full-table/online pg_embedding transition work remain unfinished implementation work. Full SQLite/PostgreSQL semantics, SEE file compatibility and production security are not claimed.
 
 
 ## Explicit exclusive WAL
@@ -202,8 +202,9 @@ retain an immutable authenticated head while a writer commits or checkpoints;
 legacy layouts are never silently upgraded. Run examples/encrypted-shared only
 with disposable data. A Windows/amd64 encrypted backend now implements legacy
 and shared-session paths under its strict local-NTFS policy, with native runtime
-unverified; Windows shared rekey and Darwin encrypted storage remain unsupported
-code in this checkpoint. Retained-history collection,
+unverified. Darwin encrypted modes0/1/2 now use a shared plain/encrypted inode
+coordinator, with strict ASCII inventory limits. Windows shared rekey and Darwin
+Unicode inventory remain required implementation work. Retained-history collection,
 external freshness guarantees and independent security acceptance remain open.
 
 ## Sparse exact vectors
@@ -256,3 +257,13 @@ Shared encrypted rekey remains unsupported, directory namespace barriers are not
 supplied, and default Windows VFS vet retains a disclosed mapping diagnostic. See
 [encrypted policy](docs/native-encrypted-windows.md) and
 [metadata correction](docs/native-windows-metadata.md).
+
+## Darwin coordination and failed-open ownership
+
+Darwin uses one bounded descriptor registry across plain/encrypted backends,
+with deferred close, native relative namespace operations and direct bounded
+directory enumeration. Native execution is still NOT_RUN. See
+[Darwin scope](docs/native-encrypted-darwin.md). Shared-WAL unsuccessful opening
+now retains nested owners and protection in bounded groups, with explicit
+[retry API](docs/shared-open-cleanup.md). Successful-session Close and driver
+disposal ownership remain separate required code corrections.

@@ -67,7 +67,7 @@ func (r *metadataOwners) close(o *metadataOwner, closeHandle func(uintptr) error
 	}
 	if err := closeHandle(o.handle); err != nil {
 		o.unknown = true
-		r.poisoned = errors.Join(ErrPoisoned, r.poisoned, err)
+		r.poisoned = terminalCleanup(errors.Join(ErrPoisoned, r.poisoned, err))
 		return r.poisoned
 	}
 	o.handle = 0

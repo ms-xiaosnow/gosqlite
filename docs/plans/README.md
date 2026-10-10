@@ -87,11 +87,12 @@ source plan, cross-build, ordinary rollback or benchmark closes those gates.
 
 ## Exceptional ownership cleanup
 
-Add a bounded synchronous pending-retirement group for shared-session failed-open
-cleanup when mapping retirement fails. Keep DMS/main locks until every view is
-retired, never evict live ownership, and expose a deliberate retry. Current
-fail-closed resource retention can last for the process lifetime; ordinary tests
-and memory state models do not qualify real unmap/close failures.
+Shared-session failed-open cleanup now uses 64 bounded strongly retained groups
+and a deliberate RetryOpenCleanup route. Nested owners retire before index/DMS,
+WAL and main protection. Successful-session retirement, public DB.Close retry and
+driver disposal still need their own bounded ownership correction; this slice
+does not cover them. Terminal retention may last for process lifetime. Ordinary
+and memory checks do not qualify real unmap/close failures.
 
 A later source review found plain Windows metadata probes outside this ownership
 model: generic os.Stat/Lstat/SameFile can internally create handles with discarded
@@ -102,6 +103,7 @@ standard earlier cross-build/memory-ledger tests did not cover this correction.
 No data-loss or ordinary-lock-failure claim has been established.
 
 Windows encrypted modes0/1/shared2 now have native managed coordination code.
-Keep Windows shared rekey, Darwin encrypted coordination and platform runtime/
-durability acceptance as separate open requirements. A cross-build does not
+Darwin encrypted coordination now shares plain/encrypted inode ownership. Keep
+Windows shared rekey, Darwin Unicode inventory and platform runtime/durability
+acceptance as separate open requirements. A cross-build does not
 close those gates. Preserve current encrypted bytes and exact lifecycle rules.

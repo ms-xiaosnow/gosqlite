@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"github.com/ms-xiaosnow/gosqlite/internal/encstore"
+	"github.com/ms-xiaosnow/gosqlite/internal/testkit/fileview"
 	"os"
 	"path/filepath"
 	"testing"
@@ -47,7 +48,7 @@ func TestEncryptedPagerWALFinalDirtySegments(t *testing.T) {
 	}
 	saved := map[string][]byte{}
 	for _, p := range bases {
-		b, e := os.ReadFile(p)
+		b, e := fileview.ReadFile(p)
 		if e != nil {
 			t.Fatal(e)
 		}
@@ -75,12 +76,12 @@ func TestEncryptedPagerWALFinalDirtySegments(t *testing.T) {
 		t.Fatal("WAL commit created a base", e)
 	}
 	for p, want := range saved {
-		got, e := os.ReadFile(p)
+		got, e := fileview.ReadFile(p)
 		if e != nil || !bytes.Equal(want, got) {
 			t.Fatal("base changed", e)
 		}
 	}
-	root, e := os.ReadFile(path)
+	root, e := fileview.ReadFile(path)
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -101,7 +102,7 @@ func TestEncryptedPagerWALFinalDirtySegments(t *testing.T) {
 	if e = tx.Commit(ctx); e != nil {
 		t.Fatal(e)
 	}
-	gotRoot, e := os.ReadFile(path)
+	gotRoot, e := fileview.ReadFile(path)
 	if e != nil || !bytes.Equal(root, gotRoot) {
 		t.Fatal("rollback/no-op publication", e)
 	}
@@ -175,7 +176,7 @@ func TestEncryptedPagerWALQuotaBeforePublication(t *testing.T) {
 	if e = tx.Commit(ctx); e != nil {
 		t.Fatal(e)
 	}
-	root, e := os.ReadFile(path)
+	root, e := fileview.ReadFile(path)
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -196,7 +197,7 @@ func TestEncryptedPagerWALQuotaBeforePublication(t *testing.T) {
 	if e = tx.Rollback(); e != nil {
 		t.Fatal(e)
 	}
-	now, e := os.ReadFile(path)
+	now, e := fileview.ReadFile(path)
 	if e != nil || !bytes.Equal(root, now) {
 		t.Fatal("quota changed root", e)
 	}

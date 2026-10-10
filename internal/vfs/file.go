@@ -79,7 +79,7 @@ func Open(path string, opts OpenOptions) (*File, error) {
 	}
 	raw, err := nativeOpen(path, opts)
 	if err != nil {
-		return nil, err
+		return nil, unmanagedOpenError(err)
 	}
 	f := &File{raw: raw, path: path, role: opts.Role, writable: opts.Flags&(os.O_WRONLY|os.O_RDWR) != 0, replaceable: opts.Replaceable, maps: make(map[*Mapping]struct{})}
 	owners.Lock()
@@ -220,7 +220,9 @@ func (f *File) Close() error {
 	f.closing = true
 	err := f.closeResourcesLocked(nativeUnmap, func() error { return nativeClose(f) })
 	if len(f.maps) != 0 || errors.Is(err, ErrPoisoned) {
-		return err
+		// Nested constructors may return nil plus this error. Carry the
+		// managed retry obligation to their parent instead of losing it.
+		return retainedFileCleanup(f, err)
 	}
 	f.raw = nil
 	owners.Lock()

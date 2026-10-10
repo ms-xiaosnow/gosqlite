@@ -1,0 +1,291 @@
+Encrypted Darwin independent scoped engineering review
+Date: 2026-10-10 UTC
+Status: COMPLETE for the bounded source/memory/compile review on the final
+22-path freeze. No remaining concrete source blocker identified after D1/D2.
+Native Darwin runtime is NOT_RUN. No M3/M8/M10, physical durability,
+interoperability, cryptographic/security or production-readiness acceptance.
+
+Scope and source boundaries
+---------------------------
+The initial 11-path manifest was verified before source review; review findings
+expanded the owner's final freeze to 22 paths. The final source manifest is:
+  docs/evidence/native-encrypted-darwin-source-sha256.txt
+  SHA-256 d11f32c0bd01d51e2ff6f0682ff449e5d52948a8318aefbf0b92010e5ef0fba5
+The exact owner list is ../darwin-encrypted-evidence/owned-paths.txt.
+Final hashes were checked before and after the final compilation and again
+before writing this report. The small final doc-only timing correction was
+reviewed; production and test code remained unchanged through final checks.
+
+Read goal.md, relevant ADR 0015/0016 and encrypted storage/platform docs,
+common namespace/publication/selection paths, the managed VFS forwarding diff,
+and the pinned Go/x/sys primary implementation sources. No applicable AGENTS.md
+or checkout .agents skill file was found in this checkout/ancestor chain.
+The software-engineering skill was read. Main HEAD at review was
+f5663cc47f7e3f30f7b239cab674c47b6ad54b34; unpublished concurrent changes were
+present, so this report certifies only the enumerated working-tree bytes,
+not all repository changes or that HEAD's published capability.
+Reviewer changed only this report and out-of-repository review evidence files.
+No source edits, staging, commit, publication or central-document edits by reviewer.
+
+Findings reported directly to owner and parent
+---------------------------------------------
+D1. FIXED: Darwin directory enumeration bypassed physical-resource ownership.
+The original managedFile.ReadDir called os.File.ReadDir. Pinned Go 1.27.2
+os/dir_darwin.go invokes internal/poll.FD.OpenDir, which duplicates the directory
+handle for fdopendir; setup failure discards syscall.Close(fd2)'s result.
+dirInfo.close also discards closedir errors. This hidden handle never reserved
+shared registry capacity and had no terminal-close record. x/sys Getdirentries
+was not a safe substitute: it opens another descriptor through Openat and
+closes through fdopendir/closedir, also discarding some close results.
+This was a source-proven resource-representation/boundedness gap, not observed
+regular-database lock loss; the hidden alias is a directory descriptor.
+
+Final fix inspected: directory_darwin.go invokes exported unix.Syscall6 with
+SYS_GETDIRENTRIES64 on the already managed directory descriptor. No hidden open,
+dup, close, libc DIR object, private linkname or fallback exists. The stream owns
+one 64 KiB buffer, returns at most 64 names per call, and serializes with its
+lease mutex. ABI assertions cover the Dirent field offsets; the bounded parser
+uses explicit little-endian fields and consumes only returned bytes, excluding
+the kernel's possible trailing flags word. It validates extent, name length,
+termination and separators, skips dot/zero-inode records, and has no lazy Info
+open. The exact trap ABI was checked against pinned Go/x/sys assembly and Apple
+source. Direct-kernel ABI/native-version compatibility still requires native
+validation and is explicitly marked compile-only in the platform document.
+
+D2. FIXED: requested ASCII root restriction did not prevent Unicode alias
+retention undercount. Apple's APFS documentation states that names preserve
+spelling while lookup is normalization-insensitive; the Unicode Kelvin sign
+canonically decomposes to ASCII K. An intact imported family preserving such a
+Unicode prefix could be opened through an allowed ASCII root, while ASCII-only
+prefix classification silently omitted its retained entries. No hostile active
+rename/race is needed to describe this state. No such native fixture was run.
+
+Final fix inspected: darwinFamilyEntry rejects every non-ASCII enumerated name
+before family classification, including unrelated Unicode siblings. Portable
+memory tests cover Kelvin-sign aliases, retained members, unrelated Unicode,
+ordinary ASCII case aliases and unrelated ASCII names. The document now requires
+a dedicated ASCII-entry directory while allowing Unicode in its parent path.
+This is deliberately restrictive; full Apple Unicode equivalence remains an
+implementation gap. Requested target basenames are checked before provider/
+stable-lock acquisition, while the additional entry restriction is checked
+when inventory runs. The final wording makes these timings distinct.
+
+Additional owner/parent-requested test adaptation reviewed
+---------------------------------------------------------
+Six generic encrypted fixture-inspection test files now use testkit/fileview.
+Darwin's helper reads through vfs.Open and joins ReadAll and Close results,
+so an inspection of live .gse-lock does not silently release sibling POSIX holds.
+The non-Darwin helper remains exactly os.ReadFile. Test assertions and history
+semantics were not weakened. A Darwin cross-domain target test includes this
+helper; it was compiled only. The existing oracle-tagged conformance file's
+substitution was reviewed as source, not executed as an oracle/native test.
+
+Ownership and protocol audit
+----------------------------
+1. Admission and identity: both nativeOpen and encryptedDarwinOpenHeld hold the
+   same darwinfile.Process mutex across Admit, native open, fstat and Register.
+   Descriptor-free lstat/fstatat hints allow pre-open per-inode refusal. Actual
+   identity is the full Darwin (int32 device, uint64 inode) pair from fstat.
+   Register precedes all validation-failure retirement. No raw handle escapes
+   the encrypted managed lease. Raw handles whose identity cannot be obtained
+   are quarantined before any os.File finalizer exists.
+2. Shared bounds: the registry charges both domains, max 256 per inode and
+   16,384 total. An unknown/raced alias can produce one represented overflow
+   record; the global overflow blocks subsequent physical opens until drained.
+   There is no eviction or close-to-make-room beneath live locks. The single
+   gate holds the admission reservation continuously through registration.
+3. Process fcntl lifetime: encstore and VFS publish their successful-lock marker
+   while still under the gate used for the native lock call. Physical retirement
+   requires neither domain to hold process locks for that inode. Deferred
+   descriptors strongly retain the actual os.File through bound close callbacks.
+   Last successful releases trigger draining. The VFS changes forward physical
+   lifetime state; its separate SQLite range/DMS protocol remains intact.
+4. Logical encrypted locks: processByteLocks separates each lease's three exact
+   holds from aggregate kernel modes. Same-mode operations are idempotent;
+   local conflicts return BUSY before native calls; multiple readers share one
+   process read lock. Successful F_SETLK alone updates the aggregate ledger.
+   Shared/exclusive conversion makes one native request with no unlock gap.
+   Acquisition BUSY preserves old ownership; unexpected errors poison it.
+   Ordered cleanup releases capture, writer, then lifecycle and retains every
+   not-successfully-released hold when cleanup is partial.
+5. Close uncertainty: attempted is set before native close. Known close errors
+   retain a charged tombstone and poison the inode. Unknown close errors retain
+   a charged quarantine entry and block physical opens globally. Neither path
+   retries the numeric handle. Parent hook errors/panics cannot resurrect a
+   consumed handle. Failed unlocks remain represented for ordered retry, distinct
+   from the terminal native-close rule. Parent-child bookkeeping never takes a
+   per-file mutex from the common lifecycle gate.
+6. Reuse and parent pins: only idle, never-attempted, unpoisoned regular records
+   are reused with matching access and parent identity. A fresh logical lease
+   is created; old public Close cannot retire the new lease. Sequential position
+   is reset. Pin transfer charges the new parent before releasing the previous
+   one. Logical directory Close is permanent, but live children retain its raw
+   descriptor for private relative identity checks. Unknown/failed child close
+   does not release its parent pin.
+7. Namespace: relative member names reject empty/dot/dot-dot, separator/NUL and
+   excessive component lengths; only the explicit enumeration '.' is allowed.
+   Openat uses O_NOFOLLOW/O_CLOEXEC/O_NONBLOCK and rejects truncating dispositions.
+   Inspect verifies regular single-link files or directories plus MNT_LOCAL.
+   Stable checks compare held and named identities, size/mtime evidence and the
+   named original parent. Darwin Lstat/EvalSymlinks/SameFile are descriptor-free
+   in the inspected pinned Go sources. Trusted cooperative hierarchy remains
+   required; these checks are not a hostile namespace-race proof.
+8. Publication and old leases: candidate and destination remain relative to the
+   retained parent. Initial publication is native RENAME_EXCL; replacement is
+   Renameat, followed by destination inode/type/link checks. No check-then-rename,
+   link/unlink or copy/delete fallback was introduced. Common publication still
+   owns its capture/writer/lifecycle protocol, candidate Sync, directory Sync,
+   authentication, uncertainty marking, adoption and old-selection retirement.
+   Existing formats, constants, content commitments and archive behavior were
+   not changed by the Darwin slice.
+
+Permitted independent verification
+----------------------------------
+Source/test behavior was reviewed before execution. All executed physical test
+histories used intact fresh fixtures, correct keys, ordinary cooperative API
+transactions and normal closes. Pure-memory exceptional cases use Go callbacks
+or fabricated byte arrays, never failed native operations.
+
+Environment:
+  GO=../toolchains/go1.27.2/bin/go (reported go1.27.2 linux/amd64)
+  GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off
+  GOPATH=$PWD/../go-path GOCACHE=$PWD/../go-cache
+  CGO_ENABLED=0 for production/test checks; CGO_ENABLED=1 only for -race.
+
+PASS: $GO run ./internal/testscope
+PASS: $GO test ./internal/darwinfile ./internal/encstore -run "$MEM" -count=1
+PASS: CGO_ENABLED=1 $GO test -race ./internal/darwinfile ./internal/encstore -run "$MEM" -count=1
+  MEM='^(TestRegistryMemory.*|TestProcessByteLocksMemory.*|TestDarwinDirectoryMemory.*)$'
+  11 registry tests, 7 process-lock tests, 4 directory memory tests.
+  Covers cross-domain last release, deferred reuse, terminal known/unknown close,
+  cross-inode quarantine, reentrant parent retirement, parent-close error,
+  hook panic, bounded/raced admission, cross-domain poison, concurrent retirement,
+  owner conflicts/atomic conversion, all 27 held arrays/partial cleanup positions,
+  directory wire extent/malformed records/returned bytes, and ASCII inventory.
+
+PASS: $GO test ./internal/encstore -run "$ENC" -count=1
+PASS: CGO_ENABLED=1 $GO test -race ./internal/encstore -run "$ENC" -count=1
+  ENC='^(TestSnapshotManifestCanonicalMemory|TestInventoryAccountingMemory|TestWALFormatFrozenMemoryVectors|TestSharedLayoutFrozenMemoryModeAndProtocol|TestReviewSharedIntactPinnedSelectionAndLedger|TestReviewSharedIntactConcurrentReaderAndPublisher)$'
+PASS: $GO test ./sqlite -run "$SQL" -count=1
+PASS: CGO_ENABLED=1 $GO test -race ./sqlite -run "$SQL" -count=1
+  SQL='^(TestEncryptionOrdinaryLifecycleAndCopies|TestEncryptionSharedReadersWriterAndStalePromotion|TestEncryptionSharedLazySavepointsAndNoopRelease|TestEncryptionSharedQuiescentRekeyAndLeaseRetention)$'
+
+PASS for each of GOOS=darwin GOARCH=arm64 and GOARCH=amd64, CGO_ENABLED=0:
+  $GO build ./internal/darwinfile ./internal/encstore ./internal/vfs ./internal/testkit/fileview ./sqlite ./driver
+  $GO test -c -o ../darwin-encrypted-review/encstore-${GOOS}-${GOARCH}.test ./internal/encstore
+  $GO test -c -o ../darwin-encrypted-review/vfs-${GOOS}-${GOARCH}.test ./internal/vfs
+  $GO test -c -o ../darwin-encrypted-review/pager-${GOOS}-${GOARCH}.test ./internal/pager
+  $GO test -c -o ../darwin-encrypted-review/sqlite-${GOOS}-${GOARCH}.test ./sqlite
+  $GO vet ./internal/darwinfile ./internal/encstore ./internal/vfs ./internal/testkit/fileview
+  $GO list -deps -f '{{if .CgoFiles}}{{.ImportPath}} {{.CgoFiles}}{{end}}' ./internal/encstore ./internal/vfs ./sqlite ./driver
+  Dependency output was empty: no selected production CgoFiles.
+
+One command-scope correction, not concealed:
+The first compile script also attempted default `go test -c ./internal/testkit`.
+It stopped because all files there require the existing oracle build tag.
+No tags or source assertions were changed. That command is NOT_A_PASS; oracle
+execution is NOT_RUN. The corrected compile script above passed for both targets.
+
+PASS: Linux encrypted/native VFS and Windows encrypted backend bytes match both
+../windows-encrypted-verify and the named frozen Git tree
+  d52c82cfa393f220bfcd2a6c54fe4f6c9b47b3d3
+for platform_linux.go, platform_windows.go, file_windows.go and native_linux.go.
+The common contextual source hash inventory was also rechecked unchanged.
+PASS: final manifest sha256sum -c (all 22 paths); git diff --check.
+
+Detailed uncommitted workspace logs:
+  ../darwin-encrypted-review/final-checks.log
+  SHA-256 04442ba66e72d956f08b9006a572f7bc12b7073af656845fb5c47e8265d3ee90
+  ../darwin-encrypted-review/compile-checks.log
+  SHA-256 3d1102f31fb49795fc2dac4dbf3193e12f2e2f24a63337e46e3748ddff468aed
+The first log retains the command-scope failure; the second records corrected
+compile-only completion. No target executable was launched.
+
+Not executed / remaining gates
+------------------------------
+Native Darwin and Windows runtime, cross-process acceptance, official SQLite
+Darwin interoperability, failed native I/O/lock/unmap/close/Sync, short write,
+disk-full/permission failure, physical DB corruption/tamper/wrong-key or missing
+selected-file tests, external active-DB replacement/retarget, namespace races,
+crash/kill/process-exit/hot recovery and interrupted publication/rekey are NOT_RUN.
+No forbidden task was relocated to CI or another executor. Focused passing tests
+are not a full repository test pass. Native compiled local-ledger assertions are
+not proof of actual kernel lock preservation; native acceptance remains separate.
+
+Unmanaged application descriptors and independent same-process SQLite libraries
+remain outside the Darwin process-lock contract. A failed common Store/open can
+lose a public retry route while protected resources remain retained for process
+lifetime; there is no collector or universal recovery claim. Unicode namespace
+support, native filesystem/syscall-version qualification, fsync versus device
+cache durability, security/legal review and milestone acceptance remain open.
+
+Primary API/source references independently checked on 2026-10-10
+----------------------------------------------------------------
+https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/fcntl.2.html
+  Process ownership, any-alias close releasing locks, conflict and conversion semantics.
+https://raw.githubusercontent.com/apple-oss-distributions/xnu/main/bsd/man/man2/open.2
+  Relative directory opens, nofollow, directory and close-on-exec flags.
+https://raw.githubusercontent.com/apple-oss-distributions/xnu/main/bsd/man/man2/rename.2
+  Relative rename and RENAME_EXCL behavior; filesystem-dependent support.
+https://raw.githubusercontent.com/apple-oss-distributions/xnu/main/bsd/kern/syscalls.master
+  getdirentries64 trap 344 and fd/buffer/size/off_t pointer arguments.
+https://raw.githubusercontent.com/apple-oss-distributions/xnu/main/bsd/vfs/vfs_syscalls.c
+  getdirentries64 returns directory byte count and separately writes optional end flags.
+https://raw.githubusercontent.com/apple-oss-distributions/xnu/main/bsd/sys/dirent.h
+  64-bit inode/seekoff, record and name lengths, type byte, name offset/termination.
+https://developer.apple.com/library/archive/documentation/FileManagement/Conceptual/APFS_Guide/FAQ/FAQ.html
+  Preserved name spelling with normalization-insensitive lookup; basis of D2.
+https://www.unicode.org/Public/UCD/latest/ucd/UnicodeData.txt
+  U+212A has canonical decomposition U+004B; this was source reasoning, not a native test.
+Only API/protocol facts were used; no Apple implementation was copied into production.
+
+Exact reviewed final owned source SHA-256 inventory
+--------------------------------------------------
+be9b77de417fb58d773769dbef03b170a1a57022b45ed0cac5064d4a466b4d1e  internal/darwinfile/registry.go
+69c92a1a3b043c1d0d3b1c7092eb9fe5bc436092dc58ee5ee5f40f46a87b0769  internal/darwinfile/registry_test.go
+1037547fed8abe33032d20ed804eb98110313966d63ad5b6435cf63e2524ebf1  internal/encstore/file_default.go
+70cc7f606556898071940dbe567cb5e05e931606e1ade561a8162206dbdb21bb  internal/encstore/file_darwin.go
+3644b74175fe9559bb1fb5922dd6bf35c01be04f40a3c906abbe178ab1cf98c4  internal/encstore/platform_darwin.go
+26c6b6f65832041eae9d9a1174e1cdad65331e30d2c471c2e403a160f7f38027  internal/encstore/platform_other.go
+e0addbda8cbab6c6f323330befef5941065f1005a3c64ec7a2efe64c259c5795  internal/encstore/process_locks.go
+16a7ba5ada6a3438dc36d92c7e05f0678762e960f09901bc8a8e3d79ba499454  internal/encstore/process_locks_test.go
+70561f4b6482f36fd902f08c12adfd287ec1eebf762b9eae0f5835ffb35553af  internal/encstore/native_darwin_test.go
+211663d9ac392730f16f9bc7dd6f6c90d61b1c2ad379434c2ed62a81957c4284  internal/vfs/native_darwin.go
+4a6bab037f99da3b0e571513463a2505e8d5b5cf8f15fdadc820fa9d21edc0a2  docs/native-encrypted-darwin.md
+d94703a634a87f001b0600cd58125f73cdb52d6116b5ed3eae650c46537e0afe  internal/testkit/fileview/read_default.go
+90dc5dcd775b08f4598cab0b9a4f8cf709abcb284129d1beb786cf1fca0e7d89  internal/testkit/fileview/read_darwin.go
+86be741e2208cca7d409d760ae4d80e1954f98e294401bcfac28ce9784291dc6  sqlite/encryption_review_test.go
+2c6bb2e03b4f413b668ec76bb812bf8842287f889c2b647fa480c7e3a508c836  sqlite/encryption_test.go
+8705e7e79c2f32149f06980b2ad9111555c0db1dead35a9f61d92a54fa33cdd8  sqlite/encryption_wal_test.go
+eadffad17708c8cf1faa7bbecd14bda84cabfb476076b5d65f56b9115ad665fd  internal/pager/encrypted_session_test.go
+d2b9bd943d2c8955db4ea4275b3e35ada73b1dedb7a16cf991ec8f81fb16035b  internal/pager/encrypted_wal_test.go
+f6284a021a8d6beb2bb8d77bb6cec4d5ea13f287f22ba1a3ea28ec181f98b4b5  internal/testkit/encryption_conformance_test.go
+5a781e06d863e560d8b6a206dedc7fa42ad1840f604b0ac996386fb8ba924b20  internal/encstore/directory_names.go
+ab6c95f7f303642b3d43b4327d37d7cdce549f72c337204b6d20204f264a1a92  internal/encstore/directory_names_test.go
+9a3c5827eaf9a6c295736f3d299b7ecfe19d98f4b0af05df31558202ac446b14  internal/encstore/directory_darwin.go
+
+Exact contextual/pinned implementation SHA-256 inventory
+--------------------------------------------------------
+9ae7b1d776856669a10eb753408c7754d015d266f8783240165450e96e4bac81  goal.md
+56cdfaa91f7a77fb4e9e1674b39b0e2dcf23eb93fdf5a219dd5f95de2ad27112  internal/encstore/platform_linux.go
+eef5e711510b3e8b560f01185422f4131915bc1b6180187354df3d459b04f7b3  internal/encstore/platform_windows.go
+4663edc067e7aaa69406963b4839929e2dc8fb3746b07327cf75d6f681244b44  internal/encstore/file_windows.go
+ea32e7b45225baa81b0b51f422e4c0ac35fdbfbbba1bf5a7742b3df9f63eb31c  internal/vfs/native_linux.go
+f19b4cd5e8672edb7058b70e96c1cfe323708f37b0ee935c5ca8323d5de5da90  internal/encstore/exact_locks.go
+ed391c317720d194c5b3f40d59e6ff83e2cec4707dea0a42b37e89d0fcf5fbc0  internal/encstore/namespace.go
+015947e82b5ebf3fb172bf6f3a72f304c07029cec84cfc6bc17fdef2d77375c1  internal/encstore/object.go
+a00e56f3bbc8c5d447cc818598445fbe94b2250844418fe61a235eb00ee9662d  internal/encstore/inventory.go
+748d081b4a3a45b15337175ea47c1b123f788e7eaa8f7d0923dd891c58760c3e  internal/encstore/shared.go
+b103d32fb8a12eafdf288d442a28dd2edfb804c4c98e308693df5229167ad611  internal/encstore/store.go
+959ea1c614881dfae344c7b63efef1844b0ebca164b80fb36aca2692cbb5e8d8  internal/encstore/publish.go
+5b838454028bf088c05f128cd587a4a819981858027baab83db309fb2e5714c1  internal/vfs/file.go
+6c09b52e19ef315960fd0accf62b845d6bb039104dd4f9108c1168a925a8b1c5  ../toolchains/go1.27.2/src/os/dir_darwin.go
+97daa47ed38dd9d33c7f8566d1b57215cdbbff3e9e2fd3a04377a7a4d5e7a5d7  ../toolchains/go1.27.2/src/internal/poll/fd_opendir_darwin.go
+d222d99ab7e873441136cd3daeb4c147f048ec5289338ed123f223187a90f285  ../toolchains/go1.27.2/src/os/types_unix.go
+fa12fa05805074520f72342648764d156193805d6ddfa663af938145769a204a  ../toolchains/go1.27.2/src/os/stat_unix.go
+877dd004355c475e8805b5700061604558422da057037556e0cf6edeb36ab7ec  ../toolchains/go1.27.2/src/os/file_unix.go
+20a0a3d681ae7801810665cb26b34d762cf82fae21e1883c5a24c7d2b2958e16  ../toolchains/go1.27.2/src/syscall/asm_darwin_arm64.s
+f4ac337d025ceafeca0a412a4354afc695528ea5e492b967e34f0ba2bc7c64df  ../toolchains/go1.27.2/src/syscall/asm_darwin_amd64.s
+2a4add0c5f627a675f7680b6bb36d7f090f2ed1c67bc59f2a0ab882deedfcd75  ../toolchains/cache/pkg/mod/golang.org/x/sys@v0.49.0/unix/syscall_darwin.go
+b17d2e512a7bab550ef24d3d3ed9b0f3bed89de5a15ac003d7371058d6ea168e  ../toolchains/cache/pkg/mod/golang.org/x/sys@v0.49.0/unix/ztypes_darwin_arm64.go
+f7740a9d925eccd280e54e7971a36508a7d2856d9ef996a394ad5cfd80bec8c3  ../toolchains/cache/pkg/mod/golang.org/x/sys@v0.49.0/unix/asm_bsd_arm64.s

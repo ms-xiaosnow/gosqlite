@@ -284,5 +284,19 @@
     "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38062750892",
     "remote_ci_status": "COMPLETED SUCCESS for exact SHA, updated2026-10-10T15:24:30Z, observed15:25:59Z.",
     "open_gates": "Full-table/dependency recreation, online transition, live PostgreSQL/Neon validation and interrupted migration remain open. Extended ANN, broad SQL/recovery/native-platform code and restricted/independent release acceptance remain open."
+  },
+  {
+    "stage": "Corrected Windows encrypted/public metadata and mapping ownership",
+    "remote_commit": "ea6591b88353d4923e30be523f209252ab6e4ef8",
+    "local_commit": "ea6591b88353d4923e30be523f209252ab6e4ef8",
+    "tree": "540fa8ef1679cbd4e5fbc1c3eb9b86560a82193a",
+    "bundle_sha256": "88a9a80590e3bcb873cdb72e9737aad6f4c32234c5b0f1c60a328df112e71a3a",
+    "bundle_bytes": 1710182,
+    "library_file_id": "libfile_75b03ebab4fc81918cd9d7293eec0bc4",
+    "library_version": 0,
+    "verified": "Expected-SHA main readback and exact mirror; full-history bundle byte-identical Library readback, clean clone/fsck/goal verified2026-10-10T17:54:35Z. Initial local xattr call used relative path and failed; corrected absolute path succeeded. prepare_materialize had already copied the file; an unnecessary signed-transfer invocation failed without download_url, then direct-path readback/xattrs and all integrity checks passed. Exact restored scoped native/encrypted/shared unit/race, full vet/build, pinned transaction oracle, modules and clean tree passed17:55:19Z. Withdrawn75552c9 never published.",
+    "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38073597982",
+    "remote_ci_status": "IN_PROGRESS observed2026-10-10T17:55:34Z; no terminal pass inferred.",
+    "open_gates": "Windows native execution and physical failure acceptance NOT_RUN; Windows shared rekey, successful-session/public/driver close ownership, broad SQL and remaining migration/platform code are open. Default Windows VFS vet mapping diagnostic remains disclosed."
   }
 ]

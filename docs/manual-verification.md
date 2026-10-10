@@ -392,3 +392,16 @@ failed view-creation cleanup and idempotence are memory laws; no Windows
 CloseHandle/UnmapViewOfFile failure is induced. Both corrected native callsites
 are compiled and source-reviewed, with unchanged lock/identity/granularity
 contracts. A new native runtime or physical gate is not inferred from these laws.
+
+## Darwin coordination and bounded failed-open cleanup
+
+Earlier statements above about missing Darwin encrypted code and failed-open
+cleanup describe their historical checkpoints. The native Darwin backend and
+64-group failed-open retirement source are now implemented. See
+native-encrypted-darwin.md and shared-open-cleanup.md for exact ordinary commands,
+compile-only scope and manual gates. The later Darwin poison delta retains only
+the first error graph; 10,000 pure-memory retries verify bounded retained state.
+Native Darwin/Windows runtime remains NOT_RUN. Restricted failure cases remain
+BLOCKED and must not be run here or relocated. Successful-session Close, public
+DB.Close retry, driver disposal, Windows shared rekey and Darwin Unicode
+inventory are still actual required code work, separate from these manual gates.

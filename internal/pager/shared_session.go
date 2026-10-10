@@ -52,15 +52,15 @@ func sharedIndexError(err error) error {
 	case errors.Is(err, walindex.ErrPoisoned):
 		return fmt.Errorf("%w: %w", ErrPoisoned, err)
 	case errors.Is(err, walindex.ErrBusy):
-		return fmt.Errorf("%w: shared WAL lock", ErrBusy)
+		return fmt.Errorf("%w: shared WAL lock: %w", ErrBusy, err)
 	case errors.Is(err, walindex.ErrLimit):
-		return fmt.Errorf("%w: %v", ErrLimit, err)
+		return fmt.Errorf("%w: %w", ErrLimit, err)
 	case errors.Is(err, walindex.ErrUnsupported):
-		return fmt.Errorf("%w: %v", ErrUnsupported, err)
+		return fmt.Errorf("%w: %w", ErrUnsupported, err)
 	case errors.Is(err, walindex.ErrIdentity):
-		return fmt.Errorf("%w: %v", ErrChanged, err)
+		return fmt.Errorf("%w: %w", ErrChanged, err)
 	case errors.Is(err, walindex.ErrHeader):
-		return fmt.Errorf("%w: %v", ErrCorrupt, err)
+		return fmt.Errorf("%w: %w", ErrCorrupt, err)
 	default:
 		return err
 	}
@@ -77,6 +77,19 @@ func OpenSharedSession(ctx context.Context, path string, opts Options) (result *
 	if err != nil {
 		return nil, err
 	}
+	// Reserve before any native metadata probes or resource acquisition. A full
+	// registry fails closed without draining or stalling unrelated databases.
+	cleanup, err := sharedOpenRetirements.reserve()
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if result != nil {
+			cleanup.transfer()
+		} else {
+			retErr = cleanup.failedOpen(retErr)
+		}
+	}()
 	path, err = filepath.Abs(path)
 	if err != nil {
 		return nil, err
@@ -102,23 +115,7 @@ func OpenSharedSession(ctx context.Context, path string, opts Options) (result *
 		return nil, err
 	}
 	s := &SharedSession{file: f, path: path, opts: opts}
-	success := false
-	defer func() {
-		if !success {
-			if s.index != nil {
-				if err := s.index.Close(); err != nil {
-					// Keep the database SHARED lock too: an exclusive opener
-					// must not remove SHM beneath an unresolved native view.
-					retErr = errors.Join(retErr, sharedIndexError(err))
-					return
-				}
-			}
-			if s.walFile != nil {
-				retErr = errors.Join(retErr, closeNativeFile(s.walFile))
-			}
-			retErr = errors.Join(retErr, closeNativeFile(f))
-		}
-	}()
+	cleanup.main = sharedOpenFileOwner{file: f}
 	if err = lockShared(f); err != nil {
 		return nil, err
 	}
@@ -168,10 +165,12 @@ func OpenSharedSession(ctx context.Context, path string, opts Options) (result *
 	if err != nil {
 		return nil, err
 	}
+	cleanup.wal = sharedOpenFileOwner{file: s.walFile}
 	s.index, err = walindex.Open(path + "-shm")
 	if err != nil {
 		return nil, sharedIndexError(err)
 	}
+	cleanup.index = sharedOpenIndexOwner{index: s.index}
 	if err = s.checkStableLocked(); err != nil {
 		return nil, err
 	}
@@ -186,7 +185,6 @@ func OpenSharedSession(ctx context.Context, path string, opts Options) (result *
 		return nil, errors.Join(err, releaseErr)
 	}
 	s.header = h
-	success = true
 	return s, nil
 }
 

@@ -1,0 +1,258 @@
+Shared-WAL failed-open retirement: independent review
+Date: 2026-10-10 UTC
+Outcome: no remaining blocker found in the frozen scoped implementation after
+correction of the findings below. PASS applies to reviewed source, pure-memory
+ownership laws, selected intact ordinary Linux lifecycle regressions, and stated
+compile checks only. Full native-failure, M3, and release acceptance remain open.
+
+Review scope and isolation
+Read goal.md, docs/plans/README.md Exceptional ownership cleanup, the engineering
+skill, testscope source, relevant tests and ownership dependencies. No applicable
+repository AGENTS.md was found. No production-source edits, staging, commits,
+or publication were performed by this reviewer.
+
+The combined review snapshot shared-cleanup-review was extracted with:
+git archive 5207d59b667614c40c184ec277fdc1fc1ca80fae | tar -x -C SNAPSHOT
+This is an immutable Git tree, not a published commit. Only the frozen 11-path
+cleanup manifest below, the independently frozen three Windows mapping paths,
+and three isolated darwinfile package files were overlaid. Unrelated live typed-
+ANN and Darwin platform implementations were not copied. The darwinfile package
+was checked independently using memory-only tests; its full live platform
+integration is not implied by this archive's Darwin compile check.
+
+An additional descriptor-free four-owner DAG law was written only in the review
+snapshot; its complete source is included at the end for reproducibility.
+No broad live-working-tree test suite ran.
+
+Frozen cleanup SHA256 manifest, checked before and after tests:
+b17eb3998a24e64d81890815e5d71afaefb69e8dae370208bdeec183d7775de0  internal/pager/shared_open_cleanup.go
+05ca275c939580e901e384b833ace614b7f5331dc1e884f2a7834f89970d4893  internal/pager/shared_session.go
+3517028e9fe6aaaaf57f6c179e007a744cb64a95299b0c7f342103611c7c3ead  internal/pager/shared_open_cleanup_test.go
+2246d9bf0f24a29cdc430b3a0ba6a6e26c50a43bf1b70f19ec3917aabb0cd714  internal/vfs/cleanup.go
+8ab07294d0af090b98441d7ed8d823ef129646331d4242cecdd429990cd9ba6b  internal/vfs/cleanup_test.go
+64193e3e7fede5478a1440e7950f713de755572d1df6a0626ce6cfb9126b7a02  internal/vfs/file.go
+537835eeadd9ac9396d252a436510085ae7ce1904c6d63d30e5c87db30859127  internal/vfs/metadata_owners.go
+93016da6189932d4ed91e91659348a9c73d2a27104909cdae18d613af47f7d8b  sqlite/open_cleanup.go
+d6f8541099682d6bf68601218e4345119ca0a5104d10b747ad7f11897598df4d  sqlite/open_cleanup_test.go
+1dcada46e1799d355115fb0c3fc7e8ddf32a6d7ff7ee96046d76e8e01f2b33fb  docs/shared-open-cleanup.md
+e2fb9270c39437201c94920298ec6a03fe487af5a5e15e95ae7e891763ab34ea  docs/evidence/shared-open-cleanup-owned-paths.txt
+
+Companion Windows correction hashes:
+28bb464bd46d63c537b48ef52af5b29392696d1db6bbe9fc54282ef5548d76b7  internal/vfs/native_windows.go
+9791a8be8ceb3c2c7fff85aba80b31c9f1334b96ea4070dda45b5c44765d464d  internal/vfs/mapping_retirement.go
+cf811fd89e49d65ca8a664058bb14043334b96a3512e94a01b64e81584b8e7ce  internal/vfs/mapping_retirement_test.go
+Standalone Windows review: windows-mapping-retirement-independent-review.txt.
+That independent review does not require cleanup or Darwin overlays.
+
+Separately checked Darwin bounded-poison package hashes:
+04444c1423a6c3a4ac453eeb4d58387721ee65890f3f3b474e33a1196c199960  internal/darwinfile/registry.go
+69c92a1a3b043c1d0d3b1c7092eb9fe5bc436092dc58ee5ee5f40f46a87b0769  internal/darwinfile/registry_test.go
+37c2a431cdc6da757609dff148b89d94832de333c26abab38f1fddc712c8884e  internal/darwinfile/poison_test.go
+
+Findings raised during review and dispositions
+1. The initial CleanupOwners collector returned early for repeated *File owners
+   before inspecting later wrapper causes. Joined wrappers could hide distinct
+   child obligations; merely moving child traversal first could still emit a
+   shared parent before a later-discovered child. Corrected in cleanup.go lines 47-128:
+   collect all identities and dependency edges first, then emit child-first.
+   Shared identities deduplicate only the resource, not independent wrapper
+   causes. An inconsistent dependency cycle returns a leading terminal barrier
+   and retains every concrete owner. Repeated/transitive-child laws and the
+   independent 64 DAG subsets x two tree orders all pass.
+2. Nested constructors may return nil after acquiring a resource. File.Close now
+   error-carries unresolved managed owners, and failed Open metadata/native
+   probes carry terminal obligations where no safe managed retry exists. The
+   existing walindex.Open failed-open defer preserves File.Close's typed error;
+   walindex/index.go requires no source edit for this adoption route. Pager
+   failedOpen collects all those obligations before closing index/WAL/main.
+   Specifically inspected Darwin nativeOpen pre-File Seek/Retire and Fstat/
+   Quarantine paths: unmanagedOpenError conservatively represents poisoned
+   rejection as terminal when no precise lower obligation is available.
+3. Windows nativeMap failed-view cleanup and nativeUnmap previously retried an
+   uncertain mapping-object HANDLE. This was a real source blocker in the base
+   tree, not native-failure evidence. The separate three-path correction above
+   latches first close uncertainty, never reissues that raw close, preserves
+   view/owner/protectors, and permits only represented view retry after known
+   object-handle retirement. Standalone source/memory/race/Windows compilation
+   review passed; see its separate report for exact rationale and commands.
+4. The original public helper selected only the first group from errors.As, so
+   an already-completed first group could hide later pending groups. The lead
+   requested all-group semantics. The final helper discovers every distinct
+   reachable group before touching owners, attempts every discovered group,
+   and joins only current failures. Duplicate/completed-first/multiple-pending
+   and repeated-current-output laws pass.
+5. Darwin nativeClose -> darwinRelease -> darwinPoison could repeatedly call
+   darwinfile.Registry.Poison, which recursively retained previous error history.
+   The lead corrected Registry.Poison lines 75-87: retain the first poison once, return
+   a fresh first+current join for later operations without retaining it. The
+   original stored graph remains identical across 10,000 modeled calls; original
+   and current causes remain discoverable. Full registry memory and race laws
+   pass. One-time Record close/hook errors remain bounded by represented records.
+
+Verified source invariants
+- OpenSharedSession reserves one of 64 groups after context/options checks and
+  before filepath resolution/native probes/acquisition. Success transfers every
+  acquired main/WAL/index owner and removes exactly its reservation without
+  closing them. In-flight plus pending groups are bounded; live successful
+  sessions are not counted. Admission never evicts or sweeps another group.
+- The registry strongly retains group/managed-owner reachability independently
+  of the caller keeping a returned session or error. There is no finalizer,
+  eviction, background goroutine, raw-handle API, or implicit retry loop.
+- Nested obligations retire child-first. Index views/mapping objects and DMS
+  precede WAL; WAL precedes main. An error stops that group's protective tail.
+  Only successful managed retirement clears a slot. Consumed Linux os.File
+  closes cannot be retried raw; corrected Windows terminal states remain held.
+- Each group mutex serializes state and retries. The registry mutex spans only
+  admission/removal, never managed cleanup. No two group locks are held together.
+  An independent request can progress while a fake owner in another group is
+  blocked. Existing backend-specific lifecycle locks are unchanged by this layer.
+- Original errors and first opening/cleanup causes stay immutable. Each retry
+  constructs a bounded original-plus-current result; completed groups become
+  no-ops. Common wrappers retain errors.Is/As causes and package classification.
+  Pending opening errors also match ErrPoisoned and public CodeIOErr, even when
+  the initial opening cause was BUSY. Capacity refusal maps to ErrMemoryLimit/
+  CodeNoMem. The pending sentinel alone is not itself a poisoned opening error.
+
+Final API semantics and limits
+- Nil and ordinary small non-group error trees are no-ops. Ordinary %w wrapping
+  and errors.Join are traversed; each unique group is attempted once per call.
+- Successful nil means every discovered group finished its managed retirement;
+  it does not mean a database opened, original causes vanished, or future opening
+  is guaranteed. Historical pending errors continue to match their sentinels.
+- Discovery is capped at 4096 nodes and completes before cleanup. Oversized and
+  cyclic wrapper inputs return explicit ErrLimit/public ErrMemoryLimit without
+  touching any owner. This refusal deliberately omits the unsafe original chain;
+  retain original opening errors and retry smaller trees. It is the documented
+  exception to a reusable pending-error return. Recognized group tokens are
+  leaves, so retry histories are not repeatedly expanded.
+- A failed group does not suppress attempts on independent groups. Current
+  pending failures retain their original causes and may be joined/retried again.
+- Terminal obligations can occupy capacity/protectors for process lifetime.
+  Pre-existing/global poison may conservatively retain an otherwise empty group.
+  The policy favors represented ownership over availability.
+
+Scoped verification
+Tool: ../toolchains/go1.27.2/bin/go (go1.27.2 linux/amd64)
+GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off
+GOCACHE=/workspace/scratch/5e06a74e5f65/durable-restart/go-cache
+GOPATH=/workspace/scratch/5e06a74e5f65/durable-restart/go-path
+Production/default checks use CGO_ENABLED=0; race uses CGO_ENABLED=1 separately.
+
+Behavior-reviewed selector A:
+^(TestCleanupOwnersMemory.*|TestIndependentCleanupAllDAGOrders|TestWindowsMappingRetirementMemory.*|TestMetadataOwners.*|TestMetadataObservation.*|TestMetadataRejectedOpen.*|TestOwnershipReview.*|TestSharedOpenCleanup.*|TestOpenCleanupNoPendingOrCanceledOpen|TestSharedWALSnapshotsPromotionAndCheckpoint|TestSharedWALConcurrentReadersAndWriter)$
+Selector B is A with TestSharedWALSnapshotsPromotionAndCheckpoint omitted.
+
+Commands from shared-cleanup-review, all exit 0:
+CGO_ENABLED=0 go run ./internal/testscope
+CGO_ENABLED=0 go test ./internal/vfs ./internal/pager ./sqlite -run "$A" -count=1
+CGO_ENABLED=1 go test -race ./internal/vfs ./internal/pager ./sqlite -run "$B" -count=1
+CGO_ENABLED=0 go vet ./internal/vfs ./internal/walindex ./internal/pager ./sqlite ./driver
+CGO_ENABLED=0 go build ./internal/vfs ./internal/walindex ./internal/pager ./sqlite ./driver
+For each GOOS/GOARCH linux/arm64, darwin/arm64, windows/amd64:
+  CGO_ENABLED=0 go build ./internal/vfs ./internal/walindex ./internal/pager ./sqlite ./driver
+CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go test -c ./internal/pager -o ../shared-cleanup-pager-windows.test.exe
+CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go test -c ./sqlite -o ../shared-cleanup-sqlite-windows.test.exe
+CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go test -c ./internal/pager -o ../shared-cleanup-pager-darwin.test
+CGO_ENABLED=0 go test ./internal/darwinfile -run '^TestRegistryMemory' -count=1
+CGO_ENABLED=1 go test -race ./internal/darwinfile -run '^TestRegistryMemory' -count=1
+No target test executable was run.
+
+The 65-session regression uses ordinary successful native create/open, committed
+writes, snapshot reads, and normal close. Other native regressions are intact
+successful database operations, ordinary rollback/BUSY, and normal checkpoint/
+reopen. Public cancellation test cancels before any path/file access. All negative
+retirement/dependency/error cases are Go-only memory owners or integer callbacks;
+no fault is injected into a native operation.
+
+Captured combined log:
+Sat Oct 10 15:35:01 UTC 2026
+go version go1.27.2 linux/amd64
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.077s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.232s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.004s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	1.484s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.207s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	1.019s
+
+Captured compile-only log (completed exit 0):
+Sat Oct 10 15:35:35 UTC 2026
+compile-only linux/arm64
+compile-only darwin/arm64
+compile-only windows/amd64
+
+Captured independent Darwin memory-package log:
+Sat Oct 10 15:33:21 UTC 2026
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/darwinfile	0.022s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/darwinfile	1.102s
+
+Remaining code and qualification gaps
+- driver.Connector.Connect still discards db.Close errors in its post-success
+  context-cancellation branch. This is a separate unresolved ownership/retry-route
+  gap, not fixed or qualified by the failed-OpenSharedSession group.
+- Public DB.Close marks the connection closed before session.Close and subsequent
+  calls no-op; broader failed-close retry/ownership and database/sql disposal
+  contracts remain separate work. This report does not claim to repair them.
+- Public canonicalization can perform separately bounded metadata probes before
+  entering OpenSharedSession; these earlier resources are outside this group.
+- The frozen cleanup document describes the companion Windows and Darwin fixes
+  as separate/pending. This report records their exact independently checked
+  corrective sources, without rewriting or erasing that historical manifest.
+- Native Windows/Darwin runtime and physical unmap/close/IO/lock/Sync failures,
+  short-write/disk-full/permission cases, database corruption/tamper/wrong-key or
+  missing selected-file cases, namespace replacement/retarget/race, crash/kill/
+  process-exit/hot recovery, interrupted publication/rekey: BLOCKED/NOT_RUN.
+  None was executed here or relocated elsewhere. Cross-builds and portable
+  models cannot close these gates. Full M3, long soak, security, and release
+  acceptance remain open.
+
+Independent DAG-law appendix
+SHA256 5517ea72e5f3873990d1493787403648433ed3c4b6ee6951c42d2de155e22da9
+Snapshot-only path: internal/vfs/independent_cleanup_review_test.go
+package vfs
+
+import (
+ "errors"
+ "testing"
+)
+
+// Independent exhaustive memory law: all 64 acyclic dependency subsets among
+// four descriptor-free owners, each with forward and reversed error-tree order.
+// File.Close on these empty owners returns before any native operation.
+func TestIndependentCleanupAllDAGOrders(t *testing.T) {
+ for mask := 0; mask < 64; mask++ {
+  for _, reverse := range []bool{false, true} {
+   files := []*File{{}, {}, {}, {}}
+   var branches []error
+   cause := errors.New("memory cause")
+   for _, f := range files { branches = append(branches, retainedFileCleanup(f, cause)) }
+   var edges [][2]int
+   bit := 0
+   for parent := 1; parent < 4; parent++ {
+    for child := 0; child < parent; child++ {
+     if mask & (1 << bit) != 0 {
+      branches = append(branches, retainedFileCleanup(files[parent], retainedFileCleanup(files[child], cause)))
+      edges = append(edges, [2]int{parent, child})
+     }
+     bit++
+    }
+   }
+   if reverse { for i, j := 0, len(branches)-1; i < j; i, j = i+1, j-1 { branches[i], branches[j] = branches[j], branches[i] } }
+   joined := errors.Join(branches...)
+   // Repeated identical subtrees must not multiply returned owner identities.
+   owners := CleanupOwners(errors.Join(joined, joined))
+   if len(owners) != len(files) { t.Fatalf("mask=%d reverse=%t count=%d", mask, reverse, len(owners)) }
+   positions := map[*File]int{}
+   for i, o := range owners {
+    f := o.(*cleanupError).file
+    if _, ok := positions[f]; ok { t.Fatal("repeated owner") }
+    positions[f] = i
+    if err := o.Close(); err != nil { t.Fatal(err) }
+   }
+   for _, edge := range edges {
+    if positions[files[edge[1]]] >= positions[files[edge[0]]] { t.Fatalf("mask=%d reverse=%t parent retired before child %v", mask, reverse, edge) }
+   }
+  }
+ }
+}

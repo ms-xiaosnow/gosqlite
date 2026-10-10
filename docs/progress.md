@@ -461,3 +461,26 @@ Windows encstore vet and unchanged source inventory at2026-10-10T15:40:52Z, exit
 See native-windows-corrected-lead-checks.txt. Default Windows VFS vet remains
 non-clean with its mapped-address diagnostic. Remote publication, exact Library
 restore and exact-SHA CI are separate pending steps, not inferred passes.
+
+### Native Darwin encrypted coordination and failed-open retirement
+
+Implemented shared plain/encrypted inode ownership, process-lock aggregation and
+deferred close, native relative publication, direct bounded directory parsing,
+and conservative ASCII target/inventory policy. Darwin Unicode inventory remains
+required code; native runtime is NOT_RUN. A later poison-retention correction
+latches the first stored cause instead of recursively retaining retry history.
+
+Shared-WAL unsuccessful opening reserves one of64 groups before acquisitions,
+collects nested managed/terminal owners, and retires child/index/DMS before WAL
+and main. RetryOpenCleanup discovers all groups before bounded serialized retry.
+Successful opens release the group; no background cleanup, eviction or unsafe raw
+handle retry is introduced. Independent source/memory/ordinary/race checks pass.
+Successful-session Close ordering, public DB.Close retry and driver disposal still
+have required ownership fixes; this increment does not claim those paths covered.
+
+Prior Darwin22-path source manifest remains historical; registry.go is explicitly
+superseded by the bounded poison delta. Combined immutable source49f2749ffb838f936cc6066fb3496a4914cb1626,
+including corrected Windows and reviewed typed ANN, completed focused native/ANN
+unit/race, full vet/build, typed/transaction oracle, six cross-builds, module and
+unchanged-source checks at2026-10-10T15:49:53Z. That is source-composition evidence,
+not an exact restored-commit or native-platform acceptance claim.

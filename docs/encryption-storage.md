@@ -12,7 +12,8 @@ supported; `EncryptionWAL` explicitly selects lifetime-exclusive layout 2.
 
 The implementation is experimental. Linux has ordinary-path runtime evidence;
 Windows/amd64 now has a bounded native implementation with compile-only evidence,
-and Darwin remains unsupported. Windows shared-mode rekey is a separate missing
+and Darwin now has a shared plain/encrypted inode coordinator with compile-only
+evidence and strict ASCII inventory limits. Windows shared-mode rekey is a separate missing
 implementation. See [native encrypted Windows support](native-encrypted-windows.md)
 for the precise matrix and no-directory-barrier policy. It is an independent
 container, not a SQLite/SEE ciphertext format. Full M8 remains
@@ -517,8 +518,8 @@ publication/rekey workflows have **not** been executed or accepted for this
 checkpoint. They must not be run here or relocated to CI/another executor.
 Memory-only malformed-input tests do not qualify these disk/recovery behaviors.
 The shared slice adds simultaneous intact-file readers/writer, operation-pinned
-copies, stale promotion, quiescent rekey and combined-resource tests. Windows encrypted coordination is compile-only; Darwin encrypted storage and
-Windows shared-mode rekey remain explicit implementation gaps. Independent
+copies, stale promotion, quiescent rekey and combined-resource tests. Darwin/Windows encrypted coordination has source/compile evidence only; Darwin
+Unicode inventory and Windows shared-mode rekey remain implementation gaps. Independent
 security review and full release qualification remain outstanding.
 
 ## Layout-3 coordination and combined admission

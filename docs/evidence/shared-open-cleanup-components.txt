@@ -1,0 +1,91 @@
+Shared failed-open pending retirement focused evidence
+Sat Oct 10 15:24:14 UTC 2026
+go version go1.27.2 linux/amd64
+Production: GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off CGO_ENABLED=0, GOCACHE=../go-cache GOPATH=../go-path
+Initial preliminary command stopped before compilation: default GOPATH /home/agent/go is read-only; corrected to existing ../go-path.
+go run ./internal/testscope && go test ./internal/pager ./sqlite ./driver -run '^(TestSharedOpenCleanup.*|TestOpenCleanupNoPendingOrCanceledOpen|TestSharedWALSnapshotsPromotionAndCheckpoint|TestSharedWALConcurrentReadersAndWriter|TestSharedWALCrossesNativeIndexBlock|TestSharedWALSnapshotsAndWriterContention|TestSharedWALPooledConcurrentWrites|TestEncryptionSharedReadersWriterAndStalePromotion|TestEncryptedSharedConnectorIndependentPoolSnapshots|TestEncryptedConnectorOrdinaryLifecycle)$' -count=1
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.163s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.137s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.356s
+
+Separate CGO_ENABLED=1 race tooling, not production CGO dependency.
+CGO_ENABLED=0 go run ./internal/testscope && CGO_ENABLED=1 go test -race ./internal/pager ./sqlite ./driver -run '^(TestSharedOpenCleanup.*|TestOpenCleanupNoPendingOrCanceledOpen|TestSharedWALConcurrentReadersAndWriter|TestSharedWALPooledConcurrentWrites|TestEncryptedSharedConnectorIndependentPoolSnapshots)$' -count=1
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.153s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	1.048s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	2.212s
+CGO_ENABLED=0 go vet ./internal/pager ./sqlite ./driver
+CGO_ENABLED=0 go build ./internal/pager ./sqlite ./driver
+
+Nested-owner adoption correction supersedes preliminary evidence above.
+Sat Oct 10 15:31:05 UTC 2026
+go run ./internal/testscope && go test ./internal/vfs ./internal/pager ./sqlite -run '^(TestCleanupOwnersMemory.*|TestMetadataOwners.*|TestMetadataObservation.*|TestMetadataRejectedOpen.*|TestSharedOpenCleanup.*|TestOpenCleanupNoPendingOrCanceledOpen)$' -count=1
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.119s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.085s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.020s
+
+Final owned-source freeze verification; unrelated worktree changes excluded from ownership claim.
+Sat Oct 10 15:35:14 UTC 2026
+internal/pager/shared_open_cleanup.go: OK
+internal/pager/shared_session.go: OK
+internal/pager/shared_open_cleanup_test.go: OK
+internal/vfs/cleanup.go: OK
+internal/vfs/cleanup_test.go: OK
+internal/vfs/file.go: OK
+internal/vfs/metadata_owners.go: OK
+sqlite/open_cleanup.go: OK
+sqlite/open_cleanup_test.go: OK
+docs/shared-open-cleanup.md: OK
+docs/evidence/shared-open-cleanup-owned-paths.txt: OK
+Scoped source behavioral audit: fake negative ownership models only; physical selected tests use successful ordinary files/correct keys/cooperating transactions. No native fault/interruption/tamper/namespace scenarios.
+CGO_ENABLED=0 go run ./internal/testscope && CGO_ENABLED=0 go test ./internal/vfs ./internal/walindex ./internal/pager ./sqlite ./driver -run '^(TestCleanupOwnersMemory.*|TestMetadataOwners.*|TestMetadataObservation.*|TestMetadataRejectedOpen.*|TestOwnershipReviewPartialRetirementRetainsAllLocks|TestManagedMappingLogicalSpanAndClose|TestDMSNormalLifecycleAndHeaderPublication|TestRealHashBlocksSnapshotAndCleanup|TestConcurrentHeaderPublication|TestSharedOpenCleanup.*|TestOpenCleanup.*|TestSharedWALSnapshotsPromotionAndCheckpoint|TestSharedWALConcurrentReadersAndWriter|TestSharedWALCrossesNativeIndexBlock|TestSharedWALSnapshotsAndWriterContention|TestSharedWALPooledConcurrentWrites|TestEncryptionSharedReadersWriterAndStalePromotion|TestEncryptedSharedConnectorIndependentPoolSnapshots|TestEncryptedConnectorOrdinaryLifecycle)$' -count=1
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.072s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	0.160s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.465s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.083s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.228s
+CGO_ENABLED=0 go run ./internal/testscope && CGO_ENABLED=1 go test -race ./internal/vfs ./internal/walindex ./internal/pager ./sqlite ./driver -run '^(TestCleanupOwnersMemory.*|TestMetadataOwners.*|TestMetadataObservation.*|TestMetadataRejectedOpen.*|TestOwnershipReviewPartialRetirementRetainsAllLocks|TestManagedMappingLogicalSpanAndClose|TestDMSNormalLifecycleAndHeaderPublication|TestRealHashBlocksSnapshotAndCleanup|TestConcurrentHeaderPublication|TestSharedOpenCleanup.*|TestOpenCleanup.*|TestSharedWALSnapshotsPromotionAndCheckpoint|TestSharedWALConcurrentReadersAndWriter|TestSharedWALCrossesNativeIndexBlock|TestSharedWALSnapshotsAndWriterContention|TestSharedWALPooledConcurrentWrites|TestEncryptionSharedReadersWriterAndStalePromotion|TestEncryptedSharedConnectorIndependentPoolSnapshots|TestEncryptedConnectorOrdinaryLifecycle)$' -count=1
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	1.363s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	2.604s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.731s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	1.250s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	2.292s
+CGO_ENABLED=0 go vet ./internal/vfs ./internal/walindex ./internal/pager ./sqlite ./driver
+CGO_ENABLED=0 go build ./internal/vfs ./internal/walindex ./internal/pager ./sqlite ./driver
+CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build ./internal/vfs ./internal/walindex ./internal/pager ./sqlite ./driver (compile only)
+CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build ./internal/vfs ./internal/walindex ./internal/pager ./sqlite ./driver (compile only)
+internal/pager/shared_open_cleanup.go: OK
+internal/pager/shared_session.go: OK
+internal/pager/shared_open_cleanup_test.go: OK
+internal/vfs/cleanup.go: OK
+internal/vfs/cleanup_test.go: OK
+internal/vfs/file.go: OK
+internal/vfs/metadata_owners.go: OK
+sqlite/open_cleanup.go: OK
+sqlite/open_cleanup_test.go: OK
+docs/shared-open-cleanup.md: OK
+docs/evidence/shared-open-cleanup-owned-paths.txt: OK
+Final focused verification PASS; no full aggregate or native failure acceptance claimed.
+
+Final documentation-only dependency-status follow-through, 2026-10-10:
+Independent cleanup review reports no remaining scoped source blocker; Windows mapping terminal-state correction and Darwin bounded first-poison correction independently passed stated source/memory/race/compile checks in separate frozen increments.
+Only docs/shared-open-cleanup.md and shared-open-cleanup-owned-paths.txt changed after the preceding 11-path freeze; all nine production/test hashes remain unchanged.
+No code or behavioral test was changed; no new test run is claimed for this prose-only follow-through. Native Windows/Darwin runtime and restricted native failure/interruption tests remain NOT_RUN.
+internal/pager/shared_open_cleanup.go: OK
+internal/pager/shared_session.go: OK
+internal/pager/shared_open_cleanup_test.go: OK
+internal/vfs/cleanup.go: OK
+internal/vfs/cleanup_test.go: OK
+internal/vfs/file.go: OK
+internal/vfs/metadata_owners.go: OK
+sqlite/open_cleanup.go: OK
+sqlite/open_cleanup_test.go: OK
+docs/shared-open-cleanup.md: OK
+docs/evidence/shared-open-cleanup-owned-paths.txt: OK
+9fabd9ee1cdc23e16d92b6b398b0da0311c43b80c8deef58d410d8c24a2c7839  docs/evidence/shared-open-cleanup-independent-review.txt
+4d7cef75c6eefa95188c7cac2ac126e0254f00efb54cde41791198f0a19b204c  docs/evidence/windows-mapping-retirement-independent-review.txt
+cfaccf4badb5862a3d384ccb6e258760412c90fa2c3567b74f37f178b50d09fc  docs/evidence/darwin-poison-retention-delta.txt

@@ -1,0 +1,23 @@
+Exact Library restored commit ea6591b88353d4923e30be523f209252ab6e4ef8; native Windows runtime NOT_RUN
+2026-10-10T17:54:35Z
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.056s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	0.149s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	0.087s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.139s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	2.527s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.152s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-shared	0.017s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	1.359s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	2.551s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	1.448s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.629s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	11.914s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.842s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-shared	1.060s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.097s
+all modules verified
+2026-10-10T17:55:19Z
+WINDOWS CORRECTED EXACT RESTORED SCOPED CHECKS PASS

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha256"
+	"github.com/ms-xiaosnow/gosqlite/internal/testkit/fileview"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -35,7 +36,7 @@ func TestEncryptionReviewFreshIdentityAndRetainedBytes(t *testing.T) {
 	encryptedExec(t, db, "INSERT INTO retained VALUES(1,?)", payload)
 	encryptedExec(t, db, "DELETE FROM retained WHERE id=1")
 	encryptedExec(t, db, "INSERT INTO retained VALUES(2,?)", payload)
-	before, err := os.ReadFile(path)
+	before, err := fileview.ReadFile(path)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -52,7 +53,7 @@ func TestEncryptionReviewFreshIdentityAndRetainedBytes(t *testing.T) {
 		if f.Name() == filepath.Base(path) {
 			continue
 		}
-		b, e := os.ReadFile(filepath.Join(dir, f.Name()))
+		b, e := fileview.ReadFile(filepath.Join(dir, f.Name()))
 		if e != nil {
 			t.Fatal(e)
 		}
@@ -68,7 +69,7 @@ func TestEncryptionReviewFreshIdentityAndRetainedBytes(t *testing.T) {
 	if err = tx.Rollback(); err != nil {
 		t.Fatal(err)
 	}
-	afterRollback, err := os.ReadFile(path)
+	afterRollback, err := fileview.ReadFile(path)
 	if err != nil || !bytes.Equal(before, afterRollback) {
 		t.Fatalf("ordinary rollback changed committed root: %v", err)
 	}
@@ -77,7 +78,7 @@ func TestEncryptionReviewFreshIdentityAndRetainedBytes(t *testing.T) {
 	if err = db.Rekey(ctx, cfg); err != nil {
 		t.Fatal(err)
 	}
-	after, err := os.ReadFile(path)
+	after, err := fileview.ReadFile(path)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -92,7 +93,7 @@ func TestEncryptionReviewFreshIdentityAndRetainedBytes(t *testing.T) {
 		t.Fatal("new root does not identify its immediate predecessor")
 	}
 	for name, hash := range old {
-		b, e := os.ReadFile(filepath.Join(dir, name))
+		b, e := fileview.ReadFile(filepath.Join(dir, name))
 		if e != nil || sha256.Sum256(b) != hash {
 			t.Fatalf("retained artifact changed during rekey: %s: %v", name, e)
 		}

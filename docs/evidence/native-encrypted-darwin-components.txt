@@ -1,0 +1,456 @@
+Darwin encrypted native storage: focused component evidence
+Date: 2026-10-10 UTC
+Host: Linux/amd64. Toolchain: pinned Go 1.27.2.
+Status: PASS for the commands in the final run below, exit 0.
+This is component source/model/compile evidence, not aggregate or native acceptance.
+
+Frozen source manifest (22 owned source, test and documentation files):
+docs/evidence/native-encrypted-darwin-source-sha256.txt
+SHA256 d11f32c0bd01d51e2ff6f0682ff449e5d52948a8318aefbf0b92010e5ef0fba5
+Final raw command-log SHA256:
+6e06c937c380060c8254404d30ea6b7898fe25df9792ebb0899e3b7c0e771318
+The manifest and all 22 file hashes were checked at both ends of the final run.
+All tests, cross-builds and static checks in that run used final production bytes.
+Evidence artifacts are outside that source manifest to avoid self-referential hashes.
+
+Behavioral source audit preceded go run ./internal/testscope and every selected run.
+The testscope source-reference guard passed; it is not a substitute for that audit.
+No default all-package native test suite was run.
+
+Scope matrix
+------------
+1. Pure-memory state laws: PASS, CGO0 and separate CGO1 -race on Linux.
+   11 RegistryMemory tests: shared close gate, cross-domain last hold, deferred
+   reuse, identity, admission/raced overage, unknown quarantine, terminal close,
+   parent lifetime/reentrant retirement, poison, panic-safe hooks and concurrency.
+   7 ProcessByteLocksMemory tests: owner arbitration, atomic conversion ledger,
+   BUSY preserving holds, three independent bytes, partial cleanup, all 27 held
+   arrays and applicable release-failure positions, cross-domain close composition.
+   4 DarwinDirectoryMemory tests: directory wire parser, malformed byte rejection,
+   returned extent versus trailing flags, ASCII directory-inventory policy.
+   All exceptional resources, syscall outcomes and failures in these laws are
+   synthetic Go values/callbacks. No native failed operation is injected.
+2. Frozen protocol/format memory checks: PASS, CGO0 and separate CGO1 -race.
+   SnapshotManifestCanonicalMemory, InventoryAccountingMemory,
+   WALFormatFrozenMemoryVectors, SharedLayoutFrozenMemoryModeAndProtocol.
+3. Linux intact correct-key native regressions: PASS, CGO0 and separate CGO1 -race.
+   ReviewSharedIntactPinnedSelectionAndLedger,
+   ReviewSharedIntactConcurrentReaderAndPublisher,
+   EncryptionOrdinaryLifecycleAndCopies,
+   EncryptionSharedReadersWriterAndStalePromotion,
+   EncryptionSharedLazySavepointsAndNoopRelease,
+   EncryptionSharedQuiescentRekeyAndLeaseRetention.
+   These are ordinary successful storage histories and expected local contention,
+   including quiescent ordinary rekey, not interrupted rekey or native fault tests.
+4. CGO0 build + encstore test-c: PASS on Linux/amd64, Linux/arm64,
+   Darwin/arm64, Darwin/amd64, Windows/amd64 and Windows/arm64.
+   Build packages: darwinfile, encstore, vfs, sqlite, driver.
+   Windows/arm64 compilation retains its unsupported/fail-closed behavior; it
+   does not claim a supported encrypted Windows/arm64 runtime.
+5. Darwin arm64/amd64 additional compile-only: PASS for vfs, sqlite, pager
+   test-c and oracle-tagged testkit test-c. No resulting binary was launched.
+6. Static checks: PASS for host darwinfile/encstore vet and Darwin arm64/amd64
+   darwinfile/encstore/vfs vet. Production dependency CgoFiles listings were empty
+   on all six build targets. Owned-path diff whitespace and final hashes passed.
+7. Protected backend source comparisons: PASS, byte-equal to the existing
+   windows-encrypted-verify tree for encstore/platform_linux.go,
+   encstore/platform_windows.go, encstore/file_windows.go and vfs/native_linux.go.
+   This is a narrow byte-preservation check, not a claim that unrelated concurrent
+   work or common integration files are included in this owned manifest.
+8. Native Darwin and Windows execution: NOT_RUN. Cross-process interoperability,
+   target kernel/directory ABI and OS-version qualification, filesystem capability,
+   physical durability, security and M3/M8/M10 acceptance remain NOT_RUN.
+
+Target-only test classification
+-------------------------------
+The four new native_darwin_test.go tests were source-audited and compiled only:
+- AggregateLocksAndProbeReuse uses ordinary intact descriptors and contention.
+- PlainProbeCloseCoordination uses managed probes in both domain directions.
+- RelativePublicationAndParentLifetime creates isolated five-byte backend fixtures
+  and invokes normal namespace write/initial no-replace publication/replacement.
+  It does not externally replace an active database, race names or inject failure.
+- PathPolicyMemory checks values only, but its Darwin-tagged file is not run here.
+No failure/race/crash test was moved into default CI. Existing manual gates remain.
+
+Managed generic test inspections
+--------------------------------
+internal/testkit/fileview.ReadFile now routes Darwin reads through managed VFS
+ownership and joins read/Close errors. Other platforms still call os.ReadFile.
+Only the imports/read-helper calls changed in the six listed encrypted SQL,
+pager and oracle-conformance test files; assertions were retained. The selected
+Linux SQL histories above exercised ordinary helper use. Pager and oracle
+conformance source compiled for Darwin, but was not executed by this check.
+
+Source-review corrections retained transparently
+------------------------------------------------
+- An initial Darwin vet check found an unkeyed identity alias struct literal in
+  vfs/native_darwin.go. It was made keyed; final target vet passes. The original
+  components-pre-vet-fix.log remains preserved, SHA256
+  9264b560f74d913a4167ddfbd04aec934b159024266cf4bf079980cde0cc8ba7.
+- D1: Go ReadDir and x/sys Getdirentries hide duplicate directory descriptors and
+  discard some close errors. The final backend uses the checked direct Darwin
+  getdirentries64 syscall and a bounded memory-tested parser instead. No native
+  directory syscall or ABI-version acceptance has been executed.
+- D2: An ASCII requested root does not prove ASCII stored spelling on APFS.
+  Inventory now refuses all non-ASCII entries, including unrelated siblings,
+  before family accounting. Unicode-compatible inventory remains required code.
+  This was a source-level finding; no native alias or namespace manipulation ran.
+- The documentation distinguishes early requested-basename rejection from the
+  directory-content restriction applied during inventory scanning.
+- The previous full run passed all tests/builds/static checks but exited 1 at
+  its final manifest guard because that doc-only timing correction changed the
+  starting manifest 4b6e08a2ceffb3bc16a0a9c3c4cc2d6b01c5dea9431df6ead38217382890f2ab
+  to d11f32c0bd01d51e2ff6f0682ff449e5d52948a8318aefbf0b92010e5ef0fba5.
+  That original script did NOT pass. Production/test code had not changed during
+  it. Its complete preserved log is appended after the final passing run below,
+  SHA256 392f59506cc25c34ab507b78a4176c0f28e93dbfd2d399f22eba85e71fa89f5d.
+  The final run independently repeats all selected tests/builds/checks and passes
+  the starting-versus-ending manifest guard without any intervening source edit.
+
+Required limitations
+--------------------
+Unicode target basename and Unicode-compatible directory inventory are explicit
+unimplemented capabilities; unrelated Unicode siblings currently block inventory.
+Windows shared-mode rekey remains unimplemented. Unknown/poisoned resources may
+remain charged for process lifetime; there is no background recovery promise.
+Arbitrary unmanaged application descriptors cannot be intercepted by the shared
+POSIX close coordinator. Direct-kernel directory enumeration still needs approved
+native OS-version testing. fsync is not F_FULLFSYNC/power-loss qualification.
+All public formats and lock protocol bytes are unchanged.
+
+NOT RUN anywhere by this task: disk corruption/tamper, wrong key,
+missing-selected-file, namespace mutation/retarget/race, process exit/crash,
+hot recovery, failed native I/O/lock/unmap/close/Sync, short write, interrupted
+publication/rekey, or physical/security acceptance. No stage, commit or remote
+publication was performed by this implementation task.
+
+REPRODUCIBLE COMPONENT SCRIPT
+============================
+#!/usr/bin/env bash
+set -euo pipefail
+export GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off GOPATH="$PWD/../go-path" GOCACHE="$PWD/../go-cache" CGO_ENABLED=0
+GO=../toolchains/go1.27.2/bin/go
+set -x
+MANIFEST=$(sha256sum docs/evidence/native-encrypted-darwin-source-sha256.txt)
+$GO version
+sha256sum -c docs/evidence/native-encrypted-darwin-source-sha256.txt
+$GO run ./internal/testscope
+MEM='^(TestRegistryMemory.*|TestProcessByteLocksMemory.*|TestDarwinDirectoryMemory.*)$'
+ENC='^(TestSnapshotManifestCanonicalMemory|TestInventoryAccountingMemory|TestWALFormatFrozenMemoryVectors|TestSharedLayoutFrozenMemoryModeAndProtocol|TestReviewSharedIntactPinnedSelectionAndLedger|TestReviewSharedIntactConcurrentReaderAndPublisher)$'
+SQL='^(TestEncryptionOrdinaryLifecycleAndCopies|TestEncryptionSharedReadersWriterAndStalePromotion|TestEncryptionSharedLazySavepointsAndNoopRelease|TestEncryptionSharedQuiescentRekeyAndLeaseRetention)$'
+$GO test ./internal/darwinfile ./internal/encstore -run "$MEM" -count=1
+$GO test ./internal/encstore -run "$ENC" -count=1
+$GO test ./sqlite -run "$SQL" -count=1
+CGO_ENABLED=1 $GO test -race ./internal/darwinfile ./internal/encstore -run "$MEM" -count=1
+CGO_ENABLED=1 $GO test -race ./internal/encstore -run "$ENC" -count=1
+CGO_ENABLED=1 $GO test -race ./sqlite -run "$SQL" -count=1
+$GO vet ./internal/darwinfile ./internal/encstore
+for target in linux/amd64 linux/arm64 darwin/arm64 darwin/amd64 windows/amd64 windows/arm64; do
+ export GOOS=${target%/*} GOARCH=${target#*/}
+ $GO build ./internal/darwinfile ./internal/encstore ./internal/vfs ./sqlite ./driver
+ $GO test -c -o ../darwin-encrypted-evidence/encstore-${GOOS}-${GOARCH}.test ./internal/encstore
+ $GO list -deps -f '{{if .CgoFiles}}{{.ImportPath}} {{.CgoFiles}}{{end}}' ./internal/encstore ./internal/vfs ./sqlite ./driver
+ if [ "$GOOS" = darwin ]; then
+  $GO test -c -o ../darwin-encrypted-evidence/vfs-${GOOS}-${GOARCH}.test ./internal/vfs
+  $GO test -c -o ../darwin-encrypted-evidence/sqlite-${GOOS}-${GOARCH}.test ./sqlite
+  $GO test -c -o ../darwin-encrypted-evidence/pager-${GOOS}-${GOARCH}.test ./internal/pager
+  $GO test -c -tags oracle -o ../darwin-encrypted-evidence/testkit-${GOOS}-${GOARCH}.test ./internal/testkit
+  $GO vet ./internal/darwinfile ./internal/encstore ./internal/vfs
+ fi
+done
+unset GOOS GOARCH
+cmp internal/encstore/platform_linux.go ../windows-encrypted-verify/internal/encstore/platform_linux.go
+cmp internal/encstore/platform_windows.go ../windows-encrypted-verify/internal/encstore/platform_windows.go
+cmp internal/encstore/file_windows.go ../windows-encrypted-verify/internal/encstore/file_windows.go
+cmp internal/vfs/native_linux.go ../windows-encrypted-verify/internal/vfs/native_linux.go
+sha256sum -c docs/evidence/native-encrypted-darwin-source-sha256.txt
+git diff --check -- internal/testkit/fileview internal/testkit/encryption_conformance_test.go sqlite/encryption_review_test.go sqlite/encryption_test.go sqlite/encryption_wal_test.go internal/pager/encrypted_session_test.go internal/pager/encrypted_wal_test.go internal/encstore/directory_names.go internal/encstore/directory_names_test.go internal/encstore/directory_darwin.go internal/darwinfile internal/encstore/file_default.go internal/encstore/file_darwin.go internal/encstore/platform_darwin.go internal/encstore/platform_other.go internal/encstore/process_locks.go internal/encstore/process_locks_test.go internal/encstore/native_darwin_test.go internal/vfs/native_darwin.go docs/native-encrypted-darwin.md
+
+echo "$MANIFEST" | sha256sum -c -
+
+FINAL PASSING RUN (exit 0)
+==========================
+++ sha256sum docs/evidence/native-encrypted-darwin-source-sha256.txt
++ MANIFEST='d11f32c0bd01d51e2ff6f0682ff449e5d52948a8318aefbf0b92010e5ef0fba5  docs/evidence/native-encrypted-darwin-source-sha256.txt'
++ ../toolchains/go1.27.2/bin/go version
+go version go1.27.2 linux/amd64
++ sha256sum -c docs/evidence/native-encrypted-darwin-source-sha256.txt
+internal/darwinfile/registry.go: OK
+internal/darwinfile/registry_test.go: OK
+internal/encstore/file_default.go: OK
+internal/encstore/file_darwin.go: OK
+internal/encstore/platform_darwin.go: OK
+internal/encstore/platform_other.go: OK
+internal/encstore/process_locks.go: OK
+internal/encstore/process_locks_test.go: OK
+internal/encstore/native_darwin_test.go: OK
+internal/vfs/native_darwin.go: OK
+docs/native-encrypted-darwin.md: OK
+internal/testkit/fileview/read_default.go: OK
+internal/testkit/fileview/read_darwin.go: OK
+sqlite/encryption_review_test.go: OK
+sqlite/encryption_test.go: OK
+sqlite/encryption_wal_test.go: OK
+internal/pager/encrypted_session_test.go: OK
+internal/pager/encrypted_wal_test.go: OK
+internal/testkit/encryption_conformance_test.go: OK
+internal/encstore/directory_names.go: OK
+internal/encstore/directory_names_test.go: OK
+internal/encstore/directory_darwin.go: OK
++ ../toolchains/go1.27.2/bin/go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ MEM='^(TestRegistryMemory.*|TestProcessByteLocksMemory.*|TestDarwinDirectoryMemory.*)$'
++ ENC='^(TestSnapshotManifestCanonicalMemory|TestInventoryAccountingMemory|TestWALFormatFrozenMemoryVectors|TestSharedLayoutFrozenMemoryModeAndProtocol|TestReviewSharedIntactPinnedSelectionAndLedger|TestReviewSharedIntactConcurrentReaderAndPublisher)$'
++ SQL='^(TestEncryptionOrdinaryLifecycleAndCopies|TestEncryptionSharedReadersWriterAndStalePromotion|TestEncryptionSharedLazySavepointsAndNoopRelease|TestEncryptionSharedQuiescentRekeyAndLeaseRetention)$'
++ ../toolchains/go1.27.2/bin/go test ./internal/darwinfile ./internal/encstore -run '^(TestRegistryMemory.*|TestProcessByteLocksMemory.*|TestDarwinDirectoryMemory.*)$' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/darwinfile	0.040s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	0.010s
++ ../toolchains/go1.27.2/bin/go test ./internal/encstore -run '^(TestSnapshotManifestCanonicalMemory|TestInventoryAccountingMemory|TestWALFormatFrozenMemoryVectors|TestSharedLayoutFrozenMemoryModeAndProtocol|TestReviewSharedIntactPinnedSelectionAndLedger|TestReviewSharedIntactConcurrentReaderAndPublisher)$' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	0.027s
++ ../toolchains/go1.27.2/bin/go test ./sqlite -run '^(TestEncryptionOrdinaryLifecycleAndCopies|TestEncryptionSharedReadersWriterAndStalePromotion|TestEncryptionSharedLazySavepointsAndNoopRelease|TestEncryptionSharedQuiescentRekeyAndLeaseRetention)$' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.325s
++ CGO_ENABLED=1
++ ../toolchains/go1.27.2/bin/go test -race ./internal/darwinfile ./internal/encstore -run '^(TestRegistryMemory.*|TestProcessByteLocksMemory.*|TestDarwinDirectoryMemory.*)$' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/darwinfile	1.230s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	1.062s
++ CGO_ENABLED=1
++ ../toolchains/go1.27.2/bin/go test -race ./internal/encstore -run '^(TestSnapshotManifestCanonicalMemory|TestInventoryAccountingMemory|TestWALFormatFrozenMemoryVectors|TestSharedLayoutFrozenMemoryModeAndProtocol|TestReviewSharedIntactPinnedSelectionAndLedger|TestReviewSharedIntactConcurrentReaderAndPublisher)$' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	1.186s
++ CGO_ENABLED=1
++ ../toolchains/go1.27.2/bin/go test -race ./sqlite -run '^(TestEncryptionOrdinaryLifecycleAndCopies|TestEncryptionSharedReadersWriterAndStalePromotion|TestEncryptionSharedLazySavepointsAndNoopRelease|TestEncryptionSharedQuiescentRekeyAndLeaseRetention)$' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	1.391s
++ ../toolchains/go1.27.2/bin/go vet ./internal/darwinfile ./internal/encstore
++ for target in linux/amd64 linux/arm64 darwin/arm64 darwin/amd64 windows/amd64 windows/arm64
++ export GOOS=linux GOARCH=amd64
++ GOOS=linux
++ GOARCH=amd64
++ ../toolchains/go1.27.2/bin/go build ./internal/darwinfile ./internal/encstore ./internal/vfs ./sqlite ./driver
++ ../toolchains/go1.27.2/bin/go test -c -o ../darwin-encrypted-evidence/encstore-linux-amd64.test ./internal/encstore
++ ../toolchains/go1.27.2/bin/go list -deps -f '{{if .CgoFiles}}{{.ImportPath}} {{.CgoFiles}}{{end}}' ./internal/encstore ./internal/vfs ./sqlite ./driver
++ '[' linux = darwin ']'
++ for target in linux/amd64 linux/arm64 darwin/arm64 darwin/amd64 windows/amd64 windows/arm64
++ export GOOS=linux GOARCH=arm64
++ GOOS=linux
++ GOARCH=arm64
++ ../toolchains/go1.27.2/bin/go build ./internal/darwinfile ./internal/encstore ./internal/vfs ./sqlite ./driver
++ ../toolchains/go1.27.2/bin/go test -c -o ../darwin-encrypted-evidence/encstore-linux-arm64.test ./internal/encstore
++ ../toolchains/go1.27.2/bin/go list -deps -f '{{if .CgoFiles}}{{.ImportPath}} {{.CgoFiles}}{{end}}' ./internal/encstore ./internal/vfs ./sqlite ./driver
++ '[' linux = darwin ']'
++ for target in linux/amd64 linux/arm64 darwin/arm64 darwin/amd64 windows/amd64 windows/arm64
++ export GOOS=darwin GOARCH=arm64
++ GOOS=darwin
++ GOARCH=arm64
++ ../toolchains/go1.27.2/bin/go build ./internal/darwinfile ./internal/encstore ./internal/vfs ./sqlite ./driver
++ ../toolchains/go1.27.2/bin/go test -c -o ../darwin-encrypted-evidence/encstore-darwin-arm64.test ./internal/encstore
++ ../toolchains/go1.27.2/bin/go list -deps -f '{{if .CgoFiles}}{{.ImportPath}} {{.CgoFiles}}{{end}}' ./internal/encstore ./internal/vfs ./sqlite ./driver
++ '[' darwin = darwin ']'
++ ../toolchains/go1.27.2/bin/go test -c -o ../darwin-encrypted-evidence/vfs-darwin-arm64.test ./internal/vfs
++ ../toolchains/go1.27.2/bin/go test -c -o ../darwin-encrypted-evidence/sqlite-darwin-arm64.test ./sqlite
++ ../toolchains/go1.27.2/bin/go test -c -o ../darwin-encrypted-evidence/pager-darwin-arm64.test ./internal/pager
++ ../toolchains/go1.27.2/bin/go test -c -tags oracle -o ../darwin-encrypted-evidence/testkit-darwin-arm64.test ./internal/testkit
++ ../toolchains/go1.27.2/bin/go vet ./internal/darwinfile ./internal/encstore ./internal/vfs
++ for target in linux/amd64 linux/arm64 darwin/arm64 darwin/amd64 windows/amd64 windows/arm64
++ export GOOS=darwin GOARCH=amd64
++ GOOS=darwin
++ GOARCH=amd64
++ ../toolchains/go1.27.2/bin/go build ./internal/darwinfile ./internal/encstore ./internal/vfs ./sqlite ./driver
++ ../toolchains/go1.27.2/bin/go test -c -o ../darwin-encrypted-evidence/encstore-darwin-amd64.test ./internal/encstore
++ ../toolchains/go1.27.2/bin/go list -deps -f '{{if .CgoFiles}}{{.ImportPath}} {{.CgoFiles}}{{end}}' ./internal/encstore ./internal/vfs ./sqlite ./driver
++ '[' darwin = darwin ']'
++ ../toolchains/go1.27.2/bin/go test -c -o ../darwin-encrypted-evidence/vfs-darwin-amd64.test ./internal/vfs
++ ../toolchains/go1.27.2/bin/go test -c -o ../darwin-encrypted-evidence/sqlite-darwin-amd64.test ./sqlite
++ ../toolchains/go1.27.2/bin/go test -c -o ../darwin-encrypted-evidence/pager-darwin-amd64.test ./internal/pager
++ ../toolchains/go1.27.2/bin/go test -c -tags oracle -o ../darwin-encrypted-evidence/testkit-darwin-amd64.test ./internal/testkit
++ ../toolchains/go1.27.2/bin/go vet ./internal/darwinfile ./internal/encstore ./internal/vfs
++ for target in linux/amd64 linux/arm64 darwin/arm64 darwin/amd64 windows/amd64 windows/arm64
++ export GOOS=windows GOARCH=amd64
++ GOOS=windows
++ GOARCH=amd64
++ ../toolchains/go1.27.2/bin/go build ./internal/darwinfile ./internal/encstore ./internal/vfs ./sqlite ./driver
++ ../toolchains/go1.27.2/bin/go test -c -o ../darwin-encrypted-evidence/encstore-windows-amd64.test ./internal/encstore
++ ../toolchains/go1.27.2/bin/go list -deps -f '{{if .CgoFiles}}{{.ImportPath}} {{.CgoFiles}}{{end}}' ./internal/encstore ./internal/vfs ./sqlite ./driver
++ '[' windows = darwin ']'
++ for target in linux/amd64 linux/arm64 darwin/arm64 darwin/amd64 windows/amd64 windows/arm64
++ export GOOS=windows GOARCH=arm64
++ GOOS=windows
++ GOARCH=arm64
++ ../toolchains/go1.27.2/bin/go build ./internal/darwinfile ./internal/encstore ./internal/vfs ./sqlite ./driver
++ ../toolchains/go1.27.2/bin/go test -c -o ../darwin-encrypted-evidence/encstore-windows-arm64.test ./internal/encstore
++ ../toolchains/go1.27.2/bin/go list -deps -f '{{if .CgoFiles}}{{.ImportPath}} {{.CgoFiles}}{{end}}' ./internal/encstore ./internal/vfs ./sqlite ./driver
++ '[' windows = darwin ']'
++ unset GOOS GOARCH
++ cmp internal/encstore/platform_linux.go ../windows-encrypted-verify/internal/encstore/platform_linux.go
++ cmp internal/encstore/platform_windows.go ../windows-encrypted-verify/internal/encstore/platform_windows.go
++ cmp internal/encstore/file_windows.go ../windows-encrypted-verify/internal/encstore/file_windows.go
++ cmp internal/vfs/native_linux.go ../windows-encrypted-verify/internal/vfs/native_linux.go
++ sha256sum -c docs/evidence/native-encrypted-darwin-source-sha256.txt
+internal/darwinfile/registry.go: OK
+internal/darwinfile/registry_test.go: OK
+internal/encstore/file_default.go: OK
+internal/encstore/file_darwin.go: OK
+internal/encstore/platform_darwin.go: OK
+internal/encstore/platform_other.go: OK
+internal/encstore/process_locks.go: OK
+internal/encstore/process_locks_test.go: OK
+internal/encstore/native_darwin_test.go: OK
+internal/vfs/native_darwin.go: OK
+docs/native-encrypted-darwin.md: OK
+internal/testkit/fileview/read_default.go: OK
+internal/testkit/fileview/read_darwin.go: OK
+sqlite/encryption_review_test.go: OK
+sqlite/encryption_test.go: OK
+sqlite/encryption_wal_test.go: OK
+internal/pager/encrypted_session_test.go: OK
+internal/pager/encrypted_wal_test.go: OK
+internal/testkit/encryption_conformance_test.go: OK
+internal/encstore/directory_names.go: OK
+internal/encstore/directory_names_test.go: OK
+internal/encstore/directory_darwin.go: OK
++ git diff --check -- internal/testkit/fileview internal/testkit/encryption_conformance_test.go sqlite/encryption_review_test.go sqlite/encryption_test.go sqlite/encryption_wal_test.go internal/pager/encrypted_session_test.go internal/pager/encrypted_wal_test.go internal/encstore/directory_names.go internal/encstore/directory_names_test.go internal/encstore/directory_darwin.go internal/darwinfile internal/encstore/file_default.go internal/encstore/file_darwin.go internal/encstore/platform_darwin.go internal/encstore/platform_other.go internal/encstore/process_locks.go internal/encstore/process_locks_test.go internal/encstore/native_darwin_test.go internal/vfs/native_darwin.go docs/native-encrypted-darwin.md
++ echo 'd11f32c0bd01d51e2ff6f0682ff449e5d52948a8318aefbf0b92010e5ef0fba5  docs/evidence/native-encrypted-darwin-source-sha256.txt'
++ sha256sum -c -
+docs/evidence/native-encrypted-darwin-source-sha256.txt: OK
+
+PRIOR DOC-TIMING FREEZE-GUARD FAILURE (exit 1, preserved)
+======================================================
+++ sha256sum docs/evidence/native-encrypted-darwin-source-sha256.txt
++ MANIFEST='4b6e08a2ceffb3bc16a0a9c3c4cc2d6b01c5dea9431df6ead38217382890f2ab  docs/evidence/native-encrypted-darwin-source-sha256.txt'
++ ../toolchains/go1.27.2/bin/go version
+go version go1.27.2 linux/amd64
++ sha256sum -c docs/evidence/native-encrypted-darwin-source-sha256.txt
+internal/darwinfile/registry.go: OK
+internal/darwinfile/registry_test.go: OK
+internal/encstore/file_default.go: OK
+internal/encstore/file_darwin.go: OK
+internal/encstore/platform_darwin.go: OK
+internal/encstore/platform_other.go: OK
+internal/encstore/process_locks.go: OK
+internal/encstore/process_locks_test.go: OK
+internal/encstore/native_darwin_test.go: OK
+internal/vfs/native_darwin.go: OK
+docs/native-encrypted-darwin.md: OK
+internal/testkit/fileview/read_default.go: OK
+internal/testkit/fileview/read_darwin.go: OK
+sqlite/encryption_review_test.go: OK
+sqlite/encryption_test.go: OK
+sqlite/encryption_wal_test.go: OK
+internal/pager/encrypted_session_test.go: OK
+internal/pager/encrypted_wal_test.go: OK
+internal/testkit/encryption_conformance_test.go: OK
+internal/encstore/directory_names.go: OK
+internal/encstore/directory_names_test.go: OK
+internal/encstore/directory_darwin.go: OK
++ ../toolchains/go1.27.2/bin/go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ MEM='^(TestRegistryMemory.*|TestProcessByteLocksMemory.*|TestDarwinDirectoryMemory.*)$'
++ ENC='^(TestSnapshotManifestCanonicalMemory|TestInventoryAccountingMemory|TestWALFormatFrozenMemoryVectors|TestSharedLayoutFrozenMemoryModeAndProtocol|TestReviewSharedIntactPinnedSelectionAndLedger|TestReviewSharedIntactConcurrentReaderAndPublisher)$'
++ SQL='^(TestEncryptionOrdinaryLifecycleAndCopies|TestEncryptionSharedReadersWriterAndStalePromotion|TestEncryptionSharedLazySavepointsAndNoopRelease|TestEncryptionSharedQuiescentRekeyAndLeaseRetention)$'
++ ../toolchains/go1.27.2/bin/go test ./internal/darwinfile ./internal/encstore -run '^(TestRegistryMemory.*|TestProcessByteLocksMemory.*|TestDarwinDirectoryMemory.*)$' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/darwinfile	0.021s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	0.003s
++ ../toolchains/go1.27.2/bin/go test ./internal/encstore -run '^(TestSnapshotManifestCanonicalMemory|TestInventoryAccountingMemory|TestWALFormatFrozenMemoryVectors|TestSharedLayoutFrozenMemoryModeAndProtocol|TestReviewSharedIntactPinnedSelectionAndLedger|TestReviewSharedIntactConcurrentReaderAndPublisher)$' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	0.018s
++ ../toolchains/go1.27.2/bin/go test ./sqlite -run '^(TestEncryptionOrdinaryLifecycleAndCopies|TestEncryptionSharedReadersWriterAndStalePromotion|TestEncryptionSharedLazySavepointsAndNoopRelease|TestEncryptionSharedQuiescentRekeyAndLeaseRetention)$' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.026s
++ CGO_ENABLED=1
++ ../toolchains/go1.27.2/bin/go test -race ./internal/darwinfile ./internal/encstore -run '^(TestRegistryMemory.*|TestProcessByteLocksMemory.*|TestDarwinDirectoryMemory.*)$' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/darwinfile	1.080s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	1.025s
++ CGO_ENABLED=1
++ ../toolchains/go1.27.2/bin/go test -race ./internal/encstore -run '^(TestSnapshotManifestCanonicalMemory|TestInventoryAccountingMemory|TestWALFormatFrozenMemoryVectors|TestSharedLayoutFrozenMemoryModeAndProtocol|TestReviewSharedIntactPinnedSelectionAndLedger|TestReviewSharedIntactConcurrentReaderAndPublisher)$' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	1.131s
++ CGO_ENABLED=1
++ ../toolchains/go1.27.2/bin/go test -race ./sqlite -run '^(TestEncryptionOrdinaryLifecycleAndCopies|TestEncryptionSharedReadersWriterAndStalePromotion|TestEncryptionSharedLazySavepointsAndNoopRelease|TestEncryptionSharedQuiescentRekeyAndLeaseRetention)$' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	1.115s
++ ../toolchains/go1.27.2/bin/go vet ./internal/darwinfile ./internal/encstore
++ for target in linux/amd64 linux/arm64 darwin/arm64 darwin/amd64 windows/amd64 windows/arm64
++ export GOOS=linux GOARCH=amd64
++ GOOS=linux
++ GOARCH=amd64
++ ../toolchains/go1.27.2/bin/go build ./internal/darwinfile ./internal/encstore ./internal/vfs ./sqlite ./driver
++ ../toolchains/go1.27.2/bin/go test -c -o ../darwin-encrypted-evidence/encstore-linux-amd64.test ./internal/encstore
++ ../toolchains/go1.27.2/bin/go list -deps -f '{{if .CgoFiles}}{{.ImportPath}} {{.CgoFiles}}{{end}}' ./internal/encstore ./internal/vfs ./sqlite ./driver
++ '[' linux = darwin ']'
++ for target in linux/amd64 linux/arm64 darwin/arm64 darwin/amd64 windows/amd64 windows/arm64
++ export GOOS=linux GOARCH=arm64
++ GOOS=linux
++ GOARCH=arm64
++ ../toolchains/go1.27.2/bin/go build ./internal/darwinfile ./internal/encstore ./internal/vfs ./sqlite ./driver
++ ../toolchains/go1.27.2/bin/go test -c -o ../darwin-encrypted-evidence/encstore-linux-arm64.test ./internal/encstore
++ ../toolchains/go1.27.2/bin/go list -deps -f '{{if .CgoFiles}}{{.ImportPath}} {{.CgoFiles}}{{end}}' ./internal/encstore ./internal/vfs ./sqlite ./driver
++ '[' linux = darwin ']'
++ for target in linux/amd64 linux/arm64 darwin/arm64 darwin/amd64 windows/amd64 windows/arm64
++ export GOOS=darwin GOARCH=arm64
++ GOOS=darwin
++ GOARCH=arm64
++ ../toolchains/go1.27.2/bin/go build ./internal/darwinfile ./internal/encstore ./internal/vfs ./sqlite ./driver
++ ../toolchains/go1.27.2/bin/go test -c -o ../darwin-encrypted-evidence/encstore-darwin-arm64.test ./internal/encstore
++ ../toolchains/go1.27.2/bin/go list -deps -f '{{if .CgoFiles}}{{.ImportPath}} {{.CgoFiles}}{{end}}' ./internal/encstore ./internal/vfs ./sqlite ./driver
++ '[' darwin = darwin ']'
++ ../toolchains/go1.27.2/bin/go test -c -o ../darwin-encrypted-evidence/vfs-darwin-arm64.test ./internal/vfs
++ ../toolchains/go1.27.2/bin/go test -c -o ../darwin-encrypted-evidence/sqlite-darwin-arm64.test ./sqlite
++ ../toolchains/go1.27.2/bin/go test -c -o ../darwin-encrypted-evidence/pager-darwin-arm64.test ./internal/pager
++ ../toolchains/go1.27.2/bin/go test -c -tags oracle -o ../darwin-encrypted-evidence/testkit-darwin-arm64.test ./internal/testkit
++ ../toolchains/go1.27.2/bin/go vet ./internal/darwinfile ./internal/encstore ./internal/vfs
++ for target in linux/amd64 linux/arm64 darwin/arm64 darwin/amd64 windows/amd64 windows/arm64
++ export GOOS=darwin GOARCH=amd64
++ GOOS=darwin
++ GOARCH=amd64
++ ../toolchains/go1.27.2/bin/go build ./internal/darwinfile ./internal/encstore ./internal/vfs ./sqlite ./driver
++ ../toolchains/go1.27.2/bin/go test -c -o ../darwin-encrypted-evidence/encstore-darwin-amd64.test ./internal/encstore
++ ../toolchains/go1.27.2/bin/go list -deps -f '{{if .CgoFiles}}{{.ImportPath}} {{.CgoFiles}}{{end}}' ./internal/encstore ./internal/vfs ./sqlite ./driver
++ '[' darwin = darwin ']'
++ ../toolchains/go1.27.2/bin/go test -c -o ../darwin-encrypted-evidence/vfs-darwin-amd64.test ./internal/vfs
++ ../toolchains/go1.27.2/bin/go test -c -o ../darwin-encrypted-evidence/sqlite-darwin-amd64.test ./sqlite
++ ../toolchains/go1.27.2/bin/go test -c -o ../darwin-encrypted-evidence/pager-darwin-amd64.test ./internal/pager
++ ../toolchains/go1.27.2/bin/go test -c -tags oracle -o ../darwin-encrypted-evidence/testkit-darwin-amd64.test ./internal/testkit
++ ../toolchains/go1.27.2/bin/go vet ./internal/darwinfile ./internal/encstore ./internal/vfs
++ for target in linux/amd64 linux/arm64 darwin/arm64 darwin/amd64 windows/amd64 windows/arm64
++ export GOOS=windows GOARCH=amd64
++ GOOS=windows
++ GOARCH=amd64
++ ../toolchains/go1.27.2/bin/go build ./internal/darwinfile ./internal/encstore ./internal/vfs ./sqlite ./driver
++ ../toolchains/go1.27.2/bin/go test -c -o ../darwin-encrypted-evidence/encstore-windows-amd64.test ./internal/encstore
++ ../toolchains/go1.27.2/bin/go list -deps -f '{{if .CgoFiles}}{{.ImportPath}} {{.CgoFiles}}{{end}}' ./internal/encstore ./internal/vfs ./sqlite ./driver
++ '[' windows = darwin ']'
++ for target in linux/amd64 linux/arm64 darwin/arm64 darwin/amd64 windows/amd64 windows/arm64
++ export GOOS=windows GOARCH=arm64
++ GOOS=windows
++ GOARCH=arm64
++ ../toolchains/go1.27.2/bin/go build ./internal/darwinfile ./internal/encstore ./internal/vfs ./sqlite ./driver
++ ../toolchains/go1.27.2/bin/go test -c -o ../darwin-encrypted-evidence/encstore-windows-arm64.test ./internal/encstore
++ ../toolchains/go1.27.2/bin/go list -deps -f '{{if .CgoFiles}}{{.ImportPath}} {{.CgoFiles}}{{end}}' ./internal/encstore ./internal/vfs ./sqlite ./driver
++ '[' windows = darwin ']'
++ unset GOOS GOARCH
++ cmp internal/encstore/platform_linux.go ../windows-encrypted-verify/internal/encstore/platform_linux.go
++ cmp internal/encstore/platform_windows.go ../windows-encrypted-verify/internal/encstore/platform_windows.go
++ cmp internal/encstore/file_windows.go ../windows-encrypted-verify/internal/encstore/file_windows.go
++ cmp internal/vfs/native_linux.go ../windows-encrypted-verify/internal/vfs/native_linux.go
++ sha256sum -c docs/evidence/native-encrypted-darwin-source-sha256.txt
+internal/darwinfile/registry.go: OK
+internal/darwinfile/registry_test.go: OK
+internal/encstore/file_default.go: OK
+internal/encstore/file_darwin.go: OK
+internal/encstore/platform_darwin.go: OK
+internal/encstore/platform_other.go: OK
+internal/encstore/process_locks.go: OK
+internal/encstore/process_locks_test.go: OK
+internal/encstore/native_darwin_test.go: OK
+internal/vfs/native_darwin.go: OK
+docs/native-encrypted-darwin.md: OK
+internal/testkit/fileview/read_default.go: OK
+internal/testkit/fileview/read_darwin.go: OK
+sqlite/encryption_review_test.go: OK
+sqlite/encryption_test.go: OK
+sqlite/encryption_wal_test.go: OK
+internal/pager/encrypted_session_test.go: OK
+internal/pager/encrypted_wal_test.go: OK
+internal/testkit/encryption_conformance_test.go: OK
+internal/encstore/directory_names.go: OK
+internal/encstore/directory_names_test.go: OK
+internal/encstore/directory_darwin.go: OK
++ git diff --check -- internal/testkit/fileview internal/testkit/encryption_conformance_test.go sqlite/encryption_review_test.go sqlite/encryption_test.go sqlite/encryption_wal_test.go internal/pager/encrypted_session_test.go internal/pager/encrypted_wal_test.go internal/encstore/directory_names.go internal/encstore/directory_names_test.go internal/encstore/directory_darwin.go internal/darwinfile internal/encstore/file_default.go internal/encstore/file_darwin.go internal/encstore/platform_darwin.go internal/encstore/platform_other.go internal/encstore/process_locks.go internal/encstore/process_locks_test.go internal/encstore/native_darwin_test.go internal/vfs/native_darwin.go docs/native-encrypted-darwin.md
++ echo '4b6e08a2ceffb3bc16a0a9c3c4cc2d6b01c5dea9431df6ead38217382890f2ab  docs/evidence/native-encrypted-darwin-source-sha256.txt'
++ sha256sum -c -
+docs/evidence/native-encrypted-darwin-source-sha256.txt: FAILED
+sha256sum: WARNING: 1 computed checksum did NOT match

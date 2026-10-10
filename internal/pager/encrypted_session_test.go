@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/rand"
 	"errors"
+	"github.com/ms-xiaosnow/gosqlite/internal/testkit/fileview"
 	"os"
 	"path/filepath"
 	"testing"
@@ -87,7 +88,7 @@ func TestEncryptedPagerOrdinarySnapshotLifecycle(t *testing.T) {
 	if err = r.Close(); err != nil {
 		t.Fatal(err)
 	}
-	rootBefore, err := os.ReadFile(path)
+	rootBefore, err := fileview.ReadFile(path)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -98,7 +99,7 @@ func TestEncryptedPagerOrdinarySnapshotLifecycle(t *testing.T) {
 	if err = tx.Commit(ctx); err != nil {
 		t.Fatal(err)
 	}
-	rootAfter, err := os.ReadFile(path)
+	rootAfter, err := fileview.ReadFile(path)
 	if err != nil || !bytes.Equal(rootBefore, rootAfter) {
 		t.Fatal("no-op changed root", err)
 	}
