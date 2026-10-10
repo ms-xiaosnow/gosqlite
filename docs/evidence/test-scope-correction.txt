@@ -1,0 +1,35 @@
+Scope-correction report, 2026-10-10 UTC. This is not a raw terminal transcript.
+
+Both namespace mutation tests entered M2 commit9feb20357fedb2bff7901a97a462e9bf4821e279.
+Source discovery occurred13:22; the running Library-restored test session stopped
+with returned exit130. No final full-suite result was obtained. The queued oracle
+script was changed to a blocking exit77 stub before interruption. The restored
+checkout is modified; its previously verified persistent bundle remains unchanged.
+
+GitHub run38055114656 for7addc4935c7547ae32f76bcdf5e2635044c84fc9 completed success,
+updated13:25:22 and observed13:26:57. It included the two now-gated cases. No CI
+cancellation was completed. Historical PASS logs have not been rewritten.
+
+Source inspection found no other direct physical namespace mutation/termination
+in default/oracle test files; direct writes were reviewed as intact fixture copies
+or ordinary mapping allocation. This is scoped review, not a call-graph proof.
+
+Pure-memory guard checks actually run with verified Go1.27.2, CGO_ENABLED=0,
+GOTOOLCHAIN=local, offline modules and the existing writable Go cache/GOPATH:
+- go test ./internal/testscope -count=1: PASS0.003s.
+- go run ./internal/testscope: PASS.
+- go vet ./internal/testscope: PASS.
+These commands do not execute database tests.
+
+Independent go list metadata inspection confirmed write_namespace_manual_test.go
+is IgnoredGoFiles for default and oracle builds. The manual file also checks its
+explicit environment gate. Exact build constraints, RemoveAll/method mutation,
+method-value/import-alias and bare RecoverRollback guard regressions were added.
+
+Independent source-review closure at13:30 UTC: all identified guard prevention
+gaps closed; default/oracle metadata exclusions remain correct. No database test
+was run for either review. A separate staging-tree clone based on exact7addc493
+passed the guard and pure-memory guard tests0.004s. Both go list selections mark
+the manual file ignored. Manual namespace source compiled with go test -c only;
+the binary was not executed. Default go test -list did not select either moved
+namespace test. This is the safety-only patch, without in-flight feature changes.

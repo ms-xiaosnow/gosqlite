@@ -43,7 +43,8 @@
     "library_version": 0,
     "verified": "Guarded remote commit/ref readback; exact local commit mirror; complete-history bundle verify; clean clone/fsck; persisted Library readback bytes identical; original goal and all fixture manifest hashes unchanged; Library-restored clean clone passed scripts/check.sh and pinned oracle suite",
     "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38043149889",
-    "remote_ci_status": "PASSED for exact checkpoint SHA; observed 2026-10-10T09:58:48Z; only ordinary checks"
+    "remote_ci_status": "PASSED for exact checkpoint SHA; observed 2026-10-10T09:58:48Z; only ordinary checks",
+    "test_scope_correction": "Full suites at this checkpoint included two namespace-mutation tests later gated on2026-10-10. PASS results are factual, not clean ordinary-scope evidence; see docs/test-scope-audit.md."
   },
   {
     "stage": "M3 exclusive-WAL intermediate slice; full M3 incomplete",
@@ -56,7 +57,8 @@
     "verified": "Guarded remote readback; exact local mirror; full-history bundle verify; Library byte-identical readback; clean restore/fsck; restored ordinary unit/vet/build/race and pinned oracle suite passed; manual recovery compiled only and never executed",
     "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38044412625",
     "remote_ci_status": "PASSED for exact SHA, observed 2026-10-10T10:20:05Z; ordinary-only",
-    "open_gates": "Shared concurrent WAL implementation; restricted crash/fault/physical recovery acceptance; independent native-OS/security/legal gates"
+    "open_gates": "Shared concurrent WAL implementation; restricted crash/fault/physical recovery acceptance; independent native-OS/security/legal gates",
+    "test_scope_correction": "Full suites at this checkpoint included two namespace-mutation tests later gated on2026-10-10. PASS results are factual, not clean ordinary-scope evidence; see docs/test-scope-audit.md."
   },
   {
     "stage": "M3 shared-WAL ordinary implementation; M4 range/tokenizer prerequisites",
@@ -69,7 +71,8 @@
     "verified": "Guarded remote ref and commit readback; exact local mirror; full-history bundle verify; Library byte-identical readback; clean restore/fsck; restored scripts/check.sh and pinned oracle suite passed; source/fixture hashes unchanged",
     "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38045438964",
     "remote_ci_status": "PASSED for exact SHA, observed 2026-10-10T10:37:24Z; ordinary-only",
-    "open_gates": "Broader recovery/platform implementation, restricted physical recovery/crash/fault acceptance; M4 persistent index/planner and all later milestones; independent native-OS/security/legal/soak acceptance"
+    "open_gates": "Broader recovery/platform implementation, restricted physical recovery/crash/fault acceptance; M4 persistent index/planner and all later milestones; independent native-OS/security/legal/soak acceptance",
+    "test_scope_correction": "Full suites at this checkpoint included two namespace-mutation tests later gated on2026-10-10. PASS results are factual, not clean ordinary-scope evidence; see docs/test-scope-audit.md."
   },
   {
     "stage": "M4 ordinary persistent grams13/indexed LIKE/MATCH; M5 math prerequisite",
@@ -82,7 +85,8 @@
     "verified": "Guarded remote ref and commit readback; exact local mirror; full-history bundle verify; Library byte-identical readback; clean restore/fsck; restored scripts/check.sh and complete pinned-oracle suite passed",
     "remote_ci_status": "PASSED for exact SHA, observed 2026-10-10T11:05:16Z; ordinary-only",
     "open_gates": "Full M4 crash/recovery acceptance remains conditional; later integrated similarity/vector/encryption/migration features and independent OS/security/legal/soak gates remain open",
-    "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38046568934"
+    "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38046568934",
+    "test_scope_correction": "Full suites at this checkpoint included two namespace-mutation tests later gated on2026-10-10. PASS results are factual, not clean ordinary-scope evidence; see docs/test-scope-audit.md."
   },
   {
     "stage": "M5 ordinary exact text similarity; M6 dense-vector mathematical prerequisite",
@@ -95,7 +99,8 @@
     "verified": "Guarded remote ref and commit readback; exact local mirror; full-history bundle verify; Library byte-identical readback; clean restore/fsck; restored ordinary unit/vet/build/race and complete pinned oracle passed. First completion collection lost exec transport and was not counted; retained-log rerun completed exit0.",
     "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38047806226",
     "remote_ci_status": "PASSED for exact SHA, observed 2026-10-10T11:24:01Z; ordinary-only",
-    "open_gates": "M5 database vector/text fusion and M6 SQL/persistence are required code gaps; broader recovery/platform implementation, restricted physical durability and independent release gates remain open"
+    "open_gates": "M5 database vector/text fusion and M6 SQL/persistence are required code gaps; broader recovery/platform implementation, restricted physical durability and independent release gates remain open",
+    "test_scope_correction": "Full suites at this checkpoint included two namespace-mutation tests later gated on2026-10-10. PASS results are factual, not clean ordinary-scope evidence; see docs/test-scope-audit.md."
   },
   {
     "stage": "M6 ordinary typed vectors/exact KNN and M5 same-snapshot hybrid integration",
@@ -108,7 +113,8 @@
     "verified": "Guarded remote ref and commit readback; exact local mirror; full-history bundle verify; Library byte-identical readback; clean restore/fsck; restored scripts/check.sh ordinary unit/vet/build/race and complete pinned SQLite3.54 oracle passed, retained exit0 at2026-10-10T11:43:34Z",
     "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38048914433",
     "remote_ci_status": "PASSED for exact SHA, observed 2026-10-10T11:41:14Z; ordinary-only",
-    "open_gates": "HNSW/IVFFlat, authenticated encrypted storage, migration and broader recovery/platform implementations remain required code; restricted physical durability and independent release gates remain open"
+    "open_gates": "HNSW/IVFFlat, authenticated encrypted storage, migration and broader recovery/platform implementations remain required code; restricted physical durability and independent release gates remain open",
+    "test_scope_correction": "Full suites at this checkpoint included two namespace-mutation tests later gated on2026-10-10. PASS results are factual, not clean ordinary-scope evidence; see docs/test-scope-audit.md."
   },
   {
     "stage": "M7 first persistent HNSW ordinary slice; M8 memory-only authenticated-record prerequisite",
@@ -121,7 +127,8 @@
     "verified": "Guarded remote ref/commit readback; exact local mirror; full-history bundle; Library byte-identical readback; clean restore/fsck; restored ordinary unit/vet/build/race and full pinned SQLite oracle passed exit0 at2026-10-10T12:12:46Z",
     "remote_ci_status": "PASSED for exact SHA, observed2026-10-10T12:09:58Z; ordinary-only",
     "open_gates": "IVFFlat, encrypted database/storage/WAL/rekey/backup, migration and broader SQL/recovery/native-platform code remain; physical durability and independent release gates remain blocked/unverified",
-    "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38050546401"
+    "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38050546401",
+    "test_scope_correction": "Full suites at this checkpoint included two namespace-mutation tests later gated on2026-10-10. PASS results are factual, not clean ordinary-scope evidence; see docs/test-scope-audit.md."
   },
   {
     "stage": "M7 persistent IVFFlat and M8 experimental authenticated snapshot storage",
@@ -134,6 +141,22 @@
     "verified": "Guarded ref/commit readback; exact local mirror; full-history bundle; Library byte-identical readback; clean clone/fsck and original goal hash verified. Restored full ordinary unit/vet/build/race and pinned SQLite oracle passed exit0 at2026-10-10T12:55:04Z.",
     "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38052742168",
     "remote_ci_status": "PASSED for exact SHA, observed2026-10-10T12:49:47Z; ordinary-only",
-    "open_gates": "Encrypted WAL/concurrent writer-readers, migration/extended types, broader SQL/recovery/native-platform code remain; restricted physical durability and independent release gates remain blocked/unverified"
+    "open_gates": "Encrypted WAL/concurrent writer-readers, migration/extended types, broader SQL/recovery/native-platform code remain; restricted physical durability and independent release gates remain blocked/unverified",
+    "test_scope_correction": "Full suites at this checkpoint included two namespace-mutation tests later gated on2026-10-10. PASS results are factual, not clean ordinary-scope evidence; see docs/test-scope-audit.md."
+  },
+  {
+    "stage": "M8 authenticated dirty-page WAL; ordinary equality SELECT; M9 inspector and extended memory primitives",
+    "remote_commit": "7addc4935c7547ae32f76bcdf5e2635044c84fc9",
+    "local_commit": "7addc4935c7547ae32f76bcdf5e2635044c84fc9",
+    "tree": "0b6d9d9e3d9220379cff563f42095ed9c0898f1c",
+    "bundle_sha256": "8e9c3893cc054d2223026943cfdc518072c1b82a3ccd1c58fa11e2eeab487f7e",
+    "library_file_id": "libfile_2227676e270481919ecb687d6523cae7",
+    "library_version": 0,
+    "bundle_bytes": 1065240,
+    "verified": "Guarded remote readback/exact local mirror; complete-history bundle; byte-identical Library readback, clean clone/fsck and original goal hash verified. Prepublication full suites passed but included the two later-gated namespace tests. Restored test validation was administratively stopped exit130; queued oracle blocked and clone modified. No restored full-test success is claimed.",
+    "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38055114656",
+    "remote_ci_status": "COMPLETED SUCCESS at2026-10-10T13:25:22Z, observed13:26:57Z; includes the two later-gated namespace tests, not corrected ordinary-scope evidence.",
+    "open_gates": "Concurrent encrypted writer/readers; remaining migration/extended SQL/ANN, broad SQL, recovery and native-platform code; restricted physical durability and independent release acceptance remain open.",
+    "test_scope_correction": "Full suites at this checkpoint included two namespace-mutation tests later gated on2026-10-10. PASS results are factual, not clean ordinary-scope evidence; see docs/test-scope-audit.md."
   }
 ]

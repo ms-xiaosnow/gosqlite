@@ -1,5 +1,7 @@
 # Manual verification and release-blocking gates
 
+Test-scope correction: historical full suites from M2 through 7addc493 included two namespace-mutation tests. Their PASS outputs remain factual, but are not clean ordinary-scope evidence. See [the audit and gating correction](test-scope-audit.md).
+
 This file records checks that require a separately approved native environment or independent reviewer. No command here is evidence that it was executed.
 
 ## Current state
