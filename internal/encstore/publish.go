@@ -24,12 +24,15 @@ func (s *Store) nextDescriptor(g Geometry, role encryption.FileRole, records uin
 	if d.TransactionID == ([32]byte{}) {
 		return d, encryption.ErrRandomness
 	}
-	if s.root != nil {
+	if len(s.rootBytes) != 0 {
 		d.ParentCommitID = s.HeadCommitID()
 	}
 	return d, nil
 }
 func (s *Store) prepublish(ctx context.Context) error {
+	if s.opts.Mode == WALShared && !s.writerOwned && !s.lifecycleExclusive {
+		return ErrUnsupported
+	}
 	if s.readOnly {
 		return ErrReadOnly
 	}
@@ -52,7 +55,7 @@ func (s *Store) publishBase(ctx context.Context, g Geometry, src PageSource, tar
 	master, opts := s.master, s.opts
 	if target != nil {
 		master, opts = target.Master, target.Options
-		if s.root != nil && opts.Mode != s.opts.Mode {
+		if len(s.rootBytes) != 0 && opts.Mode != s.opts.Mode {
 			return ErrUnsupported
 		}
 	}
@@ -89,10 +92,10 @@ func (s *Store) publishBase(ctx context.Context, g Geometry, src PageSource, tar
 		return encryption.ErrLimit
 	}
 	rootBytes := uint64(rootSize)
-	if mode == WAL {
+	if mode.IsWAL() {
 		rootBytes = walRootSize(0)
 		stub := walManifest{Base: objectRef{Descriptor: d, Bytes: objectSize(g)}}
-		if e = graphBudget(stub, opts, 4, peakIDs*128); e != nil {
+		if e = combinedGraphBudget(s.retainedGraph(), stub, opts, peakIDs); e != nil {
 			return e
 		}
 	}
@@ -101,10 +104,10 @@ func (s *Store) publishBase(ctx context.Context, g Geometry, src PageSource, tar
 			return e
 		}
 	}
-	if e = plannedBudget(ctx, s.path, s.ns, opts, d.CommitSequence, objectSize(g), rootBytes, uint64(len(s.rootBytes)), s.root != nil); e != nil {
+	if e = plannedBudget(ctx, s.path, s.ns, opts, d.CommitSequence, objectSize(g), rootBytes, uint64(len(s.rootBytes)), len(s.rootBytes) != 0); e != nil {
 		return e
 	}
-	if target != nil && s.root != nil {
+	if target != nil && len(s.rootBytes) != 0 {
 		if e = s.Verify(ctx); e != nil {
 			return e
 		}
@@ -133,14 +136,14 @@ func (s *Store) publishBase(ctx context.Context, g Geometry, src PageSource, tar
 	var wm *walManifest
 	var loc []location
 	var ceiling uint32
-	if mode == WAL {
+	if mode.IsWAL() {
 		ref := refFor(obj)
 		m := walManifest{Base: ref, Head: ref.CommitID, PageOneHash: ref.PageOneHash}
-		if s.root != nil {
+		if len(s.rootBytes) != 0 {
 			m.PreviousRootHash = sha256.Sum256(s.rootBytes)
 		}
 		wm = &m
-		payload = m.encode()
+		payload = m.encodeMode(mode)
 		loc, ceiling, e = buildOverlay(m, nil)
 		if e != nil {
 			return e
@@ -161,23 +164,24 @@ func (s *Store) publishBase(ctx context.Context, g Geometry, src PageSource, tar
 	if target != nil {
 		target.Master = nil
 	}
+	var closeErr error
 	if oldBase != nil {
-		oldBase.close()
+		closeErr = errors.Join(closeErr, oldBase.close())
 	}
 	for _, seg := range oldSegments {
-		seg.close()
+		closeErr = errors.Join(closeErr, seg.close())
 	}
 	if oldMaster != nil && oldMaster != master {
-		oldMaster.Close()
+		closeErr = errors.Join(closeErr, oldMaster.Close())
 	}
-	return nil
+	return s.poisonOwnership(closeErr, true)
 }
 
 func (s *Store) PublishWAL(ctx context.Context, expected [32]byte, g Geometry, pages []uint32, src PageSource) error {
 	if e := s.prepublish(ctx); e != nil {
 		return e
 	}
-	if s.wal == nil || s.opts.Mode != WAL {
+	if s.wal == nil || !s.opts.Mode.IsWAL() {
 		return ErrUnsupported
 	}
 	if expected != s.wal.Head {
@@ -224,9 +228,13 @@ func (s *Store) PublishWAL(ctx context.Context, expected [32]byte, g Geometry, p
 	if e != nil {
 		return e
 	}
+	// Charge retained graph plus metadata scratch/ledger before cloning refs.
+	if e = rootBytesBudget(selectionMemory(*s.wal), walRootSize(len(m.Segments)+1), s.writerIDs+2, s.opts); e != nil {
+		return e
+	}
 	// Bounded descriptor list is allocated only after its configured count cap.
 	m.Segments = append(append([]objectRef(nil), m.Segments...), objectRef{Descriptor: d, Bytes: size})
-	if e = graphBudget(m, s.opts, 0, (s.writerIDs+2)*128); e != nil {
+	if e = combinedGraphBudget(s.wal, m, s.opts, s.writerIDs+2); e != nil {
 		return e
 	}
 	work := uint64(0)
@@ -266,7 +274,7 @@ func (s *Store) PublishWAL(ctx context.Context, expected [32]byte, g Geometry, p
 	if e != nil {
 		return e
 	}
-	if e = s.publishRoot(ctx, s.master, s.opts, d, m.encode(), func() error { return seg.ns.stable(seg.file, seg.path, seg.info) }); e != nil {
+	if e = s.publishRoot(ctx, s.master, s.opts, d, m.encodeMode(s.opts.Mode), func() error { return seg.ns.stable(seg.file, seg.path, seg.info) }); e != nil {
 		return e
 	}
 	s.wal, s.segments, s.overlay, s.baseCeiling = &m, segs, loc, ceiling
@@ -278,7 +286,7 @@ func (s *Store) PublishWAL(ctx context.Context, expected [32]byte, g Geometry, p
 // every failure is uncertain and poisons the handle. No recovery/promotion or
 // fallback to retained roots is attempted. Obsolete descriptor close cannot
 // undo a durably published root or turn success into SQL rollback.
-func (s *Store) publishRoot(ctx context.Context, master *encryption.MasterKey, opts Options, d encryption.FileDescriptor, payload []byte, candidateStable func() error) error {
+func (s *Store) publishRoot(ctx context.Context, master *encryption.MasterKey, opts Options, d encryption.FileDescriptor, payload []byte, candidateStable func() error) (err error) {
 	defer clear(payload)
 	d.Role = encryption.FileRoot
 	d.RecordCount = 1
@@ -329,7 +337,7 @@ func (s *Store) publishRoot(ctx context.Context, master *encryption.MasterKey, o
 	if e != nil {
 		return e
 	}
-	if s.root != nil {
+	if len(s.rootBytes) != 0 {
 		if e = s.ns.retain(s.path+".gse-"+idString(s.header.FileID)+".retained", s.rootBytes); e != nil {
 			return e
 		}
@@ -337,7 +345,16 @@ func (s *Store) publishRoot(ctx context.Context, master *encryption.MasterKey, o
 	if e = s.ns.sync(s.path); e != nil {
 		return e
 	}
-	if e = s.Check(); e != nil {
+	// Only final authority verification and cutover hold the short exclusive
+	// capture gate. Preparing/syncing immutable candidates does not block readers.
+	attempted := false
+	if opts.Mode == WALShared {
+		if e = s.enterGate(false); e != nil {
+			return e
+		}
+		defer func() { err = errors.Join(err, s.leaveGate(attempted)) }()
+	}
+	if e = s.checkAuthority(); e != nil {
 		return e
 	}
 	if e = s.checkSelected(); e != nil {
@@ -350,7 +367,8 @@ func (s *Store) publishRoot(ctx context.Context, master *encryption.MasterKey, o
 		return e
 	}
 	uncertain := func(e error) error { s.poisoned = errors.Join(ErrUncertain, e); return s.poisoned }
-	if e = s.ns.rename(pending, s.path, s.root == nil); e != nil {
+	attempted = true
+	if e = s.ns.rename(pending, s.path, len(s.rootBytes) == 0); e != nil {
 		return uncertain(e)
 	}
 	if e = s.ns.sync(s.path); e != nil {
@@ -371,7 +389,10 @@ func (s *Store) publishRoot(ctx context.Context, master *encryption.MasterKey, o
 		root.Close()
 		return uncertain(e)
 	}
-	if e = s.checkSelected(); e == nil {
+	if e = s.checkOwner(); e == nil {
+		e = s.checkSelected()
+	}
+	if e == nil {
 		e = candidateStable()
 	}
 	if e != nil {
@@ -379,9 +400,18 @@ func (s *Store) publishRoot(ctx context.Context, master *encryption.MasterKey, o
 		return uncertain(e)
 	}
 	old := s.root
+	if opts.Mode == WALShared {
+		if e = root.Close(); e != nil {
+			return uncertain(e)
+		}
+		root = nil
+	}
+	clear(s.rootBytes)
 	s.root, s.rootInfo, s.rootBytes, s.header = root, ri, raw, h
 	if old != nil {
-		old.Close()
+		if e = old.Close(); e != nil {
+			return uncertain(e)
+		}
 	}
 	return nil
 }
@@ -391,14 +421,21 @@ func verifyRootBytes(raw []byte, master *encryption.MasterKey, o Options) error 
 		return e
 	}
 	defer clear(p)
-	if o.Mode == WAL {
-		_, e = decodeWALManifest(p, h, o)
+	if o.Mode.IsWAL() {
+		_, e = decodeStorageWAL(p, h, o)
 	} else {
 		_, e = decodeManifest(p)
 	}
 	return e
 }
-func (s *Store) Checkpoint(ctx context.Context) error {
+func (s *Store) Checkpoint(ctx context.Context) (err error) {
+	if s.opts.Mode == WALShared {
+		if err = s.BeginMaintenance(ctx, false); err != nil {
+			return err
+		}
+		before := s.Authority()
+		defer func() { err = errors.Join(err, s.EndMaintenance(s.Authority() != before)) }()
+	}
 	if e := s.Check(); e != nil {
 		return e
 	}
@@ -443,7 +480,7 @@ func (s *Store) CopyBudget() error {
 }
 func basePlanBudget(o Options, g Geometry) error {
 	payload := uint32(manifestSize)
-	if o.Mode == WAL {
+	if o.Mode.IsWAL() {
 		payload = 512
 	}
 	if e := (encryption.RecordHeader{Role: encryption.RecordMetadata, PlaintextSize: payload}).Validate(o.Limits); e != nil {
@@ -452,7 +489,7 @@ func basePlanBudget(o Options, g Geometry) error {
 	if e := rootExtent(int64(encryption.HeaderSize+recordOverhead+payload), o); e != nil {
 		return e
 	}
-	if o.Mode == WAL {
+	if o.Mode.IsWAL() {
 		m := walManifest{Base: objectRef{Descriptor: encryption.FileDescriptor{PageSize: g.PageSize, PageCount: g.PageCount}, Bytes: objectSize(g)}}
 		return graphBudget(m, o, 4)
 	}

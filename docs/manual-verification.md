@@ -278,3 +278,25 @@ cases, not physical damage. The full aggregate uses an immutable archive tree
 98d857b4e07b755fa9bd67346905785135fba2ef and GOFLAGS=-buildvcs=false because
 the archive has no Git metadata; -timeout=30m is an ordinary test-run ceiling.
 No native target runtime, physical fault/recovery or cryptographic audit is implied.
+
+## Native-platform and shared encrypted ordinary verification
+
+Frozen source tree ba85a097c9c10cf96e0bc9049d796887cfd3ba80 excludes later sparse,
+importer, SQL-expression and encrypted-platform edits. Linux commands use pinned
+Go1.27.2, offline modules and the mandatory testscope guard. Component/review logs
+record named CGO0 and separate CGO1-race checks. Only correct-key intact files,
+cooperating ordinary API interleavings and memory-only invalid-state models run.
+
+Native Darwin/Windows build and test-binary compilation are compile-only. They
+must not be reported as runtime PASS. Default Windows cross-vet returns exit1
+for the documented mmap uintptr/unsafe.Pointer conversion. Linux and Darwin
+scoped vet pass. No checker suppression is an acceptance result.
+
+Shared encrypted tests cover lazy transactions/savepoints, stale promotion,
+independent readers/writer, copied selection stability across ordinary concurrent
+publication/checkpoint, configured quotas, normal cancellation, quiescent rekey,
+explicit upgrades, restore/import/export and close BUSY. No fault/crash/forced
+exit, physical tamper/wrong-key/selected-file removal, active namespace mutation,
+failed native IO/Sync/lock/unmap or interrupted publication/rekey is executed.
+Missing non-Linux encrypted code and failed-open retirement retry remain code
+work; physical, independent native/security/crypto/legal/soak gates stay unverified.

@@ -48,6 +48,7 @@ var (
 type File struct {
 	mu                               sync.Mutex
 	raw                              *os.File
+	native                           nativeFile
 	path                             string
 	role                             Role
 	writable                         bool
@@ -86,7 +87,10 @@ func Open(path string, opts OpenOptions) (*File, error) {
 	owners.Unlock()
 	// Register before validation or cleanup. Darwin's backend must additionally
 	// register the physical descriptor under its inode lifecycle gate.
-	f.identity, err = raw.Stat()
+	err = nativeOpened(f)
+	if err == nil {
+		f.identity, err = raw.Stat()
+	}
 	if err == nil {
 		if opts.Role == Directory {
 			if !f.identity.IsDir() {
@@ -117,7 +121,7 @@ func (f *File) checkLocked() error {
 	if f.closing {
 		return ErrPoisoned
 	}
-	return nil
+	return nativeCheck(f)
 }
 func (f *File) Name() string { f.mu.Lock(); defer f.mu.Unlock(); return f.path }
 func (f *File) Read(b []byte) (int, error) {
@@ -180,6 +184,9 @@ func (f *File) validatePathLocked() error {
 	if err := f.checkLocked(); err != nil {
 		return err
 	}
+	if err := nativeValidatePath(f); err != nil {
+		return err
+	}
 	info, err := f.raw.Stat()
 	if err != nil {
 		return err
@@ -200,8 +207,10 @@ func (f *File) validatePathLocked() error {
 func (f *File) ValidatePath() error { f.mu.Lock(); defer f.mu.Unlock(); return f.validatePathLocked() }
 
 // Close retires every mapped resource before releasing DMS or its descriptor.
-// An unresolved unmap keeps the owner strongly retained, rejects new I/O, and
-// can be retried through Close; no finalizer can release the protecting lock.
+// An unresolved unmap or poisoned native retirement keeps the owner strongly
+// retained and rejects new I/O. Close may retry represented resources; a backend
+// with an indeterminate physical close can retain an explicit tombstone instead
+// of retrying a possibly reused handle. No finalizer releases protecting locks.
 func (f *File) Close() error {
 	f.mu.Lock()
 	defer f.mu.Unlock()
@@ -210,7 +219,7 @@ func (f *File) Close() error {
 	}
 	f.closing = true
 	err := f.closeResourcesLocked(nativeUnmap, func() error { return nativeClose(f) })
-	if len(f.maps) != 0 {
+	if len(f.maps) != 0 || errors.Is(err, ErrPoisoned) {
 		return err
 	}
 	f.raw = nil
@@ -288,8 +297,17 @@ func ReplaceWAL(db, old, candidate *File) error {
 		}
 	}
 	if err := nativeReplace(candidate.path, old.path); err != nil {
+		if errors.Is(err, ErrPoisoned) {
+			db.closing, old.closing, candidate.closing = true, true, true
+		}
 		return err
 	}
 	candidate.path = old.path
-	return candidate.validatePathLocked()
+	if err := candidate.validatePathLocked(); err != nil {
+		// A completed namespace operation with unverified destination identity
+		// must not leave any publication participant usable as a cached owner.
+		db.closing, old.closing, candidate.closing = true, true, true
+		return errors.Join(ErrPoisoned, err)
+	}
+	return nil
 }

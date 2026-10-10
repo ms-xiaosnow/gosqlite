@@ -115,34 +115,22 @@ func CreateEncryptedSnapshot(ctx context.Context, destination string, target *en
 	i, e := encstore.CreateFrom(ctx, destination, target, encstore.Geometry{PageSize: h.PageSize, PageCount: h.PageCount}, r)
 	return i, encryptedError(e)
 }
-func (s *EncryptedSession) BackupPrepared(ctx context.Context, destination string, target *encstore.Prepared) (encstore.Info, error) {
+func (s *EncryptedSession) BackupPrepared(ctx context.Context, destination string, target *encstore.Prepared, validate SnapshotValidator) (info encstore.Info, err error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if err := s.checkLocked(); err != nil {
-		return encstore.Info{}, err
-	}
-	if s.active != nil {
-		return encstore.Info{}, ErrBusy
-	}
-	if err := s.store.Verify(ctx); err != nil {
-		return encstore.Info{}, encryptedError(err)
-	}
-	i, e := encstore.WriteBackup(ctx, destination, target, s.store.Geometry(), s.store)
-	return i, encryptedError(e)
+	err = s.operationLocked(ctx, false, false, validate, func(r encryptedSnapshotView) error {
+		var e error
+		info, e = encstore.WriteBackup(ctx, destination, target, s.store.Geometry(), r)
+		return encryptedError(e)
+	})
+	return info, err
 }
-func (s *EncryptedSession) ExportPlaintext(ctx context.Context, destination string) error {
+func (s *EncryptedSession) ExportPlaintext(ctx context.Context, destination string, validate SnapshotValidator) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if err := s.checkLocked(); err != nil {
-		return err
-	}
-	if s.active != nil {
-		return ErrBusy
-	}
-	if err := s.store.Verify(ctx); err != nil {
-		return encryptedError(err)
-	}
-	return encryptedError(encstore.ExportPlaintext(ctx, destination, s.store.Geometry(), s.store))
+	return s.operationLocked(ctx, false, false, validate, func(r encryptedSnapshotView) error {
+		return encryptedError(encstore.ExportPlaintext(ctx, destination, s.store.Geometry(), r))
+	})
 }
 
 // ValidatePlaintextCopySource narrows ordinary read-only alias behavior for

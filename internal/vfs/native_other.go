@@ -1,4 +1,4 @@
-//go:build !linux
+//go:build !linux && !darwin && !(windows && amd64)
 
 package vfs
 

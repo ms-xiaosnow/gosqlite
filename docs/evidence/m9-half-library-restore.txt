@@ -1,0 +1,18 @@
+Library-restored exact HALF commit focused verification; full source aggregate separately recorded.
+2026-10-10T14:28:55Z
+ebe308f06fb65ddbffa4fb506bb2b1ed6ccc2237
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.012s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.164s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.043s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/half-rerank	0.008s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	1.046s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	1.690s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.132s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/half-rerank	1.045s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	0.372s
+all modules verified
+2026-10-10T14:29:22Z
+HALF LIBRARY RESTORE FOCUSED CHECKS PASS

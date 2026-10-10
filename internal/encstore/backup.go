@@ -117,7 +117,7 @@ func CreateFrom(ctx context.Context, destination string, target *Prepared, g Geo
 	if err = publicationBudget(ctx, path, target.Options, g, 1, false); err != nil {
 		return Info{}, err
 	}
-	s, absent, err := acquire(path, false, true)
+	s, absent, err := acquire(path, false, true, target.Options.Mode)
 	if err != nil {
 		return Info{}, err
 	}

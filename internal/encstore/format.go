@@ -13,11 +13,13 @@ import (
 )
 
 var (
-	ErrBusy        = errors.New("encrypted database is busy")
-	ErrChanged     = errors.New("encrypted database identity changed")
-	ErrUnsupported = errors.New("unsupported encrypted storage configuration")
-	ErrUncertain   = errors.New("encrypted root publication durability is uncertain")
-	ErrReadOnly    = errors.New("encrypted database is read-only")
+	ErrBusySnapshot = fmt.Errorf("%w: encrypted read snapshot is no longer current", ErrBusy)
+	ErrPoisoned     = errors.New("encrypted storage ownership is poisoned")
+	ErrBusy         = errors.New("encrypted database is busy")
+	ErrChanged      = errors.New("encrypted database identity changed")
+	ErrUnsupported  = errors.New("unsupported encrypted storage configuration")
+	ErrUncertain    = errors.New("encrypted root publication durability is uncertain")
+	ErrReadOnly     = errors.New("encrypted database is read-only")
 )
 
 // Options is copied by the public connection. Provider and Budget remain
@@ -38,7 +40,7 @@ type Options struct {
 
 func (Options) Format(s fmt.State, verb rune) { _, _ = s.Write([]byte("encstore.Options{redacted}")) }
 func (o Options) Validate() error {
-	if o.Mode != Snapshot && o.Mode != WAL {
+	if o.Mode != Snapshot && !o.Mode.IsWAL() {
 		return ErrUnsupported
 	}
 	if _, err := o.WALLimits.normalized(); err != nil {

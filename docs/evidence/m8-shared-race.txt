@@ -1,0 +1,8 @@
+Frozen-source focused M8c race instrumentation. CGO enabled only for Go race runtime; no SQLite runtime delegation.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+CGO_ENABLED=1 go test -race ./internal/encstore ./internal/pager ./sqlite ./driver ./examples/encrypted-shared -run '^(TestSharedLayoutFrozenMemoryModeAndProtocol|TestSharedCombinedMemoryAndDescriptorBudgets|TestEncryptedSharedCopyPinsSelectionThroughValidationAndOutput|TestEncryptedSharedPoisonPriorityMemory|TestEncryptionSharedReadersWriterAndStalePromotion|TestEncryptionSharedLazySavepointsAndNoopRelease|TestEncryptionSharedQuiescentRekeyAndLeaseRetention|TestEncryptionSharedExplicitUpgradeCopiesAndRestore|TestEncryptionSharedCloseBusyAndPasswordRefresh|TestEncryptionSharedPromotionQuotaPreservesReadLease|TestEncryptionSharedGramsHNSWIVFSavepointAndCopy|TestEncryptedSharedConnectorIndependentPoolSnapshots|TestEncryptedSharedExampleOrdinary)$' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	1.035s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.040s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	3.447s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.060s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-shared	1.069s

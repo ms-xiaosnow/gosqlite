@@ -2,6 +2,7 @@ package sqlite
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -58,8 +59,7 @@ func (t *Tx) ensureSnapshotLocked(ctx context.Context) error {
 		for i, mark := range t.savepoints {
 			ids[i], err = p.Savepoint(ctx, mark.name)
 			if err != nil {
-				_ = p.Rollback()
-				return err
+				return errors.Join(err, p.Rollback())
 			}
 		}
 		for i := range ids {

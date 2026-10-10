@@ -56,26 +56,28 @@ type Options struct {
 // callback. A successful Commit or Rollback closes the transaction. BUSY from
 // Commit leaves the complete in-memory transaction available for retry.
 type Tx struct {
-	mu             sync.Mutex
-	file           *vfs.File
-	path           string
-	info           os.FileInfo
-	header         Header
-	originalHeader [100]byte
-	originalPages  uint32
-	opts           Options
-	dirty          map[uint32][]byte // immutable values: replace, never mutate in place
-	free           map[uint32]struct{}
-	reserved       bool
-	statement      bool
-	undo           undoState
-	exclusive      bool
-	poisoned       error
-	session        *Session
-	shared         *SharedSession
-	encrypted      *EncryptedSession
-	sharedRead     sharedRead
-	readOnly       bool
+	mu                 sync.Mutex
+	file               *vfs.File
+	path               string
+	info               os.FileInfo
+	header             Header
+	originalHeader     [100]byte
+	originalPages      uint32
+	opts               Options
+	dirty              map[uint32][]byte // immutable values: replace, never mutate in place
+	free               map[uint32]struct{}
+	reserved           bool
+	statement          bool
+	undo               undoState
+	exclusive          bool
+	poisoned           error
+	session            *Session
+	shared             *SharedSession
+	encrypted          *EncryptedSession
+	encryptedAuthority [32]byte
+	encryptedHead      [32]byte
+	sharedRead         sharedRead
+	readOnly           bool
 	// keepFile is private to the rollback-journal WAL-mode transition. The
 	// WAL session already holds EXCLUSIVE and retains the same descriptor.
 	keepFile bool
@@ -336,8 +338,7 @@ func (t *Tx) promoteLocked(ctx context.Context) error {
 		return nil
 	}
 	if t.encrypted != nil {
-		t.reserved = true
-		return nil
+		return t.encrypted.promote(ctx, t)
 	}
 	if t.shared != nil {
 		return t.shared.promote(ctx, t)
@@ -446,9 +447,9 @@ func (t *Tx) Rollback() error {
 		return fmt.Errorf("%w: rollback inside statement", ErrMisuse)
 	}
 	if t.encrypted != nil {
-		t.encrypted.release(t)
+		err := t.encrypted.release(t)
 		t.clearEncrypted()
-		return t.poisoned
+		return errors.Join(t.poisoned, err)
 	}
 	if t.file == nil {
 		return t.poisoned

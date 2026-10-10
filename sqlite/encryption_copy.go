@@ -33,17 +33,6 @@ func (d *DB) validateCopy(ctx context.Context, r pager.SnapshotReader) error {
 	}
 	return btree.CheckOwnership(ctx, r, roots, free)
 }
-func (d *DB) validateEncryptedCopyLocked(ctx context.Context, s *pager.EncryptedSession) error {
-	if err := s.CopyBudget(); err != nil {
-		return err
-	}
-	r, err := s.Reader(ctx)
-	if err != nil {
-		return err
-	}
-	defer r.Close()
-	return d.validateCopy(ctx, r)
-}
 func copyValidator() (*DB, error) {
 	r, err := registry.New(grams13.Method())
 	if err != nil {
@@ -81,10 +70,7 @@ func (d *DB) BackupEncrypted(ctx context.Context, destination string, target Enc
 	if d.tx != nil || len(d.rows) != 0 {
 		return EncryptionInfo{}, wrap("encrypted backup", ErrBusy)
 	}
-	if err = d.validateEncryptedCopyLocked(ctx, s); err != nil {
-		return EncryptionInfo{}, wrap("encrypted backup", err)
-	}
-	i, err := s.BackupPrepared(ctx, destination, p)
+	i, err := s.BackupPrepared(ctx, destination, p, d.validateCopy)
 	return encryptionInfo(i), wrap("encrypted backup", err)
 }
 
@@ -105,10 +91,7 @@ func (d *DB) ExportPlaintext(ctx context.Context, destination string) (FileInfo,
 	if d.tx != nil || len(d.rows) != 0 {
 		return FileInfo{}, wrap("plaintext export", ErrBusy)
 	}
-	if err = d.validateEncryptedCopyLocked(ctx, s); err != nil {
-		return FileInfo{}, wrap("plaintext export", err)
-	}
-	if err = s.ExportPlaintext(ctx, destination); err != nil {
+	if err = s.ExportPlaintext(ctx, destination, d.validateCopy); err != nil {
 		return FileInfo{}, wrap("plaintext export", err)
 	}
 	return fileInfo(s.Header()), nil

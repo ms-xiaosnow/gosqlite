@@ -43,44 +43,15 @@ func (s *Store) openSelection(ctx context.Context) error {
 		return e
 	}
 	defer clear(p)
-	if len(p) >= 8 && string(p[:8]) == "GSEMNF02" {
-		if s.opts.Mode != WAL {
+	if len(p) >= 8 && (string(p[:8]) == "GSEMNF02" || string(p[:8]) == "GSEMNF03") {
+		if !s.opts.Mode.IsWAL() || (s.opts.Mode == WALShared) != (string(p[:8]) == "GSEMNF03") {
 			return ErrUnsupported
 		}
-		m, e := decodeWALManifest(p, h, s.opts)
+		m, e := decodeStorageWAL(p, h, s.opts)
 		if e != nil {
 			return e
 		}
-		r := m.Base
-		obj, e := openObject(ctx, s.basePath(r.FileID), s.master, s.opts.Limits, r.identity(h.Epoch), &r.Descriptor, &r.Hash, &r.PageOneHash, s.ns)
-		if e != nil {
-			return e
-		}
-		s.base = obj
-		s.wal = &m
-		prev := r.Descriptor.PageCount
-		for _, ref := range m.Segments {
-			seg, e := s.openSegment(ctx, s.master, h.Epoch, s.opts, ref, prev)
-			if e != nil {
-				return e
-			}
-			s.segments = append(s.segments, seg)
-			prev = ref.Descriptor.PageCount
-		}
-		s.overlay, s.baseCeiling, e = buildOverlay(m, s.segments)
-		if e != nil {
-			return e
-		}
-		page, e := s.ReadPage(ctx, 1)
-		if e != nil {
-			return e
-		}
-		valid := sha256.Sum256(page) == m.PageOneHash
-		clear(page)
-		if !valid {
-			return encryption.ErrAuthentication
-		}
-		return nil
+		return s.openWALSelection(ctx, m)
 	}
 	if s.opts.Mode != Snapshot {
 		return ErrUnsupported
@@ -99,13 +70,51 @@ func (s *Store) openSelection(ctx context.Context) error {
 	s.base, e = openObject(ctx, s.basePath(m.BaseID), s.master, s.opts.Limits, expected, &d, &m.BaseHash, &m.PageOneHash, s.ns)
 	return e
 }
+
+// openWALSelection consumes already authenticated/decoded metadata. Candidate
+// builders admit the old/new combined peak before any object opens or overlay.
+func (s *Store) openWALSelection(ctx context.Context, m walManifest) error {
+	h := s.header
+	var e error
+	r := m.Base
+	obj, e := openObject(ctx, s.basePath(r.FileID), s.master, s.opts.Limits, r.identity(h.Epoch), &r.Descriptor, &r.Hash, &r.PageOneHash, s.ns)
+	if e != nil {
+		return e
+	}
+	s.base = obj
+	s.wal = &m
+	prev := r.Descriptor.PageCount
+	for _, ref := range m.Segments {
+		seg, e := s.openSegment(ctx, s.master, h.Epoch, s.opts, ref, prev)
+		if e != nil {
+			return e
+		}
+		s.segments = append(s.segments, seg)
+		prev = ref.Descriptor.PageCount
+	}
+	s.overlay, s.baseCeiling, e = buildOverlay(m, s.segments)
+	if e != nil {
+		return e
+	}
+	page, e := s.ReadPage(ctx, 1)
+	if e != nil {
+		return e
+	}
+	valid := sha256.Sum256(page) == m.PageOneHash
+	clear(page)
+	if !valid {
+		return encryption.ErrAuthentication
+	}
+	return nil
+}
+
 func (s *Store) verifyWAL(ctx context.Context) error {
 	h, p, e := rootPayload(s.rootBytes, s.master, s.opts)
 	if e != nil {
 		return e
 	}
 	defer clear(p)
-	m, e := decodeWALManifest(p, h, s.opts)
+	m, e := decodeStorageWAL(p, h, s.opts)
 	if e != nil {
 		return e
 	}

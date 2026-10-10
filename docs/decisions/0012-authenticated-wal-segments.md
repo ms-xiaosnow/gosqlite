@@ -94,15 +94,16 @@ archive/plaintext-copy helpers remain path-based; restored/imported live
 families acquire their own namespace. This does not establish protection from
 hostile namespace/OS actors or externally substituted complete valid families.
 
-## Concurrency is still a code gap
+## Concurrency boundary of layout 2
 
 Keep Linux OFD lifetime leases on the separate stable lock inode: EXCLUSIVE for
 one writable connection, SHARED for read-only connections. Multiple read-only
 connections may coexist; a writer cannot coexist with any reader or writer.
 Each connection permits one local Rows/Tx lease. This is genuine authenticated
-dirty-segment storage with restricted coordination. The required simultaneous
-encrypted writer/readers protocol is **unimplemented**, not an acceptance-only
-gap. Native plaintext shared WAL does not supply this missing encrypted protocol.
+dirty-segment storage with restricted coordination. The simultaneous encrypted writer/readers protocol is a distinct opt-in
+layout-3 mode implemented by [ADR 0016](0016-shared-encrypted-coordination.md).
+Layout 2 deliberately keeps this lifetime-exclusive contract; native plaintext
+shared WAL does not substitute for the encrypted protocol.
 
 ## Evidence and remaining gates
 

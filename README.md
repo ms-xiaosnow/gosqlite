@@ -2,11 +2,11 @@
 
 Historical test-scope statements are corrected in [the namespace-test audit](docs/test-scope-audit.md); the affected tests are now excluded from ordinary workflows.
 
-A native Go database kernel targeting tested subsets of SQLite 3.54.0 files and SQL. Current development: persistent HNSW/IVFFlat, exact typed-vector KNN and same-snapshot hybrid ranking, plus experimental authenticated snapshot and dirty-page WAL storage, ordinary B-tree equality planning, nested savepoints, BIT/HALFVEC exact search, extended vector primitives, and bounded pg_embedding catalog inspection/typed offline SQL conversion. It is not production-ready. No CGO, SQLite subprocess, C ABI, or remote SQL engine is used in production.
+A native Go database kernel targeting tested subsets of SQLite 3.54.0 files and SQL. Current development: persistent HNSW/IVFFlat, exact typed-vector KNN and same-snapshot hybrid ranking, plus experimental authenticated snapshot, dirty-page WAL and concurrent encrypted sessions, ordinary B-tree equality planning, nested savepoints, BIT/HALFVEC exact search, extended vector primitives, and bounded pg_embedding catalog inspection/typed offline SQL conversion. It is not production-ready. No CGO, SQLite subprocess, C ABI, or remote SQL engine is used in production.
 
 ## Try the implemented SQL path
 
-Use Go 1.27.2. Runtime database opening currently requires Linux; other targets compile and fail closed until native locks are supported.
+Use Go 1.27.2. Plain-file native backends are implemented for Linux, Darwin and Windows/amd64. Only Linux/amd64 ordinary runtime is verified here; Darwin/Windows evidence is source review and cross-compilation, with platform limits documented in ADR0015. Encrypted storage currently runs on Linux only.
 
 ```sh
 CGO_ENABLED=0 go test ./...
@@ -60,7 +60,7 @@ SQLITE_ORACLE=/absolute/path/to/verified/sqlite3 ./scripts/test-oracle.sh
 
 See [progress](docs/progress.md), [compatibility](docs/compatibility.md), [architecture](docs/architecture.md), [sources](docs/upstream.md), and [manual verification](docs/manual-verification.md). The unchanged [original goal](goal.md) remains the contract. [Restart protocol](docs/restart.md) and checkpoint records preserve durable development history.
 
-Qualified crash recovery, concurrent encrypted writer/readers, broader SQL/native-platform support, sparse SQL and all extended-vector ANN integration, and the remaining pg_embedding import/transition tooling remain unfinished implementation work. Full SQLite/PostgreSQL semantics, SEE file compatibility and production security are not claimed.
+Qualified crash recovery, non-Linux encrypted coordination, broader SQL, sparse SQL and all extended-vector ANN integration, and the remaining pg_embedding import/transition tooling remain unfinished implementation work. Full SQLite/PostgreSQL semantics, SEE file compatibility and production security are not claimed.
 
 
 ## Explicit exclusive WAL
@@ -130,7 +130,7 @@ CGO_ENABLED=0 go run ./examples/encrypted
 
 Native exact retrieval remains the default. IVFFlat supports L2, negative inner product and cosine, immutable trained centroids between explicit rebuilds, and actual list probes with exact rescoring. Probing every list chooses exact scan. [ANN documentation](docs/ann.md) records boundaries and measured recall.
 
-Encryption is selected only through code-configured KeyProvider and sqlite.Options.Encryption (also available through driver.NewConnector). Linux supports explicit full-snapshot mode or immutable final-dirty-page WAL segments with complete-head verification, checkpoint, correct-key rekey/backup/restore and plaintext import/export. Both currently use lifetime writable-exclusive/read-only-shared leases; concurrent encrypted writer/readers are still required code. Old ciphertext is retained and remains decryptable with old credentials after rekey. Whole-history replay/substitution lacks external freshness/identity protection. Live family operations use a pinned Linux parent directory, but initial resolution and hostile-filesystem protection remain limited. Do not use it for irreplaceable or security-sensitive data; see [encrypted storage](docs/encryption-storage.md).
+Encryption is selected only through code-configured KeyProvider and sqlite.Options.Encryption (also available through driver.NewConnector). Linux supports explicit full-snapshot mode or immutable final-dirty-page WAL segments with complete-head verification, checkpoint, correct-key rekey/backup/restore and plaintext import/export. Legacy modes use lifetime writable-exclusive/read-only-shared leases. Explicit EncryptionWALShared adds immutable reader selections and a nonblocking single writer, stale-snapshot detection, checkpoint/copy and globally quiescent rekey. Old ciphertext is retained and remains decryptable with old credentials after rekey. Whole-history replay/substitution lacks external freshness/identity protection. Live family operations use a pinned Linux parent directory, but initial resolution and hostile-filesystem protection remain limited. Do not use it for irreplaceable or security-sensitive data; see [encrypted storage](docs/encryption-storage.md).
 
 ## Encrypted WAL and migration prerequisites (experimental)
 
@@ -141,7 +141,7 @@ CGO_ENABLED=0 go run ./cmd/gosqlite migrate pgembedding inspect --catalog testda
 
 The encrypted example uses disposable in-memory keys. `EncryptionWAL` retains
 authenticated dirty-page segments; normal checkpoint compacts the complete head.
-It does not add concurrent encrypted writer/readers or qualify physical recovery.
+This legacy mode remains exclusive. EncryptionWALShared and examples/encrypted-shared supply concurrent readers and one writer; no mode qualifies physical recovery.
 
 The migration inspector reads bounded local catalog JSON, checks extension/type/
 operator ownership and legacy option semantics, and emits a deterministic review
@@ -150,7 +150,7 @@ data yet. See [migration scope and examples](docs/migration-pgembedding.md).
 
 `extension/vector` also supplies distinct immutable half, packed-bit and sparse
 values, codecs, exact metrics, nullable adapters, subvector and quantization.
-These are memory primitives; typed SQL storage and ANN integration remain open.
+BIT and HALFVEC also have typed SQL/storage/exact search. Sparse SQL and all extended ANN integration remain open.
 See [extended value contracts](extension/vector/extended-values.md).
 
 ## Transaction controls and packed-bit search
@@ -185,3 +185,18 @@ DB/Tx.HalfSearch and exact bounded ranking. Conversions and loss-report function
 are explicit; dense and half representations do not silently mix. See
 [half-precision SQL](docs/half-vector.md) and examples/half-rerank, which measures
 lost dense recall from a truncated rounded candidate set. Half ANN is unfinished.
+
+## Native platform and encrypted concurrency boundaries
+
+Plain Darwin uses managed inode-wide process-lock aggregation and deferred closes;
+Windows/amd64 uses checked native handles, exact LockFileEx ownership and aligned
+SHM views. Neither target was executed here. Windows default cross-vet retains
+one documented unsafe-pointer mapping diagnostic. Darwin fsync and Windows
+namespace publication do not claim device/physical-durability qualification.
+See [native policy](docs/decisions/0015-native-darwin-windows-backends.md).
+
+On Linux, EncryptionWALShared explicitly selects authenticated layout3. Readers
+retain an immutable authenticated head while a writer commits or checkpoints;
+legacy layouts are never silently upgraded. Run examples/encrypted-shared only
+with disposable data. Non-Linux encrypted backends, retained-history collection,
+external freshness guarantees and independent security acceptance remain open.

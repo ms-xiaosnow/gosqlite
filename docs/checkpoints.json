@@ -200,5 +200,19 @@
     "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38058308322",
     "remote_ci_status": "COMPLETED SUCCESS for exact SHA, updated2026-10-10T14:16:31Z, observed14:18:39Z.",
     "open_gates": "Resumable CSV/NDJSON import and transition bundles, remaining extended SQL/ANN, encrypted concurrent sessions, native target-runtime/broader recovery/SQL and restricted/independent acceptance remain open. No live PostgreSQL execution."
+  },
+  {
+    "stage": "M9 F typed HALFVEC SQL and exact search",
+    "remote_commit": "ebe308f06fb65ddbffa4fb506bb2b1ed6ccc2237",
+    "local_commit": "ebe308f06fb65ddbffa4fb506bb2b1ed6ccc2237",
+    "tree": "05e71cfb497849d76a346c365509e38c6247358e",
+    "bundle_sha256": "917757cb6816d25f26c1d84300e41d5c794ea1b71cf0f489de29ca1ad4223ae1",
+    "bundle_bytes": 1287040,
+    "library_file_id": "libfile_5b744f16251081918ecbf2e836d6de56",
+    "library_version": 0,
+    "verified": "Guarded remote commit/ref readback and exact local mirror; full-history bundle, byte-identical Library readback, clean clone/fsck and original goal hash verified2026-10-10T14:28:32Z. Exact frozen source full unit/vet/build/race/oracle/crossbuild/module/source manifest passed exit0 at14:25:15Z. Exact restored focused internal/sql/sqlite/driver/example CGO0 unit/vet, CGO1 race, Half official-oracle suite, full production build, modules and clean tree passed exit0 at2026-10-10T14:29:22Z; not a second full restored all-package suite.",
+    "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38059695568",
+    "remote_ci_status": "IN_PROGRESS, observed2026-10-10T14:28:57Z.",
+    "open_gates": "Sparse SQL and all extended ANN, remaining migration/SQL/recovery/native-platform code and restricted/independent acceptance remain open. Half reranking does not restore omitted candidates."
   }
 ]

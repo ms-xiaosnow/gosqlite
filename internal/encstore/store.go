@@ -14,25 +14,32 @@ import (
 // Store is serialized by its pager session. A separate stable lock inode is
 // retained throughout its lifetime. Historical encrypted objects/roots are
 // retained, never automatically selected or garbage-collected.
-type Store struct {
-	writerIDs   uint64
-	ns          *namespace
+type selection struct {
 	wal         *walManifest
 	segments    []*segment
 	overlay     []location
 	baseCeiling uint32
-	path        string
-	opts        Options
-	readOnly    bool
-	lock        *os.File
-	lockInfo    os.FileInfo
-	root        *os.File
+	root        *os.File // legacy modes only; shared roots own authenticated bytes
 	rootInfo    os.FileInfo
 	rootBytes   []byte
 	header      encryption.Header
-	master      *encryption.MasterKey
 	base        *object
-	poisoned    error
+}
+
+type Store struct {
+	selection
+	writerIDs          uint64
+	ns                 *namespace
+	path               string
+	opts               Options
+	readOnly           bool
+	lock               *os.File
+	lockInfo           os.FileInfo
+	master             *encryption.MasterKey
+	poisoned           error
+	lifecycleExclusive bool
+	writerOwned        bool
+	gateOwned          bool
 }
 
 func canonical(path string) (string, error) {
@@ -67,7 +74,7 @@ func rejectPlainSidecars(path string) error {
 	return nil
 }
 
-func acquire(path string, readOnly, create bool) (*Store, bool, error) {
+func acquire(path string, readOnly, create bool, mode Mode) (*Store, bool, error) {
 	if err := supported(); err != nil {
 		return nil, false, err
 	}
@@ -116,7 +123,7 @@ func acquire(path string, readOnly, create bool) (*Store, bool, error) {
 	if info.Size() != 0 {
 		return nil, false, ErrUnsupported
 	}
-	if err = lockFile(f, readOnly); err != nil {
+	if err = lockFile(f, readOnly || (mode == WALShared && !absent)); err != nil {
 		return nil, false, err
 	}
 	if err = ns.stable(f, path+".gse-lock", info); err != nil {
@@ -139,7 +146,7 @@ func acquire(path string, readOnly, create bool) (*Store, bool, error) {
 	}
 	ok = true
 	kept = true
-	return &Store{path: path, readOnly: readOnly, lock: f, lockInfo: info, ns: ns}, absent, nil
+	return &Store{path: path, readOnly: readOnly, lock: f, lockInfo: info, ns: ns, lifecycleExclusive: !readOnly && (mode != WALShared || absent)}, absent, nil
 }
 
 func Open(ctx context.Context, path string, o Options, readOnly, create bool, initial []byte) (*Store, error) {
@@ -176,7 +183,7 @@ func Open(ctx context.Context, path string, o Options, readOnly, create bool, in
 	if err = ctx.Err(); err != nil {
 		return nil, err
 	}
-	s, absent, err := acquire(path, readOnly, initialTarget != nil)
+	s, absent, err := acquire(path, readOnly, initialTarget != nil, o.Mode)
 	if err != nil {
 		return nil, err
 	}
@@ -198,19 +205,11 @@ func Open(ctx context.Context, path string, o Options, readOnly, create bool, in
 			return nil, err
 		}
 	} else {
-		f, info, e := s.ns.checked(s.path, os.O_RDONLY)
+		raw, e := s.captureRoot()
 		if e != nil {
 			return nil, e
 		}
-		s.root = f
-		s.rootInfo = info
-		if e = rootExtent(info.Size(), o); e != nil {
-			return nil, e
-		}
-		raw, e := readExact(f, int(info.Size()), 0)
-		if e != nil {
-			return nil, e
-		}
+
 		h, e := encryption.DecodeHeader(raw[:encryption.HeaderSize], o.Limits)
 		if e != nil {
 			return nil, e
@@ -231,6 +230,11 @@ func Open(ctx context.Context, path string, o Options, readOnly, create bool, in
 	}
 	if err = s.Check(); err != nil {
 		return nil, err
+	}
+	if o.Mode == WALShared && s.lifecycleExclusive {
+		if err = s.downgradeLifecycle(); err != nil {
+			return nil, err
+		}
 	}
 	ok = true
 	return s, nil
@@ -271,6 +275,9 @@ func (s *Store) Check() error {
 	}
 	if err := s.ns.stable(s.lock, s.path+".gse-lock", s.lockInfo); err != nil {
 		return err
+	}
+	if s.opts.Mode == WALShared && len(s.rootBytes) != 0 {
+		return s.checkSelected()
 	}
 	if s.root == nil {
 		if _, err := os.Lstat(s.path); !os.IsNotExist(err) {
@@ -335,20 +342,7 @@ func syncDirectory(path string) error {
 }
 func (s *Store) Close() error {
 	var err error
-	for _, seg := range s.segments {
-		err = errors.Join(err, seg.close())
-	}
-	s.segments = nil
-	s.overlay = nil
-	s.wal = nil
-	if s.root != nil {
-		err = errors.Join(err, s.root.Close())
-		s.root = nil
-	}
-	if s.base != nil {
-		err = errors.Join(err, s.base.close())
-		s.base = nil
-	}
+	err = s.closeSelection()
 	if s.master != nil {
 		err = errors.Join(err, s.master.Close())
 		s.master = nil
@@ -380,6 +374,9 @@ func (s *Store) Info() Info {
 	i := Info{Mode: s.opts.Mode, StorageLayout: 1, PageSize: s.header.Descriptor.PageSize, PageCount: s.header.Descriptor.PageCount, DatabaseID: s.header.Epoch.DatabaseID, CommitSequence: s.header.Descriptor.CommitSequence, RetainsHistory: true}
 	if s.wal != nil {
 		i.StorageLayout = 2
+		if s.opts.Mode == WALShared {
+			i.StorageLayout = 3
+		}
 		i.WALSegments = uint32(len(s.segments))
 		i.WALFrames = s.wal.Frames
 		i.WALBytes = s.wal.Bytes

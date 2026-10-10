@@ -1,17 +1,20 @@
 # Experimental encrypted snapshot and WAL storage
 
-The **M8b slice** adds immutable authenticated dirty-page WAL segments to the
-existing snapshot storage. Explicitly setting `sqlite.Options.Encryption`
+The **M8c slice** adds explicit shared-reader/single-writer coordination to
+immutable authenticated dirty-page WAL segments and existing snapshot storage.
+Explicitly setting `sqlite.Options.Encryption`
 connects the authenticated-record primitives to the SQL engine, code-configured
 `database/sql` connectors, rekey, portable encrypted backup/restore, and explicit
 plaintext import/export. A nil `Encryption` preserves the ordinary plaintext
 engine. The zero-valued `EncryptionSnapshot` mode and its layout-1 bytes remain
-supported; `EncryptionWAL` explicitly selects layout 2.
+supported; `EncryptionWAL` explicitly selects lifetime-exclusive layout 2.
+`EncryptionWALShared` explicitly selects shared coordination with layout 3.
 
 The implementation is experimental and currently supported only on Linux. It is
 an independent container, not a SQLite/SEE ciphertext format. Full M8 remains
-partial: encrypted simultaneous writer/readers are a **code gap**, not merely an
-unexecuted acceptance test. There is no stable encrypted-format promise,
+partial: simultaneous encrypted writer/readers now have an ordinary-path Linux
+implementation, while fault/security/durability acceptance remains pending.
+There is no stable encrypted-format promise,
 independent cryptographic/security audit, or production-security/crash-durability
 qualification. Do not use irreplaceable data. Read [security.md](security.md) and
 the [primitive design](encryption-primitives.md) before using the API.
@@ -23,6 +26,7 @@ From the repository root with Go 1.27.2 on Linux:
 ```sh
 CGO_ENABLED=0 GOTOOLCHAIN=local go run ./examples/encrypted
 CGO_ENABLED=0 GOTOOLCHAIN=local go run ./examples/encrypted-wal
+CGO_ENABLED=0 GOTOOLCHAIN=local go run ./examples/encrypted-shared
 ```
 
 [The snapshot example](../examples/encrypted/main.go) supplies independent
@@ -42,6 +46,11 @@ the logical data, then closes and reopens read-only. It also keeps its random ke
 only in memory and removes its private temporary directory on normal completion.
 Neither example performs a wrong-key, disk-corruption, interruption or fault test.
 
+[The shared example](../examples/encrypted-shared/main.go) keeps old readers
+pinned while an independent writer commits, admits a new reader during an
+uncommitted IMMEDIATE transaction, demonstrates stale promotion, and checkpoints
+with a reader still active. Its credentials also stay only in memory.
+
 ## API and configuration
 
 Use `sqlite.OpenContext(ctx, path, sqlite.Options{Encryption: &cfg})` or
@@ -55,7 +64,7 @@ Use `sqlite.OpenContext(ctx, path, sqlite.Options{Encryption: &cfg})` or
 | `KDFPolicy` | Optional stricter KDF maxima; zero fields use the format maxima below. It cannot weaken the production minima. |
 | `DerivationBudget` | Shared Argon2 concurrency budget. Nil/zero uses the process-wide single-derivation budget; explicit budgets permit 1–8 and must be shared by the application. |
 | `Limits` | Lower per-object record/page/logical-size bounds; zero fields use the hard format maxima below. |
-| `Mode` | `sqlite.EncryptionSnapshot` (zero) writes complete layout-1 snapshots; `sqlite.EncryptionWAL` writes layout-2 dirty-page segments. Existing storage must match the selected mode. |
+| `Mode` | `sqlite.EncryptionSnapshot` (zero) writes complete layout-1 snapshots; `sqlite.EncryptionWAL` writes lifetime-exclusive layout-2 segments; `sqlite.EncryptionWALShared` writes layout-3 segments with simultaneous readers and one writer. Existing storage must match the selected mode. |
 | `WALLimits` | `sqlite.EncryptionWALLimits` bounds the selected graph and storage-adapter work; zero fields select defaults below. Root/identity-ledger guards also apply to snapshot operations. |
 | `MaxGenerations` | Maximum successful root sequence; zero selects 256. |
 | `MaxRetainedBytes` | Maximum accounted physical family bytes; zero selects 1 GiB. |
@@ -85,9 +94,10 @@ accounts, endpoints, or credentials. Bind that authority in application code.
 
 For `database/sql`, construct a connector with
 `driver.NewConnector(path, sqlite.Options{Encryption: &cfg})`, check its error,
-then pass it to `sql.OpenDB`. A writable encrypted pool must use
-`SetMaxOpenConns(1)` because each connection holds an exclusive lease for its
-entire lifetime. A plain `sql.Open("gosqlite", dsn)` has no key-provider
+then pass it to `sql.OpenDB`. Legacy writable encrypted pools must use
+`SetMaxOpenConns(1)` because each connection holds an exclusive lifetime lease.
+`EncryptionWALShared` permits independent pooled connections; each still permits
+one local Rows/Tx lease and only one connection may own a writer transaction. A plain `sql.Open("gosqlite", dsn)` has no key-provider
 configuration and uses the plaintext engine. DSNs accept only a path or a
 supported `file:` URI with `mode=ro|rw|rwc`; encryption or key URI parameters are
 not supported.
@@ -96,9 +106,10 @@ Ordinary SQL, schema/index support, bounded sorting and transaction overlays use
 the same supported engine subset. `PageSize` defaults to 4,096 for creation;
 `MaxTransactionPages` defaults to 4,096 dirty pages and `MaxSortBytes` to 64 MiB.
 Sorting does not spill to disk. Encryption does not expand SQL compatibility.
-`WALExclusive`, `WALShared`, and `WALPowersafeOverwrite` are incompatible with both
+`WALExclusive`, `WALShared`, and `WALPowersafeOverwrite` are incompatible with all
 encrypted modes and are rejected before opening storage. `KeepWALOnClose` is
-accepted with `EncryptionWAL` and rejected with `EncryptionSnapshot`. Existing
+accepted with `EncryptionWAL` or `EncryptionWALShared` and rejected with
+`EncryptionSnapshot`. Existing
 native `-journal`, `-wal`, or `-shm` sidecars are refused. These encrypted modes
 do not use SQLite's native WAL/SHM protocol.
 
@@ -121,6 +132,42 @@ sequence. The open connection adopts WAL mode; future opens must explicitly use
 `EncryptionWAL`. There is no in-place downgrade. Copying through a portable
 archive can create a separate family in either destination mode.
 
+### Shared encrypted transactions and lifecycle
+
+`Mode: sqlite.EncryptionWALShared` creates a layout-3 family. On Linux, every
+connection holds a shared lifecycle guard on byte 0 of the stable lock inode.
+Byte 1 admits one writer; byte 2 is a short root-capture/publication gate. New
+readers can start while a writer owns unpublished changes. Gate and writer
+contention return nonblocking `ErrBusy`. Legacy formats keep their old locking.
+
+Deferred BEGIN and SAVEPOINT do not capture a head until first data access.
+IMMEDIATE and shared-mode EXCLUSIVE reserve the writer before selecting the
+latest committed head. A pinned read promoted after another commit/checkpoint
+returns `ErrBusySnapshot` (also `ErrBusy`) and keeps its original snapshot.
+End and restart the transaction to see the current head. Statement errors and
+ROLLBACK TO preserve writer ownership; full rollback/no-op commit release it.
+
+A snapshot owns fully authenticated root bytes and immutable child objects. It
+does not require the old root to remain the currently named inode. Strict
+selected-child identity checks and per-page authentication remain in force.
+Fresh transactions authenticate the complete current graph with the retained
+epoch master; they do not reacquire credentials or repeat Argon2 derivation.
+`Info()` remains cached most-recently-observed metadata, not a refresh operation.
+
+To upgrade either legacy encrypted format, finish local Rows/Tx and call
+`db.UpgradeEncryptedWALShared(ctx)` on its writable connection. The existing
+exclusive lifecycle guard stays held through verified fresh-base/layout-3
+publication, then becomes shared. Old ciphertext and database identity remain.
+Reopen explicitly with `EncryptionWALShared`. `UpgradeEncryptedWAL` still only
+means snapshot-to-layout-2 conversion.
+
+Shared rekey requires every other connection to close, including idle/read-only
+ones. A failed atomic lifecycle conversion leaves the original shared lease
+intact. Checkpoint and full-head copies can proceed while other connections keep
+old readers. Every copy pins one head through validation and output. There is no
+GC, retained-key revocation or protection against replay of a whole valid family.
+See [ADR 0016](decisions/0016-shared-encrypted-coordination.md).
+
 ### Maintenance and copy operations
 
 Close all `Rows` and finish any local `Tx` before calling a connection's
@@ -133,7 +180,7 @@ verification, checkpoint, upgrade, rekey, or copy method; otherwise it reports
   integrity audit or verification of all retained/unselected history.
 - `db.Checkpoint(ctx) error` on a writable WAL connection with active segments
   authenticates the selected graph and materializes its full logical head into
-  a new base and layout-2 root selecting zero segments. It advances the root
+  a new base and mode-preserving layout-2/layout-3 root selecting zero segments. It advances the root
   sequence/head identity without changing logical page-one counters, database
   identity, or mode. With no selected segments it writes nothing. It retains old
   roots, bases and segments; checkpoint is not garbage collection. A read-only
@@ -148,7 +195,7 @@ verification, checkpoint, upgrade, rekey, or copy method; otherwise it reports
 - `db.BackupEncrypted(ctx, destination, target) (sqlite.EncryptionInfo, error)`
   creates one portable, self-contained encrypted archive with a fresh database
   ID, epoch and role-separated backup keys, sequence 1, and no copied history.
-  A read-only encrypted source in either mode is sufficient. The complete head,
+  A read-only encrypted source in any mode is sufficient. The complete head,
   including uncheckpointed committed WAL pages, is copied. `target.Mode` must be
   `EncryptionSnapshot` because portable archives do not contain segment chains.
   Copying the main root alone is **not a backup**. `target.MaxRetainedBytes` also
@@ -158,7 +205,7 @@ verification, checkpoint, upgrade, rekey, or copy method; otherwise it reports
   validates supported logical structure before creating an absent destination
   family with fresh database/epoch/file IDs and sequence 1. Source supplies the
   archive credential/policy and must use `EncryptionSnapshot`; target configures
-  a new snapshot or WAL family. A WAL destination initially selects zero
+  a new snapshot, exclusive-WAL or shared-WAL family. A WAL destination initially selects zero
   segments. The archive is unchanged. Do not pass it to ordinary `sqlite.Open`.
 - `db.ExportPlaintext(ctx, destination) (sqlite.FileInfo, error)` is an explicit
   **confidentiality downgrade**. It writes all logical pages, schema and index
@@ -186,7 +233,7 @@ content proof.
 `WALBytes`, `HeadCommitID` (`[32]byte`), `PageSize`, `PageCount`, `DatabaseID`
 (`[16]byte`), `CommitSequence`, and `RetainsHistory`. Live snapshot families
 report layout 1 and the root hash as `HeadCommitID`; live WAL families report
-layout 2, selected-segment totals, and the selected content commit ID. WAL totals
+layout 2 or 3, selected-segment totals, and the selected content commit ID. WAL totals
 exclude retained/unselected files. Live families report `RetainsHistory=true`
 as a retention policy, even at their first generation; it is not a count of old
 objects. A portable archive reports false and leaves the new live-layout/head
@@ -200,7 +247,7 @@ By default, writable WAL `Close` attempts a checkpoint if committed segments are
 selected. `KeepWALOnClose: true` leaves that selection intact for normal reopen.
 Read-only close does not checkpoint. `DB.Close` closes Rows, rolls back an active
 local transaction, then closes storage. Always check its returned error: a quota
-can prevent the optional checkpoint. Storage still closes its descriptors and
+or another shared-mode writer can prevent the optional checkpoint. Storage still closes its descriptors and
 releases its lease on that error; it does not roll back the already committed
 head. Normal close/reopen is not evidence for interrupted close or recovery.
 
@@ -209,7 +256,7 @@ head. Normal close/reopen is not evidence for interrupted close or recovery.
 For a main path `example.gse`, a family consists of:
 
 - `example.gse`: the sole current root authority, an authenticated manifest
-  object, replaced on each changed commit. Layout 1 is 680 bytes; layout 2 is
+  object, replaced on each changed commit. Layout 1 is 680 bytes; layout 2/3 is
   `1064 + 256 * selected segment count` bytes.
 - `example.gse.gse-lock`: persistent empty regular lock inode. It is never
   removed by the library, including on connection close.
@@ -224,12 +271,13 @@ For a main path `example.gse`, a family consists of:
 Use a dedicated, access-controlled directory. The library refuses symlinks,
 nonregular objects and multiply linked family files, opens files with no-follow
 and nonblocking flags, and exclusive-creates candidates with mode 0600. Linux
-OFD locking on the separate lock inode provides a lifetime **EXCLUSIVE** lease
+For legacy modes, Linux OFD locking on the separate lock inode provides a lifetime **EXCLUSIVE** lease
 for one writable connection, or lifetime **SHARED** leases for read-only
 connections. A writer cannot coexist with another writer or read-only
 connection. Read-only connections may coexist with one another; they hold their
 snapshot lease even while idle. One local reader/transaction lease is permitted
-per connection. This is not shared-reader/concurrent-writer WAL behavior.
+per connection. This legacy behavior is unchanged. Shared mode uses the three-byte protocol
+described above; immutable snapshots remain valid after named-root replacement.
 
 Snapshot changed commits stream the whole logical database into a fresh base and
 root with new file IDs, rather than rebuilding its B-trees. WAL changed commits
@@ -400,7 +448,7 @@ allocations; lowering a limit can refuse an existing head at open.
 
 WAL commit operation accounting includes three new-segment extents plus eight
 old-root and eight new-root extents. Copy/rekey/checkpoint reserve a conservative
-16-pass logical/source-work envelope, including per-page authority-root rereads;
+16-pass logical/source-work envelope, including conservative legacy per-page authority-root rereads;
 new base publication has a separate four-pass budget. This can refuse large
 operations even when the selected graph alone fits. Per-master file-identity
 reservations charge attempted publications, including abandoned candidates;
@@ -464,6 +512,33 @@ short/wrong-offset writes, failed sync, permission-fault and interrupted
 publication/rekey workflows have **not** been executed or accepted for this
 checkpoint. They must not be run here or relocated to CI/another executor.
 Memory-only malformed-input tests do not qualify these disk/recovery behaviors.
-Simultaneous encrypted writer/readers remain unimplemented code work. Native
-non-Linux runtime qualification, independent security review and full release
+The shared slice adds simultaneous intact-file readers/writer, operation-pinned
+copies, stale promotion, quiescent rekey and combined-resource tests. Encrypted
+non-Linux coordination, independent security review and full release
 qualification remain outstanding.
+
+## Layout-3 coordination and combined admission
+
+The shared root has the same extent and child-reference/content-commit encoding
+as layout 2. Its authenticated payload starts with `GSEMNF03`, has version 3 in
+bytes 8–9, coordination protocol value 1 at byte 176, and zeros in bytes 177–255.
+All other canonical graph fields retain their layout-2 meaning. The layout-2
+decoder continues to reject these bytes. There is no automatic format inference.
+
+Shared refresh reserves the complete retained and candidate graph together,
+including overlays, references/directories, object/key readers, root evidence,
+codec/AEAD scratch and minted-ID ledgers. Descriptor admission conservatively
+requires `oldSegments + newSegments + 10` handles. Full authentication/scan and
+replay are bounded; validation and copying share a conservative 16-pass work
+allowance. A small individual graph cap does not guarantee that two graphs fit.
+A failed refresh or promotion keeps an exposed old snapshot intact. Admission
+failure may require ending a transaction, checkpointing through another eligible
+connection, or reopening with explicitly suitable limits; nothing is silently
+removed or downgraded.
+
+A successful publication followed by a gate/writer release failure is poisoned
+and conservatively uncertain. Such errors take precedence over BUSY. Default
+shared Close reports a BUSY checkpoint but still releases all ownership; it never
+rolls back an earlier committed selection. Candidate creation can precede a
+short publication-gate BUSY, and those encrypted candidates remain retained and
+charged. This source contract is not native-fault or crash acceptance evidence.

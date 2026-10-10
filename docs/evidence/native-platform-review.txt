@@ -1,0 +1,193 @@
+Independent native-platform source review, 2026-10-10
+Checkout: durable-restart/gosqlite. Host: Linux amd64.
+Review completed against the frozen implementation hashes below.
+
+RESULT
+No new production blocker found in the reviewed ownership/lock/mapping scope.
+This is source review plus portable memory tests and cross-compilation. It is
+not native runtime acceptance, physical durability qualification, an independent
+security certification, or M3/M10 completion. Default Windows cross-vet is NOT
+clean: the existing unsafe.Pointer diagnostic was independently reproduced.
+
+OWNED CHANGES
+Only internal/vfs/platform_review_test.go and this evidence file were added.
+No production code, other worker-owned file, staging state, or commit changed
+by this review. Other implementation work was concurrently present in the tree.
+
+SOURCE REVIEW
+Read ADR 0014/0015, docs/native-windows.md, the adjacent native-platform-design.md,
+all common VFS ownership/lock/mapping code, both native implementations and
+target test files, pager native-file adapters/close/publication paths, WAL-index
+attachment/mapping/close paths, and pinned Go/x/sys/SQLite reference code.
+
+Darwin process-fcntl ownership:
+- nativeOpen holds the lifecycle gate across raw open, fstat identity capture,
+  node lookup, and descriptor registration. Registration precedes any normal
+  validation rejection that can reach Close. Unknown-fstat descriptors remain
+  raw integers in quarantine and never acquire an os.File finalizer.
+- Rejected opens, probes, plain DB/WAL/SHM/journal files, and directory leases
+  use the same managed ownership. A search found no raw os.Open/OpenFile/Create/
+  ReadFile or exposed *os.File in the plain pager/WAL-index/SQLite production
+  paths. The separate encrypted store remains behind its non-Darwin stub.
+- File.mu precedes the registry gate. Registry operations do not acquire a
+  sibling File.mu. Active descriptors are never drained; idle descriptors are
+  reusable only by matching role/access. Their seek position is reset first.
+- Per-inode logical holds are aggregated before process fcntl changes. Local
+  exclusivity conflicts are rejected even though the kernel would coalesce
+  process ownership. Successful syscalls alone update the kernel ledger.
+- Failed EXCLUSIVE acquisition preserves process SHARED and releases temporary
+  PENDING. Downgrade replaces the shared range before releasing PENDING.
+  Failed cleanup poisons the entire inode; ordinary operations on peers stop.
+- Close releases only the retiring descriptor's logical holds, retains sibling
+  aggregate holds, defers physical close while any aggregate hold remains,
+  and drains idle descriptors under the same gate after locks are gone.
+  Unknown-identity quarantine is drained only with no managed locks anywhere.
+- First-local DMS ownership is explicit: an existing local shared aggregate
+  bypasses F_GETLK/reset; the first opener alone follows query/exclusive/reset/
+  shared conversion. A lost exclusive-initializer race remains BUSY.
+- This coverage cannot intercept unmanaged same-inode closes in the same
+  process. That limitation is explicitly declared, not assumed away.
+
+Windows exact ownership and native policy:
+- FILE_ID_INFO retains the full 128-bit ID and volume identity. Native parent
+  and final-file inspections precede common validation. ABI size/offset
+  assertions cover the reviewed amd64 SYSTEM_INFO and metadata structures.
+- Local fixed NTFS/path/reparse restrictions and compatible metadata probes
+  are present. Read/write sharing is distinct from delete sharing, which is
+  limited to explicitly replaceable exclusive-session WAL participants.
+- Each successful LockFileEx acquisition has a fixed interval/mode record.
+  Same-mode repeats do not stack. SHM native operations use exact individual
+  bytes, so logical subrange/union unlock does not violate UnlockFileEx's
+  original-acquisition requirement. Partial acquisitions unwind only new holds
+  in reverse order; conversion is rejected before calls.
+- Direct SHARED-to-EXCLUSIVE acquires PENDING independently of RESERVED.
+  After dropping SHARED, failed exclusive acquisition restores SHARED before
+  dropping PENDING. An unsuccessful restoration/unlock poisons ownership.
+  Only ERROR_LOCK_VIOLATION is ordinary contention. RESERVED probes use a
+  transient shared-byte acquisition, also valid on read-only handles.
+- First-local DMS reset/attachment is serialized with final detachment. Later
+  connections retain independent OS shared DMS locks without another reset.
+  There is no arbitrary truncation-error header-erasure fallback.
+- Close retires recorded mappings/retained mapping objects before DMS/file
+  retirement. Successful partial cleanup clears only its own record. A raw
+  os.File.Close error is a terminal uncertain tombstone, never a blind retry.
+
+Mappings and common lifetime:
+- mappingSpan conserves the logical end: aligned base + native length equals
+  requested offset + requested length, with checked int64/int arithmetic.
+  A 32 KiB first block is not enlarged to 64 KiB merely for allocation alignment.
+- Windows uses GetSystemInfo allocation granularity, zero mapping maximum
+  (existing file size), a retained original view base, and a separate mapping
+  object handle. Overlapping later views do not relocate earlier live views.
+- Closing the mapping HANDLE before UnmapViewOfFile is supported by Microsoft's
+  lifetime contract. The exposed slice remains live if either retirement stage
+  fails, and the protecting file/DMS owner remains retained until retirement.
+- Native poison is checked before portable cached-success fast paths. Common
+  Close retires every mapping before calling nativeClose and retains owners on
+  unresolved retirement. Nil raw owners reject stale cached lock bits first.
+- SharedSession cleanup retains DB/WAL protection if index retirement remains
+  unresolved. The already documented failed-OpenSharedSession limitation still
+  exists: retained protection may have no reachable public session for retry.
+  This review does not establish bounded or universally retryable cleanup.
+
+Publication and synchronization (SOURCE ONLY; no replacement executed):
+- ReplaceWAL validates distinct owners, exclusive DB ownership, roles,
+  replacement permission, same-directory candidate naming, and identities.
+  Windows MoveFileEx uses REPLACE_EXISTING|WRITE_THROUGH with no COPY_ALLOWED,
+  copy/delete, or delete/rename fallback. Native uncertain outcomes and failed
+  post-replacement identity verification poison all three common participants.
+- The pager adopts the candidate only after successful replacement and poisons
+  failed normalization. Candidate Sync precedes replacement; the declared
+  directory policy is applied afterward. No retryable-publication claim is
+  inferred from an uncertain result.
+- Darwin explicitly supplies fsync, not F_FULLFSYNC/device-cache acceptance.
+  Windows regular files use FlushFileBuffers; its directory hook intentionally
+  supplies no namespace barrier. MOVEFILE_WRITE_THROUGH is not treated as proof
+  of interruption safety. These limits agree with ADR 0015 and Windows docs.
+- Linux native_linux.go is byte-identical to HEAD. The default ownership hooks
+  are no-ops for Linux; OFD syscall semantics were not replaced with process
+  locking. Unsupported targets retain the fail-closed stub.
+
+PRIMARY API/REFERENCE CHECKS
+Retrieved official references on 2026-10-10 (source contracts, not execution):
+https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/fcntl.2.html
+https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/fsync.2.html
+https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-lockfileex
+https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-unlockfileex
+https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getvolumeinformationbyhandlew
+https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-getfileinformationbyhandleex
+https://learn.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-createfilemappingw
+https://learn.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-mapviewoffile
+https://learn.microsoft.com/en-us/windows/win32/memory/closing-a-file-mapping-object
+https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-flushfilebuffers
+https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-movefileexw
+The first GetFileInformationByHandleEx URL used the wrong fileapi header path
+and returned 404; the official winbase header URL above succeeded.
+Local protocol reference: ../toolchains/sqlite-src-3540000/src/os_win.c,
+including winLockSharedMemory, per-connection hShm, and DB lock transitions.
+Pinned Go 1.27.2 os/file_unix.go and os/file_windows.go informed descriptor
+finalizer and close consumption review. No new dependency was installed.
+
+EXECUTED CHECKS
+All Go commands used ../toolchains/go1.27.2/bin/go, with:
+GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off GOFLAGS=-mod=readonly
+GOPATH=$PWD/../go-path GOCACHE=$PWD/../go-cache
+Production/memory tests and cross-compilation used CGO_ENABLED=0.
+Only the explicitly separate race-tooling command used CGO_ENABLED=1.
+
+go run ./internal/testscope
+PASS: Ordinary test source-reference guard. Behavioral review performed too.
+
+go test ./internal/vfs -run '^(TestPlatformReviewMappingSpanConservation|TestPlatformReviewSlotTransitionsExhaustive|TestPlatformReviewRetirementPermutationsMemoryModel|TestPlatformReviewClosedOwnerPreemptsCachedHolds)$' -count=1
+PASS: ok github.com/ms-xiaosnow/gosqlite/internal/vfs 0.069s
+The four tests use only actual portable arithmetic/ledger/retirement helpers
+and nil-owner rejection. They open no files and call no native I/O backend.
+Slot coverage: all 6,561 states, 36 intervals, both requested modes.
+Retirement coverage: every retained-resource mask of four abstract mappings.
+
+go run ./internal/testscope
+PASS again before separate race tooling.
+CGO_ENABLED=1 go test -race ./internal/vfs -run '^(TestPlatformReviewMappingSpanConservation|TestPlatformReviewSlotTransitionsExhaustive|TestPlatformReviewRetirementPermutationsMemoryModel|TestPlatformReviewClosedOwnerPreemptsCachedHolds)$' -count=1
+PASS: ok github.com/ms-xiaosnow/gosqlite/internal/vfs 1.093s
+This is a memory-helper race-tooling pass, not interprocess native lock or
+mapped-memory ordering evidence.
+
+COMPILE ONLY, output binaries NEVER executed:
+GOOS=darwin GOARCH=arm64 go test -c -o ../native-platform-review-darwin-arm64-vfs.test ./internal/vfs
+PASS (exit 0).
+GOOS=windows GOARCH=amd64 go test -c -o ../native-platform-review-windows-amd64-vfs.test ./internal/vfs
+PASS (exit 0).
+
+go vet ./internal/vfs
+PASS (Linux amd64, exit 0).
+GOOS=darwin GOARCH=arm64 go vet ./internal/vfs
+PASS (cross-target static analysis only, exit 0).
+GOOS=windows GOARCH=amd64 go vet ./internal/vfs
+FAIL (exit 1), existing and unsuppressed:
+internal/vfs/native_windows.go:698:33: possible misuse of unsafe.Pointer
+This is the native MapViewOfFile address-to-slice boundary already documented
+in docs/native-windows.md. No analyzer disabling or clean-vet claim was made.
+
+SOURCE HASHES
+Linux baseline HEAD and working-tree hash both:
+ea32e7b45225baa81b0b51f422e4c0ac35fdbfbbba1bf5a7742b3df9f63eb31c  internal/vfs/native_linux.go
+5417ecd8ef86eab79a0f96b4092c1b15711fc53b18f5293ec065e84a7340eb7e  internal/vfs/file.go
+7519233f79c75d496cd33a04d3b7d94f5c23dcc9bbef30098f57eb62e7e13b4f  internal/vfs/locks.go
+f4e243e005f634ddec968ce9885a3bca4db6e998b072a128d0f44116f107f437  internal/vfs/mapping.go
+6ea8d3b6d9a77de367a523ca8792603eb2769400249b78656f672ab87c9fd37c  internal/vfs/native_hooks_default.go
+4bf2948fd77fc1a38c7e9b070667724b1361f0425eb073fbc4598bbedab26ede  internal/vfs/native_other.go
+8bcee6232ea36467e7d04919ba2b0ec152a5739f7cc5c2b43ca19fbdc6ea3da8  internal/vfs/native_darwin.go
+493bc973612d603c8664b8dc697163ed34f39e1fe05d2ac60bba6bb9f6ec798d  internal/vfs/native_darwin_test.go
+de7612a7d365c473bbef502b2ac40727c05c5a3615dfa20b8b0d46c7df9a308d  internal/vfs/native_windows.go
+a92e2c1409055cdf01263610772450dca608b25a1959fc993c290ebfc0f389a8  internal/vfs/native_windows_test.go
+be979a638030cfe4be5ae1c6166d8cadd11f58d0bab0aa4f608e9315e577c6c6  internal/vfs/platform_review_test.go
+
+NOT RUN / REMAINING BOUNDARIES
+No Darwin or Windows native runtime, cooperating-process test, or official
+SQLite native interoperability run. No native lock/unmap/Sync/short-write/
+permission/disk-full fault injection; no database namespace replacement,
+retarget, or race; no corruption/tamper/wrong-key/missing-selected-file scenario;
+no crash, process kill/forced exit, hot recovery, interrupted publication/rekey,
+manual tag, emulator, or aggregate test suite was executed by this review.
+Native ordinary runtime acceptance remains required. M3 physical/interrupted
+durability, long soak, and M10 release/security acceptance remain separate gates.

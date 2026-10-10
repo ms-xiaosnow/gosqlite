@@ -12,8 +12,9 @@ import (
 )
 
 // EncryptedSession uses immutable authenticated snapshot or WAL storage. Writable
-// connections retain an exclusive lease on a separate stable lock inode;
-// read-only connections share that inode. One local Tx/Reader lease is allowed.
+// legacy connections retain an exclusive lease on a separate stable lock inode.
+// Shared mode retains a shared lifecycle lease and acquires a separate writer
+// reservation per transaction. One local Tx/Reader lease is allowed.
 type EncryptedSession struct {
 	mu       sync.Mutex
 	store    *encstore.Store
@@ -26,14 +27,18 @@ type EncryptedSession struct {
 
 func encryptedError(err error) error {
 	switch {
+	case errors.Is(err, encstore.ErrUncertain):
+		return errors.Join(ErrPoisoned, ErrCommitUncertain, err)
+	case errors.Is(err, encstore.ErrPoisoned):
+		return errors.Join(ErrPoisoned, err)
+	case errors.Is(err, encstore.ErrBusySnapshot):
+		return errors.Join(ErrBusySnapshot, err)
 	case errors.Is(err, encstore.ErrBusy):
 		return errors.Join(ErrBusy, err)
 	case errors.Is(err, encstore.ErrChanged):
 		return errors.Join(ErrChanged, err)
 	case errors.Is(err, encstore.ErrUnsupported):
 		return errors.Join(ErrUnsupported, err)
-	case errors.Is(err, encstore.ErrUncertain):
-		return errors.Join(ErrPoisoned, ErrCommitUncertain, err)
 	case errors.Is(err, encryption.ErrLimit):
 		return errors.Join(ErrLimit, err)
 	default:
@@ -41,7 +46,7 @@ func encryptedError(err error) error {
 	}
 }
 func OpenEncryptedSession(ctx context.Context, path string, opts Options, cfg encstore.Options, readOnly bool) (*EncryptedSession, error) {
-	if (opts.KeepWALOnClose && cfg.Mode != encstore.WAL) || opts.WALPowersafeOverwrite {
+	if (opts.KeepWALOnClose && !cfg.Mode.IsWAL()) || opts.WALPowersafeOverwrite {
 		return nil, ErrUnsupported
 	}
 	opts, err := normalizedOptions(opts)
@@ -95,15 +100,15 @@ func (s *EncryptedSession) checkStable() error {
 	defer s.mu.Unlock()
 	return s.checkLocked()
 }
-func (s *EncryptedSession) Begin(ctx context.Context) (*Tx, error) { return s.begin(ctx, false) }
+func (s *EncryptedSession) Begin(ctx context.Context) (*Tx, error) { return s.begin(ctx, false, false) }
 func (s *EncryptedSession) Reader(ctx context.Context) (*Reader, error) {
-	t, e := s.begin(ctx, true)
+	t, e := s.begin(ctx, true, false)
 	if e != nil {
 		return nil, e
 	}
 	return &Reader{lease: t}, nil
 }
-func (s *EncryptedSession) begin(ctx context.Context, readOnly bool) (*Tx, error) {
+func (s *EncryptedSession) begin(ctx context.Context, readOnly, writerFirst bool) (*Tx, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
@@ -120,20 +125,41 @@ func (s *EncryptedSession) begin(ctx context.Context, readOnly bool) (*Tx, error
 		s.mu.Unlock()
 		return nil, ErrMisuse
 	}
+	var admit error
+	if writerFirst {
+		admit = s.store.AcquireWriter(ctx, nil)
+	} else {
+		admit = s.store.Refresh(ctx)
+	}
+	if admit != nil {
+		s.mu.Unlock()
+		return nil, encryptedError(admit)
+	}
 	p, err := s.store.ReadPage(ctx, 1)
+	if err == nil {
+		g := s.store.Geometry()
+		s.header, err = ParseHeader(p, int64(g.PageSize)*int64(g.PageCount))
+		if err == nil && (s.header.PageSize != g.PageSize || s.header.PageCount != g.PageCount) {
+			err = ErrCorrupt
+		}
+		if err == nil {
+			err = writableHeader(s.header)
+		}
+	}
 	if err != nil {
+		clear(p)
+		err = errors.Join(err, s.store.ReleaseWriter(false))
 		s.mu.Unlock()
 		return nil, encryptedError(err)
 	}
-	t := &Tx{encrypted: s, header: s.header, originalPages: s.header.PageCount, opts: s.opts, readOnly: readOnly, reserved: !readOnly, dirty: make(map[uint32][]byte), free: make(map[uint32]struct{})}
+	t := &Tx{encrypted: s, header: s.header, originalPages: s.header.PageCount, opts: s.opts, readOnly: readOnly, reserved: !readOnly && (writerFirst || s.store.Mode() != encstore.WALShared), encryptedAuthority: s.store.Authority(), encryptedHead: s.store.HeadCommitID(), dirty: make(map[uint32][]byte), free: make(map[uint32]struct{})}
 	copy(t.originalHeader[:], p[:100])
 	clear(p)
 	s.active = t
 	s.mu.Unlock()
 	if !readOnly {
 		if err = t.loadFreelist(ctx); err != nil {
-			_ = t.Rollback()
-			return nil, err
+			return nil, errors.Join(err, t.Rollback())
 		}
 	}
 	return t, nil
@@ -147,13 +173,41 @@ func (s *EncryptedSession) readPage(ctx context.Context, n uint32) ([]byte, erro
 	p, err := s.store.ReadPage(ctx, n)
 	return p, encryptedError(err)
 }
-func (s *EncryptedSession) release(t *Tx) {
+func (s *EncryptedSession) release(t *Tx) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if s.active == t {
-		s.active = nil
+	if s.active != t {
+		return nil
 	}
+	s.active = nil
+	err := encryptedError(s.store.ReleaseWriter(false))
+	if errors.Is(err, ErrPoisoned) {
+		s.poisoned = err
+		t.poisoned = err
+	}
+	return err
 }
+func (s *EncryptedSession) promote(ctx context.Context, t *Tx) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if err := s.checkLocked(); err != nil {
+		return err
+	}
+	if s.active != t {
+		return ErrMisuse
+	}
+	if err := s.store.AcquireWriter(ctx, &t.encryptedAuthority); err != nil {
+		return encryptedError(err)
+	}
+	t.reserved = true
+	return nil
+}
+
+// BeginImmediate reserves the writer before selecting a new read authority.
+func (s *EncryptedSession) BeginImmediate(ctx context.Context) (*Tx, error) {
+	return s.begin(ctx, false, true)
+}
+
 func (t *Tx) clearEncrypted() {
 	for _, p := range t.dirty {
 		clear(p)
@@ -173,9 +227,14 @@ func (t *Tx) commitEncryptedLocked(ctx context.Context) error {
 		return ErrMisuse
 	}
 	if len(t.dirty) == 0 {
+		err := encryptedError(s.store.ReleaseWriter(false))
+		if errors.Is(err, ErrPoisoned) {
+			s.poisoned = err
+			t.poisoned = err
+		}
 		s.active = nil
 		t.clearEncrypted()
-		return nil
+		return err
 	}
 	if t.readOnly {
 		return ErrMisuse
@@ -202,7 +261,7 @@ func (t *Tx) commitEncryptedLocked(ctx context.Context) error {
 		return s.store.ReadPage(c, n)
 	})
 	var publishErr error
-	if s.store.Mode() == encstore.WAL {
+	if s.store.Mode().IsWAL() {
 		count := uint64(len(t.dirty))
 		reserved := lockPage(h.PageSize)
 		if reserved > t.originalPages && reserved <= h.PageCount {
@@ -223,7 +282,7 @@ func (t *Tx) commitEncryptedLocked(ctx context.Context) error {
 			}
 		}
 		sort.Slice(pages, func(i, j int) bool { return pages[i] < pages[j] })
-		publishErr = s.store.PublishWAL(ctx, s.store.HeadCommitID(), encstore.Geometry{PageSize: h.PageSize, PageCount: h.PageCount}, pages, src)
+		publishErr = s.store.PublishWAL(ctx, t.encryptedHead, encstore.Geometry{PageSize: h.PageSize, PageCount: h.PageCount}, pages, src)
 	} else {
 		publishErr = s.store.Publish(ctx, encstore.Geometry{PageSize: h.PageSize, PageCount: h.PageCount}, src, nil)
 	}
@@ -233,6 +292,7 @@ func (t *Tx) commitEncryptedLocked(ctx context.Context) error {
 			s.poisoned = err
 			t.poisoned = err
 			s.active = nil
+			err = errors.Join(err, encryptedError(s.store.ReleaseWriter(true)))
 			t.clearEncrypted()
 		}
 		return err
@@ -240,8 +300,13 @@ func (t *Tx) commitEncryptedLocked(ctx context.Context) error {
 	s.header = h
 	t.header = h
 	s.active = nil
+	err = encryptedError(s.store.ReleaseWriter(true))
+	if errors.Is(err, ErrPoisoned) {
+		s.poisoned = err
+		t.poisoned = err
+	}
 	t.clearEncrypted()
-	return nil
+	return err
 }
 func (s *EncryptedSession) Checkpoint(ctx context.Context) error {
 	s.mu.Lock()
@@ -253,6 +318,9 @@ func (s *EncryptedSession) Checkpoint(ctx context.Context) error {
 		return ErrBusy
 	}
 	err := encryptedError(s.store.Checkpoint(ctx))
+	if err == nil {
+		s.header, err = s.selectedHeader(ctx)
+	}
 	if errors.Is(err, ErrCommitUncertain) {
 		s.poisoned = err
 	}
@@ -261,31 +329,14 @@ func (s *EncryptedSession) Checkpoint(ctx context.Context) error {
 func (s *EncryptedSession) Verify(ctx context.Context) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if err := s.checkLocked(); err != nil {
-		return err
-	}
-	if s.active != nil {
-		return ErrBusy
-	}
-	return encryptedError(s.store.Verify(ctx))
+	return s.operationLocked(ctx, false, false, nil, func(encryptedSnapshotView) error { return nil })
 }
-func (s *EncryptedSession) RekeyPrepared(ctx context.Context, target *encstore.Prepared) error {
+func (s *EncryptedSession) RekeyPrepared(ctx context.Context, target *encstore.Prepared, validate SnapshotValidator) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if err := s.checkLocked(); err != nil {
-		return err
-	}
-	if s.active != nil {
-		return ErrBusy
-	}
-	if s.readOnly {
-		return ErrMisuse
-	}
-	err := encryptedError(s.store.Publish(ctx, s.store.Geometry(), s.store, target))
-	if errors.Is(err, ErrCommitUncertain) {
-		s.poisoned = err
-	}
-	return err
+	return s.operationLocked(ctx, true, true, validate, func(r encryptedSnapshotView) error {
+		return encryptedError(s.store.Publish(ctx, s.store.Geometry(), r, target))
+	})
 }
 func (s *EncryptedSession) Close() error {
 	s.mu.Lock()
@@ -314,21 +365,17 @@ func (s *EncryptedSession) EncryptionInfo() encstore.Info {
 	return s.store.Info()
 }
 
-func (s *EncryptedSession) UpgradeWAL(ctx context.Context) error {
+func (s *EncryptedSession) UpgradeWAL(ctx context.Context, validate SnapshotValidator) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if err := s.checkLocked(); err != nil {
-		return err
-	}
-	if s.active != nil {
-		return ErrBusy
-	}
-	if s.readOnly {
-		return ErrMisuse
-	}
-	err := encryptedError(s.store.UpgradeWAL(ctx))
-	if errors.Is(err, ErrCommitUncertain) {
-		s.poisoned = err
-	}
-	return err
+	return s.operationLocked(ctx, true, false, validate, func(encryptedSnapshotView) error {
+		return encryptedError(s.store.UpgradeWAL(ctx))
+	})
+}
+func (s *EncryptedSession) UpgradeShared(ctx context.Context, validate SnapshotValidator) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.operationLocked(ctx, true, false, validate, func(encryptedSnapshotView) error {
+		return encryptedError(s.store.UpgradeShared(ctx))
+	})
 }

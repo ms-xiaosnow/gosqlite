@@ -1,0 +1,174 @@
+M8c shared encrypted sessions: independent engineering review
+Date: 2026-10-10 UTC
+Scope: source/design review plus named pure-memory and intact correct-key Linux
+ordinary-operation tests. This is not an independent crypto/security release
+review, a native Darwin/Windows qualification, or physical durability evidence.
+No staging or commits were performed by this reviewer.
+
+Read first:
+- ../m8c-protocol-review.md
+- ../m8c-shared-concurrency-design.md
+
+Reviewed implementation:
+- encstore shared root codec, selection ownership, capture/authority/publication,
+  lifecycle/writer/capture OFD ranges, resource/retention/ID-ledger accounting.
+- encrypted pager admission, promotion, operation-wide validator/copy reader,
+  transaction no-op/rollback/release, checkpoint/rekey/upgrade and normal close.
+- sqlite transaction integration and encryption verification/copy entry points.
+
+Findings raised to implementation owner and disposition:
+1. Candidate root decoding and PublishWAL ref cloning preceded a combined
+   retained-selection/metadata preflight; refresh decoded metadata twice.
+   Owner added bounded old-graph + twelve-root-extent + persistent-ledger
+   admission before allocation and extracted openWALSelection to use one parse.
+   Reviewed correction; normal quota regression preserves the old selection,
+   master and authority and releases newly acquired byte1/byte2 ownership.
+2. Shared current-authority cutover omitted the stable lock and pinned namespace
+   rechecks that legacy Check retained. Owner added checkOwner before cutover
+   and after publication. Verified in source only; no hostile mutation executed.
+3. Checkpoint observed-header refresh was absent in an earlier source view.
+   Current session code refreshes selectedHeader after successful checkpoint;
+   the new regression proves idle A checkpoints B's latest grown head and
+   returns current A.Info geometry. No failing runtime regression is claimed:
+   first executable regression ran against the updated code.
+4. Embedded selection migration left one existing Store{wal: ...} test literal.
+   Owner corrected it to initialize selection explicitly.
+
+Reviewed invariants:
+- Layout3 is explicit; authenticated protocol byte and canonical reserves are
+  checked. Old layout codecs are not widened. Root tokens cover exact complete
+  authenticated root bytes, not just page-one counters/head content.
+- Shared root capture closes the supersedable descriptor, releases the bounded
+  byte2 capture gate before provider/KDF or full-graph work, and retains bounded
+  authenticated bytes. Selected immutable names/extents/link checks and per-page
+  authentication remain in force across normal root replacement.
+- Independent connections own independent masters/OFDs. Writer-first admission
+  precedes root refresh; expected-token promotion preserves an exposed snapshot.
+  Ordinary contention/stale/quota/cancel/no-op paths retain correct ownership.
+- Byte0 lifecycle is shared after creation/upgrade; byte1 serializes writers;
+  byte2 gates capture/cutover. Globally quiescent rekey uses nonblocking atomic
+  lifecycle conversion. CreateFrom owns exclusive lifecycle through return/close.
+- Validation, physical verification, copy output and geometry use one retained
+  selection through encryptedSnapshotView. It does not reenter Session.mu.
+- Checkpoint selects latest authority before its no-segment decision. Old readers
+  remain valid through commits and checkpoints. Fresh operations observe growth.
+- Publication uncertainty and ownership poison take precedence over BUSY in
+  pager and sqlite error mapping; these branches were reviewed in source, not
+  induced through native failures. Memory-only composition checks are included.
+- No externally anchored fresh-head guarantee, historical-key revocation, GC,
+  cross-process global issuance count or process-global resource cap is claimed.
+
+Reviewer-owned tests:
+- TestReviewSharedMemoryAuthenticatedExactAuthority
+- TestReviewSharedMemoryCombinedAccountingBoundaries
+- TestReviewSharedIntactPinnedSelectionAndLedger
+- TestReviewSharedIntactQuotaFailurePreservesSelection
+- TestReviewSharedMemoryOwnershipPoisonPriority
+- TestReviewSharedIntactConcurrentReaderAndPublisher
+- TestReviewEncryptionSharedValidationAndCopyPinOneHead
+- TestReviewEncryptionSharedRowsPinCatalogAcrossCheckpoint
+- TestReviewEncryptionSharedCancelledAdmissionReleasesWriter
+- TestReviewEncryptionSharedLatestCheckpointMetadata
+
+The copy regression publishes and checkpoints from B inside A's validation
+callback before A starts output; both archive and plaintext copies retain A's
+old selected data/geometry. Correct-key archive restore creates a shared target.
+A separate concurrent history reads A's pinned pages while a goroutine performs
+12 normal B commits and checkpoints, then verifies old and refreshed selections.
+Quota refusal uses valid unchanged physical graphs and configured descriptor
+limits. Invalid authority/layout/epoch/error-state cases are entirely memory-only.
+
+Not executed: wrong-key/tampered/corrupt/missing-selected disk fixtures; namespace
+replacement/retarget/race injection; actual native I/O/lock/unmap failure injection;
+crash/kill/process-exit/hot recovery; failed Sync/short-write/disk-full/permission
+faults; interrupted publication/rekey. Manual suites and aggregate tests were not
+run. Initial new test compile corrections (Rows.Values and FileInfo fields) were
+test API mistakes, corrected before the successful final named suite below.
+
+Final exact-command run (pinned offline Go 1.27.2; CGO0 normal, separate CGO1 race):
++ date -u +%FT%TZ
+2026-10-10T14:11:58Z
++ export GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off GOPATH=/workspace/scratch/5e06a74e5f65/durable-restart/go-path GOCACHE=/workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go-cache
++ GOTOOLCHAIN=local
++ GOPROXY=off
++ GOSUMDB=off
++ GOPATH=/workspace/scratch/5e06a74e5f65/durable-restart/go-path
++ GOCACHE=/workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go-cache
++ ../toolchains/go1.27.2/bin/go version
+go version go1.27.2 linux/amd64
++ CGO_ENABLED=0
++ ../toolchains/go1.27.2/bin/go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ CGO_ENABLED=0
++ ../toolchains/go1.27.2/bin/go test ./internal/encstore ./sqlite -run '^(TestReviewSharedMemoryAuthenticatedExactAuthority|TestReviewSharedMemoryCombinedAccountingBoundaries|TestReviewSharedIntactPinnedSelectionAndLedger|TestReviewSharedIntactQuotaFailurePreservesSelection|TestReviewSharedMemoryOwnershipPoisonPriority|TestReviewSharedIntactConcurrentReaderAndPublisher|TestReviewEncryptionSharedValidationAndCopyPinOneHead|TestReviewEncryptionSharedRowsPinCatalogAcrossCheckpoint|TestReviewEncryptionSharedCancelledAdmissionReleasesWriter|TestReviewEncryptionSharedLatestCheckpointMetadata)$' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	0.279s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.053s
++ CGO_ENABLED=0
++ ../toolchains/go1.27.2/bin/go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ CGO_ENABLED=1
++ ../toolchains/go1.27.2/bin/go test -race ./internal/encstore ./sqlite -run '^(TestReviewSharedMemoryAuthenticatedExactAuthority|TestReviewSharedMemoryCombinedAccountingBoundaries|TestReviewSharedIntactPinnedSelectionAndLedger|TestReviewSharedIntactQuotaFailurePreservesSelection|TestReviewSharedMemoryOwnershipPoisonPriority|TestReviewSharedIntactConcurrentReaderAndPublisher|TestReviewEncryptionSharedValidationAndCopyPinOneHead|TestReviewEncryptionSharedRowsPinCatalogAcrossCheckpoint|TestReviewEncryptionSharedCancelledAdmissionReleasesWriter|TestReviewEncryptionSharedLatestCheckpointMetadata)$' -count=1
+# github.com/ms-xiaosnow/gosqlite/sqlite [github.com/ms-xiaosnow/gosqlite/sqlite.test]
+sqlite/plan_vector.go:120:43: undefined: sqlast.SparseDimensions
+sqlite/plan_vector.go:164:25: v.scoreSparse undefined (type *vectorRank has no field or method scoreSparse)
+sqlite/vector_value.go:35:18: undefined: sqlast.SparseDimensions
+sqlite/vector_value.go:35:62: undefined: decodeSparseColumn
+sqlite/vector_value.go:55:18: undefined: sqlast.SparseDimensions
+sqlite/vector_value.go:55:62: undefined: decodeSparseColumn
+sqlite/vector_value.go:106:23: undefined: sqlast.SparseDimensions
+sqlite/write_schema.go:150:22: undefined: sqlast.SparseDimensions
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	1.119s
+FAIL	github.com/ms-xiaosnow/gosqlite/sqlite [build failed]
+FAIL
+
+The preceding final CGO0 suite passed; encstore's race suite also passed.
+Sqlite's race build was blocked by concurrent unrelated sparse-vector additions
+whose symbols were not yet all present. The earlier nine-test CGO0 and CGO1 runs
+(including the concurrent reader/publisher test) both passed at 14:09 UTC, before
+adding the checkpoint metadata regression. No shared runtime failure was inferred
+from the unrelated transient compiler errors above. Once those symbols were
+present, the complete named suite was rerun as follows:
++ date -u +%FT%TZ
+2026-10-10T14:13:32Z
++ export GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off GOPATH=/workspace/scratch/5e06a74e5f65/durable-restart/go-path GOCACHE=/workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go-cache
++ GOTOOLCHAIN=local
++ GOPROXY=off
++ GOSUMDB=off
++ GOPATH=/workspace/scratch/5e06a74e5f65/durable-restart/go-path
++ GOCACHE=/workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go-cache
++ CGO_ENABLED=0
++ ../toolchains/go1.27.2/bin/go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ CGO_ENABLED=0
++ ../toolchains/go1.27.2/bin/go test ./internal/encstore ./sqlite -run '^(TestReviewSharedMemoryAuthenticatedExactAuthority|TestReviewSharedMemoryCombinedAccountingBoundaries|TestReviewSharedIntactPinnedSelectionAndLedger|TestReviewSharedIntactQuotaFailurePreservesSelection|TestReviewSharedMemoryOwnershipPoisonPriority|TestReviewSharedIntactConcurrentReaderAndPublisher|TestReviewEncryptionSharedValidationAndCopyPinOneHead|TestReviewEncryptionSharedRowsPinCatalogAcrossCheckpoint|TestReviewEncryptionSharedCancelledAdmissionReleasesWriter|TestReviewEncryptionSharedLatestCheckpointMetadata)$' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	0.055s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.070s
++ CGO_ENABLED=0
++ ../toolchains/go1.27.2/bin/go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ CGO_ENABLED=1
++ ../toolchains/go1.27.2/bin/go test -race ./internal/encstore ./sqlite -run '^(TestReviewSharedMemoryAuthenticatedExactAuthority|TestReviewSharedMemoryCombinedAccountingBoundaries|TestReviewSharedIntactPinnedSelectionAndLedger|TestReviewSharedIntactQuotaFailurePreservesSelection|TestReviewSharedMemoryOwnershipPoisonPriority|TestReviewSharedIntactConcurrentReaderAndPublisher|TestReviewEncryptionSharedValidationAndCopyPinOneHead|TestReviewEncryptionSharedRowsPinCatalogAcrossCheckpoint|TestReviewEncryptionSharedCancelledAdmissionReleasesWriter|TestReviewEncryptionSharedLatestCheckpointMetadata)$' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	1.125s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	1.218s
++ date -u +%FT%TZ
+2026-10-10T14:13:44Z
++ sha256sum internal/encstore/shared_review_test.go sqlite/encryption_shared_review_test.go internal/encstore/shared.go internal/encstore/shared_format.go internal/encstore/store.go internal/encstore/snapshot.go internal/encstore/publish.go internal/encstore/wal_format.go internal/encstore/backup.go internal/encstore/platform_linux.go internal/pager/encrypted_session.go internal/pager/encrypted_operation.go internal/pager/encrypted_copy.go internal/pager/tx.go sqlite/encryption.go sqlite/encryption_copy.go sqlite/transaction.go sqlite/transaction_control.go sqlite/sqlite.go
+061b4389967451ca62d93821a190cdb31b567d590dc114646278b172b6d04b22  internal/encstore/shared_review_test.go
+7f4a21889a9c6e2dba6b234433f51ddd159386cbf2acc2bc539deb9acb8792f1  sqlite/encryption_shared_review_test.go
+6e9a88af62a4d93c393cfb51596aba8fbbb4cc97d1ec0af660aa718efcb8f542  internal/encstore/shared.go
+f1fe562db5422ab201943758e0daec298fe266b31b83139e459acaf5ad2adf19  internal/encstore/shared_format.go
+bb132b74b8301b85353563fb89012f044979f636192e7eb4207d5be537b3a8ec  internal/encstore/store.go
+d3c9cffda1e609d3b3c63b93f0f7faa575832f94b26f3f9d4c85ce133e0c03cf  internal/encstore/snapshot.go
+959ea1c614881dfae344c7b63efef1844b0ebca164b80fb36aca2692cbb5e8d8  internal/encstore/publish.go
+91f23b88c1bb86e0487fd11ec3de4a17163619ff790452ab07de27e92bbf0159  internal/encstore/wal_format.go
+13d943236807e10ef1bd35c91ec047c1348c2852e5a7a8728ea0e0b459e0619a  internal/encstore/backup.go
+56cdfaa91f7a77fb4e9e1674b39b0e2dcf23eb93fdf5a219dd5f95de2ad27112  internal/encstore/platform_linux.go
+2fe5c1e15a0fb665f00b38132cbc6104ab8daf4c9e5ec9a2313316941152e315  internal/pager/encrypted_session.go
+b172f3f25ac82bff0da61aa6c5f67a32aa8860b263bf3ec97efead946e3960a6  internal/pager/encrypted_operation.go
+ec095ecbe6665dbdfecf0692ebd000c5fd44f94e264a4baf777ddc78646c9569  internal/pager/encrypted_copy.go
+9abbb0ce50a3198f6400bb91ef1ebbf4fe2dba3b33d63cf2c523521c9f3cdd04  internal/pager/tx.go
+02679a9bc79ce5c61201516e3f8216e92fdb70a7ac9fd9db529ee5218a65caa4  sqlite/encryption.go
+87186b75ca1718dcc809bc20ffde7dc9bbdf029f182098cf552881ec0ae5cbd1  sqlite/encryption_copy.go
+7faf6c21c52b4a4d088f898a5494c3d9e0a4dd32eada9d9815dfed22787efa10  sqlite/transaction.go
+e2ab214067fc19876ac85417d70da4a0be5279cb00a5853305d5b03c1ef0f875  sqlite/transaction_control.go
+c1bd69b3f87477558616506dcc8daf58144c8a1abd2157b6efdafc12df88f38a  sqlite/sqlite.go

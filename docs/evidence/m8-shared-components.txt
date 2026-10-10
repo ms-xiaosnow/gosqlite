@@ -1,0 +1,86 @@
+M8c focused component evidence. Correct-key intact-files and memory-only negative models.
+No aggregate, manual tags, fault/tamper/wrong-key disk, interruption or recovery execution.
+go version go1.27.2 linux/amd64
+CGO_ENABLED=0 GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off; local pinned toolchain/cache.
+Ordinary test source-reference guard PASS; behavioral review is still required.
++ go test ./internal/encstore -run '^(TestSharedLayoutFrozenMemoryModeAndProtocol|TestSharedCombinedMemoryAndDescriptorBudgets|TestWALFormatFrozenMemoryVectors|TestSnapshotManifestCanonicalMemory|TestReviewWALMemoryMintedIdentityLedgerBudget)$' -count=1 -v
+=== RUN   TestSnapshotManifestCanonicalMemory
+--- PASS: TestSnapshotManifestCanonicalMemory (0.00s)
+=== RUN   TestSharedLayoutFrozenMemoryModeAndProtocol
+--- PASS: TestSharedLayoutFrozenMemoryModeAndProtocol (0.00s)
+=== RUN   TestSharedCombinedMemoryAndDescriptorBudgets
+--- PASS: TestSharedCombinedMemoryAndDescriptorBudgets (0.00s)
+=== RUN   TestWALFormatFrozenMemoryVectors
+--- PASS: TestWALFormatFrozenMemoryVectors (0.00s)
+=== RUN   TestReviewWALMemoryMintedIdentityLedgerBudget
+--- PASS: TestReviewWALMemoryMintedIdentityLedgerBudget (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	0.005s
++ go test ./internal/pager -run '^(TestEncryptedPagerOrdinarySnapshotLifecycle|TestEncryptedPagerWALFinalDirtySegments|TestEncryptedPagerWALQuotaBeforePublication|TestEncryptedSharedCopyPinsSelectionThroughValidationAndOutput|TestEncryptedSharedPoisonPriorityMemory)$' -count=1 -v
+=== RUN   TestEncryptedPagerOrdinarySnapshotLifecycle
+--- PASS: TestEncryptedPagerOrdinarySnapshotLifecycle (0.00s)
+=== RUN   TestEncryptedSharedCopyPinsSelectionThroughValidationAndOutput
+--- PASS: TestEncryptedSharedCopyPinsSelectionThroughValidationAndOutput (0.01s)
+=== RUN   TestEncryptedSharedPoisonPriorityMemory
+--- PASS: TestEncryptedSharedPoisonPriorityMemory (0.00s)
+=== RUN   TestEncryptedPagerWALFinalDirtySegments
+--- PASS: TestEncryptedPagerWALFinalDirtySegments (0.01s)
+=== RUN   TestEncryptedPagerWALQuotaBeforePublication
+--- PASS: TestEncryptedPagerWALQuotaBeforePublication (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.021s
++ go test ./sqlite -run '^(TestEncryptionSharedReadersWriterAndStalePromotion|TestEncryptionSharedLazySavepointsAndNoopRelease|TestEncryptionSharedQuiescentRekeyAndLeaseRetention|TestEncryptionSharedExplicitUpgradeCopiesAndRestore|TestEncryptionSharedCloseBusyAndPasswordRefresh|TestEncryptionSharedPromotionQuotaPreservesReadLease|TestEncryptionSharedGramsHNSWIVFSavepointAndCopy|TestEncryptionOrdinaryLifecycleAndCopies|TestEncryptionPasswordNormalReopen|TestEncryptionIncompatibleOptionsBeforeFiles|TestEncryptionStatementQuotaNormalRollback|TestEncryptionExtensionBackupRestore|TestEncryptionRetainedGenerationQuota|TestEncryptionReviewFreshIdentityAndRetainedBytes|TestEncryptionWALPasswordOrdinaryReopenAndCancellation|TestEncryptionWALNativeOptionPreflight)$' -count=1 -v
+=== RUN   TestEncryptionReviewFreshIdentityAndRetainedBytes
+--- PASS: TestEncryptionReviewFreshIdentityAndRetainedBytes (0.01s)
+=== RUN   TestEncryptionSharedReadersWriterAndStalePromotion
+--- PASS: TestEncryptionSharedReadersWriterAndStalePromotion (0.01s)
+=== RUN   TestEncryptionSharedLazySavepointsAndNoopRelease
+--- PASS: TestEncryptionSharedLazySavepointsAndNoopRelease (0.01s)
+=== RUN   TestEncryptionSharedQuiescentRekeyAndLeaseRetention
+--- PASS: TestEncryptionSharedQuiescentRekeyAndLeaseRetention (0.00s)
+=== RUN   TestEncryptionSharedExplicitUpgradeCopiesAndRestore
+=== RUN   TestEncryptionSharedExplicitUpgradeCopiesAndRestore/0
+=== RUN   TestEncryptionSharedExplicitUpgradeCopiesAndRestore/1
+--- PASS: TestEncryptionSharedExplicitUpgradeCopiesAndRestore (0.01s)
+    --- PASS: TestEncryptionSharedExplicitUpgradeCopiesAndRestore/0 (0.01s)
+    --- PASS: TestEncryptionSharedExplicitUpgradeCopiesAndRestore/1 (0.01s)
+=== RUN   TestEncryptionSharedCloseBusyAndPasswordRefresh
+--- PASS: TestEncryptionSharedCloseBusyAndPasswordRefresh (0.38s)
+=== RUN   TestEncryptionSharedPromotionQuotaPreservesReadLease
+--- PASS: TestEncryptionSharedPromotionQuotaPreservesReadLease (0.01s)
+=== RUN   TestEncryptionSharedGramsHNSWIVFSavepointAndCopy
+--- PASS: TestEncryptionSharedGramsHNSWIVFSavepointAndCopy (0.14s)
+=== RUN   TestEncryptionOrdinaryLifecycleAndCopies
+--- PASS: TestEncryptionOrdinaryLifecycleAndCopies (0.01s)
+=== RUN   TestEncryptionPasswordNormalReopen
+--- PASS: TestEncryptionPasswordNormalReopen (0.36s)
+=== RUN   TestEncryptionIncompatibleOptionsBeforeFiles
+--- PASS: TestEncryptionIncompatibleOptionsBeforeFiles (0.00s)
+=== RUN   TestEncryptionStatementQuotaNormalRollback
+--- PASS: TestEncryptionStatementQuotaNormalRollback (0.00s)
+=== RUN   TestEncryptionExtensionBackupRestore
+--- PASS: TestEncryptionExtensionBackupRestore (0.02s)
+=== RUN   TestEncryptionRetainedGenerationQuota
+--- PASS: TestEncryptionRetainedGenerationQuota (0.00s)
+=== RUN   TestEncryptionWALPasswordOrdinaryReopenAndCancellation
+--- PASS: TestEncryptionWALPasswordOrdinaryReopenAndCancellation (0.51s)
+=== RUN   TestEncryptionWALNativeOptionPreflight
+--- PASS: TestEncryptionWALNativeOptionPreflight (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	1.500s
++ go test ./driver -run '^(TestEncryptedSharedConnectorIndependentPoolSnapshots|TestEncryptedConnectorOrdinaryLifecycle|TestEncryptedConnectorRejectsSecretDSNWithoutFiles|TestEncryptedWALConnectorCopiesLimits)$' -count=1 -v
+=== RUN   TestEncryptedSharedConnectorIndependentPoolSnapshots
+--- PASS: TestEncryptedSharedConnectorIndependentPoolSnapshots (0.01s)
+=== RUN   TestEncryptedConnectorOrdinaryLifecycle
+--- PASS: TestEncryptedConnectorOrdinaryLifecycle (0.01s)
+=== RUN   TestEncryptedConnectorRejectsSecretDSNWithoutFiles
+--- PASS: TestEncryptedConnectorRejectsSecretDSNWithoutFiles (0.00s)
+=== RUN   TestEncryptedWALConnectorCopiesLimits
+--- PASS: TestEncryptedWALConnectorCopiesLimits (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.029s
++ go test ./examples/encrypted-shared -run '^TestEncryptedSharedExampleOrdinary$' -count=1 -v
+=== RUN   TestEncryptedSharedExampleOrdinary
+--- PASS: TestEncryptedSharedExampleOrdinary (0.02s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-shared	0.021s

@@ -30,12 +30,16 @@ func validateLinks(f *os.File) error {
 	}
 	return nil
 }
-func lockFile(f *os.File, readOnly bool) error {
+func lockFile(f *os.File, readOnly bool) error { return rangeLock(f, 0, readOnly, false) }
+func rangeLock(f *os.File, offset int64, shared, unlock bool) error {
 	typ := int16(unix.F_WRLCK)
-	if readOnly {
+	if shared {
 		typ = unix.F_RDLCK
 	}
-	l := unix.Flock_t{Type: typ, Whence: 0, Start: 0, Len: 1}
+	if unlock {
+		typ = unix.F_UNLCK
+	}
+	l := unix.Flock_t{Type: typ, Whence: 0, Start: offset, Len: 1}
 	err := unix.FcntlFlock(f.Fd(), unix.F_OFD_SETLK, &l)
 	if errors.Is(err, unix.EAGAIN) || errors.Is(err, unix.EACCES) {
 		return ErrBusy

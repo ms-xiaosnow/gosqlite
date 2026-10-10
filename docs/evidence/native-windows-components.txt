@@ -1,0 +1,40 @@
+2026-10-10. Windows VFS component evidence. Linux host; no Windows runtime.
+Repository working directory: durable-restart/gosqlite.
+No staging or commits performed by this worker. No dependency downloads.
+
+All Go commands below used:
+  GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off
+  GOPATH="$PWD/../go-path" GOCACHE="$PWD/../go-cache" CGO_ENABLED=0
+  ../toolchains/go1.27.2/bin/go
+
+Source-reference guard:
+  go run ./internal/testscope
+  PASS: Ordinary test source-reference guard PASS; behavioral review is still required.
+
+Focused compilation only, all PASS:
+  GOOS=windows GOARCH=amd64 go build ./internal/vfs ./internal/pager ./internal/walindex
+  GOOS=windows GOARCH=amd64 go test -c -o ../native-build/vfs-windows-amd64.test.exe ./internal/vfs
+  GOOS=windows GOARCH=amd64 go test -c -o ../native-build/pager-windows-amd64.test.exe ./internal/pager
+  GOOS=windows GOARCH=amd64 go test -c -o ../native-build/walindex-windows-amd64.test.exe ./internal/walindex
+These executables were not launched. Native tests and native SQLite process
+interoperability remain NOT_RUN, not PASS.
+
+Exact reviewed Linux pure-memory models, after a fresh source-reference guard:
+  go test ./internal/vfs -run '^(TestSlotLedgerStrictOwnership|TestMappingSpanGranularity|TestMappingRetirementMemoryModel|TestCloseOrderingMemoryModel|TestOwnershipReviewPartialRetirementRetainsAllLocks|TestOwnershipReviewClosingLeaseRejectsReuse|TestOwnershipReviewLockPoisonLatch|TestOwnershipReviewReplacementRejectsIneligibleRoles)$' -count=1 -v
+  PASS: all eight named cases and their subcases, package 0.006s.
+These exercise existing portable bookkeeping without native calls or OS
+failure injection. They do not execute or validate the Windows backend.
+
+Default cross-vet, NOT CLEAN:
+  GOOS=windows GOARCH=amd64 go vet ./internal/vfs ./internal/pager ./internal/walindex
+  Exit 1: internal/vfs/native_windows.go:698:33: possible misuse of unsafe.Pointer
+This is the successful MapViewOfFile uintptr-to-unsafe.Slice conversion,
+matching the direct pattern in pinned Go runtime/tooling mmap implementations.
+See docs/native-windows.md for rationale and lifetime constraints. No checker
+was disabled and no misleading replacement was used to hide the diagnostic.
+
+Not executed: Windows native tests, Windows official-SQLite interoperability,
+manual harnesses, native error/fault injection, namespace replacement or
+retargeting, corruption/wrong-key/selected-file-removal, crash/kill/process-exit,
+hot recovery, interrupted publication/rekey, physical durability, soak tests.
+No aggregate test suite was run for this component assignment.

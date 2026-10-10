@@ -12,7 +12,11 @@ type Mode uint8
 const (
 	Snapshot Mode = iota
 	WAL
+	// WALShared uses layout 3 and the lifecycle/writer/capture range protocol.
+	WALShared
 )
+
+func (m Mode) IsWAL() bool { return m == WAL || m == WALShared }
 
 // WALLimits bounds the complete selected graph and operation, independently of
 // primitive, transaction-dirty and retained-history limits. Zero uses defaults.

@@ -8,7 +8,7 @@ Behavior baseline: official SQLite 3.54.0. M2 implements a deliberately bounded 
 | SQLite header/records | partial | format3, UTF-8, rollback-mode header; page sizes 512/4096/65536 exercised; integer widths/REAL/NULL/TEXT/BLOB |
 | Rowid B-trees | partial | leaf/interior, signed rowids, overflow, streaming, schema root1 including schema overflow |
 | Ordinary secondary indices | partial | create/maintain nonunique BINARY ASC keys; actual rowid/IPK equality and leading-prefix equality SELECT seeks with residual recheck; unsupported shapes scan; no general range/covering/order optimization |
-| Native file locking | partial | managed role-specific file/mapping ownership, Linux OFD shared/reserved/pending/exclusive byte-range locks; native Darwin/Windows implementations still absent |
+| Native file locking | partial | managed role-specific file/mapping ownership, Linux OFD shared/reserved/pending/exclusive byte-range locks; Darwin managed process-fcntl and Windows/amd64 checked LockFileEx/mapping backends implemented; only Linux ordinary runtime verified |
 | SELECT | partial | one rowid table or no FROM; projection, *, WHERE, parameters, ORDER BY, LIMIT/OFFSET; aliases and rowid/IPK semantics |
 | Expressions | partial | NULL3VL, comparisons/affinity, arithmetic/bitwise/concat, ASCII-insensitive rune LIKE with ESCAPE, tested scalar builtins |
 | Schema interpretation | partial | declared types INTEGER/INT/REAL/TEXT/BLOB/NUMERIC, strict VECTOR(n)/BIT(n)/HALFVEC(n), or typeless; supported INTEGER PRIMARY KEY, NOT NULL and literal DEFAULT enforced on writes; non-INTEGER PK metadata read-only |
@@ -25,14 +25,14 @@ Behavior baseline: official SQLite 3.54.0. M2 implements a deliberately bounded 
 | HNSW | conditional ordinary first slice | real persisted lazy graph, transactional tombstones/reindex, filtered widening/exact fallback, native explicit approximate and eligible SQL planner; measured recall with slower small-data latency |
 | IVFFlat | conditional ordinary implementation | deterministic bounded training, fixed-centroid transactional membership, real selected-list reads, exact rescoring/fallback and diagnostics; no universal recall/speedup claim |
 | encrypted snapshot / rekey / backup | experimental ordinary slice | authenticated root/base, Linux stable locks, full snapshot publication, correct-key rekey/backup/restore and plaintext import/export; retained history and namespace/freshness limitations |
-| encrypted WAL | experimental ordinary slice | immutable authenticated final-dirty-page segments, bounded complete-head replay, checkpoint/rekey/copy and explicit snapshot upgrade; concurrent encrypted writer/readers remain required code |
+| encrypted WAL | experimental ordinary slice | immutable authenticated final-dirty-page segments, bounded complete-head replay, checkpoint/rekey/copy and explicit snapshot upgrade; explicit Linux EncryptionWALShared adds single writer/immutable concurrent readers, pinned copies, stale-promotion refusal and quiescent rekey |
 | pg_embedding migration tooling | partial | bounded catalog/real-array inspector and typed source-span SQL converter with local execution fixtures and review-only PostgreSQL text; resumable import/transition templates remain required code; no live PostgreSQL execution |
 | extended vector values | partial | distinct half/bit/sparse memory codecs and metrics; BIT(n) and HALFVEC(n) SQL/storage/driver/exact ranking, explicit half conversion/loss reports and dense/half transforms implemented; sparse SQL and all extended ANN remain required code |
 | release audits / native OS evidence | unsupported | M10 not started; cross-build success is not native-runtime evidence |
 
 Unimplemented SQL/PRAGMAs return explicit errors. JOIN, aggregate/grouping, subqueries, CTEs, window functions, DISTINCT, UNION, scalar COLLATE (CREATE INDEX COLLATE BINARY is accepted), CASE, IN/BETWEEN, general views/triggers, STRICT, WITHOUT ROWID, autovacuum, UTF-16 and unlisted schema grammar remain unsupported. Some storage mechanisms can safely coexist in a read-only file without their SQL being executable.
 
-ORDER BY materializes under a configurable memory cap; unsorted results stream. Idle rollback-mode handles do not hold shared locks. Query Rows and explicit Tx own snapshots. WALExclusive holds EXCLUSIVE even when idle and allows only one local reader/transaction lease. Ordinary concurrent readers/writers, BUSY retry and cross-process official SQLite locks are tested; recovery and crash durability are unqualified. Native runtime is currently Linux only.
+ORDER BY materializes under a configurable memory cap; unsorted results stream. Idle rollback-mode handles do not hold shared locks. Query Rows and explicit Tx own snapshots. WALExclusive holds EXCLUSIVE even when idle and allows only one local reader/transaction lease. Ordinary concurrent readers/writers, BUSY retry and cross-process official SQLite locks are tested; recovery and crash durability are unqualified. Verified runtime is currently Linux/amd64 only; implemented Darwin and Windows/amd64 backends have cross-build/source-review evidence, not native execution.
 
 LIKE uses rune matching with SQLite's default ASCII case folding. Invalid UTF-8 is preserved by raw reads/equality, but rejected by rune LIKE/length rather than silently repaired. CLI JSON rejects invalid UTF-8 text; BLOBs use base64 JSON strings. Scalar builtins include abs, length, lower, upper, typeof, hex, nullif, ifnull and coalesce, within the tested argument/value subset.
 
@@ -69,7 +69,7 @@ M7 HNSW supports dimensions1..2000, four matching metric/opclass pairs, immutabl
 
 IVFFlat supports dense dimensions up to2000, L2/cosine/negative-IP, bounded minhash training and fixed centroids until REINDEX. Too few trainable rows persist untrained state; DML does not silently retrain. Cosine zero norms reject; IP zero source values remain members and zero queries work. Probes count selected centroid ranges; all-list requests truthfully SCAN. Cumulative centroid/member/source work is retained through fallback. First matching catalog index can mask a later trained index; native Index selects explicitly. See ann.md.
 
-Encrypted files use an independent GSQLENC1 container, not SQLite plaintext or SEE. Both experimental snapshot and dirty-segment WAL modes lock writers exclusively for connection lifetime; read-only connections may share. Native WAL options reject. Commit/rekey retain old ciphertext; key rotation is not historical revocation or secure deletion. MaxGenerations/MaxRetainedBytes/MaxDirectoryEntries bound publication inventory/work, not automatic garbage collection. Whole valid-family replacement or historic replay under reused credentials is not prevented without external identity/freshness. Linux live family operations use pinned parent-directory descriptors with relative opens/publication and identity checks; initial path resolution and hostile namespace protection remain limited. Plaintext import currently accepts only rollback mode and a single-link source. See encryption-storage.md and security.md.
+Encrypted files use an independent GSQLENC1 container, not SQLite plaintext or SEE. Legacy snapshot and dirty-segment WAL modes lock writers exclusively for connection lifetime; read-only connections may share. Explicit shared encrypted layout3 instead separates shared lifecycle, writer and short root-publication byte locks on Linux. Native WAL options reject. Commit/rekey retain old ciphertext; key rotation is not historical revocation or secure deletion. MaxGenerations/MaxRetainedBytes/MaxDirectoryEntries bound publication inventory/work, not automatic garbage collection. Whole valid-family replacement or historic replay under reused credentials is not prevented without external identity/freshness. Linux live family operations use pinned parent-directory descriptors with relative opens/publication and identity checks; initial path resolution and hostile namespace protection remain limited. Plaintext import currently accepts only rollback mode and a single-link source. See encryption-storage.md and security.md.
 
 Ordinary equality planning is conservative: ANN/grams plans retain precedence,
 NOT INDEXED forces scans, candidate rowids are sorted before source seeks, and
@@ -96,11 +96,15 @@ retained copy. Active transaction Rows still prevent mutations/control/Commit;
 full rollback invalidates them. Connection-level changes()/last_insert_rowid()
 SQL functions and general cursor relaxation are absent. See transactions.md.
 
-Managed native ownership is a Linux prerequisite for later ports. Every adopted
-plain pager/SHM descriptor participates in explicit lifetime ownership; a mapping
-retains its complete native view and owner. Native Darwin process-fcntl close
-coordination and Windows lock/mapping/publication policies are still missing
-code, regardless of successful cross-compilation. See ADR0014.
+Every adopted plain pager/SHM descriptor participates in explicit lifetime
+ownership; mappings retain their complete native views and owners. Darwin now
+aggregates process-fcntl locks with managed deferred-close discipline; Windows
+uses exact acquired byte locks, checked identities and granularity-aware views.
+Native execution is unverified on both. Default Windows cross-vet reports one
+unsafe-pointer mapping diagnostic; no checker was disabled. Darwin supplies
+fsync, not F_FULLFSYNC; Windows declares no Unix-style directory barrier. See
+ADR0014/0015 and native-windows.md. Unmanaged same-inode closes inside a Darwin
+process remain outside the registry contract.
 
 Native ownership error handling latches uncertain lock state before allowing
 further operations. A failed normal Close can retain mappings and protecting
@@ -128,3 +132,12 @@ reject when read, but an explicit valid native replacement is possible. Native
 CREATE still validates defaults strictly. Half search/ranking is exact over
 rounded binary16 values, not exact with respect to the original dense source;
 small lossy candidate sets can omit its nearest neighbor. See half-vector.md.
+
+Shared encrypted layout3 keeps each operation on one authenticated selection,
+including catalog/freelist validation and copy output. Refresh charges both old
+and new graphs before allocating metadata/opening children; bounded retained
+history and minted identities are not reset at checkpoint. Any independent
+connection blocks quiescent rekey. Default writable Close may return BUSY from
+checkpoint while releasing its connection safely. Legacy0/1 layout/base/segment/
+archive bytes remain unchanged; upgrades are explicit. Encrypted support remains
+Linux-only, independently of the plain native backends. See ADR0016.

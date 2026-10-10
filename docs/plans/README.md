@@ -9,17 +9,15 @@ remain code work; unsupported is a safe interim behavior, not removal from goal.
 - Broaden rollback-journal recovery segments/modes and integrate safe automatic
   Open recovery. Extend current-generation ambiguous WAL-tail handling. Source-only
   physical branches and manual harnesses do not establish runtime durability.
-- Add native Darwin descriptor/inode registration and deferred-close discipline:
-  process-scoped fcntl locks may be lost by closing another descriptor for the same
-  inode. Every open/early-error path must participate, including sidecars.
-- Add native Windows LockFileEx acquisition/conversion semantics, stable handle
-  identities and supported publication/directory durability policy. Map SHM with
-  allocation-granularity-aligned base addresses while retaining logical offsets;
-  a32KiB SQLite region can lie inside a64KiB-aligned Windows mapping.
-- Encrypted immutable authenticated dirty-page WAL, ordered root selection, bounded
-  replay, checkpoint/rekey/copy and explicit snapshot upgrade now exist. Add
-  concurrent encrypted writer/readers with a stable lock/read-lease design; the
-  current lifetime-exclusive writer slice does not satisfy that requirement.
+- Plain Darwin process-fcntl aggregation/deferred close and Windows/amd64 native
+  checked handles/locks/mapping/publication code now exist. Complete remaining
+  native policy and target-runtime evidence; default Windows cross-vet has one
+  disclosed unsafe-pointer mapping warning. No physical durability claim follows.
+- Linux encrypted immutable shared selections and one writer now exist, with
+  pinned copy/checkpoint and quiescent rekey. Implement non-Linux encrypted
+  ownership/coordination; the plain native ports do not supply that code.
+- Retained encrypted history has no garbage collection or external freshness
+  guarantee. Keep these limitations distinct from independent security review.
 
 ## Required SQL batches
 

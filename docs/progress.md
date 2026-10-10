@@ -105,7 +105,7 @@ Fresh restart, 2026-10-10 UTC. Historical work and test results are not acceptan
 - Limits: dense only, bounded training/query memory and work; no L1 IVF, no silent retraining, no automatic dynamic tuning or general SQL ANN hint. ANN approximation remains explicit in diagnostics. Restricted recovery and broader remaining code are not qualified by these ordinary results.
 
 ### M8: Authenticated encryption
-- Status: experimental authenticated snapshot and dirty-page WAL storage/rekey/copy implemented. Concurrent encrypted writer/readers remain required code. Physical tamper/recovery and independent security acceptance remain open.
+- Status: experimental snapshot, dirty-page WAL and Linux shared encrypted sessions implemented; non-Linux encrypted coordination remains required code. Physical tamper/recovery and independent security acceptance remain open.
 - Delivered: write-once AES256GCM records, domain-separated HKDFSHA256, bounded Argon2id, code KeyProvider lifecycle, strict bootstrap/record codecs and expected-location authentication. Final component unit0.921s/race4.113s/purego0.958s/vet passed; upstream RFC Argon2 test0.005s passed. AES/HKDF known answers, memory-only substitutions/truncation/nonce/provider/cancel/race tests pass; three10second actual fuzz campaigns total1400866 executions pass. Evidence m8-primitives.txt, ADR0010. At that primitive-only checkpoint no database encryption was integrated. The following increment supplies an explicit encrypted session; plaintext options still remain plaintext. No SEE compatibility or independent cryptographic audit is claimed.
 
 - Snapshot increment: native SQL/database/sql correct-key encrypted create/read/write/rollback/normal reopen; raw/password provider, full-page root/base authentication, stable Linux lifetime leases, rekey, portable encrypted backup/restore and explicit plaintext export/import. Changed commits copy full logical snapshot with fresh identities; no plaintext journal/WAL/staging path. Mode rejects native WAL options. ADR0011 and encryption-storage.md give the exact format/API/quotas.
@@ -246,6 +246,43 @@ checks and CI38057793162 are tracked independently.
   conversion changes2 components, maximum absolute error0.00020003318786621094
   and relative error1. Exact rescoring cannot recover an omitted candidate.
 - Evidence: m9-half-sql components/review/source hashes/example, half-vector.md.
-  Frozen full aggregate tree98d857b4e07b755fa9bd67346905785135fba2ef is running
-  separately from later sparse/native-platform/shared-encryption/importer edits.
+  Frozen full aggregate tree98d857b4e07b755fa9bd67346905785135fba2ef passed
+  guarded CGO0 unit/vet/build, CGO1 full race, complete pinned oracle, four
+  cross-builds, module/no-CGO and unchanged source/fixture checks exit0 at
+  2026-10-10T14:25:15Z. SQLite unit99.307s/race454.551s; oracle
+  testkit422.888s/sqlite126.083s. Later features were excluded.
   Sparse SQL, all extended ANN and restricted/independent release gates remain open.
+
+### Plain native Darwin/Windows and M8 shared encrypted increment
+- Delivered: real Darwin managed inode-lock aggregation/deferred descriptor close,
+  checked Windows/amd64 handles/LockFileEx intervals/aligned mappings and explicit
+  publication/sync policies. Linux OFD implementation bytes remain unchanged.
+  Independent ownership source review plus portable memory laws pass; four-target
+  builds/test compilation pass. Native Darwin/Windows tests were NOT_RUN. Windows
+  default cross-vet has one disclosed MapViewOfFile unsafe-pointer diagnostic.
+- Delivered: explicit EncryptionWALShared/layout3 on Linux, immutable authenticated
+  reader selections, independent single writer, stale snapshot promotion,
+  provider/epoch reuse, lazy/savepoint/pool semantics, latest-head checkpoint,
+  single-selection verify/copy/export, quiescent rekey and explicit legacy upgrade.
+  Old mode0/1 and layout1/2 APIs and bytes remain unchanged. Operation admission accounts for
+  simultaneous old/new graphs, descriptors and retained issuance history.
+- Independent review fixed pre-allocation graph accounting, missing stable-lock/
+  namespace checks at publication and stale checkpoint metadata. Ten named review
+  tests and focused correct-key intact-file component/race tests pass, including
+  concurrent publisher/checkpoint while another operation validates/copies its
+  older head. No restricted disk/namespace/native-failure workflows ran.
+- Evidence: native-platform-components/review, native-windows-components,
+  m8-shared-components/race/review/source manifests; ADR0015/0016 and runnable
+  examples/encrypted-shared. Lead full aggregate on immutable tree
+  ba85a097c9c10cf96e0bc9049d796887cfd3ba80 is tracked separately; no terminal
+  aggregate/remote-CI/restored-test success is asserted before its result. Frozen
+  full CGO0 unit/vet/build already passed (sqlite86.528s); full race/oracle remain
+  running at this checkpoint.
+- Remaining code: non-Linux encrypted coordination; failed-open mapping-retirement
+  retry lifecycle; broader recovery/SQL/extended ANN/migration. Retained history,
+  old-key decryptability and no external freshness remain disclosed. Physical
+  durability and independent native/security/crypto/legal/soak gates remain open.
+
+S1 exact Library-restored full guarded checks passed exit0 at2026-10-10T14:24:14Z;
+CI38057793162 also passed. M9 B CI38058308322 completed SUCCESS at14:16:31Z.
+See checkpoints.json and s1-library-restore.txt for distinct evidence scopes.

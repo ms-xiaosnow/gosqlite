@@ -1,0 +1,74 @@
+Native platform scoped implementation evidence, Linux host, 2026-10-10 14:00:08 UTC
+Environment: GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off GOPATH=$PWD/../go-path GOCACHE=$PWD/../go-cache CGO_ENABLED=0
+Toolchain: ../toolchains/go1.27.2/bin/go
+go version go1.27.2 linux/amd64
+go run ./internal/testscope
+Ordinary test source-reference guard PASS; behavioral review is still required.
+CGO_ENABLED=0 go test ./internal/vfs -run '^(TestSlotLedgerStrictOwnership|TestMappingSpanGranularity|TestMappingRetirementMemoryModel|TestCloseOrderingMemoryModel|TestOwnershipReviewPartialRetirementRetainsAllLocks|TestOwnershipReviewClosingLeaseRejectsReuse|TestOwnershipReviewLockPoisonLatch|TestOwnershipReviewReplacementRejectsIneligibleRoles|TestIndependentOFDLocksAndPOSIXInterop|TestOFDSubrangeAndUnionUnlock|TestManagedDBProbeRetainsReservedAndSnapshot|TestManagedMappingLogicalSpanAndClose)$' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.004s
+CGO_ENABLED=0 go test ./internal/walindex -run '^(TestDMSNormalLifecycleAndHeaderPublication|TestDMSEarlierExclusiveOpenerReturnsBusy|TestRealHashBlocksSnapshotAndCleanup|TestCheckpointMetadataAndLimits|TestConcurrentHeaderPublication|TestNativeHashAndPageMappingBytes|TestPortableSHMLockRequiresExplicitRelease)$' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	0.140s
+CGO_ENABLED=0 go test ./internal/pager -run '^(TestTxBusyCommitIsRetryableWithoutSideEffects|TestSharedWALSnapshotsPromotionAndCheckpoint|TestSharedWALConcurrentReadersAndWriter|TestSharedWALCrossesNativeIndexBlock)$' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.108s
+
+Separate race tooling; production remains CGO_ENABLED=0.
+CGO_ENABLED=1 go test -race ./internal/vfs -run '^(TestSlotLedgerStrictOwnership|TestMappingSpanGranularity|TestMappingRetirementMemoryModel|TestCloseOrderingMemoryModel|TestOwnershipReviewPartialRetirementRetainsAllLocks|TestOwnershipReviewClosingLeaseRejectsReuse|TestOwnershipReviewLockPoisonLatch|TestOwnershipReviewReplacementRejectsIneligibleRoles|TestIndependentOFDLocksAndPOSIXInterop|TestOFDSubrangeAndUnionUnlock|TestManagedDBProbeRetainsReservedAndSnapshot|TestManagedMappingLogicalSpanAndClose)$' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	1.027s
+CGO_ENABLED=1 go test -race ./internal/walindex -run '^(TestDMSNormalLifecycleAndHeaderPublication|TestDMSEarlierExclusiveOpenerReturnsBusy|TestRealHashBlocksSnapshotAndCleanup|TestCheckpointMetadataAndLimits|TestConcurrentHeaderPublication|TestNativeHashAndPageMappingBytes|TestPortableSHMLockRequiresExplicitRelease)$' -count=1
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	2.519s
+
+CGO_ENABLED=0 go vet ./internal/vfs ./internal/walindex ./internal/pager
+
+COMPILE ONLY, never executed: GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build ./internal/vfs ./internal/walindex ./internal/pager
+COMPILE ONLY: GOOS=linux GOARCH=amd64 go test -c -o ../native-platform-linux-amd64-vfs.test ./internal/vfs
+COMPILE ONLY: GOOS=linux GOARCH=amd64 go test -c -o ../native-platform-linux-amd64-walindex.test ./internal/walindex
+COMPILE ONLY: GOOS=linux GOARCH=amd64 go test -c -o ../native-platform-linux-amd64-pager.test ./internal/pager
+CGO closure check: GOOS=linux GOARCH=amd64 go list -deps -f '{{if .CgoFiles}}{{.ImportPath}} {{.CgoFiles}}{{end}}' ./internal/vfs ./internal/walindex ./internal/pager
+No CgoFiles in dependency closure.
+
+COMPILE ONLY, never executed: GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build ./internal/vfs ./internal/walindex ./internal/pager
+COMPILE ONLY: GOOS=linux GOARCH=arm64 go test -c -o ../native-platform-linux-arm64-vfs.test ./internal/vfs
+COMPILE ONLY: GOOS=linux GOARCH=arm64 go test -c -o ../native-platform-linux-arm64-walindex.test ./internal/walindex
+COMPILE ONLY: GOOS=linux GOARCH=arm64 go test -c -o ../native-platform-linux-arm64-pager.test ./internal/pager
+CGO closure check: GOOS=linux GOARCH=arm64 go list -deps -f '{{if .CgoFiles}}{{.ImportPath}} {{.CgoFiles}}{{end}}' ./internal/vfs ./internal/walindex ./internal/pager
+No CgoFiles in dependency closure.
+
+COMPILE ONLY, never executed: GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go build ./internal/vfs ./internal/walindex ./internal/pager
+COMPILE ONLY: GOOS=darwin GOARCH=arm64 go test -c -o ../native-platform-darwin-arm64-vfs.test ./internal/vfs
+COMPILE ONLY: GOOS=darwin GOARCH=arm64 go test -c -o ../native-platform-darwin-arm64-walindex.test ./internal/walindex
+COMPILE ONLY: GOOS=darwin GOARCH=arm64 go test -c -o ../native-platform-darwin-arm64-pager.test ./internal/pager
+CGO closure check: GOOS=darwin GOARCH=arm64 go list -deps -f '{{if .CgoFiles}}{{.ImportPath}} {{.CgoFiles}}{{end}}' ./internal/vfs ./internal/walindex ./internal/pager
+No CgoFiles in dependency closure.
+
+COMPILE ONLY, never executed: GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build ./internal/vfs ./internal/walindex ./internal/pager
+COMPILE ONLY: GOOS=windows GOARCH=amd64 go test -c -o ../native-platform-windows-amd64-vfs.test ./internal/vfs
+COMPILE ONLY: GOOS=windows GOARCH=amd64 go test -c -o ../native-platform-windows-amd64-walindex.test ./internal/walindex
+COMPILE ONLY: GOOS=windows GOARCH=amd64 go test -c -o ../native-platform-windows-amd64-pager.test ./internal/pager
+CGO closure check: GOOS=windows GOARCH=amd64 go list -deps -f '{{if .CgoFiles}}{{.ImportPath}} {{.CgoFiles}}{{end}}' ./internal/vfs ./internal/walindex ./internal/pager
+No CgoFiles in dependency closure.
+
+GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go vet ./internal/vfs ./internal/walindex ./internal/pager
+
+GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go vet ./internal/vfs ./internal/walindex ./internal/pager
+internal/vfs/native_windows.go:698:33: possible misuse of unsafe.Pointer
+Default Windows cross-vet exit=1. Known unsafeptr diagnostic is NOT suppressed or represented as a clean pass.
+
+Unsupported Windows architecture remains stub-selected (compile/source-selection only):
+[file.go locks.go mapping.go native_hooks_default.go native_other.go]
+
+Implementation source SHA-256 at this scoped check:
+5417ecd8ef86eab79a0f96b4092c1b15711fc53b18f5293ec065e84a7340eb7e  internal/vfs/file.go
+7519233f79c75d496cd33a04d3b7d94f5c23dcc9bbef30098f57eb62e7e13b4f  internal/vfs/locks.go
+f4e243e005f634ddec968ce9885a3bca4db6e998b072a128d0f44116f107f437  internal/vfs/mapping.go
+6ea8d3b6d9a77de367a523ca8792603eb2769400249b78656f672ab87c9fd37c  internal/vfs/native_hooks_default.go
+ea32e7b45225baa81b0b51f422e4c0ac35fdbfbbba1bf5a7742b3df9f63eb31c  internal/vfs/native_linux.go
+4bf2948fd77fc1a38c7e9b070667724b1361f0425eb073fbc4598bbedab26ede  internal/vfs/native_other.go
+8bcee6232ea36467e7d04919ba2b0ec152a5739f7cc5c2b43ca19fbdc6ea3da8  internal/vfs/native_darwin.go
+493bc973612d603c8664b8dc697163ed34f39e1fe05d2ac60bba6bb9f6ec798d  internal/vfs/native_darwin_test.go
+de7612a7d365c473bbef502b2ac40727c05c5a3615dfa20b8b0d46c7df9a308d  internal/vfs/native_windows.go
+a92e2c1409055cdf01263610772450dca608b25a1959fc993c290ebfc0f389a8  internal/vfs/native_windows_test.go
+
+Native Darwin and Windows runtime, cooperating-process, and official-SQLite tests: NOT_RUN.
+No native-error/fault, namespace replacement/retarget, corruption, wrong-key, missing-selected-file, crash/kill/forced-exit, hot recovery, interrupted publication/rekey, or manual harness was executed.
+These are focused component checks of concurrently developed working-tree code, not an aggregate/release acceptance run.
+Completed at 2026-10-10 14:00:35 UTC

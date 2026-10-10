@@ -154,7 +154,7 @@ func publicationBudget(ctx context.Context, path string, o Options, g Geometry, 
 		return err
 	}
 	root := uint64(rootSize)
-	if o.Mode == WAL {
+	if o.Mode.IsWAL() {
 		root = walRootSize(0)
 	}
 	old := uint64(0)

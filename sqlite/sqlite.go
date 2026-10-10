@@ -213,7 +213,7 @@ func OpenContext(ctx context.Context, path string, opts Options) (*DB, error) {
 		if err := cfg.validate(); err != nil {
 			return nil, wrap("open", err)
 		}
-		if opts.WALExclusive || opts.WALShared || opts.WALPowersafeOverwrite || (opts.KeepWALOnClose && cfg.Mode != EncryptionWAL) {
+		if opts.WALExclusive || opts.WALShared || opts.WALPowersafeOverwrite || (opts.KeepWALOnClose && cfg.Mode != EncryptionWAL && cfg.Mode != EncryptionWALShared) {
 			return nil, wrap("open", fmt.Errorf("%w: encrypted storage rejects incompatible native WAL options", ErrUnsupported))
 		}
 	}
@@ -226,7 +226,7 @@ func OpenContext(ctx context.Context, path string, opts Options) (*DB, error) {
 	if opts.ReadOnly && (opts.WALExclusive || opts.WALShared) {
 		return nil, wrap("open", fmt.Errorf("%w: native WAL modes currently require writable access", ErrUnsupported))
 	}
-	if opts.KeepWALOnClose && !opts.WALExclusive && !opts.WALShared && (opts.Encryption == nil || opts.Encryption.Mode != EncryptionWAL) {
+	if opts.KeepWALOnClose && !opts.WALExclusive && !opts.WALShared && (opts.Encryption == nil || (opts.Encryption.Mode != EncryptionWAL && opts.Encryption.Mode != EncryptionWALShared)) {
 		return nil, wrap("open", fmt.Errorf("KeepWALOnClose requires a WAL mode"))
 	}
 	opts, err := normalizeConnectionLimits(opts)

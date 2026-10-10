@@ -1,0 +1,48 @@
+Native platform backends and Linux shared encrypted sessions aggregate; sparse/importer and later platform ports excluded
+Audited corrected scope: manual namespace/recovery excluded. Intact-file ordinary operations and memory-only models only.
+Ordinary test source-reference guard PASS; behavioral review is still required.
+2026-10-10T14:28:33Z
+go version go1.27.2 linux/amd64
+Frozen archived Git tree: ba85a097c9c10cf96e0bc9049d796887cfd3ba80
+Verification directory has no Git metadata; GOFLAGS=-buildvcs=false avoids ancestor-VCS discovery. This is a source-tree test, not a mirrored-commit claim.
+
+Production unit/vet/build
+?   	github.com/ms-xiaosnow/gosqlite/benchmarks/ann	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.081s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	3.823s
+ok  	github.com/ms-xiaosnow/gosqlite/encryption	1.793s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ann	2.187s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/bit-rerank	0.008s
+?   	github.com/ms-xiaosnow/gosqlite/examples/encrypted	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-shared	0.015s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-wal	0.018s
+?   	github.com/ms-xiaosnow/gosqlite/examples/grams	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/half-rerank	0.011s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ivfflat	1.258s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/migrate-pgembedding	0.030s
+?   	github.com/ms-xiaosnow/gosqlite/examples/readonly	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/similarity	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/vector	0.157s
+?   	github.com/ms-xiaosnow/gosqlite/examples/wal	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/write	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/extension/grams13	1.842s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/registry	0.065s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/similarity	4.187s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	1.321s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector/ann	5.335s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	17.704s
+?   	github.com/ms-xiaosnow/gosqlite/internal/buildinfo	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	0.177s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/journal	0.021s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.316s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/record	0.005s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.102s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testscope	0.006s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.026s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/wal	0.736s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	0.205s
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	0.384s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	86.528s
+
+
+Captured2026-10-10T14:30:34Z: CGO0 unit/vet/build phase passed. Full race/oracle and cross-build phases still running, not counted yet.

@@ -18,6 +18,8 @@ const (
 	// EncryptionWAL writes immutable final-dirty-page transaction segments. It
 	// currently holds a lifetime-exclusive writer lease; readers cannot coexist.
 	EncryptionWAL EncryptionMode = 1
+	// EncryptionWALShared uses layout 3 with simultaneous immutable readers and one writer.
+	EncryptionWALShared EncryptionMode = 2
 )
 
 // EncryptionWALLimits separately bounds active replay and peak storage-adapter
@@ -68,7 +70,7 @@ func (o EncryptionOptions) storageOptions() encstore.Options {
 	return encstore.Options{Mode: encstore.Mode(o.Mode), WALLimits: encstore.WALLimits(o.WALLimits), KeyProvider: o.KeyProvider, CredentialKind: o.CredentialKind, CreateKDF: o.CreateKDF, KDFPolicy: o.KDFPolicy, DerivationBudget: o.DerivationBudget, Limits: o.Limits, MaxGenerations: o.MaxGenerations, MaxRetainedBytes: o.MaxRetainedBytes, MaxDirectoryEntries: o.MaxDirectoryEntries}
 }
 func (o EncryptionOptions) validate() error {
-	if o.Mode != EncryptionSnapshot && o.Mode != EncryptionWAL {
+	if o.Mode != EncryptionSnapshot && o.Mode != EncryptionWAL && o.Mode != EncryptionWALShared {
 		return ErrUnsupported
 	}
 	return o.storageOptions().Validate()
@@ -119,6 +121,7 @@ func (d *DB) VerifyEncrypted(ctx context.Context) (EncryptionInfo, error) {
 	if err = s.Verify(ctx); err != nil {
 		return EncryptionInfo{}, wrap("verify encrypted", err)
 	}
+	d.info = fileInfo(s.Header())
 	return encryptionInfo(s.EncryptionInfo()), nil
 }
 
@@ -165,10 +168,7 @@ func (d *DB) Rekey(ctx context.Context, target EncryptionOptions) error {
 	if d.tx != nil || len(d.rows) != 0 {
 		return wrap("rekey", ErrBusy)
 	}
-	if err = d.validateEncryptedCopyLocked(ctx, s); err != nil {
-		return wrap("rekey", err)
-	}
-	if err = s.RekeyPrepared(ctx, prepared); err != nil {
+	if err = s.RekeyPrepared(ctx, prepared, d.validateCopy); err != nil {
 		return wrap("rekey", err)
 	}
 	cfg := target
@@ -198,10 +198,7 @@ func (d *DB) UpgradeEncryptedWAL(ctx context.Context) error {
 	if d.opts.Encryption.Mode != EncryptionSnapshot {
 		return wrap("upgrade encrypted WAL", ErrUnsupported)
 	}
-	if err = d.validateEncryptedCopyLocked(ctx, s); err != nil {
-		return wrap("upgrade encrypted WAL", err)
-	}
-	if err = s.UpgradeWAL(ctx); err != nil {
+	if err = s.UpgradeWAL(ctx, d.validateCopy); err != nil {
 		return wrap("upgrade encrypted WAL", err)
 	}
 	cfg := *d.opts.Encryption
@@ -215,4 +212,35 @@ func (o EncryptionOptions) validateArchive() error {
 		return ErrUnsupported
 	}
 	return o.validate()
+}
+
+// UpgradeEncryptedWALShared explicitly publishes layout 3 from a quiescent
+// snapshot or exclusive WAL connection. It preserves identity and ciphertext
+// history, then permits simultaneous readers and a single admitted writer.
+func (d *DB) UpgradeEncryptedWALShared(ctx context.Context) error {
+	if err := checkContext(ctx); err != nil {
+		return wrap("upgrade encrypted shared WAL", err)
+	}
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	s, err := d.encryptedSession()
+	if err != nil {
+		return wrap("upgrade encrypted shared WAL", err)
+	}
+	if d.opts.ReadOnly {
+		return wrap("upgrade encrypted shared WAL", ErrReadOnly)
+	}
+	if d.tx != nil || len(d.rows) != 0 {
+		return wrap("upgrade encrypted shared WAL", ErrBusy)
+	}
+	if d.opts.Encryption.Mode == EncryptionWALShared {
+		return wrap("upgrade encrypted shared WAL", ErrUnsupported)
+	}
+	if err = s.UpgradeShared(ctx, d.validateCopy); err != nil {
+		return wrap("upgrade encrypted shared WAL", err)
+	}
+	cfg := *d.opts.Encryption
+	cfg.Mode = EncryptionWALShared
+	d.opts.Encryption = &cfg
+	return nil
 }

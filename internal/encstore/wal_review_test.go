@@ -433,7 +433,7 @@ func TestReviewWALMemoryMintedIdentityLedgerBudget(t *testing.T) {
 		t.Fatal("two-master ledger memory not cumulative", err)
 	}
 	opts.WALLimits.MaxMemoryBytes = baseline + oldIDs*128 - 1
-	store := Store{wal: &m, opts: opts, writerIDs: oldIDs}
+	store := Store{selection: selection{wal: &m}, opts: opts, writerIDs: oldIDs}
 	if err := store.CopyBudget(); !errors.Is(err, encryption.ErrLimit) {
 		t.Fatal("copy omitted live nonce-ID registry memory", err)
 	}

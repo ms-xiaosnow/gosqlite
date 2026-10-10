@@ -1,0 +1,6 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+CGO_ENABLED=0 go run ./examples/encrypted-shared
+A new reader sees the committed head while another connection owns unpublished writes.
+The old reader stays pinned; stale promotion fails, and a fresh transaction sees the new value.
+Checkpoint retains old snapshots and selects a fresh base; all historical ciphertext remains.
+Credentials stayed in memory. Disposable files are removed after normal close, without secure-erasure claims.

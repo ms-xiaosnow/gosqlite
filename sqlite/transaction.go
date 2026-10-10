@@ -82,6 +82,15 @@ func (d *DB) beginLocked(ctx context.Context, opts TxOptions) (*Tx, error) {
 	}
 	tx := &Tx{db: d, ctx: ctx, readOnly: d.opts.ReadOnly || opts.ReadOnly, initialInfo: d.info}
 	if opts.Immediate || opts.Exclusive {
+		if session, ok := d.session.(*pager.EncryptedSession); ok {
+			p, err := session.BeginImmediate(ctx)
+			if err != nil {
+				return nil, err
+			}
+			tx.reader, tx.storage = p, p
+			tx.initialInfo = fileInfo(p.Header())
+			d.info = tx.initialInfo
+		}
 		if err := tx.ensureSnapshotLocked(ctx); err != nil {
 			return nil, err
 		}
@@ -92,8 +101,7 @@ func (d *DB) beginLocked(ctx context.Context, opts TxOptions) (*Tx, error) {
 			err = tx.storage.PromoteWrite(ctx)
 		}
 		if err != nil {
-			_ = tx.storage.Rollback()
-			return nil, err
+			return nil, errors.Join(err, tx.storage.Rollback())
 		}
 	}
 	d.tx = tx
