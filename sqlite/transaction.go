@@ -137,7 +137,7 @@ func (t *Tx) queryLocked(ctx context.Context, query string, args []any) (*Rows, 
 	if !ok {
 		return nil, wrap("query", ErrReadOnly)
 	}
-	params, err := bind(stmt, args)
+	ctx, params, err := t.db.bindSelect(ctx, sel, args)
 	if err != nil {
 		return nil, wrap("bind", err)
 	}

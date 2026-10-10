@@ -1,0 +1,13 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+Behavior audit: TestIndependentRelationalTruthByteWork/EscapeByteWork are pure-memory evaluator and budget laws only.
+=== RUN   TestIndependentRelationalTruthByteWork
+    relational_independent_budget_test.go:20: result=1 err=<nil> work=3 allocation=0
+    relational_independent_budget_test.go:21: truth conversion scanned a 10001-byte value under a 100-unit work cap
+--- FAIL: TestIndependentRelationalTruthByteWork (0.00s)
+=== RUN   TestIndependentRelationalEscapeByteWork
+    relational_independent_budget_test.go:28: result=1 err=<nil> work=5 allocation=128 escapeBytes=10002
+    relational_independent_budget_test.go:29: ESCAPE conversion copied/scanned a 10002-byte BLOB under a 100-unit work cap
+--- FAIL: TestIndependentRelationalEscapeByteWork (0.00s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/sql	0.004s
+FAIL

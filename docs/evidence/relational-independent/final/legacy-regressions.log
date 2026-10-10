@@ -1,0 +1,195 @@
+SOURCE=/workspace/scratch/5e06a74e5f65/durable-restart/relational-independent-review/source-final-v3
+4dd07287c3687ee466b51b7d6c343261aeb997ff81c01f75bdfe0188b85a9397  docs/evidence/relational-source-sha256.txt
+Ordinary test source-reference guard PASS; behavioral review is still required.
+Behavior audit: Narrow audited parser/scalar-expression/index/rank tests; parser and arithmetic negatives are memory-only; native fixtures use ordinary statements/normal transactions and concurrency only.
+=== RUN   TestExpressionReviewConstantInErrors
+--- PASS: TestExpressionReviewConstantInErrors (0.00s)
+=== RUN   TestExpressionReviewCastContextualTypenames
+--- PASS: TestExpressionReviewCastContextualTypenames (0.00s)
+=== RUN   TestExpressionReviewCaseBetweenEvaluationOrder
+--- PASS: TestExpressionReviewCaseBetweenEvaluationOrder (0.00s)
+=== RUN   TestExpressionReviewImmutableRewriteAllChildren
+--- PASS: TestExpressionReviewImmutableRewriteAllChildren (0.00s)
+=== RUN   TestExtensionGrammar
+--- PASS: TestExtensionGrammar (0.00s)
+=== RUN   TestIndexBinaryCollation
+--- PASS: TestIndexBinaryCollation (0.00s)
+=== RUN   TestLexer
+--- PASS: TestLexer (0.00s)
+=== RUN   TestParseSelect
+--- PASS: TestParseSelect (0.00s)
+=== RUN   TestParseCreateAndDML
+--- PASS: TestParseCreateAndDML (0.00s)
+=== RUN   TestRejectUnsupported
+--- PASS: TestRejectUnsupported (0.00s)
+=== RUN   TestResourceBounds
+--- PASS: TestResourceBounds (0.03s)
+=== RUN   TestValuesAndThreeValuedLogic
+=== RUN   TestValuesAndThreeValuedLogic/NULL_AND_0
+=== RUN   TestValuesAndThreeValuedLogic/NULL_AND_1
+=== RUN   TestValuesAndThreeValuedLogic/NULL_OR_1
+=== RUN   TestValuesAndThreeValuedLogic/NULL_OR_0
+=== RUN   TestValuesAndThreeValuedLogic/NOT_NULL
+=== RUN   TestValuesAndThreeValuedLogic/NULL_=_NULL
+=== RUN   TestValuesAndThreeValuedLogic/NULL_IS_NULL
+=== RUN   TestValuesAndThreeValuedLogic/NULL_IS_FALSE
+=== RUN   TestValuesAndThreeValuedLogic/2_IS_TRUE
+=== RUN   TestValuesAndThreeValuedLogic/2_IS_NOT_TRUE
+=== RUN   TestValuesAndThreeValuedLogic/2_IS_+TRUE
+=== RUN   TestValuesAndThreeValuedLogic/NOT_1=2
+=== RUN   TestValuesAndThreeValuedLogic/1=2<3
+=== RUN   TestValuesAndThreeValuedLogic/1+2*3
+=== RUN   TestValuesAndThreeValuedLogic/5/2
+=== RUN   TestValuesAndThreeValuedLogic/5.0/2
+=== RUN   TestValuesAndThreeValuedLogic/1/0
+=== RUN   TestValuesAndThreeValuedLogic/5.0%2
+=== RUN   TestValuesAndThreeValuedLogic/9223372036854775807+1
+=== RUN   TestValuesAndThreeValuedLogic/-9223372036854775808_/_-1
+=== RUN   TestValuesAndThreeValuedLogic/'123junk'+1
+=== RUN   TestValuesAndThreeValuedLogic/'junk'+1
+=== RUN   TestValuesAndThreeValuedLogic/'1.0'+0
+=== RUN   TestValuesAndThreeValuedLogic/'1e0'+0
+=== RUN   TestValuesAndThreeValuedLogic/1='1'
+=== RUN   TestValuesAndThreeValuedLogic/0xFFFFFFFFFFFFFFFF
+=== RUN   TestValuesAndThreeValuedLogic/-8_>>_2
+=== RUN   TestValuesAndThreeValuedLogic/-8_>>_200
+=== RUN   TestValuesAndThreeValuedLogic/1_<<_-1
+=== RUN   TestValuesAndThreeValuedLogic/1e999_-_1e999
+=== RUN   TestValuesAndThreeValuedLogic/'ab'||'中'
+=== RUN   TestValuesAndThreeValuedLogic/X'0061'
+=== RUN   TestValuesAndThreeValuedLogic/'A'_LIKE_'a'
+=== RUN   TestValuesAndThreeValuedLogic/'Æ'_LIKE_'æ'
+=== RUN   TestValuesAndThreeValuedLogic/'数据库'_LIKE_'数_库'
+=== RUN   TestValuesAndThreeValuedLogic/'a_b'_LIKE_'a!_b'_ESCAPE_'!'
+=== RUN   TestValuesAndThreeValuedLogic/'a%b'_LIKE_'a中%b'_ESCAPE_'中'
+=== RUN   TestValuesAndThreeValuedLogic/coalesce(NULL,3,4)
+=== RUN   TestValuesAndThreeValuedLogic/ifnull(NULL,'yes')
+=== RUN   TestValuesAndThreeValuedLogic/typeof(1.0)
+=== RUN   TestValuesAndThreeValuedLogic/length('数据库')
+=== RUN   TestValuesAndThreeValuedLogic/length(X'00ff')
+=== RUN   TestValuesAndThreeValuedLogic/lower('AÉ')
+=== RUN   TestValuesAndThreeValuedLogic/upper('aé')
+=== RUN   TestValuesAndThreeValuedLogic/nullif(1,1)
+=== RUN   TestValuesAndThreeValuedLogic/hex(X'0061')
+=== RUN   TestValuesAndThreeValuedLogic/abs(-4)
+=== RUN   TestValuesAndThreeValuedLogic/abs('12')
+=== RUN   TestValuesAndThreeValuedLogic/abs('abc')
+=== RUN   TestValuesAndThreeValuedLogic/'1e2'%7
+=== RUN   TestValuesAndThreeValuedLogic/'1e2'|0
+=== RUN   TestValuesAndThreeValuedLogic/~'1e2'
+--- PASS: TestValuesAndThreeValuedLogic (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/NULL_AND_0 (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/NULL_AND_1 (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/NULL_OR_1 (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/NULL_OR_0 (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/NOT_NULL (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/NULL_=_NULL (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/NULL_IS_NULL (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/NULL_IS_FALSE (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/2_IS_TRUE (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/2_IS_NOT_TRUE (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/2_IS_+TRUE (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/NOT_1=2 (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/1=2<3 (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/1+2*3 (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/5/2 (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/5.0/2 (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/1/0 (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/5.0%2 (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/9223372036854775807+1 (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/-9223372036854775808_/_-1 (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/'123junk'+1 (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/'junk'+1 (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/'1.0'+0 (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/'1e0'+0 (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/1='1' (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/0xFFFFFFFFFFFFFFFF (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/-8_>>_2 (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/-8_>>_200 (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/1_<<_-1 (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/1e999_-_1e999 (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/'ab'||'中' (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/X'0061' (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/'A'_LIKE_'a' (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/'Æ'_LIKE_'æ' (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/'数据库'_LIKE_'数_库' (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/'a_b'_LIKE_'a!_b'_ESCAPE_'!' (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/'a%b'_LIKE_'a中%b'_ESCAPE_'中' (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/coalesce(NULL,3,4) (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/ifnull(NULL,'yes') (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/typeof(1.0) (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/length('数据库') (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/length(X'00ff') (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/lower('AÉ') (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/upper('aé') (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/nullif(1,1) (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/hex(X'0061') (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/abs(-4) (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/abs('12') (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/abs('abc') (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/'1e2'%7 (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/'1e2'|0 (0.00s)
+    --- PASS: TestValuesAndThreeValuedLogic/~'1e2' (0.00s)
+=== RUN   TestAffinityAndIntegerComparison
+--- PASS: TestAffinityAndIntegerComparison (0.00s)
+=== RUN   TestFunctionsAndBindings
+--- PASS: TestFunctionsAndBindings (0.00s)
+=== RUN   TestInlineNonIntegerPrimaryKeySchema
+--- PASS: TestInlineNonIntegerPrimaryKeySchema (0.00s)
+=== RUN   TestInvalidUTF8TextOperations
+--- PASS: TestInvalidUTF8TextOperations (0.00s)
+=== RUN   TestRealTextBaseline
+--- PASS: TestRealTextBaseline (0.00s)
+=== RUN   TestHexadecimalNumericSeparators
+--- PASS: TestHexadecimalNumericSeparators (0.00s)
+=== RUN   TestLikeEscapeNULAndLimit
+--- PASS: TestLikeEscapeNULAndLimit (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.043s
+=== RUN   TestSQLExpressionFeaturesDMLBindingDefaults
+--- PASS: TestSQLExpressionFeaturesDMLBindingDefaults (0.00s)
+=== RUN   TestSQLExpressionFeaturesNullOrdering
+--- PASS: TestSQLExpressionFeaturesNullOrdering (0.00s)
+=== RUN   TestSQLExpressionFeaturesVectorStorageIdentity
+--- PASS: TestSQLExpressionFeaturesVectorStorageIdentity (0.00s)
+=== RUN   TestSQLExpressionFeaturesConstantInAliases
+--- PASS: TestSQLExpressionFeaturesConstantInAliases (0.00s)
+=== RUN   TestExpressionReviewPhysicalUntypedAliasIdentity
+--- PASS: TestExpressionReviewPhysicalUntypedAliasIdentity (0.00s)
+=== RUN   TestExpressionReviewBoundTreeIsolation
+--- PASS: TestExpressionReviewBoundTreeIsolation (0.00s)
+=== RUN   TestExpressionReviewStatementUndoAndDefaults
+--- PASS: TestExpressionReviewStatementUndoAndDefaults (0.00s)
+=== RUN   TestExpressionReviewRepresentationAliasFamilies
+--- PASS: TestExpressionReviewRepresentationAliasFamilies (0.00s)
+=== RUN   TestOrdinaryIndexStorageClassesAndAffinities
+    plan_index_test.go:69: 240 storage-class/affinity equality and IS probes matched independently forced scans
+--- PASS: TestOrdinaryIndexStorageClassesAndAffinities (0.80s)
+=== RUN   TestOrdinaryIndexRowIDAndShadowedNames
+--- PASS: TestOrdinaryIndexRowIDAndShadowedNames (0.08s)
+=== RUN   TestOrdinaryIndexPrefixWorkAndDeterministicLimit
+    plan_index_test.go:133: tail="" matching keys=20 range page reads=3 source fetches=20 forced-scan fetches=1800
+    plan_index_test.go:133: tail=" LIMIT 7 OFFSET 3" matching keys=20 range page reads=3 source fetches=10 forced-scan fetches=900
+    plan_index_test.go:133: tail=" ORDER BY tie LIMIT 7 OFFSET 3" matching keys=20 range page reads=3 source fetches=20 forced-scan fetches=1800
+    plan_index_test.go:133: tail=" ORDER BY tie DESC LIMIT 7 OFFSET 3" matching keys=20 range page reads=3 source fetches=20 forced-scan fetches=1800
+    plan_index_test.go:133: tail=" ORDER BY suffix,id LIMIT 7 OFFSET 3" matching keys=20 range page reads=3 source fetches=20 forced-scan fetches=1800
+    plan_index_test.go:133: tail=" ORDER BY id DESC LIMIT 7 OFFSET 3" matching keys=20 range page reads=3 source fetches=20 forced-scan fetches=1800
+--- PASS: TestOrdinaryIndexPrefixWorkAndDeterministicLimit (0.45s)
+=== RUN   TestOrdinaryIndexBudgetsCancellationAndResidualErrors
+--- PASS: TestOrdinaryIndexBudgetsCancellationAndResidualErrors (0.08s)
+=== RUN   TestOrdinaryIndexTransactionsRollbackReopenAndSnapshot
+=== RUN   TestOrdinaryIndexTransactionsRollbackReopenAndSnapshot/sharedfalse
+=== RUN   TestOrdinaryIndexTransactionsRollbackReopenAndSnapshot/sharedtrue
+--- PASS: TestOrdinaryIndexTransactionsRollbackReopenAndSnapshot (0.01s)
+    --- PASS: TestOrdinaryIndexTransactionsRollbackReopenAndSnapshot/sharedfalse (0.00s)
+    --- PASS: TestOrdinaryIndexTransactionsRollbackReopenAndSnapshot/sharedtrue (0.01s)
+=== RUN   TestOrdinaryIndexConcurrentQueries
+--- PASS: TestOrdinaryIndexConcurrentQueries (0.04s)
+=== RUN   TestOrdinaryIndexSlotBindingAndUnsupportedShapes
+--- PASS: TestOrdinaryIndexSlotBindingAndUnsupportedShapes (0.03s)
+=== RUN   TestVectorSQLRankShapesNullOffsetAndTies
+--- PASS: TestVectorSQLRankShapesNullOffsetAndTies (0.01s)
+=== RUN   TestVectorSQLBoundedHeapAgainstGeneralSort
+--- PASS: TestVectorSQLBoundedHeapAgainstGeneralSort (0.02s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	1.559s

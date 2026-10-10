@@ -40,6 +40,9 @@ func Eval(e Expr, ctx *EvalContext) (any, error) {
 			return nil, err
 		}
 	}
+	if err := scalarStep(ctx, e); err != nil {
+		return nil, err
+	}
 	switch x := e.(type) {
 	case *Literal:
 		return normalize(x.Value)
@@ -73,6 +76,9 @@ func Eval(e Expr, ctx *EvalContext) (any, error) {
 		if err != nil || v == nil {
 			return nil, err
 		}
+		if err := scalarPreflight(ctx, x.Op, v); err != nil {
+			return nil, err
+		}
 		switch x.Op {
 		case "+":
 			return v, nil
@@ -98,8 +104,19 @@ func Eval(e Expr, ctx *EvalContext) (any, error) {
 		if err != nil {
 			return nil, err
 		}
+		if err := scalarPreflight(ctx, x.Op, a, b); err != nil {
+			return nil, err
+		}
 		switch x.Op {
 		case "<->", "<#>", "<=>", "<+>", "<~>", "<%>":
+			if a != nil && b != nil {
+				if err := scalarTreeWork(ctx, x.Left); err != nil {
+					return nil, err
+				}
+				if err := scalarTreeWork(ctx, x.Right); err != nil {
+					return nil, err
+				}
+			}
 			return vectorExpressionFunction(ctx, vectorOperatorFunction(x.Op), []Expr{x.Left, x.Right}, []any{a, b})
 		case "AND":
 			at, an := Truth(a)
@@ -202,6 +219,12 @@ func Eval(e Expr, ctx *EvalContext) (any, error) {
 		if err != nil {
 			return nil, err
 		}
+		switch pattern.(type) {
+		case []byte, int64, float64:
+			if err := scalarPreflight(ctx, "pattern text", pattern); err != nil {
+				return nil, err
+			}
+		}
 		if len(textValue(pattern)) > MaxLikePatternBytes {
 			return nil, fmt.Errorf("LIKE pattern exceeds 50000 bytes")
 		}
@@ -213,6 +236,9 @@ func Eval(e Expr, ctx *EvalContext) (any, error) {
 			}
 			if e == nil {
 				return nil, nil
+			}
+			if err := scalarPreflight(ctx, "ESCAPE", e); err != nil {
+				return nil, err
 			}
 			s := textValue(e)
 			if !utf8.ValidString(s) {
@@ -229,6 +255,9 @@ func Eval(e Expr, ctx *EvalContext) (any, error) {
 		}
 		if a == nil || pattern == nil {
 			return nil, nil
+		}
+		if err := scalarPreflight(ctx, "LIKE", a, pattern); err != nil {
+			return nil, err
 		}
 		valueText, err := LikeText(a)
 		if err != nil {
@@ -248,6 +277,9 @@ func Eval(e Expr, ctx *EvalContext) (any, error) {
 	case *Cast:
 		v, err := Eval(x.Expr, ctx)
 		if err != nil {
+			return nil, err
+		}
+		if err := scalarPreflight(ctx, "CAST", v); err != nil {
 			return nil, err
 		}
 		return castValue(v, x.Type), nil
@@ -272,6 +304,9 @@ func Eval(e Expr, ctx *EvalContext) (any, error) {
 			}
 			return nil, nil
 		}
+		if err := scalarAllocate(ctx, int64(len(x.Args))*16); err != nil {
+			return nil, err
+		}
 		args := make([]any, len(x.Args))
 		for i, arg := range x.Args {
 			v, err := Eval(arg, ctx)
@@ -280,11 +315,27 @@ func Eval(e Expr, ctx *EvalContext) (any, error) {
 			}
 			args[i] = v
 		}
+		if err := scalarPreflight(ctx, name, args...); err != nil {
+			return nil, err
+		}
 		fn := ctx.Functions[name]
 		if fn == nil && isSimilarityFunction(name) {
 			return similarityFunction(ctx.Context, name, args)
 		}
 		if fn == nil && isVectorFunction(name) {
+			nonnull := true
+			for _, a := range args {
+				if a == nil {
+					nonnull = false
+				}
+			}
+			if nonnull {
+				for _, e := range x.Args {
+					if err := scalarTreeWork(ctx, e); err != nil {
+						return nil, err
+					}
+				}
+			}
 			return vectorExpressionFunction(ctx, name, x.Args, args)
 		}
 		if fn == nil {
@@ -606,6 +657,16 @@ func ApplyAffinity(v any, declared string) (any, error) {
 	return v, nil
 }
 func comparisonAffinity(ae, be Expr, a, b any, ctx *EvalContext) (any, any, error) {
+	if err := scalarPreflight(ctx, "affinity", a, b); err != nil {
+		return nil, nil, err
+	}
+	for _, e := range []Expr{ae, be} {
+		if c, ok := e.(*Cast); ok {
+			if err := scalarStep(ctx, c); err != nil {
+				return nil, nil, err
+			}
+		}
+	}
 	affinity := func(e Expr) string {
 		a := ExpressionAffinity(e, ctx.Affinity)
 		if a == "" {

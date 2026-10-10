@@ -1,0 +1,1327 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+Behavior audit: TestIndependentRelational* only intact native SQL-created fixture, read-only pinned oracle SELECT, ordinary cleanup; no manual tags or forbidden physical negative execution.
+=== RUN   TestIndependentRelationalBooleanOrder
+=== RUN   TestIndependentRelationalBooleanOrder/SELECT_a.id_FROM_boolnames_a_ORDER_BY_true
+=== RUN   TestIndependentRelationalBooleanOrder/SELECT_a.id_FROM_boolnames_a_ORDER_BY_false
+=== RUN   TestIndependentRelationalBooleanOrder/SELECT_-a.lid_AS_x_FROM_lhs_a_ORDER_BY_TRUE
+    relational_independent_test.go:29: row 0 column 0: got int64(-6); oracle int64(-1)
+=== RUN   TestIndependentRelationalBooleanOrder/SELECT_-a.lid_AS_x_FROM_lhs_a_ORDER_BY_FALSE
+    relational_independent_test.go:29: native query "SELECT -a.lid AS x FROM lhs a ORDER BY FALSE": sqlite query: ORDER BY position outside result column range
+=== RUN   TestIndependentRelationalBooleanOrder/SELECT_a.id_FROM_boolnames_a,plain_b_WHERE_b.rowid=1_ORDER_BY_true
+    relational_independent_test.go:29: row 0 column 0: got int64(1); oracle int64(2)
+=== RUN   TestIndependentRelationalBooleanOrder/SELECT_a.id_FROM_boolnames_a,plain_b_WHERE_b.rowid=1_ORDER_BY_false
+    relational_independent_test.go:29: native query "SELECT a.id FROM boolnames a,plain b WHERE b.rowid=1 ORDER BY false": sqlite query: ORDER BY position outside result column range
+=== RUN   TestIndependentRelationalBooleanOrder/SELECT_a.id_FROM_boolnames_a,plain_b_WHERE_b.rowid=1_ORDER_BY_+true
+    relational_independent_test.go:29: row 0 column 0: got int64(1); oracle int64(2)
+=== RUN   TestIndependentRelationalBooleanOrder/SELECT_a.id_FROM_boolnames_a,plain_b_WHERE_b.rowid=1_ORDER_BY_(true)_DESC
+    relational_independent_test.go:29: row 0 column 0: got int64(3); oracle int64(1)
+=== RUN   TestIndependentRelationalBooleanOrder/SELECT_-a.lid_AS_x_FROM_lhs_a,plain_b_WHERE_b.rowid=1_ORDER_BY_TRUE
+    relational_independent_test.go:29: row 0 column 0: got int64(-6); oracle int64(-1)
+=== RUN   TestIndependentRelationalBooleanOrder/SELECT_-a.lid_AS_x_FROM_lhs_a,plain_b_WHERE_b.rowid=1_ORDER_BY_FALSE
+    relational_independent_test.go:29: native query "SELECT -a.lid AS x FROM lhs a,plain b WHERE b.rowid=1 ORDER BY FALSE": sqlite query: ORDER BY position outside result column range
+--- FAIL: TestIndependentRelationalBooleanOrder (0.03s)
+    --- PASS: TestIndependentRelationalBooleanOrder/SELECT_a.id_FROM_boolnames_a_ORDER_BY_true (0.00s)
+    --- PASS: TestIndependentRelationalBooleanOrder/SELECT_a.id_FROM_boolnames_a_ORDER_BY_false (0.00s)
+    --- FAIL: TestIndependentRelationalBooleanOrder/SELECT_-a.lid_AS_x_FROM_lhs_a_ORDER_BY_TRUE (0.00s)
+    --- FAIL: TestIndependentRelationalBooleanOrder/SELECT_-a.lid_AS_x_FROM_lhs_a_ORDER_BY_FALSE (0.00s)
+    --- FAIL: TestIndependentRelationalBooleanOrder/SELECT_a.id_FROM_boolnames_a,plain_b_WHERE_b.rowid=1_ORDER_BY_true (0.00s)
+    --- FAIL: TestIndependentRelationalBooleanOrder/SELECT_a.id_FROM_boolnames_a,plain_b_WHERE_b.rowid=1_ORDER_BY_false (0.00s)
+    --- FAIL: TestIndependentRelationalBooleanOrder/SELECT_a.id_FROM_boolnames_a,plain_b_WHERE_b.rowid=1_ORDER_BY_+true (0.00s)
+    --- FAIL: TestIndependentRelationalBooleanOrder/SELECT_a.id_FROM_boolnames_a,plain_b_WHERE_b.rowid=1_ORDER_BY_(true)_DESC (0.00s)
+    --- FAIL: TestIndependentRelationalBooleanOrder/SELECT_-a.lid_AS_x_FROM_lhs_a,plain_b_WHERE_b.rowid=1_ORDER_BY_TRUE (0.00s)
+    --- FAIL: TestIndependentRelationalBooleanOrder/SELECT_-a.lid_AS_x_FROM_lhs_a,plain_b_WHERE_b.rowid=1_ORDER_BY_FALSE (0.00s)
+=== RUN   TestIndependentRelationalGenerated
+=== RUN   TestIndependentRelationalGenerated/case_000
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a JOIN rhs b ON a.r BETWEEN b.score AND b.score+1 WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_001
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a INNER JOIN rhs b ON a.lid=b.rid-9 WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_002
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a JOIN rhs b ON a.flag AND b.score>1 WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_003
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a INNER JOIN rhs b ON a.k IS b.k WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_004
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a INNER JOIN rhs b ON a.flag AND b.score>1 WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_005
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a JOIN rhs b ON a.k IN (b.k,NULL,'word') WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_006
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a JOIN rhs b ON a.txt=b.k WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_007
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a JOIN rhs b ON 1 WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_008
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a LEFT JOIN rhs b ON a.k=+b.k WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_009
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a JOIN rhs b ON 1 WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_010
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a JOIN rhs b ON a.flag AND b.score>1 WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_011
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a INNER JOIN rhs b ON +a.k=b.k WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_012
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a , rhs b ON a.txt=b.k WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_013
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a JOIN rhs b ON 1 WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_014
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a JOIN rhs b ON CASE WHEN b.k IS NULL THEN a.flag ELSE a.k=b.k END WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_015
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a JOIN rhs b ON a.r BETWEEN b.score AND b.score+1 WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_016
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a JOIN rhs b ON a.k IS b.k WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_017
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a LEFT JOIN rhs b ON a.txt=b.k WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_018
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a INNER JOIN rhs b ON a.flag AND b.score>1 WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_019
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a JOIN rhs b ON a.flag AND b.score>1 WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_020
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a CROSS JOIN rhs b ON 0 WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_021
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a CROSS JOIN rhs b ON a.lid=b.rid-9 WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_022
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a JOIN rhs b ON a.r BETWEEN b.score AND b.score+1 WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_023
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a JOIN rhs b ON a.k=b.k WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_024
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a INNER JOIN rhs b ON 0 WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_025
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a , rhs b ON a.flag AND b.score>1 WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_026
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a INNER JOIN rhs b ON a.k=b.k WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_027
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a CROSS JOIN rhs b ON NULL WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_028
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a LEFT JOIN rhs b ON CASE WHEN b.k IS NULL THEN a.flag ELSE a.k=b.k END WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_029
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a LEFT JOIN rhs b ON NULL WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_030
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a CROSS JOIN rhs b ON a.flag AND b.score>1 WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_031
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a INNER JOIN rhs b ON 0 WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_032
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a , rhs b ON 0 WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_033
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a LEFT JOIN rhs b ON 1 WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_034
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a CROSS JOIN rhs b ON a.lid=b.rid-9 WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_035
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a , rhs b ON CASE WHEN b.k IS NULL THEN a.flag ELSE a.k=b.k END WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_036
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a JOIN rhs b ON a.txt=b.k WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_037
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a , rhs b ON +a.k=b.k WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_038
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a LEFT JOIN rhs b ON a.r BETWEEN b.score AND b.score+1 WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_039
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a CROSS JOIN rhs b ON a.k IS b.k WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_040
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a , rhs b ON NULL WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_041
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a INNER JOIN rhs b ON a.lid=b.rid-9 WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_042
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a JOIN rhs b ON 0 WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_043
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a , rhs b ON NULL WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_044
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a LEFT JOIN rhs b ON 0 WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_045
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a JOIN rhs b ON a.k=b.k WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_046
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a LEFT JOIN rhs b ON 1 WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_047
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a JOIN rhs b ON 0 WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_048
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a LEFT JOIN rhs b ON +a.k=b.k WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_049
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a LEFT JOIN rhs b ON +a.k=b.k WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_050
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a INNER JOIN rhs b ON a.k IS b.k WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_051
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a , rhs b ON a.k=b.k WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_052
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a CROSS JOIN rhs b ON a.k=+b.k WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_053
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a , rhs b ON CASE WHEN b.k IS NULL THEN a.flag ELSE a.k=b.k END WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_054
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a CROSS JOIN rhs b ON a.flag AND b.score>1 WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_055
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a INNER JOIN rhs b ON a.k IS b.k WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_056
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a CROSS JOIN rhs b ON a.k IS b.k WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_057
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a , rhs b ON 0 WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_058
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a INNER JOIN rhs b ON CASE WHEN b.k IS NULL THEN a.flag ELSE a.k=b.k END WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_059
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a LEFT JOIN rhs b ON a.txt=b.k WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_060
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a INNER JOIN rhs b ON a.k IN (b.k,NULL,'word') WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_061
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a INNER JOIN rhs b ON a.k IN (b.k,NULL,'word') WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_062
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a CROSS JOIN rhs b ON NULL WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_063
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a , rhs b ON CASE WHEN b.k IS NULL THEN a.flag ELSE a.k=b.k END WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_064
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a LEFT JOIN rhs b ON a.k IS b.k WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_065
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a LEFT JOIN rhs b ON CASE WHEN b.k IS NULL THEN a.flag ELSE a.k=b.k END WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_066
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a CROSS JOIN rhs b ON NULL WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_067
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a LEFT JOIN rhs b ON a.k IS b.k WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_068
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a JOIN rhs b ON a.k IS b.k WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_069
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a , rhs b ON a.k IS b.k WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_070
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a CROSS JOIN rhs b ON a.k=+b.k WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_071
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a CROSS JOIN rhs b ON CASE WHEN b.k IS NULL THEN a.flag ELSE a.k=b.k END WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_072
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a CROSS JOIN rhs b ON a.k=b.k WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_073
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a JOIN rhs b ON a.flag AND b.score>1 WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_074
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a INNER JOIN rhs b ON a.k=+b.k WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_075
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a JOIN rhs b ON 0 WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_076
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a , rhs b ON a.lid=b.rid-9 WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_077
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a , rhs b ON CASE WHEN b.k IS NULL THEN a.flag ELSE a.k=b.k END WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_078
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a LEFT JOIN rhs b ON +a.k=b.k WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_079
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a CROSS JOIN rhs b ON a.r BETWEEN b.score AND b.score+1 WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_080
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a LEFT JOIN rhs b ON a.txt=b.k WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_081
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a , rhs b ON 0 WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_082
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a JOIN rhs b ON a.txt=b.k WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_083
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a CROSS JOIN rhs b ON a.k=+b.k WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_084
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a INNER JOIN rhs b ON a.k IN (b.k,NULL,'word') WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_085
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a INNER JOIN rhs b ON a.txt=b.k WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_086
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a LEFT JOIN rhs b ON a.r BETWEEN b.score AND b.score+1 WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_087
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a INNER JOIN rhs b ON CASE WHEN b.k IS NULL THEN a.flag ELSE a.k=b.k END WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_088
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a JOIN rhs b ON NULL WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_089
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a , rhs b ON a.r BETWEEN b.score AND b.score+1 WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_090
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a JOIN rhs b ON a.k=b.k WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_091
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a INNER JOIN rhs b ON a.txt=b.k WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_092
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a JOIN rhs b ON a.txt=b.k WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_093
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a INNER JOIN rhs b ON 1 WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_094
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a CROSS JOIN rhs b ON a.flag AND b.score>1 WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_095
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a LEFT JOIN rhs b ON 0 WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_096
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a JOIN rhs b ON a.r BETWEEN b.score AND b.score+1 WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_097
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a CROSS JOIN rhs b ON a.k IS b.k WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_098
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a LEFT JOIN rhs b ON 0 WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_099
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a JOIN rhs b ON a.k IS b.k WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_100
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a JOIN rhs b ON a.k=+b.k WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_101
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a LEFT JOIN rhs b ON a.k IS b.k WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_102
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a INNER JOIN rhs b ON CASE WHEN b.k IS NULL THEN a.flag ELSE a.k=b.k END WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_103
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a JOIN rhs b ON +a.k=b.k WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_104
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a , rhs b ON NULL WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_105
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a , rhs b ON +a.k=b.k WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_106
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a LEFT JOIN rhs b ON CASE WHEN b.k IS NULL THEN a.flag ELSE a.k=b.k END WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_107
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a INNER JOIN rhs b ON a.k=b.k WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_108
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a LEFT JOIN rhs b ON a.k=+b.k WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_109
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a INNER JOIN rhs b ON CASE WHEN b.k IS NULL THEN a.flag ELSE a.k=b.k END WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_110
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a INNER JOIN rhs b ON a.k=b.k WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_111
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a CROSS JOIN rhs b ON 1 WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_112
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a LEFT JOIN rhs b ON a.txt=b.k WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_113
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a JOIN rhs b ON a.flag AND b.score>1 WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_114
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a , rhs b ON a.lid=b.rid-9 WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_115
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a JOIN rhs b ON a.flag AND b.score>1 WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_116
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a LEFT JOIN rhs b ON 0 WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_117
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a LEFT JOIN rhs b ON a.k=b.k WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_118
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a , rhs b ON CASE WHEN b.k IS NULL THEN a.flag ELSE a.k=b.k END WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_119
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a JOIN rhs b ON 1 WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_120
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a INNER JOIN rhs b ON a.lid=b.rid-9 WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_121
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a LEFT JOIN rhs b ON a.k=b.k WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_122
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a JOIN rhs b ON a.k IS b.k WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_123
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a , rhs b ON a.k IS b.k WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_124
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a INNER JOIN rhs b ON a.k=+b.k WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_125
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a LEFT JOIN rhs b ON a.k IN (b.k,NULL,'word') WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_126
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a , rhs b ON 1 WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_127
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a INNER JOIN rhs b ON a.k IN (b.k,NULL,'word') WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_128
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a CROSS JOIN rhs b ON CASE WHEN b.k IS NULL THEN a.flag ELSE a.k=b.k END WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_129
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a LEFT JOIN rhs b ON a.r BETWEEN b.score AND b.score+1 WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_130
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a CROSS JOIN rhs b ON 0 WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_131
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a LEFT JOIN rhs b ON a.flag AND b.score>1 WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_132
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a INNER JOIN rhs b ON a.k=+b.k WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_133
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a , rhs b ON a.k=+b.k WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_134
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a INNER JOIN rhs b ON CASE WHEN b.k IS NULL THEN a.flag ELSE a.k=b.k END WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_135
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a CROSS JOIN rhs b ON a.lid=b.rid-9 WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_136
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a LEFT JOIN rhs b ON NULL WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_137
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a CROSS JOIN rhs b ON +a.k=b.k WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_138
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a INNER JOIN rhs b ON a.lid=b.rid-9 WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_139
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a INNER JOIN rhs b ON a.k IN (b.k,NULL,'word') WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_140
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a INNER JOIN rhs b ON a.k IN (b.k,NULL,'word') WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_141
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a CROSS JOIN rhs b ON 0 WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_142
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a JOIN rhs b ON 0 WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_143
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a , rhs b ON NULL WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_144
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a INNER JOIN rhs b ON CASE WHEN b.k IS NULL THEN a.flag ELSE a.k=b.k END WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_145
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a JOIN rhs b ON 1 WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_146
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a , rhs b ON a.r BETWEEN b.score AND b.score+1 WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_147
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a INNER JOIN rhs b ON a.lid=b.rid-9 WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_148
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a LEFT JOIN rhs b ON a.k=+b.k WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_149
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a INNER JOIN rhs b ON a.lid=b.rid-9 WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_150
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a LEFT JOIN rhs b ON NULL WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_151
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a CROSS JOIN rhs b ON NULL WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_152
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a CROSS JOIN rhs b ON a.flag AND b.score>1 WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_153
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a INNER JOIN rhs b ON a.k IN (b.k,NULL,'word') WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_154
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a INNER JOIN rhs b ON 0 WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_155
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a CROSS JOIN rhs b ON a.txt=b.k WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_156
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a INNER JOIN rhs b ON CASE WHEN b.k IS NULL THEN a.flag ELSE a.k=b.k END WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_157
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a INNER JOIN rhs b ON CASE WHEN b.k IS NULL THEN a.flag ELSE a.k=b.k END WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_158
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a CROSS JOIN rhs b ON a.k=b.k WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_159
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a LEFT JOIN rhs b ON CASE WHEN b.k IS NULL THEN a.flag ELSE a.k=b.k END WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_160
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a CROSS JOIN rhs b ON a.k IN (b.k,NULL,'word') WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_161
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a CROSS JOIN rhs b ON a.k IN (b.k,NULL,'word') WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_162
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a JOIN rhs b ON a.lid=b.rid-9 WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_163
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a LEFT JOIN rhs b ON a.r BETWEEN b.score AND b.score+1 WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_164
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a LEFT JOIN rhs b ON a.k IS b.k WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_165
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a LEFT JOIN rhs b ON a.k=+b.k WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_166
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a LEFT JOIN rhs b ON a.txt=b.k WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_167
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a JOIN rhs b ON NULL WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_168
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a CROSS JOIN rhs b ON a.k=b.k WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_169
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a LEFT JOIN rhs b ON a.txt=b.k WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_170
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a JOIN rhs b ON 1 WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_171
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a JOIN rhs b ON a.flag AND b.score>1 WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_172
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a JOIN rhs b ON a.r BETWEEN b.score AND b.score+1 WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_173
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a CROSS JOIN rhs b ON NULL WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_174
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a JOIN rhs b ON +a.k=b.k WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_175
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a , rhs b ON a.k=+b.k WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_176
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a LEFT JOIN rhs b ON a.k IS b.k WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_177
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a LEFT JOIN rhs b ON a.r BETWEEN b.score AND b.score+1 WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_178
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a INNER JOIN rhs b ON 0 WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_179
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a , rhs b ON a.k IS b.k WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_180
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a , rhs b ON 1 WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_181
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a , rhs b ON a.k=+b.k WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_182
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a , rhs b ON a.k IS b.k WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_183
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a LEFT JOIN rhs b ON a.k IN (b.k,NULL,'word') WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_184
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a CROSS JOIN rhs b ON a.k=b.k WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_185
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a , rhs b ON 1 WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_186
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a JOIN rhs b ON a.r BETWEEN b.score AND b.score+1 WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_187
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a CROSS JOIN rhs b ON 0 WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_188
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a LEFT JOIN rhs b ON +a.k=b.k WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_189
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a INNER JOIN rhs b ON a.k IS b.k WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_190
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a , rhs b ON a.k=b.k WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_191
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a , rhs b ON a.lid=b.rid-9 WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_192
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a JOIN rhs b ON 0 WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_193
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a LEFT JOIN rhs b ON NULL WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_194
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a CROSS JOIN rhs b ON a.k IS b.k WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_195
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a CROSS JOIN rhs b ON a.txt=b.k WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_196
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a CROSS JOIN rhs b ON a.txt=b.k WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_197
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a JOIN rhs b ON CASE WHEN b.k IS NULL THEN a.flag ELSE a.k=b.k END WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_198
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a LEFT JOIN rhs b ON 0 WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_199
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a INNER JOIN rhs b ON a.txt=b.k WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_200
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a CROSS JOIN rhs b ON CASE WHEN b.k IS NULL THEN a.flag ELSE a.k=b.k END WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_201
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a CROSS JOIN rhs b ON 0 WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_202
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a INNER JOIN rhs b ON 0 WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_203
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a CROSS JOIN rhs b ON a.flag AND b.score>1 WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_204
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a CROSS JOIN rhs b ON a.k=b.k WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_205
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a INNER JOIN rhs b ON a.k IN (b.k,NULL,'word') WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_206
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a LEFT JOIN rhs b ON CASE WHEN b.k IS NULL THEN a.flag ELSE a.k=b.k END WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_207
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a , rhs b ON a.txt=b.k WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_208
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a CROSS JOIN rhs b ON a.flag AND b.score>1 WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_209
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a INNER JOIN rhs b ON a.txt=b.k WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_210
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a CROSS JOIN rhs b ON a.k=+b.k WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_211
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a LEFT JOIN rhs b ON +a.k=b.k WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_212
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a , rhs b ON NULL WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_213
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a JOIN rhs b ON a.txt=b.k WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_214
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a , rhs b ON a.txt=b.k WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_215
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a , rhs b ON a.lid=b.rid-9 WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_216
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a JOIN rhs b ON a.k=+b.k WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_217
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a LEFT JOIN rhs b ON a.flag AND b.score>1 WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_218
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a JOIN rhs b ON a.k IN (b.k,NULL,'word') WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_219
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a LEFT JOIN rhs b ON a.flag AND b.score>1 WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_220
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a , rhs b ON a.k=b.k WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_221
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a CROSS JOIN rhs b ON NULL WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_222
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a INNER JOIN rhs b ON a.lid=b.rid-9 WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_223
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a JOIN rhs b ON a.flag AND b.score>1 WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_224
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a INNER JOIN rhs b ON a.k IN (b.k,NULL,'word') WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_225
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a INNER JOIN rhs b ON a.lid=b.rid-9 WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_226
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a , rhs b ON a.flag AND b.score>1 WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_227
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a , rhs b ON +a.k=b.k WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_228
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a JOIN rhs b ON a.k IS b.k WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_229
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a , rhs b ON a.k=b.k WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_230
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a INNER JOIN rhs b ON CASE WHEN b.k IS NULL THEN a.flag ELSE a.k=b.k END WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_231
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a CROSS JOIN rhs b ON CASE WHEN b.k IS NULL THEN a.flag ELSE a.k=b.k END WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_232
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a CROSS JOIN rhs b ON 1 WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_233
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a JOIN rhs b ON 0 WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_234
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a INNER JOIN rhs b ON a.flag AND b.score>1 WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_235
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a INNER JOIN rhs b ON a.k IN (b.k,NULL,'word') WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_236
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a , rhs b ON CASE WHEN b.k IS NULL THEN a.flag ELSE a.k=b.k END WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_237
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a LEFT JOIN rhs b ON a.k IS b.k WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_238
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a LEFT JOIN rhs b ON a.k=b.k WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_239
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a INNER JOIN rhs b ON a.k=+b.k WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_240
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a INNER JOIN rhs b ON a.flag AND b.score>1 WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_241
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a LEFT JOIN rhs b ON a.k=b.k WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_242
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a , rhs b ON a.txt=b.k WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_243
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a JOIN rhs b ON a.r BETWEEN b.score AND b.score+1 WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_244
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a CROSS JOIN rhs b ON a.k=+b.k WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_245
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a CROSS JOIN rhs b ON a.flag AND b.score>1 WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_246
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a , rhs b ON a.flag AND b.score>1 WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_247
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a INNER JOIN rhs b ON NULL WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_248
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a JOIN rhs b ON NULL WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_249
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a JOIN rhs b ON a.k IS b.k WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_250
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a INNER JOIN rhs b ON a.k=+b.k WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_251
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a LEFT JOIN rhs b ON a.lid=b.rid-9 WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_252
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a LEFT JOIN rhs b ON a.k IN (b.k,NULL,'word') WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_253
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a , rhs b ON 0 WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_254
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a JOIN rhs b ON 0 WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_255
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a LEFT JOIN rhs b ON a.k=b.k WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_256
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a INNER JOIN rhs b ON a.k=+b.k WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_257
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a JOIN rhs b ON a.lid=b.rid-9 WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_258
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a INNER JOIN rhs b ON a.k IN (b.k,NULL,'word') WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_259
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a INNER JOIN rhs b ON a.k=b.k WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_260
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a LEFT JOIN rhs b ON CASE WHEN b.k IS NULL THEN a.flag ELSE a.k=b.k END WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_261
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a , rhs b ON NULL WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_262
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a LEFT JOIN rhs b ON a.k=+b.k WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_263
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a , rhs b ON CASE WHEN b.k IS NULL THEN a.flag ELSE a.k=b.k END WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_264
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a , rhs b ON NULL WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_265
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a LEFT JOIN rhs b ON 0 WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_266
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a , rhs b ON +a.k=b.k WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_267
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a INNER JOIN rhs b ON a.flag AND b.score>1 WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_268
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a LEFT JOIN rhs b ON a.txt=b.k WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_269
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a JOIN rhs b ON CASE WHEN b.k IS NULL THEN a.flag ELSE a.k=b.k END WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_270
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a , rhs b ON CASE WHEN b.k IS NULL THEN a.flag ELSE a.k=b.k END WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_271
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a LEFT JOIN rhs b ON 1 WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_272
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a JOIN rhs b ON NULL WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_273
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a , rhs b ON NULL WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_274
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a INNER JOIN rhs b ON a.k=b.k WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_275
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a JOIN rhs b ON a.lid=b.rid-9 WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_276
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a , rhs b ON a.txt=b.k WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_277
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a LEFT JOIN rhs b ON a.flag AND b.score>1 WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_278
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a LEFT JOIN rhs b ON +a.k=b.k WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_279
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a LEFT JOIN rhs b ON a.lid=b.rid-9 WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_280
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a CROSS JOIN rhs b ON a.r BETWEEN b.score AND b.score+1 WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_281
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a CROSS JOIN rhs b ON a.k IN (b.k,NULL,'word') WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_282
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a , rhs b ON a.k IN (b.k,NULL,'word') WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_283
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a , rhs b ON a.k IS b.k WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_284
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a LEFT JOIN rhs b ON 1 WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_285
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a JOIN rhs b ON +a.k=b.k WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_286
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a CROSS JOIN rhs b ON NULL WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_287
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a CROSS JOIN rhs b ON 0 WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_288
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a CROSS JOIN rhs b ON a.flag AND b.score>1 WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_289
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a INNER JOIN rhs b ON CASE WHEN b.k IS NULL THEN a.flag ELSE a.k=b.k END WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_290
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a INNER JOIN rhs b ON a.k IS b.k WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_291
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a , rhs b ON a.r BETWEEN b.score AND b.score+1 WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_292
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a JOIN rhs b ON +a.k=b.k WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_293
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a LEFT JOIN rhs b ON a.k IS b.k WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_294
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a INNER JOIN rhs b ON a.flag AND b.score>1 WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_295
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a LEFT JOIN rhs b ON a.flag AND b.score>1 WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_296
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a CROSS JOIN rhs b ON +a.k=b.k WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_297
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a INNER JOIN rhs b ON a.k=b.k WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_298
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a , rhs b ON a.txt=b.k WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_299
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a INNER JOIN rhs b ON NULL WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_300
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a , rhs b ON +a.k=b.k WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_301
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a JOIN rhs b ON a.k IS b.k WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_302
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a , rhs b ON NULL WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_303
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a LEFT JOIN rhs b ON a.k=+b.k WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_304
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a INNER JOIN rhs b ON a.k=b.k WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_305
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a , rhs b ON a.r BETWEEN b.score AND b.score+1 WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_306
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a CROSS JOIN rhs b ON CASE WHEN b.k IS NULL THEN a.flag ELSE a.k=b.k END WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_307
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a LEFT JOIN rhs b ON a.flag AND b.score>1 WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_308
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a CROSS JOIN rhs b ON a.txt=b.k WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_309
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a LEFT JOIN rhs b ON NULL WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_310
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a LEFT JOIN rhs b ON CASE WHEN b.k IS NULL THEN a.flag ELSE a.k=b.k END WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_311
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a JOIN rhs b ON NULL WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_312
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a CROSS JOIN rhs b ON a.lid=b.rid-9 WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_313
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a CROSS JOIN rhs b ON a.flag AND b.score>1 WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_314
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a LEFT JOIN rhs b ON a.k IN (b.k,NULL,'word') WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_315
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a INNER JOIN rhs b ON NULL WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_316
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a , rhs b ON CASE WHEN b.k IS NULL THEN a.flag ELSE a.k=b.k END WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_317
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a LEFT JOIN rhs b ON a.k=+b.k WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_318
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a INNER JOIN rhs b ON a.flag AND b.score>1 WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_319
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a , rhs b ON 0 WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_320
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a LEFT JOIN rhs b ON 1 WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_321
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a CROSS JOIN rhs b ON a.k IN (b.k,NULL,'word') WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_322
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a JOIN rhs b ON a.txt=b.k WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_323
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a , rhs b ON a.lid=b.rid-9 WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_324
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a , rhs b ON a.k IS b.k WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_325
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a , rhs b ON a.txt=b.k WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_326
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a CROSS JOIN rhs b ON a.k=b.k WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_327
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a JOIN rhs b ON 0 WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_328
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a JOIN rhs b ON a.txt=b.k WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_329
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a JOIN rhs b ON CASE WHEN b.k IS NULL THEN a.flag ELSE a.k=b.k END WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_330
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a JOIN rhs b ON a.k IS b.k WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_331
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a JOIN rhs b ON a.txt=b.k WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_332
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a CROSS JOIN rhs b ON a.k IN (b.k,NULL,'word') WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_333
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a INNER JOIN rhs b ON NULL WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_334
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a LEFT JOIN rhs b ON a.k=b.k WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_335
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a LEFT JOIN rhs b ON a.k=+b.k WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_336
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a CROSS JOIN rhs b ON a.lid=b.rid-9 WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_337
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a JOIN rhs b ON 1 WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_338
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a LEFT JOIN rhs b ON a.flag AND b.score>1 WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_339
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a LEFT JOIN rhs b ON a.k=+b.k WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_340
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a LEFT JOIN rhs b ON +a.k=b.k WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_341
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a JOIN rhs b ON a.r BETWEEN b.score AND b.score+1 WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_342
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a CROSS JOIN rhs b ON 0 WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_343
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a JOIN rhs b ON NULL WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_344
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a INNER JOIN rhs b ON a.txt=b.k WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_345
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a INNER JOIN rhs b ON NULL WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_346
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a , rhs b ON NULL WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_347
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a CROSS JOIN rhs b ON CASE WHEN b.k IS NULL THEN a.flag ELSE a.k=b.k END WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_348
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a CROSS JOIN rhs b ON 1 WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_349
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a INNER JOIN rhs b ON a.k IS b.k WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_350
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a LEFT JOIN rhs b ON a.k IN (b.k,NULL,'word') WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_351
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a INNER JOIN rhs b ON a.txt=b.k WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_352
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a LEFT JOIN rhs b ON a.k=+b.k WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_353
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a CROSS JOIN rhs b ON a.k IN (b.k,NULL,'word') WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_354
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a LEFT JOIN rhs b ON CASE WHEN b.k IS NULL THEN a.flag ELSE a.k=b.k END WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_355
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a JOIN rhs b ON a.txt=b.k WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_356
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a , rhs b ON a.r BETWEEN b.score AND b.score+1 WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_357
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a INNER JOIN rhs b ON a.k=b.k WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_358
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a CROSS JOIN rhs b ON +a.k=b.k WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_359
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a JOIN rhs b ON a.lid=b.rid-9 WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_360
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a INNER JOIN rhs b ON a.k=+b.k WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_361
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a LEFT JOIN rhs b ON NULL WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_362
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a CROSS JOIN rhs b ON a.k=b.k WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_363
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a LEFT JOIN rhs b ON a.r BETWEEN b.score AND b.score+1 WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_364
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a JOIN rhs b ON a.k IN (b.k,NULL,'word') WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_365
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a CROSS JOIN rhs b ON CASE WHEN b.k IS NULL THEN a.flag ELSE a.k=b.k END WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_366
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a INNER JOIN rhs b ON +a.k=b.k WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_367
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a INNER JOIN rhs b ON a.k IS b.k WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_368
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a LEFT JOIN rhs b ON a.lid=b.rid-9 WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_369
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a , rhs b ON 0 WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_370
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a LEFT JOIN rhs b ON a.k=b.k WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_371
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a INNER JOIN rhs b ON a.k IN (b.k,NULL,'word') WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_372
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a JOIN rhs b ON a.k IN (b.k,NULL,'word') WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_373
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a LEFT JOIN rhs b ON a.flag AND b.score>1 WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_374
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a LEFT JOIN rhs b ON a.txt=b.k WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_375
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a CROSS JOIN rhs b ON 1 WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_376
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a INNER JOIN rhs b ON a.flag AND b.score>1 WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_377
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a , rhs b ON 1 WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_378
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a LEFT JOIN rhs b ON a.txt=b.k WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_379
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a CROSS JOIN rhs b ON NULL WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_380
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a LEFT JOIN rhs b ON 1 WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_381
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a CROSS JOIN rhs b ON a.k=b.k WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_382
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a , rhs b ON a.k=b.k WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_383
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a LEFT JOIN rhs b ON a.lid=b.rid-9 WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_384
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a LEFT JOIN rhs b ON CASE WHEN b.k IS NULL THEN a.flag ELSE a.k=b.k END WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_385
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a LEFT JOIN rhs b ON NULL WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_386
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a , rhs b ON NULL WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_387
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a , rhs b ON a.k IS b.k WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_388
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a INNER JOIN rhs b ON a.k IS b.k WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_389
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a CROSS JOIN rhs b ON a.r BETWEEN b.score AND b.score+1 WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_390
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a CROSS JOIN rhs b ON 0 WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_391
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a CROSS JOIN rhs b ON a.r BETWEEN b.score AND b.score+1 WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_392
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a INNER JOIN rhs b ON NULL WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_393
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a CROSS JOIN rhs b ON +a.k=b.k WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_394
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a CROSS JOIN rhs b ON 1 WHERE b.rid IS NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_395
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a LEFT JOIN rhs b ON a.lid=b.rid-9 WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_396
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a INNER JOIN rhs b ON a.flag AND b.score>1 WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_397
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a LEFT JOIN rhs b ON a.lid=b.rid-9 WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_398
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a , rhs b ON a.k=b.k WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_399
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a LEFT JOIN rhs b ON NULL WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_400
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a , rhs b ON NULL WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_401
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a JOIN rhs b ON a.flag AND b.score>1 WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_402
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a JOIN rhs b ON NULL WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_403
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a INNER JOIN rhs b ON a.r BETWEEN b.score AND b.score+1 WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_404
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a INNER JOIN rhs b ON 1 WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_405
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a LEFT JOIN rhs b ON 1 WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_406
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a LEFT JOIN rhs b ON a.k=b.k WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_407
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a LEFT JOIN rhs b ON a.k=+b.k WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_408
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a LEFT JOIN rhs b ON 1 WHERE coalesce(b.tag,'missing')!='null' ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_409
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a LEFT JOIN rhs b ON a.k=b.k WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_410
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a LEFT JOIN rhs b ON a.k=+b.k WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_411
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a JOIN rhs b ON a.lid=b.rid-9 WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_412
+    relational_independent_test.go:43: SELECT a.lid,b.rid FROM lhs a JOIN rhs b ON a.lid=b.rid-9 WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_413
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a JOIN rhs b ON +a.k=b.k WHERE a.lid<4 OR b.rid>14 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_414
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a , rhs b ON a.k=b.k WHERE 1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_415
+    relational_independent_test.go:43: SELECT a.lid,b.rid,a.k=b.k,typeof(b.score) FROM lhs a INNER JOIN rhs b ON a.flag AND b.score>1 WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_416
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a , rhs b ON CASE WHEN b.k IS NULL THEN a.flag ELSE a.k=b.k END WHERE a.k IS NOT NULL ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_417
+    relational_independent_test.go:43: SELECT a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END FROM lhs a JOIN rhs b ON 0 WHERE a.flag=1 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_418
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a , rhs b ON a.txt=b.k WHERE b.score<4 ORDER BY 1,2
+=== RUN   TestIndependentRelationalGenerated/case_419
+    relational_independent_test.go:43: SELECT a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r) FROM lhs a LEFT JOIN rhs b ON a.k=+b.k WHERE a.flag=1 ORDER BY 1,2
+--- PASS: TestIndependentRelationalGenerated (1.30s)
+    --- PASS: TestIndependentRelationalGenerated/case_000 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_001 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_002 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_003 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_004 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_005 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_006 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_007 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_008 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_009 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_010 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_011 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_012 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_013 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_014 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_015 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_016 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_017 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_018 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_019 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_020 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_021 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_022 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_023 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_024 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_025 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_026 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_027 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_028 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_029 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_030 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_031 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_032 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_033 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_034 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_035 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_036 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_037 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_038 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_039 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_040 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_041 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_042 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_043 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_044 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_045 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_046 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_047 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_048 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_049 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_050 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_051 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_052 (0.01s)
+    --- PASS: TestIndependentRelationalGenerated/case_053 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_054 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_055 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_056 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_057 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_058 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_059 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_060 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_061 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_062 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_063 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_064 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_065 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_066 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_067 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_068 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_069 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_070 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_071 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_072 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_073 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_074 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_075 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_076 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_077 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_078 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_079 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_080 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_081 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_082 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_083 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_084 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_085 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_086 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_087 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_088 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_089 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_090 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_091 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_092 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_093 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_094 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_095 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_096 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_097 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_098 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_099 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_100 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_101 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_102 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_103 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_104 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_105 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_106 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_107 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_108 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_109 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_110 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_111 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_112 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_113 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_114 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_115 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_116 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_117 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_118 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_119 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_120 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_121 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_122 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_123 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_124 (0.01s)
+    --- PASS: TestIndependentRelationalGenerated/case_125 (0.01s)
+    --- PASS: TestIndependentRelationalGenerated/case_126 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_127 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_128 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_129 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_130 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_131 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_132 (0.03s)
+    --- PASS: TestIndependentRelationalGenerated/case_133 (0.08s)
+    --- PASS: TestIndependentRelationalGenerated/case_134 (0.03s)
+    --- PASS: TestIndependentRelationalGenerated/case_135 (0.01s)
+    --- PASS: TestIndependentRelationalGenerated/case_136 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_137 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_138 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_139 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_140 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_141 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_142 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_143 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_144 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_145 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_146 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_147 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_148 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_149 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_150 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_151 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_152 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_153 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_154 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_155 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_156 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_157 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_158 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_159 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_160 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_161 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_162 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_163 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_164 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_165 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_166 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_167 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_168 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_169 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_170 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_171 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_172 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_173 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_174 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_175 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_176 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_177 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_178 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_179 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_180 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_181 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_182 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_183 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_184 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_185 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_186 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_187 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_188 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_189 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_190 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_191 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_192 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_193 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_194 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_195 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_196 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_197 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_198 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_199 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_200 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_201 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_202 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_203 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_204 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_205 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_206 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_207 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_208 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_209 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_210 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_211 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_212 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_213 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_214 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_215 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_216 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_217 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_218 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_219 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_220 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_221 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_222 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_223 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_224 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_225 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_226 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_227 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_228 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_229 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_230 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_231 (0.01s)
+    --- PASS: TestIndependentRelationalGenerated/case_232 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_233 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_234 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_235 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_236 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_237 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_238 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_239 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_240 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_241 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_242 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_243 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_244 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_245 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_246 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_247 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_248 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_249 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_250 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_251 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_252 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_253 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_254 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_255 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_256 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_257 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_258 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_259 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_260 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_261 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_262 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_263 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_264 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_265 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_266 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_267 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_268 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_269 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_270 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_271 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_272 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_273 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_274 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_275 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_276 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_277 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_278 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_279 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_280 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_281 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_282 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_283 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_284 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_285 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_286 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_287 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_288 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_289 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_290 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_291 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_292 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_293 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_294 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_295 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_296 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_297 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_298 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_299 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_300 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_301 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_302 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_303 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_304 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_305 (0.01s)
+    --- PASS: TestIndependentRelationalGenerated/case_306 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_307 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_308 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_309 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_310 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_311 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_312 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_313 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_314 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_315 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_316 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_317 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_318 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_319 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_320 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_321 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_322 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_323 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_324 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_325 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_326 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_327 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_328 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_329 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_330 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_331 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_332 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_333 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_334 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_335 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_336 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_337 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_338 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_339 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_340 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_341 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_342 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_343 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_344 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_345 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_346 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_347 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_348 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_349 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_350 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_351 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_352 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_353 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_354 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_355 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_356 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_357 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_358 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_359 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_360 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_361 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_362 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_363 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_364 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_365 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_366 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_367 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_368 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_369 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_370 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_371 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_372 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_373 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_374 (0.01s)
+    --- PASS: TestIndependentRelationalGenerated/case_375 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_376 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_377 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_378 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_379 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_380 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_381 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_382 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_383 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_384 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_385 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_386 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_387 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_388 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_389 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_390 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_391 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_392 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_393 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_394 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_395 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_396 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_397 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_398 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_399 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_400 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_401 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_402 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_403 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_404 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_405 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_406 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_407 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_408 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_409 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_410 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_411 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_412 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_413 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_414 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_415 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_416 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_417 (0.01s)
+    --- PASS: TestIndependentRelationalGenerated/case_418 (0.00s)
+    --- PASS: TestIndependentRelationalGenerated/case_419 (0.00s)
+=== RUN   TestIndependentRelationalScopedEdges
+=== RUN   TestIndependentRelationalScopedEdges/SELECT_a.lid-1_AS_"true",b.rid_FROM_lhs_a_JOIN_rhs_b_ON_true_AND_a.k=b.k_ORDER_BY_1,2
+    relational_independent_test.go:63: row count: got 6; oracle 4
+=== RUN   TestIndependentRelationalScopedEdges/SELECT_a.lid-1_AS_"false",b.rid_FROM_lhs_a_JOIN_rhs_b_ON_false_AND_a.k=b.k_ORDER_BY_1,2
+    relational_independent_test.go:63: row count: got 0; oracle 4
+=== RUN   TestIndependentRelationalScopedEdges/SELECT_a.lid-1_AS_"true",b.rid_FROM_lhs_a,rhs_b_WHERE_true_AND_a.k=b.k_ORDER_BY_1,2
+    relational_independent_test.go:63: row count: got 6; oracle 4
+=== RUN   TestIndependentRelationalScopedEdges/SELECT_a.lid-1_AS_"false",b.rid_FROM_lhs_a,rhs_b_WHERE_false_AND_a.k=b.k_ORDER_BY_1,2
+    relational_independent_test.go:63: row count: got 0; oracle 4
+=== RUN   TestIndependentRelationalScopedEdges/SELECT_a.lid_AS_x,-a.lid_AS_x,b.rid_FROM_lhs_a,rhs_b_WHERE_b.rid=10_ORDER_BY_x
+=== RUN   TestIndependentRelationalScopedEdges/SELECT_a.rowid,b.rowid_FROM_plain_a_LEFT_JOIN_plain_b_ON_a.rowid+1=b.rowid_ORDER_BY_a.rowid
+=== RUN   TestIndependentRelationalScopedEdges/SELECT_a.lid,b.rid,c.cid_FROM_lhs_a_LEFT_JOIN_rhs_b_ON_a.k=b.k_JOIN_third_c_ON_c.rid=b.rid_ORDER_BY_1,2,3
+=== RUN   TestIndependentRelationalScopedEdges/SELECT_a.lid,b.rid,c.cid_FROM_lhs_a_LEFT_JOIN_rhs_b_ON_a.k=b.k_LEFT_JOIN_third_c_ON_c.rid=b.rid_AND_a.lid=1_WHERE_c.cid_IS_NULL_ORDER_BY_1,2,3
+=== RUN   TestIndependentRelationalScopedEdges/SELECT_a.lid,b.eid,c.cid_FROM_lhs_a,empty_source_b_LEFT_JOIN_third_c_ON_c.rid=b.eid_ORDER_BY_1,2,3
+=== RUN   TestIndependentRelationalScopedEdges/SELECT_a.lid,b.eid,c.cid_FROM_lhs_a_LEFT_JOIN_empty_source_b_ON_1_LEFT_JOIN_third_c_ON_b.eid_IS_NULL_ORDER_BY_1,3
+=== RUN   TestIndependentRelationalScopedEdges/SELECT_b.rid,a.lid_FROM_lhs_a_LEFT_JOIN_rhs_b_ON_a.k=b.k_ORDER_BY_1_NULLS_LAST,2_DESC_LIMIT_8_OFFSET_2
+=== RUN   TestIndependentRelationalScopedEdges/SELECT_b.rid,a.lid_FROM_lhs_a_LEFT_JOIN_rhs_b_ON_a.k=b.k_ORDER_BY_1_DESC_NULLS_FIRST,2_ASC_LIMIT_-1_OFFSET_-1
+--- FAIL: TestIndependentRelationalScopedEdges (0.03s)
+    --- FAIL: TestIndependentRelationalScopedEdges/SELECT_a.lid-1_AS_"true",b.rid_FROM_lhs_a_JOIN_rhs_b_ON_true_AND_a.k=b.k_ORDER_BY_1,2 (0.00s)
+    --- FAIL: TestIndependentRelationalScopedEdges/SELECT_a.lid-1_AS_"false",b.rid_FROM_lhs_a_JOIN_rhs_b_ON_false_AND_a.k=b.k_ORDER_BY_1,2 (0.00s)
+    --- FAIL: TestIndependentRelationalScopedEdges/SELECT_a.lid-1_AS_"true",b.rid_FROM_lhs_a,rhs_b_WHERE_true_AND_a.k=b.k_ORDER_BY_1,2 (0.00s)
+    --- FAIL: TestIndependentRelationalScopedEdges/SELECT_a.lid-1_AS_"false",b.rid_FROM_lhs_a,rhs_b_WHERE_false_AND_a.k=b.k_ORDER_BY_1,2 (0.00s)
+    --- PASS: TestIndependentRelationalScopedEdges/SELECT_a.lid_AS_x,-a.lid_AS_x,b.rid_FROM_lhs_a,rhs_b_WHERE_b.rid=10_ORDER_BY_x (0.00s)
+    --- PASS: TestIndependentRelationalScopedEdges/SELECT_a.rowid,b.rowid_FROM_plain_a_LEFT_JOIN_plain_b_ON_a.rowid+1=b.rowid_ORDER_BY_a.rowid (0.00s)
+    --- PASS: TestIndependentRelationalScopedEdges/SELECT_a.lid,b.rid,c.cid_FROM_lhs_a_LEFT_JOIN_rhs_b_ON_a.k=b.k_JOIN_third_c_ON_c.rid=b.rid_ORDER_BY_1,2,3 (0.00s)
+    --- PASS: TestIndependentRelationalScopedEdges/SELECT_a.lid,b.rid,c.cid_FROM_lhs_a_LEFT_JOIN_rhs_b_ON_a.k=b.k_LEFT_JOIN_third_c_ON_c.rid=b.rid_AND_a.lid=1_WHERE_c.cid_IS_NULL_ORDER_BY_1,2,3 (0.00s)
+    --- PASS: TestIndependentRelationalScopedEdges/SELECT_a.lid,b.eid,c.cid_FROM_lhs_a,empty_source_b_LEFT_JOIN_third_c_ON_c.rid=b.eid_ORDER_BY_1,2,3 (0.00s)
+    --- PASS: TestIndependentRelationalScopedEdges/SELECT_a.lid,b.eid,c.cid_FROM_lhs_a_LEFT_JOIN_empty_source_b_ON_1_LEFT_JOIN_third_c_ON_b.eid_IS_NULL_ORDER_BY_1,3 (0.00s)
+    --- PASS: TestIndependentRelationalScopedEdges/SELECT_b.rid,a.lid_FROM_lhs_a_LEFT_JOIN_rhs_b_ON_a.k=b.k_ORDER_BY_1_NULLS_LAST,2_DESC_LIMIT_8_OFFSET_2 (0.00s)
+    --- PASS: TestIndependentRelationalScopedEdges/SELECT_b.rid,a.lid_FROM_lhs_a_LEFT_JOIN_rhs_b_ON_a.k=b.k_ORDER_BY_1_DESC_NULLS_FIRST,2_ASC_LIMIT_-1_OFFSET_-1 (0.00s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/testkit	1.374s
+FAIL

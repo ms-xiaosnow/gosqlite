@@ -426,7 +426,7 @@ func (d *DB) Query(ctx context.Context, query string, args ...any) (*Rows, error
 	if !ok {
 		return nil, wrap("query", ErrReadOnly)
 	}
-	params, err := bind(stmt, args)
+	ctx, params, err := d.bindSelect(ctx, sel, args)
 	if err != nil {
 		return nil, wrap("bind", err)
 	}

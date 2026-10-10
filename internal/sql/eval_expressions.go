@@ -18,7 +18,10 @@ func evalCase(x *Case, ctx *EvalContext) (any, error) {
 		}
 		var match bool
 		if x.Base == nil {
-			match, _ = Truth(v)
+			match, _, err = TruthContext(ctx.Context, v)
+			if err != nil {
+				return nil, err
+			}
 		} else if base != nil && v != nil {
 			a, b, err := comparisonAffinity(x.Base, arm.When, base, v, ctx)
 			if err != nil {
@@ -95,6 +98,9 @@ func evalInList(x *InList, ctx *EvalContext) (any, error) {
 	eager := len(x.Values) > 2
 	if eager {
 		for _, expr := range x.Values {
+			if err := scalarTreeWork(ctx, expr); err != nil {
+				return nil, err
+			}
 			if !ConstantExpression(expr, ctx) {
 				eager = false
 				break

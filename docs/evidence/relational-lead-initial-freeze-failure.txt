@@ -1,0 +1,1 @@
+../relational_lead.sh: line 2: cd: /workspace/scratch/5e06a74e5f65/durable-restart/relational-lead-verify: No such file or directory

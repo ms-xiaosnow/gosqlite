@@ -28,6 +28,7 @@ type resultRow struct {
 // Next, Values, Err and Close are synchronized, but callers must not interleave
 // multiple consumers because their logical Next/Values pair is not atomic.
 type Rows struct {
+	relational                      *relationalBudget
 	annWork                         ANNWorkStats
 	vectorRank                      *vectorRank
 	queryPlan                       QueryPlan
@@ -101,6 +102,10 @@ func (r *Rows) close() error {
 		err = errors.Join(err, r.release())
 		r.release = nil
 	}
+	if r.relational != nil {
+		r.relational.stats.CurrentBytes = 0
+		r.exprs, r.order, r.table, r.sel, r.aliases = nil, nil, nil, nil, nil
+	}
 	delete(r.db.rows, r)
 	if r.tx != nil {
 		r.tx.activeRows--
@@ -146,6 +151,9 @@ func (r *Rows) Next() bool {
 	if r.limit >= 0 && r.emitted >= r.limit {
 		return r.fail(io.EOF)
 	}
+	// The previous result's backing buffers are no longer live before fetch
+	// releases its charge and starts allocating the next joined row.
+	r.current = nil
 	for {
 		var row resultRow
 		if len(r.order) > 0 {
@@ -174,6 +182,9 @@ func (r *Rows) Next() bool {
 }
 
 func (r *Rows) fetch() (resultRow, int64, error) {
+	if r.relational != nil {
+		r.relational.clearResult()
+	}
 	for {
 		if err := r.ctx.Err(); err != nil {
 			return resultRow{}, 0, err
@@ -187,6 +198,12 @@ func (r *Rows) fetch() (resultRow, int64, error) {
 			return resultRow{}, 0, err
 		}
 		if keep {
+			if r.relational != nil {
+				if err := r.relational.reserve(cost); err != nil {
+					return resultRow{}, 0, err
+				}
+				r.relational.resultBytes = cost
+			}
 			return row, cost, nil
 		}
 	}
@@ -195,15 +212,21 @@ func (r *Rows) fetch() (resultRow, int64, error) {
 // evaluateSourceRow is shared by scans and ANN base-row rechecks. WHERE runs
 // before vector decoding/scoring; aliases and projection retain one pipeline.
 func (r *Rows) evaluateSourceRow(rowid int64, values []any) (resultRow, int64, bool, error) {
+	if r.relational != nil {
+		defer r.relational.clearScalar()
+		if err := r.relational.Allocate(int64(len(r.exprs)+len(r.order))*16 + 192); err != nil {
+			return resultRow{}, 0, false, err
+		}
+	}
 	var err error
-	if r.table != nil {
+	if r.table != nil && r.relational == nil {
 		r.queryStats.BaseRowFetches++
 		if r.vectorRank != nil && r.queryStats.BaseRowFetches > int64(r.vectorRank.limits.MaxCandidates) {
 			return resultRow{}, 0, false, fmt.Errorf("%w: vector source candidates", vector.ErrLimit)
 		}
 	}
 	rawCost := valuesSize(values)
-	if r.table != nil {
+	if r.table != nil && r.relational == nil {
 		if len(values) > len(r.table.columns) {
 			return resultRow{}, 0, false, fmt.Errorf("%w: record has too many columns", ErrCorrupt)
 		}
@@ -244,6 +267,9 @@ func (r *Rows) evaluateSourceRow(rowid int64, values []any) (resultRow, int64, b
 		}
 		if i < 0 {
 			return rowid, nil
+		}
+		if r.relational != nil {
+			return r.relationalColumnValue(values[i], r.table.columns[i].Type)
 		}
 		return columnValue(values[i], r.table.columns[i].Type)
 	}
@@ -307,7 +333,10 @@ func (r *Rows) evaluateSourceRow(rowid int64, values []any) (resultRow, int64, b
 		if err != nil {
 			return resultRow{}, 0, false, err
 		}
-		truth, isNull := sqlast.Truth(value)
+		truth, isNull, err := sqlast.TruthContext(r.ctx, value)
+		if err != nil {
+			return resultRow{}, 0, false, err
+		}
 		if isNull || !truth {
 			if r.vectorRank != nil {
 				r.queryStats.VectorFilteredRows++
@@ -396,6 +425,11 @@ func (r *Rows) materialize() error {
 		if cost > r.db.opts.MaxSortBytes-used {
 			return ErrMemoryLimit
 		}
+		if r.relational != nil {
+			if err := r.relational.reserve(cost); err != nil {
+				return err
+			}
+		}
 		used += cost
 		r.sorted = append(r.sorted, row)
 	}
@@ -403,6 +437,9 @@ func (r *Rows) materialize() error {
 		return err
 	}
 	r.source = nil
+	if r.relational != nil {
+		return r.sortRelational()
+	}
 	var compareErr error
 	comparisons := 0
 	sort.SliceStable(r.sorted, func(i, j int) bool {

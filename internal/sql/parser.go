@@ -236,24 +236,15 @@ func (p *parser) selectStmt() (*Select, error) {
 		}
 	}
 	if p.take("FROM") {
-		var err error
-		s.From, err = p.name()
+		relation, err := p.fromRelation()
 		if err != nil {
 			return nil, err
 		}
-		s.Alias, err = p.optionalAlias()
-		if err != nil {
-			return nil, err
+		if leaf, ok := relation.(*TableRelation); ok {
+			s.From, s.Alias, s.NotIndexed = leaf.Name, leaf.Alias, leaf.NotIndexed
+		} else {
+			s.Relation = relation
 		}
-	}
-	if p.take("NOT") {
-		if s.From == "" {
-			return nil, p.unsupported("NOT INDEXED without a table")
-		}
-		if err := p.need("INDEXED"); err != nil {
-			return nil, err
-		}
-		s.NotIndexed = true
 	}
 	if p.take("WHERE") {
 		var err error

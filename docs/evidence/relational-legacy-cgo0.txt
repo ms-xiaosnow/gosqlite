@@ -1,0 +1,6 @@
+2026-10-10T18:28:05Z
+9a797377eb1a1d7306b87b84abd7fa55ad1a8783baeda5e9bb58224469d82072  docs/evidence/relational-source-sha256.txt
+CGO_ENABLED=0 go test ./internal/sql ./sqlite -run ^(TestLexer$|TestParseSelect$|TestParseCreateAndDML$|TestRejectUnsupported$|TestResourceBounds$|TestValuesAndThreeValuedLogic$|TestAffinityAndIntegerComparison$|TestFunctionsAndBindings$|TestInlineNonIntegerPrimaryKeySchema$|TestInvalidUTF8TextOperations$|TestRealTextBaseline$|TestHexadecimalNumericSeparators$|TestLikeEscapeNULAndLimit$|TestExtensionGrammar$|TestIndexBinaryCollation$|TestSQLExpressionFeatures|TestExpressionReview|TestOrdinaryIndex(Storage|RowID|Prefix|Budgets|Transactions|Concurrent|Slot)|TestOrdinaryIndexGramsANNPrecedenceAndExactVector$|TestVectorSQLRankShapesNullOffsetAndTies$|TestVectorSQLBoundedHeapAgainstGeneralSort$|TestTypedANNHNSWAllMetricsPersistentSQLAndNative$) -count=1
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.088s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	15.175s

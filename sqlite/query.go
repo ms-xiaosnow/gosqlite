@@ -146,6 +146,9 @@ func affinity(typ string) string {
 }
 
 func (d *DB) plan(ctx context.Context, reader btree.PageReader, sel *sqlast.Select, params []any) (*Rows, error) {
+	if sel.Relation != nil {
+		return d.planRelational(ctx, reader, sel, params)
+	}
 	t, err := d.table(ctx, reader, sel)
 	if err != nil {
 		return nil, err
@@ -188,6 +191,12 @@ func (d *DB) plan(ctx context.Context, reader btree.PageReader, sel *sqlast.Sele
 			r.aliases[key] = i
 		}
 	}
+	// TRUE/FALSE remain fallback names after physical binding. Resolve result
+	// aliases only in the clauses where SQLite permits them, never projections.
+	sel.Where = bindBooleanAliases(sel.Where, r.aliases)
+	for i := range sel.OrderBy {
+		sel.OrderBy[i].Expr = bindBooleanAliases(sel.OrderBy[i].Expr, r.aliases)
+	}
 	for _, expr := range r.exprs {
 		if err := validate(expr, t, nil); err != nil {
 			return nil, err
@@ -205,8 +214,8 @@ func (d *DB) plan(ctx context.Context, reader btree.PageReader, sel *sqlast.Sele
 			r.order = append(r.order, orderExpr{column: int(ordinal) - 1, desc: o.Desc, nulls: o.Nulls})
 			continue
 		}
-		if c, ok := o.Expr.(*sqlast.Column); ok && c.Table == "" {
-			if resultIndex, found := r.aliases[fold(c.Name)]; found {
+		if name, ok := orderResultName(o.Expr); ok {
+			if resultIndex, found := r.aliases[fold(name)]; found {
 				r.order = append(r.order, orderExpr{column: resultIndex, desc: o.Desc, nulls: o.Nulls})
 				continue
 			}
@@ -281,6 +290,9 @@ func (d *DB) plan(ctx context.Context, reader btree.PageReader, sel *sqlast.Sele
 func integerConstant(e sqlast.Expr) (int64, bool) {
 	switch x := e.(type) {
 	case *sqlast.Literal:
+		if x.Boolean {
+			return 0, false
+		}
 		v, ok := x.Value.(int64)
 		return v, ok
 	case *sqlast.Unary:
@@ -300,6 +312,9 @@ func integerConstant(e sqlast.Expr) (int64, bool) {
 func limitValue(ctx context.Context, expr sqlast.Expr, params []any) (int64, error) {
 	value, err := sqlast.Eval(expr, &sqlast.EvalContext{Context: ctx, Params: params})
 	if err != nil {
+		return 0, err
+	}
+	if err := sqlast.PreflightValueContext(ctx, "LIMIT", value); err != nil {
 		return 0, err
 	}
 	switch v := value.(type) {
@@ -323,30 +338,31 @@ func limitValue(ctx context.Context, expr sqlast.Expr, params []any) (int64, err
 }
 
 func validate(e sqlast.Expr, t *table, aliases map[string]int) error {
-	return sqlast.Walk(e, func(e sqlast.Expr) error {
-		switch x := e.(type) {
-		case *sqlast.Literal, *sqlast.Parameter, *sqlast.Unary, *sqlast.Binary, *sqlast.Like, *sqlast.Case, *sqlast.Cast, *sqlast.Between, *sqlast.InList:
-			return nil
-		case *sqlast.Column:
-			if x.Table == "" && aliases != nil {
-				if _, ok := aliases[fold(x.Name)]; ok {
-					return nil
-				}
-			}
-			_, err := t.column(x.Table, x.Name)
-			return err
-		case *sqlast.Call:
-			if fold(x.Name) == "grams13_match" {
-				if len(x.Args) != 3 {
-					return fmt.Errorf("wrong number of arguments to grams13_match()")
-				}
+	return sqlast.Walk(e, func(e sqlast.Expr) error { return validateNode(e, t, aliases) })
+}
+func validateNode(e sqlast.Expr, t *table, aliases map[string]int) error {
+	switch x := e.(type) {
+	case *sqlast.Literal, *sqlast.Parameter, *sqlast.Unary, *sqlast.Binary, *sqlast.Like, *sqlast.Case, *sqlast.Cast, *sqlast.Between, *sqlast.InList:
+		return nil
+	case *sqlast.Column:
+		if x.Table == "" && aliases != nil {
+			if _, ok := aliases[fold(x.Name)]; ok {
 				return nil
 			}
-			return sqlast.ValidateFunction(x.Name, len(x.Args))
-		default:
-			return fmt.Errorf("%w: expression context", ErrUnsupported)
 		}
-	})
+		_, err := t.column(x.Table, x.Name)
+		return err
+	case *sqlast.Call:
+		if fold(x.Name) == "grams13_match" {
+			if len(x.Args) != 3 {
+				return fmt.Errorf("wrong number of arguments to grams13_match()")
+			}
+			return nil
+		}
+		return sqlast.ValidateFunction(x.Name, len(x.Args))
+	default:
+		return fmt.Errorf("%w: expression context", ErrUnsupported)
+	}
 }
 
 func columnLabel(t *table, c *sqlast.Column) string {
@@ -383,6 +399,26 @@ func bindBooleans(e sqlast.Expr, t *table) sqlast.Expr {
 	})
 }
 
+func bindBooleanAliases(e sqlast.Expr, aliases map[string]int) sqlast.Expr {
+	if _, yes := aliases["true"]; !yes {
+		if _, yes := aliases["false"]; !yes {
+			return e
+		}
+	}
+	return sqlast.Rewrite(e, func(e sqlast.Expr) sqlast.Expr {
+		if lit, ok := e.(*sqlast.Literal); ok && lit.Boolean {
+			name := "false"
+			if lit.Value == int64(1) {
+				name = "true"
+			}
+			if _, ok := aliases[name]; ok {
+				return &sqlast.Column{Name: name}
+			}
+		}
+		return e
+	})
+}
+
 func isConstantDefault(e sqlast.Expr) bool {
 	switch x := e.(type) {
 	case *sqlast.Literal:
@@ -391,4 +427,18 @@ func isConstantDefault(e sqlast.Expr) bool {
 		return (x.Op == "+" || x.Op == "-") && isConstantDefault(x.Expr)
 	}
 	return false
+}
+
+// TRUE/FALSE are identifier fallbacks, never integer ORDER BY ordinals.
+func orderResultName(e sqlast.Expr) (string, bool) {
+	if c, ok := e.(*sqlast.Column); ok && c.Table == "" {
+		return c.Name, true
+	}
+	if v, ok := e.(*sqlast.Literal); ok && v.Boolean {
+		if v.Value == int64(1) {
+			return "true", true
+		}
+		return "false", true
+	}
+	return "", false
 }

@@ -1,0 +1,4 @@
+SOURCE=/workspace/scratch/5e06a74e5f65/durable-restart/relational-independent-review/source-final-v3
+4dd07287c3687ee466b51b7d6c343261aeb997ff81c01f75bdfe0188b85a9397  docs/evidence/relational-source-sha256.txt
+Ordinary test source-reference guard PASS; behavioral review is still required.
+Behavior audit: Static vet only for changed native packages; no database workflows executed.

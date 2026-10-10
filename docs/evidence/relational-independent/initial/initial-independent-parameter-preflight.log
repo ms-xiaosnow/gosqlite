@@ -1,0 +1,9 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+Behavior audit: BLOB input allocated in memory before measurement; intact native fixture; query memory quota refusal only; no storage or native-failure injection.
+=== RUN   TestIndependentRelationalParameterClonePreflight
+    relational_independent_budget_test.go:81: engine allocation before MaxBytes=1 rejection: 8403896 for caller-owned input 8388608 bytes
+    relational_independent_budget_test.go:82: BLOB parameter clone happened before relational memory preflight
+--- FAIL: TestIndependentRelationalParameterClonePreflight (0.01s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/sqlite	0.017s
+FAIL

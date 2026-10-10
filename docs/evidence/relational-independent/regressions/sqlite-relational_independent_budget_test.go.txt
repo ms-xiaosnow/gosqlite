@@ -1,0 +1,89 @@
+package sqlite
+
+import (
+	"context"
+	"errors"
+	"runtime"
+	"strings"
+	"testing"
+)
+
+// Descriptor-free laws: scalar allocation, retained-result lifetime and sort
+// comparison accounting only. No storage, I/O error injection or native calls.
+func TestIndependentRelationalSortByteWork(t *testing.T) {
+	b, err := newRelationalBudget(WithRelationalLimits(context.Background(), RelationalLimits{MaxWork: 100}), 1<<20)
+	if err != nil {
+		t.Fatal(err)
+	}
+	r := &Rows{relational: b, order: []orderExpr{{column: 0}}}
+	a := strings.Repeat("x", 10000) + "a"
+	c := strings.Repeat("x", 10000) + "b"
+	cmp, err := r.compareRelationalRows(resultRow{keys: []any{a}}, resultRow{keys: []any{c}})
+	t.Logf("comparison=%d err=%v work=%d for two 10001-byte distinct common-prefix values", cmp, err, b.stats.Work)
+	if err == nil {
+		t.Error("sort inspected 10000-byte prefixes without exhausting a 100-unit byte-work quota")
+	}
+}
+
+type reviewLifetimeSource struct {
+	rows *Rows
+	t    *testing.T
+}
+
+func (s *reviewLifetimeSource) Next() (int64, []any, error) {
+	if s.rows.current != nil && s.rows.relational.resultBytes == 0 {
+		s.t.Error("previous row remains retained in Rows.current after its result reservation was released")
+	}
+	return 0, nil, context.Canceled
+}
+func (*reviewLifetimeSource) Close() error { return nil }
+func TestIndependentRelationalPreviousResultLifetime(t *testing.T) {
+	b, err := newRelationalBudget(context.Background(), 1<<20)
+	if err != nil {
+		t.Fatal(err)
+	}
+	b.resultBytes = 100000
+	b.stats.CurrentBytes = 100000
+	r := &Rows{db: &DB{rows: map[*Rows]struct{}{}}, limit: -1, ctx: context.Background(), relational: b, current: []any{strings.Repeat("a", 100000)}}
+	r.source = &reviewLifetimeSource{r, t}
+	r.Next()
+}
+
+func TestIndependentRelationalPlanningWork(t *testing.T) {
+	db, _ := relationalFixture(t, Options{})
+	// Both expressions are shallow enough for existing parser caps, but binding
+	// substitutes the shared projection tree many times into WHERE validation.
+	expr := "a.id" + strings.Repeat("+1", 90)
+	predicate := "calculated" + strings.Repeat("+calculated", 90)
+	q := "SELECT " + expr + " AS calculated FROM a,b WHERE " + predicate + " LIMIT 0"
+	ctx := WithRelationalLimits(context.Background(), RelationalLimits{MaxWork: 100})
+	rows, err := db.Query(ctx, q)
+	if rows != nil {
+		defer rows.Close()
+		t.Logf("planning returned rows with work=%d for about 16000 substituted expression visits", rows.RelationalStats().Work)
+	}
+	if !errors.Is(err, ErrQueryWorkLimit) {
+		t.Errorf("expanded binding/validation work bypassed quota: %v", err)
+	}
+}
+
+func TestIndependentRelationalParameterClonePreflight(t *testing.T) {
+	db, _ := relationalFixture(t, Options{})
+	value := make([]byte, 8<<20)
+	ctx := WithRelationalLimits(context.Background(), RelationalLimits{MaxBytes: 1})
+	var before, after runtime.MemStats
+	runtime.ReadMemStats(&before)
+	rows, err := db.Query(ctx, "SELECT ? FROM a,b", value)
+	runtime.ReadMemStats(&after)
+	if rows != nil {
+		rows.Close()
+	}
+	if !errors.Is(err, ErrMemoryLimit) {
+		t.Fatalf("expected quota rejection, got %v", err)
+	}
+	delta := after.TotalAlloc - before.TotalAlloc
+	t.Logf("engine allocation before MaxBytes=1 rejection: %d for caller-owned input %d bytes", delta, len(value))
+	if delta >= uint64(len(value)) {
+		t.Error("BLOB parameter clone happened before relational memory preflight")
+	}
+}

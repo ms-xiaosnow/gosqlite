@@ -1,0 +1,30 @@
+Shared-WAL successful-close exact Library restored evidence
+Exact commit69008bf658611318154a112178913c693b679a2b, no future SQL/migration changes.
+Sat Oct 10 18:17:11 UTC 2026
+go version go1.27.2 linux/amd64
+Production environment: GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off CGO_ENABLED=0; shared ../go-cache and ../go-path.
+Behavioral audit: new negative laws are descriptor-free managed-owner callbacks, fake sessions and real database/sql pooling over memory-only connections. Existing failed-open/VFS negative laws are memory-only. Native selected tests create intact ordinary files, acquire/release normal locks and mappings, commit/rollback, read snapshots, encounter ordinary BUSY, cancel before work, close/reopen. No injected native I/O/close/unmap/lock/Sync failure, corruption/tamper/wrong key, missing selected files, namespace substitution, kill/exit/crash or hot-recovery execution.
+go run ./internal/testscope && go test ./internal/vfs ./internal/walindex ./internal/pager ./sqlite ./driver -run \^\(TestCloseStatusMemory.\*\|TestSharedCloseCleanupMemory.\*\|TestCloseCleanup.\*\|TestSharedCloseCleanupConnectorCancellationAndOrdinaryDisposal\|TestSharedOpenCleanup.\*\|TestOpenCleanup.\*\|TestCleanupOwnersMemory.\*\|TestOwnershipReviewPartialRetirementRetainsAllLocks\|TestManagedMappingLogicalSpanAndClose\|TestDMSNormalLifecycleAndHeaderPublication\|TestRealHashBlocksSnapshotAndCleanup\|TestSharedWALSnapshotsPromotionAndCheckpoint\|TestSharedWALConcurrentReadersAndWriter\|TestSharedWALSnapshotsAndWriterContention\|TestSharedWALPooledConcurrentWrites\)\$ -count=1
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.007s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	0.130s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.089s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.298s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.384s
+Race tooling only: CGO_ENABLED=1; production dependency remains pure Go.
+Same behavioral audit repeated against the same unchanged scoped source, only race instrumentation differs.
+CGO_ENABLED=0 go run ./internal/testscope && CGO_ENABLED=1 go test -race ./internal/vfs ./internal/walindex ./internal/pager ./sqlite ./driver -run \^\(TestCloseStatusMemory.\*\|TestSharedCloseCleanupMemory.\*\|TestCloseCleanup.\*\|TestSharedCloseCleanupConnectorCancellationAndOrdinaryDisposal\|TestSharedOpenCleanup.\*\|TestOpenCleanup.\*\|TestCleanupOwnersMemory.\*\|TestOwnershipReviewPartialRetirementRetainsAllLocks\|TestManagedMappingLogicalSpanAndClose\|TestDMSNormalLifecycleAndHeaderPublication\|TestRealHashBlocksSnapshotAndCleanup\|TestSharedWALSnapshotsPromotionAndCheckpoint\|TestSharedWALConcurrentReadersAndWriter\|TestSharedWALSnapshotsAndWriterContention\|TestSharedWALPooledConcurrentWrites\)\$ -count=1
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	1.018s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	2.390s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.301s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	1.311s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.909s
+CGO_ENABLED=0 go vet ./internal/vfs ./internal/walindex ./internal/pager ./sqlite ./driver
+CGO_ENABLED=0 go build ./internal/vfs ./internal/walindex ./internal/pager ./sqlite ./driver
+CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build ./internal/vfs ./internal/walindex ./internal/pager ./sqlite ./driver (compile only; native runtime NOT_RUN)
+CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build ./internal/vfs ./internal/walindex ./internal/pager ./sqlite ./driver (compile only; native runtime NOT_RUN)
+CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build ./internal/vfs ./internal/walindex ./internal/pager ./sqlite ./driver (compile only; native runtime NOT_RUN)
+all modules verified
+2026-10-10T18:17:47Z
+SHARED CLOSE EXACT RESTORED SCOPED CHECKS PASS

@@ -1,0 +1,11 @@
+--- a/sqlite/sqlite.go
++++ b/sqlite/sqlite.go
+@@ -426,7 +426,7 @@
+ 	if !ok {
+ 		return nil, wrap("query", ErrReadOnly)
+ 	}
+-	params, err := bind(stmt, args)
++	ctx, params, err := d.bindSelect(ctx, sel, args)
+ 	if err != nil {
+ 		return nil, wrap("bind", err)
+ 	}

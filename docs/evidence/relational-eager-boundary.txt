@@ -1,0 +1,19 @@
+2026-10-10T18:28:37Z
+Ordinary test source-reference guard PASS; behavioral review is still required.
+FIXTURE /tmp/relational-eager-343729115/ordinary.db
+native SQL: SELECT a.x FROM a,b WHERE 0 AND abs(-9223372036854775808)
+rows=0 error=sqlite next: integer overflow
+native SQL: SELECT a.x FROM a JOIN b ON 0 AND abs(-9223372036854775808)
+rows=0 error=sqlite next: integer overflow
+native SQL: SELECT a.x FROM a,b WHERE 1 OR abs(-9223372036854775808)
+rows=0 error=sqlite next: integer overflow
+SQLite 3.54.0 SQL: SELECT a.x FROM a,b WHERE 0 AND abs(-9223372036854775808)
+'x'
+status=0
+SQLite 3.54.0 SQL: SELECT a.x FROM a JOIN b ON 0 AND abs(-9223372036854775808)
+'x'
+status=0
+SQLite 3.54.0 SQL: SELECT a.x FROM a,b WHERE 1 OR abs(-9223372036854775808)
+'x'
+1
+status=0

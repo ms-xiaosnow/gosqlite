@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -uo pipefail
+ROOT=/workspace/scratch/5e06a74e5f65/durable-restart
+export GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off CGO_ENABLED=0 GOFLAGS=-buildvcs=false
+export GOCACHE="$ROOT/go-cache" GOPATH="$ROOT/go-path"
+export SQLITE_ORACLE="$ROOT/toolchains/sqlite-build-3540000/sqlite3"
+GO="$ROOT/toolchains/go1.27.2/bin/go"
+SOURCE=${1:?final immutable source path}
+EVIDENCE=${2:?evidence path}
+mkdir -p "$EVIDENCE"
+cd "$SOURCE"
+run(){
+ local name=$1 audit=$2;shift 2
+ { printf 'SOURCE=%s\n' "$SOURCE";sha256sum docs/evidence/relational-source-sha256.txt;
+ "$GO" run ./internal/testscope && printf 'Behavior audit: %s\n' "$audit" && "$@";
+ } > "$EVIDENCE/$name.log" 2>&1
+ local code=$?; echo "$code" > "$EVIDENCE/$name.exit"; printf '%s exit=%s\n' "$name" "$code"
+}
+run scoped-unit 'Only named new relational tests, review budget laws, and B-tree parse allocation laws. Intact native SQL fixtures and normal snapshot/transaction/BUSY/cancel/close/reopen/checkpoint; pure-memory parser/math/budget tests. No manual tags or physical-negative tests.' "$GO" test ./internal/sql ./internal/btree ./sqlite ./driver -run '^Test(Relational|DriverRelational|IndependentRelational)' -count=1 -v
+run exact-oracle 'Only relational pinned-oracle suites and independent seeded differential queries, plus driver relational ordinary tests. Official SQLite version/source identity enforced; oracle read/write only intact fixtures, process completes normally. No crash, tamper, wrong-key, missing-file, namespace replacement, native failure, permission or recovery behavior.' "$GO" test -tags=oracle ./internal/testkit ./driver -run '^Test(RelationalOracle|DriverRelational|IndependentRelational)' -count=1 -v
+run legacy-regressions 'Narrow audited parser/scalar-expression/index/rank tests; parser and arithmetic negatives are memory-only; native fixtures use ordinary statements/normal transactions and concurrency only.' "$GO" test ./internal/sql ./sqlite -run '^(TestLexer$|TestParseSelect$|TestParseCreateAndDML$|TestRejectUnsupported$|TestResourceBounds$|TestValuesAndThreeValuedLogic$|TestAffinityAndIntegerComparison$|TestFunctionsAndBindings$|TestInlineNonIntegerPrimaryKeySchema$|TestInvalidUTF8TextOperations$|TestRealTextBaseline$|TestHexadecimalNumericSeparators$|TestLikeEscapeNULAndLimit$|TestExtensionGrammar$|TestIndexBinaryCollation$|TestSQLExpressionFeatures|TestExpressionReview|TestOrdinaryIndex(Storage|RowID|Prefix|Budgets|Transactions|Concurrent|Slot)|TestVectorSQLRankShapesNullOffsetAndTies$|TestVectorSQLBoundedHeapAgainstGeneralSort$)' -count=1 -v
+run scoped-race 'Same audited named new native relational/parser/memory/driver tests under race instrumentation. CGO_ENABLED=1 is solely required by Go race tooling, separate from CGO0 production proof.' env CGO_ENABLED=1 "$GO" test -race ./internal/sql ./internal/btree ./sqlite ./driver -run '^Test(Relational|DriverRelational|IndependentRelational)' -count=1 -v
+run scoped-vet 'Static vet only for changed native packages; no database workflows executed.' "$GO" vet ./internal/sql ./internal/btree ./sqlite ./driver
+run cgo0-build 'Compile production packages only with CGO_ENABLED=0; no test/database execution.' "$GO" build ./...
+run btree-parser-regressions 'Checked-in intact readonly fixtures at512/4096/65536-byte page sizes, schema/interior/overflow reads, normal cursor cancellation and early close; malformed-page parser tests mutate descriptor-free memory only.' "$GO" test ./internal/btree -run '^(TestOracleRowsAllPageSizes|TestOracleIntegerWidthsAndSchema|TestOracleInteriorSchemaAndOverflow|TestCursorCancellationAndEarlyStop|TestMalformedPageParser)$' -count=1 -v
+sha256sum -c docs/evidence/relational-source-sha256.txt > "$EVIDENCE/final-source-verify.log"
+sha256sum "$GO" "$SQLITE_ORACLE" > "$EVIDENCE/toolchain-sha256.txt"
+"$GO" version > "$EVIDENCE/go-version.txt"
+"$SQLITE_ORACLE" -batch -bail :memory: 'SELECT sqlite_version(),sqlite_source_id();' > "$EVIDENCE/sqlite-version.txt"

@@ -1,0 +1,31 @@
+39b9947b3b8cd8fe770e68471bd473d8f4d4a756968ac045242afed729de37ae  docs/evidence/relational-source-sha256.txt
+Ordinary test source-reference guard PASS; behavioral review is still required.
+Behavior audit: final reviewer regression source against initial implementation only; pure evaluator/budget/callback laws and intact SQL fixture with memory quota refusal. Expected failures are preserved, not acceptance.
+=== RUN   TestIndependentRelationalTruthByteWork
+    relational_independent_budget_test.go:28: result=1 err=<nil> work=3 allocation=0
+    relational_independent_budget_test.go:30: truth conversion scanned a 10001-byte value under a 100-unit work cap
+--- FAIL: TestIndependentRelationalTruthByteWork (0.00s)
+=== RUN   TestIndependentRelationalEscapeByteWork
+    relational_independent_budget_test.go:38: result=1 err=<nil> work=5 allocation=128 escapeBytes=10002
+    relational_independent_budget_test.go:40: ESCAPE conversion copied/scanned a 10002-byte BLOB under a 100-unit work cap
+--- FAIL: TestIndependentRelationalEscapeByteWork (0.00s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/sql	0.007s
+=== RUN   TestIndependentRelationalSortByteWork
+    relational_independent_budget_test.go:22: comparison=-1 err=<nil> work=1 for two 10001-byte distinct common-prefix values
+    relational_independent_budget_test.go:24: sort inspected 10000-byte prefixes without exhausting a 100-unit byte-work quota
+--- FAIL: TestIndependentRelationalSortByteWork (0.00s)
+=== RUN   TestIndependentRelationalPreviousResultLifetime
+    relational_independent_budget_test.go:35: previous row remains retained in Rows.current after its result reservation was released
+--- FAIL: TestIndependentRelationalPreviousResultLifetime (0.00s)
+=== RUN   TestIndependentRelationalPlanningWork
+    relational_independent_budget_test.go:63: planning returned rows with work=3 for about 16000 substituted expression visits
+    relational_independent_budget_test.go:66: expanded binding/validation work bypassed quota: <nil>
+--- FAIL: TestIndependentRelationalPlanningWork (0.00s)
+=== RUN   TestIndependentRelationalParameterClonePreflight
+    relational_independent_budget_test.go:85: engine allocation before MaxBytes=1 rejection: 8398688 for caller-owned input 8388608 bytes
+    relational_independent_budget_test.go:87: BLOB parameter clone happened before relational memory preflight
+--- FAIL: TestIndependentRelationalParameterClonePreflight (0.01s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/sqlite	0.013s
+FAIL

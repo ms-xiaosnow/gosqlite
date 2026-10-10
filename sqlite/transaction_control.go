@@ -73,7 +73,7 @@ func (t *Tx) ensureSnapshotLocked(ctx context.Context) error {
 }
 
 func selectReadsDatabase(sel *sqlast.Select) bool {
-	if sel.From != "" {
+	if sel.From != "" || sel.Relation != nil {
 		return true
 	}
 	reads := false

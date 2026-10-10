@@ -215,9 +215,20 @@ func TestSchemaAndWildcard(t *testing.T) {
 		t.Fatal("Columns leaked slice")
 	}
 }
+
+// The unqualified JOIN form was formerly rejected before the relational slice.
+// Keep a positive regression while USING remains an explicit unsupported form.
+func TestRelationalReadonlyFixtureJoin(t *testing.T) {
+	db := openFixture(t, sqlite.Options{})
+	got := query(t, db, "SELECT id FROM samples JOIN numbers WHERE id=1 LIMIT 1")
+	if want := [][]any{{int64(1)}}; !reflect.DeepEqual(got, want) {
+		t.Fatalf("got %#v want %#v", got, want)
+	}
+}
+
 func TestRejectionsAndCodes(t *testing.T) {
 	db := openFixture(t, sqlite.Options{})
-	for _, text := range []string{"SELECT absent FROM samples WHERE 0", "SELECT absent() FROM samples WHERE 0", "SELECT length() FROM samples WHERE 0", "SELECT count(*) FROM samples", "SELECT id FROM samples ORDER BY 0", "SELECT id FROM samples ORDER BY -1", "SELECT id FROM samples LIMIT NULL", "SELECT id FROM samples LIMIT 1.5", "SELECT *", "SELECT samples.id FROM samples AS s", "SELECT ?", "SELECT 1; SELECT 2", "SELECT id FROM samples JOIN numbers"} {
+	for _, text := range []string{"SELECT absent FROM samples WHERE 0", "SELECT absent() FROM samples WHERE 0", "SELECT length() FROM samples WHERE 0", "SELECT count(*) FROM samples", "SELECT id FROM samples ORDER BY 0", "SELECT id FROM samples ORDER BY -1", "SELECT id FROM samples LIMIT NULL", "SELECT id FROM samples LIMIT 1.5", "SELECT *", "SELECT samples.id FROM samples AS s", "SELECT ?", "SELECT 1; SELECT 2", "SELECT id FROM samples JOIN numbers USING(id)"} {
 		t.Run(text, func(t *testing.T) {
 			rows, err := db.Query(context.Background(), text)
 			if err == nil {

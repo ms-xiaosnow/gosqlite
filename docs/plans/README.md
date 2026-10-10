@@ -29,10 +29,11 @@ remain code work; unsupported is a safe interim behavior, not removal from goal.
   inequalities, covering access, reverse/order use and statistics only with
   proven residual/error semantics, reduced work and truthful diagnostics.
 - CASE/CAST/BETWEEN/IN-list scalar nodes, SELECT ALL and explicit NULL ordering
-  now exist with immutable boolean binding. Introduce the full scoped relational
-  binding model and composable bounded pull operators before
-  JOIN, grouping/aggregates, subqueries, compound SELECT, CTE and windows. All
-  operators share one statement snapshot and resource budget.
+  now exist with immutable boolean binding. Scoped named-table INNER/CROSS/comma/LEFT
+  joins now use bounded composable pull operators and one statement snapshot.
+  Correct inherited predicate AND/OR error suppression, then extend remaining
+  JOIN forms, grouping/aggregates, subqueries, compound SELECT, CTE and windows.
+  Preserve binding, lifetime and shared work/memory budgets across operators.
 - Unify mutation outcomes before general constraints, conflict policies, UPSERT,
   foreign keys and triggers. SQLite FAIL can preserve earlier row changes in the
   statement; whole-statement rollback on every error is not compatible.

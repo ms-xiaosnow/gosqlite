@@ -326,5 +326,19 @@
     "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38074127283",
     "remote_ci_status": "COMPLETED SUCCESS for exact SHA, updated2026-10-10T18:14:13Z, observed18:14:41Z.",
     "open_gates": "Broad SQL/planner/recovery/native lifetime and migration code remain open. Sparse IVF/IVF L1/Jaccard unsupported; nativeOS, physical recovery and independent M10 qualification remain unavailable. Exact dense v1 fixtures are retained; approximation is not exact recall."
+  },
+  {
+    "stage": "Native shared-WAL successful-session close retirement",
+    "remote_commit": "69008bf658611318154a112178913c693b679a2b",
+    "local_commit": "69008bf658611318154a112178913c693b679a2b",
+    "tree": "fd3ab616a0aa5c5f205ca74377ecd6bcc17757d8",
+    "bundle_sha256": "486b4b52351745ebc62fbb10cd2ee74bd49be40a4bcede14020f252b27c1c122",
+    "bundle_bytes": 1907327,
+    "library_file_id": "libfile_57fbae91a7d88191ae55980b2e0eb6bb",
+    "library_version": 0,
+    "verified": "Expected-SHA main readback, exact local commit mirror, full-history bundle byte-identical Library readback, clean clone/fsck and original goal hash verified2026-10-10T18:17:10Z. Sixteen-path independent source review/focused unit/race/vet/build/three target compilation passed. Lead sourcebc3ddb29edab8a1d8e9ab599600dac8e6d114121 full CGO0 unit/vet/build passed18:13:25Z; full race/oracle remains running separately. Exact restored scoped memory/ordinary shared lifecycle unit/race, scoped and full vet/build, three target crossbuilds, modules and clean tree passed18:17:47Z. Full frozen-source bc3ddb29edab8a1d8e9ab599600dac8e6d114121 aggregate completed exit0 at2026-10-10T18:25:56Z: all CGO0 unit/vet/build, separate full CGO1 race (SQLite406.588s), full pinned ordinary SQLite oracle (testkit301.848s/sqlite121.838s), four target crossbuilds, modules and unchanged full source inventory. This is source-tree evidence distinct from exact restored focused commit checks.",
+    "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38075132617",
+    "remote_ci_status": "COMPLETED SUCCESS for exact SHA, updated2026-10-10T18:24:50Z, observed18:25:32Z.",
+    "open_gates": "1024 live/in-flight/pending native shared-WAL admission is an explicit new availability limit, separate from64 failed-open groups. Rollback Reader/Tx, exclusive-WAL, encrypted Store/copy and other constructor ownership gaps remain code work. Native failure/runtime and full M3/M10 acceptance remain NOT_RUN."
   }
 ]

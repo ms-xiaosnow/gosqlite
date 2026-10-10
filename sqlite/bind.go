@@ -10,9 +10,21 @@ import (
 )
 
 func bind(stmt sqlast.Statement, args []any) ([]any, error) {
+	return bindBudget(stmt, args, nil)
+}
+
+func bindBudget(stmt sqlast.Statement, args []any, budget *relationalBudget) ([]any, error) {
 	count := stmt.ParameterCount()
 	if count > 32766 {
 		return nil, fmt.Errorf("too many parameter slots")
+	}
+	if budget != nil {
+		if err := budget.reserve(int64(count)*17 + 128); err != nil {
+			return nil, err
+		}
+		if err := budget.step(int64(count)); err != nil {
+			return nil, err
+		}
 	}
 	params := make([]any, count)
 	bound := make([]bool, count)
@@ -24,7 +36,7 @@ func bind(stmt sqlast.Statement, args []any) ([]any, error) {
 			name = named.Name
 			value = named.Value
 		}
-		v, err := parameterValue(value)
+		v, err := parameterValueBudget(value, budget)
 		if err != nil {
 			return nil, fmt.Errorf("parameter %d: %w", ordinal+1, err)
 		}
@@ -41,6 +53,11 @@ func bind(stmt sqlast.Statement, args []any) ([]any, error) {
 		}
 		found := false
 		for _, p := range used {
+			if budget != nil {
+				if err := budget.step(1 + int64(len(p.Name)+len(name))); err != nil {
+					return nil, err
+				}
+			}
 			if p.Name != "" && p.Name[0] != '?' && p.Name[1:] == name {
 				if bound[p.Index-1] {
 					return nil, fmt.Errorf("parameter slot %d bound twice", p.Index)
@@ -65,9 +82,30 @@ func bind(stmt sqlast.Statement, args []any) ([]any, error) {
 }
 
 func parameterValue(v any) (any, error) {
+	return parameterValueBudget(v, nil)
+}
+
+func parameterValueBudget(v any, budget *relationalBudget) (any, error) {
 	value, err := driver.DefaultParameterConverter.ConvertValue(v)
 	if err != nil {
 		return nil, err
+	}
+	// Converter/Valuer callbacks are caller code. Admit the returned value
+	// before this engine retains its bytes or clones a BLOB.
+	if budget != nil {
+		cost := int64(32)
+		switch x := value.(type) {
+		case string:
+			cost += int64(len(x))
+		case []byte:
+			cost += int64(len(x))
+		}
+		if err := budget.step(cost); err != nil {
+			return nil, err
+		}
+		if err := budget.reserve(cost); err != nil {
+			return nil, err
+		}
 	}
 	switch x := value.(type) {
 	case nil, int64, string:

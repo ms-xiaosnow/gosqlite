@@ -1,0 +1,86 @@
+Pure-memory bounded fuzz on exact restored69008bf658611318154a112178913c693b679a2b; no physical database workload.
+Behavioral source review: targets only parse canonical typed config, decode/reencode typed byte values, or tokenize memory strings and compare necessary grams. No DB/files/native fault/process-crash workflows invoked.
+2026-10-10T18:20:06Z
+Ordinary test source-reference guard PASS; behavioral review is still required.
+CGO_ENABLED=0 GOMAXPROCS=2 go test ./extension/vector/ann -run '^$' -fuzz '^FuzzTypedConfigCanonical$' -fuzztime=60s -parallel=2
+fuzz: elapsed: 0s, gathering baseline coverage: 0/3 completed
+fuzz: elapsed: 0s, gathering baseline coverage: 3/3 completed, now fuzzing with 2 workers
+fuzz: elapsed: 3s, execs: 7 (2/sec), new interesting: 0 (total: 3)
+fuzz: elapsed: 6s, execs: 7 (0/sec), new interesting: 0 (total: 3)
+fuzz: elapsed: 9s, execs: 7 (0/sec), new interesting: 0 (total: 3)
+fuzz: elapsed: 12s, execs: 265238 (88407/sec), new interesting: 2 (total: 5)
+fuzz: elapsed: 15s, execs: 265238 (0/sec), new interesting: 2 (total: 5)
+fuzz: elapsed: 18s, execs: 401225 (45269/sec), new interesting: 3 (total: 6)
+fuzz: elapsed: 21s, execs: 533065 (44005/sec), new interesting: 4 (total: 7)
+fuzz: elapsed: 24s, execs: 533065 (0/sec), new interesting: 4 (total: 7)
+fuzz: elapsed: 27s, execs: 533065 (0/sec), new interesting: 4 (total: 7)
+fuzz: elapsed: 30s, execs: 668008 (44990/sec), new interesting: 5 (total: 8)
+fuzz: elapsed: 33s, execs: 774500 (35494/sec), new interesting: 6 (total: 9)
+fuzz: elapsed: 36s, execs: 774500 (0/sec), new interesting: 6 (total: 9)
+fuzz: elapsed: 39s, execs: 774500 (0/sec), new interesting: 6 (total: 9)
+fuzz: elapsed: 42s, execs: 774500 (0/sec), new interesting: 6 (total: 9)
+fuzz: elapsed: 45s, execs: 1042745 (89381/sec), new interesting: 10 (total: 13)
+fuzz: elapsed: 48s, execs: 1042745 (0/sec), new interesting: 10 (total: 13)
+fuzz: elapsed: 51s, execs: 1142904 (33385/sec), new interesting: 14 (total: 17)
+fuzz: elapsed: 54s, execs: 1280989 (46031/sec), new interesting: 15 (total: 18)
+fuzz: elapsed: 57s, execs: 1280989 (0/sec), new interesting: 15 (total: 18)
+fuzz: elapsed: 1m0s, execs: 1456682 (58563/sec), new interesting: 19 (total: 22)
+fuzz: elapsed: 1m1s, execs: 1456682 (0/sec), new interesting: 19 (total: 22)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector/ann	61.025s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+CGO_ENABLED=0 GOMAXPROCS=2 go test ./extension/vector/ann -run '^$' -fuzz '^FuzzTypedValueCodec$' -fuzztime=60s -parallel=2
+fuzz: elapsed: 0s, gathering baseline coverage: 0/24 completed
+fuzz: elapsed: 0s, gathering baseline coverage: 24/24 completed, now fuzzing with 2 workers
+fuzz: elapsed: 3s, execs: 85813 (28594/sec), new interesting: 0 (total: 24)
+fuzz: elapsed: 6s, execs: 169997 (28060/sec), new interesting: 1 (total: 25)
+fuzz: elapsed: 9s, execs: 257821 (29282/sec), new interesting: 1 (total: 25)
+fuzz: elapsed: 12s, execs: 346769 (29559/sec), new interesting: 1 (total: 25)
+fuzz: elapsed: 15s, execs: 432925 (28805/sec), new interesting: 1 (total: 25)
+fuzz: elapsed: 18s, execs: 520224 (29100/sec), new interesting: 1 (total: 25)
+fuzz: elapsed: 21s, execs: 603708 (27829/sec), new interesting: 1 (total: 25)
+fuzz: elapsed: 24s, execs: 695225 (30509/sec), new interesting: 1 (total: 25)
+fuzz: elapsed: 27s, execs: 780988 (28586/sec), new interesting: 1 (total: 25)
+fuzz: elapsed: 30s, execs: 874295 (31105/sec), new interesting: 1 (total: 25)
+fuzz: elapsed: 33s, execs: 965764 (30481/sec), new interesting: 1 (total: 25)
+fuzz: elapsed: 36s, execs: 1054317 (29508/sec), new interesting: 1 (total: 25)
+fuzz: elapsed: 39s, execs: 1138738 (28153/sec), new interesting: 1 (total: 25)
+fuzz: elapsed: 42s, execs: 1225359 (28875/sec), new interesting: 1 (total: 25)
+fuzz: elapsed: 45s, execs: 1311547 (28713/sec), new interesting: 1 (total: 25)
+fuzz: elapsed: 48s, execs: 1385061 (24517/sec), new interesting: 1 (total: 25)
+fuzz: elapsed: 51s, execs: 1466204 (27052/sec), new interesting: 1 (total: 25)
+fuzz: elapsed: 54s, execs: 1551101 (28289/sec), new interesting: 2 (total: 26)
+fuzz: elapsed: 57s, execs: 1634727 (27866/sec), new interesting: 2 (total: 26)
+fuzz: elapsed: 1m0s, execs: 1724094 (29796/sec), new interesting: 2 (total: 26)
+fuzz: elapsed: 1m0s, execs: 1724094 (0/sec), new interesting: 2 (total: 26)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector/ann	60.032s
+Ordinary test source-reference guard PASS; behavioral review is still required.
+CGO_ENABLED=0 GOMAXPROCS=2 go test ./extension/grams13 -run '^$' -fuzz '^FuzzLikeLiteralNoFalseNegatives$' -fuzztime=60s -parallel=2
+fuzz: elapsed: 0s, gathering baseline coverage: 0/59 completed
+fuzz: elapsed: 0s, gathering baseline coverage: 59/59 completed, now fuzzing with 2 workers
+fuzz: elapsed: 3s, execs: 42205 (14066/sec), new interesting: 7 (total: 66)
+fuzz: elapsed: 6s, execs: 100910 (19567/sec), new interesting: 8 (total: 67)
+fuzz: elapsed: 9s, execs: 150698 (16597/sec), new interesting: 8 (total: 67)
+fuzz: elapsed: 12s, execs: 150698 (0/sec), new interesting: 8 (total: 67)
+fuzz: elapsed: 15s, execs: 150698 (0/sec), new interesting: 8 (total: 67)
+fuzz: elapsed: 18s, execs: 150698 (0/sec), new interesting: 8 (total: 67)
+fuzz: elapsed: 21s, execs: 150698 (0/sec), new interesting: 8 (total: 67)
+fuzz: elapsed: 24s, execs: 150698 (0/sec), new interesting: 8 (total: 67)
+fuzz: elapsed: 27s, execs: 150698 (0/sec), new interesting: 8 (total: 67)
+fuzz: elapsed: 30s, execs: 150698 (0/sec), new interesting: 8 (total: 67)
+fuzz: elapsed: 33s, execs: 150698 (0/sec), new interesting: 8 (total: 67)
+fuzz: elapsed: 36s, execs: 150698 (0/sec), new interesting: 8 (total: 67)
+fuzz: elapsed: 39s, execs: 150698 (0/sec), new interesting: 8 (total: 67)
+fuzz: elapsed: 42s, execs: 150698 (0/sec), new interesting: 8 (total: 67)
+fuzz: elapsed: 45s, execs: 150698 (0/sec), new interesting: 8 (total: 67)
+fuzz: elapsed: 48s, execs: 150698 (0/sec), new interesting: 8 (total: 67)
+fuzz: elapsed: 51s, execs: 150698 (0/sec), new interesting: 8 (total: 67)
+fuzz: elapsed: 54s, execs: 150698 (0/sec), new interesting: 8 (total: 67)
+fuzz: elapsed: 57s, execs: 150698 (0/sec), new interesting: 8 (total: 67)
+fuzz: elapsed: 1m0s, execs: 150698 (0/sec), new interesting: 8 (total: 67)
+fuzz: elapsed: 1m1s, execs: 150698 (0/sec), new interesting: 8 (total: 67)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/extension/grams13	61.029s
+2026-10-10T18:23:13Z
+RESUMED MEMORY FUZZ CHECKS PASS

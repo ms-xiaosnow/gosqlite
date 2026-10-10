@@ -28,6 +28,7 @@ type Select struct {
 	Base
 	Columns       []ResultColumn
 	From, Alias   string
+	Relation      Relation // Non-nil for multi-source FROM; legacy leaf fields are preserved.
 	Where         Expr
 	OrderBy       []OrderTerm
 	Limit, Offset Expr

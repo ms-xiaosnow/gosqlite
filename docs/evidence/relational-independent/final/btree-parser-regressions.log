@@ -1,0 +1,34 @@
+SOURCE=/workspace/scratch/5e06a74e5f65/durable-restart/relational-independent-review/source-final-v3
+4dd07287c3687ee466b51b7d6c343261aeb997ff81c01f75bdfe0188b85a9397  docs/evidence/relational-source-sha256.txt
+Ordinary test source-reference guard PASS; behavioral review is still required.
+Behavior audit: Checked-in intact readonly fixtures at512/4096/65536-byte page sizes, schema/interior/overflow reads, normal cursor cancellation and early close; malformed-page parser tests mutate descriptor-free memory only.
+=== RUN   TestOracleRowsAllPageSizes
+=== RUN   TestOracleRowsAllPageSizes/512
+=== RUN   TestOracleRowsAllPageSizes/4096
+=== RUN   TestOracleRowsAllPageSizes/65536
+--- PASS: TestOracleRowsAllPageSizes (0.03s)
+    --- PASS: TestOracleRowsAllPageSizes/512 (0.02s)
+    --- PASS: TestOracleRowsAllPageSizes/4096 (0.00s)
+    --- PASS: TestOracleRowsAllPageSizes/65536 (0.00s)
+=== RUN   TestOracleIntegerWidthsAndSchema
+--- PASS: TestOracleIntegerWidthsAndSchema (0.00s)
+=== RUN   TestCursorCancellationAndEarlyStop
+--- PASS: TestCursorCancellationAndEarlyStop (0.00s)
+=== RUN   TestMalformedPageParser
+=== RUN   TestMalformedPageParser/type
+=== RUN   TestMalformedPageParser/array
+=== RUN   TestMalformedPageParser/content
+=== RUN   TestMalformedPageParser/fragments
+=== RUN   TestMalformedPageParser/cell
+=== RUN   TestMalformedPageParser/free
+--- PASS: TestMalformedPageParser (0.00s)
+    --- PASS: TestMalformedPageParser/type (0.00s)
+    --- PASS: TestMalformedPageParser/array (0.00s)
+    --- PASS: TestMalformedPageParser/content (0.00s)
+    --- PASS: TestMalformedPageParser/fragments (0.00s)
+    --- PASS: TestMalformedPageParser/cell (0.00s)
+    --- PASS: TestMalformedPageParser/free (0.00s)
+=== RUN   TestOracleInteriorSchemaAndOverflow
+--- PASS: TestOracleInteriorSchemaAndOverflow (0.00s)
+PASS
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	0.034s

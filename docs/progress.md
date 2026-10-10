@@ -541,3 +541,56 @@ unit/vet/build18:13:25Z. Full race/oracle is still running at this record, not
 inferred complete. Runtime outside Linux and all restricted native failures stay
 NOT_RUN. Rollback/exclusive-WAL/encrypted constructors and lifecycle loss remain
 actual required code work; no full M3 or release acceptance follows.
+
+Additional bounded pure-memory fuzz ran against exact restored69008bf at
+2026-10-10T18:20:06Z–18:23:13Z: typed-config canonicality1,456,682 executions,
+typed-value codec1,724,094 executions and necessary LIKE grams150,698 executions,
+60 seconds each with two workers, all PASS and unchanged restored Git tree. The
+recorded zero-throughput intervals are preserved; no throughput or coverage
+completeness inference is made. See resume-memory-fuzz.txt. These byte/string
+models invoke no database/native-fault/crash workflow and do not qualify recovery
+or independent security/release gates.
+
+Native shared-close frozen sourcebc3ddb29edab8a1d8e9ab599600dac8e6d114121
+completed full guarded CGO0 unit/vet/build, separate full CGO1 race, full pinned
+ordinary SQLite oracle, four cross-builds, modules and unchanged source inventory
+at2026-10-10T18:25:56Z, exit0. Exact remote commit69008bf CI38075132617 completed
+SUCCESS18:24:50Z. Exact Library-restored focused checks are recorded separately.
+No restricted physical or native non-Linux qualification follows from these passes.
+
+### Scoped relational JOIN execution
+
+Implemented named-rowid-table INNER/CROSS/comma/LEFT pull joins, scoped aliases,
+qualified names/stars, affinity-aware ON, correct null extension and one root
+snapshot/Tx lease. No index/ANN join pushdown or unbounded inner materialization
+is claimed. New per-context work/memory limits charge binding, pre-copy BLOB
+retention, dense page-cell arrays, record reads, scalar coercion, sorting and
+retained rows, with cancellation before allocation admission. Existing public
+Options/QueryPlan/QueryStats layouts and dense/vector disk identities remain.
+
+The 27-path final manifest4dd07287c3687ee466b51b7d6c343261aeb997ff81c01f75bdfe0188b85a9397
+is immutable, reconstructed on69008bf without concurrent encrypted/migration
+changes. Independent review passes seven suites, including604 pinned SQLite
+comparisons, unit/race/vet/build and selected B-tree/legacy regressions. Concrete
+Boolean binding/labels, quota/pre-copy/work and retained-result defects found
+during review were fixed and initial failing evidence retained. The first lead full suite on
+source2f1ab3df86cdf5aaf97143d6ad53d186da836b3f failed because a historical
+negative fixture still expected a now-implemented JOIN to fail. The corrected
+fixture retains all rejection assertions, uses unsupported USING for that
+negative case, and adds an exact positive JOIN result; independent delta review
+and focused tests pass. No production byte changed. The28-path formatted final
+manifest is c64078230751713f951fcc3dd1a71f4470657d2eaf1e18e82035c89b826abb0b,
+source treead73b8d6425cd86d1c15caccb0f858048df63ef9. Final aggregate evidence is
+recorded separately in relational-lead-aggregate.txt. Full CGO0 unit/vet/build
+passed18:39:10Z (SQLite78.121s); full race/oracle continuation remains running
+at this checkpoint. A prior preflight had
+correctly stopped on a changed manifest; no test ran against misattributed bytes.
+All initial failure logs are preserved.
+
+This is PARTIAL SQL work: USING/NATURAL/RIGHT/FULL, derived/parenthesized sources,
+forward ON references, subqueries/aggregates/CTE/compound/windows and index join
+probes remain actual code gaps. Inherited eager binary AND/OR still reports
+errors for predicates SQLite folds/short-circuits; documented counterexamples
+are not passing equivalence claims. No physical recovery, native non-Linux or
+independent release acceptance follows. See relational-sql.md and the complete
+relational-independent review evidence.

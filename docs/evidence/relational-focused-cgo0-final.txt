@@ -1,0 +1,8 @@
+2026-10-10T18:29:59Z
+4dd07287c3687ee466b51b7d6c343261aeb997ff81c01f75bdfe0188b85a9397  docs/evidence/relational-source-sha256.txt
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	0.006s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.003s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	0.046s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	0.389s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	0.032s

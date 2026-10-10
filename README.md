@@ -2,7 +2,7 @@
 
 Historical test-scope statements are corrected in [the namespace-test audit](docs/test-scope-audit.md); the affected tests are now excluded from ordinary workflows.
 
-A native Go database kernel targeting tested subsets of SQLite 3.54.0 files and SQL. Current development: persistent HNSW/IVFFlat, exact typed-vector KNN and same-snapshot hybrid ranking, plus experimental authenticated snapshot, dirty-page WAL and concurrent encrypted sessions, ordinary B-tree equality planning, nested savepoints, CASE/CAST/BETWEEN/IN and explicit NULL ordering, BIT/HALFVEC/SPARSEVEC exact search, extended vector primitives, and bounded pg_embedding catalog inspection, typed offline SQL conversion and resumable CSV/NDJSON import. It is not production-ready. No CGO, SQLite subprocess, C ABI, or remote SQL engine is used in production.
+A native Go database kernel targeting tested subsets of SQLite 3.54.0 files and SQL. Current development: persistent HNSW/IVFFlat, exact typed-vector KNN and same-snapshot hybrid ranking, plus experimental authenticated snapshot, dirty-page WAL and concurrent encrypted sessions, ordinary B-tree equality planning, nested savepoints, scoped INNER/CROSS/LEFT JOINs, CASE/CAST/BETWEEN/IN and explicit NULL ordering, BIT/HALFVEC/SPARSEVEC exact search, extended vector primitives, and bounded pg_embedding catalog inspection, typed offline SQL conversion and resumable CSV/NDJSON import. It is not production-ready. No CGO, SQLite subprocess, C ABI, or remote SQL engine is used in production.
 
 ## Try the implemented SQL path
 
@@ -236,8 +236,11 @@ SELECT ALL, lazy simple/searched CASE, CAST, BETWEEN and IN-lists now execute
 natively, with SQLite affinity/NULL behavior and explicit NULLS FIRST/LAST order.
 Vector representations remain distinct through supported value-preserving trees;
 CAST is not a replacement for explicit vector constructors/conversion. See
-[expression scope](docs/sql-expressions.md). JOIN, subqueries, COLLATE, aggregates
-and the full relational binder still require implementation.
+[expression scope](docs/sql-expressions.md). Bounded INNER/CROSS/comma/LEFT joins
+now use scoped binding and a single-snapshot pull graph; see
+[relational scope and budgets](docs/relational-sql.md). USING/NATURAL/RIGHT/FULL,
+subqueries, COLLATE, aggregates and broader relational forms remain unimplemented.
+Inherited eager AND/OR error suppression differs from SQLite and remains a code gap.
 
 ## Review-only PostgreSQL transition bundles
 

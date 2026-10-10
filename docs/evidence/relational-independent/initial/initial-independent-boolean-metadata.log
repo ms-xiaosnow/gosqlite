@@ -1,0 +1,41 @@
+Ordinary test source-reference guard PASS; behavioral review is still required.
+Behavior audit: targeted Boolean metadata cases use intact SQL fixtures, native SELECT and normally completing read-only official oracle only.
+=== RUN   TestIndependentRelationalBooleanOrder
+=== RUN   TestIndependentRelationalBooleanOrder/SELECT_TRUE,FALSE_FROM_boolnames_a,plain_b_WHERE_b.rowid=1_ORDER_BY_a.id
+    relational_independent_test.go:31: column names: got []string{"TRUE", "FALSE"}; oracle []string{"true", "false"}
+=== RUN   TestIndependentRelationalBooleanOrder/SELECT_(TRUE),(FALSE)_FROM_boolnames_a,plain_b_WHERE_b.rowid=1_ORDER_BY_a.id
+    relational_independent_test.go:31: column names: got []string{"(TRUE)", "(FALSE)"}; oracle []string{"true", "false"}
+=== RUN   TestIndependentRelationalBooleanOrder/SELECT_a.id_FROM_boolnames_a_ORDER_BY_true
+=== RUN   TestIndependentRelationalBooleanOrder/SELECT_a.id_FROM_boolnames_a_ORDER_BY_false
+=== RUN   TestIndependentRelationalBooleanOrder/SELECT_-a.lid_AS_x_FROM_lhs_a_ORDER_BY_TRUE
+    relational_independent_test.go:31: row 0 column 0: got int64(-6); oracle int64(-1)
+=== RUN   TestIndependentRelationalBooleanOrder/SELECT_-a.lid_AS_x_FROM_lhs_a_ORDER_BY_FALSE
+    relational_independent_test.go:31: native query "SELECT -a.lid AS x FROM lhs a ORDER BY FALSE": sqlite query: ORDER BY position outside result column range
+=== RUN   TestIndependentRelationalBooleanOrder/SELECT_a.id_FROM_boolnames_a,plain_b_WHERE_b.rowid=1_ORDER_BY_true
+    relational_independent_test.go:31: row 0 column 0: got int64(1); oracle int64(2)
+=== RUN   TestIndependentRelationalBooleanOrder/SELECT_a.id_FROM_boolnames_a,plain_b_WHERE_b.rowid=1_ORDER_BY_false
+    relational_independent_test.go:31: native query "SELECT a.id FROM boolnames a,plain b WHERE b.rowid=1 ORDER BY false": sqlite query: ORDER BY position outside result column range
+=== RUN   TestIndependentRelationalBooleanOrder/SELECT_a.id_FROM_boolnames_a,plain_b_WHERE_b.rowid=1_ORDER_BY_+true
+    relational_independent_test.go:31: row 0 column 0: got int64(1); oracle int64(2)
+=== RUN   TestIndependentRelationalBooleanOrder/SELECT_a.id_FROM_boolnames_a,plain_b_WHERE_b.rowid=1_ORDER_BY_(true)_DESC
+    relational_independent_test.go:31: row 0 column 0: got int64(3); oracle int64(1)
+=== RUN   TestIndependentRelationalBooleanOrder/SELECT_-a.lid_AS_x_FROM_lhs_a,plain_b_WHERE_b.rowid=1_ORDER_BY_TRUE
+    relational_independent_test.go:31: row 0 column 0: got int64(-6); oracle int64(-1)
+=== RUN   TestIndependentRelationalBooleanOrder/SELECT_-a.lid_AS_x_FROM_lhs_a,plain_b_WHERE_b.rowid=1_ORDER_BY_FALSE
+    relational_independent_test.go:31: native query "SELECT -a.lid AS x FROM lhs a,plain b WHERE b.rowid=1 ORDER BY FALSE": sqlite query: ORDER BY position outside result column range
+--- FAIL: TestIndependentRelationalBooleanOrder (0.04s)
+    --- FAIL: TestIndependentRelationalBooleanOrder/SELECT_TRUE,FALSE_FROM_boolnames_a,plain_b_WHERE_b.rowid=1_ORDER_BY_a.id (0.00s)
+    --- FAIL: TestIndependentRelationalBooleanOrder/SELECT_(TRUE),(FALSE)_FROM_boolnames_a,plain_b_WHERE_b.rowid=1_ORDER_BY_a.id (0.00s)
+    --- PASS: TestIndependentRelationalBooleanOrder/SELECT_a.id_FROM_boolnames_a_ORDER_BY_true (0.00s)
+    --- PASS: TestIndependentRelationalBooleanOrder/SELECT_a.id_FROM_boolnames_a_ORDER_BY_false (0.00s)
+    --- FAIL: TestIndependentRelationalBooleanOrder/SELECT_-a.lid_AS_x_FROM_lhs_a_ORDER_BY_TRUE (0.00s)
+    --- FAIL: TestIndependentRelationalBooleanOrder/SELECT_-a.lid_AS_x_FROM_lhs_a_ORDER_BY_FALSE (0.00s)
+    --- FAIL: TestIndependentRelationalBooleanOrder/SELECT_a.id_FROM_boolnames_a,plain_b_WHERE_b.rowid=1_ORDER_BY_true (0.00s)
+    --- FAIL: TestIndependentRelationalBooleanOrder/SELECT_a.id_FROM_boolnames_a,plain_b_WHERE_b.rowid=1_ORDER_BY_false (0.00s)
+    --- FAIL: TestIndependentRelationalBooleanOrder/SELECT_a.id_FROM_boolnames_a,plain_b_WHERE_b.rowid=1_ORDER_BY_+true (0.00s)
+    --- FAIL: TestIndependentRelationalBooleanOrder/SELECT_a.id_FROM_boolnames_a,plain_b_WHERE_b.rowid=1_ORDER_BY_(true)_DESC (0.00s)
+    --- FAIL: TestIndependentRelationalBooleanOrder/SELECT_-a.lid_AS_x_FROM_lhs_a,plain_b_WHERE_b.rowid=1_ORDER_BY_TRUE (0.00s)
+    --- FAIL: TestIndependentRelationalBooleanOrder/SELECT_-a.lid_AS_x_FROM_lhs_a,plain_b_WHERE_b.rowid=1_ORDER_BY_FALSE (0.00s)
+FAIL
+FAIL	github.com/ms-xiaosnow/gosqlite/internal/testkit	0.042s
+FAIL

@@ -1,0 +1,8 @@
+2026-10-10T18:28:08Z
+9a797377eb1a1d7306b87b84abd7fa55ad1a8783baeda5e9bb58224469d82072  docs/evidence/relational-source-sha256.txt
+CGO_ENABLED=1 go test -race ./internal/btree ./internal/sql ./sqlite ./driver -run '^Test(Relational|DriverRelational)' -count=1
+Ordinary test source-reference guard PASS; behavioral review is still required.
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	1.025s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	1.021s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	1.175s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.149s

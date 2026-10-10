@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"sort"
+	"unsafe"
 
 	"github.com/ms-xiaosnow/gosqlite/internal/pager"
 	"github.com/ms-xiaosnow/gosqlite/internal/record"
@@ -52,17 +53,18 @@ type PageReader interface {
 // the whole table. Visited-page bookkeeping is capped to prevent cycles and
 // malicious inputs exhausting memory. Cursor methods must not run concurrently.
 type Cursor struct {
-	ctx       context.Context
-	reader    PageReader
-	header    pager.Header
-	root      uint32
-	leafDepth int
-	stack     []frame
-	visited   map[uint32]struct{}
-	last      int64
-	hasLast   bool
-	done      bool
-	terminal  error
+	ctx          context.Context
+	reader       PageReader
+	header       pager.Header
+	root         uint32
+	leafDepth    int
+	stack        []frame
+	visited      map[uint32]struct{}
+	last         int64
+	hasLast      bool
+	done         bool
+	terminal     error
+	beforeRecord func(int) error
 }
 
 func NewCursor(ctx context.Context, r PageReader, root uint32) (*Cursor, error) {
@@ -74,10 +76,24 @@ func NewCursor(ctx context.Context, r PageReader, root uint32) (*Cursor, error) 
 		return nil, corrupt("invalid PageReader header")
 	}
 	c := &Cursor{ctx: ctx, reader: r, header: h, root: root, visited: make(map[uint32]struct{})}
+	if budget, ok := r.(interface{ BeforeRecord(int) error }); ok {
+		c.beforeRecord = budget.BeforeRecord
+	}
 	if err := c.push(root, bounds{}); err != nil {
 		return nil, err
 	}
 	return c, nil
+}
+
+// NewBudgetCursor borrows the same snapshot as NewCursor. beforeRecord runs
+// before overflow allocation and record decoding, including local payloads.
+// The owner releases its reservation after the returned record is no longer live.
+func NewBudgetCursor(ctx context.Context, r PageReader, root uint32, beforeRecord func(int) error) (*Cursor, error) {
+	c, err := NewCursor(ctx, r, root)
+	if err == nil {
+		c.beforeRecord = beforeRecord
+	}
+	return c, err
 }
 
 func corrupt(format string, args ...any) error {
@@ -113,7 +129,11 @@ func (c *Cursor) push(n uint32, b bounds) error {
 	if err != nil {
 		return err
 	}
-	f, err := parsePage(p, n, int(c.header.UsableSize), b)
+	var beforePage func(int64) error
+	if budget, ok := c.reader.(interface{ BeforePage(int64) error }); ok {
+		beforePage = budget.BeforePage
+	}
+	f, err := parsePageBudget(p, n, int(c.header.UsableSize), b, beforePage)
 	if err != nil {
 		return err
 	}
@@ -134,6 +154,9 @@ func (c *Cursor) push(n uint32, b bounds) error {
 type span struct{ start, end int }
 
 func parsePage(p []byte, n uint32, usable int, b bounds) (frame, error) {
+	return parsePageBudget(p, n, usable, b, nil)
+}
+func parsePageBudget(p []byte, n uint32, usable int, b bounds, beforePage func(int64) error) (frame, error) {
 	f := frame{number: n, data: p, bounds: b}
 	off := 0
 	if n == 1 {
@@ -176,8 +199,29 @@ func parsePage(p []byte, n uint32, usable int, b bounds) (frame, error) {
 			return f, corrupt("page %d has zero right child", n)
 		}
 	}
+	// Count the bounded, ordered freeblock chain before allocating. Reserving
+	// exact cell/span capacities avoids an uncharged append-growth buffer.
+	freeCount := 0
+	freeAt, lastAt := int(binary.BigEndian.Uint16(p[off+1:off+3])), 0
+	for freeAt != 0 {
+		if freeAt < content || freeAt <= lastAt || freeAt > usable-4 {
+			return f, corrupt("page %d freeblock offset", n)
+		}
+		size := int(binary.BigEndian.Uint16(p[freeAt+2 : freeAt+4]))
+		if size < 4 || size > usable-freeAt {
+			return f, corrupt("page %d freeblock length", n)
+		}
+		freeCount++
+		lastAt, freeAt = freeAt, int(binary.BigEndian.Uint16(p[freeAt:freeAt+2]))
+	}
+	if beforePage != nil {
+		bytes := int64(count)*int64(unsafe.Sizeof(cell{})) + int64(count+freeCount)*int64(unsafe.Sizeof(span{})) + 512
+		if err := beforePage(bytes); err != nil {
+			return f, err
+		}
+	}
 	f.cells = make([]cell, 0, count)
-	spans := make([]span, 0, count)
+	spans := make([]span, 0, count+freeCount)
 	for i := 0; i < count; i++ {
 		start := int(binary.BigEndian.Uint16(p[off+hdr+2*i : off+hdr+2*i+2]))
 		if start < content || start >= usable {
@@ -332,6 +376,11 @@ func (c *Cursor) Next() (rowid int64, values []any, err error) {
 			f.next++
 			if c.hasLast && item.rowid <= c.last {
 				return 0, nil, corrupt("global rowid order")
+			}
+			if c.beforeRecord != nil {
+				if e := c.beforeRecord(item.payload); e != nil {
+					return 0, nil, e
+				}
 			}
 			p, e := c.payload(f, item)
 			if e != nil {

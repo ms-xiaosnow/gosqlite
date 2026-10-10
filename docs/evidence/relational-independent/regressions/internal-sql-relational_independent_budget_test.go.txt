@@ -1,0 +1,42 @@
+package sql
+
+import (
+	"context"
+	"errors"
+	"strings"
+	"testing"
+)
+
+// Pure-memory evaluator budget laws with supplied values. No storage or
+// external processes and no physical-negative behavior.
+var independentWorkErr = errors.New("independent work cap")
+
+type independentEvalBudget struct{ work, allocated int64 }
+
+func (b *independentEvalBudget) Step(n int64) error {
+	if n > 100-b.work {
+		return independentWorkErr
+	}
+	b.work += n
+	return nil
+}
+func (b *independentEvalBudget) Allocate(n int64) error { b.allocated += n; return nil }
+func TestIndependentRelationalTruthByteWork(t *testing.T) {
+	b := &independentEvalBudget{}
+	e := &Case{Arms: []CaseArm{{When: &Parameter{Index: 1}, Then: &Literal{Value: int64(1)}}}, Else: &Literal{Value: int64(0)}}
+	v, err := Eval(e, &EvalContext{Context: WithEvalBudget(context.Background(), b), Params: []any{strings.Repeat(" ", 10000) + "1"}})
+	t.Logf("result=%v err=%v work=%d allocation=%d", v, err, b.work, b.allocated)
+	if !errors.Is(err, independentWorkErr) {
+		t.Error("truth conversion scanned a 10001-byte value under a 100-unit work cap")
+	}
+}
+func TestIndependentRelationalEscapeByteWork(t *testing.T) {
+	b := &independentEvalBudget{}
+	escape := append([]byte{'!', '\x00'}, []byte(strings.Repeat("x", 10000))...)
+	e := &Like{Expr: &Literal{Value: ""}, Pattern: &Literal{Value: ""}, Escape: &Parameter{Index: 1}}
+	v, err := Eval(e, &EvalContext{Context: WithEvalBudget(context.Background(), b), Params: []any{escape}})
+	t.Logf("result=%v err=%v work=%d allocation=%d escapeBytes=%d", v, err, b.work, b.allocated, len(escape))
+	if !errors.Is(err, independentWorkErr) {
+		t.Error("ESCAPE conversion copied/scanned a 10002-byte BLOB under a 100-unit work cap")
+	}
+}

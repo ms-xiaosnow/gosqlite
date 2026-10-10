@@ -1,0 +1,9 @@
+2026-10-10T18:28:06Z
+9a797377eb1a1d7306b87b84abd7fa55ad1a8783baeda5e9bb58224469d82072  docs/evidence/relational-source-sha256.txt
+go version go1.27.2 linux/amd64
+3.54.0 2026-10-09 15:46:58 be8d059e9a49089ab2dce5ed26dd87aaf598fdc5fbe0b107c0dd758464bcd5e3 (64-bit)
+CGO_ENABLED=0 go build ./...
+BUILD_PASS
+CGO_ENABLED=0 go vet ./...
+VET_PASS
+CGO_ENABLED=1 go list -deps production CgoFiles:

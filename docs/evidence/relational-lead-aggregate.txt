@@ -1,0 +1,54 @@
+Frozen28-path relational delta on durable69008bf; native encrypted and full-table migration future changes excluded.
+Source audited ordinary intact database/SQL/driver/oracle and memory budget laws only. No manual namespace/recovery/native fault suite.
+ad73b8d6425cd86d1c15caccb0f858048df63ef9
+2026-10-10T18:37:35Z
+Ordinary test source-reference guard PASS; behavioral review is still required.
+?   	github.com/ms-xiaosnow/gosqlite/benchmarks/ann	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.272s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	7.320s
+ok  	github.com/ms-xiaosnow/gosqlite/encryption	1.376s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ann	1.929s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/bit-rerank	0.018s
+?   	github.com/ms-xiaosnow/gosqlite/examples/encrypted	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-shared	0.037s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-wal	0.034s
+?   	github.com/ms-xiaosnow/gosqlite/examples/grams	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/half-rerank	0.022s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ivfflat	0.855s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/migrate-pgembedding	0.056s
+?   	github.com/ms-xiaosnow/gosqlite/examples/migration-transition	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/pgembedding-import	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/readonly	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/similarity	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/sparse-exact	0.018s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/typed-ann-rerank	1.197s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/vector	0.258s
+?   	github.com/ms-xiaosnow/gosqlite/examples/wal	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/write	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/extension/grams13	1.451s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/registry	0.093s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/similarity	4.469s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	0.797s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector/ann	10.855s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	15.088s
+?   	github.com/ms-xiaosnow/gosqlite/internal/buildinfo	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/darwinfile	0.079s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	0.262s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/journal	0.037s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.391s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/record	0.007s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.199s
+?   	github.com/ms-xiaosnow/gosqlite/internal/testkit/fileview	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testscope	0.010s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.097s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/wal	1.037s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	0.328s
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	4.716s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	78.121s
+RELATIONAL FULL CGO0 UNIT/VET/BUILD PASS
+2026-10-10T18:39:10Z
+Ordinary test source-reference guard PASS; behavioral review is still required.
+?   	github.com/ms-xiaosnow/gosqlite/benchmarks/ann	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	1.517s
+
+Captured2026-10-10T18:39:10Z after CGO0 full unit/vet/build PASS. Full race/oracle/cross-build continuation remains RUNNING and is not inferred complete.

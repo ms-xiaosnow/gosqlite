@@ -1,0 +1,80 @@
+//go:build oracle
+
+package testkit_test
+
+import (
+	"fmt"
+	"math/rand"
+	"testing"
+)
+
+// Reviewer-only tests. Intact SQL-created fixtures; read-only oracle queries;
+// ordinary completion and cleanup; no fault or physical-negative behavior.
+func TestIndependentRelationalBooleanOrder(t *testing.T) {
+	db, path := relationalOracleFixture(t, false)
+	writeExec(t, db, `CREATE TABLE boolnames(id INTEGER PRIMARY KEY,"true" INTEGER,"false" INTEGER)`)
+	writeExec(t, db, `INSERT INTO boolnames VALUES(1,9,2),(2,3,8),(3,6,5)`)
+	for _, q := range []string{
+		`SELECT TRUE,FALSE FROM boolnames a,plain b WHERE b.rowid=1 ORDER BY a.id`,
+		`SELECT (TRUE),(FALSE) FROM boolnames a,plain b WHERE b.rowid=1 ORDER BY a.id`,
+		`SELECT a.id FROM boolnames a ORDER BY true`,
+		`SELECT a.id FROM boolnames a ORDER BY false`,
+		`SELECT -a.lid AS x FROM lhs a ORDER BY TRUE`,
+		`SELECT -a.lid AS x FROM lhs a ORDER BY FALSE`,
+		`SELECT a.id FROM boolnames a,plain b WHERE b.rowid=1 ORDER BY true`,
+		`SELECT a.id FROM boolnames a,plain b WHERE b.rowid=1 ORDER BY false`,
+		`SELECT a.id FROM boolnames a,plain b WHERE b.rowid=1 ORDER BY +true`,
+		`SELECT a.id FROM boolnames a,plain b WHERE b.rowid=1 ORDER BY (true) DESC`,
+		`SELECT -a.lid AS x FROM lhs a,plain b WHERE b.rowid=1 ORDER BY TRUE`,
+		`SELECT -a.lid AS x FROM lhs a,plain b WHERE b.rowid=1 ORDER BY FALSE`,
+	} {
+		t.Run(q, func(t *testing.T) { confCompare(t, confExpected(t, path, q), confNative(t, db, q)) })
+	}
+}
+
+func TestIndependentRelationalGenerated(t *testing.T) {
+	db, path := relationalOracleFixture(t, false)
+	rng := rand.New(rand.NewSource(202610101809))
+	joins := []string{"JOIN", "INNER JOIN", "LEFT JOIN", "CROSS JOIN", ","}
+	ons := []string{"a.k=b.k", "a.k IS b.k", "a.txt=b.k", "+a.k=b.k", "a.k=+b.k", "a.flag AND b.score>1", "a.lid=b.rid-9", "a.k IN (b.k,NULL,'word')", "a.r BETWEEN b.score AND b.score+1", "CASE WHEN b.k IS NULL THEN a.flag ELSE a.k=b.k END", "NULL", "0", "1"}
+	filters := []string{"1", "b.rid IS NULL", "a.flag=1", "b.score<4", "a.k IS NOT NULL", "a.lid<4 OR b.rid>14", "coalesce(b.tag,'missing')!='null'"}
+	projs := []string{"a.lid,b.rid", "a.lid,b.rid,a.k=b.k,typeof(b.score)", "a.lid,b.rid,CASE WHEN b.rid IS NULL THEN 'missing' ELSE b.tag END", "a.lid,b.rid,coalesce(b.k,a.txt),typeof(a.r)"}
+	for i := 0; i < 420; i++ {
+		j, on, w, p := joins[rng.Intn(len(joins))], ons[rng.Intn(len(ons))], filters[rng.Intn(len(filters))], projs[rng.Intn(len(projs))]
+		q := fmt.Sprintf("SELECT %s FROM lhs a %s rhs b ON %s WHERE %s ORDER BY 1,2", p, j, on, w)
+		t.Run(fmt.Sprintf("case_%03d", i), func(t *testing.T) { t.Log(q); confCompare(t, confExpected(t, path, q), confNative(t, db, q)) })
+	}
+}
+
+func TestIndependentRelationalScopedEdges(t *testing.T) {
+	db, path := relationalOracleFixture(t, false)
+	for _, q := range []string{
+		`SELECT a.lid-1 AS "true",b.rid FROM lhs a JOIN rhs b ON true AND a.k=b.k ORDER BY 1,2`,
+		`SELECT a.lid-1 AS "false",b.rid FROM lhs a JOIN rhs b ON false AND a.k=b.k ORDER BY 1,2`,
+		`SELECT a.lid-1 AS "true",b.rid FROM lhs a,rhs b WHERE true AND a.k=b.k ORDER BY 1,2`,
+		`SELECT a.lid-1 AS "false",b.rid FROM lhs a,rhs b WHERE false AND a.k=b.k ORDER BY 1,2`,
+		`SELECT a.lid AS x,-a.lid AS x,b.rid FROM lhs a,rhs b WHERE b.rid=10 ORDER BY x`,
+		`SELECT a.rowid,b.rowid FROM plain a LEFT JOIN plain b ON a.rowid+1=b.rowid ORDER BY a.rowid`,
+		`SELECT a.lid,b.rid,c.cid FROM lhs a LEFT JOIN rhs b ON a.k=b.k JOIN third c ON c.rid=b.rid ORDER BY 1,2,3`,
+		`SELECT a.lid,b.rid,c.cid FROM lhs a LEFT JOIN rhs b ON a.k=b.k LEFT JOIN third c ON c.rid=b.rid AND a.lid=1 WHERE c.cid IS NULL ORDER BY 1,2,3`,
+		`SELECT a.lid,b.eid,c.cid FROM lhs a,empty_source b LEFT JOIN third c ON c.rid=b.eid ORDER BY 1,2,3`,
+		`SELECT a.lid,b.eid,c.cid FROM lhs a LEFT JOIN empty_source b ON 1 LEFT JOIN third c ON b.eid IS NULL ORDER BY 1,3`,
+		`SELECT b.rid,a.lid FROM lhs a LEFT JOIN rhs b ON a.k=b.k ORDER BY 1 NULLS LAST,2 DESC LIMIT 8 OFFSET 2`,
+		`SELECT b.rid,a.lid FROM lhs a LEFT JOIN rhs b ON a.k=b.k ORDER BY 1 DESC NULLS FIRST,2 ASC LIMIT -1 OFFSET -1`,
+	} {
+		t.Run(q, func(t *testing.T) { confCompare(t, confExpected(t, path, q), confNative(t, db, q)) })
+	}
+}
+
+func TestIndependentRelationalGeneratedThreeWay(t *testing.T) {
+	db, path := relationalOracleFixture(t, false)
+	rng := rand.New(rand.NewSource(202610101816))
+	joins := []string{"JOIN", "LEFT JOIN", "CROSS JOIN", ","}
+	ab := []string{"a.k=b.k", "a.k IS b.k", "a.flag AND b.score>1", "a.lid=b.rid-9", "NULL", "1"}
+	bc := []string{"b.rid=c.rid", "b.rid=c.rid AND a.flag=1", "b.rid=c.rid OR (a.flag=0 AND c.cid=103)", "b.rid IS NULL", "c.rid=a.lid+9", "NULL", "1"}
+	wh := []string{"1", "c.cid IS NULL", "b.rid IS NULL", "a.lid<3", "c.cid IS NOT NULL OR b.rid IS NULL"}
+	for i := 0; i < 160; i++ {
+		q := fmt.Sprintf("SELECT a.lid,b.rid,c.cid,typeof(b.score),coalesce(c.caption,b.tag,'missing') FROM lhs a %s rhs b ON %s %s third c ON %s WHERE %s ORDER BY 1,2,3", joins[rng.Intn(len(joins))], ab[rng.Intn(len(ab))], joins[rng.Intn(len(joins))], bc[rng.Intn(len(bc))], wh[rng.Intn(len(wh))])
+		t.Run(fmt.Sprintf("case_%03d", i), func(t *testing.T) { t.Log(q); confCompare(t, confExpected(t, path, q), confNative(t, db, q)) })
+	}
+}
