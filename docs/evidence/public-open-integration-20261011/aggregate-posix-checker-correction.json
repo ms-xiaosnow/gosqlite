@@ -1,0 +1,12 @@
+{
+  "observed_utc": "2026-10-11T07:58:51Z",
+  "phase": "Preparation audit, before any Go execution",
+  "failure": "AssertionError at examples/migration-transition/golden/retain-single/00-preflight.sql, identity.py line 107",
+  "cause": "External checker incorrectly required baseline Git-archive POSIX modes to equal preserved frozen source modes. Requested identity boundary is exact frozen versus supplied frozen inventory and fresh copy before/after.",
+  "before_checker_sha256": "d240bf8c22e0696a71cfc4b612c41b121bf79966f37b865edbf9a14bac852a05",
+  "corrected_checker_sha256": "6a0a982ae1315ec4029da7cc5b3b0c21266fe32ea4b95e3b522f1e79d939eb65",
+  "correction": "Removed only the overbroad unchanged-file baseline POSIX assertion. Frozen inventory, owned-source POSIX, audit/copy/before/after POSIX and root mode checks retained.",
+  "delta": "baseline-posix-delta.json: 30 files plus 2 directories; all file bytes and Git modes identical",
+  "source_or_mode_edits": false,
+  "go_execution": "NOT_RUN"
+}

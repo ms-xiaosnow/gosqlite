@@ -1300,3 +1300,32 @@ ANN/performance-CI sources remain separate increments.
 - 07:40:36 UTC在所有已知Go检查自然结束及可见Go进程为空后，按限定维护范围执行固定Go与显式本任务GOCACHE的`go clean -cache`，exit0。只清可再生成build cache，保留源码/Git/验收日志/备份/模块缓存，未使用其他删除或fuzzcache/modcache flags。workspace余量恢复14,975,832,064字节，默认/tmp余1,416,167,424字节；维护记录保存。不是重启受限soak或被拒链路。
 - 新源码三文件此后不变，仅追加文档与真实证据；接下来核对精确待提交tree、保存私库main与Library、恢复所选提交并跟踪其CI。未先填新commit或未发生结果。
 - 下一项P0 public rollback Open已另行开始逐hunk源码集成，先合入防误执行guard，仅descriptor-free模型、源码检查与编译在独立副本进行；本检查点没有纳入该候选，实际RecoverRollback、启用恢复真实Open、任何物理恢复保持NOT_RUN。
+
+### P0 public rollback Open：限定源码集成（2026-10-11）
+- 状态：IN_PROGRESS；source/model-only。真实恢复、production bridge 和开启恢复选项的真实 Open 仍 BLOCKED / NOT_RUN；不宣布 M3、稳定版或全项目完成。
+- 本阶段交付：在已发布基线 `63c2ebb10e3a2c4ff2378ee9f33c46133134c70f` 上逐 hunk 合入 nil-default `Options.RollbackRecovery`、Linux writable plaintext rollback 策略、准确 path 的已退休 reader proof、一次恢复加 fresh no-create reprobe、Connector limits 值复制。默认关闭、现有预算/上下文/加密行为保留；内部 physical recovery 除注释外未改。
+- 防误执行先行：先审阅并集成 `internal/testscope` 对直接/捕获恢复函数、opt-in 字段、同文件 type/alias 与 dot-import unkeyed Options 的 guard，再处理生产源码。它不是完整类型/调用图证明；inferred element / cross-file alias 漏检与 shadow-name 误报仍要求 helper 审阅，没有利用遗漏。独立 Rename/rename / OS namespace 更改不在本切片。
+- 代码路径：`sqlite/{sqlite,rollback_recovery}.go`、`internal/pager/{pager,reader_recovery,recovery}.go`、`driver/driver.go` 及对应 descriptor-free tests。现有 `reader_acquisition_test.go` 仅将精确 defer 预期更新为新 bridge，原全部 ordering/ownership 断言保留；`main_test.go` 只新增 inert source 断言。
+- 本次检查：2026-10-11 07:42:37 UTC，串行 source guard（普通/race 前各一次）、11 项精确 descriptor-free selector（3 guard、4 pager、4 sqlite）的 CGO0 与 CGO1 race、四包 vet、全包 CGO0 build、空 CgoFiles dependency closure 全部自然 exit 0。固定 Go1.27.2、离线 sibling cache、p=1/GOMAXPROCS=2；精确命令见 [专题文档](rollback-recovery-open.md)。源码检查前后完整 byte/size/mode inventories 相同；之后仅补充本段与专题结果文字。旧 V1/V2 PASS 未挪用；完整 ordinary/oracle/fuzz/manual suite 未运行。独立最终集成审阅仍待完成。
+- 用户操作与支持边界：[中文手册第 18 节](manual-verification-zh.md) 给出真实 API/limits、没有 CLI/DSN 开关、实际 manual tag/env 名称和未来独立审查步骤。现有内部 manual harness 不覆盖 public bridge，完整 public physical harness 仍缺，不能编造已存在的执行入口。
+- 关键语义：任何 recovery/reprobe/cancel/close 失败保留最初 `ErrRecoveryRequired` 及全部后续 cause/token，primary code 因而为 `CodeIOErr`；这不是磁盘当前仍需恢复的保证。恢复后的零 extent 可被 fresh probe 拒绝且不创建。
+- 未扩展：WAL publisher、broader journal formats、retained-directory、backup/backend、ANN V4、41-target fuzz、native OS/CI 和既有受限物理/security-negative 工作。下一步是精确源码/模型检查与独立集成审阅，物理资格另列 NOT_RUN。
+
+
+### 2026-10-11 P0 public Open 独立审阅与c150文档组合
+
+- 状态：有限实验性源码/无描述符模型/编译独立PASS；真实RecoverRollback、production bridge、开启恢复的真实Open/OpenContext/Connect仍BLOCKED / NOT_RUN。上一段独立审阅待办已由07:49:35 UTC的候选报告闭合，不把它扩展成物理或完整M3验收。
+- 独立候选tree `75c074548e8b5208beb06e6ead314d835cd16f4f`，原基点63c2。13命令阶段自然exit0；11个精确顶层测试在CGO0和相同CGO1 race选择均PASS、零skip/FAIL/空匹配，两个guard、四包vet、全包CGO0 build和无CgoFiles闭包通过。末次race07:49:34.878759 UTC、身份检查07:49:35.178221 UTC。精确命令和报告身份见[专题](rollback-recovery-open.md)，没有新真实数据库工作负载。
+- 独立审阅未发现阻断源码缺陷；精确候选前后/重放tree相同，13个Go源文件与三个候选文档归属已核对。全部旧测试断言保留；reader acquisition仅更新defer源码拼写，guard追加inert source回归。Guard并非完整调用图或类型证明，既有漏检/误报边界继续披露。
+- 本批组合基点为已保存 `c1502790c4b233757b0f9a3c4d5e5bdee1321310`、tree `5a98da017584fe708e43bce9f9e52dca1f06bd20`。13源码路径由主线逐hunk组合；文档保留c150原progress全文作前缀再追加候选和本段记录，未用63c2旧progress覆盖LIMIT/分类成果。其他当前矩阵纠正“public Open未接线”，历史里程碑原结论保持。
+- 默认nil仍拒绝已有journal，保持errors.Is(ErrRecoveryRequired)及CodeIOErr；journal diagnostic文字与私有包装有意变化，不能称字节相同。Linux可写明文有限opt-in最多一次恢复和一次fresh no-create probe，不增加后续SQL/Reader/Tx恢复入口。broader journals、default-on、WAL publisher与其他平台仍是独立待办。
+- public physical harness明确IMPLEMENTATION_MISSING；现有manual_recovery内部harness不调用公开bridge，其原tag/env/真实测试命令和受限状态保留。中文第18节给真实API/limits、精确source/model入口、未来fixture/断言/证据与停止清理要求，没有编造物理执行命令。
+- 此文档组合仅静态读取、编辑、差异/链接/哈希与shell语法核对，没有Go/数据库/物理/原生测试执行。此时c150加P0完整ordinary/oracle/race组合、新提交恢复与新提交CI仍PENDING；须取得各自精确身份与终态后另追加结果。旧基点、LIMIT与候选的PASS不作为替代。
+
+### LIMIT 父基点闭合补记（2026-10-11 08:13 UTC）
+
+已保存父基点 `c1502790c4b233757b0f9a3c4d5e5bdee1321310` 的精确 Library 恢复15阶段于07:57:22 UTC PASS；1016普通叶用例与344官方oracle比较分别在normal/race全通过、零skip，2998文件/779非docs身份保持。该提交 CI `38122662808` 于08:10:53 UTC SUCCESS（ordinary `114420432223`、oracle `114420432058`）。bundle Library `libfile_37b21d0517b48191aa12da9186208cd8`；完整证据归档 `libfile_609edcfa90988191b5f3b29595ec7c8b`，均已读回核验。这些结果只属于LIMIT父基点，不替代本批P0新源码组合、提交恢复与CI。
+
+### P0 默认关闭完整普通门结果（2026-10-11 08:22 UTC）
+
+当前P0组合执行冻结tree `442a7104dc780ddb20826e5ee4f1250b291f2b24` 于08:22:39 UTC自然完成18阶段PASS：完整CGO0普通测试/vet/build、固定SQLite3.54.0完整普通oracle、完整CGO1 race、guard、五目标生产编译、模块及全部3004文件/143目录前后身份。785非docs文件固定；最终文档/证据改变整个tree但不得改变这些运行源码。两个外部预检的报告版本/基线POSIX比较问题在Go执行前发现并保留，修正外部验证器后一次完成运行门，无运行重试。详见[精确组合证据](evidence/public-open-integration-20261011.md)。本批新提交/Library恢复/CI仍待实际核验。真实RecoverRollback、production bridge和开启恢复选项的真实Open/Connect均BLOCKED / NOT_RUN，公开物理harness仍IMPLEMENTATION_MISSING；M3/M10/整体未验收。

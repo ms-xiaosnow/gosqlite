@@ -1,0 +1,14 @@
+--- observed-94113361
++++ final-e507af6e
+@@ -181,8 +181,9 @@
+ 
+ Go version: **go1.27.2 linux/amd64**, pinned absolute tool path.
+ GOTOOLCHAIN=local; GOPROXY=off; GOSUMDB=off; GOFLAGS=-buildvcs=false;
+-GOPATH=ROOT/go-path; GOCACHE=ROOT/go-cache; GOMAXPROCS=2; every Go build/test/vet
+-build/test/vet/run/list command uses -p=1. Default /tmp; GOTMPDIR unset. Every command passed the original
++GOPATH=ROOT/go-path; GOCACHE=ROOT/go-cache; GOMAXPROCS=2; every Go
++build/test/vet/run/list command uses -p=1. Default /tmp; GOTMPDIR unset.
++Every command passed the original
+ >=1 GiB /tmp, >=2 GiB workspace, >=10000 available-inodes and writability checks.
+ No cleanup, cache relocation, threshold change, alternate machine or workaround.
+ 

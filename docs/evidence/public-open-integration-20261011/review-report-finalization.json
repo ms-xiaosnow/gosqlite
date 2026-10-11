@@ -1,0 +1,18 @@
+{
+  "observed_utc": "2026-10-11T07:58:03.035008+00:00",
+  "status": "REPORT_FINALIZATION_RECONCILED",
+  "original_integration_record_preserved": true,
+  "observed_old_report_sha256": "94113361f3b9cc489135f94c07d4b50fca820b877250deae812bcc06e3ae7556",
+  "observed_old_report_bytes": 14314,
+  "final_report_sha256": "e507af6e674aae7802b060cb3c798fc2b21e7f4c6771271533576b65c91a6d17",
+  "final_report_bytes": 14299,
+  "exact_delta_bytes": -15,
+  "change": "Removed duplicate build/test/vet phrase and reflowed one environment sentence only. No verdict/source/test/command result changed.",
+  "earlier_14302_byte_size_note": "An earlier separate report version; not the file hashed by source-integration at 07:52:28. Initial size assumption was wrong.",
+  "reconstruction": "Old bytes reconstructed from exact reviewer-supplied final patch; SHA256 matches originally recorded 94113361, proving exact identity. This is explicitly a reconstruction, not a retained original file.",
+  "final_manifest_files_verified": 43,
+  "frozen_source_tree": "75c074548e8b5208beb06e6ead314d835cd16f4f",
+  "combined_source_tree": "442a7104dc780ddb20826e5ee4f1250b291f2b24",
+  "combined_first_validation": "Correctly stopped at old review-hash mismatch before any Go execution; preserve failure.",
+  "scope": "Final source/model verdict accepted with final e507 hash; compiler execution needs separate release."
+}

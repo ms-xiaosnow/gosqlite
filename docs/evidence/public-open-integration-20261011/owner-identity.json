@@ -1,0 +1,64 @@
+{
+  "base_commit": "63c2ebb10e3a2c4ff2378ee9f33c46133134c70f",
+  "base_tree": "d735409ebd1c43d90ee1650c8a7c2a084e270674",
+  "frozen_tree": "75c074548e8b5208beb06e6ead314d835cd16f4f",
+  "replay_tree": "75c074548e8b5208beb06e6ead314d835cd16f4f",
+  "base_files": 2962,
+  "frozen_files": 2969,
+  "owned_count": 16,
+  "changed": [
+    "docs/manual-verification-zh.md",
+    "docs/progress.md",
+    "docs/rollback-recovery-open.md",
+    "driver/driver.go",
+    "internal/pager/pager.go",
+    "internal/pager/reader_acquisition_test.go",
+    "internal/pager/reader_recovery.go",
+    "internal/pager/reader_recovery_test.go",
+    "internal/pager/recovery.go",
+    "internal/testscope/independent_public_recovery_test.go",
+    "internal/testscope/main.go",
+    "internal/testscope/main_test.go",
+    "internal/testscope/recovery_alias_guard_test.go",
+    "sqlite/rollback_recovery.go",
+    "sqlite/rollback_recovery_test.go",
+    "sqlite/sqlite.go"
+  ],
+  "post_check_docs_only": [
+    "docs/progress.md",
+    "docs/rollback-recovery-open.md"
+  ],
+  "source_patch_sha256": "4285b5bae09bcdb515a484b777eeb858f8ad5572d3f808917a89a17dba68080f",
+  "full_byte_size_mode_identity": true,
+  "goal_and_modules_unchanged": true,
+  "donor_unchanged": true,
+  "commands": [
+    {
+      "timestamp": "2026-10-11T07:43:48.849772+00:00",
+      "cwd": "/workspace/scratch/5e06a74e5f65/durable-restart/public-open-integration-evidence/replay",
+      "command": [
+        "git",
+        "apply",
+        "--check",
+        "/workspace/scratch/5e06a74e5f65/durable-restart/public-open-integration-evidence/source.patch"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "timestamp": "2026-10-11T07:43:48.855892+00:00",
+      "cwd": "/workspace/scratch/5e06a74e5f65/durable-restart/public-open-integration-evidence/replay",
+      "command": [
+        "git",
+        "apply",
+        "/workspace/scratch/5e06a74e5f65/durable-restart/public-open-integration-evidence/source.patch"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "git_metadata_writes": "none; tree identity computed using in-memory Git object serialization",
+  "physical_recovery": "BLOCKED / NOT_RUN"
+}

@@ -1,12 +1,36 @@
 # 当前实现与验收矩阵
 
-核对时间：2026-10-11；当前开发基点为 `63c2ebb10e3a2c4ff2378ee9f33c46133134c70f`，tree `d735409ebd1c43d90ee1650c8a7c2a084e270674`。该历史检查点的恢复与 CI 已闭合，详见文末；本轮新源码、提交、恢复及 CI 仍须分别核验，不预写自指提交。旧 `7a9972547f49531df04cf1b624dfa662b483907b` 与 `1352ae524575e4d6fe8b5434fd930c3b07be4ac8` 保留为历史基点。
+核对时间：2026-10-11；以下历史开发基点为 `63c2ebb10e3a2c4ff2378ee9f33c46133134c70f`，tree `d735409ebd1c43d90ee1650c8a7c2a084e270674`。该历史检查点的恢复与 CI 已闭合，详见文末；本轮新源码、提交、恢复及 CI 仍须分别核验，不预写自指提交。旧 `7a9972547f49531df04cf1b624dfa662b483907b` 与 `1352ae524575e4d6fe8b5434fd930c3b07be4ac8` 保留为历史基点。
 63c2 历史检查点叠加三项有限收尾：四项 CLI/示例资源修正、三份必需入口文档对账、五例目录终结与输出错误修正。四项 CLI 固定树完整普通门、三份文档独立静态审阅、五例独立源码和限定普通/race 审阅分别 PASS；最终组合与新提交持久门见文末，不能沿用基点结果。四项 CLI 的精确结果见[组合证据](evidence/cli-resources-20261011.md)，五例的操作边界见[留存限定复验](example-retention-verification-zh.md)。
 已有 inspect 精确源码和边界见[元数据证据](evidence/inspect-metadata-20261011.md)和[上下文证据](evidence/inspect-context-20261011.md)。
 这是开发检查点清单，不是最终交付。原始 [goal.md](../goal.md) 不变。
 平台受限项目可以暂停执行并记录用户自测步骤，不能取消真实实现义务。
 
 06:53 UTC 用户要求跳过并记录受限测试，其余继续分批编码、提交并报告。已将过宽的源码 HOLD 分类纠正为[逐项限制溯源](restriction-provenance-20261011.md)：可访问证据中未定位到 recovery/backup/WAL/planner/backend/harness 的精确源码编辑拒绝，不能据此断言它们从未被拒绝或一揽子解限。实际受限执行和 ANN V4、41目标 fuzz、未知中断的禁重试保持。当前 LIMIT/OFFSET 数值转换与 ErrMismatch 的三文件候选已取得限定普通/race与独立审阅PASS；精确组合普通18阶段已于07:39:21 UTC全部PASS；提交及恢复/CI仍待本批精确身份闭合。具体原始失败、包装器纠正及范围见[新切片证据](evidence/limit-conversion-20261011.md)。
+
+## 2026-10-11 P0 public Open 源码更新
+
+本批在已保存 `c1502790c4b233757b0f9a3c4d5e5bdee1321310`（tree
+`5a98da017584fe708e43bce9f9e52dca1f06bd20`）上组合公开恢复源码，保留
+LIMIT 修正、限制分类及既有进展。上文关于 LIMIT 提交待办是该批写作时点；
+此处不推定 c150 的恢复或 CI 结果，也不让其普通门替代本批新组合门。
+
+- 源码已实现：`Options.RollbackRecovery` 的 nil-default 有限 Linux 可写明文
+  rollback opt-in、reader 退休/path proof、一次恢复和 fresh no-create probe、
+  Connector 配置值复制及防误执行 guard；仍属实验性 source/model 范围。
+- 独立候选 tree `75c074548e8b5208beb06e6ead314d835cd16f4f` 的源码审阅、
+  11 项精确 descriptor-free 测试（CGO0 与相同 race 选择）、guard、限定 vet、
+  全包 CGO0 build / 无 CgoFiles 闭包 PASS；独立最终阶段于 07:49:35 UTC 完成。
+- 当前文档对账时，本批 c150 加 P0 的完整普通/oracle/race 组合、新提交恢复及
+  新提交 CI 尚待各自终态证据。旧63c2、LIMIT和上述候选证据不自动覆盖新身份。
+- 真实 RecoverRollback、production bridge、开启恢复的真实 Open/Connect
+  均 `BLOCKED / NOT_RUN`；public physical harness 为 `IMPLEMENTATION_MISSING`。
+  现有内部 manual harness 不覆盖该公开桥接；它的原命令及限制保持。
+
+API、预算、诊断兼容边界与精确 source/model 命令见
+[专题文档](rollback-recovery-open.md)；详细人工前置见
+[中文手册第18节](manual-verification-zh.md)。默认拒绝、ErrRecoveryRequired
+匹配与 CodeIOErr 保持，但诊断文本和私有包装有变化，不承诺错误字节相同。
 
 ## 状态定义与证据
 
@@ -25,7 +49,7 @@
 
 | 原规范条款 | main 已有能力 | 剩余代码 / 状态 |
 |---|---|---|
-| G1、§3、§4.1、M3 | 有界有限计数多段 rollback 字节解析、internal 恢复所有权；Reader post-SHARED stat/shared 初始不存在来源已修正 | `PARTIAL`：公开 Open 恢复尚未合入，更多 journal 形式及 native exclusive WAL 尾部安全发布缺实现。物理恢复另列人工门 |
+| G1、§3、§4.1、M3 | 有界多段解析及 internal 恢复所有权；新增默认关闭的 Linux 可写明文 Open/Connector 恢复源码、准确 path 的退休 proof 和一次 fresh no-create probe，源码/模型独立 PASS | `PARTIAL / experimental`：更多 journal 形式、默认开启策略、其他原生平台与 native exclusive WAL 尾部安全发布仍未完成；public physical harness 为 IMPLEMENTATION_MISSING，实际恢复/开启选项的真实 Open 均 BLOCKED / NOT_RUN |
 | G1、§4.2、§11.1/11.3 | 索引范围、有限 JOIN/GROUP BY/HAVING、连接计数和 cached preparation 的限定普通门通过 | `已知差异`：支持查询的 planner 错误/排序/阶段一致性仍待修正。V4c 树 `552286a…` 有独立有限 PASS，但没有和 main 新 grouped/counter 组合；不能替代 main 结果。新 LIMIT 转换/ErrMismatch 三文件修正独立限定PASS，组合完整普通18阶段PASS；不覆盖其余绑定/执行阶段缺口 |
 | §4.2、§8.1、§12.2 | correct-key 加密 backup/rekey CLI、native DB/Tx/CLI Check V2 已合入 | `未实现/未合入`：main 明文 backup 命令仍明确 unsupported；Linux rollback V2 候选终审未完成，WAL/非 Linux backup 和真正只读 plaintext-WAL CLI 缺代码。native VACUUM 未实现 |
 | G1、§3.6、§12.2 | query/check/inspect CLI 均使用 OpenContext；DB.Inspect 和 inspect --extensions 在单快照呈现持久 method/version/config/generation，默认 JSON 保持 | `PARTIAL`：本次实测只涵盖 Linux plaintext rollback、grams/custom metadata；加密 inspect CLI 的密钥/profile 路由、真正只读 WAL 及其余已选 CLI 目标仍有实现缺口。持久 metadata 不证明索引可用或正确，中途 I/O 取消未动态验证 |
@@ -61,7 +85,7 @@
 
 | 原规范条款 | 状态 | 自测入口和限制 |
 |---|---|---|
-| §4.1、M3、§11.1 | `平台阻塞 / NOT_RUN`：实际 native rollback replay | 中文手册列出 manual_recovery 标签、显式门和真实测试名；现有 deterministic harness 不覆盖真实断电、强杀、短写、Sync/ENOSPC/torn write |
+| §4.1、M3、§11.1 | `平台阻塞 / NOT_RUN`：实际 native rollback replay、public production bridge 和开启恢复的真实 Open | 内部 harness 的 manual_recovery 标签、显式门和真实测试名保留；public physical harness 为 IMPLEMENTATION_MISSING。内部 deterministic harness 不覆盖公开桥接、真实断电、强杀、短写、Sync/ENOSPC/torn write |
 | §4.1、§11.1 | `平台阻塞 / NOT_RUN（当前）`：已有 plaintext namespace 测试 | 手册列出 manual_namespace 独立门。历史 M2 至 7addc493 全套曾包含两项 namespace 测试，原 PASS 是事实，不能改称当时全都未运行或当时范围完全干净 |
 | M3/M4/M7/M8、§8.3、§11.1 | `未实现设施 + 平台阻塞`：完整物理故障/崩溃/重启、checkpoint/rekey 中断、安全篡改矩阵 | 没有现成 harness 的项先补源码和独立审阅；只提供实验前置/断言，不编造现成测试名或成功命令 |
 | M7/M10 | `平台阻塞 / 未知触发`：ANN V4、41 目标 fuzz、未知整轮中断 | 不重发/换路。ANN V3 FAIL 是未发布报告工具缺陷，不自动推断生产 ANN 算法已坏，也不能因为受阻改成 PASS |
@@ -118,3 +142,11 @@
 父基点 `7a9972547f49531df04cf1b624dfa662b483907b` 的 Library `libfile_f28c9a0df2108191981d41eb76fafc58` 已读回并精确恢复；30阶段、18项每模式具名测试/29子项、8 sourceguard、vet/build/五目标/模块/全部身份于04:13:29 UTC PASS。该提交 CI `38110617335` ordinary/oracle 均 SUCCESS（04:30:02 UTC）；[闭合证据](evidence/cli-resources-20261011/persistence.json)只属于父基点，不替代本次新提交。
 
 63c2 的全历史 bundle 为 Library `libfile_ce332d051b4c8191a833e09094b5722e`，5,334,849字节，SHA-256 `5c0c18551f6874a6bc2e5766362e47308432424c366eec5eff448010376bfbf7`；终态证据归档为 `libfile_7fea2541ad7881919b7236a66499c138`，SHA-256 `d1a8e98dae0d1260006f75c938360e04b3b40744b69b1c7d1b4e286800e6bd45`。首次恢复V1的验证器FAIL保留：745/777计数差来自额外排除32个Markdown，在任何Go检查前失败；V2只修筛选谓词。完整身份、分类依据及下一批边界见[限制溯源](restriction-provenance-20261011.md)。
+
+### LIMIT 父基点闭合补记（2026-10-11 08:13 UTC）
+
+已保存父基点 `c1502790c4b233757b0f9a3c4d5e5bdee1321310` 的精确 Library 恢复15阶段于07:57:22 UTC PASS；1016普通叶用例与344官方oracle比较分别在normal/race全通过、零skip，2998文件/779非docs身份保持。该提交 CI `38122662808` 于08:10:53 UTC SUCCESS（ordinary `114420432223`、oracle `114420432058`）。bundle Library `libfile_37b21d0517b48191aa12da9186208cd8`；完整证据归档 `libfile_609edcfa90988191b5f3b29595ec7c8b`，均已读回核验。这些结果只属于LIMIT父基点，不替代本批P0新源码组合、提交恢复与CI。
+
+### P0 默认关闭完整普通门结果（2026-10-11 08:22 UTC）
+
+当前P0组合执行冻结tree `442a7104dc780ddb20826e5ee4f1250b291f2b24` 于08:22:39 UTC自然完成18阶段PASS：完整CGO0普通测试/vet/build、固定SQLite3.54.0完整普通oracle、完整CGO1 race、guard、五目标生产编译、模块及全部3004文件/143目录前后身份。785非docs文件固定；最终文档/证据改变整个tree但不得改变这些运行源码。两个外部预检的报告版本/基线POSIX比较问题在Go执行前发现并保留，修正外部验证器后一次完成运行门，无运行重试。详见[精确组合证据](evidence/public-open-integration-20261011.md)。本批新提交/Library恢复/CI仍待实际核验。真实RecoverRollback、production bridge和开启恢复选项的真实Open/Connect均BLOCKED / NOT_RUN，公开物理harness仍IMPLEMENTATION_MISSING；M3/M10/整体未验收。

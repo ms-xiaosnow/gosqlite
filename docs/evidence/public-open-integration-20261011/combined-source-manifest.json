@@ -1,0 +1,54 @@
+{
+  "created_utc": "2026-10-11T07:52:56.362583+00:00",
+  "base_commit": "c1502790c4b233757b0f9a3c4d5e5bdee1321310",
+  "base_tree": "5a98da017584fe708e43bce9f9e52dca1f06bd20",
+  "tree": "442a7104dc780ddb20826e5ee4f1250b291f2b24",
+  "owner_tree": "75c074548e8b5208beb06e6ead314d835cd16f4f",
+  "files": 3004,
+  "directories": 143,
+  "source_paths": [
+    "driver/driver.go",
+    "internal/pager/pager.go",
+    "internal/pager/reader_acquisition_test.go",
+    "internal/pager/reader_recovery.go",
+    "internal/pager/reader_recovery_test.go",
+    "internal/pager/recovery.go",
+    "internal/testscope/independent_public_recovery_test.go",
+    "internal/testscope/main.go",
+    "internal/testscope/main_test.go",
+    "internal/testscope/recovery_alias_guard_test.go",
+    "sqlite/rollback_recovery.go",
+    "sqlite/rollback_recovery_test.go",
+    "sqlite/sqlite.go"
+  ],
+  "changed_paths": [
+    "driver/driver.go",
+    "internal/pager/pager.go",
+    "internal/pager/reader_acquisition_test.go",
+    "internal/pager/reader_recovery.go",
+    "internal/pager/reader_recovery_test.go",
+    "internal/pager/recovery.go",
+    "internal/testscope/independent_public_recovery_test.go",
+    "internal/testscope/main.go",
+    "internal/testscope/main_test.go",
+    "internal/testscope/recovery_alias_guard_test.go",
+    "sqlite/rollback_recovery.go",
+    "sqlite/rollback_recovery_test.go",
+    "sqlite/sqlite.go"
+  ],
+  "original_test_files": 362,
+  "modified_old_tests": [
+    "internal/pager/reader_acquisition_test.go",
+    "internal/testscope/main_test.go"
+  ],
+  "unchanged_old_test_files": 360,
+  "new_tests": [
+    "internal/pager/reader_recovery_test.go",
+    "internal/testscope/independent_public_recovery_test.go",
+    "internal/testscope/recovery_alias_guard_test.go",
+    "sqlite/rollback_recovery_test.go"
+  ],
+  "non_docs_files": 785,
+  "physical_recovery": "BLOCKED / NOT_RUN",
+  "status": "Exact runtime composition frozen; full guarded ordinary default-off aggregate pending"
+}

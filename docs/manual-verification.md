@@ -17,6 +17,31 @@ Test-scope correction: historical full suites from M2 through 7addc493 included 
 
 This file records checks that require a separately approved native environment or independent reviewer. No command here is evidence that it was executed.
 
+## 2026-10-11 public Open recovery update
+
+The bounded experimental public source is now connected through nil-default
+`Options.RollbackRecovery`, Open/OpenContext and configured driver.NewConnector.
+It permits only Linux writable plaintext rollback recovery, at most one attempt
+and one fresh no-create probe after verified reader retirement. Nil still refuses
+existing journals with ErrRecoveryRequired / CodeIOErr. Journal diagnostic text
+and private wrapping changed; byte-identical errors are not claimed.
+
+Independent candidate tree `75c074548e8b5208beb06e6ead314d835cd16f4f` passed the
+11 exact descriptor-free tests in CGO0 and the identical race selection, guards,
+scoped vet, full CGO0 build and dependency/identity checks. This is source/model/
+compile evidence only. The later c150 composition's complete ordinary/oracle/race,
+exact-commit restore and new CI remain pending at this documentation checkpoint.
+
+Actual RecoverRollback, the production bridge and recovery-enabled real
+Open/OpenContext/Connect remain BLOCKED / NOT_RUN. The public physical harness
+is IMPLEMENTATION_MISSING: the existing internal TestManualRollbackRecovery does
+not exercise that bridge. Its commands below remain the same restricted internal
+harness, not a newly working public acceptance command. Default-on recovery,
+broader journals, WAL-tail publication and other native platforms remain gaps.
+See [API, source/model commands and evidence](rollback-recovery-open.md) and
+[Chinese manual section 18](manual-verification-zh.md) for exact boundaries.
+Older milestone statements below retain their original source/time identities.
+
 ## Current state
 
 M0–M2 ordinary unit/build/vet/race, valid-data read/write/rollback and cross-process lock tests, memory-only fuzz and opt-in official-oracle checks are executable here. Database crash/fault/process-exit workflow execution is prohibited by the current platform boundary; it must not be renamed, obscured, moved to remote CI, or executed elsewhere as a workaround. Such test source may be reviewed and documented; its results remain BLOCKED / NOT_RUN until independently supplied authorized evidence is available.
@@ -32,7 +57,7 @@ CGO_ENABLED=1 go test -race ./sqlite ./driver ./internal/pager ./internal/btree
 
 These execute normal process completion and supported valid-data operations. The oracle's integrity_check and ordinary lock-contention checks are permitted and do not simulate power loss or injected I/O faults. TestTxStatementPanicAndCancellationUndo only restores an in-memory statement callback and recovers in the same goroutine before commit; it never crashes a process or interrupts disk publication.
 
-Pending restricted gates: interrupted journal creation/publication/database writes/unlink/directory-sync; short-write, Sync-error, disk-full, permissions and wrong-offset injection; hot-journal recovery after forced exit; WAL crash/checkpoint recovery. Status: BLOCKED / NOT_RUN. M2 contains defensive source branches for ambiguous commit errors but no claim that those branches were executed. Native exclusive WAL normal-success paths are implemented; native rollback recovery remains source-only and is never invoked by normal Open. Shared concurrent WAL ordinary paths are implemented and tested; ambiguous cold tails and broader journal recovery remain implementation gaps. Do not run an invented placeholder command; a later source-only harness will document precise independently executable commands once it exists.
+Pending restricted gates: interrupted journal creation/publication/database writes/unlink/directory-sync; short-write, Sync-error, disk-full, permissions and wrong-offset injection; hot-journal recovery after forced exit; WAL crash/checkpoint recovery. Status: BLOCKED / NOT_RUN. M2 contains defensive source branches for ambiguous commit errors but no claim that those branches were executed. Native exclusive WAL normal-success paths are implemented; physical rollback recovery remains unqualified. Nil-policy Open never invokes it. The explicit experimental Linux writable-plaintext opt-in now has a production source call path, but that bridge and recovery-enabled real Open have not been executed. Shared concurrent WAL ordinary paths are implemented and tested; ambiguous cold tails and broader journal recovery remain implementation gaps. Do not run an invented placeholder command; a later source-only harness will document precise independently executable commands once it exists.
 
 One pre-final aggregate oracle attempt FAILED because a legacy M1 read-only test used the new writable-default driver and deleted rows from a generated fixture. The test was corrected to an explicit mode=ro DSN and a read-only transaction assertion; the exact fixture was restored from the verified M1 commit. Final reruns and source hashes are recorded separately in M2 evidence. This was a real test failure, not passing evidence.
 

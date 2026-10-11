@@ -1,0 +1,46 @@
+{
+  "phase": "after",
+  "baseline_commit": "c1502790c4b233757b0f9a3c4d5e5bdee1321310",
+  "baseline_tree": "5a98da017584fe708e43bce9f9e52dca1f06bd20",
+  "exact_tree": "442a7104dc780ddb20826e5ee4f1250b291f2b24",
+  "source_files": 3004,
+  "source_directories": 143,
+  "changed_paths": [
+    "driver/driver.go",
+    "internal/pager/pager.go",
+    "internal/pager/reader_acquisition_test.go",
+    "internal/pager/reader_recovery.go",
+    "internal/pager/reader_recovery_test.go",
+    "internal/pager/recovery.go",
+    "internal/testscope/independent_public_recovery_test.go",
+    "internal/testscope/main.go",
+    "internal/testscope/main_test.go",
+    "internal/testscope/recovery_alias_guard_test.go",
+    "sqlite/rollback_recovery.go",
+    "sqlite/rollback_recovery_test.go",
+    "sqlite/sqlite.go"
+  ],
+  "new_test_paths": [
+    "internal/pager/reader_recovery_test.go",
+    "internal/testscope/independent_public_recovery_test.go",
+    "internal/testscope/recovery_alias_guard_test.go",
+    "sqlite/rollback_recovery_test.go"
+  ],
+  "owner_tree": "75c074548e8b5208beb06e6ead314d835cd16f4f",
+  "owned_source_paths_exact_owner_match": 13,
+  "non_doc_files": 785,
+  "old_test_files_byte_mode_unchanged": 360,
+  "modified_old_tests": [
+    "internal/pager/reader_acquisition_test.go",
+    "internal/testscope/main_test.go"
+  ],
+  "module_scripts_workflows_goal_unchanged": true,
+  "limit_regression_unchanged": true,
+  "owner_inventory_matches": true,
+  "freeze_copy_bytes_git_modes_actual_modes_directory_inventory_match": true,
+  "copy_has_git": false,
+  "git_commands_run": 0,
+  "manifest_sha256": "c0affbbafbc4e1c16b57529891ea315383464f375c6043930501ce8825dfc67d",
+  "baseline_inventory_sha256": "0299c64f8398b7bca631a2ece298cb8ce4f79061b3f778b7aebf7c83c08616fa",
+  "frozen_inventory_sha256": "10f81c74349b90b08785ad75ae1859169cf8b11b68646961f3959526baf1042a"
+}

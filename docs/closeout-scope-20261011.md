@@ -19,10 +19,10 @@
 
 | 优先项 | 真实状态 | 当前分类与下一步边界 |
 |---|---|---|
-| §4.1 P0 恢复与安全发布 | public Open rollback 恢复未合入；native exclusive WAL-tail publisher 仍缺 | 源码属开发暂停/集成待办，未定位精确编辑拒绝；物理恢复执行限制不变。先按具体源码动作审阅依赖，不整树恢复旧a314/715b15。普通reopen/checkpoint不等于热恢复 |
+| §4.1 P0 恢复与安全发布 | 有限 Linux 可写明文 public Open/Connector opt-in 源码已接入，nil 默认拒绝；独立 source/model/compile PASS。native exclusive WAL-tail publisher、broader journals/default-on/其他平台仍缺 | 实验性源码实现不等于物理资格；public physical harness 为 IMPLEMENTATION_MISSING，真实 RecoverRollback/bridge/启用恢复的真实 Open 均 BLOCKED / NOT_RUN。新组合普通门及新提交恢复/CI另验，不整树恢复旧候选 |
 | 已声明支持 SQL 的正确性 | CAST/IPK、LEFT-ON/WHERE、排序/执行阶段等差异；planner V4c 尚未与 main grouped/counter 组合 | 属于工程正确性/集成待办，未定位planner编辑拒绝；当前limitValue数值转换/ErrMismatch三文件修正已独立限定PASS，组合完整普通18阶段PASS。其余phase/order/binding逐批审阅，不能仅靠测试机补齐 |
 | 明文备份、真正只读 WAL | main plaintext backup 仍 unsupported；rollback V2 未终审/合入；WAL/非 Linux 备份及真正只读 WAL 入口缺实现 | 与旧backup/WAL/目录协议有依赖，属于具体审阅/集成待办；未定位编辑拒绝，仍须逐项划定源码范围。已有可写协调named Check不称为只读；物理负向执行受限 |
-| 原生 backend/目录所有权 | Windows shared rekey、Darwin V3、public rollback-open、OS namespace 门控候选未合入；retained-directory 未完整冻结/整合 | 属源码/集成待办及受限原生资格，未定位编辑拒绝；不能整树复制旧组合、把交叉编译称为原生运行或直接开启新OS全套 |
+| 原生 backend/目录所有权 | Windows shared rekey、Darwin V3、OS namespace 门控候选未合入；retained-directory 未完整冻结/整合 | 属源码/集成待办及受限原生资格，未定位编辑拒绝；不能整树复制旧组合、把交叉编译称为原生运行或直接开启新OS全套 |
 | ANN 报告和发布测量 | ANN V3 三个报告准入缺陷仍 FAIL；V4 未完成；performance V3 未合入/部署 | ANN V4、41目标fuzz与未知链路禁重试。Performance V3的源码集成和自动部署HOLD分开；旧算法PASS不消除报告工具FAIL，报告工具FAIL也不证明生产ANN算法全错 |
 | 完整物理安全设施 | crash/power-loss/process-exit、short write、Sync/ENOSPC、torn write、checkpoint/rekey 中断、完整磁盘认证负面矩阵等 harness 仍有源码缺口 | 源码缺口标记IMPLEMENTATION_MISSING，执行另记BLOCKED/NOT_RUN；未定位harness源码编辑拒绝。具体源码须审阅，不能编造现成命令或称为只待运行 |
 | 格式升级/回退与恢复测量 | 全部受支持模式的升级/回退覆盖、WAL 恢复耗时工具及必要安全恢复路径尚未闭合 | 既有少数跨版本 fixture/普通测量不能代表完整矩阵 |
@@ -51,13 +51,15 @@
 
 三项历史有限改动及各自独立scoped/static审阅已完成，63c2持久证据已按第一节闭合。此前停止新增工作的结论取决于过宽的源码暂停分类，现不再作为全面停编依据。按用户06:53 UTC指示，继续完成原目标中的具体源码缺口，每批完成后提交并报告；若遇到被明确拒绝或无法识别的中断动作依赖，停止该依赖并报告，不另起同义链路。
 
-当前开发基点为63c2；新切片是sqlite/query.go的limitValue数值affinity/ErrMismatch及专用回归，三文件修正已独立限定PASS；精确组合18阶段PASS，提交/恢复/CI待闭合，见[新证据](evidence/limit-conversion-20261011.md)。只读依赖不涉及VFS/recovery/backup/ANN；ordinary/fixed-oracle/race按实际源码与选择器审阅后验证。其他候选尚未一揽子启动。
+历史 LIMIT 批次的开发基点为63c2；该切片是sqlite/query.go的limitValue数值affinity/ErrMismatch及专用回归，三文件修正已独立限定PASS；精确组合18阶段PASS，提交/恢复/CI待闭合，见[新证据](evidence/limit-conversion-20261011.md)。只读依赖不涉及VFS/recovery/backup/ANN；ordinary/fixed-oracle/race按实际源码与选择器审阅后验证。其他候选尚未一揽子启动。
 
-旧有限结论不表示所有当前可实现功能已完成，也不表示只剩人工测试或已证明源码编辑被平台全面禁止。公开恢复、WAL-tail publisher、支持域 SQL 正确性、明文备份、真正只读 WAL、部分 backend 和完整故障设施仍有实现或集成缺口；ANN V3原始FAIL、ANN V4/41目标fuzz/未知中断禁重试，以及真实物理执行限制不变。当前 M10 未完成，不能宣布生产安全、原始 goal 或 M0–M10 全部 VERIFIED。
+2026-10-11 后续 P0 批次以已保存 c150 为组合基点，有限公开恢复源码及独立 source/model/compile 已完成；新组合普通门、提交恢复/CI另列待核验，详见[专题边界](rollback-recovery-open.md)。默认拒绝、ErrRecoveryRequired/CodeIOErr保持，诊断文本及私有包装有变化。
+
+旧有限结论不表示所有当前可实现功能已完成，也不表示只剩人工测试或已证明源码编辑被平台全面禁止。更广公开恢复配置与物理harness、WAL-tail publisher、支持域 SQL 正确性、明文备份、真正只读 WAL、部分 backend 和完整故障设施仍有实现或集成缺口；ANN V3原始FAIL、ANN V4/41目标fuzz/未知中断禁重试，以及真实物理执行限制不变。当前 M10 未完成，不能宣布生产安全、原始 goal 或 M0–M10 全部 VERIFIED。
 
 ## 六、维护者的实际下一步
 
-以下是继续开发和验收的分类清单，不是一揽子执行许可。当前LIMIT切片以外的源码候选逐项审阅动作、依赖和验证范围；不能笼统说“之后人工验收”，也不能把所有未合入源码称为平台禁止编码。
+以下是继续开发和验收的分类清单，不是一揽子执行许可。LIMIT和已审阅P0有限公开恢复切片以外的源码候选逐项审阅动作、依赖和验证范围；不能笼统说“之后人工验收”，也不能把所有未合入源码称为平台禁止编码。
 
 ### 已有可执行入口但当前受限或未运行
 
@@ -68,7 +70,7 @@
 
 ### 首先需要实际代码或 harness 并重新审阅
 
-- public Open rollback集成、native exclusive WAL-tail publisher、支持SQL域内已知planner/阶段/排序错误仍是实际源码待办。当前仅LIMIT转换切片开始；其余候选先核定原暂停/工程缺陷/依赖，不能整体放行或重建同义被阻链路。
+- 有限 public Open rollback opt-in 源码已接入且通过独立 source/model/compile 审阅；其 public physical harness 仍为 IMPLEMENTATION_MISSING。broader journals/default-on/其他平台、native exclusive WAL-tail publisher、支持SQL域内已知planner/阶段/排序错误仍是实际源码或策略待办。其余候选先核定原暂停/工程缺陷/依赖，不能整体放行或重建同义被阻链路。
 - main 明文 backup、WAL/非 Linux backup、真正只读 plaintext-WAL 入口、尚未整合的 backend/目录所有权候选及完整格式升级/回退覆盖。
 - 完整 crash/power-loss/process-exit、短写/Sync/ENOSPC/torn-write、checkpoint/rekey 中断与磁盘认证负面矩阵：IMPLEMENTATION_MISSING 加受限执行；先补具体协议、实现、断言与独立审阅，不能编造命令。
 - ANN V3 的三个源码/报告准入 FAIL 保留；V4 未完成，41 目标 fuzz 和未知中断链路没有明确操作/目标。对应链路继续HOLD/UNKNOWN/BLOCKED，不能以纯内存修复、缩小任务或新测试机重试。

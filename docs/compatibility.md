@@ -5,6 +5,10 @@
 [验收矩阵](acceptance-status.md)、[中断记录](interruption-20261010.md) 和
 [中文手册](manual-verification-zh.md)。Native Check V2 已在 776b23e 合入；
 下面修正此前“没有 native full checker”的过时摘要，保留原记录于 Git 历史。
+2026-10-11 P0 更新：公开 Open 已接入默认关闭的有限 Linux 明文 rollback
+恢复源码；独立源码/内存模型/编译审阅 PASS，后续当前组合默认关闭的完整普通/oracle/race 门亦 PASS。真实恢复和开启选项的
+真实 Open 仍未运行；新提交恢复及 CI 需各自精确身份，
+不能沿用旧 LIMIT 或候选结果，详见[公开恢复边界](rollback-recovery-open.md)。
 
 Behavior baseline: official SQLite **3.54.0**; Go **1.27.2**. This is a
 conditional development checkpoint, not production or complete milestone
@@ -27,8 +31,8 @@ Exact source, command, CI and restored-commit evidence remains in
 | SQLite format-3 rowid files | partial | Explicit header/varint/record/table/index/overflow/freelist encodings, schema root1, signed rowids, integer/REAL/NULL/TEXT/BLOB; ordinary CLI interoperability at 512/4096/65536-byte pages |
 | Unsupported file/schema forms | unsupported | UTF-16, WITHOUT ROWID, autovacuum and unlisted schema/format semantics fail closed; support is never inferred from the version number |
 | Table and index mutation | partial | Native page split/merge, table/index creation and maintained nonunique BINARY ASC indices; test-oracle integrity_check and the separately bounded native DB/Tx/CLI Check V2 provide distinct checks, neither implies universal SQLite feature support |
-| Rollback journal | partial | Standard DELETE-journal normal commit/rollback and sector assumptions; existing journals cause ErrRecoveryRequired; existing zero-byte databases are rejected |
-| Hot rollback recovery | partial source only | Explicit internal aligned finite-count multi-segment replay with bounded memory parsing and minimal cleanup ownership; automatic Open integration and unsupported modes/tails remain code work. Native RecoverRollback is source-reviewed only; physical replay/crash qualification is NOT_RUN |
+| Rollback journal | partial | Standard DELETE-journal normal commit/rollback and sector assumptions; nil-default Open still refuses existing journals with ErrRecoveryRequired / CodeIOErr. Explicit RollbackRecovery opts into the bounded source-only profile below; existing zero-byte databases remain rejected |
+| Hot rollback recovery | partial experimental source/model | Open/OpenContext and configured Connector now have a nil-default, Linux writable-plaintext rollback opt-in, with retired-reader path proof and at most one recovery plus one fresh no-create probe. Independent descriptor-free model/source/compile checks PASS; real RecoverRollback, the production bridge and recovery-enabled real Open remain BLOCKED / NOT_RUN. Public physical harness is IMPLEMENTATION_MISSING; default-on recovery, broader journals, WAL-tail publication and other native platforms remain separate gaps |
 | Exclusive WAL | partial | Explicit writable WALExclusive, lifetime EXCLUSIVE lock, one active lease, ordinary append/read/checkpoint/close/interoperability; not shared concurrency |
 | Shared WAL | partial | Actual dual-header/hash/readmark SHM protocol, single writer/multiple independent snapshots, ordinary live official-reader/writer interoperability and reader-safe checkpoint/reset; one active lease per connection |
 | Ambiguous WAL tails | partial | Accepted ordinary committed/discarded/reset cases are bounded; incomplete/current-generation ambiguous tails fail closed; broader recovery handling remains code work |
@@ -37,6 +41,12 @@ Exact source, command, CI and restored-commit evidence remains in
 | Busy/cancel/uncertain results | partial | Normal BUSY, stale shared promotion, cancellation and snapshot lifetime are exercised. Once physical publication begins it is not interrupted; ErrPoisoned/ErrCommitUncertain requires stopping use and preserving evidence |
 | Native full-profile integrity checking | partial | DB.Check/Tx.Check/CLI Check V2 validate one pinned snapshot, whole-page ownership, supported tables/ordinary indices and built-in extension semantics under explicit budgets. This is not unrestricted SQLite PRAGMA integrity_check or physical recovery qualification; see native-check.md |
 | Plaintext backup/native VACUUM | unsupported | Plaintext backup API/CLI and native VACUUM are not implemented on main. Unpublished Linux rollback backup candidates do not change this status; encrypted correct-key backup has a separate supported profile |
+
+The journal-presence diagnostic text and private wrapping changed, including
+with nil policy. Default refusal, `errors.Is(err, ErrRecoveryRequired)` and
+`CodeIOErr` are preserved; byte-identical errors or error-chain shape are not
+promised. See [opt-in rollback recovery](rollback-recovery-open.md) for API,
+limits, supported journals and evidence boundaries.
 
 Plaintext paths are resolved once per connection. Idle rollback connections do
 not hold a shared snapshot. Query Rows and explicit Tx retain their snapshot;

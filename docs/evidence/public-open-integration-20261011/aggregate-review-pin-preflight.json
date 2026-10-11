@@ -1,0 +1,15 @@
+{
+  "observed_utc": "2026-10-11T07:55:50Z",
+  "action": "Prepare independent aggregate configuration and pin completed independent review report before any Go execution",
+  "target": "public-open-independent-review-v1/report.md",
+  "expected_sha256": "94113361f3b9cc489135f94c07d4b50fca820b877250deae812bcc06e3ae7556",
+  "observed_sha256": "e507af6e674aae7802b060cb3c798fc2b21e7f4c6771271533576b65c91a6d17",
+  "report_bytes": 14299,
+  "report_mtime_utc": "2026-10-11T07:52:37.022029846Z",
+  "preparation_python_result": "AssertionError at expected report SHA assertion before approved-config.json or runner was written",
+  "following_identity_command_result": "Exit 2: identity.py did not exist, because preparation stopped before file creation",
+  "go_execution": "NOT_RUN",
+  "resource_failure": false,
+  "source_identity": "Independently reconstructed unchanged exact tree 442a7104dc780ddb20826e5ee4f1250b291f2b24 afterward; no database or Go execution",
+  "handling": "Reported immediately to parent; held Go execution pending final report provenance reconciliation plus separate compiler release. Historical source-integration pin retained."
+}

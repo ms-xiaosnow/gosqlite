@@ -1,0 +1,47 @@
+{
+  "observed_utc": "2026-10-11T07:52:28.242012+00:00",
+  "base_commit": "c1502790c4b233757b0f9a3c4d5e5bdee1321310",
+  "donor_tree": "75c074548e8b5208beb06e6ead314d835cd16f4f",
+  "source_paths": [
+    "driver/driver.go",
+    "internal/pager/pager.go",
+    "internal/pager/reader_acquisition_test.go",
+    "internal/pager/reader_recovery.go",
+    "internal/pager/reader_recovery_test.go",
+    "internal/pager/recovery.go",
+    "internal/testscope/independent_public_recovery_test.go",
+    "internal/testscope/main.go",
+    "internal/testscope/main_test.go",
+    "internal/testscope/recovery_alias_guard_test.go",
+    "sqlite/rollback_recovery.go",
+    "sqlite/rollback_recovery_test.go",
+    "sqlite/sqlite.go"
+  ],
+  "guard_applied_first": true,
+  "checked_patch_sha256": "4285b5bae09bcdb515a484b777eeb858f8ad5572d3f808917a89a17dba68080f",
+  "review_sha256": "94113361f3b9cc489135f94c07d4b50fca820b877250deae812bcc06e3ae7556",
+  "commands": [
+    [
+      "git",
+      "apply",
+      "--check",
+      "--exclude=docs/*",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-open-integration-evidence/source.patch"
+    ],
+    [
+      "git",
+      "apply",
+      "--include=internal/testscope/*",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-open-integration-evidence/source.patch"
+    ],
+    [
+      "git",
+      "apply",
+      "--exclude=docs/*",
+      "--exclude=internal/testscope/*",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-open-integration-evidence/source.patch"
+    ]
+  ],
+  "source_exact_reviewed_bytes": true,
+  "no_go_execution": true
+}

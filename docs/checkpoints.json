@@ -639,5 +639,66 @@
     "acceptance": "历史有限三项收尾；整体未验收。06:53继续编码指示与限制分类纠正另见当前文档，不将旧暂停解释为全面编码拒绝。",
     "evidence_archive_library_file_id": "libfile_7fea2541ad7881919b7236a66499c138",
     "evidence_archive_sha256": "d1a8e98dae0d1260006f75c938360e04b3b40744b69b1c7d1b4e286800e6bd45"
+  },
+  {
+    "observed_utc": "2026-10-11T08:13:45.136302+00:00",
+    "remote_commit": "c1502790c4b233757b0f9a3c4d5e5bdee1321310",
+    "tree": "5a98da017584fe708e43bce9f9e52dca1f06bd20",
+    "parent": "63c2ebb10e3a2c4ff2378ee9f33c46133134c70f",
+    "library_file_id": "libfile_37b21d0517b48191aa12da9186208cd8",
+    "library_version": 0,
+    "bundle_bytes": 5458603,
+    "bundle_sha256": "7d6b4dc5bed8f57f3f43ad2fa754fcb794ed66dea49efb4f67ffe04c2acedf90",
+    "main_readback_verified": true,
+    "local_mirror_exact": true,
+    "restore": {
+      "status": "PASS",
+      "finished_utc": "2026-10-11T07:57:22.974509+00:00",
+      "stages": 15,
+      "source_files": 2998,
+      "accepted_non_docs": 779,
+      "native_leaf_cases_per_mode": 1016,
+      "oracle_leaf_cases_per_mode": 344,
+      "scope": "exact restored LIMIT ordinary/race/oracle/oracle-race, guards, full vet/build, five production cross-builds, module/dependency and full source/Git identity",
+      "evidence_manifest_sha256": "72870af28cb087fc6e5f0207257a0b23a80055fc04c04496c028fecdd05d6735"
+    },
+    "source_gate": {
+      "tree": "ca8947811d60266c19db2d6b155bd62b843d6e48",
+      "status": "PASS",
+      "finished_utc": "2026-10-11T07:39:21Z",
+      "stages": 18,
+      "non_doc_identity_files": 779,
+      "scope": "complete existing guarded ordinary unit/oracle/race; source/models added only LIMITconversion; foreign production compile only"
+    },
+    "ci_run": 38122662808,
+    "ci_status": "COMPLETED SUCCESS 2026-10-11T08:10:53Z",
+    "ci_jobs": [
+      {
+        "id": 114420432058,
+        "name": "oracle",
+        "conclusion": "success"
+      },
+      {
+        "id": 114420432223,
+        "name": "ordinary",
+        "conclusion": "success"
+      }
+    ],
+    "ci_decoded_logs": {
+      "ordinary": {
+        "bytes": 23991,
+        "sha256": "053efc48defbd22f89cc531f75c0861d64c192998a0d3ba3952b45059c1c079d"
+      },
+      "oracle": {
+        "bytes": 21227,
+        "sha256": "7b2334e6b83b7ccd9a953a853d26e3adee4d1dd21ae0195ac950c62f44edfad4"
+      }
+    },
+    "evidence_archive_library_file_id": "libfile_609edcfa90988191b5f3b29595ec7c8b",
+    "evidence_archive_bytes": 7600159,
+    "evidence_archive_sha256": "d316d7a446ee6c83002a3a17b18758aa6b640545635ac048c95690116313ea92",
+    "evidence_archive_readback": "PASS bytecmp,544 archive entries,543 manifest file hashes",
+    "history": "Original630native/208corrected-oracle baseline failures and initial oracle HARNESS_FAIL preserved; corrected final test bytes used on both baseline/fixed. Original private-main authorization rejection and unchanged single retry preserved. No restricted workflow rerun.",
+    "acceptance": "LIMIT bounded conversion checkpoint; broader SQL/recovery/platform/safety/overall M10 remain incomplete."
   }
 ]

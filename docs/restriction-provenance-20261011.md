@@ -1,6 +1,6 @@
 # 源码开发与受限执行的证据分类
 
-核对日期：2026-10-11 UTC。本文纠正此前将多项剩余编码工作一并列作平台禁止的过宽表述。原始 [goal.md](../goal.md) 不变；当前开发基点为 `63c2ebb10e3a2c4ff2378ee9f33c46133134c70f`，tree `d735409ebd1c43d90ee1650c8a7c2a084e270674`。07:01:55 UTC 的远端只读记录仍指向该提交。本轮后续新提交、精确恢复和 CI 尚待实际产生及核验，不预写自指 SHA。
+核对日期：2026-10-11 UTC。本文纠正此前将多项剩余编码工作一并列作平台禁止的过宽表述。原始 [goal.md](../goal.md) 不变；初次分类时的开发基点为 `63c2ebb10e3a2c4ff2378ee9f33c46133134c70f`，tree `d735409ebd1c43d90ee1650c8a7c2a084e270674`。07:01:55 UTC 的远端只读记录仍指向该提交。本轮后续新提交、精确恢复和 CI 尚待实际产生及核验，不预写自指 SHA。
 
 **结论：在已搜索的可访问证据中，没有定位到 recovery、backup、WAL、planner、backend 或缺失 harness 的精确源码编辑动作被拒绝的原始记录。** 已定位的事实包括受限测试执行、开发时的谨慎暂停、真实工程缺陷、待审阅/待集成，以及触发动作不明的整轮安全中断。这些事实应分开记载。没有找到记录，不证明从未拒绝，也不自动授予任何操作权限。
 
@@ -34,13 +34,17 @@ ANN V4、41 目标 fuzz 与未知中断操作继续禁止重发、改写、拆�
 
 ## 三 逐项源码待办分类
 
+2026-10-11 P0后续对账：下表公开恢复一行按本次有限source/model集成更新，
+其他行保留其已有证据身份。第四至六节保留LIMIT/分类批次的历史时点；
+具体新增范围及尚未闭合的组合/持久/CI门见第七节。
+
 ### 3.1 恢复 备份 WAL 与目录所有权
 
 下表每行均为“①未定位；④未归因”，另外明确②执行与③源码状态。
 
 | 剩余项及源码位置 | ③ 源码或集成待办 | ② 仍受限的执行 | 依赖及溯源 |
 |---|---|---|---|
-| public Open rollback 恢复 | `sqlite/sqlite.go` 尚未接入候选 `sqlite/rollback_recovery.go`、pager reader-proof 和 driver 选项复制；V2 源码增量已审阅，未合入 | 实际 RecoverRollback、启用恢复的真实 Open、生产桥接均 NOT_RUN | 依赖现有 reader retirement/admission、路径身份及有限记录数恢复，不依赖 ANN。`public-recovery-independent-review-v2/report.md:3,7–13,35–47`；原交接 `:111`。候选 tree `5f2766d4b058b7d0b284dd1f34d35edf90c83db4` |
+| public Open rollback 恢复 | 已接入 `sqlite/rollback_recovery.go` 的 nil-default Linux 可写明文有限 opt-in、pager retired-reader/path proof 和 driver 配置复制；独立 source/model/compile PASS，仍属实验性实现 | 实际 RecoverRollback、启用恢复的真实 Open/Connect、生产桥接均 BLOCKED / NOT_RUN；public physical harness 为 IMPLEMENTATION_MISSING | 依赖既有 retirement/admission、路径身份和有限记录数恢复，不依赖 ANN。旧V2 tree `5f2766d…`保留历史；本次独立候选 tree `75c074548e8b5208beb06e6ead314d835cd16f4f`，c150组合另验，见[专题](rollback-recovery-open.md)及第七节 |
 | 更广 rollback journal 形式 | `internal/journal/replay.go:59–74` 仍排除 super/master journal、no-sync 记录数和旧式未指定页大小；真实解析/恢复兼容性缺口 | 物理 replay 受限；字节解析与磁盘执行是不同动作 | 需明确定义受支持格式与恢复边界。没有定位到该 parser 编辑的原始拒绝 |
 | Linux rollback plaintext Backup V2 | `sqlite/backup.go`、`internal/pager/plain_backup.go`、namespace identity 和 CLI 接线候选未完成最终审阅/集成；main 明文 backup 仍 unsupported | 原生故障、namespace 碰撞、恢复/发布负向场景受限 | V1 P1 为源/目标 sidecar 家族重叠的工程缺陷；V2 局部修正不补齐终审。`plaintext-backup-ownership-review-v1/review.md:5–52`、`plaintext-backup-api-v2-report.md:20–49,61–84`、原交接 `:94–100,115`。V2 tree `d73faa3d653df5382b01ebc318145ed921833732` |
 | WAL plaintext backup | 缺 WAL 快照/复制所有权协议与 API profile dispatch，不能只运行现有 rollback backup | 物理失败/恢复资格受限 | 依赖 WAL 快照、发布和目录所有权设计。`plaintext-backup-api-v2-report.md:83–84`；63c2 版 acceptance 第29行 |
@@ -139,3 +143,29 @@ ANN V4、41 目标 fuzz 与未知中断操作继续禁止重发、改写、拆�
 表中非仓库路径是原工程证据文件名，不能假定仅 checkout main 就已取得这些外置材料。此前 Library 源码归档与后续日志归档覆盖不同：30705保留旧组合，276312保留六份静态候选；均不证明未合入候选已验收。后续需要时应按实际文件及哈希核对，不能以归档存在替代缺失审阅。
 
 原始 goal.md 的 SHA-256 仍为 `9ae7b1d776856669a10eb753408c7754d015d266f8783240165450e96e4bac81`，43,100字节。用户自测步骤以[中文手工验收手册](manual-verification-zh.md)、[CLI资源限定复验](cli-resource-verification-zh.md)及[五例限定复验](example-retention-verification-zh.md)为准；本分类纠正没有改写这些步骤或解除其限制。
+
+
+## 七 2026-10-11 P0 public Open 后续源码与模型更新
+
+本次有限公开恢复源码在已保存 c150 上逐 hunk 组合，保留该提交的 LIMIT
+和分类文档。候选原基点63c2，独立复核 tree
+`75c074548e8b5208beb06e6ead314d835cd16f4f`，13项命令阶段自然 exit0，
+末次 race 07:49:34.878759 UTC、身份复核07:49:35.178221 UTC完成。
+11个精确无描述符测试在CGO0与相同race选择均PASS，guard、限定vet、
+全包CGO0 build、无CgoFiles闭包及精确补丁重放PASS，未发现阻断源码问题。
+这不是完整 ordinary/oracle 组合验收；c150加P0的新组合、新提交恢复和CI
+仍须按各自身份取得结果，不能继承旧基点或候选的PASS。
+
+真实API是 `Options.RollbackRecovery *RollbackRecoveryOptions`，nil继续拒绝
+已有journal；Linux可写明文rollback的非nil配置只允许一次恢复及一次新的
+no-create probe。默认拒绝、`errors.Is(err, ErrRecoveryRequired)`和CodeIOErr
+保持，journal诊断文本与私有包装有变化。其他SQL/Reader/Tx入口没有新增恢复。
+完整API、三个预算及错误/所有权界限见[公开恢复专题](rollback-recovery-open.md)。
+
+公开物理harness仍为IMPLEMENTATION_MISSING；现有内部manual_recovery
+测试不调用新public bridge，不能作为公开入口验收。实际RecoverRollback、
+production bridge及开启恢复的真实Open/OpenContext/Connect均BLOCKED / NOT_RUN。
+默认开启、更广journal、WAL publisher、Darwin/Windows恢复及原生失败资格
+没有被这一源码/模型PASS补齐；ANN V4、41目标fuzz和未知链路的禁重试不变。
+中文第18节记录实际配置和未来断言；缺少入口不编造可运行命令，旧第12节
+的已存在手工命令保持原门控和限制。

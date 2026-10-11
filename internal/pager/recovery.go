@@ -14,7 +14,8 @@ import (
 )
 
 // RecoveryOptions bounds the explicit, internal rollback recovery operation.
-// This operation is not wired into Open, OpenTx, or any public SQL entry point.
+// It is reachable only from explicitly opted public rollback Open, after a
+// verified retired probe; OpenTx and subsequent SQL never invoke it.
 // Its physical recovery/failure behavior has NOT passed the acceptance gate.
 type RecoveryOptions struct {
 	Limits journal.ReplayLimits

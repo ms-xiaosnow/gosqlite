@@ -138,6 +138,10 @@ type Options struct {
 	IndexMethods *registry.Registry
 	ReadOnly     bool
 	NoCreate     bool
+	// RollbackRecovery explicitly enables one source-only Linux recovery attempt
+	// during writable plaintext rollback Open. Nil preserves journal refusal.
+	// See RollbackRecoveryOptions for exact limits and unqualified safety gates.
+	RollbackRecovery *RollbackRecoveryOptions
 	// WALExclusive enables the restricted native WAL mode. It retains an
 	// EXCLUSIVE database lock for the connection lifetime and allows one active
 	// query or transaction lease. It requires writable access even for reads.
@@ -218,6 +222,11 @@ func OpenContext(ctx context.Context, path string, opts Options) (result *DB, re
 	if err := checkContext(ctx); err != nil {
 		return nil, wrap("open", err)
 	}
+	var err error
+	opts, err = snapshotRollbackRecovery(opts)
+	if err != nil {
+		return nil, wrap("open", err)
+	}
 	if opts.Encryption != nil {
 		cfg := *opts.Encryption
 		opts.Encryption = &cfg
@@ -240,7 +249,7 @@ func OpenContext(ctx context.Context, path string, opts Options) (result *DB, re
 	if opts.KeepWALOnClose && !opts.WALExclusive && !opts.WALShared && (opts.Encryption == nil || (opts.Encryption.Mode != EncryptionWAL && opts.Encryption.Mode != EncryptionWALShared)) {
 		return nil, wrap("open", fmt.Errorf("KeepWALOnClose requires a WAL mode"))
 	}
-	opts, err := normalizeConnectionLimits(opts)
+	opts, err = normalizeConnectionLimits(opts)
 	if err != nil {
 		return nil, wrap("open", err)
 	}
@@ -321,6 +330,8 @@ func OpenContext(ctx context.Context, path string, opts Options) (result *DB, re
 	if err == nil {
 		d.info = fileInfo(r.Header())
 		err = r.Close()
+	} else if opts.RollbackRecovery != nil && pager.ReaderProbeRecoveryReady(err, path) {
+		d.info, err = recoverRollbackOpen(ctx, path, err, *opts.RollbackRecovery)
 	} else if !opts.ReadOnly && !opts.NoCreate && plainProbeMissing(err) {
 		var p *pager.Tx
 		p, err = pager.OpenTx(ctx, path, d.pagerOptions())

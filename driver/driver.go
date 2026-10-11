@@ -63,6 +63,10 @@ func NewConnector(dsn string, opts sqlite.Options) (*Connector, error) {
 	if mode == "rw" {
 		opts.NoCreate = true
 	}
+	if opts.RollbackRecovery != nil {
+		copy := *opts.RollbackRecovery
+		opts.RollbackRecovery = &copy
+	}
 	if opts.Encryption != nil {
 		cfg := *opts.Encryption
 		opts.Encryption = &cfg

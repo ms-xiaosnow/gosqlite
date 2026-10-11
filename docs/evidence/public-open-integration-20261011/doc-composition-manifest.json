@@ -1,0 +1,150 @@
+{
+  "base_commit": "c1502790c4b233757b0f9a3c4d5e5bdee1321310",
+  "base_tree": "5a98da017584fe708e43bce9f9e52dca1f06bd20",
+  "candidate_tree": "75c074548e8b5208beb06e6ead314d835cd16f4f",
+  "changed_paths": [
+    {
+      "path": "docs/compatibility.md",
+      "before": {
+        "sha256": "5ef5295ad86ede8fcd2de2606fa8634ec28a88fafba7da34ec1e32b2c7a41f05",
+        "bytes": 15903,
+        "mode": "100644"
+      },
+      "after": {
+        "sha256": "e9a886a32730189df7bb8a00811fc067689e417a8d5646b90b798a7b691d70eb",
+        "bytes": 17004,
+        "mode": "100644"
+      }
+    },
+    {
+      "path": "docs/acceptance-status.md",
+      "before": {
+        "sha256": "3e2884178ad239e90164ddcd6bee699b6725120d2cfde7803aee387326169dc6",
+        "bytes": 16538,
+        "mode": "100644"
+      },
+      "after": {
+        "sha256": "33ba04c51de237b6749c3d5d6c8fb4f35f2fd73a4580f4558ca461b7a6478e11",
+        "bytes": 18573,
+        "mode": "100644"
+      }
+    },
+    {
+      "path": "docs/closeout-scope-20261011.md",
+      "before": {
+        "sha256": "85ad7b6b87939475822e18181b3ed863243e7ef61eb37dc57387c2f6c5bee2f4",
+        "bytes": 13760,
+        "mode": "100644"
+      },
+      "after": {
+        "sha256": "742297108be16b33b4224bde7c96402567e35ea6b52a33d2ef4abf1bd19633ae",
+        "bytes": 14448,
+        "mode": "100644"
+      }
+    },
+    {
+      "path": "docs/restriction-provenance-20261011.md",
+      "before": {
+        "sha256": "ea2598ade191311c7550a1e6739221f8c2d7136960373b5d5eb52f14e3a9af29",
+        "bytes": 24709,
+        "mode": "100644"
+      },
+      "after": {
+        "sha256": "bf5f92da288ac2f0a5a4c5120fe288005d03bd11c9312b37402b4f07f106b90c",
+        "bytes": 26921,
+        "mode": "100644"
+      }
+    },
+    {
+      "path": "docs/manual-verification.md",
+      "before": {
+        "sha256": "ed0effa2c69461e6705d6e25b0c371a3a27a396f4fc28406a05a9102e9bfea99",
+        "bytes": 45151,
+        "mode": "100644"
+      },
+      "after": {
+        "sha256": "ccc3a2cb8c38da83b04034b89ad02d1549129eceb22573d80971fd819a219d85",
+        "bytes": 46943,
+        "mode": "100644"
+      }
+    },
+    {
+      "path": "docs/manual-verification-zh.md",
+      "before": {
+        "sha256": "73fe54945066b8a74bda41eb7e402c28a242e75c1312924789582cc2c6291225",
+        "bytes": 64882,
+        "mode": "100644"
+      },
+      "after": {
+        "sha256": "d4d76d27b3fa292a387238bcf6a5c687543f4587d68b963d85ab02d1cb065e4f",
+        "bytes": 75373,
+        "mode": "100644"
+      }
+    },
+    {
+      "path": "docs/progress.md",
+      "before": {
+        "sha256": "183d06a5790c59b9519758ff0e8b5d280ef0c43c110cd033ccb69eb4c9845b5b",
+        "bytes": 135731,
+        "mode": "100644"
+      },
+      "after": {
+        "sha256": "b2d4d89231aff6c26291ee80a4215c308af898829096f223501fbce302fe5b6e",
+        "bytes": 141163,
+        "mode": "100644"
+      }
+    },
+    {
+      "path": "docs/rollback-recovery-open.md",
+      "before": null,
+      "after": {
+        "sha256": "d7d3a8cab66c58942c002dd863c56b819c59243e1784677e7a5ab3963cb19c12",
+        "bytes": 15636,
+        "mode": "100644"
+      }
+    }
+  ],
+  "progress_base_prefix_bytes": 135731,
+  "progress_prefix_preserved": true,
+  "relative_links_checked": 120,
+  "broken_relative_links": [],
+  "new_shell_blocks_static_only": [
+    {
+      "path": "docs/rollback-recovery-open.md",
+      "block_index": 0,
+      "exit": 0,
+      "stderr": ""
+    }
+  ],
+  "test_names_declared": [
+    "TestScopeSourceReferenceGuard",
+    "TestScopeRecoveryOptionTypeChains",
+    "TestIndependentReviewGuardDirectAndAliasLimit",
+    "TestReaderRecoveryMemoryRetiredPathProof",
+    "TestReaderRecoveryMemoryDiagnosticAndOwnershipRefusal",
+    "TestReaderRecoverySourceProofBoundary",
+    "TestReaderAcquisitionSourceSnapshotAfterShared",
+    "TestRollbackRecoveryMemoryPolicy",
+    "TestRollbackRecoveryMemorySingleAttemptSequence",
+    "TestRollbackRecoverySourcePublicAndDriverBoundaries",
+    "TestRollbackRecoveryMemoryFailureClassification"
+  ],
+  "historical_manual_code_blocks_preserved": true,
+  "go_or_database_execution": false,
+  "main_edits": false,
+  "git_writes": false,
+  "remote_ci_library_actions": false,
+  "patch_sha256": "fb5e5c9e797defcddb4f4fb669e096876503fd3f35196d19db8f1e0e1cbb22f4",
+  "reviewed_argv_matches": true,
+  "reviewed_argv_command_count": 11,
+  "patch_replay_in_memory_paths": [
+    "docs/compatibility.md",
+    "docs/acceptance-status.md",
+    "docs/closeout-scope-20261011.md",
+    "docs/restriction-provenance-20261011.md",
+    "docs/manual-verification.md",
+    "docs/manual-verification-zh.md",
+    "docs/progress.md",
+    "docs/rollback-recovery-open.md"
+  ]
+}

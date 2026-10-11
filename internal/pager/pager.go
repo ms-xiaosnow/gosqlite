@@ -38,7 +38,7 @@ func OpenAdmitted(path string, admission *PlainOpenAdmission) (result *Reader, r
 	}
 	defer func() {
 		if result == nil {
-			retErr = cleanup.begin(retErr)
+			retErr = finishReaderProbe(cleanup, path, retErr)
 		}
 	}()
 	// Resolve symlinks so sidecar checks apply to the actual database pathname.
@@ -91,9 +91,9 @@ func OpenAdmitted(path string, admission *PlainOpenAdmission) (result *Reader, r
 	return r, nil
 }
 
-// checkSidecars is shared by read-only probes and writable snapshots. Until
-// recovery has an acceptance-verified implementation, every existing rollback
-// journal (including a cold or empty one) fails closed with a distinct error.
+// checkSidecars is shared by read-only probes and writable snapshots. Every
+// existing rollback journal fails closed here. Only an explicitly opted public
+// Open may recover, after its failed probe has conclusively retired.
 func checkSidecars(path string) error {
 	for _, suffix := range []string{"-wal", "-journal"} {
 		st, absent, err := nativeLstatForCreate(path + suffix)
@@ -104,7 +104,7 @@ func checkSidecars(path string) error {
 			return fmt.Errorf("inspect SQLite sidecar: %w", err)
 		}
 		if suffix == "-journal" {
-			return fmt.Errorf("%w: existing journal; recovery is not yet acceptance-verified", ErrRecoveryRequired)
+			return &rollbackJournalPresence{path: path}
 		}
 		if !st.Mode().IsRegular() || st.Size() != 0 {
 			return fmt.Errorf("%w: nonempty WAL sidecar", ErrUnsupported)

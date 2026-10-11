@@ -1,0 +1,214 @@
+{
+  "observed_utc": "2026-10-11T08:13:45.136302+00:00",
+  "commit": "c1502790c4b233757b0f9a3c4d5e5bdee1321310",
+  "tree": "5a98da017584fe708e43bce9f9e52dca1f06bd20",
+  "parent": "63c2ebb10e3a2c4ff2378ee9f33c46133134c70f",
+  "private": true,
+  "remote_ref_readback": {
+    "ref": "refs/heads/main",
+    "node_id": "REF_kwDOVDg6U69yZWZzL2hlYWRzL21haW4",
+    "url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/git/refs/heads/main",
+    "object": {
+      "sha": "c1502790c4b233757b0f9a3c4d5e5bdee1321310",
+      "type": "commit",
+      "url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/git/commits/c1502790c4b233757b0f9a3c4d5e5bdee1321310"
+    }
+  },
+  "remote_commit_readback": {
+    "sha": "c1502790c4b233757b0f9a3c4d5e5bdee1321310",
+    "node_id": "C_kwDOVDg6U9oAKGMxNTAyNzkwYzRiMjMzNzU3YjBmOWEzYzRkNWU1YmRlZTEzMjEzMTA",
+    "url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/git/commits/c1502790c4b233757b0f9a3c4d5e5bdee1321310",
+    "html_url": "https://github.com/ms-xiaosnow/gosqlite/commit/c1502790c4b233757b0f9a3c4d5e5bdee1321310",
+    "author": {
+      "name": "ms-xiaosnow",
+      "email": "1103184133@qq.com",
+      "date": "2026-10-11T07:48:27Z"
+    },
+    "committer": {
+      "name": "ms-xiaosnow",
+      "email": "1103184133@qq.com",
+      "date": "2026-10-11T07:48:27Z"
+    },
+    "tree": {
+      "sha": "5a98da017584fe708e43bce9f9e52dca1f06bd20",
+      "url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/git/trees/5a98da017584fe708e43bce9f9e52dca1f06bd20"
+    },
+    "message": "fix: align limit value conversion",
+    "parents": [
+      {
+        "sha": "63c2ebb10e3a2c4ff2378ee9f33c46133134c70f",
+        "url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/git/commits/63c2ebb10e3a2c4ff2378ee9f33c46133134c70f",
+        "html_url": "https://github.com/ms-xiaosnow/gosqlite/commit/63c2ebb10e3a2c4ff2378ee9f33c46133134c70f"
+      }
+    ],
+    "verification": {
+      "verified": false,
+      "reason": "unsigned",
+      "signature": null,
+      "payload": null,
+      "verified_at": null
+    }
+  },
+  "library": {
+    "operation": "create_library_file",
+    "status": "succeeded",
+    "path": "/gosqlite-limit-conversion.bundle",
+    "file_id": "file_00000000b37481f58556fea60707fd84",
+    "library_file_id": "libfile_37b21d0517b48191aa12da9186208cd8",
+    "file_name": "gosqlite-limit-conversion.bundle",
+    "current_version_number": 0,
+    "restored_from_version_number": null,
+    "xattrs": [
+      {
+        "name": "user.library-file-version",
+        "value": "0"
+      }
+    ],
+    "directory_id": "libdir_1064175b1a0c8191a612be8a51e00075",
+    "mime_type": null,
+    "library_artifact_type": "other",
+    "file_size_bytes": 5458603,
+    "external_connectors_accessed": false
+  },
+  "bundle_sha256": "7d6b4dc5bed8f57f3f43ad2fa754fcb794ed66dea49efb4f67ffe04c2acedf90",
+  "bundle_bytes": 5458603,
+  "bundle_readback": "/workspace/scratch/5e06a74e5f65/durable-restart/library-limit-conversion/gosqlite-limit-conversion.bundle",
+  "restored_checkout": "/workspace/scratch/5e06a74e5f65/durable-restart/restore-library-limit-conversion",
+  "git_restore": "PASS complete history, exact commit/tree, fsck, goal hash",
+  "runtime_restore": "PASS",
+  "ci": {
+    "run_id": 38122662808,
+    "status": "completed",
+    "conclusion": "success",
+    "completed_updated_at": "2026-10-11T08:10:53Z",
+    "url": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38122662808",
+    "jobs": [
+      {
+        "id": 114420432058,
+        "name": "oracle",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 38122662808,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run actions/setup-go@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Build and verify pinned official SQLite oracle",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Run complete guarded ordinary oracle suite",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Post Run actions/setup-go@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11
+          }
+        ]
+      },
+      {
+        "id": 114420432223,
+        "name": "ordinary",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 38122662808,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run actions/setup-go@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run ./scripts/check.sh",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Post Run actions/setup-go@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          }
+        ]
+      }
+    ],
+    "decoded_logs": {
+      "ordinary": {
+        "bytes": 23991,
+        "sha256": "053efc48defbd22f89cc531f75c0861d64c192998a0d3ba3952b45059c1c079d"
+      },
+      "oracle": {
+        "bytes": 21227,
+        "sha256": "7b2334e6b83b7ccd9a953a853d26e3adee4d1dd21ae0195ac950c62f44edfad4"
+      }
+    }
+  },
+  "first_update_ref_rejected": true,
+  "unchanged_authorized_retry": "success",
+  "runtime_restore_report": "limit-restore-verification-v1/REPORT.md",
+  "runtime_restore_manifest_sha256": "72870af28cb087fc6e5f0207257a0b23a80055fc04c04496c028fecdd05d6735",
+  "runtime_restore_finished_utc": "2026-10-11T07:57:22.974509+00:00",
+  "final_remote_main_readback": "c1502790c4b233757b0f9a3c4d5e5bdee1321310"
+}

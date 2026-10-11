@@ -26,6 +26,7 @@ func inspectSource(path string, raw []byte) ([]string, error) {
 		return nil, err
 	}
 	imports := map[string]string{}
+	sqliteDotImported := false
 	var findings []string
 	for _, i := range file.Imports {
 		p, e := strconv.Unquote(i.Path.Value)
@@ -37,17 +38,74 @@ func inspectSource(path string, raw []byte) ([]string, error) {
 			name = i.Name.Name
 		}
 		imports[name] = p
+		if name == "." && p == "github.com/ms-xiaosnow/gosqlite/sqlite" {
+			sqliteDotImported = true
+		}
 		if name == "." && (p == "os" || p == "os/exec" || p == "syscall" || p == "golang.org/x/sys/unix") {
 			findings = append(findings, fmt.Sprintf("%s: high-risk dot import requires review", set.Position(i.Pos())))
+		}
+	}
+	// Conservatively follow same-file type names (including aliases), not Go
+	// scope/type identity or cross-file data flow. Cycles cannot make progress.
+	// Behavioral review is still required for helper calls, reflection, implicit
+	// element types and declarations in other files.
+	optionTypes := map[string]bool{}
+	if file.Name.Name == "sqlite" || sqliteDotImported {
+		optionTypes["Options"] = true
+	}
+	var isOptionType func(ast.Expr) bool
+	isOptionType = func(expr ast.Expr) bool {
+		switch typ := expr.(type) {
+		case *ast.ParenExpr:
+			return isOptionType(typ.X)
+		case *ast.IndexExpr:
+			return isOptionType(typ.X)
+		case *ast.IndexListExpr:
+			return isOptionType(typ.X)
+		case *ast.Ident:
+			return optionTypes[typ.Name]
+		case *ast.SelectorExpr:
+			if qualifier, ok := typ.X.(*ast.Ident); ok {
+				return imports[qualifier.Name] == "github.com/ms-xiaosnow/gosqlite/sqlite" && typ.Sel.Name == "Options"
+			}
+		}
+		return false
+	}
+	var declarations []*ast.TypeSpec
+	ast.Inspect(file, func(n ast.Node) bool {
+		if spec, ok := n.(*ast.TypeSpec); ok {
+			declarations = append(declarations, spec)
+		}
+		return true
+	})
+	for changed := true; changed; {
+		changed = false
+		for _, spec := range declarations {
+			if !optionTypes[spec.Name.Name] && isOptionType(spec.Type) {
+				optionTypes[spec.Name.Name] = true
+				changed = true
+			}
 		}
 	}
 	report := func(pos token.Pos, name string) {
 		findings = append(findings, fmt.Sprintf("%s: restricted reference %s requires separate manual source and review", set.Position(pos), name))
 	}
 	ast.Inspect(file, func(n ast.Node) bool {
-		if call, ok := n.(*ast.CallExpr); ok {
-			if id, ok := call.Fun.(*ast.Ident); ok && id.Name == "RecoverRollback" {
-				report(call.Pos(), id.Name)
+		// Includes function values and opt-in field keys, not only direct calls.
+		// Recovery-enabled public opens are source/model-only in ordinary suites.
+		if id, ok := n.(*ast.Ident); ok {
+			switch id.Name {
+			case "RecoverRollback", "recoverRollbackOpen", "RollbackRecovery":
+				report(id.Pos(), id.Name)
+			}
+		}
+		if literal, ok := n.(*ast.CompositeLit); ok && len(literal.Elts) != 0 {
+			if isOptionType(literal.Type) {
+				for _, elt := range literal.Elts {
+					if _, keyed := elt.(*ast.KeyValueExpr); !keyed {
+						report(elt.Pos(), "unkeyed sqlite.Options may enable recovery")
+					}
+				}
 			}
 		}
 		sel, ok := n.(*ast.SelectorExpr)

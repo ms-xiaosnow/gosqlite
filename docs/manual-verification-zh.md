@@ -2,6 +2,8 @@
 
 五个示例目录终结的后续限定普通复验见[补充规程](example-retention-verification-zh.md)；其真实失败现场仍未动态验证，旧受限门与缺失设施保持原状态。
 
+2026-10-11 P0更新：有限public Open恢复源码已接入，独立source/model/compile审阅PASS；真实恢复仍BLOCKED / NOT_RUN，公开物理harness为IMPLEMENTATION_MISSING，详见第18节及[专题](rollback-recovery-open.md)。下面固定776b基线的缺口表和历史步骤保留当时身份，不能据其旧“public Open未接线”推断当前源码仍未实现。
+
 本文供维护者规划后续独立验收，核对实际可执行入口、应保存的证据和不能据此作出的结论。**本手册编写过程只读核对并写入这个新文件，没有执行任何测试、构建、fuzz、数据库命令、故障操作或 namespace 操作，也没有修改项目源码或 CI。下面的执行步骤均未因编写本文而运行，状态为 NOT_RUN。** 文档持久保存及同期独立更改和测试如有结果，在 docs/progress.md 中另行记录，不属于本文编写证据。
 
 ## 1 先读结论与执行边界
@@ -842,3 +844,143 @@ cmp "$EVIDENCE/cli-binary.sha256" "$EVIDENCE/cli-binary-after.sha256" || exit 1
 - `INTERRUPTION-20261010T2239Z.md`：`13092da4ed0e6ca3d7633dc4951a9ac5d0ab18060f6bbd55a4330d39a3a2a5d2`
 
 本文作为 docs/manual-verification-zh.md 收入项目，保留原 docs/manual-verification.md 的历史记录；没有把历史日志复制为本轮成功证据。
+
+
+## 18 P0 public Open rollback 恢复源码集成（2026-10-11）
+
+本节补充第 3.2 / 12.1 节的历史状态，不改写其当时结论。候选从已发布
+`63c2ebb10e3a2c4ff2378ee9f33c46133134c70f` 按已审查的独立 hunk 构成，
+本批在已保存 `c1502790c4b233757b0f9a3c4d5e5bdee1321310` 上组合并保留
+LIMIT 修正和限制分类；有限实验性源码已接入
+公开 opt-in、pager retirement/path proof、driver limits 值复制及 testscope
+恢复防误执行 guard。这里的源码集成、编译和 descriptor-free 模型检查，
+与真实恢复运行验收是两回事。**真实 `pager.RecoverRollback`、开启选项的
+真实 `Open/OpenContext`、production bridge 和所有物理恢复仍为
+BLOCKED / NOT_RUN。** 自动默认恢复仍未启用，M3/全项目验收没有完成。
+
+### 18.1 实际 API、平台和预算
+
+- 入口为 `sqlite.Options.RollbackRecovery *sqlite.RollbackRecoveryOptions`；
+  nil / 零值 Options / 未配置的注册 driver 均继续拒绝已有 journal。
+  `errors.Is(err, sqlite.ErrRecoveryRequired)` 与 `CodeIOErr` 保持；presence
+  诊断文本及私有包装有变化，不能按错误字符串字节或旧链形状判断兼容。
+- 只有 Linux、可写、明文、rollback 模式允许非 nil。`ReadOnly` 返回
+  `ErrReadOnly`；加密、`WALExclusive`、`WALShared`、
+  `WALPowersafeOverwrite`、`KeepWALOnClose` 和非 Linux 返回
+  `ErrUnsupported`，这些策略拒绝发生在原生 acquisition 之前。
+- `MaxJournalBytes` 默认为 64 MiB，`MaxRecords` 默认为 65536（跨段累计），
+  `MaxDatabaseBytes` 默认为 1 TiB 原数据库 extent；各字段 0 选择默认值。
+  内存需约两倍 journal bytes 加 O(records) 元数据，不是进程 RSS 上限。
+- `NoCreate: true` 不妨碍已有文件恢复，但禁止普通首次缺失文件创建。
+  恢复后的 fresh probe 永不创建。API / Connector 都复制 options 指向的值；
+  调用者不能在构造连接的同时并发修改配置。
+- 没有 recovery CLI flag、DSN 参数或独立 public Recover 函数。
+  `driver.NewConnector` 接收 Options，URI `mode=ro` 保留只读并于实际
+  Connect 拒绝恢复，`mode=rw` 仍保留 NoCreate；不得静默升级权限。
+
+下面是实际 API 的配置形状，**只展示给未来具备独立授权的人工操作者审查；
+本次没有编译或运行该示例，也不能把它放进 ordinary 测试绕过 guard**。
+`path` 必须由操作者选定为隔离可丢弃的已有数据库，不能指向重要数据。
+
+```go
+opts := sqlite.Options{
+    NoCreate: true,
+    RollbackRecovery: &sqlite.RollbackRecoveryOptions{
+        MaxJournalBytes: 64 << 20,
+        MaxRecords: 65536,
+        MaxDatabaseBytes: 1 << 40,
+    },
+}
+db, err := sqlite.OpenContext(ctx, path, opts)
+// 必须检查 err；只有 err == nil 时才使用 db，并检查 db.Close() 的结果。
+// database/sql 的配置入口：
+// connector, err := driver.NewConnector("file:/absolute/disposable.db?mode=rw", opts)
+// pooled := sql.OpenDB(connector) // 实际 Connect/Ping 才可能执行恢复。
+```
+
+### 18.2 本次允许的 source/model 复核
+
+先完整审阅 [专题文档](rollback-recovery-open.md) 所列精确测试及 helper，
+再运行其 guard、descriptor-free selector 命令。测试只使用内存 owner、
+错误对象、callbacks 和 AST/source 字符串；不构造开启恢复的真实 Open。
+若选择 race，只把同一精确 selector 换成 `CGO_ENABLED=1 go test -race`，
+并先重跑 guard。不运行全套旧 guard/普通/oracle suite，更不添加 manual tags。
+
+`internal/testscope` 能识别直接/捕获的恢复函数、恢复字段、同文件 alias/
+defined type 和 dot-import 的 unkeyed Options。它不是完整类型或调用图证明：
+跨文件 alias、推断 composite-literal 元素类型可漏检；同名 shadow 类型可误报；
+helper / reflection 仍须人工审查。本次测试没有利用这些缺口。独立的
+Rename/rename selector 扩展和 Windows/Darwin raw namespace 门控不在此切片，
+不要据此启动新 OS runner 或 native aggregate。
+
+### 18.3 未来物理验收的准确范围和停止条件
+
+本节不给代理新的执行权限，也不提供绕过受限链路的另一套命令。
+未来人工必须先取得合法独立授权并明确 fixture、原数据库/sidecar 身份、
+原始/已提交/未提交账本、预期页与 schema、各阶段 evidence 和真实测试入口。
+现有 `internal/pager/recovery_manual_test.go` 仍是第 12.1 节的内部 harness：
+`manual_recovery && linux` 与 `GOSQLITE_MANUAL_RECOVERY=independently_authorized`
+是其实际门控，**它不调用新 public Open bridge，不能作为其验收结果**。
+本次没有新增 public physical harness，其状态明确为 **IMPLEMENTATION_MISSING**，
+执行另列 **BLOCKED / NOT_RUN**，因此不能声称已有一条可完整覆盖它的
+`go test -run ...` 命令。环境变量本身不是授权。上面的 API 配置片段也不是
+fixture 生成器、物理验收 harness 或可直接运行的完整程序。
+
+独立审查和未来 harness 至少需要逐项固定这些断言，再按许可执行：
+
+1. nil-default 持续拒绝 journal；唯有准确 resolved path 的 private proof，
+   且失败 reader 已完全退休、没有其他 cleanup 诊断，才进入显式恢复。
+   wrapped/joined/synthetic `ErrRecoveryRequired` 不授权恢复。
+2. 内部操作自己获取 owner 和 locks、重新验证完整 journal/database；最多
+   一次恢复，成功后最多一次新的只读、no-create probe。不能复用初始 admission、
+   自动 cleanup retry、递归 Open 或在 reprobe 失败后创建数据库。
+3. 成功 reprobe 必须 close；任何恢复/probe/close/cancel/ownership 错误要保留
+   初始与后续 cause/token，返回空 metadata。历史 `ErrRecoveryRequired` 使
+   primary code 为 `CodeIOErr`；BUSY/cancel/limit 可通过 `errors.Is/As` 找到。
+   它不是当前磁盘仍需恢复的证明：恢复成功后取消或重探测失败仍可使 Open 失败。
+4. 支持有限记录数、已发布的 DELETE journal 多段子集；页大小 512..65536，
+   recovery sector 32..65536，重复页/geometry 不符/不完整 extent 拒绝。
+   cold/empty/ambiguous、super/master journal、0xffffffff no-sync count、
+   legacy 未指定页大小和 unsupported header 不丢弃。不认证恶意文件内容。
+5. WAL/SHM 包括空 sidecar 都阻止 rollback recovery；不截断或重建 WAL。
+   原 extent 为 0 可使恢复后文件为空，fresh probe 此时拒绝且不创建。
+   后续 Query/Begin/Exec 永不再次触发恢复。敌对 namespace 替换不在保证内。
+
+遇到缺入口、受限操作、源码身份不符、owner 未退休或审核拒绝即暂停；保留
+确切 operation/target/error，不能换输入、改名字、换机器/CI 或静默重试。
+ANN V4、41-target fuzz、broader journals、WAL publisher、retained-directory、
+backup/backend 和物理 fault/security-negative 的状态不因本节改变。
+
+
+### 18.4 已取得与尚缺证据逐项记录
+
+| 项目 | 本批准确状态 | 记录方法与不能推出的结论 |
+|---|---|---|
+| nil-default / policy / proof / sequence / error / option-copy / guard | 独立候选 source/model/compile PASS | tree `75c074548e8b5208beb06e6ead314d835cd16f4f`；11项精确测试各在CGO0和CGO1 race通过，无skip；只含无描述符模型及源码AST |
+| guard、四包vet、全包CGO0 build、无CgoFiles闭包 | 同一候选PASS | 编译与依赖检查没有运行production bridge；不证明物理效果或其他OS运行 |
+| 候选源码身份和补丁重放 | 独立PASS，07:49:35 UTC完成 | 原63c2基线、候选前后及重放身份对应；不把候选tree当成c150加P0的组合tree |
+| c150加P0的完整普通/oracle/race组合 | 本节写作时PENDING | 必须记录该精确组合的终态；旧LIMIT、63c2或候选PASS不能代替 |
+| 本批新提交、精确恢复和CI | 本节写作时PENDING | 提交、保存、恢复与CI分别核验；不预填未知SHA或SUCCESS |
+| 实际RecoverRollback / public bridge / 启用恢复的真实Open或Connect | BLOCKED / NOT_RUN | 本轮没有调用；源码模型不能证明恢复后的文件、锁、目录或故障语义 |
+| public physical harness | IMPLEMENTATION_MISSING | 现有内部手工测试不覆盖它；没有真实入口时不编造命令或测试名 |
+| 更广journal/default-on/WAL publisher/其他原生平台 | 未完成的实现或策略范围 | source/model PASS不改变原缺口及物理资格限制 |
+
+独立候选的11项精确测试名、完整命令形状、固定工具链、离线依赖、资源阈值
+和原始证据身份见[公开恢复专题](rollback-recovery-open.md)。每步单独记录
+实际命令、UTC起止、stdout/stderr、exit、测试匹配数/skip及源码前后哈希；
+不应把本节整段提取执行，不因外层shell为0就吞掉内层FAIL。
+
+未来public physical harness的准备还须单独规定：
+
+1. 选择并记录精确新提交和测试源码/二进制身份，核对真实Linux/文件系统与
+   持久性条件。使用独立可丢弃已有数据库家族及外部账本，不操作生产数据。
+2. 按18.3逐项建立可审查fixture、预期页/schema/表索引结果、锁与retirement
+   断言、恢复前后journal/DB/WAL/SHM身份和目录证据，区分成功、拒绝与不确定。
+3. 先补齐且审阅public入口harness与显式独立门，再由有相应权限的操作者决定
+   具体执行；当前缺少这一步，因此没有公开bridge的运行命令。
+4. 任一异常、owner未退休或结果未知时停止，不再次Open、重试恢复或清理
+   journal/WAL/旧generation以求成功；保留原始cause/token、完整日志及fixture。
+   只有正常退休和证据保存都确认后，才按第15节人工清理自己创建的目录。
+
+这些是未来验收协议要求，不是已经实现的测试断言或新增执行许可。更广物理
+crash/fault/tamper/rekey矩阵仍按第12.4节记IMPLEMENTATION_MISSING与受限执行。

@@ -1,0 +1,434 @@
+[
+  {
+    "name": "00-go-version",
+    "command": [
+      "/workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go",
+      "version"
+    ],
+    "cwd": "/workspace/scratch/5e06a74e5f65/durable-restart/public-open-integration-work",
+    "start": "2026-10-11T07:40:54.752610+00:00",
+    "end": "2026-10-11T07:40:54.758905+00:00",
+    "exit": 0,
+    "CGO_ENABLED": "0",
+    "resources_before": {
+      "tmp": {
+        "bytes_available": 1416167424,
+        "inodes_available": 1243493,
+        "writable": true,
+        "minimum_bytes": 1073741824,
+        "minimum_inodes": 10000
+      },
+      "workspace": {
+        "bytes_available": 14975557632,
+        "inodes_available": 1245477,
+        "writable": true,
+        "minimum_bytes": 2147483648,
+        "minimum_inodes": 10000
+      }
+    }
+  },
+  {
+    "name": "01-gofmt",
+    "command": [
+      "/workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/gofmt",
+      "-w",
+      "internal/testscope/main.go",
+      "internal/testscope/main_test.go",
+      "internal/testscope/independent_public_recovery_test.go",
+      "internal/testscope/recovery_alias_guard_test.go",
+      "sqlite/sqlite.go",
+      "sqlite/rollback_recovery.go",
+      "sqlite/rollback_recovery_test.go",
+      "internal/pager/pager.go",
+      "internal/pager/recovery.go",
+      "internal/pager/reader_recovery.go",
+      "internal/pager/reader_recovery_test.go",
+      "internal/pager/reader_acquisition_test.go",
+      "driver/driver.go"
+    ],
+    "cwd": "/workspace/scratch/5e06a74e5f65/durable-restart/public-open-integration-work",
+    "start": "2026-10-11T07:40:54.759971+00:00",
+    "end": "2026-10-11T07:40:54.774554+00:00",
+    "exit": 0,
+    "CGO_ENABLED": "0",
+    "resources_before": {
+      "tmp": {
+        "bytes_available": 1416167424,
+        "inodes_available": 1243493,
+        "writable": true,
+        "minimum_bytes": 1073741824,
+        "minimum_inodes": 10000
+      },
+      "workspace": {
+        "bytes_available": 14975541248,
+        "inodes_available": 1245474,
+        "writable": true,
+        "minimum_bytes": 2147483648,
+        "minimum_inodes": 10000
+      }
+    }
+  },
+  {
+    "name": "02-source-guard",
+    "command": [
+      "/workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go",
+      "run",
+      "-p=1",
+      "./internal/testscope"
+    ],
+    "cwd": "/workspace/scratch/5e06a74e5f65/durable-restart/public-open-integration-work",
+    "start": "2026-10-11T07:40:56.196029+00:00",
+    "end": "2026-10-11T07:41:06.458428+00:00",
+    "exit": 0,
+    "CGO_ENABLED": "0",
+    "resources_before": {
+      "tmp": {
+        "bytes_available": 1416167424,
+        "inodes_available": 1243493,
+        "writable": true,
+        "minimum_bytes": 1073741824,
+        "minimum_inodes": 10000
+      },
+      "workspace": {
+        "bytes_available": 14974627840,
+        "inodes_available": 1245469,
+        "writable": true,
+        "minimum_bytes": 2147483648,
+        "minimum_inodes": 10000
+      }
+    }
+  },
+  {
+    "name": "03-model-guard",
+    "command": [
+      "/workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go",
+      "test",
+      "-p=1",
+      "./internal/testscope",
+      "-run",
+      "^(TestScopeSourceReferenceGuard|TestScopeRecoveryOptionTypeChains|TestIndependentReviewGuardDirectAndAliasLimit)$",
+      "-count=1",
+      "-v"
+    ],
+    "cwd": "/workspace/scratch/5e06a74e5f65/durable-restart/public-open-integration-work",
+    "start": "2026-10-11T07:41:06.460150+00:00",
+    "end": "2026-10-11T07:41:13.509542+00:00",
+    "exit": 0,
+    "CGO_ENABLED": "0",
+    "resources_before": {
+      "tmp": {
+        "bytes_available": 1416167424,
+        "inodes_available": 1243493,
+        "writable": true,
+        "minimum_bytes": 1073741824,
+        "minimum_inodes": 10000
+      },
+      "workspace": {
+        "bytes_available": 14932582400,
+        "inodes_available": 1244728,
+        "writable": true,
+        "minimum_bytes": 2147483648,
+        "minimum_inodes": 10000
+      }
+    }
+  },
+  {
+    "name": "03-model-pager",
+    "command": [
+      "/workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go",
+      "test",
+      "-p=1",
+      "./internal/pager",
+      "-run",
+      "^(TestReaderRecoveryMemoryRetiredPathProof|TestReaderRecoveryMemoryDiagnosticAndOwnershipRefusal|TestReaderRecoverySourceProofBoundary|TestReaderAcquisitionSourceSnapshotAfterShared)$",
+      "-count=1",
+      "-v"
+    ],
+    "cwd": "/workspace/scratch/5e06a74e5f65/durable-restart/public-open-integration-work",
+    "start": "2026-10-11T07:41:13.511232+00:00",
+    "end": "2026-10-11T07:41:19.693100+00:00",
+    "exit": 0,
+    "CGO_ENABLED": "0",
+    "resources_before": {
+      "tmp": {
+        "bytes_available": 1416167424,
+        "inodes_available": 1243493,
+        "writable": true,
+        "minimum_bytes": 1073741824,
+        "minimum_inodes": 10000
+      },
+      "workspace": {
+        "bytes_available": 14907125760,
+        "inodes_available": 1244112,
+        "writable": true,
+        "minimum_bytes": 2147483648,
+        "minimum_inodes": 10000
+      }
+    }
+  },
+  {
+    "name": "03-model-sqlite",
+    "command": [
+      "/workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go",
+      "test",
+      "-p=1",
+      "./sqlite",
+      "-run",
+      "^(TestRollbackRecoveryMemoryPolicy|TestRollbackRecoveryMemorySingleAttemptSequence|TestRollbackRecoverySourcePublicAndDriverBoundaries|TestRollbackRecoveryMemoryFailureClassification)$",
+      "-count=1",
+      "-v"
+    ],
+    "cwd": "/workspace/scratch/5e06a74e5f65/durable-restart/public-open-integration-work",
+    "start": "2026-10-11T07:41:19.694629+00:00",
+    "end": "2026-10-11T07:41:29.328837+00:00",
+    "exit": 0,
+    "CGO_ENABLED": "0",
+    "resources_before": {
+      "tmp": {
+        "bytes_available": 1416167424,
+        "inodes_available": 1243493,
+        "writable": true,
+        "minimum_bytes": 1073741824,
+        "minimum_inodes": 10000
+      },
+      "workspace": {
+        "bytes_available": 14885912576,
+        "inodes_available": 1243774,
+        "writable": true,
+        "minimum_bytes": 2147483648,
+        "minimum_inodes": 10000
+      }
+    }
+  },
+  {
+    "name": "04-vet",
+    "command": [
+      "/workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go",
+      "vet",
+      "-p=1",
+      "./internal/testscope",
+      "./internal/pager",
+      "./sqlite",
+      "./driver"
+    ],
+    "cwd": "/workspace/scratch/5e06a74e5f65/durable-restart/public-open-integration-work",
+    "start": "2026-10-11T07:41:29.330816+00:00",
+    "end": "2026-10-11T07:41:36.860760+00:00",
+    "exit": 0,
+    "CGO_ENABLED": "0",
+    "resources_before": {
+      "tmp": {
+        "bytes_available": 1416167424,
+        "inodes_available": 1243493,
+        "writable": true,
+        "minimum_bytes": 1073741824,
+        "minimum_inodes": 10000
+      },
+      "workspace": {
+        "bytes_available": 14856515584,
+        "inodes_available": 1243537,
+        "writable": true,
+        "minimum_bytes": 2147483648,
+        "minimum_inodes": 10000
+      }
+    }
+  },
+  {
+    "name": "05-build",
+    "command": [
+      "/workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go",
+      "build",
+      "-p=1",
+      "./..."
+    ],
+    "cwd": "/workspace/scratch/5e06a74e5f65/durable-restart/public-open-integration-work",
+    "start": "2026-10-11T07:41:36.862850+00:00",
+    "end": "2026-10-11T07:41:48.387726+00:00",
+    "exit": 0,
+    "CGO_ENABLED": "0",
+    "resources_before": {
+      "tmp": {
+        "bytes_available": 1416167424,
+        "inodes_available": 1243493,
+        "writable": true,
+        "minimum_bytes": 1073741824,
+        "minimum_inodes": 10000
+      },
+      "workspace": {
+        "bytes_available": 14848401408,
+        "inodes_available": 1243162,
+        "writable": true,
+        "minimum_bytes": 2147483648,
+        "minimum_inodes": 10000
+      }
+    }
+  },
+  {
+    "name": "06-cgo-dependencies",
+    "command": [
+      "/workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go",
+      "list",
+      "-p=1",
+      "-deps",
+      "-f",
+      "{{if .CgoFiles}}{{.ImportPath}}: {{.CgoFiles}}{{end}}",
+      "./..."
+    ],
+    "cwd": "/workspace/scratch/5e06a74e5f65/durable-restart/public-open-integration-work",
+    "start": "2026-10-11T07:41:48.389228+00:00",
+    "end": "2026-10-11T07:41:48.654331+00:00",
+    "exit": 0,
+    "CGO_ENABLED": "0",
+    "resources_before": {
+      "tmp": {
+        "bytes_available": 1416167424,
+        "inodes_available": 1243493,
+        "writable": true,
+        "minimum_bytes": 1073741824,
+        "minimum_inodes": 10000
+      },
+      "workspace": {
+        "bytes_available": 14834274304,
+        "inodes_available": 1242920,
+        "writable": true,
+        "minimum_bytes": 2147483648,
+        "minimum_inodes": 10000
+      }
+    }
+  },
+  {
+    "name": "07-race-source-guard",
+    "command": [
+      "/workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go",
+      "run",
+      "-p=1",
+      "./internal/testscope"
+    ],
+    "cwd": "/workspace/scratch/5e06a74e5f65/durable-restart/public-open-integration-work",
+    "start": "2026-10-11T07:41:48.655294+00:00",
+    "end": "2026-10-11T07:41:48.839171+00:00",
+    "exit": 0,
+    "CGO_ENABLED": "0",
+    "resources_before": {
+      "tmp": {
+        "bytes_available": 1416167424,
+        "inodes_available": 1243493,
+        "writable": true,
+        "minimum_bytes": 1073741824,
+        "minimum_inodes": 10000
+      },
+      "workspace": {
+        "bytes_available": 14833664000,
+        "inodes_available": 1242806,
+        "writable": true,
+        "minimum_bytes": 2147483648,
+        "minimum_inodes": 10000
+      }
+    }
+  },
+  {
+    "name": "08-race-guard",
+    "command": [
+      "/workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go",
+      "test",
+      "-p=1",
+      "-race",
+      "./internal/testscope",
+      "-run",
+      "^(TestScopeSourceReferenceGuard|TestScopeRecoveryOptionTypeChains|TestIndependentReviewGuardDirectAndAliasLimit)$",
+      "-count=1",
+      "-v"
+    ],
+    "cwd": "/workspace/scratch/5e06a74e5f65/durable-restart/public-open-integration-work",
+    "start": "2026-10-11T07:41:48.840103+00:00",
+    "end": "2026-10-11T07:42:11.807022+00:00",
+    "exit": 0,
+    "CGO_ENABLED": "1",
+    "resources_before": {
+      "tmp": {
+        "bytes_available": 1416167424,
+        "inodes_available": 1243493,
+        "writable": true,
+        "minimum_bytes": 1073741824,
+        "minimum_inodes": 10000
+      },
+      "workspace": {
+        "bytes_available": 14833655808,
+        "inodes_available": 1242804,
+        "writable": true,
+        "minimum_bytes": 2147483648,
+        "minimum_inodes": 10000
+      }
+    }
+  },
+  {
+    "name": "08-race-pager",
+    "command": [
+      "/workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go",
+      "test",
+      "-p=1",
+      "-race",
+      "./internal/pager",
+      "-run",
+      "^(TestReaderRecoveryMemoryRetiredPathProof|TestReaderRecoveryMemoryDiagnosticAndOwnershipRefusal|TestReaderRecoverySourceProofBoundary|TestReaderAcquisitionSourceSnapshotAfterShared)$",
+      "-count=1",
+      "-v"
+    ],
+    "cwd": "/workspace/scratch/5e06a74e5f65/durable-restart/public-open-integration-work",
+    "start": "2026-10-11T07:42:11.808500+00:00",
+    "end": "2026-10-11T07:42:22.050482+00:00",
+    "exit": 0,
+    "CGO_ENABLED": "1",
+    "resources_before": {
+      "tmp": {
+        "bytes_available": 1416167424,
+        "inodes_available": 1243493,
+        "writable": true,
+        "minimum_bytes": 1073741824,
+        "minimum_inodes": 10000
+      },
+      "workspace": {
+        "bytes_available": 14765531136,
+        "inodes_available": 1242065,
+        "writable": true,
+        "minimum_bytes": 2147483648,
+        "minimum_inodes": 10000
+      }
+    }
+  },
+  {
+    "name": "08-race-sqlite",
+    "command": [
+      "/workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go",
+      "test",
+      "-p=1",
+      "-race",
+      "./sqlite",
+      "-run",
+      "^(TestRollbackRecoveryMemoryPolicy|TestRollbackRecoveryMemorySingleAttemptSequence|TestRollbackRecoverySourcePublicAndDriverBoundaries|TestRollbackRecoveryMemoryFailureClassification)$",
+      "-count=1",
+      "-v"
+    ],
+    "cwd": "/workspace/scratch/5e06a74e5f65/durable-restart/public-open-integration-work",
+    "start": "2026-10-11T07:42:22.055313+00:00",
+    "end": "2026-10-11T07:42:37.528973+00:00",
+    "exit": 0,
+    "CGO_ENABLED": "1",
+    "resources_before": {
+      "tmp": {
+        "bytes_available": 1416167424,
+        "inodes_available": 1243493,
+        "writable": true,
+        "minimum_bytes": 1073741824,
+        "minimum_inodes": 10000
+      },
+      "workspace": {
+        "bytes_available": 14741946368,
+        "inodes_available": 1241804,
+        "writable": true,
+        "minimum_bytes": 2147483648,
+        "minimum_inodes": 10000
+      }
+    }
+  }
+]

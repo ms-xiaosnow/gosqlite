@@ -1,0 +1,226 @@
+[
+  {
+    "path": "examples/migration-transition/golden/retain-single",
+    "baseline_posix": "0o755",
+    "frozen_posix": "0o700",
+    "owner_posix": "0o755",
+    "file_content_git_mode_equal": true
+  },
+  {
+    "path": "examples/migration-transition/golden/retain-single/00-preflight.sql",
+    "baseline_posix": "0o644",
+    "frozen_posix": "0o600",
+    "owner_posix": "0o644",
+    "file_content_git_mode_equal": true
+  },
+  {
+    "path": "examples/migration-transition/golden/retain-single/10-extension-transition.sql",
+    "baseline_posix": "0o644",
+    "frozen_posix": "0o600",
+    "owner_posix": "0o644",
+    "file_content_git_mode_equal": true
+  },
+  {
+    "path": "examples/migration-transition/golden/retain-single/20-shadow-copy.sql",
+    "baseline_posix": "0o644",
+    "frozen_posix": "0o600",
+    "owner_posix": "0o644",
+    "file_content_git_mode_equal": true
+  },
+  {
+    "path": "examples/migration-transition/golden/retain-single/30-batch.sql",
+    "baseline_posix": "0o644",
+    "frozen_posix": "0o600",
+    "owner_posix": "0o644",
+    "file_content_git_mode_equal": true
+  },
+  {
+    "path": "examples/migration-transition/golden/retain-single/40-indexes.sql",
+    "baseline_posix": "0o644",
+    "frozen_posix": "0o600",
+    "owner_posix": "0o644",
+    "file_content_git_mode_equal": true
+  },
+  {
+    "path": "examples/migration-transition/golden/retain-single/50-verify.sql",
+    "baseline_posix": "0o644",
+    "frozen_posix": "0o600",
+    "owner_posix": "0o644",
+    "file_content_git_mode_equal": true
+  },
+  {
+    "path": "examples/migration-transition/golden/retain-single/60-application-cutover.sql",
+    "baseline_posix": "0o644",
+    "frozen_posix": "0o600",
+    "owner_posix": "0o644",
+    "file_content_git_mode_equal": true
+  },
+  {
+    "path": "examples/migration-transition/golden/retain-single/70-rollback.sql",
+    "baseline_posix": "0o644",
+    "frozen_posix": "0o600",
+    "owner_posix": "0o644",
+    "file_content_git_mode_equal": true
+  },
+  {
+    "path": "examples/migration-transition/golden/retain-single/README.md",
+    "baseline_posix": "0o644",
+    "frozen_posix": "0o600",
+    "owner_posix": "0o644",
+    "file_content_git_mode_equal": true
+  },
+  {
+    "path": "examples/migration-transition/golden/retain-single/inventory.json",
+    "baseline_posix": "0o644",
+    "frozen_posix": "0o600",
+    "owner_posix": "0o644",
+    "file_content_git_mode_equal": true
+  },
+  {
+    "path": "examples/migration-transition/golden/retain-single/manifest.json",
+    "baseline_posix": "0o644",
+    "frozen_posix": "0o600",
+    "owner_posix": "0o644",
+    "file_content_git_mode_equal": true
+  },
+  {
+    "path": "examples/migration-transition/golden/retain-single/report.json",
+    "baseline_posix": "0o644",
+    "frozen_posix": "0o600",
+    "owner_posix": "0o644",
+    "file_content_git_mode_equal": true
+  },
+  {
+    "path": "examples/migration-transition/golden/retain-single/report.md",
+    "baseline_posix": "0o644",
+    "frozen_posix": "0o600",
+    "owner_posix": "0o644",
+    "file_content_git_mode_equal": true
+  },
+  {
+    "path": "examples/migration-transition/golden/shadow-batches",
+    "baseline_posix": "0o755",
+    "frozen_posix": "0o700",
+    "owner_posix": "0o755",
+    "file_content_git_mode_equal": true
+  },
+  {
+    "path": "examples/migration-transition/golden/shadow-batches/00-preflight.sql",
+    "baseline_posix": "0o644",
+    "frozen_posix": "0o600",
+    "owner_posix": "0o644",
+    "file_content_git_mode_equal": true
+  },
+  {
+    "path": "examples/migration-transition/golden/shadow-batches/10-extension-transition.sql",
+    "baseline_posix": "0o644",
+    "frozen_posix": "0o600",
+    "owner_posix": "0o644",
+    "file_content_git_mode_equal": true
+  },
+  {
+    "path": "examples/migration-transition/golden/shadow-batches/20-shadow-copy.sql",
+    "baseline_posix": "0o644",
+    "frozen_posix": "0o600",
+    "owner_posix": "0o644",
+    "file_content_git_mode_equal": true
+  },
+  {
+    "path": "examples/migration-transition/golden/shadow-batches/30-batch.sql",
+    "baseline_posix": "0o644",
+    "frozen_posix": "0o600",
+    "owner_posix": "0o644",
+    "file_content_git_mode_equal": true
+  },
+  {
+    "path": "examples/migration-transition/golden/shadow-batches/40-indexes.sql",
+    "baseline_posix": "0o644",
+    "frozen_posix": "0o600",
+    "owner_posix": "0o644",
+    "file_content_git_mode_equal": true
+  },
+  {
+    "path": "examples/migration-transition/golden/shadow-batches/50-verify.sql",
+    "baseline_posix": "0o644",
+    "frozen_posix": "0o600",
+    "owner_posix": "0o644",
+    "file_content_git_mode_equal": true
+  },
+  {
+    "path": "examples/migration-transition/golden/shadow-batches/60-application-cutover.sql",
+    "baseline_posix": "0o644",
+    "frozen_posix": "0o600",
+    "owner_posix": "0o644",
+    "file_content_git_mode_equal": true
+  },
+  {
+    "path": "examples/migration-transition/golden/shadow-batches/70-rollback.sql",
+    "baseline_posix": "0o644",
+    "frozen_posix": "0o600",
+    "owner_posix": "0o644",
+    "file_content_git_mode_equal": true
+  },
+  {
+    "path": "examples/migration-transition/golden/shadow-batches/README.md",
+    "baseline_posix": "0o644",
+    "frozen_posix": "0o600",
+    "owner_posix": "0o644",
+    "file_content_git_mode_equal": true
+  },
+  {
+    "path": "examples/migration-transition/golden/shadow-batches/inventory.json",
+    "baseline_posix": "0o644",
+    "frozen_posix": "0o600",
+    "owner_posix": "0o644",
+    "file_content_git_mode_equal": true
+  },
+  {
+    "path": "examples/migration-transition/golden/shadow-batches/manifest.json",
+    "baseline_posix": "0o644",
+    "frozen_posix": "0o600",
+    "owner_posix": "0o644",
+    "file_content_git_mode_equal": true
+  },
+  {
+    "path": "examples/migration-transition/golden/shadow-batches/report.json",
+    "baseline_posix": "0o644",
+    "frozen_posix": "0o600",
+    "owner_posix": "0o644",
+    "file_content_git_mode_equal": true
+  },
+  {
+    "path": "examples/migration-transition/golden/shadow-batches/report.md",
+    "baseline_posix": "0o644",
+    "frozen_posix": "0o600",
+    "owner_posix": "0o644",
+    "file_content_git_mode_equal": true
+  },
+  {
+    "path": "testdata/ann/hnsw-v1.db",
+    "baseline_posix": "0o644",
+    "frozen_posix": "0o600",
+    "owner_posix": "0o644",
+    "file_content_git_mode_equal": true
+  },
+  {
+    "path": "testdata/ann/legacy-grams.db",
+    "baseline_posix": "0o644",
+    "frozen_posix": "0o600",
+    "owner_posix": "0o644",
+    "file_content_git_mode_equal": true
+  },
+  {
+    "path": "third_party/golang.org-x-crypto-LICENSE",
+    "baseline_posix": "0o644",
+    "frozen_posix": "0o444",
+    "owner_posix": "0o644",
+    "file_content_git_mode_equal": true
+  },
+  {
+    "path": "third_party/golang.org-x-sys-LICENSE",
+    "baseline_posix": "0o644",
+    "frozen_posix": "0o444",
+    "owner_posix": "0o644",
+    "file_content_git_mode_equal": true
+  }
+]

@@ -77,7 +77,7 @@ func TestReaderAcquisitionSourceSnapshotAfterShared(t *testing.T) {
 	}
 	// The original retirement owner still handles every unsuccessful constructor
 	// exit, including the added metadata acquisition. No raw native close path.
-	index("defer func() {\n\tif result == nil {\n\t\tretErr = cleanup.begin(retErr)\n\t}\n}()")
+	index("defer func() {\n\tif result == nil {\n\t\tretErr = finishReaderProbe(cleanup, path, retErr)\n\t}\n}()")
 }
 
 // The writer changes only valid schema-cookie metadata through normal pager

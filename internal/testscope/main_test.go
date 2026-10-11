@@ -19,6 +19,12 @@ func TestScopeSourceReferenceGuard(t *testing.T) {
 		`package x; import "os/exec"; var command=exec.CommandContext`,
 		`package x; func f(){RecoverRollback(ctx,path,opts)}`,
 		`package x; func f(){pager.RecoverRollback(ctx,path,opts)}`,
+		`package x; var replay=RecoverRollback`,
+		`package x; var replay=recoverRollbackOpen`,
+		`package x; func f(){opts.RollbackRecovery=cfg}`,
+		`package x; var opts=Options{RollbackRecovery:cfg}`,
+		`package sqlite; var opts=Options{nil,false,false,cfg}`,
+		`package x; import s "github.com/ms-xiaosnow/gosqlite/sqlite"; var opts=s.Options{nil,false,false,cfg}`,
 		"//go:build manual_namespace || linux\n\npackage x; import \"os\"; func f(){os.Rename(\"a\",\"b\")}",
 	} {
 		got, err := inspectSource("fixture_test.go", []byte(source))
