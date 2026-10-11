@@ -1,0 +1,56 @@
+{
+  "archive": "/workspace/scratch/5e06a74e5f65/durable-restart/backups/gosqlite-held-sources-static-20261011.tar.gz",
+  "bytes": 3891811,
+  "sha256": "62426f18782f2f39d25b95e9a98448649163399015da5f64d1c66da571811423",
+  "objects": 1452,
+  "trees": {
+    "planner-parity-close-freeze-v4c": {
+      "tree": "552286a4985b1d9f339d8f59756b4eb2cad7071a",
+      "prior_confirmed_tree": "552286a4985b1d9f339d8f59756b4eb2cad7071a",
+      "status": "HOLD：历史有界审阅通过；未与新 grouped/counter/main 组合；此次不重跑或整合。",
+      "file_count": 1282,
+      "snapshot_only_unreviewed": false
+    },
+    "wal-tail-freeze-v2": {
+      "tree": "715b15f50577b23d60b6848a3309fcba6ca491f9",
+      "prior_confirmed_tree": "715b15f50577b23d60b6848a3309fcba6ca491f9",
+      "status": "HOLD：历史局部检查通过，V2 独立复核未完成；native exclusive-tail publisher 缺实现。",
+      "file_count": 1377,
+      "snapshot_only_unreviewed": false
+    },
+    "plaintext-backup-api-freeze-v2": {
+      "tree": "d73faa3d653df5382b01ebc318145ed921833732",
+      "prior_confirmed_tree": "d73faa3d653df5382b01ebc318145ed921833732",
+      "status": "HOLD：历史局部检查通过，最终报告/事后完整清单未闭合；WAL/非 Linux backup 缺实现。",
+      "file_count": 1381,
+      "snapshot_only_unreviewed": false
+    },
+    "ann-harness-freeze-v3": {
+      "tree": "b13158709a57ce175437bb48a0d66104b5eff68d",
+      "prior_confirmed_tree": "b13158709a57ce175437bb48a0d66104b5eff68d",
+      "status": "FAIL/HOLD：HNSW 工作计数、IVF 全列表覆盖、exact/rescore 距离相容性准入缺陷；原生测量未运行。",
+      "file_count": 1381,
+      "snapshot_only_unreviewed": false
+    },
+    "ann-harness-work-v4": {
+      "tree": "3f36a1130ea62df0b6688d6ebd793ecf8bb4442b",
+      "prior_confirmed_tree": null,
+      "status": "BLOCKED/未冻结：V3 加审阅探针，未完成修正；仅静态快照归档，不恢复已中断链路。",
+      "file_count": 1382,
+      "snapshot_only_unreviewed": true
+    },
+    "retained-directory-work": {
+      "tree": "57d9bfbf6c9e853a14f750d527c4c7ecdd7a5978",
+      "prior_confirmed_tree": null,
+      "status": "HOLD/未冻结：VFS 增量未完整构建/独立审阅/接入 pager/backup；无 native namespace 执行证据。",
+      "file_count": 1400,
+      "snapshot_only_unreviewed": true
+    }
+  },
+  "before_after_source_identity_unchanged": true,
+  "runtime_validation": "NOT_RUN: archival never executes project code/tests/scripts",
+  "library_file_id": "libfile_276312ea452881918463dcb19db1e1b8",
+  "library_version": 0,
+  "readback": "PASS: byte equality;1452contentobjects;8203filememberships;6reconstructedGitcontenttrees;alloriginalsourcebytes/modes/inventory remain unchanged. No project code/tests/scripts executed.",
+  "verified_utc": "2026-10-11T03:02Z"
+}

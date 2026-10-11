@@ -508,5 +508,19 @@
     "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38103659605",
     "remote_ci_status": "COMPLETED SUCCESS；2026-10-11T02:13:13Z 自然终态，02:17:25Z 读回；ordinary114364553029 与 oracle114364552820 均 SUCCESS。",
     "open_gates": "仅文档，未关闭任何真实实现、物理故障、原生 OS、长测、独立 M10 验收项。受阻 ANN V4、新41目标fuzz/未知触发链路保持暂停。"
+  },
+  {
+    "stage": "CLI inspect 调用者上下文；独立一行修复",
+    "remote_commit": "7a3c45706b85104d3dc75d4947a333651226b69c",
+    "local_commit": "7a3c45706b85104d3dc75d4947a333651226b69c",
+    "tree": "1acb42237e585007d92b1ce4493740fe03074862",
+    "bundle_sha256": "36d255976cc003024c07e5d53f401b208b451d3c9799421e278a99c8c31d63e6",
+    "bundle_bytes": 5032050,
+    "library_file_id": "libfile_67ebf97843748191804425397ce64f00",
+    "library_version": 0,
+    "verified": "2026-10-11T02:26:17Z expected-SHA 非强制远端更新；02:26:31Z 精确本地镜像。02:26:58Z Library 字节读回/clone --branch main/fsck/精确 commit/tree/原 goal PASS。02:29:59Z 恢复6项CLI普通/race、sourceguard、全vet/build、五目标编译/modules/2886文件身份PASS。先前固定非文档源0124d04f32966846bc38537863274390ca5daccc 全普通/oracle/race/五目标/模块/全源门02:21:52Z PASS；最终只另加证据文档。",
+    "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38105152184",
+    "remote_ci_status": "COMPLETED SUCCESS，2026-10-11T02:48:20Z；ordinary114368973335、oracle114368973527 均SUCCESS，02:50:52Z读回。ordinary sqlite race451.724s；GitHub Node20→24 action弃用警告保留，没有失败。",
+    "open_gates": "仅caller-context转发和正常readonly输出；中途I/O取消未动态验证。元数据、公开恢复、明文备份/只读WAL等缺口分别记录；被阻断ANN V4/41fuzz/未知链路不恢复，其他OS/物理故障/长测/独立M10未验收。"
   }
 ]

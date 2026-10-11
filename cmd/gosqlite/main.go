@@ -24,7 +24,7 @@ func runContext(ctx context.Context, args []string, out io.Writer) (resultErr er
 		return err
 	}
 	if len(args) == 0 || (len(args) == 1 && args[0] == "help") {
-		_, err := fmt.Fprintln(out, "usage: gosqlite version\n       gosqlite query [--wal-exclusive|--wal-shared] <db> '<sql>'\n       gosqlite inspect <db>\n       gosqlite backup <db> --out <new-archive> --key-provider <provider> [--out-key-provider <provider>] [--mode snapshot|wal|shared]\n       gosqlite rekey <db> --key-provider <new-provider> --current-key-provider <provider> [--mode snapshot|wal|shared]\n       gosqlite migrate pgembedding inspect --catalog <catalog.json> [--format json|markdown]\n       gosqlite migrate pgembedding --input <export> --manifest <manifest.json> [--output <new.db> --apply [--resume]]\n       gosqlite migrate pgembedding verify --input <export> --manifest <manifest.json> --output <db>\n       gosqlite migrate pgembedding transition --catalog <catalog.json> --options <options.json> [--report <new.json>]\n       gosqlite check <db> [<extension-index>] [--key-provider <provider> --mode snapshot|wal|shared]\n       gosqlite check [--wal-exclusive|--wal-shared] <db> <extension-index>\nSQLite SQL MVP. One statement per invocation; SELECT emits JSON Lines, writes emit a result.\nEncrypted maintenance: env-hex:NAME, env-password:NAME, stdin-hex, stdin-password. See docs/cli-encryption.md; plaintext backup is unsupported.")
+		_, err := fmt.Fprintln(out, "usage: gosqlite version\n       gosqlite query [--wal-exclusive|--wal-shared] <db> '<sql>'\n       gosqlite inspect [--extensions] <db>\n       gosqlite backup <db> --out <new-archive> --key-provider <provider> [--out-key-provider <provider>] [--mode snapshot|wal|shared]\n       gosqlite rekey <db> --key-provider <new-provider> --current-key-provider <provider> [--mode snapshot|wal|shared]\n       gosqlite migrate pgembedding inspect --catalog <catalog.json> [--format json|markdown]\n       gosqlite migrate pgembedding --input <export> --manifest <manifest.json> [--output <new.db> --apply [--resume]]\n       gosqlite migrate pgembedding verify --input <export> --manifest <manifest.json> --output <db>\n       gosqlite migrate pgembedding transition --catalog <catalog.json> --options <options.json> [--report <new.json>]\n       gosqlite check <db> [<extension-index>] [--key-provider <provider> --mode snapshot|wal|shared]\n       gosqlite check [--wal-exclusive|--wal-shared] <db> <extension-index>\nSQLite SQL MVP. One statement per invocation; SELECT emits JSON Lines, writes emit a result.\nEncrypted maintenance: env-hex:NAME, env-password:NAME, stdin-hex, stdin-password. See docs/cli-encryption.md; plaintext backup is unsupported.")
 		return err
 	}
 	switch args[0] {
@@ -93,23 +93,35 @@ func runContext(ctx context.Context, args []string, out io.Writer) (resultErr er
 	case "check":
 		return runCheck(ctx, args[1:], out)
 	case "inspect":
+		includeExtensions := len(args) > 1 && args[1] == "--extensions"
+		if includeExtensions {
+			args = append([]string{args[0]}, args[2:]...)
+		}
 		if len(args) != 2 {
-			return fmt.Errorf("usage: gosqlite inspect <db>")
+			return fmt.Errorf("usage: gosqlite inspect [--extensions] <db>")
 		}
 		db, err := sqlite.OpenContext(ctx, args[1], sqlite.Options{ReadOnly: true})
 		if err != nil {
 			return err
 		}
 		defer func() { resultErr = errors.Join(resultErr, db.Close()) }()
-		schema, err := db.Schema(ctx)
+		inspection, err := db.Inspect(ctx, sqlite.InspectOptions{IncludeExtensions: includeExtensions})
 		if err != nil {
 			return err
+		}
+		if includeExtensions {
+			return json.NewEncoder(out).Encode(struct {
+				Format           string                          `json:"format"`
+				Header           sqlite.FileInfo                 `json:"header"`
+				Schema           []sqlite.SchemaEntry            `json:"schema"`
+				ExtensionIndexes []sqlite.ExtensionIndexMetadata `json:"extension_indexes"`
+			}{"SQLite format 3 (metadata inspection only)", inspection.Header, inspection.Schema, inspection.ExtensionIndexes})
 		}
 		return json.NewEncoder(out).Encode(struct {
 			Format string               `json:"format"`
 			Header sqlite.FileInfo      `json:"header"`
 			Schema []sqlite.SchemaEntry `json:"schema"`
-		}{"SQLite format 3 (metadata inspection only)", db.Info(), schema})
+		}{"SQLite format 3 (metadata inspection only)", inspection.Header, inspection.Schema})
 	default:
 		return fmt.Errorf("unsupported command %q", args[0])
 	}

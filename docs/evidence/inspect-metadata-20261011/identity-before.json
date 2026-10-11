@@ -1,0 +1,25 @@
+{
+  "phase": "before",
+  "baseline_commit": "7a3c45706b85104d3dc75d4947a333651226b69c",
+  "baseline_tree": "1acb42237e585007d92b1ce4493740fe03074862",
+  "exact_tree": "185944581731b5f21a5582ceb60ed340d4ad9012",
+  "source_files": 2890,
+  "source_directories": 136,
+  "changed_paths": [
+    "README.md",
+    "cmd/gosqlite/inspect_metadata_test.go",
+    "cmd/gosqlite/main.go",
+    "docs/cli-inspect.md",
+    "docs/progress.md",
+    "sqlite/inspect.go",
+    "sqlite/inspect_metadata_test.go"
+  ],
+  "old_test_files_byte_mode_unchanged": 351,
+  "owner_identity_matches": true,
+  "owner_sha256_list_matches": true,
+  "freeze_copy_bytes_modes_inventory_match": true,
+  "copy_has_git": false,
+  "git_commands_run": 0,
+  "owner_identity_sha256": "eec7d7b4a8ef63805edf1dc464e03a8eb00fd336e4b829dda45f3033dee6ce50",
+  "owner_sha256_list_sha256": "bf313c9bf867b1573b95b7abfc73087f75aa4f07c20bfe365b09b43f010373c5"
+}

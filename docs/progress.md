@@ -1074,3 +1074,46 @@ ANN/performance-CI sources remain separate increments.
 - inspect 扩展元数据、公开恢复、明文 backup/只读 WAL 等仍有真实缺口；
   被中止的 ANN V4、41 目标 fuzz、未知链路未恢复。未运行物理故障、
   新 OS/performance runner 或长测，M10 仍未完成。
+
+### 2026-10-11：inspect 扩展元数据独立切片（定名普通验证通过）
+
+- 独立源码从 `7a3c45706b85104d3dc75d4947a333651226b69c` 导出；未修改
+  主工作树、Git 历史、远端、CI 或已冻结候选。
+- 新增 `DB.Inspect` 同快照 header/schema/扩展 catalog 元数据读取，以及
+  opt-in `inspect --extensions`。默认 JSON 结构不变；config 为不透明字符串。
+- 不解析/配置方法，不读 fields/postings/frequency/source/ANN 数据根。
+  active Tx 借用 reader；独立 reader 的关闭错误加入返回错误，不返回部分结果。
+- 1024 条记录上限及 MaxSortBytes 保守 metadata/decode 配额；现有 schema
+  和 B-tree 上限独立，不声称限制全部堆内存。详见 [契约](cli-inspect.md)。
+- 先经固定测试/helper 审阅，再通过 source guard、7 个新 sqlite 测试、
+  5 个新 CLI 测试及 4 个既有 inspect/context 回归；同样精确选择的
+  race 通过，scoped vet 与 CGO0 库/CLI build 通过。未运行全仓门。
+- 首轮新测试编译因漏传 tx.Commit(ctx) 的 ctx 失败；原始失败源码/日志
+  保存，单参数修正后上述门在新证据目录自然 exit 0。fresh-header 断言
+  在开跑前依据静态审阅改为精确比较正常 writer 提交后的完整 header，
+  不假设建表一定增长 PageCount（可能正常复用 freelist）。
+- 实际验证仅 Linux/amd64 plaintext rollback、grams/custom catalog。
+  未据此获得加密 inspect、真正只读 WAL、ANN 算法/恢复或其他 OS 原生
+  验证；config 仅是持久字符串，不证明索引当前可用或可恢复。§12.2
+  及 CLI 总体仍未完成。下一步是独立源码/定名验证审阅，随后由主任务
+  决定整合与所需完整门；此切片未更改主树、Git、远端或 CI。
+- 被中止 ANN V4、41 目标 fuzz、未知链路仍 BLOCKED；未运行故障、损坏输入、
+  WAL、recovery、native OS/performance 或长测。
+
+
+#### inspect 元数据的独立复审与完整普通门
+
+- 独立复审无阻断项；精确 tree `185944581731b5f21a5582ceb60ed340d4ad9012`，
+  2,890 文件/136 目录，351 个旧测试不变；7 SQLite + 9 CLI 同样定名普通/race
+  和 scoped vet/build 再次通过。生命周期/预解码预算仅在声明范围成立。
+- 相同固定树全普通 test/vet/build、完整官方 pinned oracle、全 race、五目标
+  CGO0 编译、模块与前后所有字节/模式/目录身份于 03:05:03 UTC exit 0。
+  无失败、拒绝、修改或重跑。跨编译不计作其他 OS 原生运行。
+- 最终整合将契约译为中文，增加 capture 日志/首错停止及精确的适用范围；
+  另补 [完整证据](evidence/inspect-metadata-20261011.md)、7a3c457 的终态
+  CI/恢复记录和旧 held 源码的静态 Library 保全。不改变通过门的非 docs 源字节和 Git 文件模式；不声称所有 POSIX 权限相同。
+- 旧候选原样归档 Library `libfile_276312ea452881918463dcb19db1e1b8`，
+  六树/8,203 文件归属/1,452 对象静态读回相同，原文件字节/Git 模式/清单前后不变；不执行旧
+  源码或测试，不解除 HOLD/BLOCKED，不算运行验收或 main 已有能力。
+- 此源码检查点的远端 main、完整 git bundle、恢复和 CI 结果仍须逐项确认；
+  未提前声明它们已通过，未声明完成整体 §12.2、生产可用或 M10。

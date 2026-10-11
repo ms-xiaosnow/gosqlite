@@ -1,0 +1,30 @@
+{
+  "observed_utc": "2026-10-11T02:26:58Z",
+  "remote_commit": "7a3c45706b85104d3dc75d4947a333651226b69c",
+  "tree": "1acb42237e585007d92b1ce4493740fe03074862",
+  "parent": "e40b0081e173d171e05816a04bcd1a188d14609f",
+  "library_file_id": "libfile_67ebf97843748191804425397ce64f00",
+  "library_version": 0,
+  "bundle_bytes": 5032050,
+  "bundle_sha256": "36d255976cc003024c07e5d53f401b208b451d3c9799421e278a99c8c31d63e6",
+  "main_readback_verified": true,
+  "local_mirror_exact": true,
+  "restore": "PASS exit0 2026-10-11T02:29:59Z: Library bytes/clone --branch main/fsck/exact SHA/tree/original goal;6namedCLIunit+race,sourceguard,fullvet/build,five cross-builds,module verification;all2886sourcefiles content/mode/inventory unchanged. Non-document exact full-gate source. No fulltests/oracle rerun.",
+  "source_gate": "tree0124d04f32966846bc38537863274390ca5daccc full ordinary unit/vet/build/oracle/race/five builds/modules/inventory PASS exit0 02:21:52Z. Final commit only docs differ outside 2 approved code paths.",
+  "ci_run": 38105152184,
+  "ci_status": "COMPLETED SUCCESS, updated2026-10-11T02:48:20Z, readback2026-10-11T02:50:40Z",
+  "authorization_event": "Initial update_ref rejected for missing main authorization; private repository/readback confirmed. Root supplied verbatim standing main/CI authorization. ONE unchanged retry succeeded02:26:17Z; original response retained; no force/alternate branch/route.",
+  "restore_log_sha256": "ea13e1a7ae08bf5dc32d9d2f3cbe1628fa3c5a19e15454f1943b728f17a30ff1",
+  "ci_jobs": [
+    {
+      "id": 114368973335,
+      "name": "ordinary",
+      "conclusion": "success"
+    },
+    {
+      "id": 114368973527,
+      "name": "oracle",
+      "conclusion": "success"
+    }
+  ]
+}

@@ -1,0 +1,219 @@
+# Independent review: stored extension catalog inspection
+
+## Verdict
+
+No blocking correctness or scope defect found in the frozen slice. The exact
+approved named checks independently pass. This supports integration of this
+bounded metadata slice, not whole-repository acceptance, production readiness,
+ANN validity, interrupted-operation safety, or completion of goal §12.2.
+
+Reviewed goal §3 principles 6/7 (cancellation/resource quotas and persisted
+extension versions) and §12.2. No applicable AGENTS.md exists in the frozen
+source or its ancestor workspace; the only discovered AGENTS.md files belong to
+unrelated SQLite C toolchain source directories and were not used.
+
+## Exact source and independence
+
+- Baseline commit: `7a3c45706b85104d3dc75d4947a333651226b69c`.
+- Baseline tree: `1acb42237e585007d92b1ce4493740fe03074862`.
+- Frozen source: `../inspect-metadata-freeze-v1`.
+- Independent execution copy: `../inspect-metadata-independent-verify-v1`.
+- Exact review tree before and after checks:
+  `185944581731b5f21a5582ceb60ed340d4ad9012`.
+- 2,890 source files; frozen, independent copy and owner manifest agree on every
+  relative file path, mode, Git blob, SHA256 and byte count.
+- The prior independently retained baseline inventory was rehashed as a Git
+  Merkle tree entirely in Python and reproduces the stated baseline tree.
+  Comparison shows exactly seven changed paths, no removed paths, and all 351
+  old `_test.go` files byte/mode unchanged. This independently establishes no
+  weakened assertion or silent skip in those old tests.
+- Modified paths: `README.md`, `cmd/gosqlite/main.go`, `docs/progress.md`.
+- Added paths: `sqlite/inspect.go`, `sqlite/inspect_metadata_test.go`,
+  `cmd/gosqlite/inspect_metadata_test.go`, `docs/cli-inspect.md`.
+- `identity.py`, `identity-before.json`, `identity-after.json`, complete
+  `inventory-before.json` / `inventory-after.json`, and corresponding SHA256
+  lists preserve the comparison. `modified-paths.diff` records the three
+  modified files against verified baseline bytes.
+- No Git commands, main checkout changes, remote actions, source edits, new
+  tests, or alternate probes were performed. The execution copy has no `.git`.
+  Reports, logs and the CLI build are outside the source copy.
+
+## Static audit
+
+### Snapshot, context, result and ownership
+
+`sqlite/inspect.go:51-117` takes the connection mutex before selecting the reader.
+An active transaction follows its existing `check` / `ensureSnapshotLocked`
+path and lends its reader; no reader-close callback is installed in that case.
+A nontransaction call obtains one `openReader` result and installs precisely one
+close callback. Header, schema and optional catalog are all read through that
+same reader. The connection mutex prevents concurrent transaction replacement
+or connection retirement while the deferred checks run.
+
+The owned close executes before mutex unlock. `wrapCleanup` joins a cleanup
+error with an earlier inspection error while preserving error discovery; caller
+context and active-transaction context are rechecked before success. Any such
+error clears the entire named `InspectResult`, including errors that occur
+only during deferred cleanup. `Info` receives the successful snapshot header.
+Initial nil/canceled contexts and closed handles return zero results. Borrowed
+transaction lifetime is preserved; its existing first-access logic may pin its
+snapshot, as expected for a metadata read.
+
+Cancellation reaches schema/cursor page reads and iteration. Bounded schema
+copying and schema-root identity scans have final context checks rather than a
+hard real-time cancellation-latency guarantee. Reader-acquisition internals and
+cleanup/error classifications were not changed. The cursor's deferred Close is
+currently infallible and only retires cursor buffers; it does not own the reader.
+
+### Catalog-only behavior and schema envelope
+
+The inspect-specific path calls `btree.ReadSchema` and, only when requested,
+one `NewBudgetCursor` over the extension catalog root. Static examination finds
+no operational extension loader, registry lookup, Configure, Canonical, Keys,
+source SQL parser, integrity checker, or source/fields/postings/frequency/ANN
+root traversal. `extensionSchemas`, `annSchemas`, `extensionReserved` and
+`extensionGuardName` used here are pure schema/name helpers.
+
+The decoder checks ASCII-folded schema-name uniqueness; when owned objects
+exist, it checks positive-root uniqueness and byte-exact current base schema
+identities. Any member of the optional ANN schema family requires that entire
+schema envelope. Known generated guard names are recognized without declaring
+their SQL/type or the index usable. Unexpected owned-prefix objects fail closed.
+
+Catalog row IDs must be positive and rows must contain exactly 13 fields with
+a NULL rowid alias. Text types and integer ranges are checked. Storage version
+must equal the current envelope version. Method version must be positive and
+representable as int; unknown positive method versions can be reported without
+requiring a registered implementation. This is intentional metadata behavior.
+Newly returned text fields must be valid UTF-8, avoiding lossy JSON replacement.
+Config is returned unchanged as an opaque string, not parsed or embedded JSON.
+Source/config hashes, dirty state, source counts, generation correctness and ANN
+semantics are not verified or presented as validity evidence.
+
+### Quota and allocation boundary
+
+`sqlite/inspect.go:120-197` reserves a fixed allowance before maps, charges schema
+map/folded-name entries and positive-root maps, and retains every catalog-record
+reservation to completion. At most 1,024 successfully retained records are
+allowed. The next record is refused before payload assembly or decode.
+
+The existing B-tree cursor calls `beforeRecord(item.payload)` before `payload`
+overflow allocation and `record.Decode`, including local payloads. Its existing
+64 MiB payload cap makes the `128*n + 2048` reservation arithmetic safe in int64.
+The conservative factor covers the payload, variable-column decoder growth,
+retained strings, result growth and per-record name/guard maps even before row
+shape has been established. Subtraction-based reservation prevents budget
+addition overflow. No reservation is released while retained results remain.
+
+This is an accounting bound on the documented inspection metadata/decode
+allocations, not a measured allocator/total-heap/RSS bound. Schema materialization,
+B-tree page/visited bookkeeping and page-cache allocations remain governed by
+their existing independent limits. The docs explicitly preserve that boundary.
+Default inspection does not enter this optional catalog budget path.
+
+### CLI and compatibility
+
+The production delta outside the new API is confined to inspect handling and
+usage text in `cmd/gosqlite/main.go`. The exact existing
+`sqlite.OpenContext(ctx, args[1], sqlite.Options{ReadOnly: true})` call remains,
+and the unchanged AST assertion still passes. `--extensions` is opt-in before
+the database argument. Both modes prepare one complete Inspect result before
+encoding. The default format string, field names, order, uppercase nested
+header/schema names and newline are unchanged. The optional field is an array,
+including `[]` when empty. Opaque non-JSON custom config is JSON string-escaped.
+The existing CLI Close error is joined. Output writer failures can still yield
+partial JSON writes; documentation states this, and no stronger output-atomicity
+claim is made.
+
+## Reviewed execution scope and results
+
+Before running, all selected new test bodies/helpers and the four selected
+existing CLI tests/helpers were read. Fixtures use ordinary successful creation,
+DDL, grams/custom index creation, Reindex, transaction writes/commit and close/
+readonly reopen. The only read observer forwards ReadPage unchanged and records
+page numbers. The 8 KiB config is a valid benign custom-method label. Contexts
+are pre-canceled or already expired. Full fixture-directory inventories and
+hashes are checked. No init or TestMain hooks exist in either selected package.
+The static source-reference guard itself was read before execution.
+
+Environment: Go 1.27.2, Linux/amd64; original project GOPATH/GOCACHE;
+GOTOOLCHAIN=local, GOPROXY=off, GOSUMDB=off, GOFLAGS=-buildvcs=false,
+GOMAXPROCS=2; TMPDIR/GOTMPDIR unset (default /tmp). CGO=0 for ordinary tests,
+vet and builds; CGO=1 only for the same named race selections.
+
+Exact SQLite selector:
+
+`^TestInspectMetadata(EmptyReadonly|GramsRoundTrip|CustomMethodNoCallbacks|CatalogOnlyReads|Quota|Contexts|TransactionAndFreshHeader)$`
+
+Exact CLI selector:
+
+`^TestInspect(Metadata(DefaultJSON|ExtensionsJSON|EmptyExtensionsJSON|CanceledOutput|OpaqueConfigJSON)|SourceForwardsCallerContext|ContextReadonlyFixtures|ContextCanceled|ReadonlyFixture)$`
+
+Commands and outcomes (all exit 0):
+
+- `go run ./internal/testscope`: source-reference guard PASS, static-only.
+- `go test -count=1 -v ./sqlite -run "$sqlite"`: 7 top-level PASS, 0.044s.
+- `go test -count=1 -v ./cmd/gosqlite -run "$cli"`: 9 top-level PASS, 0.031s.
+- `go vet ./sqlite ./cmd/gosqlite`: PASS.
+- `go build -trimpath ./sqlite`: PASS.
+- `go build -trimpath -o <this-evidence-directory>/gosqlite ./cmd/gosqlite`: PASS.
+- `env CGO_ENABLED=1 go test -race -count=1 -v ./sqlite -run "$sqlite"`:
+  7 top-level PASS, 1.190s.
+- `env CGO_ENABLED=1 go test -race -count=1 -v ./cmd/gosqlite -run "$cli"`:
+  9 top-level PASS, 1.102s.
+
+`run-scoped.sh`, `run-scoped.log`, `run-scoped.exit`, and every stage's .log/.exit
+are retained unabridged. The full after-inventory matches the before-inventory.
+No new runtime failure or tool-review denial occurred in this independent run.
+
+The prior owner compile failure remains preserved, not erased or rerun here:
+`../inspect-metadata-evidence-v1/sqlite-named.log` reports missing ctx in
+`tx.Commit()`. The preserved failed test SHA256 is
+`e8fa3e6ccee10f4f3efc3310089a7971b7e1bf3a23e69930a34a647e6c1b449d`.
+An independent textual comparison confirms the sole difference from that failed
+source is `tx.Commit()` -> `tx.Commit(ctx)`; corrected SHA256 is
+`eb73ca1253893734d8906871d0a684b9f153fc1faeb27916456d21a951381055`.
+No database test had run in the failed owner compile stage. The owner also
+records its earlier, pre-execution replacement of a PageCount-growth assumption
+with exact committed FileInfo comparison; this avoids assuming no freelist reuse.
+
+## Evidence limits and handoff
+
+Runtime evidence covers only Linux plaintext rollback, small complete grams13/
+custom-method catalogs, normal lifecycle, quota rejection before valid overflow,
+pre-canceled contexts and existing committed default-inspection fixtures.
+
+Owned-close failures, malformed shapes, unknown storage versions, invalid UTF-8,
+1,024-record boundary, optional ANN envelope handling and similar defensive
+branches were source-reviewed only. The race selections do not establish broad
+concurrency or cancellation-latency acceptance. Config/generation output is
+stored metadata, not an integrity/usability/ANN-algorithm verdict.
+
+No aggregate repository suite, new oracle, fuzz, soak, manual tags, malformed/
+missing/damaged database, namespace interference, fault/crash/signal/process-exit,
+backup/rekey/recovery/wrong-key, encrypted inspection, true readonly WAL, other-OS
+native run or performance run was executed. ANN V4, the new 41-target fuzz work,
+the unknown interrupted chain and frozen previous candidates remain paused.
+
+Next decision belongs to the lead: integrate this exact reviewed slice and
+separately determine the authorized broader gate. This review makes no remote,
+CI, publication, persistence or full-project-completion claim.
+
+## Additional Chinese-document review (read-only)
+
+At the lead's request, read `../inspect-metadata-doc-zh.md` without executing any
+of its commands. Reviewed draft SHA256:
+`e9eab75d48cb825ed234b586dc2258c991e12b5dde27a26114a4dcdb917d06a9`.
+Its translated API, snapshot, envelope, opaque-config, quota and qualification
+statements agree with the implementation. Two small documentation corrections
+were sent to the lead:
+
+1. Replace “空目录返回 []” with “无扩展索引时返回 []”; the test concerns an empty
+   extension-index catalog, not an empty filesystem directory.
+2. Use the linked manual's `capture` wrapper plus explicit `|| exit $?` for the
+   displayed verification commands. The current consecutive bare commands do
+   not themselves retain evidence or enforce the stated stop-at-first-error
+   requirement. The manual's setup uses pipefail, not global errexit.
+
+This document draft is outside the frozen source and does not change the
+reviewed/tested tree. No commands from either manual were executed.

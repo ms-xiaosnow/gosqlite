@@ -1,0 +1,13 @@
+{
+  "library_file_id": "libfile_ce043444c3b48191a4936926bb7b52d8",
+  "version": 0,
+  "bytes": 1005919,
+  "sha256": "df9f87a98a957247b137e3d1f6f28e90ef6cca9dc5c92a39087ccc614fc1cea3",
+  "archive_entries": 80,
+  "verified_manifest_entries": 79,
+  "baseline_library_file_id": "libfile_67ebf97843748191804425397ce64f00",
+  "baseline_commit": "7a3c45706b85104d3dc75d4947a333651226b69c",
+  "reconstructed_tree": "185944581731b5f21a5582ceb60ed340d4ad9012",
+  "reconstructed_files": 2890,
+  "status": "PASS Library byte comparison, all79manifestentries and baseline+7delta exact content tree; no database tests during backup verification; full ordinary gate pending"
+}

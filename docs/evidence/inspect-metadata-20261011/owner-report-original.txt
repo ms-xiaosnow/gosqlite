@@ -1,0 +1,139 @@
+# Inspect extension metadata: implementation handoff
+
+Status: independent source slice implemented and approved scoped checks passed.
+This is not full repository acceptance or completion of goal §12.2.
+
+## Source identity
+
+- Baseline commit: `7a3c45706b85104d3dc75d4947a333651226b69c`
+- Baseline tree: `1acb42237e585007d92b1ce4493740fe03074862`
+- Frozen source: `/workspace/scratch/5e06a74e5f65/durable-restart/inspect-metadata-freeze-v1`
+- Exact frozen tree: `185944581731b5f21a5582ceb60ed340d4ad9012`
+- 2,890 files. All 351 existing test files are byte/mode unchanged.
+- Changed paths only: `sqlite/inspect.go`, `sqlite/inspect_metadata_test.go`,
+  `cmd/gosqlite/main.go`, `cmd/gosqlite/inspect_metadata_test.go`, `README.md`,
+  `docs/cli-inspect.md`, `docs/progress.md`.
+- No main checkout edits, Git writes, remote changes, CI, new dependencies,
+  pager/registry/planner/write-path changes or old candidate reuse.
+- `source-identity.json`, `source-sha256.txt` and `source-tree.txt` record complete
+  identities. `freeze_identity.py` hashes Git objects in memory and compares the
+  entire work/frozen inventory; its only Git action is read-only `ls-tree`.
+
+## Implementation
+
+`DB.Inspect(ctx, InspectOptions)` returns one snapshot's Header, Schema and
+optional ExtensionIndexes. It borrows an active transaction reader after the
+normal check/ensureSnapshotLocked path; otherwise it owns exactly one openReader.
+Owned-reader Close errors are joined and clear the result. Context and active
+transaction state are checked again before success. Info observes a successful
+inspection's fresh header. Cleanup-error behavior was source-reviewed, not fault
+injected in this scope.
+
+The separate decoder only walks sqlite_schema and __gosqlite_ext_catalog. It
+checks the exact base schema envelope and optional whole ANN envelope, schema
+name/root uniqueness, known owned names, the 13-column catalog shape, integer
+ranges, current storage version and positive representable method versions.
+It does not call loadExtensions, loadExtensionsEntries, validateCatalog, Query,
+Check, method lookup, Configure, Canonical or Keys. It never parses config/source
+SQL or reads source/fields/postings/frequency/ANN data roots. Recognized logical
+guard names do not imply those guards or an index are usable.
+
+Public metadata is ID, name, source_table, method, method_version,
+storage_version, config and generation. Config is an opaque UTF-8 string,
+including legitimate non-JSON whole-v1. Newly exposed text is checked before
+JSON can silently replace invalid UTF-8. The invalid-UTF8 rejection branch was
+source-reviewed only; no malformed database fixture was introduced.
+
+At most 1024 records are retained. Conservative MaxSortBytes charges cover
+metadata maps/names/output retention and record allocations. NewBudgetCursor
+reserves before overflow/decode. Schema, B-tree and payload limits apply
+independently; there is no total-heap/RSS guarantee.
+
+The CLI keeps exactly the required OpenContext(ctx,args[1],ReadOnly:true) call.
+Both modes use the one Inspect result before output. Default JSON bytes and
+uppercase nested header/schema fields remain unchanged. --extensions adds
+extension_indexes, including [] for an empty catalog. An output-writer failure
+can still leave partial output, as before; metadata preparation errors do not.
+
+## Approved executed scope
+
+Go 1.27.2, Linux/amd64, offline dependencies, GOPROXY/GOSUMDB off,
+GOTOOLCHAIN=local, GOFLAGS=-buildvcs=false, existing project GOPATH/GOCACHE,
+default /tmp. CGO0 production and CGO1 scoped race.
+
+Exact SQLite selector:
+
+`^TestInspectMetadata(EmptyReadonly|GramsRoundTrip|CustomMethodNoCallbacks|CatalogOnlyReads|Quota|Contexts|TransactionAndFreshHeader)$`
+
+Exact CLI selector:
+
+`^TestInspect(Metadata(DefaultJSON|ExtensionsJSON|EmptyExtensionsJSON|CanceledOutput|OpaqueConfigJSON)|SourceForwardsCallerContext|ContextReadonlyFixtures|ContextCanceled|ReadonlyFixture)$`
+
+The lead read all new helpers before approving execution, and expressly added
+those three existing runtime fixture tests alongside the unchanged AST test.
+
+Results, all exit 0 in evidence-v2:
+
+- `go run ./internal/testscope`: source-reference guard PASS
+- CGO0 named SQLite tests: 7 top-level tests PASS, 0.044s
+- CGO0 named CLI tests: 9 top-level tests PASS, 0.033s
+- `go vet ./sqlite ./cmd/gosqlite`: PASS
+- `go build -trimpath ./sqlite`: PASS
+- `go build -trimpath -o <evidence-v2>/gosqlite ./cmd/gosqlite`: PASS
+- CGO1 same SQLite selection with `-race`: PASS, 1.203s
+- CGO1 same CLI selection with `-race`: PASS, 1.105s
+
+Each named run used `-count=1 -v`; commands and unabridged output are in
+run-scoped.sh/run-scoped.log and the per-stage .log/.exit files. The final code
+was unchanged through these checks and freezing. Only final documentation
+wording was edited after execution.
+
+The new tests use small complete databases made only by successful ordinary
+APIs, normally close/reopen readonly, and compare full directory inventories and
+SHA256s. Grams config/generation roundtrips include normal Reindex. A counted
+custom method proves Configure/Canonical/Keys are used for normal creation and
+unchanged by inspection, including when not registered on the inspecting
+connection. Passive readers only forward and record page reads. An ordinary
+8 KiB configuration label supplies valid overflow pages; the same complete
+fixture succeeds normally and returns only ErrMemoryLimit at smaller budgets,
+before reading its config overflow pages. Context cases are deterministically
+pre-canceled/already-expired, not mid-operation injection. The transaction test
+reads uncommitted DDL and metadata, then successfully queries, writes and commits,
+and compares a later observed header exactly with a separate normal writer's
+committed header.
+
+## Preserved failure and pre-run review correction
+
+The first approved attempt in evidence-v1 passed sourceguard, then failed to
+compile the new SQLite test: tx.Commit() lacked its required context argument.
+No database tests or subsequent gates ran in that attempt. It exited 1.
+The complete original log and failed source are preserved in:
+
+- `../inspect-metadata-evidence-v1/run-scoped.log`
+- `../inspect-metadata-evidence-v1/sqlite-named.log` / `.exit`
+- `../inspect-metadata-evidence-v1/sqlite-inspect_metadata_test.go.failed-source`
+  SHA256 `e8fa3e6ccee10f4f3efc3310089a7971b7e1bf3a23e69930a34a647e6c1b449d`
+
+The lead approved changing that one call to tx.Commit(ctx). Corrected test SHA:
+`eb73ca1253893734d8906871d0a684b9f153fc1faeb27916456d21a951381055`.
+The same approved sequence was run in a new evidence directory, passing.
+
+Before any execution, static review also replaced an unreliable PageCount-growth
+assertion (CREATE TABLE can reuse freelist pages) with exact committed FileInfo
+comparison, retaining SchemaCookie growth and later-object presence. Original
+pre-review SQLite test SHA was
+`704f846acab7b500805efa7a43a714131571b92feaaed6dafc86f6516fb3ab97`.
+There was no runtime failure related to that pre-execution correction.
+
+## Qualification boundaries and next step
+
+This verifies only Linux plaintext rollback, grams/custom catalog metadata, and
+existing default inspection fixtures. No encrypted inspection, true read-only
+WAL, ANN algorithms/recovery, interruption, other native OS, performance, fuzz,
+malformed/missing/damaged database or fault/crash/signal/exit tests ran. ANN V4,
+41-target fuzz and the unknown interrupted chain remain blocked and untouched.
+No full repository aggregate, new oracle run or CI ran here. Persisted configs
+and generations are not a verdict that an index is usable, valid or recoverable.
+
+Next: independent review of this immutable source and the same approved named
+scope, then parent-owned integration and any separately approved full gate.

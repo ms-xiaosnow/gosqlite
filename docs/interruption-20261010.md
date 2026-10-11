@@ -77,6 +77,9 @@ SHA-256 `13092da4ed0e6ca3d7633dc4951a9ac5d0ab18060f6bbd55a4330d39a3a2a5d2`。
 以下路径是原开发空间 `durable-restart/` 下的目录名，不是当前仓库内
 已实现功能。只有明确记录为已保存的精确版本才具备持久恢复证据。
 
+下表持久性保留 11 日 01:37 的原始交接状态；其中“仅本地”的六份源码
+已在下方 03:02 补充记录中静态保全，未因备份改变其实现/验收状态。
+
 | 源码或目录 | 精确状态 | 持久性 |
 |---|---|---|
 | `native-recovery-combined-verify/`，树 `a31402820617c836cf2c716f9af404b30fcfc038` | Windows shared rekey、Darwin V3、公开 rollback-open V2 和原生 namespace 测试门控；既有普通完整门通过，未并入 main；真实恢复与目标 OS 未运行 | 下述补充备份有源码；后来的终态日志仅本地 |
@@ -97,6 +100,31 @@ SHA-256 `0c925133d55dae1550f254e8d1a4f5ad7ad632a2e5aae7f0522b9a09d9d12941`。
 **当前 main 的 Windows/Darwin 两项 raw namespace 测试尚未并入新的
 人工门控修正。不得直接在这些 OS 上执行默认全套或据此启用 CI。**
 这不影响区分当前 Linux 普通套件和受限的目标 OS 测试。
+
+### 4.1 11 日 03:02 的原样静态保全（不是恢复执行）
+
+经限定归档授权，六个已有目录已保存到 Library
+`libfile_276312ea452881918463dcb19db1e1b8`，版本 0，文件名
+`gosqlite-held-sources-static-20261011.tar.gz`，3,891,811 字节，SHA-256
+`62426f18782f2f39d25b95e9a98448649163399015da5f64d1c66da571811423`。
+
+- planner V4c、WAL V2、backup V2、ANN V3 的静态 tree 与上表原确认值一致。
+- 未冻结 ANN V4 work 的此次快照 tree 为
+  `3f36a1130ea62df0b6688d6ebd793ecf8bb4442b`；retained-directory work 为
+  `57d9bfbf6c9e853a14f750d527c4c7ecdd7a5978`。这只是静态身份，不是完成
+  冻结、独立复审或可执行验收的标记。
+- 内容寻址对象去重保存 1,452 份原始 bytes，六树共有 8,203 个文件归属。
+  Library 字节读回、全部对象/清单、重建 Git 内容树，以及原目录保存前后
+  bytes/Git 文件模式/inventory 全部相同。该归档没有记录所有原始 POSIX
+  权限；清单逐项保留各自 HOLD/BLOCKED 原因。
+- 未读取凭据存储或进程环境；不包含 Git 凭据、token、环境 secret、私钥
+  或外部私有业务数据；没有跟随 symlink。仅归档项目源、合成 fixture 和
+  目录内历史证据，没有执行其中任何源码、测试或脚本。
+- 未改 main、CI 或旧源码，没有重启 ANN V4、41 目标 fuzz 或未知中断链路。
+  完整性只证明静态保全，不能登记为一次运行通过。尚未归入这些源目录的
+  后续本地报告/日志也不能假定已包含。
+
+具体清单摘要：[静态保全证据](evidence/inspect-metadata-20261011/held-sources-backup.json)。
 
 ## 5. 长期压力与持久性环境前提
 

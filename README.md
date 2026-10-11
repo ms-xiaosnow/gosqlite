@@ -21,9 +21,10 @@ CGO_ENABLED=0 go run ./cmd/gosqlite query example.db 'CREATE TABLE docs(id INTEG
 CGO_ENABLED=0 go run ./cmd/gosqlite query example.db 'CREATE INDEX docs_title ON docs(title)'
 CGO_ENABLED=0 go run ./cmd/gosqlite query example.db "INSERT INTO docs VALUES(1,'数据库')"
 CGO_ENABLED=0 go run ./cmd/gosqlite query example.db 'SELECT id,title FROM docs'
+CGO_ENABLED=0 go run ./cmd/gosqlite inspect --extensions example.db
 ```
 
-Each CLI invocation executes one statement. Writes autocommit and return JSON with rows_affected and last_insert_id. Explicit transactions use the Go API; BEGIN/COMMIT in separate CLI invocations are rejected. SELECT opens read-only and writes JSON Lines: a columns object followed by row objects. BLOB values are base64. Inspect is metadata inspection, not a full integrity check. Unsupported commands return errors.
+Each CLI invocation executes one statement. Writes autocommit and return JSON with rows_affected and last_insert_id. Explicit transactions use the Go API; BEGIN/COMMIT in separate CLI invocations are rejected. SELECT opens read-only and writes JSON Lines: a columns object followed by row objects. BLOB values are base64. Inspect reads header/schema metadata from one snapshot. Opt-in `inspect --extensions <db>` also reports persisted index identity, method/storage versions, opaque configuration strings and generations. It does not validate index integrity or usability or invoke registered method callbacks. Default inspect JSON is unchanged. See [inspection contract](docs/cli-inspect.md). Unsupported commands return errors.
 
 ```go
 import (
