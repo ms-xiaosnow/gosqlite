@@ -87,6 +87,7 @@ API、预算、诊断兼容边界与精确 source/model 命令见
 |---|---|---|
 | §4.1、M3、§11.1 | `平台阻塞 / NOT_RUN`：实际 native rollback replay、public production bridge 和开启恢复的真实 Open | 内部 harness 的 manual_recovery 标签、显式门和真实测试名保留；public physical harness 为 IMPLEMENTATION_MISSING。内部 deterministic harness 不覆盖公开桥接、真实断电、强杀、短写、Sync/ENOSPC/torn write |
 | §4.1、§11.1 | `平台阻塞 / NOT_RUN（当前）`：已有 plaintext namespace 测试 | 手册列出 manual_namespace 独立门。历史 M2 至 7addc493 全套曾包含两项 namespace 测试，原 PASS 是事实，不能改称当时全都未运行或当时范围完全干净 |
+| §4.1、§8、§11.3 | `平台阻塞 / NOT_RUN`：Windows/Darwin 两个 encstore raw namespace 测试 | 本批完整移动原函数，manual_namespace 加显式环境门；default/oracle 刻意减少这两个声明，其余原声明保持。source/model/race、188 项选择和六项外平台编译/符号独立 PASS；[中文第 19 节](manual-verification-zh.md#19-os-raw-namespace-门控与独立原生验收2026-10-11) 给独立用户步骤，编译不是 native PASS |
 | M3/M4/M7/M8、§8.3、§11.1 | `未实现设施 + 平台阻塞`：完整物理故障/崩溃/重启、checkpoint/rekey 中断、安全篡改矩阵 | 没有现成 harness 的项先补源码和独立审阅；只提供实验前置/断言，不编造现成测试名或成功命令 |
 | M7/M10 | `平台阻塞 / 未知触发`：ANN V4、41 目标 fuzz、未知整轮中断 | 不重发/换路。ANN V3 FAIL 是未发布报告工具缺陷，不自动推断生产 ANN 算法已坏，也不能因为受阻改成 PASS |
 
@@ -98,7 +99,7 @@ API、预算、诊断兼容边界与精确 source/model 命令见
 
 | 原规范条款 | 缺少的环境/证据 | 状态 |
 |---|---|---|
-| §11.3、M3/M8/M10 | Linux/amd64、Linux/arm64、Darwin/arm64、Windows/amd64 实际文件锁、目录同步和恢复边界 | 部分 Linux 普通证据，其他原生门 NOT_RUN。新 OS runner 未启用；main 两项 OS raw namespace 测试尚未手工门控，不能直接默认全套 |
+| §11.3、M3/M8/M10 | Linux/amd64、Linux/arm64、Darwin/arm64、Windows/amd64 实际文件锁、目录同步和恢复边界 | 部分 Linux 普通证据，其他原生门 NOT_RUN。本批两个 encstore namespace 测试已移入 manual tag/env gate，三目标六项编译/符号 PASS 不等于原生资格；新 OS runner 未启用，不直接默认全套 |
 | §11.3、M10 | 固定硬件/文件系统/冷暖缓存的大规模基准及长并发 soak | `NOT_RUN`；两小时计划没启动。10 日预检显示默认 /tmp 对拟议长测余量不足，当时 workspace 挂载为 fsync=volatile；未来运行前须重新核验，普通 Sync 不能证明断电持久性 |
 | §8.2/8.3、§11.3 | 有资格且独立的数据安全、密码学、威胁模型、依赖许可/法律、API 审查 | `NOT_RUN`；开发工程复审和自动扫描不能替代这些资格与结论 |
 | §9.2、M9 | 授权的可丢弃 PostgreSQL/Neon、已核验版本/依赖、回滚快照 | `NOT_RUN`；离线转换/生成 SQL 不等于服务器执行成功；pgx 直连本身为可选项 |
@@ -150,3 +151,27 @@ API、预算、诊断兼容边界与精确 source/model 命令见
 ### P0 默认关闭完整普通门结果（2026-10-11 08:22 UTC）
 
 当前P0组合执行冻结tree `442a7104dc780ddb20826e5ee4f1250b291f2b24` 于08:22:39 UTC自然完成18阶段PASS：完整CGO0普通测试/vet/build、固定SQLite3.54.0完整普通oracle、完整CGO1 race、guard、五目标生产编译、模块及全部3004文件/143目录前后身份。785非docs文件固定；最终文档/证据改变整个tree但不得改变这些运行源码。两个外部预检的报告版本/基线POSIX比较问题在Go执行前发现并保留，修正外部验证器后一次完成运行门，无运行重试。详见[精确组合证据](evidence/public-open-integration-20261011.md)。本批新提交/Library恢复/CI仍待实际核验。真实RecoverRollback、production bridge和开启恢复选项的真实Open/Connect均BLOCKED / NOT_RUN，公开物理harness仍IMPLEMENTATION_MISSING；M3/M10/整体未验收。
+
+## 2026-10-11 OS namespace 六路径批次
+
+2026-10-11 namespace 后续更新：本批以已保存 P0 提交
+`56bbcf3febe233197aa0a5eac965c67a67a88011`（tree
+`c31e7dcbeed9732688681741ee38ec60ff0bfb49`）为组合基点，只移出两个
+Windows/Darwin raw namespace 测试并追加通用 Rename/rename selector guard。
+恢复 guard 和 LIMIT 成果保持。六路径候选的 source/model/race、188 项选择矩阵
+及六项外平台编译/符号核对已有独立 PASS；原生/manual 二进制全部 NOT_RUN。
+详见[本批手册](manual-verification-zh.md#19-os-raw-namespace-门控与独立原生验收2026-10-11)及[范围审计](test-scope-audit.md)。
+本批新组合、提交、恢复和 CI 必须各自记录，不能继承 P0 或候选 PASS。
+
+P0 父基点 56bb 的 Library bundle `libfile_04182e9da3f88191b348c6790628a7bd`
+已读回并核验字节身份；其精确恢复于 08:43:14 UTC 完成 21 项命令、11 项
+具名测试在普通与 race 均 PASS。CI `38125268420` 于 08:44 UTC 仍在进行，
+尚无终态；bundle 字节身份与恢复测试是分开的证据。P0 默认关闭完整普通门的既有结果
+只属于其冻结 tree 442a；本批 source/model/compile 结果只属于候选 01918609。
+
+
+## 2026-10-11 namespace 最终组合限定门与 P0 持久闭合
+
+运行冻结 tree `697e45c6aba7a5cf62ebbf2bab2662f10903c5be` 于09:01完成独立核验：3070文件、788非docs与已审候选完整字节/Git/POSIX模式相同；guard、4项纯模型及同集合race PASS，manual GOFLAGS按预期拒绝。实际7条Go工具调用含早于后发5条限定的只读version/env前检，完整记录保留。另157链接、45shell语法块、29选录工件/617前置原件哈希PASS。没有运行该组合完整aggregate/oracle、外平台二进制或手工物理测试。报告见[最终组合限定证据](evidence/namespace-gating-20261011/final-composition-report.md)。此后仅追加终态文档/证据；最终提交的788非docs须逐字节核验等同该运行冻结源。
+
+父P0提交 `56bbcf3febe233197aa0a5eac965c67a67a88011` 的 CI `38125268420` 已于08:56:41 UTC SUCCESS，两job ordinary114428206934/oracle114428207050均SUCCESS；精确Library恢复21条命令PASS。终态证据归档 `libfile_4a413988d4608191aebf695542a04caf`，10211483B，SHA256 `0d6579c338465be5df401b4f2a594df8fe63737900a78dbcc9e4ef28e85bbfb3`，读回411条/410文件哈希PASS。原08:44/08:45 PENDING是先前写作时点，现仅对父P0闭合，不能当作namespace新提交CI。

@@ -139,3 +139,20 @@ bounds and exact-search/Top-K coverage, while ANN remains separately not_run.
 NFC grams membership and build/space/latency tools are implemented; measured
 space amplification and selective slowdowns are preserved. These additions do
 not qualify native failure recovery, long soak or statistical performance.
+
+## 2026-10-11 OS namespace 测试选择边界
+
+2026-10-11 namespace 后续更新：本批以已保存 P0 提交
+`56bbcf3febe233197aa0a5eac965c67a67a88011`（tree
+`c31e7dcbeed9732688681741ee38ec60ff0bfb49`）为组合基点，只移出两个
+Windows/Darwin raw namespace 测试并追加通用 Rename/rename selector guard。
+恢复 guard 和 LIMIT 成果保持。六路径候选的 source/model/race、188 项选择矩阵
+及六项外平台编译/符号核对已有独立 PASS；原生/manual 二进制全部 NOT_RUN。
+详见[本批手册](manual-verification-zh.md#19-os-raw-namespace-门控与独立原生验收2026-10-11)及[范围审计](test-scope-audit.md)。
+本批新组合、提交、恢复和 CI 必须各自记录，不能继承 P0 或候选 PASS。
+
+| 范围 | 当前状态 | 准确边界 |
+|---|---|---|
+| 两个 encstore 原生 namespace 回归的默认选择 | verified scoped source/model/compile | default 与仅 oracle 在适用平台排除这两个完整移走的函数；manual_namespace 加 env gate 保留它们，其他原声明保持。测试覆盖变化被明确记录 |
+| Rename/rename source-reference guard | verified scoped | 追加通用 selector 检查，当前 P0 recovery guard 全部保持；bare helper/wrapper/reflection 等仍需行为审阅，不是完整安全证明 |
+| Windows/amd64、Darwin/amd64、Darwin/arm64 原生 namespace 行为 | unqualified / NOT_RUN | 两种 manual tag 的六项外平台编译与符号核对仅证明编译/链接；不证明文件锁、持久性、加密安全或原生故障资格 |

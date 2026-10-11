@@ -1,0 +1,399 @@
+diff --git a/internal/encstore/namespace_manual_darwin_test.go b/internal/encstore/namespace_manual_darwin_test.go
+new file mode 100644
+--- /dev/null
++++ b/internal/encstore/namespace_manual_darwin_test.go
+@@ -0,0 +1,94 @@
++//go:build manual_namespace
++
++package encstore
++
++// Restricted direct namespace-publication primitive test. Retained source only;
++// do not execute or relocate it into ordinary CI. Previous evidence is compile
++// only, not native runtime. The OS/architecture filename also restricts selection.
++
++import (
++	"bytes"
++	"context"
++	"errors"
++	"github.com/ms-xiaosnow/gosqlite/encryption"
++	"github.com/ms-xiaosnow/gosqlite/internal/darwinfile"
++	"os"
++	"path/filepath"
++	"strings"
++	"testing"
++)
++
++func TestDarwinEncryptedRelativePublicationAndParentLifetime(t *testing.T) {
++	if os.Getenv("GOSQLITE_MANUAL_NAMESPACE") != "independently_authorized" {
++		t.Skip("restricted raw namespace publication test: excluded from ordinary CI")
++	}
++	path := filepath.Join(t.TempDir(), "ordinary.gse")
++	ns, e := newNamespace(path)
++	if e != nil {
++		t.Fatal(e)
++	}
++	defer ns.dir.Close()
++	if _, e = inventory(context.Background(), path, 1<<20, 64, ns); e != nil {
++		t.Fatal(e)
++	}
++	pending := path + ".gse-" + strings.Repeat("a", 64) + ".pending"
++	if e = ns.write(pending, []byte("first")); e != nil {
++		t.Fatal(e)
++	}
++	if e = ns.rename(pending, path, true); e != nil {
++		t.Fatal(e)
++	}
++	root, info, e := ns.checked(path, os.O_RDONLY)
++	if e != nil {
++		t.Fatal(e)
++	}
++	defer root.Close()
++	if e = ns.stable(root, path, info); e != nil {
++		t.Fatal(e)
++	}
++	next := path + ".gse-" + strings.Repeat("b", 64) + ".pending"
++	if e = ns.write(next, []byte("after")); e != nil {
++		t.Fatal(e)
++	}
++	if e = ns.rename(next, path, false); e != nil {
++		t.Fatal(e)
++	}
++	old, e := readExact(root, 5, 0)
++	if e != nil || !bytes.Equal(old, []byte("first")) {
++		t.Fatal("retained root", e)
++	}
++	current, ci, e := ns.checked(path, os.O_RDONLY)
++	if e != nil {
++		t.Fatal(e)
++	}
++	defer current.Close()
++	raw, e := readExact(current, 5, 0)
++	if e != nil || !bytes.Equal(raw, []byte("after")) {
++		t.Fatal("published root", e)
++	}
++	if e = ns.stable(current, path, ci); e != nil {
++		t.Fatal(e)
++	}
++	if e = ns.dir.Close(); e != nil {
++		t.Fatal(e)
++	}
++	if e = platformDirectoryCheck(ns.dir, ns.path, ns.info); !errors.Is(e, encryption.ErrClosed) {
++		t.Fatal("public directory resurrected", e)
++	}
++	if e = ns.stable(current, path, ci); e != nil {
++		t.Fatal("retained child lost parent", e)
++	}
++	if e = root.Close(); e != nil {
++		t.Fatal(e)
++	}
++	if e = current.Close(); e != nil {
++		t.Fatal(e)
++	}
++	darwinfile.Process.Lock()
++	left := ns.dir.children
++	rawDir := ns.dir.descriptor.raw
++	darwinfile.Process.Unlock()
++	if left != 0 || rawDir != nil {
++		t.Fatal("directory retained after last physical child")
++	}
++}
+diff --git a/internal/encstore/namespace_manual_windows_amd64_test.go b/internal/encstore/namespace_manual_windows_amd64_test.go
+new file mode 100644
+--- /dev/null
++++ b/internal/encstore/namespace_manual_windows_amd64_test.go
+@@ -0,0 +1,82 @@
++//go:build manual_namespace
++
++package encstore
++
++// Restricted direct namespace-publication primitive test. Retained source only;
++// do not execute or relocate it into ordinary CI. Previous evidence is compile
++// only, not native runtime. The OS/architecture filename also restricts selection.
++
++import (
++	"bytes"
++	"context"
++	"os"
++	"path/filepath"
++	"strings"
++	"testing"
++)
++
++func TestWindowsEncryptedRelativePublicationAndRetainedRoot(t *testing.T) {
++	if os.Getenv("GOSQLITE_MANUAL_NAMESPACE") != "independently_authorized" {
++		t.Skip("restricted raw namespace publication test: excluded from ordinary CI")
++	}
++	path := filepath.Join(t.TempDir(), "ordinary Ω family.gse")
++	ns, err := newNamespace(path)
++	if err != nil {
++		t.Fatal(err)
++	}
++	defer ns.dir.Close()
++	lock, _, err := ns.checked(path+".gse-lock", os.O_RDWR|os.O_CREATE|os.O_EXCL)
++	if err != nil {
++		t.Fatal(err)
++	}
++	defer lock.Close()
++	if err = lockFile(lock, false); err != nil {
++		t.Fatal(err)
++	}
++	if _, err = inventory(context.Background(), path, 1<<20, 64, ns); err != nil {
++		t.Fatal("relative directory inventory", err)
++	}
++	pending := path + ".gse-" + strings.Repeat("a", 64) + ".pending"
++	if err = ns.write(pending, []byte("first")); err != nil {
++		t.Fatal(err)
++	}
++	if err = ns.rename(pending, path, true); err != nil {
++		t.Fatal(err)
++	}
++	root, info, err := ns.checked(path, os.O_RDONLY)
++	if err != nil {
++		t.Fatal(err)
++	}
++	defer root.Close()
++	if err = ns.stable(root, path, info); err != nil {
++		t.Fatal(err)
++	}
++	next := path + ".gse-" + strings.Repeat("b", 64) + ".pending"
++	if err = ns.write(next, []byte("after")); err != nil {
++		t.Fatal(err)
++	}
++	if err = ns.rename(next, path, false); err != nil {
++		t.Fatal(err)
++	}
++	// Replacement is an ordinary authorized cutover. The older open handle
++	// retains its original bytes until explicit close, without a copy fallback.
++	old, err := readExact(root, 5, 0)
++	if err != nil || !bytes.Equal(old, []byte("first")) {
++		t.Fatal("old root handle", err)
++	}
++	current, ci, err := ns.checked(path, os.O_RDONLY)
++	if err != nil {
++		t.Fatal(err)
++	}
++	defer current.Close()
++	raw, err := readExact(current, 5, 0)
++	if err != nil || !bytes.Equal(raw, []byte("after")) {
++		t.Fatal("new root handle", err)
++	}
++	if err = ns.stable(current, path, ci); err != nil {
++		t.Fatal(err)
++	}
++	if err = ns.check(); err != nil {
++		t.Fatal(err)
++	}
++}
+diff --git a/internal/encstore/native_darwin_test.go b/internal/encstore/native_darwin_test.go
+--- a/internal/encstore/native_darwin_test.go
++++ b/internal/encstore/native_darwin_test.go
+@@ -3,15 +3,12 @@
+ package encstore
+ 
+ import (
+-	"bytes"
+-	"context"
+ 	"errors"
+ 	"os"
+ 	"path/filepath"
+ 	"strings"
+ 	"testing"
+ 
+-	"github.com/ms-xiaosnow/gosqlite/encryption"
+ 	"github.com/ms-xiaosnow/gosqlite/internal/darwinfile"
+ 	"github.com/ms-xiaosnow/gosqlite/internal/testkit/fileview"
+ 	"github.com/ms-xiaosnow/gosqlite/internal/vfs"
+@@ -159,77 +156,7 @@
+ 		t.Fatal("encrypted probe erased plain reservation", e)
+ 	}
+ }
+-func TestDarwinEncryptedRelativePublicationAndParentLifetime(t *testing.T) {
+-	path := filepath.Join(t.TempDir(), "ordinary.gse")
+-	ns, e := newNamespace(path)
+-	if e != nil {
+-		t.Fatal(e)
+-	}
+-	defer ns.dir.Close()
+-	if _, e = inventory(context.Background(), path, 1<<20, 64, ns); e != nil {
+-		t.Fatal(e)
+-	}
+-	pending := path + ".gse-" + strings.Repeat("a", 64) + ".pending"
+-	if e = ns.write(pending, []byte("first")); e != nil {
+-		t.Fatal(e)
+-	}
+-	if e = ns.rename(pending, path, true); e != nil {
+-		t.Fatal(e)
+-	}
+-	root, info, e := ns.checked(path, os.O_RDONLY)
+-	if e != nil {
+-		t.Fatal(e)
+-	}
+-	defer root.Close()
+-	if e = ns.stable(root, path, info); e != nil {
+-		t.Fatal(e)
+-	}
+-	next := path + ".gse-" + strings.Repeat("b", 64) + ".pending"
+-	if e = ns.write(next, []byte("after")); e != nil {
+-		t.Fatal(e)
+-	}
+-	if e = ns.rename(next, path, false); e != nil {
+-		t.Fatal(e)
+-	}
+-	old, e := readExact(root, 5, 0)
+-	if e != nil || !bytes.Equal(old, []byte("first")) {
+-		t.Fatal("retained root", e)
+-	}
+-	current, ci, e := ns.checked(path, os.O_RDONLY)
+-	if e != nil {
+-		t.Fatal(e)
+-	}
+-	defer current.Close()
+-	raw, e := readExact(current, 5, 0)
+-	if e != nil || !bytes.Equal(raw, []byte("after")) {
+-		t.Fatal("published root", e)
+-	}
+-	if e = ns.stable(current, path, ci); e != nil {
+-		t.Fatal(e)
+-	}
+-	if e = ns.dir.Close(); e != nil {
+-		t.Fatal(e)
+-	}
+-	if e = platformDirectoryCheck(ns.dir, ns.path, ns.info); !errors.Is(e, encryption.ErrClosed) {
+-		t.Fatal("public directory resurrected", e)
+-	}
+-	if e = ns.stable(current, path, ci); e != nil {
+-		t.Fatal("retained child lost parent", e)
+-	}
+-	if e = root.Close(); e != nil {
+-		t.Fatal(e)
+-	}
+-	if e = current.Close(); e != nil {
+-		t.Fatal(e)
+-	}
+-	darwinfile.Process.Lock()
+-	left := ns.dir.children
+-	rawDir := ns.dir.descriptor.raw
+-	darwinfile.Process.Unlock()
+-	if left != 0 || rawDir != nil {
+-		t.Fatal("directory retained after last physical child")
+-	}
+-}
++
+ func TestDarwinEncryptedPathPolicyMemory(t *testing.T) {
+ 	for _, name := range []string{"ordinary.gse", "Mixed Case.gse", strings.Repeat("a", 177)} {
+ 		if e := encryptedDarwinTarget(name); e != nil {
+diff --git a/internal/encstore/native_windows_test.go b/internal/encstore/native_windows_test.go
+--- a/internal/encstore/native_windows_test.go
++++ b/internal/encstore/native_windows_test.go
+@@ -3,7 +3,6 @@
+ package encstore
+ 
+ import (
+-	"bytes"
+ 	"context"
+ 	"errors"
+ 	"os"
+@@ -102,68 +101,7 @@
+ 		t.Fatal("downgraded shared lease", err)
+ 	}
+ }
+-func TestWindowsEncryptedRelativePublicationAndRetainedRoot(t *testing.T) {
+-	path := filepath.Join(t.TempDir(), "ordinary Ω family.gse")
+-	ns, err := newNamespace(path)
+-	if err != nil {
+-		t.Fatal(err)
+-	}
+-	defer ns.dir.Close()
+-	lock, _, err := ns.checked(path+".gse-lock", os.O_RDWR|os.O_CREATE|os.O_EXCL)
+-	if err != nil {
+-		t.Fatal(err)
+-	}
+-	defer lock.Close()
+-	if err = lockFile(lock, false); err != nil {
+-		t.Fatal(err)
+-	}
+-	if _, err = inventory(context.Background(), path, 1<<20, 64, ns); err != nil {
+-		t.Fatal("relative directory inventory", err)
+-	}
+-	pending := path + ".gse-" + strings.Repeat("a", 64) + ".pending"
+-	if err = ns.write(pending, []byte("first")); err != nil {
+-		t.Fatal(err)
+-	}
+-	if err = ns.rename(pending, path, true); err != nil {
+-		t.Fatal(err)
+-	}
+-	root, info, err := ns.checked(path, os.O_RDONLY)
+-	if err != nil {
+-		t.Fatal(err)
+-	}
+-	defer root.Close()
+-	if err = ns.stable(root, path, info); err != nil {
+-		t.Fatal(err)
+-	}
+-	next := path + ".gse-" + strings.Repeat("b", 64) + ".pending"
+-	if err = ns.write(next, []byte("after")); err != nil {
+-		t.Fatal(err)
+-	}
+-	if err = ns.rename(next, path, false); err != nil {
+-		t.Fatal(err)
+-	}
+-	// Replacement is an ordinary authorized cutover. The older open handle
+-	// retains its original bytes until explicit close, without a copy fallback.
+-	old, err := readExact(root, 5, 0)
+-	if err != nil || !bytes.Equal(old, []byte("first")) {
+-		t.Fatal("old root handle", err)
+-	}
+-	current, ci, err := ns.checked(path, os.O_RDONLY)
+-	if err != nil {
+-		t.Fatal(err)
+-	}
+-	defer current.Close()
+-	raw, err := readExact(current, 5, 0)
+-	if err != nil || !bytes.Equal(raw, []byte("after")) {
+-		t.Fatal("new root handle", err)
+-	}
+-	if err = ns.stable(current, path, ci); err != nil {
+-		t.Fatal(err)
+-	}
+-	if err = ns.check(); err != nil {
+-		t.Fatal(err)
+-	}
+-}
++
+ func TestWindowsEncryptedStandaloneParentRetention(t *testing.T) {
+ 	path := filepath.Join(t.TempDir(), "archive.gse")
+ 	file, info, err := checkedFile(path, os.O_RDWR|os.O_CREATE|os.O_EXCL)
+diff --git a/internal/testscope/main.go b/internal/testscope/main.go
+--- a/internal/testscope/main.go
++++ b/internal/testscope/main.go
+@@ -132,7 +132,7 @@
+ 			}
+ 		}
+ 		switch sel.Sel.Name {
+-		case "Kill", "Signal", "Truncate", "Chmod", "RecoverRollback":
++		case "Kill", "Signal", "Truncate", "Chmod", "RecoverRollback", "Rename", "rename":
+ 			prohibited = true
+ 		}
+ 		if prohibited {
+diff --git a/internal/testscope/native_namespace_test.go b/internal/testscope/native_namespace_test.go
+new file mode 100644
+--- /dev/null
++++ b/internal/testscope/native_namespace_test.go
+@@ -0,0 +1,17 @@
++package main
++
++import "testing"
++
++// Source-string probes only. No namespace operation is executed.
++func TestNativeNamespaceMethodReferenceGuard(t *testing.T) {
++	for _, src := range []string{`package encstore;func f(){ns.rename(a,b,false)}`, `package encstore;var f=ns.rename`, `package x;var f=adapter.Rename`} {
++		got, err := inspectSource("ordinary_test.go", []byte(src))
++		if err != nil || len(got) == 0 {
++			t.Fatal(got, err)
++		}
++	}
++	src := []byte("//go:build manual_namespace\n\npackage encstore;func f(){ns.rename(a,b,false)}")
++	if got, err := inspectSource("namespace_manual_windows_amd64_test.go", src); err != nil || len(got) != 0 {
++		t.Fatal(got, err)
++	}
++}

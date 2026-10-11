@@ -1,0 +1,25 @@
+{
+  "status": "SOURCE_LEXICAL_REVIEW_PASS_NOT_A_GO_AST_EXECUTION",
+  "ordinary_nonliteral_Rename_or_rename_selectors": [],
+  "exact_manual_exempt_sources": [
+    "internal/encstore/namespace_manual_darwin_test.go",
+    "internal/encstore/namespace_manual_windows_amd64_test.go",
+    "internal/pager/recovery_manual_test.go",
+    "sqlite/write_namespace_manual_test.go"
+  ],
+  "namespace_regression_actual_calls_are_parser_and_testing_only": true,
+  "selection_source_conclusion": {
+    "windows": "Original first-line windows && amd64 plus _windows_test.go is equivalent to new _windows_amd64_test.go plus manual_namespace, conditional on the manual tag.",
+    "darwin": "Original first-line darwin plus _darwin_test.go is equivalent to new _darwin_test.go plus manual_namespace, conditional on the manual tag. Existing ios-to-darwin matching remains.",
+    "default_and_oracle": "Neither new manual file is selected. Only the two moved function declarations leave existing platform suites.",
+    "manual_and_oracle_manual": "Selection retains the original OS/architecture conditions and additionally requires manual_namespace.",
+    "actual_go_list": "NOT_RUN"
+  },
+  "limitations": [
+    "Name-based selector detection is conservative and may flag unrelated Rename methods.",
+    "Source scanning is not type, call-graph or physical safety proof.",
+    "Bare helper calls, wrappers, reflection/dynamic calls and future APIs require behavioral review.",
+    "Exact first-line manual-tag exemption does not prove an environment gate or safe function body. These two functions were checked independently.",
+    "Go unit/race tests, actual target listing and foreign compile-symbol checks remain NOT_RUN for this review."
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "status": "PASS",
+  "method": "Independent Python exact unified-hunk parser; no Git invoked",
+  "paths": [
+    {
+      "path": "internal/encstore/namespace_manual_darwin_test.go",
+      "hunks": 1,
+      "kind": "added",
+      "exact_output_sha256": "7c37bdeae5876c23f580d55cf733c3c81bced4cd8335750d1fffcab56f6047bf"
+    },
+    {
+      "path": "internal/encstore/namespace_manual_windows_amd64_test.go",
+      "hunks": 1,
+      "kind": "added",
+      "exact_output_sha256": "c8644be1e007135792a59167dd24410b284e1a46ff3c8cb86a36ac81ec08a98a"
+    },
+    {
+      "path": "internal/encstore/native_darwin_test.go",
+      "hunks": 2,
+      "kind": "modified",
+      "exact_output_sha256": "42ea278b8379fbc7f14111bdf3524e2534e27aca80ec091f3fd1dab4de6e37dd"
+    },
+    {
+      "path": "internal/encstore/native_windows_test.go",
+      "hunks": 2,
+      "kind": "modified",
+      "exact_output_sha256": "aa395f38d60d9a6e4499a0f134d212014e2eac34a7ae45e9465c5beb12b5252c"
+    },
+    {
+      "path": "internal/testscope/main.go",
+      "hunks": 1,
+      "kind": "modified",
+      "exact_output_sha256": "0423cb10343cda347fb2cc7239fe5ddeeddba4d19e2f995c768d523117003c85"
+    },
+    {
+      "path": "internal/testscope/native_namespace_test.go",
+      "hunks": 1,
+      "kind": "added",
+      "exact_output_sha256": "370f79f26d90292b49aed63cd4be17b79ef339b22657291b3c24a82bb05cbcc2"
+    }
+  ],
+  "tree": "01918609a55cc149c5155451da40f7389854db06"
+}

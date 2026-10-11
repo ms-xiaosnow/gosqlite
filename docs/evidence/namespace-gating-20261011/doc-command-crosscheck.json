@@ -1,0 +1,132 @@
+{
+  "status": "STATIC_SOURCE_COMMAND_CROSSCHECK_PASS",
+  "source_tree": "01918609a55cc149c5155451da40f7389854db06",
+  "tests": [
+    {
+      "path": "internal/encstore/namespace_manual_windows_amd64_test.go",
+      "sha256": "c8644be1e007135792a59167dd24410b284e1a46ff3c8cb86a36ac81ec08a98a",
+      "test": "TestWindowsEncryptedRelativePublicationAndRetainedRoot",
+      "platforms_for_manual": "windows/amd64",
+      "tag": "manual_namespace",
+      "environment_name": "GOSQLITE_MANUAL_NAMESPACE",
+      "environment_value": "independently_authorized",
+      "first_statement_gate": true,
+      "gate_before_tempdir": true,
+      "binary_run_regex": "^TestWindowsEncryptedRelativePublicationAndRetainedRoot$",
+      "package": "./internal/encstore",
+      "execution": "NOT_RUN"
+    },
+    {
+      "path": "internal/encstore/namespace_manual_darwin_test.go",
+      "sha256": "7c37bdeae5876c23f580d55cf733c3c81bced4cd8335750d1fffcab56f6047bf",
+      "test": "TestDarwinEncryptedRelativePublicationAndParentLifetime",
+      "platforms_for_manual": "darwin/amd64, darwin/arm64",
+      "tag": "manual_namespace",
+      "environment_name": "GOSQLITE_MANUAL_NAMESPACE",
+      "environment_value": "independently_authorized",
+      "first_statement_gate": true,
+      "gate_before_tempdir": true,
+      "binary_run_regex": "^TestDarwinEncryptedRelativePublicationAndParentLifetime$",
+      "package": "./internal/encstore",
+      "execution": "NOT_RUN"
+    }
+  ],
+  "literal_assertion_witnesses": {
+    "TestWindowsEncryptedRelativePublicationAndRetainedRoot": [
+      "ordinary Ω family.gse",
+      "lockFile(lock, false)",
+      "[]byte(\"first\")",
+      "[]byte(\"after\")",
+      "ns.stable(current, path, ci)",
+      "ns.check()"
+    ],
+    "TestDarwinEncryptedRelativePublicationAndParentLifetime": [
+      "[]byte(\"first\")",
+      "[]byte(\"after\")",
+      "encryption.ErrClosed",
+      "retained child lost parent",
+      "left != 0 || rawDir != nil"
+    ]
+  },
+  "binary_flags": [
+    "test.run",
+    "test.v",
+    "test.count",
+    "test.parallel",
+    "test.timeout"
+  ],
+  "testing_source_sha256": "27c59df1832eae458ab8d2d4b6a6252bbd1ea2a3001734910d1ce2decff16f81",
+  "recorded_owner_compile_argv": [
+    [
+      "/workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go",
+      "test",
+      "-c",
+      "-mod=readonly",
+      "-tags",
+      "manual_namespace",
+      "-o",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/namespace-gating-integration-evidence/windows-amd64-manual_namespace.test",
+      "./internal/encstore"
+    ],
+    [
+      "/workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go",
+      "test",
+      "-c",
+      "-mod=readonly",
+      "-tags",
+      "oracle,manual_namespace",
+      "-o",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/namespace-gating-integration-evidence/windows-amd64-oracle-manual_namespace.test",
+      "./internal/encstore"
+    ],
+    [
+      "/workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go",
+      "test",
+      "-c",
+      "-mod=readonly",
+      "-tags",
+      "manual_namespace",
+      "-o",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/namespace-gating-integration-evidence/darwin-amd64-manual_namespace.test",
+      "./internal/encstore"
+    ],
+    [
+      "/workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go",
+      "test",
+      "-c",
+      "-mod=readonly",
+      "-tags",
+      "oracle,manual_namespace",
+      "-o",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/namespace-gating-integration-evidence/darwin-amd64-oracle-manual_namespace.test",
+      "./internal/encstore"
+    ],
+    [
+      "/workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go",
+      "test",
+      "-c",
+      "-mod=readonly",
+      "-tags",
+      "manual_namespace",
+      "-o",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/namespace-gating-integration-evidence/darwin-arm64-manual_namespace.test",
+      "./internal/encstore"
+    ],
+    [
+      "/workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go",
+      "test",
+      "-c",
+      "-mod=readonly",
+      "-tags",
+      "oracle,manual_namespace",
+      "-o",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/namespace-gating-integration-evidence/darwin-arm64-oracle-manual_namespace.test",
+      "./internal/encstore"
+    ]
+  ],
+  "manual_examples_executed": false,
+  "all_encstore_TestMain_absent": true,
+  "windows_lock_mode": "exclusive lifecycle byte (readOnly=false)",
+  "toolchain_version_source": "module github.com/ms-xiaosnow/gosqlite\n\ngo 1.27.2\n\nrequire (\n\tgolang.org/x/crypto v0.58.0\n\tgolang.org/x/sys v0.49.0\n\tgolang.org/x/text v0.43.0\n)\n",
+  "limits": "Flags and source are read; no Go command, native test or documentation example was run."
+}

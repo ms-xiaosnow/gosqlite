@@ -1,0 +1,23 @@
+{
+  "status": "PASS",
+  "owned_document_paths": 9,
+  "base_commit": "56bbcf3febe233197aa0a5eac965c67a67a88011",
+  "base_tree": "c31e7dcbeed9732688681741ee38ec60ff0bfb49",
+  "docs_only_tree": "982244fa28e4c27ba8dccf6ed368685d900b89b9",
+  "base_files": 3036,
+  "candidate_files": 3036,
+  "directories": 144,
+  "only_owned_docs_changed": true,
+  "progress_original_prefix_preserved": true,
+  "goal_unchanged": true,
+  "all_non_docs_unchanged": true,
+  "p0_limit_evidence_unchanged": true,
+  "links_checked": 148,
+  "links_failed": 0,
+  "shell_fences_checked": 45,
+  "shell_fences_failed": 0,
+  "patch_sha256": "7c88ae64dbb09a1a45ef5660f1403d92a269b606c999436a2c651056a256321d",
+  "go_commands_executed": false,
+  "documentation_examples_executed": false,
+  "native_runtime": "NOT_RUN"
+}

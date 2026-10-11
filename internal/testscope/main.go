@@ -132,7 +132,7 @@ func inspectSource(path string, raw []byte) ([]string, error) {
 			}
 		}
 		switch sel.Sel.Name {
-		case "Kill", "Signal", "Truncate", "Chmod", "RecoverRollback":
+		case "Kill", "Signal", "Truncate", "Chmod", "RecoverRollback", "Rename", "rename":
 			prohibited = true
 		}
 		if prohibited {

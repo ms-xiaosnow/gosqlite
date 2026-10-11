@@ -1,0 +1,17 @@
+{
+  "time": "2026-10-11T08:37:48.951630+00:00",
+  "parent": "56bbcf3febe233197aa0a5eac965c67a67a88011",
+  "candidate_tree": "01918609a55cc149c5155451da40f7389854db06",
+  "paths": [
+    "internal/encstore/namespace_manual_darwin_test.go",
+    "internal/encstore/namespace_manual_windows_amd64_test.go",
+    "internal/encstore/native_darwin_test.go",
+    "internal/encstore/native_windows_test.go",
+    "internal/testscope/main.go",
+    "internal/testscope/native_namespace_test.go"
+  ],
+  "patch_sha256": "18ba34e90283080cbc0a1ab1ab1e213945d2b9a05168acb33221498faaba4ee0",
+  "before_files": 3036,
+  "after_files": 3039,
+  "unrelated_bytes_preserved": true
+}

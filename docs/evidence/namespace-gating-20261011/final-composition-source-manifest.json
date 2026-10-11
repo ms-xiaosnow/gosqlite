@@ -1,0 +1,11 @@
+{
+  "created_utc": "2026-10-11T08:52:44.558220+00:00",
+  "parent": "56bbcf3febe233197aa0a5eac965c67a67a88011",
+  "tree": "697e45c6aba7a5cf62ebbf2bab2662f10903c5be",
+  "files": 3070,
+  "non_docs": 788,
+  "non_docs_exact_owner_and_independent_candidate": true,
+  "source_reference_tree": "01918609a55cc149c5155451da40f7389854db06",
+  "source_tests": "owner/independent narrow checks already PASS on exact all non-doc bytes/modes; final-composition independent check pending",
+  "CI": "new commit not created"
+}

@@ -1,0 +1,15 @@
+{
+  "paths": [
+    "docs/manual-verification-zh.md",
+    "docs/manual-verification.md",
+    "docs/progress.md",
+    "docs/acceptance-status.md",
+    "docs/restriction-provenance-20261011.md",
+    "docs/compatibility.md",
+    "docs/closeout-scope-20261011.md",
+    "docs/test-scope-audit.md",
+    "docs/rollback-recovery-open.md"
+  ],
+  "patch_sha256": "7c88ae64dbb09a1a45ef5660f1403d92a269b606c999436a2c651056a256321d",
+  "result": "PASS exactbaseline-hunkintegration and candidate-readback"
+}

@@ -1,0 +1,82 @@
+[
+  {
+    "target": "windows/amd64",
+    "tags": "manual_namespace",
+    "artifact": "/workspace/scratch/5e06a74e5f65/durable-restart/namespace-gating-integration-evidence/windows-amd64-manual_namespace.test",
+    "sha256": "6121e550a4f922269789fcee875bc210b4f6d46988950548147a3721515bf249",
+    "symbols": [
+      "14026b1a0 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestWindowsEncryptedRelativePublicationAndRetainedRoot",
+      "140288c40 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestWindowsEncryptedRelativePublicationAndRetainedRoot.deferwrap1",
+      "140288c00 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestWindowsEncryptedRelativePublicationAndRetainedRoot.deferwrap2",
+      "140288bc0 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestWindowsEncryptedRelativePublicationAndRetainedRoot.deferwrap3",
+      "140288b80 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestWindowsEncryptedRelativePublicationAndRetainedRoot.deferwrap4"
+    ],
+    "execution": "NOT_RUN"
+  },
+  {
+    "target": "windows/amd64",
+    "tags": "oracle,manual_namespace",
+    "artifact": "/workspace/scratch/5e06a74e5f65/durable-restart/namespace-gating-integration-evidence/windows-amd64-oracle-manual_namespace.test",
+    "sha256": "7735ffa71270a5de4317bbac0a99da548864ceb1a87e6e52eb13cf1c08280ec0",
+    "symbols": [
+      "14026b1a0 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestWindowsEncryptedRelativePublicationAndRetainedRoot",
+      "140288c40 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestWindowsEncryptedRelativePublicationAndRetainedRoot.deferwrap1",
+      "140288c00 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestWindowsEncryptedRelativePublicationAndRetainedRoot.deferwrap2",
+      "140288bc0 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestWindowsEncryptedRelativePublicationAndRetainedRoot.deferwrap3",
+      "140288b80 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestWindowsEncryptedRelativePublicationAndRetainedRoot.deferwrap4"
+    ],
+    "execution": "NOT_RUN"
+  },
+  {
+    "target": "darwin/amd64",
+    "tags": "manual_namespace",
+    "artifact": "/workspace/scratch/5e06a74e5f65/durable-restart/namespace-gating-integration-evidence/darwin-amd64-manual_namespace.test",
+    "sha256": "3b73f8c7b29ca4d458fe70b5c8b92c740ad25c14ee534d9baa04198ee4bb089e",
+    "symbols": [
+      " 124f9c0 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestDarwinEncryptedRelativePublicationAndParentLifetime",
+      " 126d940 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestDarwinEncryptedRelativePublicationAndParentLifetime.deferwrap1",
+      " 126d900 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestDarwinEncryptedRelativePublicationAndParentLifetime.deferwrap2",
+      " 126d8c0 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestDarwinEncryptedRelativePublicationAndParentLifetime.deferwrap3"
+    ],
+    "execution": "NOT_RUN"
+  },
+  {
+    "target": "darwin/amd64",
+    "tags": "oracle,manual_namespace",
+    "artifact": "/workspace/scratch/5e06a74e5f65/durable-restart/namespace-gating-integration-evidence/darwin-amd64-oracle-manual_namespace.test",
+    "sha256": "ae956e59cd57c75a2ebc4b3fbfbcaca6cc07fa82c1550c13f55a3358ca47487a",
+    "symbols": [
+      " 124f9c0 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestDarwinEncryptedRelativePublicationAndParentLifetime",
+      " 126d940 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestDarwinEncryptedRelativePublicationAndParentLifetime.deferwrap1",
+      " 126d900 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestDarwinEncryptedRelativePublicationAndParentLifetime.deferwrap2",
+      " 126d8c0 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestDarwinEncryptedRelativePublicationAndParentLifetime.deferwrap3"
+    ],
+    "execution": "NOT_RUN"
+  },
+  {
+    "target": "darwin/arm64",
+    "tags": "manual_namespace",
+    "artifact": "/workspace/scratch/5e06a74e5f65/durable-restart/namespace-gating-integration-evidence/darwin-arm64-manual_namespace.test",
+    "sha256": "d730fb02fe97d45a9ae0b446d65cd282b79863c8dd81ece9bf155eeff6d0a3bb",
+    "symbols": [
+      "1001ff060 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestDarwinEncryptedRelativePublicationAndParentLifetime",
+      "100215080 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestDarwinEncryptedRelativePublicationAndParentLifetime.deferwrap1",
+      "100215040 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestDarwinEncryptedRelativePublicationAndParentLifetime.deferwrap2",
+      "100215000 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestDarwinEncryptedRelativePublicationAndParentLifetime.deferwrap3"
+    ],
+    "execution": "NOT_RUN"
+  },
+  {
+    "target": "darwin/arm64",
+    "tags": "oracle,manual_namespace",
+    "artifact": "/workspace/scratch/5e06a74e5f65/durable-restart/namespace-gating-integration-evidence/darwin-arm64-oracle-manual_namespace.test",
+    "sha256": "21445df4279236a361eecb97732f1c9278efc40cbc85cbee171ef31e52c83239",
+    "symbols": [
+      "1001ff060 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestDarwinEncryptedRelativePublicationAndParentLifetime",
+      "100215080 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestDarwinEncryptedRelativePublicationAndParentLifetime.deferwrap1",
+      "100215040 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestDarwinEncryptedRelativePublicationAndParentLifetime.deferwrap2",
+      "100215000 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestDarwinEncryptedRelativePublicationAndParentLifetime.deferwrap3"
+    ],
+    "execution": "NOT_RUN"
+  }
+]

@@ -1,0 +1,20 @@
+{
+  "TestWindowsEncryptedRelativePublicationAndRetainedRoot": {
+    "original_file": "internal/encstore/native_windows_test.go",
+    "manual_file": "internal/encstore/namespace_manual_windows_amd64_test.go",
+    "original_function_sha256": "017622ac62e4b69e0396fb85f9404ef71372fc9aceb506e1f6c29ea8a05fd88b",
+    "new_function_without_gate_sha256": "017622ac62e4b69e0396fb85f9404ef71372fc9aceb506e1f6c29ea8a05fd88b",
+    "gate_is_first_statement": true,
+    "full_function_equivalence_except_gate": true,
+    "other_source_unchanged_except_unused_import_removal": true
+  },
+  "TestDarwinEncryptedRelativePublicationAndParentLifetime": {
+    "original_file": "internal/encstore/native_darwin_test.go",
+    "manual_file": "internal/encstore/namespace_manual_darwin_test.go",
+    "original_function_sha256": "140d779476126902745a89299b992a2d82d3a011d27ace0bdf945b055b50d245",
+    "new_function_without_gate_sha256": "140d779476126902745a89299b992a2d82d3a011d27ace0bdf945b055b50d245",
+    "gate_is_first_statement": true,
+    "full_function_equivalence_except_gate": true,
+    "other_source_unchanged_except_unused_import_removal": true
+  }
+}

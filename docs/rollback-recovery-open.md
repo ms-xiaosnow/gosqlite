@@ -233,3 +233,14 @@ recovery/native-failure workflow, all of which remain **BLOCKED / NOT_RUN**.
 ### P0 默认关闭完整普通门结果（2026-10-11 08:22 UTC）
 
 当前P0组合执行冻结tree `442a7104dc780ddb20826e5ee4f1250b291f2b24` 于08:22:39 UTC自然完成18阶段PASS：完整CGO0普通测试/vet/build、固定SQLite3.54.0完整普通oracle、完整CGO1 race、guard、五目标生产编译、模块及全部3004文件/143目录前后身份。785非docs文件固定；最终文档/证据改变整个tree但不得改变这些运行源码。两个外部预检的报告版本/基线POSIX比较问题在Go执行前发现并保留，修正外部验证器后一次完成运行门，无运行重试。详见[精确组合证据](evidence/public-open-integration-20261011.md)。本批新提交/Library恢复/CI仍待实际核验。真实RecoverRollback、production bridge和开启恢复选项的真实Open/Connect均BLOCKED / NOT_RUN，公开物理harness仍IMPLEMENTATION_MISSING；M3/M10/整体未验收。
+
+## 2026-10-11 后续 namespace 切片交叉说明
+
+上文 Rename/rename 与 OS namespace 未纳入，是原 P0 切片及其当时基线的历史
+范围。后续在已保存 P0 提交 `56bbcf3febe233197aa0a5eac965c67a67a88011` 上
+逐 hunk 组合独立六路径门控；仅追加 Rename/rename selectors，P0 恢复 guard
+及本页原 descriptor-free 命令/证据全部保持。具体测试移动、默认覆盖减少、
+188 项选择、六项外平台编译/符号证据及用户独立原生规程见
+[中文手册第 19 节](manual-verification-zh.md#19-os-raw-namespace-门控与独立原生验收2026-10-11)；该切片不增加 public physical harness，
+所有真实恢复、启用恢复的 Open/Connect、namespace 原生执行仍 BLOCKED / NOT_RUN。
+P0 完整普通门、已保存基点、精确恢复及尚待终态的 CI，按[当前验收补记](acceptance-status.md#2026-10-11-os-namespace-六路径批次)分别记录；不将新候选 PASS 归入旧切片。

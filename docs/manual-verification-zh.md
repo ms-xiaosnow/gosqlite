@@ -30,7 +30,7 @@
 1. 本文中的命令块只能逐项审阅，不能整篇提取为脚本执行。本文未创建或启动任何命令文件。
 2. 物理故障、崩溃、进程强制退出、热恢复、原生 I/O 失败、错误密钥、磁盘篡改、namespace 干预及中断发布/rekey 在当前环境保持 BLOCKED / NOT_RUN。不得由代理换命令、换输入、换机器、换 CI 重试以绕过限制。
 3. 22:39 中断的精确触发操作与对象未知。ANN V4 修正链路及约 22:30 被中断的 41 目标 fuzz 链路不得重发、改写或用另一项执行替代。没有证据证明其完整运行，也没有可记为通过的结果。
-4. 当前 main 的 Windows/Darwin 两个 raw namespace 测试尚未合入新门控。**不要在该提交直接开启新的 Windows/macOS 全量测试或 OS CI runner。**
+4. 本批已将 Windows/Darwin 两个 raw namespace 测试完整移入 manual tag/env gate，详见第 19 节；固定 776b 基线尚未具备该修正。**门控不构成新 Windows/macOS 全量测试或 OS CI runner 的执行许可。**
 5. 新 OS runner、性能 CI runner、Actions 用量/配额/计费读取都不在本轮权限内。本文不给出启用、付款、配额检查或远端工作流触发操作。
 6. 未来环境也必须是合法独立验收，不能被当作恢复被拒绝链路的替代路线。执行不确定时先暂停并查明原因，不推测“换写法就能解锁”。
 
@@ -75,7 +75,7 @@
 | SQL/planner | 有限支持；更广的错误阶段、排序和多键差异未完全关闭 | V3 有 34 个保留失败，V4 有 6 个 bound-LIMIT 回归；V4c 是未合入候选，不能借其日志给 main 判 PASS |
 | Windows shared encrypted rekey | main 中不支持 | 已审查的候选未并入 main；原生 Windows 仍 NOT_RUN |
 | Darwin Unicode 与目录诊断 | main 保留受限文件名/目录清单范围 | V3 修正在未发布组合；更广 Unicode 根名能力仍受限 |
-| raw namespace 门控 | main 的两个 OS 原生测试未迁入 manual gate | 先合入已审查门控并重新核对精确版本；不能直接新增 OS runner |
+| raw namespace 门控 | 此表固定的 776b 基线未迁入 manual gate；本批两项门控更新见第 19 节 | 后续版本已保留原断言并增加 tag/env 双门；原生执行仍 NOT_RUN，不能直接新增 OS runner |
 | ANN 报告验收工具 | main 是既有简单 harness；V3 候选 HOLD，V4 未冻结 | 不得以历史算法测试替代报告审查；被中断链路保持暂停 |
 | 性能回归 CI | 后续 V3 候选有有界审查，未部署 | 受控机器、配额读取授权、资源决策和单独部署授权均未完成 |
 | 长时间 soak、大规模测量 | 有 harness 与提案，无完整长时间结果 | 预声明负载、资源、目录、停止条件和审查；本文不启动 |
@@ -249,7 +249,7 @@ capture ordinary-scope go run ./internal/testscope || exit 1
 Ordinary test source-reference guard PASS; behavioral review is still required.
 ```
 
-人工还要阅读所选测试及 helper。此 guard 是防错辅助，不能证明行为安全；main 对 OS raw namespace primitive 的缺口就是已知反例。普通 `GOFLAGS` 不得出现 `manual_`；`manual_namespace` 与 `manual_recovery` 不得混入 unit、race、oracle 或 CI。
+人工还要阅读所选测试及 helper。此 guard 是防错辅助，不能证明行为安全；旧基线的 OS raw namespace selector 缺口已在第 19 节的独立切片补上，但 bare helper、不同名 wrapper、动态调用与 reflection 仍需行为审阅。普通 `GOFLAGS` 不得出现 `manual_`；`manual_namespace` 与 `manual_recovery` 不得混入普通 unit、race、oracle 或 CI。
 
 ### 5.2 无缓存普通全量测试与产物
 
@@ -692,14 +692,18 @@ capture manual-namespace-run env GOSQLITE_MANUAL_NAMESPACE=independently_authori
 
 应审查的具体断言：symlink retarget 后已打开连接仍写原 first 数据库，second 不被改；valid-file replacement 后 commit 返回 `sqlite.ErrChanged`、rollback 正常、替代文件中的行保持原样。这不是所有 hostile namespace、权限或 hardlink 问题的充分验收。
 
-### 12.3 尚未合入门控的 OS raw namespace 测试
+### 12.3 OS raw namespace 测试门控的当前状态
 
-main 的以下文件只受 OS tag 限制，**没有**上面的 manual tag/env gate：
+旧 776b 基线的 `native_windows_test.go` / `native_darwin_test.go` 中两项测试
+只有 OS 约束、没有 manual gate，这是原始审计事实。本批在当前 P0 基础上
+逐 hunk 移动这两个完整函数，原断言与操作保持，仅首句增加环境 gate；
+当前入口为 `internal/encstore/namespace_manual_windows_amd64_test.go` 与
+`internal/encstore/namespace_manual_darwin_test.go`。它们不同于第 12.2 节的
+两个 plaintext 测试。真实测试名、平台、标签、可复制人工步骤和证据边界见
+[第 19 节](#19-os-raw-namespace-门控与独立原生验收2026-10-11)。
 
-- `internal/encstore/native_windows_test.go`：`windows && amd64`；`TestWindowsEncryptedRelativePublicationAndRetainedRoot`
-- `internal/encstore/native_darwin_test.go`：`darwin`；`TestDarwinEncryptedRelativePublicationAndParentLifetime`
-
-它们直接做 namespace publication/rename/retained-root 操作。修正候选已把原 body 搬到 manual gated 文件并增强 guard，但该候选不在当前 main。不能把 main 普通 OS 全量运行当作干净 ordinary scope。本文不提供 raw namespace 启动命令；先由人工审查精确候选和集成状态，并通过合法范围决定是否进行独立原生验收。
+本环境仍禁止执行这两个原生测试；文档步骤仅供用户在独立批准的目标环境
+自行验收。设置 sentinel、源码门控、编译成功均不产生执行许可；不启动新 OS runner。
 
 ### 12.4 没有完整实现入口的门禁
 
@@ -984,3 +988,220 @@ backup/backend 和物理 fault/security-negative 的状态不因本节改变。
 
 这些是未来验收协议要求，不是已经实现的测试断言或新增执行许可。更广物理
 crash/fault/tamper/rekey矩阵仍按第12.4节记IMPLEMENTATION_MISSING与受限执行。
+
+## 19 OS raw namespace 门控与独立原生验收（2026-10-11）
+
+### 19.1 源码身份、实际入口与已取得证据
+
+本批组合基点为已保存 P0 提交 `56bbcf3febe233197aa0a5eac965c67a67a88011`、
+tree `c31e7dcbeed9732688681741ee38ec60ff0bfb49`。已审阅六路径候选以 P0
+运行冻结 tree `442a7104dc780ddb20826e5ee4f1250b291f2b24` 为基础，得到
+`01918609a55cc149c5155451da40f7389854db06`；这不是含当前文档的新提交身份。
+只改两个旧 native 测试文件、两个新增 manual 文件、`internal/testscope/main.go`
+及新增 inert guard 回归 `internal/testscope/native_namespace_test.go`；无生产实现或 CI 改动。
+
+| 实际具名测试 | 当前文件与平台选择 | 精确双门 |
+|---|---|---|
+| `TestWindowsEncryptedRelativePublicationAndRetainedRoot` | [namespace_manual_windows_amd64_test.go](../internal/encstore/namespace_manual_windows_amd64_test.go)，windows/amd64 | 首行 `//go:build manual_namespace`；首句要求 `GOSQLITE_MANUAL_NAMESPACE=independently_authorized` |
+| `TestDarwinEncryptedRelativePublicationAndParentLifetime` | [namespace_manual_darwin_test.go](../internal/encstore/namespace_manual_darwin_test.go)，本规程面向 darwin/amd64、darwin/arm64 | 同一精确 tag/env gate；Darwin 后缀保留 Go 原有 iOS/Darwin 选择关系，不据此新增 iOS 原生验收 |
+
+两个 gate 在 `t.TempDir()` 和原生调用之前，缺值或值不匹配会 `t.Skip`。
+去掉且只去掉该首句 gate 后，两个完整函数与原版逐字节相同。默认与仅 oracle
+选择在适用平台刻意减少这两个声明，其他原有声明不减少；不是全量 native
+覆盖保持不变。manual 文件各只含一个原测试，没有新的 initializer 或 helper。
+Windows 原文件保留当前 shared-rekey preflight 所需 `context` import。
+
+通用 selector switch 只增加 `Rename` / `rename`，原 P0 恢复引用、同文件
+alias/type、dot-import、unkeyed Options 检查保持。新增纯源码测试为
+`TestNativeNamespaceMethodReferenceGuard`，只解析字符串，不执行字符串里的操作。
+selector 规则保守匹配接收者，可检查调用/方法值/方法表达式等，但不是完整类型、
+调用图、沙箱或物理安全证明。bare helper、改名 wrapper、反射/动态调用及未来 API
+仍需人工审阅；精确 manual tag 豁免也不能单独证明 body 有环境门或行为安全。
+
+| 证据范围 | 已发生结果 | 不覆盖什么 |
+|---|---|---|
+| 全部六路径、完整函数、其余文件与补丁重放 | owner 与独立源码审阅 PASS | 不代表原生运行 |
+| guard、纯 AST/source-string 测试、同选择 race、manual GOFLAGS 预期拒绝 | owner 08:23:50 UTC 自然完成；独立追加检查 08:27:31 UTC 自然完成，PASS | GOFLAGS 拒绝为预期 exit 1；不是物理测试失败或许可 |
+| 47 个 Go 支持目标 × default/oracle/manual_namespace/oracle,manual_namespace | 两方各自 188 项实际 `go list -e -json` 选择 PASS，无 package error | 不是 47 平台运行或支持承诺 |
+| windows/amd64、darwin/amd64、darwin/arm64 × 两组 manual tags | 两方各自六项 `go test -c` 与精确测试符号核对 PASS | 二进制仅编译/读取符号，全部原生执行 NOT_RUN |
+| 本批新组合完整普通门、新提交、恢复与 CI | 各自待精确身份与终态记录 | P0/LIMIT 的旧 PASS 不能代替本批 |
+| manual/native 物理门 | BLOCKED / NOT_RUN | 本文没有执行以下任何命令，也没有开启 OS runner |
+
+已保存的[owner 报告](evidence/namespace-gating-20261011/owner-report.md)、
+[独立源码报告](evidence/namespace-gating-20261011/independent-source-review.md)与
+[独立检查追加报告](evidence/namespace-gating-20261011/independent-checks-addendum.md)
+分别对应原工作目录中的 owner report、source review 和 compiler addendum；
+[证据清单](evidence/namespace-gating-20261011/evidence-files.json)记录材料身份。
+独立原报告的 source-only NOT_RUN 保留，后续 addendum 只追加获准的编译/模型结果。
+这些已选材料没有复制全部外置原生二进制或完整工作目录；需要更深重放时先按
+清单取得对应原文件，不能凭文件名补造结果。当前章节只做静态核对，未重跑检查；
+本批持久身份由后续真实记录闭合。
+
+### 19.2 独立用户验收前置与隔离副本
+
+下列步骤只供用户在另行批准的独立原生环境自行采用；**当前代理不执行、不转交
+其他执行器、不迁移 CI 作为绕行**。sentinel 仅防止误启动，不能代替授权。
+这里只验两个原有 namespace primitive 回归，不验真实加密容器安全、恢复或故障。
+
+- 主机须为 Windows/amd64，或真实 macOS 的 amd64/arm64。不得在 Linux、WSL、
+  iOS 或架构模拟层运行后冒称对应原生结果；架构/虚拟化条件均单独记录。
+- 固定原生 Go 1.27.2 和已验证离线模块缓存；依赖版本见本手册 4.1 / `go.mod`。
+  使用 Bash（macOS Bash 或 Windows Git Bash）、Git、tar、Python 3；缺少工具先停止，
+  本文不安装软件。Windows 的 Go 必须是 Windows 原生工具链，不是 WSL 的 Linux Go。
+- 提前记录 OS/build、CPU/架构、真实文件系统/卷与挂载、空间、inode 或等价限制、
+  权限及持久性语义。Windows 无 Unix directory barrier、Darwin fsync 非 F_FULLFSYNC
+  的既有限制不变。空间不足或平台条件不符即 BLOCKED，不临时改断言/权限/挂载。
+- 只用独立、可丢弃且不含用户数据的新目录。不得使用生产路径、唯一备份或活库家族。
+  两测试只写合成 `first`/`after` 字节，不能误称实际加密数据库验收。
+- `SOURCE_COMMIT` 必须由用户先填入实际已合入本批六路径的审阅提交全 SHA，
+  同时填其 `SOURCE_TREE`。上面的 56bb 是组合父基点，**不能用作下面的新入口提交**。
+  不把未提交 worktree、旧候选全树或 `HEAD` 的动态变化当作固定来源。
+
+以下只建立本次独立副本，变量的示例路径须先替换；Windows Bash 路径可用 `/c/...`。
+执行前还须按第 4.3 节在本专用终端定义原有 `capture` 函数，日志名不重复使用。
+
+```bash
+# 文档模板：仅供未来独立授权的用户逐步执行。本次 NOT_RUN。
+SOURCE_REPO=/absolute/path/to/reviewed/gosqlite
+BASE=/absolute/path/to/disposable-native-acceptance
+TOOLCHAIN_BIN=/absolute/path/to/native-go1.27.2/bin
+# 用户须先设置 SOURCE_COMMIT、SOURCE_TREE 和 GOPATH；GOPATH 为已核验缓存的原生绝对路径。
+: "${SOURCE_COMMIT:?填写已合入六路径的新审阅提交全SHA}"
+: "${SOURCE_TREE:?填写该提交的实际tree}"
+: "${GOPATH:?填写已验证离线模块缓存的原生路径}"
+test -d "$BASE" && test -d "$SOURCE_REPO/.git" || exit 1
+test "$(git -C "$SOURCE_REPO" rev-parse "$SOURCE_COMMIT^{commit}")" = "$SOURCE_COMMIT" || exit 1
+test "$(git -C "$SOURCE_REPO" rev-parse "$SOURCE_COMMIT^{tree}")" = "$SOURCE_TREE" || exit 1
+umask 077
+set -o pipefail
+RUNROOT=$(mktemp -d "$BASE/gosqlite-namespace-XXXXXXXX") || exit 1
+WORK="$RUNROOT/source"; EVIDENCE="$RUNROOT/evidence"
+mkdir "$WORK" "$EVIDENCE" "$RUNROOT/bin" "$RUNROOT/tmp" "$RUNROOT/go-cache" || exit 1
+git -C "$SOURCE_REPO" archive "$SOURCE_COMMIT" > "$RUNROOT/source.tar" || exit 1
+tar -xf "$RUNROOT/source.tar" -C "$WORK" || exit 1
+printf '%s\n' "$SOURCE_COMMIT" > "$EVIDENCE/source-commit.txt" || exit 1
+printf '%s\n' "$SOURCE_TREE" > "$EVIDENCE/source-tree.txt" || exit 1
+export PATH="$TOOLCHAIN_BIN:$PATH" GOPATH
+export GOTOOLCHAIN=local GOENV=off GOWORK=off GOPROXY=off GOSUMDB=off
+export CGO_ENABLED=0 GOMAXPROCS=2 GOFLAGS=-buildvcs=false
+unset GOOS GOARCH GOTMPDIR GOSQLITE_MANUAL_NAMESPACE GOSQLITE_MANUAL_RECOVERY
+cd "$WORK" || exit 1
+# 先由用户核对工具路径和主机身份；这不是交叉编译目标。
+test "$(go env GOVERSION)" = go1.27.2 || exit 1
+TARGET="$(go env GOHOSTOS)/$(go env GOHOSTARCH)"
+case "$TARGET" in
+  windows/amd64)
+    TEST=TestWindowsEncryptedRelativePublicationAndRetainedRoot
+    BINARY="$RUNROOT/bin/namespace-windows-amd64.test.exe"
+    GOCACHE=$(cygpath -m "$RUNROOT/go-cache") || exit 1
+    NATIVE_TMP=$(cygpath -m "$RUNROOT/tmp") || exit 1
+    test -n "$GOCACHE" && test -n "$NATIVE_TMP" || exit 1
+    export GOCACHE TMPDIR="$NATIVE_TMP" TEMP="$NATIVE_TMP" TMP="$NATIVE_TMP"
+    ;;
+  darwin/amd64|darwin/arm64)
+    TEST=TestDarwinEncryptedRelativePublicationAndParentLifetime
+    BINARY="$RUNROOT/bin/namespace-${TARGET#*/}.test"
+    export GOCACHE="$RUNROOT/go-cache" TMPDIR="$RUNROOT/tmp"
+    ;;
+  *) printf '不属于本原生规程的主机: %s\n' "$TARGET" >&2; exit 1 ;;
+esac
+capture namespace-version go version || exit 1
+capture namespace-env go env GOVERSION GOHOSTOS GOHOSTARCH GOOS GOARCH CGO_ENABLED GOTOOLCHAIN GOFLAGS GOPATH GOCACHE || exit 1
+capture namespace-modules go mod verify || exit 1
+```
+
+用户另存 `host-and-storage.md`，说明批准的目标与范围、OS/卷/硬件、工具路径、
+空间预检和实际临时目录。不要打印整份环境或秘密。`cygpath` 是 Windows Git Bash
+路径转换；路径不通时先排查并保留失败，不转到 WSL 或改目标绕过。
+
+保存可跨两平台使用的只读源码清单帮助程序，并记录源码与 archive 的身份：
+
+```bash
+# 只供未来用户在本次 EVIDENCE 下保存辅助程序，不改源码树。本次 NOT_RUN。
+cat > "$EVIDENCE/source_inventory.py" <<'PYTHON'
+import hashlib, json, pathlib, stat, sys
+root = pathlib.Path(sys.argv[1])
+rows = []
+for p in sorted(root.rglob('*')):
+    if p.is_file():
+        b = p.read_bytes()
+        rows.append([p.relative_to(root).as_posix(), len(b), hashlib.sha256(b).hexdigest(), stat.S_IMODE(p.stat().st_mode)])
+print(json.dumps(rows, ensure_ascii=True, indent=2))
+PYTHON
+capture namespace-source-before python3 "$EVIDENCE/source_inventory.py" "$WORK" || exit 1
+capture namespace-archive-hash python3 -c 'import hashlib,pathlib,sys; print(hashlib.sha256(pathlib.Path(sys.argv[1]).read_bytes()).hexdigest())' "$RUNROOT/source.tar" || exit 1
+```
+
+### 19.3 源码门核对、仅编译与原生单项执行
+
+先人工核对 19.1 两文件的首行、各自完整函数和首句 gate，以及当前 P0 恢复
+检查仍在。下面 guard 只运行源码扫描，成功文本仍是
+`Ordinary test source-reference guard PASS; behavioral review is still required.`
+**不要把 manual tag 放进 GOFLAGS**，也不在本规程运行 package 全套。
+
+```bash
+# 未来独立人工步骤。本次 NOT_RUN；每步非零立即停止。
+capture namespace-source-guard go run -p=1 ./internal/testscope || exit 1
+capture namespace-compile go test -p=1 -c -mod=readonly -tags manual_namespace \
+  -o "$BINARY" ./internal/encstore || exit 1
+capture namespace-symbols go tool nm "$BINARY" || exit 1
+capture namespace-binary-before python3 -c 'import hashlib,pathlib,sys; print(hashlib.sha256(pathlib.Path(sys.argv[1]).read_bytes()).hexdigest())' "$BINARY" || exit 1
+```
+
+编译成功只记 COMPILE_PASS。人工从 `namespace-symbols.stdout` 检查完整符号
+`github.com/ms-xiaosnow/gosqlite/internal/encstore.` 加本机 `$TEST`，精确函数符号
+须存在，另一平台函数须不存在；`deferwrap` 符号不代替函数本体。若出现原有 Windows
+unsafe-pointer vet 诊断，保存原始结果，不加 `-vet=off` 或关闭 checker 补 PASS。
+这里不用 oracle tag 或官方 CLI，因为两项 primitive 回归没有 oracle 对照调用；
+此前两种 tag 的外平台编译是另一条选择/链接证据。
+
+只有用户的独立原生执行授权和上述前置都已成立，才单独执行下一块。
+它只选择本机的一个精确函数，没有循环、自动重试、信号或终止进程逻辑。
+
+```bash
+# 当前代理禁止执行。仅用户在独立批准环境自行运行；sentinel 不是许可。
+capture namespace-native-run env GOSQLITE_MANUAL_NAMESPACE=independently_authorized \
+  "$BINARY" -test.run "^${TEST}$" -test.v -test.count=1 -test.parallel=1 -test.timeout=0 || exit 1
+capture namespace-source-after python3 "$EVIDENCE/source_inventory.py" "$WORK" || exit 1
+capture namespace-binary-after python3 -c 'import hashlib,pathlib,sys; print(hashlib.sha256(pathlib.Path(sys.argv[1]).read_bytes()).hexdigest())' "$BINARY" || exit 1
+cmp "$EVIDENCE/namespace-source-before.stdout" "$EVIDENCE/namespace-source-after.stdout" || exit 1
+cmp "$EVIDENCE/namespace-binary-before.stdout" "$EVIDENCE/namespace-binary-after.stdout" || exit 1
+```
+
+### 19.4 两项原有断言与通过条件
+
+Windows：合成 Unicode basename `ordinary Ω family.gse`；相对目录 inventory、
+lock file 创建及独占 lifecycle 锁 acquisition 成功；首次 no-replace 发布 `first` 后取得稳定
+root，replacement 发布 `after`；旧 root 仍读出 `first`，新 root 读出 `after`；
+新 root stable 和 namespace check 成功。源码中的 defer Close 返回值没有全部断言，
+因此即使通过也不能宣称所有 close/retirement 错误路径都已验收。
+
+Darwin：相对 inventory、no-replace 发布、replacement 与旧/新 root 字节断言同上；
+显式关闭公开 parent 后，`platformDirectoryCheck` 必须匹配 `encryption.ErrClosed`，
+但 retained child 的 stable 检查仍成功；显式关闭两个 root 后，受锁读取的
+`ns.dir.children == 0` 且 `ns.dir.descriptor.raw == nil`。这只证明该正常顺序下
+测试实际断言的 parent/child 生命周期，不是任意原生 close 失败注入。
+
+每台机器分别判定：准确目标测试出现一次 `=== RUN` 与 `--- PASS`、零 SKIP、
+无空匹配/`no tests to run`、进程自然 exit 0、没有测试 FAIL 或未解释 stderr，且
+身份/符号/日志/预检齐备。仅 COMPILE_PASS、t.Skip 后 exit 0 或 shell 记录成功都
+不能算 NATIVE_CASE_PASS。三种 OS/arch 分别保留结果，不互相替代；任何单项
+通过都不等于全原生平台、加密安全、故障恢复、M3/M8/M10 或整个 goal 验收。
+
+### 19.5 排查、证据与清理限制
+
+- gate SKIP：检查精确 env 名和值、所选新提交及标签；没有独立授权就停止，
+  不能为去掉 SKIP 自动设置门。空匹配/缺符号：检查平台/架构/包/完整测试名。
+- guard 拒绝：核对 manual GOFLAGS、实际 body/helper，保留拒绝记录；不改名、
+  添加豁免或删掉 guard。原生错误、hang、身份变化、资源不明：停止后续启动，
+  保存原始错误与当前状态，不重试、强杀、修改权限/挂载或清库求 PASS。
+- 保存 source commit/tree/archive SHA、源码前后清单、binary SHA/nm 输出、
+  实际 tag/env gate（不含任何密钥）、每步 argv/UTC 起止/stdout/stderr/exit、
+  原生主机与卷、所有断言/skip/未覆盖范围。结果表将 SOURCE/MODEL/COMPILE/
+  NATIVE_CASE 分列；文档本轮为静态核对，native 一律 NOT_RUN。
+- 两测试沿用原 `t.TempDir()`，会在测试结束（包括常见断言失败）自动清理 fixture；
+  外部 capture 留住日志不等于完整失败目录仍在。本切片没有新增失败留存 harness，
+  不能悄悄改 body 或宣称失败现场保存已实现。
+- 只有进程自然结束、已知资源正常收尾且日志/身份归档核对完成后，用户才决定
+  是否删除自己本次新建的 RUNROOT。失败/不确定时不额外删除残留，不清原仓库、
+  活库 sidecar、历史证据或其他任务缓存；不提供宽泛删除命令。不把删除当安全擦除。

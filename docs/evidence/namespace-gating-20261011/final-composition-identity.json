@@ -1,0 +1,10 @@
+{
+  "time_utc": "2026-10-11T08:55:07.112971+00:00",
+  "freeze_tree": "697e45c6aba7a5cf62ebbf2bab2662f10903c5be",
+  "source_tree": "01918609a55cc149c5155451da40f7389854db06",
+  "main_tree": "697e45c6aba7a5cf62ebbf2bab2662f10903c5be",
+  "files": 3070,
+  "non_docs": 788,
+  "all_788_non_docs_byte_git_posix_modes_equal": true,
+  "supplied_frozen_inventory_matches": true
+}

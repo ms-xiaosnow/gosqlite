@@ -1329,3 +1329,23 @@ ANN/performance-CI sources remain separate increments.
 ### P0 默认关闭完整普通门结果（2026-10-11 08:22 UTC）
 
 当前P0组合执行冻结tree `442a7104dc780ddb20826e5ee4f1250b291f2b24` 于08:22:39 UTC自然完成18阶段PASS：完整CGO0普通测试/vet/build、固定SQLite3.54.0完整普通oracle、完整CGO1 race、guard、五目标生产编译、模块及全部3004文件/143目录前后身份。785非docs文件固定；最终文档/证据改变整个tree但不得改变这些运行源码。两个外部预检的报告版本/基线POSIX比较问题在Go执行前发现并保留，修正外部验证器后一次完成运行门，无运行重试。详见[精确组合证据](evidence/public-open-integration-20261011.md)。本批新提交/Library恢复/CI仍待实际核验。真实RecoverRollback、production bridge和开启恢复选项的真实Open/Connect均BLOCKED / NOT_RUN，公开物理harness仍IMPLEMENTATION_MISSING；M3/M10/整体未验收。
+
+
+### 2026-10-11 OS raw namespace 六路径门控与中文规程
+
+- 状态：IN_PROGRESS；有限源码/模型/选择/编译独立 PASS，全部 manual/native 物理执行 BLOCKED / NOT_RUN。门控不代表 M3/M8/M10、完整 goal 或原生安全验收。
+- 本批组合基点为已保存 P0 提交 `56bbcf3febe233197aa0a5eac965c67a67a88011`、tree `c31e7dcbeed9732688681741ee38ec60ff0bfb49`。LIMIT/P0 源码和本文件完整原前缀保留，没有用旧候选覆盖当前进展。P0 bundle `libfile_04182e9da3f88191b348c6790628a7bd` 读回字节身份已核验；精确恢复于08:43:14 UTC完成21项命令、11项具名测试在普通/race均PASS。CI `38125268420` 于08:44 UTC仍在进行，未取得终态；以上均只属于P0父基点。
+- 已审阅六路径候选从 P0 运行 tree `442a7104dc780ddb20826e5ee4f1250b291f2b24` 得到 `01918609a55cc149c5155451da40f7389854db06`；3,007 文件。只移动 `TestWindowsEncryptedRelativePublicationAndRetainedRoot`、`TestDarwinEncryptedRelativePublicationAndParentLifetime` 到各自 manual 文件，各函数只新增首句 env gate，原完整 body/断言保持。旧 native 文件仅移走该函数与无用 import，当前 Windows context 依赖保留。
+- 两文件 exact `manual_namespace` 首行与 `GOSQLITE_MANUAL_NAMESPACE=independently_authorized` 双门，gate 先于 TempDir/native 操作。default/oracle 在适用平台有意减少恰这两个声明，其他原声明保持；Windows 仍 amd64，Darwin 保留原 Go iOS/Darwin 选择关系。sentinel 是防误执行措施，不是授权。
+- `internal/testscope/main.go` 只在 generic selector switch 追加 Rename/rename，当前 P0 recovery、alias/type、dot-import、unkeyed Options guard 保留；新增 `TestNativeNamespaceMethodReferenceGuard` 只解析源码字符串。该 guard 不构成完整调用图/类型/行为安全证明，bare helper/wrapper/reflection 等局限继续披露。
+- owner 于 08:23:50 UTC、独立追加检查于 08:27:31 UTC 自然完成：whole-tree guard、纯 AST/source 模型与 race、manual GOFLAGS 预期拒绝、47目标×4标签=188项实际选择及6项外平台编译/精确符号均 PASS。固定 Go1.27.2、local/offline、GOMAXPROCS=2/p=1；独立检查有207条顺序命令，仅预期拒绝为exit1。所有 manual 二进制只编译/读符号，未执行；不是 full ordinary/oracle aggregate 结果。
+- 原始 owner/source/后续 compiler 报告的身份与阶段保持，外置材料名称见[中文第19节](manual-verification-zh.md#19-os-raw-namespace-门控与独立原生验收2026-10-11)；不得将旧 source-only NOT_RUN 静默改成 native PASS。文档仅静态读取/编辑/差异、链接、哈希与 Bash 语法核对，没有 Go 或示例执行，不创建自指 checkpoint。
+- 用户规程给出真实平台/tag/env、已审阅新提交的隔离副本、原生 Go1.27.2/离线依赖、Windows Git Bash 路径差异、只编译与单项运行分离、原断言、skip/空匹配/诊断规则、证据与清理。t.TempDir 会自动清理失败 fixture；原 Close 断言范围保持，不宣称完整失败留存/退休资格。
+- 下一步：在精确当前组合上独立静态复审与获准的普通门核验，再按实际新提交保存、恢复与 CI 终态追加证据。本批新提交 SHA/整体 tree 尚不预写；P0 旧结果和 01918609 候选结果均不替代新身份。真实恢复/故障/namespace/磁盘负向/中断发布 rekey、新 OS runner、ANN V4、41-target fuzz 与未知链路限制保持。
+
+
+## 2026-10-11 namespace 最终组合限定门与 P0 持久闭合
+
+运行冻结 tree `697e45c6aba7a5cf62ebbf2bab2662f10903c5be` 于09:01完成独立核验：3070文件、788非docs与已审候选完整字节/Git/POSIX模式相同；guard、4项纯模型及同集合race PASS，manual GOFLAGS按预期拒绝。实际7条Go工具调用含早于后发5条限定的只读version/env前检，完整记录保留。另157链接、45shell语法块、29选录工件/617前置原件哈希PASS。没有运行该组合完整aggregate/oracle、外平台二进制或手工物理测试。报告见[最终组合限定证据](evidence/namespace-gating-20261011/final-composition-report.md)。此后仅追加终态文档/证据；最终提交的788非docs须逐字节核验等同该运行冻结源。
+
+父P0提交 `56bbcf3febe233197aa0a5eac965c67a67a88011` 的 CI `38125268420` 已于08:56:41 UTC SUCCESS，两job ordinary114428206934/oracle114428207050均SUCCESS；精确Library恢复21条命令PASS。终态证据归档 `libfile_4a413988d4608191aebf695542a04caf`，10211483B，SHA256 `0d6579c338465be5df401b4f2a594df8fe63737900a78dbcc9e4ef28e85bbfb3`，读回411条/410文件哈希PASS。原08:44/08:45 PENDING是先前写作时点，现仅对父P0闭合，不能当作namespace新提交CI。

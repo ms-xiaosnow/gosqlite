@@ -1,0 +1,21 @@
+{
+  "status": "PASS",
+  "go_version": "go1.27.2",
+  "model_tests": "PASS",
+  "race_tests": "PASS",
+  "whole_tree_source_guard": "PASS",
+  "manual_goflags_refusal": "PASS",
+  "selection_targets": 47,
+  "selection_tag_sets": 4,
+  "selection_cases": 188,
+  "foreign_compilations": 6,
+  "manual_namespace_runtime": "NOT_RUN",
+  "native_physical_runtime": "NOT_RUN",
+  "post_identity": {
+    "base_tree": "442a7104dc780ddb20826e5ee4f1250b291f2b24",
+    "work_tree": "01918609a55cc149c5155451da40f7389854db06",
+    "frozen_tree": "01918609a55cc149c5155451da40f7389854db06",
+    "replay_tree": "01918609a55cc149c5155451da40f7389854db06",
+    "all_bytes_posix_git_modes_unchanged": true
+  }
+}

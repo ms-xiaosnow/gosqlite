@@ -34,9 +34,10 @@ ANN V4、41 目标 fuzz 与未知中断操作继续禁止重发、改写、拆�
 
 ## 三 逐项源码待办分类
 
-2026-10-11 P0后续对账：下表公开恢复一行按本次有限source/model集成更新，
-其他行保留其已有证据身份。第四至六节保留LIMIT/分类批次的历史时点；
-具体新增范围及尚未闭合的组合/持久/CI门见第七节。
+2026-10-11 后续对账：下表公开恢复一行按有限 source/model 集成更新，
+OS namespace 行按当前六路径门控更新；其他行保留其已有证据身份。
+第四至六节保留 LIMIT/分类批次的历史时点；新增 P0 和 namespace 范围分别
+见第七、八节，组合/持久/CI 门必须按对应身份闭合。
 
 ### 3.1 恢复 备份 WAL 与目录所有权
 
@@ -63,7 +64,7 @@ ANN V4、41 目标 fuzz 与未知中断操作继续禁止重发、改写、拆�
 | 已支持 SQL 的 planner/阶段/排序正确性 | V4c 与 main 新 grouped/counter/preparation 尚需精确 hunk 组合；涉及 CAST/IPK、LEFT-ON/WHERE、排序、绑定/执行阶段，不能写成只缺测试机 | 没有找到 planner 专属测试拒绝；本次只选择下节 LIMIT 转换，不恢复整棵旧候选 | `planner-parity-independent-review-v4c/REVIEW.md:3–7,47–56,77–79`；`planner-parity-close-v4c-evidence/HANDOFF.md:12–29,109–115`。旧 full patch 37路径；tree `552286a4985b1d9f339d8f59756b4eb2cad7071a` |
 | Windows shared encrypted rekey | main `internal/encstore/platform_windows.go:81–87` 仍拒绝；候选 guarded lifecycle/authority 检查待按 hunk 集成，不复制整个 a314 | native Windows、namespace、错误密钥/篡改、I/O 故障、中断 rekey 均未资格验收 | `windows-shared-rekey-independent-review-v1/review.md:5–7,28–56,74–94`；候选 tree `7ede866de6a99f5390bc2f912e2e54f7d8c586d0` |
 | Darwin V3 名称与诊断 | 受限 Unicode sibling admission、managed apfs/hfs gate、inventory 诊断保存未合入；不等于任意 Unicode root 支持 | 原生 OS、namespace 和故障场景 NOT_RUN | `darwin-unicode-independent-review-v3/REVIEW.md:5–20,30–54,88–90`；tree `62051a4f338d2e3de249694079b742ebab70c19a`。V1/V2 工程 HOLD 保留 |
-| OS raw namespace 测试隔离 | 两项现有 Windows/Darwin 测试尚未移入 exact manual tag/env gate；需与 public-recovery guard 逐 hunk 合并 | 这两项物理测试仍受限；main 默认 Windows/macOS 全套不能直接启用 | `native-scope-independent-review-v1/report.md:3–30`；[中文手册](manual-verification-zh.md) §12.3。门控是源码待办，不能等同于运行许可 |
+| OS raw namespace 测试隔离 | 本批六路径已把两个完整函数移入 exact manual_namespace/env gate，并只追加 Rename/rename selectors；当前 public-recovery guard 保持 | 两项原生物理执行仍 BLOCKED / NOT_RUN；不直接启用 Windows/macOS 全套或新 runner | 新候选 tree `01918609a55cc149c5155451da40f7389854db06` 的 owner/独立 source/model/race、188 选择及六项编译/符号 PASS；旧 native-scope 报告仅作来源，见第八节与[中文第 19 节](manual-verification-zh.md#19-os-raw-namespace-门控与独立原生验收2026-10-11)。源码门控不是运行许可 |
 | 更广 Darwin Unicode root | 已有设计提案未实现/未接受；应按必要支持范围单独决策，不能虚构任意无限文件名为强制门槛 | 涉及的原生名称资格另行界定 | `darwin-unicode-sibling-evidence-v2/UNICODE-ROOT-DESIGN-NOT-IMPLEMENTED.md:1–4,60–65` |
 | 分期 SQL/文件格式 | UNIQUE/CHECK/FK、CTE/UPSERT/view/trigger/window/JSON/FTS5/ATTACH 等按实际矩阵 PARTIAL/未实现；UTF-16/WITHOUT ROWID/autovacuum 按支持范围 fail closed | 没有找到这些编辑的原始拒绝；不能凭普通测试许可启动任意新功能 | goal §4.2；[兼容矩阵](compatibility.md)。分期状态不能豁免已声明支持域的正确性，也不能用新增语法替代基础恢复义务 |
 | native VACUUM | 缺 parser/executor/storage rewrite 能力；官方 SQLite 的历史 VACUUM 互操作不能算原生实现 | 物理重写/恢复资格另列 | goal §4.2 第三批、compatibility 第39行（63c2）；依赖事务、pager、所有权及安全发布设计 |
@@ -94,7 +95,7 @@ ANN V4、41 目标 fuzz 与未知中断操作继续禁止重发、改写、拆�
 | interrupted publication/rekey 与 generation 判定 | 完整失败点协议、旧/新代际与恢复规则，避免半新半旧误接受 | 同手册第712行 |
 | selected-file 缺失/namespace 干预/原生 lock-unmap-close 失败矩阵 | 原生 OS/文件系统、diagnostic/retirement obligations；已有两项 manual namespace 不补齐矩阵 | 同手册第669–713行；test-scope-audit 第5–39行 |
 
-现有 `TestManualRollbackRecovery` 和两项 `manual_namespace` 仍按[中文手工验收手册](manual-verification-zh.md) §12.1–12.2 的真实源码、标签、门、步骤、断言、证据与清理规则保存，当前 BLOCKED / NOT_RUN。没有补写虚假测试名，也没有把编写步骤记成执行。历史 M2 至 7addc493 曾误纳入两项 namespace 的 PASS 与不干净范围事实继续保留。
+现有 `TestManualRollbackRecovery` 与两个 plaintext `manual_namespace` 按[中文手工验收手册](manual-verification-zh.md) §12.1–12.2 保存；本批另两个 encstore 原生 namespace 测试的双门、步骤和断言见 §19。当前这些受限物理执行均 BLOCKED / NOT_RUN。没有补写虚假测试名，也没有把编写步骤记成执行。历史 M2 至 7addc493 曾误纳入两项 namespace 的 PASS 与不干净范围事实继续保留。
 
 ## 四 本检查点的独立源码批次
 
@@ -169,3 +170,22 @@ production bridge及开启恢复的真实Open/OpenContext/Connect均BLOCKED / NO
 没有被这一源码/模型PASS补齐；ANN V4、41目标fuzz和未知链路的禁重试不变。
 中文第18节记录实际配置和未来断言；缺少入口不编造可运行命令，旧第12节
 的已存在手工命令保持原门控和限制。
+
+## 八 2026-10-11 OS namespace 门控源码更新
+
+2026-10-11 namespace 后续更新：本批以已保存 P0 提交
+`56bbcf3febe233197aa0a5eac965c67a67a88011`（tree
+`c31e7dcbeed9732688681741ee38ec60ff0bfb49`）为组合基点，只移出两个
+Windows/Darwin raw namespace 测试并追加通用 Rename/rename selector guard。
+恢复 guard 和 LIMIT 成果保持。六路径候选的 source/model/race、188 项选择矩阵
+及六项外平台编译/符号核对已有独立 PASS；原生/manual 二进制全部 NOT_RUN。
+详见[本批手册](manual-verification-zh.md#19-os-raw-namespace-门控与独立原生验收2026-10-11)及[范围审计](test-scope-audit.md)。
+本批新组合、提交、恢复和 CI 必须各自记录，不能继承 P0 或候选 PASS。
+
+这次关闭的是已知两项默认选择与通用 selector 的源码门控缺口，并未解除②执行限制。
+完整函数去掉首句 gate 后字节相同，Windows 的当前 context 依赖保留；没有复制旧
+a314 全树或覆盖当前恢复 guard。原 source-only 独立报告与后续 compiler addendum
+分别保留，后者只更新实际获准的 guard/model/race/selection/compile 结果。
+未执行任何 manual binary、恢复、故障、错密钥、篡改、中断发布/rekey，亦未继续
+ANN V4、41-target fuzz 或未知触发链路。更广 backend/目录协议和缺失物理 harness
+仍有真实实现/资格缺口；该门控 PASS 不将它们改写成只差测试机。

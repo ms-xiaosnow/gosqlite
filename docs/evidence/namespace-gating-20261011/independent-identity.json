@@ -1,0 +1,37 @@
+{
+  "status": "SOURCE_REVIEW_PASS",
+  "started_and_completed_utc": "2026-10-11T08:02:16.890282+00:00",
+  "base": "/workspace/scratch/5e06a74e5f65/durable-restart/public-open-combined-freeze-v1",
+  "base_tree": "442a7104dc780ddb20826e5ee4f1250b291f2b24",
+  "candidate": "/workspace/scratch/5e06a74e5f65/durable-restart/namespace-gating-integration-freeze-v1",
+  "candidate_tree": "01918609a55cc149c5155451da40f7389854db06",
+  "patch_sha256": "18ba34e90283080cbc0a1ab1ab1e213945d2b9a05168acb33221498faaba4ee0",
+  "exact_six_changed_paths": [
+    "internal/encstore/namespace_manual_darwin_test.go",
+    "internal/encstore/namespace_manual_windows_amd64_test.go",
+    "internal/encstore/native_darwin_test.go",
+    "internal/encstore/native_windows_test.go",
+    "internal/testscope/main.go",
+    "internal/testscope/native_namespace_test.go"
+  ],
+  "base_files": 3004,
+  "candidate_files": 3007,
+  "candidate_directories_excluding_root": 143,
+  "replay_tree": "01918609a55cc149c5155451da40f7389854db06",
+  "full_bytes_sha256_modes_root_and_subdirectory_modes_exact": true,
+  "input_trees_unchanged": true,
+  "existing_tests_count": 366,
+  "existing_tests_byte_mode_identical": 364,
+  "modified_existing_tests": [
+    "internal/encstore/native_darwin_test.go",
+    "internal/encstore/native_windows_test.go"
+  ],
+  "recovery_guard_reversible_single_selector_change": true,
+  "windows_context_preserved_and_used": true,
+  "all_three_added_files_match_prior_accepted_source": true,
+  "go_commands": "NOT_RUN; compiler slot not authorized",
+  "actual_selection_matrix": "NOT_RUN",
+  "foreign_compilation_symbols": "NOT_RUN",
+  "manual_native_namespace_runtime": "NOT_RUN",
+  "restricted_workflows": "NOT_RUN"
+}

@@ -1,0 +1,14 @@
+{
+  "/tmp": {
+    "minimum_free_bytes": 1413267456,
+    "minimum_free_inodes": 1243461,
+    "required_bytes": 1073741824,
+    "required_inodes": 10000
+  },
+  "/workspace/scratch/5e06a74e5f65/durable-restart": {
+    "minimum_free_bytes": 12054114304,
+    "minimum_free_inodes": 1185761,
+    "required_bytes": 2147483648,
+    "required_inodes": 10000
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "TestWindowsEncryptedRelativePublicationAndRetainedRoot": {
+    "source_file": "internal/encstore/native_windows_test.go",
+    "manual_file": "internal/encstore/namespace_manual_windows_amd64_test.go",
+    "first_statement_exact_environment_gate": true,
+    "entire_function_bytes_equal_after_only_gate_removal": true,
+    "original_and_normalized_sha256": "017622ac62e4b69e0396fb85f9404ef71372fc9aceb506e1f6c29ea8a05fd88b",
+    "existing_file_exact_after_function_removal_and_listed_import_removals": true,
+    "removed_import_lines": [
+      "\"bytes\""
+    ],
+    "retained_function_sha256": {
+      "Acquire": "56afc440344fe2c7ad7ae7b9897dab9854f47a9b53e9529ff8c1337dcbf58662",
+      "TestWindowsEncryptedExactLocksAndProbeLifetime": "da27ad4856b1c9923cbae6302e80dd5d8d328242052632cad0d101658bc69335",
+      "TestWindowsEncryptedPathPolicyMemory": "ec04ee725922f9bb8eb35869ea7220144cfc5826e0a8900e4a0934bd86cf6060",
+      "TestWindowsEncryptedSharedRekeyPreflightMemory": "57d5b599024aa9d0184096944fe99fecbaab14e310a1535200cf01ed4d0bdefc",
+      "TestWindowsEncryptedStandaloneParentRetention": "bba40821c9a1a4c8f4b25f4730f88f9af018f77ac380a6db6ea7998f3d42e4c6"
+    },
+    "unique_declaration_file": "namespace_manual_windows_amd64_test.go",
+    "build_constraint": "//go:build manual_namespace"
+  },
+  "TestDarwinEncryptedRelativePublicationAndParentLifetime": {
+    "source_file": "internal/encstore/native_darwin_test.go",
+    "manual_file": "internal/encstore/namespace_manual_darwin_test.go",
+    "first_statement_exact_environment_gate": true,
+    "entire_function_bytes_equal_after_only_gate_removal": true,
+    "original_and_normalized_sha256": "140d779476126902745a89299b992a2d82d3a011d27ace0bdf945b055b50d245",
+    "existing_file_exact_after_function_removal_and_listed_import_removals": true,
+    "removed_import_lines": [
+      "\"bytes\"",
+      "\"context\"",
+      "\"github.com/ms-xiaosnow/gosqlite/encryption\""
+    ],
+    "retained_function_sha256": {
+      "TestDarwinEncryptedAggregateLocksAndProbeReuse": "a97b675128a947955de18006117172e7c09ae2e5358c6e75215b67e6e9f8b944",
+      "TestDarwinEncryptedPathPolicyMemory": "18deaf9466cc9cc9cbd6068ac05f22401b453e7242c7a21824599e110f3cdf59",
+      "TestDarwinEncryptedPlainProbeCloseCoordination": "e5c3f5bda09769442ec77d8840ea3f71bd95987cac11185cdad4856b58b16332"
+    },
+    "unique_declaration_file": "namespace_manual_darwin_test.go",
+    "build_constraint": "//go:build manual_namespace"
+  }
+}

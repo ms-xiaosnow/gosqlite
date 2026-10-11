@@ -22,7 +22,7 @@
 | §4.1 P0 恢复与安全发布 | 有限 Linux 可写明文 public Open/Connector opt-in 源码已接入，nil 默认拒绝；独立 source/model/compile PASS。native exclusive WAL-tail publisher、broader journals/default-on/其他平台仍缺 | 实验性源码实现不等于物理资格；public physical harness 为 IMPLEMENTATION_MISSING，真实 RecoverRollback/bridge/启用恢复的真实 Open 均 BLOCKED / NOT_RUN。新组合普通门及新提交恢复/CI另验，不整树恢复旧候选 |
 | 已声明支持 SQL 的正确性 | CAST/IPK、LEFT-ON/WHERE、排序/执行阶段等差异；planner V4c 尚未与 main grouped/counter 组合 | 属于工程正确性/集成待办，未定位planner编辑拒绝；当前limitValue数值转换/ErrMismatch三文件修正已独立限定PASS，组合完整普通18阶段PASS。其余phase/order/binding逐批审阅，不能仅靠测试机补齐 |
 | 明文备份、真正只读 WAL | main plaintext backup 仍 unsupported；rollback V2 未终审/合入；WAL/非 Linux 备份及真正只读 WAL 入口缺实现 | 与旧backup/WAL/目录协议有依赖，属于具体审阅/集成待办；未定位编辑拒绝，仍须逐项划定源码范围。已有可写协调named Check不称为只读；物理负向执行受限 |
-| 原生 backend/目录所有权 | Windows shared rekey、Darwin V3、OS namespace 门控候选未合入；retained-directory 未完整冻结/整合 | 属源码/集成待办及受限原生资格，未定位编辑拒绝；不能整树复制旧组合、把交叉编译称为原生运行或直接开启新OS全套 |
+| 原生 backend/目录所有权 | Windows shared rekey、Darwin V3 仍未合入；retained-directory 未完整冻结/整合。本批仅两个 OS namespace 测试门控已逐 hunk 接入，原生执行仍 NOT_RUN | 属源码/集成待办及受限原生资格，未定位编辑拒绝；不能整树复制旧组合、把交叉编译称为原生运行或直接开启新OS全套 |
 | ANN 报告和发布测量 | ANN V3 三个报告准入缺陷仍 FAIL；V4 未完成；performance V3 未合入/部署 | ANN V4、41目标fuzz与未知链路禁重试。Performance V3的源码集成和自动部署HOLD分开；旧算法PASS不消除报告工具FAIL，报告工具FAIL也不证明生产ANN算法全错 |
 | 完整物理安全设施 | crash/power-loss/process-exit、short write、Sync/ENOSPC、torn write、checkpoint/rekey 中断、完整磁盘认证负面矩阵等 harness 仍有源码缺口 | 源码缺口标记IMPLEMENTATION_MISSING，执行另记BLOCKED/NOT_RUN；未定位harness源码编辑拒绝。具体源码须审阅，不能编造现成命令或称为只待运行 |
 | 格式升级/回退与恢复测量 | 全部受支持模式的升级/回退覆盖、WAL 恢复耗时工具及必要安全恢复路径尚未闭合 | 既有少数跨版本 fixture/普通测量不能代表完整矩阵 |
@@ -31,7 +31,7 @@
 
 ## 三、代码已有的人工门与真实外部资格
 
-- 已存在的有限 manual rollback recovery 和两个 manual_namespace 回归，仍按主手册的标签、单项选择和实际覆盖记录；它们不覆盖上表缺失的完整物理故障设施。
+- 已存在的有限 manual rollback recovery、两个 plaintext namespace 回归，以及本批另两个 Windows/Darwin encstore namespace 回归，分别按主手册 12.1、12.2、19 节的双门、单项选择和实际覆盖记录；它们不覆盖上表缺失的完整物理故障设施，原生执行仍 NOT_RUN。
 - 已实现 backend 在真实目标 OS/架构、文件系统和持久性硬件上的锁、mapping、目录同步、恢复边界验证。
 - 已有普通长测工具的长期并发 soak、固定硬件和数据集的大规模测量；短样本和有界正确性测试不替代。
 - 现有加密、事务和索引实现对应的物理安全资格及独立数据安全/密码学/威胁模型审查；不能用正确密钥 round-trip 或无明文 marker 代替。
@@ -65,6 +65,7 @@
 
 - Linux 有限 rollback recovery：`internal/pager/recovery_manual_test.go` 的 `TestManualRollbackRecovery`，独立 manual_recovery gate；具体已实现断言与限制见中文主手册 12.1。当前 BLOCKED / NOT_RUN。
 - 两个 plaintext namespace 回归：`sqlite/write_namespace_manual_test.go` 中两个真实具名测试，见主手册 12.2；当前 BLOCKED / NOT_RUN，历史曾运行事实单独保留。
+- 两个 encstore 原生 namespace 回归：Windows `TestWindowsEncryptedRelativePublicationAndRetainedRoot` 与 Darwin `TestDarwinEncryptedRelativePublicationAndParentLifetime`，见[主手册 19 节](manual-verification-zh.md#19-os-raw-namespace-门控与独立原生验收2026-10-11)；manual_namespace 加环境门已存在，编译/符号 PASS，全部原生执行 BLOCKED / NOT_RUN。
 - 现有普通 SQL/互操作、grams/精确向量、正确密钥维护和离线迁移入口见主手册 5–10；未来只对所选提交和授权范围逐项复验，不把这份清单当作立即重跑整套的指令。
 - 事务 V4、grams 测量等现有工具可用于将来的有资源预算长测，见主手册 11；完整 soak 与大规模合格结果仍 NOT_RUN。小样本不是长期资格。
 
@@ -77,7 +78,7 @@
 
 ### 需要真实外部环境或有资格的独立审查
 
-- 精确源码在真实目标 OS/架构、文件系统和具持久性语义硬件上的原生锁、mapping、目录同步与恢复边界。新 OS 全量运行前还需先解决 raw namespace 门控集成。
+- 精确源码在真实目标 OS/架构、文件系统和具持久性语义硬件上的原生锁、mapping、目录同步与恢复边界。本批 raw namespace 双门已接入，但新 OS 全量运行和 runner 仍需单独审查与许可；交叉编译不替代原生资格。
 - 已声明数据与负载的长期 soak、大规模固定硬件性能测量、实际冷暖缓存及资源预算；不得用交叉编译或 cloud tmpfs 的正常成功代替。
 - 授权可丢弃 PG/Neon 的实际版本、依赖、权限、模板与回滚快照；离线 SQL/NDJSON 转换不能代替服务器执行。
 - 独立数据安全、密码学、威胁模型、依赖许可/法律和稳定 API 审查。一般工程审阅不能替代相应资格与结论。
@@ -88,3 +89,19 @@
 父基点 `7a9972547f49531df04cf1b624dfa662b483907b` 的 Library `libfile_f28c9a0df2108191981d41eb76fafc58` 已读回并精确恢复；30阶段、18项每模式具名测试/29子项、8 sourceguard、vet/build/五目标/模块/全部身份于04:13:29 UTC PASS。该提交 CI `38110617335` ordinary/oracle 均 SUCCESS（04:30:02 UTC）；[闭合证据](evidence/cli-resources-20261011/persistence.json)只属于父基点，不替代本次新提交。
 
 历史63c2的bundle、CI/job与恢复V1验证器FAIL/V2修正、终态证据归档身份见[限制溯源第五节](restriction-provenance-20261011.md)。普通transaction V4工具已实现；两小时soak未启动，具体预检缺口是fixture位置/空间等资源条件，不能误写为该工具缺实现或编辑被拒绝。新OS/perf runner、计费读取、新费用与权限仍分别待许可。
+
+## 七 当前 OS namespace 门控批次
+
+2026-10-11 namespace 后续更新：本批以已保存 P0 提交
+`56bbcf3febe233197aa0a5eac965c67a67a88011`（tree
+`c31e7dcbeed9732688681741ee38ec60ff0bfb49`）为组合基点，只移出两个
+Windows/Darwin raw namespace 测试并追加通用 Rename/rename selector guard。
+恢复 guard 和 LIMIT 成果保持。六路径候选的 source/model/race、188 项选择矩阵
+及六项外平台编译/符号核对已有独立 PASS；原生/manual 二进制全部 NOT_RUN。
+详见[本批手册](manual-verification-zh.md#19-os-raw-namespace-门控与独立原生验收2026-10-11)及[范围审计](test-scope-audit.md)。
+本批新组合、提交、恢复和 CI 必须各自记录，不能继承 P0 或候选 PASS。
+
+当前已保存 P0 基点、bundle 身份、已通过的精确恢复及尚待终态的 CI 见
+[验收矩阵当前补记](acceptance-status.md#2026-10-11-os-namespace-六路径批次)。
+原 LIMIT/P0 段落的 PENDING 是其写作时点；不改写历史，也不将后来候选的
+有限结果填入父基点或本批新身份。后续仅按真实组合/提交/恢复/CI 证据追加。

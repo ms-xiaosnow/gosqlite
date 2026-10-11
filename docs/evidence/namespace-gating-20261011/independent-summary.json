@@ -1,0 +1,31 @@
+{
+  "status": "PASS",
+  "started_utc": "2026-10-11T08:26:58.375564+00:00",
+  "finished_utc": "2026-10-11T08:27:31.145833+00:00",
+  "candidate_tree": "01918609a55cc149c5155451da40f7389854db06",
+  "source_guard": "PASS",
+  "pure_ast_model": "PASS",
+  "pure_ast_model_race": "PASS",
+  "manual_goflags_refusal": "PASS_EXPECTED_EXIT_1",
+  "selection_cases": 188,
+  "supported_targets": 47,
+  "tag_sets": 4,
+  "exact_default_oracle_lost_entry_points": [
+    "TestDarwinEncryptedRelativePublicationAndParentLifetime",
+    "TestWindowsEncryptedRelativePublicationAndRetainedRoot"
+  ],
+  "foreign_compilation_and_exact_symbols": 6,
+  "commands": 207,
+  "manual_binaries": "NOT_RUN",
+  "native_physical_runtime": "NOT_RUN",
+  "restricted_workflows": "NOT_RUN",
+  "original_source_report_unchanged": true,
+  "post_identity": {
+    "at_utc": "2026-10-11T08:27:30.696911+00:00",
+    "base_tree": "442a7104dc780ddb20826e5ee4f1250b291f2b24",
+    "frozen_tree": "01918609a55cc149c5155451da40f7389854db06",
+    "reviewer_replay_tree": "01918609a55cc149c5155451da40f7389854db06",
+    "all_bytes_sha256_git_posix_directory_modes_unchanged": true,
+    "original_source_report_unchanged": true
+  }
+}

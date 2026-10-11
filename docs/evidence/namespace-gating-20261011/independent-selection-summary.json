@@ -1,0 +1,147 @@
+{
+  "total_cases": 188,
+  "selected_manual_cases": [
+    {
+      "target": "darwin/amd64",
+      "tags": "manual_namespace",
+      "manual_files": [
+        "namespace_manual_darwin_test.go"
+      ]
+    },
+    {
+      "target": "darwin/amd64",
+      "tags": "oracle,manual_namespace",
+      "manual_files": [
+        "namespace_manual_darwin_test.go"
+      ]
+    },
+    {
+      "target": "darwin/arm64",
+      "tags": "manual_namespace",
+      "manual_files": [
+        "namespace_manual_darwin_test.go"
+      ]
+    },
+    {
+      "target": "darwin/arm64",
+      "tags": "oracle,manual_namespace",
+      "manual_files": [
+        "namespace_manual_darwin_test.go"
+      ]
+    },
+    {
+      "target": "ios/amd64",
+      "tags": "manual_namespace",
+      "manual_files": [
+        "namespace_manual_darwin_test.go"
+      ]
+    },
+    {
+      "target": "ios/amd64",
+      "tags": "oracle,manual_namespace",
+      "manual_files": [
+        "namespace_manual_darwin_test.go"
+      ]
+    },
+    {
+      "target": "ios/arm64",
+      "tags": "manual_namespace",
+      "manual_files": [
+        "namespace_manual_darwin_test.go"
+      ]
+    },
+    {
+      "target": "ios/arm64",
+      "tags": "oracle,manual_namespace",
+      "manual_files": [
+        "namespace_manual_darwin_test.go"
+      ]
+    },
+    {
+      "target": "windows/amd64",
+      "tags": "manual_namespace",
+      "manual_files": [
+        "namespace_manual_windows_amd64_test.go"
+      ]
+    },
+    {
+      "target": "windows/amd64",
+      "tags": "oracle,manual_namespace",
+      "manual_files": [
+        "namespace_manual_windows_amd64_test.go"
+      ]
+    }
+  ],
+  "reduced_default_oracle_cases": [
+    {
+      "target": "darwin/amd64",
+      "tags": "(default)",
+      "lost": [
+        "TestDarwinEncryptedRelativePublicationAndParentLifetime"
+      ]
+    },
+    {
+      "target": "darwin/amd64",
+      "tags": "oracle",
+      "lost": [
+        "TestDarwinEncryptedRelativePublicationAndParentLifetime"
+      ]
+    },
+    {
+      "target": "darwin/arm64",
+      "tags": "(default)",
+      "lost": [
+        "TestDarwinEncryptedRelativePublicationAndParentLifetime"
+      ]
+    },
+    {
+      "target": "darwin/arm64",
+      "tags": "oracle",
+      "lost": [
+        "TestDarwinEncryptedRelativePublicationAndParentLifetime"
+      ]
+    },
+    {
+      "target": "ios/amd64",
+      "tags": "(default)",
+      "lost": [
+        "TestDarwinEncryptedRelativePublicationAndParentLifetime"
+      ]
+    },
+    {
+      "target": "ios/amd64",
+      "tags": "oracle",
+      "lost": [
+        "TestDarwinEncryptedRelativePublicationAndParentLifetime"
+      ]
+    },
+    {
+      "target": "ios/arm64",
+      "tags": "(default)",
+      "lost": [
+        "TestDarwinEncryptedRelativePublicationAndParentLifetime"
+      ]
+    },
+    {
+      "target": "ios/arm64",
+      "tags": "oracle",
+      "lost": [
+        "TestDarwinEncryptedRelativePublicationAndParentLifetime"
+      ]
+    },
+    {
+      "target": "windows/amd64",
+      "tags": "(default)",
+      "lost": [
+        "TestWindowsEncryptedRelativePublicationAndRetainedRoot"
+      ]
+    },
+    {
+      "target": "windows/amd64",
+      "tags": "oracle",
+      "lost": [
+        "TestWindowsEncryptedRelativePublicationAndRetainedRoot"
+      ]
+    }
+  ]
+}

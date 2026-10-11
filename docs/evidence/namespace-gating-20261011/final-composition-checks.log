@@ -1,0 +1,10 @@
+PASS full identity and 788 exact non-doc paths
+version exit 0
+go-env exit 0
+source-guard-before-model exit 0
+pure-model exit 0
+source-guard-before-race exit 0
+pure-model-race exit 0
+expected-manual-goflags-refusal exit 1
+COMPILER_SLOT_RELEASED
+{"status": "PASS", "started_utc": "2026-10-11T08:55:05.033572+00:00", "finished_utc": "2026-10-11T08:55:11.825617+00:00", "freeze_tree": "697e45c6aba7a5cf62ebbf2bab2662f10903c5be", "commands": 7, "guard_before_model": "PASS", "guard_before_race": "PASS", "all_pure_model_tests": "PASS", "all_pure_model_tests_race": "PASS", "expected_manual_goflags_refusal": "PASS_EXPECTED_EXIT_1", "all_full_inventories_unchanged": true, "ordinary_aggregate": "NOT_RUN", "oracle": "NOT_RUN", "foreign_compile": "NOT_RERUN", "manual_binaries": "NOT_RUN", "native_namespace_runtime": "NOT_RUN", "restricted_workflows": "NOT_RUN"}

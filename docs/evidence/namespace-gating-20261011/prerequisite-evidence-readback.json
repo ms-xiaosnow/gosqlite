@@ -1,0 +1,26 @@
+[
+  {
+    "manifest": "namespace-gating-integration-evidence/evidence-manifest.json",
+    "files": 252,
+    "sha256": "6c899060712bfa61f4d2ae6c4e98c478f36ddda07b10a70ea07a824c763256bd",
+    "result": "PASS"
+  },
+  {
+    "manifest": "namespace-gating-independent-review-v2/evidence-sha256.json",
+    "files": 12,
+    "sha256": "69d8694b211160b24096e0c7cb78df531c08fecee9fbca1e025ce7b1e593e2c1",
+    "result": "PASS"
+  },
+  {
+    "manifest": "namespace-gating-independent-review-v2/compiler-evidence-sha256.json",
+    "files": 229,
+    "sha256": "9424d7bc1aee9dd430ac74ab7e4015250db480fed4dc4a5f00216b62a15cfceb",
+    "result": "PASS"
+  },
+  {
+    "manifest": "public-open-restore-verification-v1/EVIDENCE-MANIFEST.json",
+    "files": 124,
+    "sha256": "2fbfcaa1ed51062644972e4a73e6903394c385a1e12394b5d5d9bda32cbda179",
+    "result": "PASS"
+  }
+]

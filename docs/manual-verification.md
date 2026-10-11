@@ -8,10 +8,10 @@
 验收结论。2026-10-10 被中止的 ANN V4、新 41 目标 fuzz 及未知触发链路
 继续暂停，不通过改名、变更输入、其他执行环境或 CI 重试。
 
-当前 main 的 Windows/Darwin 两项 raw namespace 测试尚未合入新的人工
-门控；不要直接在这些 OS 上执行默认全套。已有 Linux 普通 CI 与新 OS/
-性能 runner、计费读取是不同授权范围。明确未实现的 harness 或生产能力
-仍列为代码缺口，不伪装成“已有测试只差手工运行”。
+本批已将 Windows/Darwin 两项 raw namespace 测试完整移到精确 manual tag/env
+门，保留原断言和当前 P0 恢复 guard；原生执行仍 BLOCKED / NOT_RUN。
+详见[中文第 19 节](manual-verification-zh.md#19-os-raw-namespace-门控与独立原生验收2026-10-11)。门控不授权默认 OS 全套、新 runner 或计费读取；
+明确未实现的 harness 或生产能力仍列代码缺口，不伪装成只差手工运行。
 
 Test-scope correction: historical full suites from M2 through 7addc493 included two namespace-mutation tests. Their PASS outputs remain factual, but are not clean ordinary-scope evidence. See [the audit and gating correction](test-scope-audit.md).
 
@@ -693,3 +693,20 @@ no crash, fault, native recovery, namespace substitution or interrupted-rekey
 execution. Correctness/ordinary source review is not independent security/legal
 release approval. Wider planner, Windows/Darwin/public recovery and repaired
 ANN/performance-CI sources remain separate increments.
+
+## 2026-10-11 OS namespace 门控后续记录
+
+2026-10-11 namespace 后续更新：本批以已保存 P0 提交
+`56bbcf3febe233197aa0a5eac965c67a67a88011`（tree
+`c31e7dcbeed9732688681741ee38ec60ff0bfb49`）为组合基点，只移出两个
+Windows/Darwin raw namespace 测试并追加通用 Rename/rename selector guard。
+恢复 guard 和 LIMIT 成果保持。六路径候选的 source/model/race、188 项选择矩阵
+及六项外平台编译/符号核对已有独立 PASS；原生/manual 二进制全部 NOT_RUN。
+详见[本批手册](manual-verification-zh.md#19-os-raw-namespace-门控与独立原生验收2026-10-11)及[范围审计](test-scope-audit.md)。
+本批新组合、提交、恢复和 CI 必须各自记录，不能继承 P0 或候选 PASS。
+
+原 M2 至 7addc493 的两个 plaintext namespace 历史 PASS 与 unsafe-scope 事实保持。
+本批移动的是另两个 encstore 原生测试，不能混为历史 plaintext 用例。
+旧 P0 段落的 namespace 未纳入是该切片范围，不反推当前仍未门控。
+真实原生测试须用户独立批准环境，具体平台、tag、env、隔离副本、命令、原断言、
+失败保留局限和清理条件都在中文第 19 节；设置 gate 本身不是授权。

@@ -1,0 +1,100 @@
+[
+  {
+    "target": "windows/amd64",
+    "tags": "manual_namespace",
+    "artifact": "/workspace/scratch/5e06a74e5f65/durable-restart/namespace-gating-independent-review-v2/compiler-checks/windows-amd64-manual_namespace.test",
+    "sha256": "98477c6a1f2327ea15b9e4d4730db6d63a93df474e45de62c647be7318bdb988",
+    "expected_exact_test_symbol": [
+      "14026b1a0 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestWindowsEncryptedRelativePublicationAndRetainedRoot"
+    ],
+    "moved_test_symbols": [
+      "14026b1a0 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestWindowsEncryptedRelativePublicationAndRetainedRoot",
+      "140288c40 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestWindowsEncryptedRelativePublicationAndRetainedRoot.deferwrap1",
+      "140288c00 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestWindowsEncryptedRelativePublicationAndRetainedRoot.deferwrap2",
+      "140288bc0 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestWindowsEncryptedRelativePublicationAndRetainedRoot.deferwrap3",
+      "140288b80 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestWindowsEncryptedRelativePublicationAndRetainedRoot.deferwrap4"
+    ],
+    "execution": "NOT_RUN"
+  },
+  {
+    "target": "windows/amd64",
+    "tags": "oracle,manual_namespace",
+    "artifact": "/workspace/scratch/5e06a74e5f65/durable-restart/namespace-gating-independent-review-v2/compiler-checks/windows-amd64-oracle-manual_namespace.test",
+    "sha256": "bddf70a1a351ffe17abb0395f20ef29723911566854ecf2af42edb16f4d9f335",
+    "expected_exact_test_symbol": [
+      "14026b1a0 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestWindowsEncryptedRelativePublicationAndRetainedRoot"
+    ],
+    "moved_test_symbols": [
+      "14026b1a0 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestWindowsEncryptedRelativePublicationAndRetainedRoot",
+      "140288c40 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestWindowsEncryptedRelativePublicationAndRetainedRoot.deferwrap1",
+      "140288c00 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestWindowsEncryptedRelativePublicationAndRetainedRoot.deferwrap2",
+      "140288bc0 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestWindowsEncryptedRelativePublicationAndRetainedRoot.deferwrap3",
+      "140288b80 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestWindowsEncryptedRelativePublicationAndRetainedRoot.deferwrap4"
+    ],
+    "execution": "NOT_RUN"
+  },
+  {
+    "target": "darwin/amd64",
+    "tags": "manual_namespace",
+    "artifact": "/workspace/scratch/5e06a74e5f65/durable-restart/namespace-gating-independent-review-v2/compiler-checks/darwin-amd64-manual_namespace.test",
+    "sha256": "6200cf80c37fee35d284d1d57f30f95ff51eb5e8ba5818be0907a4419c2cbe33",
+    "expected_exact_test_symbol": [
+      " 124f9c0 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestDarwinEncryptedRelativePublicationAndParentLifetime"
+    ],
+    "moved_test_symbols": [
+      " 124f9c0 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestDarwinEncryptedRelativePublicationAndParentLifetime",
+      " 126d940 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestDarwinEncryptedRelativePublicationAndParentLifetime.deferwrap1",
+      " 126d900 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestDarwinEncryptedRelativePublicationAndParentLifetime.deferwrap2",
+      " 126d8c0 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestDarwinEncryptedRelativePublicationAndParentLifetime.deferwrap3"
+    ],
+    "execution": "NOT_RUN"
+  },
+  {
+    "target": "darwin/amd64",
+    "tags": "oracle,manual_namespace",
+    "artifact": "/workspace/scratch/5e06a74e5f65/durable-restart/namespace-gating-independent-review-v2/compiler-checks/darwin-amd64-oracle-manual_namespace.test",
+    "sha256": "d8343e5bb8fb165f42b40ef0be47964e8ecd31eef7043f12b0a44bb7ed1c9609",
+    "expected_exact_test_symbol": [
+      " 124f9c0 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestDarwinEncryptedRelativePublicationAndParentLifetime"
+    ],
+    "moved_test_symbols": [
+      " 124f9c0 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestDarwinEncryptedRelativePublicationAndParentLifetime",
+      " 126d940 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestDarwinEncryptedRelativePublicationAndParentLifetime.deferwrap1",
+      " 126d900 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestDarwinEncryptedRelativePublicationAndParentLifetime.deferwrap2",
+      " 126d8c0 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestDarwinEncryptedRelativePublicationAndParentLifetime.deferwrap3"
+    ],
+    "execution": "NOT_RUN"
+  },
+  {
+    "target": "darwin/arm64",
+    "tags": "manual_namespace",
+    "artifact": "/workspace/scratch/5e06a74e5f65/durable-restart/namespace-gating-independent-review-v2/compiler-checks/darwin-arm64-manual_namespace.test",
+    "sha256": "ab952e039fb51ff7692749d7321a3d67ed00eed103acd0759f997ea878dc89ff",
+    "expected_exact_test_symbol": [
+      "1001ff060 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestDarwinEncryptedRelativePublicationAndParentLifetime"
+    ],
+    "moved_test_symbols": [
+      "1001ff060 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestDarwinEncryptedRelativePublicationAndParentLifetime",
+      "100215080 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestDarwinEncryptedRelativePublicationAndParentLifetime.deferwrap1",
+      "100215040 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestDarwinEncryptedRelativePublicationAndParentLifetime.deferwrap2",
+      "100215000 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestDarwinEncryptedRelativePublicationAndParentLifetime.deferwrap3"
+    ],
+    "execution": "NOT_RUN"
+  },
+  {
+    "target": "darwin/arm64",
+    "tags": "oracle,manual_namespace",
+    "artifact": "/workspace/scratch/5e06a74e5f65/durable-restart/namespace-gating-independent-review-v2/compiler-checks/darwin-arm64-oracle-manual_namespace.test",
+    "sha256": "4b8340db102fcf8104202b7d3404515e9a074148d379a71a09447c34dcec253c",
+    "expected_exact_test_symbol": [
+      "1001ff060 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestDarwinEncryptedRelativePublicationAndParentLifetime"
+    ],
+    "moved_test_symbols": [
+      "1001ff060 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestDarwinEncryptedRelativePublicationAndParentLifetime",
+      "100215080 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestDarwinEncryptedRelativePublicationAndParentLifetime.deferwrap1",
+      "100215040 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestDarwinEncryptedRelativePublicationAndParentLifetime.deferwrap2",
+      "100215000 T github.com/ms-xiaosnow/gosqlite/internal/encstore.TestDarwinEncryptedRelativePublicationAndParentLifetime.deferwrap3"
+    ],
+    "execution": "NOT_RUN"
+  }
+]
