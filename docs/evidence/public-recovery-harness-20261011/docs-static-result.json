@@ -1,0 +1,13 @@
+{
+  "owned_paths": 8,
+  "full_base_files": 3077,
+  "unchanged_unowned": 3069,
+  "patch_replay": "PASS",
+  "progress_prefix": "PASS",
+  "unchanged_all_command_fences": "PASS",
+  "parsed_shell_blocks": 45,
+  "verified_relative_links": 180,
+  "pending_lead_summary_links": 5,
+  "go_invocations": 0,
+  "physical_runtime": "NOT_RUN"
+}

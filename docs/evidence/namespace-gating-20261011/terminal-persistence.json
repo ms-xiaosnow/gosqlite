@@ -1,0 +1,95 @@
+{
+  "observed_utc": "2026-10-11T09:31:20.731327+00:00",
+  "remote_commit": "50b627e11e9dbce7f2fde8df35c4634c52a06d52",
+  "tree": "8f2709293287a3517a52b3f989888ded8230ef53",
+  "parent": "56bbcf3febe233197aa0a5eac965c67a67a88011",
+  "main_readback_verified": true,
+  "local_mirror_exact": true,
+  "library_file_id": "libfile_e5dcbc0ac16c8191bce977aa165163f9",
+  "library_version": 0,
+  "bundle_bytes": 5755098,
+  "bundle_sha256": "111d9cc34e9d011c10ab9612010a5c7c3b4841900bc199fc6f1a4e7af30faaec",
+  "library_readback": "PASS bytecmp,completebundleverify,freshclone/fsck/exactHEADtreegoal",
+  "restore": {
+    "status": "PASS",
+    "started_utc": "2026-10-11T09:13:37.139606+00:00",
+    "finished_utc": "2026-10-11T09:14:09.789964+00:00",
+    "restored_head": "50b627e11e9dbce7f2fde8df35c4634c52a06d52",
+    "restored_tree": "8f2709293287a3517a52b3f989888ded8230ef53",
+    "full_publication_files": 3077,
+    "non_docs_exact_paths": 788,
+    "commands": 207,
+    "source_guard": "PASS",
+    "pure_models": "PASS",
+    "pure_models_race": "PASS",
+    "manual_goflags_refusal": "PASS_EXPECTED_EXIT_1",
+    "selection_cases": 188,
+    "foreign_compiles_and_exact_symbols": 6,
+    "all_files_paths_git_posix_and_directory_modes_unchanged": true,
+    "restore_git_metadata_index_refs_unchanged": true,
+    "manual_environment": "UNSET",
+    "manual_binaries": "NOT_RUN",
+    "physical_native_namespace": "NOT_RUN",
+    "full_ordinary_aggregate": "NOT_RUN",
+    "oracle_runtime": "NOT_RUN",
+    "restricted_scenarios": "NOT_RUN",
+    "mutable_main": "Excluded by explicit lead instruction",
+    "resource_minima": {
+      "/tmp": {
+        "free_bytes": 1413300224,
+        "free_inodes": 1243469
+      },
+      "/workspace/scratch/5e06a74e5f65/durable-restart": {
+        "free_bytes": 10990202880,
+        "free_inodes": 1153863
+      }
+    }
+  },
+  "restore_report_sha256": "210650ca7c794a53e9d7aed4a3ed0c34d03b74a9cee173a01d255eec08ed8855",
+  "restore_manifest_sha256": "3e971ba2242b6465b15b1a3872a995db6b622eefeff1dacad0bd76280e4d4ead",
+  "restore_manifest_files": 277,
+  "source_gate": {
+    "tree": "697e45c6aba7a5cf62ebbf2bab2662f10903c5be",
+    "runtime_files": 788,
+    "scope": "guard/puremodel/race;freshsourceidentity;no fullaggregate on thisfreeze",
+    "status": "PASS"
+  },
+  "ci_run": 38127196102,
+  "ci_status": "COMPLETED SUCCESS 2026-10-11T09:29:33Z",
+  "ci_jobs": [
+    {
+      "id": 114433911927,
+      "name": "ordinary",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 114433912045,
+      "name": "oracle",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "acceptance": "twoexistingnative namespace tests movedunderdualmanualgate;originalassertionsretained;allmanual/nativeNOT_RUN,M10incomplete",
+  "ci_terminal": {
+    "id": 38127196102,
+    "head_sha": "50b627e11e9dbce7f2fde8df35c4634c52a06d52",
+    "updated_at": "2026-10-11T09:29:33Z",
+    "status": "completed",
+    "conclusion": "success"
+  },
+  "ci_decoded_logs": {
+    "ordinary": {
+      "bytes": 23988,
+      "sha256": "6b6be5aaa673b7e82873e4f262d11a1a114cd388a92f8bba2780d47bdffe9019"
+    },
+    "oracle": {
+      "bytes": 21227,
+      "sha256": "ed5dbd21690e8616c5903bd8ff4c633a9fa2e8bcc47ea0e14ea65e249efab558"
+    }
+  },
+  "evidence_archive_library_file_id": "libfile_6b7a1c37d8fc8191bed2389e8dbe14dd",
+  "evidence_archive_bytes": 15356765,
+  "evidence_archive_sha256": "21cd1a73b622123605eb48a5031b0cc38314a04eac8a9b71c72f873ecaa3d701",
+  "evidence_archive_readback": "PASS bytecmp,843entries,842manifestfile hashes"
+}

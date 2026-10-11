@@ -32,7 +32,7 @@ Exact source, command, CI and restored-commit evidence remains in
 | Unsupported file/schema forms | unsupported | UTF-16, WITHOUT ROWID, autovacuum and unlisted schema/format semantics fail closed; support is never inferred from the version number |
 | Table and index mutation | partial | Native page split/merge, table/index creation and maintained nonunique BINARY ASC indices; test-oracle integrity_check and the separately bounded native DB/Tx/CLI Check V2 provide distinct checks, neither implies universal SQLite feature support |
 | Rollback journal | partial | Standard DELETE-journal normal commit/rollback and sector assumptions; nil-default Open still refuses existing journals with ErrRecoveryRequired / CodeIOErr. Explicit RollbackRecovery opts into the bounded source-only profile below; existing zero-byte databases remain rejected |
-| Hot rollback recovery | partial experimental source/model | Open/OpenContext and configured Connector now have a nil-default, Linux writable-plaintext rollback opt-in, with retired-reader path proof and at most one recovery plus one fresh no-create probe. Independent descriptor-free model/source/compile checks PASS; real RecoverRollback, the production bridge and recovery-enabled real Open remain BLOCKED / NOT_RUN. Public physical harness is IMPLEMENTATION_MISSING; default-on recovery, broader journals, WAL-tail publication and other native platforms remain separate gaps |
+| Hot rollback recovery | partial experimental source/model | Open/OpenContext and configured Connector now have a nil-default, Linux writable-plaintext rollback opt-in, with retired-reader path proof and at most one recovery plus one fresh no-create probe. Independent descriptor-free model/source/compile checks PASS; real RecoverRollback, the production bridge and recovery-enabled real Open remain BLOCKED / NOT_RUN. The four-case public Open manual harness is implemented with independent source/compiler-only PASS; all physical cases remain NOT_RUN. Driver Connector physical coverage, default-on recovery, broader journals, native WAL-tail publication, other native platforms and full fault harnesses remain separate gaps |
 | Exclusive WAL | partial | Explicit writable WALExclusive, lifetime EXCLUSIVE lock, one active lease, ordinary append/read/checkpoint/close/interoperability; not shared concurrency |
 | Shared WAL | partial | Actual dual-header/hash/readmark SHM protocol, single writer/multiple independent snapshots, ordinary live official-reader/writer interoperability and reader-safe checkpoint/reset; one active lease per connection |
 | Ambiguous WAL tails | partial | Accepted ordinary committed/discarded/reset cases are bounded; incomplete/current-generation ambiguous tails fail closed; broader recovery handling remains code work |
@@ -156,3 +156,15 @@ Windows/Darwin raw namespace 测试并追加通用 Rename/rename selector guard�
 | 两个 encstore 原生 namespace 回归的默认选择 | verified scoped source/model/compile | default 与仅 oracle 在适用平台排除这两个完整移走的函数；manual_namespace 加 env gate 保留它们，其他原声明保持。测试覆盖变化被明确记录 |
 | Rename/rename source-reference guard | verified scoped | 追加通用 selector 检查，当前 P0 recovery guard 全部保持；bare helper/wrapper/reflection 等仍需行为审阅，不是完整安全证明 |
 | Windows/amd64、Darwin/amd64、Darwin/arm64 原生 namespace 行为 | unqualified / NOT_RUN | 两种 manual tag 的六项外平台编译与符号核对仅证明编译/链接；不证明文件锁、持久性、加密安全或原生故障资格 |
+
+
+## 2026-10-11 公开恢复手工测试的有限补齐
+
+[TestManualPublicRollbackRecovery](../sqlite/rollback_recovery_manual_linux_test.go)
+只覆盖 nil-default/input-preservation、opt-in/只读重开、journal quota refusal、
+NoCreate absence 四个拟议物理场景。独立 V3 的源码审阅、AST、选择 0/0/1、
+编译及唯一顶层符号 PASS；没有执行 test binary 或生成 fixture，全部物理
+**NOT_RUN**。没有生产行为改动，不新增兼容格式、平台或自动恢复策略。
+[中文步骤](public-rollback-manual-zh.md)只追加当前发布状态，原命令/断言保持；
+原 V3 手册字节另存证据。当前资格、准确候选与 namespace 组合身份见
+[验收补记](acceptance-status.md#2026-10-11-有限公开恢复-harness-源码与编译资格)。

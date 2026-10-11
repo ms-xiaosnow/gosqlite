@@ -1,0 +1,8 @@
+{
+  "target": "github.com/ms-xiaosnow/gosqlite/sqlite_test.TestManualPublicRollbackRecovery",
+  "matches": [
+    "  8eefe0 T github.com/ms-xiaosnow/gosqlite/sqlite_test.TestManualPublicRollbackRecovery"
+  ],
+  "count": 1,
+  "status": "PASS"
+}

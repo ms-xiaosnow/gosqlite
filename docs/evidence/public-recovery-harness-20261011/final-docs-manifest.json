@@ -1,0 +1,42 @@
+{
+  "addendum.md": {
+    "bytes": 6393,
+    "sha256": "b2204bf64afc3314ce191afe6134f0fff2a6e6a8d2f6b1573c83b1f762c3d33c"
+  },
+  "check_docs.py": {
+    "bytes": 10500,
+    "sha256": "6642041f79faff4ba43c10dfaf3602694c7704798ddf9d4dc44911585814ceee"
+  },
+  "delta-from-compiler-freeze.json": {
+    "bytes": 2323,
+    "sha256": "2b8199bafa5ffc1e422b77e2be4e45ada339b02ec9160e2551a87d8520885eb9"
+  },
+  "git-metadata-after.json": {
+    "bytes": 1362167,
+    "sha256": "fda025184c5d11b073439353d712b3aec67d8bbc0f023a5311eb40c5535948ec"
+  },
+  "git-metadata-before.json": {
+    "bytes": 1362167,
+    "sha256": "fda025184c5d11b073439353d712b3aec67d8bbc0f023a5311eb40c5535948ec"
+  },
+  "post-inventory.json": {
+    "bytes": 1027925,
+    "sha256": "f9ceebada6442a3b8f685d9576917db347d59f07d0ef0fbd3b7e8fe09353e297"
+  },
+  "pre-inventory.json": {
+    "bytes": 1027925,
+    "sha256": "f9ceebada6442a3b8f685d9576917db347d59f07d0ef0fbd3b7e8fe09353e297"
+  },
+  "relative-links.json": {
+    "bytes": 40670,
+    "sha256": "df63298527c917f8872e9993d04a070918331f17974b9564bf0aea5fb1016845"
+  },
+  "result.json": {
+    "bytes": 1449,
+    "sha256": "39e77c46b3812074d003ec224054193661d3c281d6b62ddd2421fb7ee8d00c3a"
+  },
+  "shell-syntax.json": {
+    "bytes": 13967,
+    "sha256": "7326efed1f3b550fd79b3c3cedb28421035dfa48e10916a40dd272b30ab33242"
+  }
+}

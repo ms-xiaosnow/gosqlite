@@ -1,0 +1,124 @@
+[
+  {
+    "name": "01-ast",
+    "argv": [
+      "/workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go",
+      "run",
+      "-p=1",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-independent-review-v1/v2/check_ast.go",
+      "--",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-combined-freeze-v1/sqlite/rollback_recovery_manual_linux_test.go"
+    ],
+    "cwd": "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-combined-freeze-v1",
+    "start_utc": "2026-10-11T09:32:42.029498+00:00",
+    "stdout": "01-ast.stdout",
+    "stderr": "01-ast.stderr",
+    "finish_utc": "2026-10-11T09:32:42.262437+00:00",
+    "exit": 0
+  },
+  {
+    "name": "02-default-list",
+    "argv": [
+      "/workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go",
+      "list",
+      "-p=1",
+      "-f",
+      "{{join .XTestGoFiles \"\\n\"}}",
+      "./sqlite"
+    ],
+    "cwd": "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-combined-freeze-v1",
+    "start_utc": "2026-10-11T09:32:42.263030+00:00",
+    "stdout": "default-files.txt",
+    "stderr": "02-default-list.stderr",
+    "finish_utc": "2026-10-11T09:32:42.379243+00:00",
+    "exit": 0
+  },
+  {
+    "name": "03-oracle-list",
+    "argv": [
+      "/workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go",
+      "list",
+      "-p=1",
+      "-tags",
+      "oracle",
+      "-f",
+      "{{join .XTestGoFiles \"\\n\"}}",
+      "./sqlite"
+    ],
+    "cwd": "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-combined-freeze-v1",
+    "start_utc": "2026-10-11T09:32:42.380164+00:00",
+    "stdout": "oracle-files.txt",
+    "stderr": "03-oracle-list.stderr",
+    "finish_utc": "2026-10-11T09:32:42.443925+00:00",
+    "exit": 0
+  },
+  {
+    "name": "04-manual-list",
+    "argv": [
+      "/workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go",
+      "list",
+      "-p=1",
+      "-tags",
+      "manual_recovery",
+      "-f",
+      "{{join .XTestGoFiles \"\\n\"}}",
+      "./sqlite"
+    ],
+    "cwd": "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-combined-freeze-v1",
+    "start_utc": "2026-10-11T09:32:42.444661+00:00",
+    "stdout": "manual-files.txt",
+    "stderr": "04-manual-list.stderr",
+    "finish_utc": "2026-10-11T09:32:42.502162+00:00",
+    "exit": 0
+  },
+  {
+    "name": "selection-text-check",
+    "argv": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-independent-review-v1/v2/manual-block-2-python-1.py.txt",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/compiler"
+    ],
+    "cwd": "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-combined-freeze-v1",
+    "start_utc": "2026-10-11T09:32:42.502697+00:00",
+    "stdout": "selection-text-check.stdout",
+    "stderr": "selection-text-check.stderr",
+    "finish_utc": "2026-10-11T09:32:42.530866+00:00",
+    "exit": 0
+  },
+  {
+    "name": "05-compile",
+    "argv": [
+      "/workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go",
+      "test",
+      "-c",
+      "-p=1",
+      "-vet=off",
+      "-tags",
+      "manual_recovery",
+      "-o",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/compiler/public-recovery.test",
+      "./sqlite"
+    ],
+    "cwd": "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-combined-freeze-v1",
+    "start_utc": "2026-10-11T09:32:42.531900+00:00",
+    "stdout": "05-compile.stdout",
+    "stderr": "05-compile.stderr",
+    "finish_utc": "2026-10-11T09:32:51.150822+00:00",
+    "exit": 0
+  },
+  {
+    "name": "06-symbols",
+    "argv": [
+      "/workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go",
+      "tool",
+      "nm",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/compiler/public-recovery.test"
+    ],
+    "cwd": "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-combined-freeze-v1",
+    "start_utc": "2026-10-11T09:32:51.152314+00:00",
+    "stdout": "symbols.txt",
+    "stderr": "06-symbols.stderr",
+    "finish_utc": "2026-10-11T09:32:51.286834+00:00",
+    "exit": 0
+  }
+]

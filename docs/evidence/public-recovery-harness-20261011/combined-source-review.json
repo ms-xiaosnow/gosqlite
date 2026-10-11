@@ -1,0 +1,19 @@
+{
+  "utc": "2026-10-11T09:32:01.710072+00:00",
+  "result": "PASS",
+  "read_full_goal": true,
+  "applicable_AGENTS": "none found at workspace ancestors or under frozen candidate",
+  "full_source_and_helpers_reviewed": true,
+  "source_sha256": "dd5a63e2a8e7d4fdd969ba03273a8f8147d5eff81babf8fce44a5228c5cdaf5e",
+  "build_constraint": "manual_recovery && linux",
+  "first_statement_environment_refusal": "PASS before root access, fixtures or public API",
+  "four_scenarios": "nil-default preservation; opt-in restore plus read-only NoCreate reopen; MaxJournalBytes=1 preservation; NoCreate absence",
+  "fail_stop": "all t.Run false returns immediately; Close failure returns before reopen",
+  "one_attempt_Close": "closed set before Close; cached error return and no retry",
+  "retained_inputs": "fixed ordered nonfatal check of three backups plus exact manifest bytes",
+  "pending_diagnostics": "read-only top-level cleanup after subtest cleanup; no retry",
+  "fixture": "deterministic prepared two-page DB plus synthetic journal; not crash simulation",
+  "journal_encoders": "read source: allocation/encoding/checksum only, no I/O",
+  "no_test_execution": true,
+  "source_blockers": []
+}

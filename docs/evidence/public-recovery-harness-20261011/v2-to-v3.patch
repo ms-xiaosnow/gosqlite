@@ -1,0 +1,32 @@
+--- v2/docs/public-rollback-manual-zh.md
++++ v3/docs/public-rollback-manual-zh.md
+@@ -30,6 +30,9 @@
+ 
+ ```sh
+ set -eu
++export GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off GOENV=off GOWORK=off
++export GOFLAGS=-buildvcs=false GOMAXPROCS=2 CGO_ENABLED=0
++unset GOSQLITE_MANUAL_RECOVERY GOSQLITE_MANUAL_NAMESPACE
+ test -z "$(git status --porcelain)"
+ COMMIT=$(git rev-parse --verify HEAD)
+ test "$(go version | awk '{print $3}')" = go1.27.2
+@@ -37,7 +40,8 @@
+ SOURCE=$(pwd -P)
+ RUN=$(mktemp -d "${TMPDIR:-/tmp}/gosqlite-public-recovery-review.XXXXXX")
+ mkdir "$RUN/source" "$RUN/evidence" "$RUN/fixtures"
+-git archive "$COMMIT" | tar -x -C "$RUN/source"
++git archive "$COMMIT" > "$RUN/source.tar"
++tar -xf "$RUN/source.tar" -C "$RUN/source"
+ EVIDENCE="$RUN/evidence"
+ FIXTURES="$RUN/fixtures"
+ printf '%s\n' "$COMMIT" > "$EVIDENCE/commit.txt"
+@@ -50,9 +54,6 @@
+ findmnt -T "$RUN" > "$EVIDENCE/mount.txt"
+ printf '源码原件=%s\n提交=%s\n隔离目录=%s\n证据=%s\nfixture=%s\n' "$SOURCE" "$COMMIT" "$RUN" "$EVIDENCE" "$FIXTURES"
+ cd "$RUN/source"
+-export GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off GOENV=off GOWORK=off
+-export GOFLAGS=-buildvcs=false GOMAXPROCS=2 CGO_ENABLED=0
+-unset GOSQLITE_MANUAL_RECOVERY GOSQLITE_MANUAL_NAMESPACE
+ go env GOOS GOARCH CGO_ENABLED GOCACHE GOPATH GOTMPDIR > "$EVIDENCE/go-env.txt"
+ go mod verify > "$EVIDENCE/modules.txt"
+ ```

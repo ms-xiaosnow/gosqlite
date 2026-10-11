@@ -1,0 +1,674 @@
+[
+  {
+    "source": "docs/rollback-recovery-open.md",
+    "fence": 0,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/01.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "25fcd762206c3545dbcfda3f9247d145736966f062bd46dcdecbad23f1810315",
+    "executed": false
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "fence": 0,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/02.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "83db43654470ffdb1d88cdccec3931321fab5a79da6424c964412b5e150caae1",
+    "executed": false
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "fence": 1,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/03.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "ffdee5d20269a115bb2367c2c3cf464e6a10ef92d2907ce4322bd282e69f7c26",
+    "executed": false
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "fence": 2,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/04.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "95d0522f8188a367863fe51175b58cc29e20171408cdb3753d3baec0938f67fe",
+    "executed": false
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "fence": 3,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/05.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "b1684c63b8e6f93851a430a7efe44882ebefe2a59e577d879caa4207a145d411",
+    "executed": false
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "fence": 5,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/06.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "3b7540fd91587ef4e53d3fa5e17d4887d3f1591545141a953813bd4309807c6a",
+    "executed": false
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "fence": 7,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/07.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "07336c288991a5abe535e0ccf9b590f92fa64c9940d105112aa22d09039c3eb4",
+    "executed": false
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "fence": 8,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/08.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "c6de50dda7486071c21ac4766ac4489b9b8917c26f669017d8c7f582d11fed48",
+    "executed": false
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "fence": 9,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/09.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "76a4ef97096fe707ba71f9fd3728efe9118f23199d8c953e001c92a6997df77e",
+    "executed": false
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "fence": 10,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/10.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "9ac03954b47a19cb1758db56f10114c84a085d7997135bd522fbf7e519df1a3f",
+    "executed": false
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "fence": 11,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/11.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "e9def903782f90d62fd7ebbf9df0832517e72ad576e589a2cb3d8df9f2ac0755",
+    "executed": false
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "fence": 12,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/12.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "312326ea17da0a51d60ec481dcea50e94ee0b2ada201c170cfc23709fd32a06a",
+    "executed": false
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "fence": 13,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/13.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "d1cce6ca89805a275e9a879f3f9a70b6a701a53ba4615062d8cf00479abf4a28",
+    "executed": false
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "fence": 14,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/14.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "493f2adf902d75221cfff721445897786bee5c0b8d7c4dac767564cb19dc472b",
+    "executed": false
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "fence": 15,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/15.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "bdd36e4258a28e081a127c783cb3ea085ea1edeb6a8ae63ec1f6b357ccf87086",
+    "executed": false
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "fence": 16,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/16.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "65a5296c3a8593610c013bc58353432b318eda01c6488120a6d5fde3d8181c18",
+    "executed": false
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "fence": 17,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/17.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "a3c42cb4f6226ae37f86bdf5ba85ae647e1344f9dc03831d5aa0911f2aea541d",
+    "executed": false
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "fence": 18,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/18.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "d319c0c1429b7f6adfef8c10f805f438629a377c0d42ab7551f724f31907c431",
+    "executed": false
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "fence": 19,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/19.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "50c73e66ec5ae2420f9401efadd075775b93264ee21d8daa09a956169bd47653",
+    "executed": false
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "fence": 20,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/20.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "320b80a5ad5e9222332bec3f9302b9ecd7661fc69b7ef5bf8e2e028dfa4331bf",
+    "executed": false
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "fence": 21,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/21.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "1b6534762f3b7eadafb9597eedb523dc659f4e0df9aa361dc5d73bf968c5b731",
+    "executed": false
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "fence": 22,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/22.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "8b20a3bc909120c69fd328829a0884fc2ce8c5843b51b27c41167535b174753b",
+    "executed": false
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "fence": 23,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/23.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "8e0704d11f8708429d99629b9ae72f4444013b508ad1bf1ae4ab86cb89d97a8b",
+    "executed": false
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "fence": 24,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/24.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "5c9857206c5931c685552c779097fb1b38a24ceea077c2652040541cb7e3c8a8",
+    "executed": false
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "fence": 25,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/25.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "3c0cca7b3d6b68abb3c6bac48ec8b4efbf19aab1fe68c27d2e3bbd8a296fbae6",
+    "executed": false
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "fence": 26,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/26.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "15ddf2d8e6510526739df472a9e2f11a920d8225219f6244a7ecf5b9eda2d61a",
+    "executed": false
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "fence": 27,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/27.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "5d96d1119fc799902c3ce31399ea35b11294434078945ff626f886c73b98acfb",
+    "executed": false
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "fence": 29,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/28.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "d14952a31b991e75b36ebcd8899e742065f541808431ada49a1cb19a81dc540c",
+    "executed": false
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "fence": 31,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/29.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "484953292fa081db2c816c3f88ca2e4f151ef5ce352db02e9c958c03373e68b9",
+    "executed": false
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "fence": 32,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/30.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "6718422fb8b3b060a2e6fe937d0d0d98d98f082588f8b7b47d267ebdccda78d0",
+    "executed": false
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "fence": 33,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/31.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "adf9f5ea008a44de7bd185aa7474c93dd1c544d63f3f00159385d9675fe51e57",
+    "executed": false
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "fence": 34,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/32.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "ec911709a8b6ab13c1ef09fa2fcb48ae4c10138f85d6d572210054e9d01f56d2",
+    "executed": false
+  },
+  {
+    "source": "docs/manual-verification.md",
+    "fence": 0,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/33.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "da4e820d6a5fc4501a7c9172665e46c049215eca846e9bd168f82644b8261bd3",
+    "executed": false
+  },
+  {
+    "source": "docs/manual-verification.md",
+    "fence": 1,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/34.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "bb86551a6946ab6107ef133342c04d1351ff831bcdbdea1f687a3394693e80d8",
+    "executed": false
+  },
+  {
+    "source": "docs/manual-verification.md",
+    "fence": 2,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/35.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "1f763fd708affd51ae5fdb7703a89ce491ace398b6130e6c88e8739ee733960e",
+    "executed": false
+  },
+  {
+    "source": "docs/manual-verification.md",
+    "fence": 3,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/36.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "2bb1f051f6e3d33e0051b6ecc2979ca7a163774d111afc4173818f1511dec0e9",
+    "executed": false
+  },
+  {
+    "source": "docs/manual-verification.md",
+    "fence": 4,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/37.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "4a51a3d0ef566e67270f45ed1ec0d08275e7f32d74e3211f33f8d958d61104d7",
+    "executed": false
+  },
+  {
+    "source": "docs/manual-verification.md",
+    "fence": 5,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/38.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "ec98f13af009f453f2b5faa5a080e23493e70b219b4d48a725314044059f98b6",
+    "executed": false
+  },
+  {
+    "source": "docs/manual-verification.md",
+    "fence": 6,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/39.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "e2677d45cf1ee72afb582c3072cd4aba3e3ea46e953e624ece0776d641279f3f",
+    "executed": false
+  },
+  {
+    "source": "docs/manual-verification.md",
+    "fence": 7,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/40.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "e8d8a2a89af84150df989f6029246a0afe785154aa409589e4f212017e60e806",
+    "executed": false
+  },
+  {
+    "source": "docs/manual-verification.md",
+    "fence": 8,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/41.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "f5cbaeaf66e5af9a21d706349182bf141acac1b9b6b98b98b37a5ab68e78a99b",
+    "executed": false
+  },
+  {
+    "source": "docs/manual-verification.md",
+    "fence": 9,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/42.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "b448fdc79ba14846aa7faa98b631d8b2f2678dd3736032a28cc1bd84bb6ace8e",
+    "executed": false
+  },
+  {
+    "source": "docs/manual-verification.md",
+    "fence": 10,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/43.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "5af117ca79bae68cc5a7716409fe13faff0f16b1e908c42c40e342c75cc58577",
+    "executed": false
+  },
+  {
+    "source": "docs/manual-verification.md",
+    "fence": 11,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/44.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "415a0633e797c7886049138cb551c6f41915d1047d7f8ddb744e98f1cb894889",
+    "executed": false
+  },
+  {
+    "source": "docs/manual-verification.md",
+    "fence": 12,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/45.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "a08adb2afd54841fa791792158e486d0df491c559cc294a29c3b5e2a67842e90",
+    "executed": false
+  },
+  {
+    "source": "docs/public-rollback-manual-zh.md",
+    "fence": 0,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/46.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "785c1ff4f8861f486d31bc855d69c37c7092499a34d15cf9c6ed19fb7e224b4f",
+    "executed": false
+  },
+  {
+    "source": "docs/public-rollback-manual-zh.md",
+    "fence": 1,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/47.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "926293f2a54047fc6736bebbd49b8eaf5fa8a5c672b081ee80793b2a5a8afee1",
+    "executed": false
+  },
+  {
+    "source": "docs/public-rollback-manual-zh.md",
+    "fence": 2,
+    "argv": [
+      "bash",
+      "-n",
+      "/workspace/scratch/5e06a74e5f65/durable-restart/public-recovery-harness-final-composition-review-v1/shell/48.sh"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "sha256": "a0e34fb6db702daef296a395950a274fb6c370cd5787dfdc82d42ca467f29ef4",
+    "executed": false
+  }
+]

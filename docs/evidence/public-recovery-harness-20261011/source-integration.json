@@ -1,0 +1,20 @@
+{
+  "parent": "50b627e11e9dbce7f2fde8df35c4634c52a06d52",
+  "source_candidate_tree": "1755d67431f9de082449b08fa24b26b2b35eb612",
+  "paths": {
+    "sqlite/rollback_recovery_manual_linux_test.go": {
+      "bytes": 10657,
+      "sha256": "dd5a63e2a8e7d4fdd969ba03273a8f8147d5eff81babf8fce44a5228c5cdaf5e",
+      "mode": 420
+    },
+    "docs/public-rollback-manual-zh.md": {
+      "bytes": 9711,
+      "sha256": "a49ae1882c4a5dcb8c58860fa8df3b011f88c9ee99963a5721831049477ec4d2",
+      "mode": 420
+    }
+  },
+  "old_files_preserved": 3077,
+  "new_files": 3079,
+  "physical_runtime": "NOT_RUN",
+  "result": "PASS two approved additions only"
+}

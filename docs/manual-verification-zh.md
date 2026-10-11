@@ -1,5 +1,11 @@
 # gosqlite 中文手工验收操作手册
 
+2026-10-11 后续补记：公开 Open 四场景手工测试入口现已补齐并通过独立
+源码/AST/选择/编译/符号检查，全部物理运行仍 **BLOCKED / NOT_RUN**。
+当前身份及步骤索引见[第20节](#20-公开-open-四场景-harness-源码与编译资格2026-10-11)；
+下面 P0/第18节中“整个 public harness 未实现”的文字保留原阶段时点，
+不能据其旧状态否定新入口，也不能把编译资格改成运行 PASS。
+
 五个示例目录终结的后续限定普通复验见[补充规程](example-retention-verification-zh.md)；其真实失败现场仍未动态验证，旧受限门与缺失设施保持原状态。
 
 2026-10-11 P0更新：有限public Open恢复源码已接入，独立source/model/compile审阅PASS；真实恢复仍BLOCKED / NOT_RUN，公开物理harness为IMPLEMENTATION_MISSING，详见第18节及[专题](rollback-recovery-open.md)。下面固定776b基线的缺口表和历史步骤保留当时身份，不能据其旧“public Open未接线”推断当前源码仍未实现。
@@ -1205,3 +1211,70 @@ Darwin：相对 inventory、no-replace 发布、replacement 与旧/新 root 字�
 - 只有进程自然结束、已知资源正常收尾且日志/身份归档核对完成后，用户才决定
   是否删除自己本次新建的 RUNROOT。失败/不确定时不额外删除残留，不清原仓库、
   活库 sidecar、历史证据或其他任务缓存；不提供宽泛删除命令。不把删除当安全擦除。
+
+
+## 20 公开 Open 四场景 harness 源码与编译资格（2026-10-11）
+
+本节补充第18节的历史状态，保留第12节内部 harness、第19节 namespace
+规程及全部既有命令。新测试保持独立 V3 审阅原字节；专题手册仅更新
+发布状态段，命令/断言不改，V3 审阅手册原字节另存证据。
+该 V3 基于 P0 提交 `56bbcf3febe233197aa0a5eac965c67a67a88011`，
+候选 tree `1755d67431f9de082449b08fa24b26b2b35eb612`。
+本次组合基点为已保存 namespace 提交
+`50b627e11e9dbce7f2fde8df35c4634c52a06d52` / tree
+`8f2709293287a3517a52b3f989888ded8230ef53`，不整树覆盖 namespace 成果。
+
+### 20.1 已有入口与严格有限覆盖
+
+[`TestManualPublicRollbackRecovery`](../sqlite/rollback_recovery_manual_linux_test.go)
+位于单一新增 Linux 手工文件，实际通过公开 `sqlite.OpenContext` 和
+`Options.RollbackRecovery`；没有直接调用内部恢复函数或改变生产行为。
+首行必须为 `//go:build manual_recovery && linux`，函数首语句必须先核对
+`GOSQLITE_MANUAL_RECOVERY=independently_authorized`，缺值即 Fatal。
+它先拒绝误启动，再检查全新、空、绝对且无符号链接的 fixture 根目录。
+
+| 真实子测试名 | 已实现的断言 | 当前执行 |
+|---|---|---|
+| `nil-default-preserves-input` | nil DB、ErrRecoveryRequired、CodeIOErr，工作 DB/journal 字节保持 | BLOCKED / NOT_RUN |
+| `opt-in-restores-and-reopens` | 恢复到原两页、元数据/空 schema/完整字节、journal 消失；一次正常关闭后只读 NoCreate 重开 | BLOCKED / NOT_RUN |
+| `journal-limit-preserves-input` | MaxJournalBytes=1，nil DB，ErrRecoveryRequired 与 ErrMemoryLimit/CodeIOErr，输入保持 | BLOCKED / NOT_RUN |
+| `no-create-preserves-absence` | nil DB、os.ErrNotExist，主库/journal/WAL/SHM 与隔离目录其他条目均不创建 | BLOCKED / NOT_RUN |
+
+恰这四项没有覆盖 Connector 真实恢复、更广 journal 形式、其他平台、native
+WAL-tail publisher、短写/Sync/ENOSPC、断电/强杀/torn-write、恶意目录替换
+或完整加密故障矩阵。该有限入口不再是 IMPLEMENTATION_MISSING；
+其余缺失设施和原执行限制保持。
+
+### 20.2 实际通过的是审阅与编译
+
+- [V1 原报告](evidence/public-recovery-harness-20261011/v1-source-review.md)
+  的三项阻断保留。[V2](evidence/public-recovery-harness-20261011/v2-source-review.md)
+  修正 fail-open 检查、所有备份及 manifest 核对、失败即停/Close/pending 处理；
+  [V3](evidence/public-recovery-harness-20261011/v3-compiler-review.md)只移动
+  手册环境设置到首个 Go 命令之前，并将 archive 与提取拆开，Go 源码未再改动。
+- 六项获准 Go 工具调用为外置标准库 AST 文本检查器、default/oracle/manual
+  三次 go list、只编译的 go test -c、只读符号的 go tool nm；08:58:38 UTC
+  自然完成，全部 exit 0。独立文本检查要求文件次数恰 0/0/1，具名顶层符号唯一。
+- 没有执行 test binary、gate-off、-test.list、无匹配 selector、fixture
+  生成器或任何物理测试。本次文档对账本身也没有调用 Go 或运行数据库。
+- 源码 SHA-256 为
+  `dd5a63e2a8e7d4fdd969ba03273a8f8147d5eff81babf8fce44a5228c5cdaf5e`；
+  原 V3 审阅手册 SHA-256 为
+  `a49ae1882c4a5dcb8c58860fa8df3b011f88c9ee99963a5721831049477ec4d2`。
+  候选、当前组合及后来提交须分别记录，不能互借 PASS。
+
+### 20.3 人工步骤、证据留存与停止
+
+完整步骤见[独立中文规程](public-rollback-manual-zh.md)：环境/资源与独立授权、
+固定干净提交的隔离副本、fail-closed 选择计数、compile/nm、精确单项选择、
+预期断言、排查及整个 RUN 目录留存。该手册当前发布状态段与
+[原 V3 审阅手册](evidence/public-recovery-harness-20261011/v3-reviewed-manual.md.txt)
+分开记录，历史 V1/V2/V3 身份保留；资格以本节、[当前验收](acceptance-status.md)与 V3 报告为准。
+它的执行命令仍仅供用户在另行批准环境自行使用，不能由代理执行或迁移 CI 绕行。
+
+发生失败即停止后续场景；Close 失败不得继续重开，pending-owner 只记录，
+不隐式重试恢复或清理。所有已构造输入备份、manifest、工作文件和目录成功后
+仍保留；核对证据归档和资源状态后，才由操作者决定清理自己创建的目录。
+四个具名子项全部实际运行且通过、零 FAIL/SKIP、身份/日志/退出码齐备，
+才可对该精确提交及实际 Linux/架构/文件系统记四场景 PASS；编译、空匹配或
+部分 PASS 均不符合。当前没有这份物理运行证据，M3/M10/整体仍未验收。

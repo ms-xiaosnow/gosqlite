@@ -34,8 +34,9 @@ ANN V4、41 目标 fuzz 与未知中断操作继续禁止重发、改写、拆�
 
 ## 三 逐项源码待办分类
 
-2026-10-11 后续对账：下表公开恢复一行按有限 source/model 集成更新，
-OS namespace 行按当前六路径门控更新；其他行保留其已有证据身份。
+2026-10-11 后续对账：下表公开恢复一行按有限 source/model 集成及四场景
+manual harness 源码/编译资格更新；OS namespace 行保留六路径门控状态，
+其他行保留其已有证据身份。
 第四至六节保留 LIMIT/分类批次的历史时点；新增 P0 和 namespace 范围分别
 见第七、八节，组合/持久/CI 门必须按对应身份闭合。
 
@@ -45,7 +46,7 @@ OS namespace 行按当前六路径门控更新；其他行保留其已有证据�
 
 | 剩余项及源码位置 | ③ 源码或集成待办 | ② 仍受限的执行 | 依赖及溯源 |
 |---|---|---|---|
-| public Open rollback 恢复 | 已接入 `sqlite/rollback_recovery.go` 的 nil-default Linux 可写明文有限 opt-in、pager retired-reader/path proof 和 driver 配置复制；独立 source/model/compile PASS，仍属实验性实现 | 实际 RecoverRollback、启用恢复的真实 Open/Connect、生产桥接均 BLOCKED / NOT_RUN；public physical harness 为 IMPLEMENTATION_MISSING | 依赖既有 retirement/admission、路径身份和有限记录数恢复，不依赖 ANN。旧V2 tree `5f2766d…`保留历史；本次独立候选 tree `75c074548e8b5208beb06e6ead314d835cd16f4f`，c150组合另验，见[专题](rollback-recovery-open.md)及第七节 |
+| public Open rollback 恢复 | 已接入 `sqlite/rollback_recovery.go` 的 nil-default Linux 可写明文有限 opt-in、pager retired-reader/path proof 和 driver 配置复制；独立 source/model/compile PASS，仍属实验性实现 | 实际 RecoverRollback、启用恢复的真实 Open/Connect、生产桥接均 BLOCKED / NOT_RUN；四场景 public Open manual harness 源码/编译资格已补齐，Connector 物理 harness 和更广覆盖仍缺 | 依赖既有 retirement/admission、路径身份和有限记录数恢复，不依赖 ANN。旧V2 tree `5f2766d…`及 P0 source/model 候选 `75c074548e8b5208beb06e6ead314d835cd16f4f`保留原身份；新增 harness 资格见第九节和[专题](rollback-recovery-open.md) |
 | 更广 rollback journal 形式 | `internal/journal/replay.go:59–74` 仍排除 super/master journal、no-sync 记录数和旧式未指定页大小；真实解析/恢复兼容性缺口 | 物理 replay 受限；字节解析与磁盘执行是不同动作 | 需明确定义受支持格式与恢复边界。没有定位到该 parser 编辑的原始拒绝 |
 | Linux rollback plaintext Backup V2 | `sqlite/backup.go`、`internal/pager/plain_backup.go`、namespace identity 和 CLI 接线候选未完成最终审阅/集成；main 明文 backup 仍 unsupported | 原生故障、namespace 碰撞、恢复/发布负向场景受限 | V1 P1 为源/目标 sidecar 家族重叠的工程缺陷；V2 局部修正不补齐终审。`plaintext-backup-ownership-review-v1/review.md:5–52`、`plaintext-backup-api-v2-report.md:20–49,61–84`、原交接 `:94–100,115`。V2 tree `d73faa3d653df5382b01ebc318145ed921833732` |
 | WAL plaintext backup | 缺 WAL 快照/复制所有权协议与 API profile dispatch，不能只运行现有 rollback backup | 物理失败/恢复资格受限 | 依赖 WAL 快照、发布和目录所有权设计。`plaintext-backup-api-v2-report.md:83–84`；63c2 版 acceptance 第29行 |
@@ -189,3 +190,22 @@ a314 全树或覆盖当前恢复 guard。原 source-only 独立报告与后续 c
 未执行任何 manual binary、恢复、故障、错密钥、篡改、中断发布/rekey，亦未继续
 ANN V4、41-target fuzz 或未知触发链路。更广 backend/目录协议和缺失物理 harness
 仍有真实实现/资格缺口；该门控 PASS 不将它们改写成只差测试机。
+
+
+## 九 2026-10-11 公开恢复四场景 harness 的独立资格
+
+在 namespace 提交 `50b627e11e9dbce7f2fde8df35c4634c52a06d52` 上只组合
+已审阅的一个 manual Go 文件及[中文步骤](public-rollback-manual-zh.md)，
+没有放宽生产代码、普通测试选择或 CI。候选 V3 仍以 P0 为基点，不能把其
+`1755d67431f9de082449b08fa24b26b2b35eb612` 记为本次 namespace 组合。
+准确源码/手册哈希、V1 阻断与 V2/V3 修正、六项 AST/list/compile/nm PASS
+见[本批证据](evidence/public-recovery-harness-20261011.md)。
+
+本次闭合的是四场景 public Open harness 的源码缺口及有限编译资格；
+不再把这一有限入口整体标为 IMPLEMENTATION_MISSING。第七节的同名缺口
+是此前 P0 阶段的记录，保留不改写。整个第 3.4 节的完整物理安全设施、
+Connector 实际恢复覆盖、更广 journal、其他平台及 native WAL publisher
+未因此补齐。设置 `GOSQLITE_MANUAL_RECOVERY=independently_authorized`
+不是执行授权；任何 test binary、fixture 生成或物理场景均未执行。
+实际 RecoverRollback/public bridge/启用恢复的 Open/Connect 仍 BLOCKED / NOT_RUN。
+ANN V4、41-target fuzz、未知触发链路及其他执行限制均保持。

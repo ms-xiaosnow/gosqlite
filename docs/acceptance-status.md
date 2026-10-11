@@ -1,5 +1,11 @@
 # 当前实现与验收矩阵
 
+当前后续状态（2026-10-11）：有限公开恢复手工 harness 源码及中文步骤已补齐，
+独立源码审阅和六项 AST/选择/编译/符号检查 PASS，四个物理场景全部
+**BLOCKED / NOT_RUN**。旧 P0 段落中的整个 public harness
+`IMPLEMENTATION_MISSING` 是当时状态；当前精确范围和组合/持久证据分层见
+[本次补记](#2026-10-11-有限公开恢复-harness-源码与编译资格)。
+
 核对时间：2026-10-11；以下历史开发基点为 `63c2ebb10e3a2c4ff2378ee9f33c46133134c70f`，tree `d735409ebd1c43d90ee1650c8a7c2a084e270674`。该历史检查点的恢复与 CI 已闭合，详见文末；本轮新源码、提交、恢复及 CI 仍须分别核验，不预写自指提交。旧 `7a9972547f49531df04cf1b624dfa662b483907b` 与 `1352ae524575e4d6fe8b5434fd930c3b07be4ac8` 保留为历史基点。
 63c2 历史检查点叠加三项有限收尾：四项 CLI/示例资源修正、三份必需入口文档对账、五例目录终结与输出错误修正。四项 CLI 固定树完整普通门、三份文档独立静态审阅、五例独立源码和限定普通/race 审阅分别 PASS；最终组合与新提交持久门见文末，不能沿用基点结果。四项 CLI 的精确结果见[组合证据](evidence/cli-resources-20261011.md)，五例的操作边界见[留存限定复验](example-retention-verification-zh.md)。
 已有 inspect 精确源码和边界见[元数据证据](evidence/inspect-metadata-20261011.md)和[上下文证据](evidence/inspect-context-20261011.md)。
@@ -49,7 +55,7 @@ API、预算、诊断兼容边界与精确 source/model 命令见
 
 | 原规范条款 | main 已有能力 | 剩余代码 / 状态 |
 |---|---|---|
-| G1、§3、§4.1、M3 | 有界多段解析及 internal 恢复所有权；新增默认关闭的 Linux 可写明文 Open/Connector 恢复源码、准确 path 的退休 proof 和一次 fresh no-create probe，源码/模型独立 PASS | `PARTIAL / experimental`：更多 journal 形式、默认开启策略、其他原生平台与 native exclusive WAL 尾部安全发布仍未完成；public physical harness 为 IMPLEMENTATION_MISSING，实际恢复/开启选项的真实 Open 均 BLOCKED / NOT_RUN |
+| G1、§3、§4.1、M3 | 有界多段解析及 internal 恢复所有权；新增默认关闭的 Linux 可写明文 Open/Connector 恢复源码、准确 path 的退休 proof 和一次 fresh no-create probe，源码/模型独立 PASS | `PARTIAL / experimental`：更多 journal 形式、默认开启策略、其他原生平台与 native exclusive WAL 尾部安全发布仍未完成；四场景 public manual harness 已实现并独立 source/compiler-only PASS；driver Connector 物理 harness 与更广覆盖仍缺，实际恢复/开启选项的真实 Open/Connect 均 BLOCKED / NOT_RUN |
 | G1、§4.2、§11.1/11.3 | 索引范围、有限 JOIN/GROUP BY/HAVING、连接计数和 cached preparation 的限定普通门通过 | `已知差异`：支持查询的 planner 错误/排序/阶段一致性仍待修正。V4c 树 `552286a…` 有独立有限 PASS，但没有和 main 新 grouped/counter 组合；不能替代 main 结果。新 LIMIT 转换/ErrMismatch 三文件修正独立限定PASS，组合完整普通18阶段PASS；不覆盖其余绑定/执行阶段缺口 |
 | §4.2、§8.1、§12.2 | correct-key 加密 backup/rekey CLI、native DB/Tx/CLI Check V2 已合入 | `未实现/未合入`：main 明文 backup 命令仍明确 unsupported；Linux rollback V2 候选终审未完成，WAL/非 Linux backup 和真正只读 plaintext-WAL CLI 缺代码。native VACUUM 未实现 |
 | G1、§3.6、§12.2 | query/check/inspect CLI 均使用 OpenContext；DB.Inspect 和 inspect --extensions 在单快照呈现持久 method/version/config/generation，默认 JSON 保持 | `PARTIAL`：本次实测只涵盖 Linux plaintext rollback、grams/custom metadata；加密 inspect CLI 的密钥/profile 路由、真正只读 WAL 及其余已选 CLI 目标仍有实现缺口。持久 metadata 不证明索引可用或正确，中途 I/O 取消未动态验证 |
@@ -85,7 +91,7 @@ API、预算、诊断兼容边界与精确 source/model 命令见
 
 | 原规范条款 | 状态 | 自测入口和限制 |
 |---|---|---|
-| §4.1、M3、§11.1 | `平台阻塞 / NOT_RUN`：实际 native rollback replay、public production bridge 和开启恢复的真实 Open | 内部 harness 的 manual_recovery 标签、显式门和真实测试名保留；public physical harness 为 IMPLEMENTATION_MISSING。内部 deterministic harness 不覆盖公开桥接、真实断电、强杀、短写、Sync/ENOSPC/torn write |
+| §4.1、M3、§11.1 | `平台阻塞 / NOT_RUN`：实际 native rollback replay、public production bridge 和开启恢复的真实 Open | 内部 harness 的原门控/命令保留；新增 [TestManualPublicRollbackRecovery 的四场景规程](public-rollback-manual-zh.md)已有独立源码/编译资格，物理全部 NOT_RUN。它不覆盖 Connector、真实断电、强杀、短写、Sync/ENOSPC/torn write；完整设施仍缺 |
 | §4.1、§11.1 | `平台阻塞 / NOT_RUN（当前）`：已有 plaintext namespace 测试 | 手册列出 manual_namespace 独立门。历史 M2 至 7addc493 全套曾包含两项 namespace 测试，原 PASS 是事实，不能改称当时全都未运行或当时范围完全干净 |
 | §4.1、§8、§11.3 | `平台阻塞 / NOT_RUN`：Windows/Darwin 两个 encstore raw namespace 测试 | 本批完整移动原函数，manual_namespace 加显式环境门；default/oracle 刻意减少这两个声明，其余原声明保持。source/model/race、188 项选择和六项外平台编译/符号独立 PASS；[中文第 19 节](manual-verification-zh.md#19-os-raw-namespace-门控与独立原生验收2026-10-11) 给独立用户步骤，编译不是 native PASS |
 | M3/M4/M7/M8、§8.3、§11.1 | `未实现设施 + 平台阻塞`：完整物理故障/崩溃/重启、checkpoint/rekey 中断、安全篡改矩阵 | 没有现成 harness 的项先补源码和独立审阅；只提供实验前置/断言，不编造现成测试名或成功命令 |
@@ -175,3 +181,56 @@ P0 父基点 56bb 的 Library bundle `libfile_04182e9da3f88191b348c6790628a7bd`
 运行冻结 tree `697e45c6aba7a5cf62ebbf2bab2662f10903c5be` 于09:01完成独立核验：3070文件、788非docs与已审候选完整字节/Git/POSIX模式相同；guard、4项纯模型及同集合race PASS，manual GOFLAGS按预期拒绝。实际7条Go工具调用含早于后发5条限定的只读version/env前检，完整记录保留。另157链接、45shell语法块、29选录工件/617前置原件哈希PASS。没有运行该组合完整aggregate/oracle、外平台二进制或手工物理测试。报告见[最终组合限定证据](evidence/namespace-gating-20261011/final-composition-report.md)。此后仅追加终态文档/证据；最终提交的788非docs须逐字节核验等同该运行冻结源。
 
 父P0提交 `56bbcf3febe233197aa0a5eac965c67a67a88011` 的 CI `38125268420` 已于08:56:41 UTC SUCCESS，两job ordinary114428206934/oracle114428207050均SUCCESS；精确Library恢复21条命令PASS。终态证据归档 `libfile_4a413988d4608191aebf695542a04caf`，10211483B，SHA256 `0d6579c338465be5df401b4f2a594df8fe63737900a78dbcc9e4ef28e85bbfb3`，读回411条/410文件哈希PASS。原08:44/08:45 PENDING是先前写作时点，现仅对父P0闭合，不能当作namespace新提交CI。
+
+
+## 2026-10-11 有限公开恢复 harness 源码与编译资格
+
+- 本次组合基点是已保存的 namespace 提交
+  `50b627e11e9dbce7f2fde8df35c4634c52a06d52`，tree
+  `8f2709293287a3517a52b3f989888ded8230ef53`。仅新增一个手工测试源码和
+  配套专题手册，保留 LIMIT、P0、namespace 源码及历史；没有生产行为或 CI 改动。
+- 独立 V3 候选 tree `1755d67431f9de082449b08fa24b26b2b35eb612`
+  是 P0 `56bbcf3febe233197aa0a5eac965c67a67a88011` 加两项新增文件，
+  **不是**当前 namespace 组合或新提交的 tree。单一测试源码 SHA-256
+  `dd5a63e2a8e7d4fdd969ba03273a8f8147d5eff81babf8fce44a5228c5cdaf5e`；
+  原 V3 审阅手册 SHA-256
+  `a49ae1882c4a5dcb8c58860fa8df3b011f88c9ee99963a5721831049477ec4d2`。
+- V1 的三项阻断发现原样保留；V2 修正 fail-open 选择检查、备份及 manifest
+  全量核对、失败即停与一次 Close；V3 仅改手册的环境设置先后和 archive
+  分步检查。六项检查于 08:58:38 UTC 自然完成：AST inspector、三次
+  go list、go test -c、go tool nm 全部 PASS；default/oracle/manual 文件次数
+  为 0/0/1，精确顶层测试符号唯一。未执行任何 test binary、fixture 生成器、
+  gate-off、-test.list、无匹配选择器或物理用例。
+- 实际源码是 [TestManualPublicRollbackRecovery](../sqlite/rollback_recovery_manual_linux_test.go)，
+  首行 `//go:build manual_recovery && linux`，首语句环境门缺值即 Fatal。
+  只含 nil-default 拒绝并保留输入、opt-in 恢复及只读重开、journal 配额拒绝、
+  NoCreate 保持缺失四场景；源码/编译 PASS 不等于四场景运行 PASS。
+- [证据摘要](evidence/public-recovery-harness-20261011.md)、
+  [V3 独立报告](evidence/public-recovery-harness-20261011/v3-compiler-review.md)
+  和[精确命令](evidence/public-recovery-harness-20261011/compiler-commands.json)
+  分开记录候选资格与当前组合身份。[中文步骤](public-rollback-manual-zh.md)
+  的发布状态段单独更新，命令及断言保持；[原 V3 审阅手册](evidence/public-recovery-harness-20261011/v3-reviewed-manual.md.txt)
+  保存当时原字节。旧审阅身份与当前发布文档不混同，物理 NOT_RUN 不变。
+- 本次写作时，namespace 提交的 Library
+  `libfile_e5dcbc0ac16c8191bce977aa165163f9` 已读回核验字节身份；其精确限定
+  恢复的 207 项调用于 09:14:09 UTC 完成 PASS，涵盖纯模型/选择/编译/符号，
+  不含完整普通/oracle 运行或原生物理测试。CI `38127196102` 尚无已核验终态，
+  本次最后已知为 in_progress，不能写为 SUCCESS。
+  父 P0 的 CI `38125268420` 于 08:56:41 UTC SUCCESS 及恢复 PASS 已在上一节
+  闭合，只属于父 P0。本次新增 harness 的组合、新提交/保存/恢复/CI
+  仍须各自按实际身份追加，不能继承上述任何结果。
+
+公开 Open 四场景不再整体列为 IMPLEMENTATION_MISSING；driver Connector
+真实恢复 harness、更广 journal/平台/native WAL-tail publisher 和完整 fault/crash
+设施仍有实现缺口。实际 public bridge、恢复启用的 Open/Connect 与全部物理场景
+仍 BLOCKED / NOT_RUN。M3、M10 和原始目标未完整验收。
+
+
+## 2026-10-11 09:32 UTC：namespace 父检查点终态闭合
+
+提交 `50b627e11e9dbce7f2fde8df35c4634c52a06d52`、tree `8f2709293287a3517a52b3f989888ded8230ef53` 的 CI `38127196102` 于09:29:33Z自然完成 SUCCESS；ordinary `114433911927`、oracle `114433912045` 均SUCCESS。Library bundle `libfile_e5dcbc0ac16c8191bce977aa165163f9` 已读回并精确恢复，207条限定检查PASS。全部manual/真实namespace仍NOT_RUN。终态证据归档 `libfile_6b7a1c37d8fc8191bed2389e8dbe14dd`，15356765字节，SHA256 `21cd1a73b622123605eb48a5031b0cc38314a04eac8a9b71c72f873ecaa3d701`，Library读回843项/842清单哈希PASS。此前“运行中”只表示当时观测；此终态不属于新增public harness提交，不代替它的保存/恢复/CI。
+
+
+## 2026-10-11 09:35 UTC：public harness 精确组合限定检查完成
+
+独立组合树 `0af9b064bebfbec9c8270c4bf2f10ec2055fb186`，3104文件/789非docs（原788全部保持，加唯一手工测试源码），于09:32:51完成六条AST/list/编译/符号命令 PASS；196相对链接和48shell块仅静态检查PASS。独立报告SHA256 `ba6e3c4458d8d192b9dd2f231936c61706d9f6b2fdb64249f34ea34d1b71d765`，81项证据清单SHA256 `394e491d4564c594cb7f7e1e304495f95c8b620122c7e7408a14bcae30f6279e`。物理四场景全部BLOCKED/NOT_RUN，二进制从未执行。随后仅追加文档和证据；发布前逐路径核对全部789非docs不变，文档另做最终静态读回。精确新提交、Library恢复和CI在实际完成后另记，不继承父namespace的成功。

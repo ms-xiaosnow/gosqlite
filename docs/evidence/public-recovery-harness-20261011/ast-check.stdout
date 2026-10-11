@@ -1,0 +1,1 @@
+AST PASS: exact double gate; no eager hook; four fail-stop scenarios; five public Open calls; no cleanup retry or deletion

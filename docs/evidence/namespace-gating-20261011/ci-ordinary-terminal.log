@@ -1,0 +1,301 @@
+﻿2026-10-11T09:06:41.1111856Z Current runner version: '2.337.0'
+2026-10-11T09:06:41.1197741Z ##[group]Runner Image Provisioner
+2026-10-11T09:06:41.1199490Z Hosted Compute Agent
+2026-10-11T09:06:41.1200734Z Version: 20261002.596
+2026-10-11T09:06:41.1201957Z Commit: c3d12f3313a95f25162a1503be624f3b0617f8c0
+2026-10-11T09:06:41.1203532Z Build Date: 2026-10-02T22:28:27Z
+2026-10-11T09:06:41.1225505Z Worker ID: {7bade42d-850f-47d4-9851-0f4d0d1f3298}
+2026-10-11T09:06:41.1226961Z Region: centralus
+2026-10-11T09:06:41.1228069Z Cloud: Azure
+2026-10-11T09:06:41.1229154Z ##[endgroup]
+2026-10-11T09:06:41.1232328Z ##[group]Operating System
+2026-10-11T09:06:41.1233650Z Ubuntu
+2026-10-11T09:06:41.1235100Z 24.04.5
+2026-10-11T09:06:41.1236175Z LTS
+2026-10-11T09:06:41.1237181Z ##[endgroup]
+2026-10-11T09:06:41.1238433Z ##[group]Runner Image
+2026-10-11T09:06:41.1239643Z Image: ubuntu-24.04
+2026-10-11T09:06:41.1240708Z Version: 20261004.327.1
+2026-10-11T09:06:41.1243427Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261004.327/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-11T09:06:41.1267437Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261004.327
+2026-10-11T09:06:41.1269370Z ##[endgroup]
+2026-10-11T09:06:41.1271636Z ##[group]GITHUB_TOKEN Permissions
+2026-10-11T09:06:41.1275517Z Contents: read
+2026-10-11T09:06:41.1276538Z Metadata: read
+2026-10-11T09:06:41.1277712Z ##[endgroup]
+2026-10-11T09:06:41.1281505Z Secret source: Actions
+2026-10-11T09:06:41.1304461Z Cache mode: write
+2026-10-11T09:06:41.1306348Z Prepare workflow directory
+2026-10-11T09:06:41.2446923Z Prepare all required actions
+2026-10-11T09:06:41.2557931Z Getting action download info
+2026-10-11T09:06:41.4831941Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-11T09:06:41.6087569Z Download action repository 'actions/setup-go@v5' (SHA:40f1582b2485089dde7abd97c1529aa768e1baff)
+2026-10-11T09:06:42.1739775Z Complete job name: ordinary
+2026-10-11T09:06:42.2537627Z ##[group]Run actions/checkout@v4
+2026-10-11T09:06:42.2538668Z with:
+2026-10-11T09:06:42.2539189Z   repository: ms-xiaosnow/gosqlite
+2026-10-11T09:06:42.2543263Z   token: ***
+2026-10-11T09:06:42.2544010Z   ssh-strict: true
+2026-10-11T09:06:42.2544586Z   ssh-user: git
+2026-10-11T09:06:42.2545110Z   persist-credentials: true
+2026-10-11T09:06:42.2545669Z   clean: true
+2026-10-11T09:06:42.2546192Z   sparse-checkout-cone-mode: true
+2026-10-11T09:06:42.2546793Z   fetch-depth: 1
+2026-10-11T09:06:42.2547290Z   fetch-tags: false
+2026-10-11T09:06:42.2547794Z   show-progress: true
+2026-10-11T09:06:42.2548308Z   lfs: false
+2026-10-11T09:06:42.2548802Z   submodules: false
+2026-10-11T09:06:42.2549339Z   set-safe-directory: true
+2026-10-11T09:06:42.2549914Z   allow-unsafe-pr-checkout: false
+2026-10-11T09:06:42.2550812Z ##[endgroup]
+2026-10-11T09:06:42.3798558Z Syncing repository: ms-xiaosnow/gosqlite
+2026-10-11T09:06:42.3809363Z ##[group]Getting Git version info
+2026-10-11T09:06:42.3815013Z Working directory is '/home/runner/work/gosqlite/gosqlite'
+2026-10-11T09:06:42.3828411Z [command]/usr/bin/git version
+2026-10-11T09:06:42.3942953Z git version 2.55.0
+2026-10-11T09:06:42.3952479Z ##[endgroup]
+2026-10-11T09:06:42.3966043Z Temporarily overriding HOME='/home/runner/work/_temp/023dac4c-0a9f-4bba-a33c-f8c4e9b66328' before making global git config changes
+2026-10-11T09:06:42.3969146Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-11T09:06:42.3992263Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/gosqlite/gosqlite
+2026-10-11T09:06:42.4061011Z Deleting the contents of '/home/runner/work/gosqlite/gosqlite'
+2026-10-11T09:06:42.4100859Z ##[group]Initializing the repository
+2026-10-11T09:06:42.4103018Z [command]/usr/bin/git init /home/runner/work/gosqlite/gosqlite
+2026-10-11T09:06:42.4265695Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-11T09:06:42.4288643Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-11T09:06:42.4335132Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-11T09:06:42.4337052Z hint: call:
+2026-10-11T09:06:42.4338658Z hint:
+2026-10-11T09:06:42.4340049Z hint: 	git config --global init.defaultBranch <name>
+2026-10-11T09:06:42.4341783Z hint:
+2026-10-11T09:06:42.4345401Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-11T09:06:42.4348198Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-11T09:06:42.4351512Z hint:
+2026-10-11T09:06:42.4352917Z hint: 	git branch -m <name>
+2026-10-11T09:06:42.4354756Z hint:
+2026-10-11T09:06:42.4356717Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-11T09:06:42.4360804Z Initialized empty Git repository in /home/runner/work/gosqlite/gosqlite/.git/
+2026-10-11T09:06:42.4364611Z [command]/usr/bin/git remote add origin https://github.com/ms-xiaosnow/gosqlite
+2026-10-11T09:06:42.4367977Z ##[endgroup]
+2026-10-11T09:06:42.4369435Z ##[group]Disabling automatic garbage collection
+2026-10-11T09:06:42.4370782Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-11T09:06:42.4504755Z ##[endgroup]
+2026-10-11T09:06:42.4506936Z ##[group]Setting up auth
+2026-10-11T09:06:42.4509344Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-11T09:06:42.4515845Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-11T09:06:42.5180748Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-11T09:06:42.5187969Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-11T09:06:42.5367314Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-11T09:06:42.5414686Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-11T09:06:42.5679795Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-11T09:06:42.5730939Z ##[endgroup]
+2026-10-11T09:06:42.5733513Z ##[group]Fetching the repository
+2026-10-11T09:06:42.5744480Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +50b627e11e9dbce7f2fde8df35c4634c52a06d52:refs/remotes/origin/main
+2026-10-11T09:06:44.5303142Z From https://github.com/ms-xiaosnow/gosqlite
+2026-10-11T09:06:44.5321029Z  * [new ref]         50b627e11e9dbce7f2fde8df35c4634c52a06d52 -> origin/main
+2026-10-11T09:06:44.5325022Z ##[endgroup]
+2026-10-11T09:06:44.5325986Z ##[group]Determining the checkout info
+2026-10-11T09:06:44.5326928Z ##[endgroup]
+2026-10-11T09:06:44.5327698Z [command]/usr/bin/git sparse-checkout disable
+2026-10-11T09:06:44.5397957Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-11T09:06:44.5439305Z ##[group]Checking out the ref
+2026-10-11T09:06:44.5444561Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+2026-10-11T09:06:44.7865583Z Switched to a new branch 'main'
+2026-10-11T09:06:44.7867270Z branch 'main' set up to track 'origin/main'.
+2026-10-11T09:06:44.7905238Z ##[endgroup]
+2026-10-11T09:06:44.7965956Z [command]/usr/bin/git log -1 --format=%H
+2026-10-11T09:06:44.8011897Z 50b627e11e9dbce7f2fde8df35c4634c52a06d52
+2026-10-11T09:06:44.8382357Z ##[group]Run actions/setup-go@v5
+2026-10-11T09:06:44.8382783Z with:
+2026-10-11T09:06:44.8383048Z   go-version: 1.27.2
+2026-10-11T09:06:44.8383312Z   cache: false
+2026-10-11T09:06:44.8383556Z   check-latest: false
+2026-10-11T09:06:44.8386763Z   token: ***
+2026-10-11T09:06:44.8387020Z ##[endgroup]
+2026-10-11T09:06:44.9914303Z Setup go version spec 1.27.2
+2026-10-11T09:06:44.9927658Z Attempting to download 1.27.2...
+2026-10-11T09:06:45.0062455Z (node:2107) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-11T09:06:45.0064911Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-11T09:06:45.6636229Z matching 1.27.2...
+2026-10-11T09:06:45.6771258Z Acquiring 1.27.2 from https://github.com/actions/go-versions/releases/download/1.27.2-37875086547/go-1.27.2-linux-x64.tar.gz
+2026-10-11T09:06:46.4121812Z Extracting Go...
+2026-10-11T09:06:46.4260612Z [command]/usr/bin/tar xz --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/ca185724-809a-403e-8e3c-a61eac07c9bb -f /home/runner/work/_temp/ade94983-8c3f-4bd3-bdeb-0a335db97fae
+2026-10-11T09:06:48.4158474Z Successfully extracted go to /home/runner/work/_temp/ca185724-809a-403e-8e3c-a61eac07c9bb
+2026-10-11T09:06:48.4160363Z Adding to the cache ...
+2026-10-11T09:06:55.8567553Z Successfully cached go to /opt/hostedtoolcache/go/1.27.2/x64
+2026-10-11T09:06:55.8568916Z Added go to the path
+2026-10-11T09:06:55.8570107Z Successfully set up Go version 1.27.2
+2026-10-11T09:06:55.8896989Z go version go1.27.2 linux/amd64
+2026-10-11T09:06:55.8897482Z 
+2026-10-11T09:06:55.8898020Z ##[group]go env
+2026-10-11T09:06:56.8875377Z AR='ar'
+2026-10-11T09:06:56.8894605Z CC='gcc'
+2026-10-11T09:06:56.8914714Z CGO_CFLAGS='-O2 -g'
+2026-10-11T09:06:56.8915445Z CGO_CPPFLAGS=''
+2026-10-11T09:06:56.8934402Z CGO_CXXFLAGS='-O2 -g'
+2026-10-11T09:06:56.8954501Z CGO_ENABLED='1'
+2026-10-11T09:06:56.8974412Z CGO_FFLAGS='-O2 -g'
+2026-10-11T09:06:56.8975176Z CGO_LDFLAGS='-O2 -g'
+2026-10-11T09:06:56.8994491Z CXX='g++'
+2026-10-11T09:06:56.9014457Z GCCGO='gccgo'
+2026-10-11T09:06:56.9034343Z GO111MODULE=''
+2026-10-11T09:06:56.9035159Z GOAMD64='v1'
+2026-10-11T09:06:56.9054643Z GOARCH='amd64'
+2026-10-11T09:06:56.9095258Z GOAUTH='netrc'
+2026-10-11T09:06:56.9095985Z GOBIN='/home/runner/go/bin'
+2026-10-11T09:06:56.9100349Z GOCACHE='/home/runner/.cache/go-build'
+2026-10-11T09:06:56.9101218Z GOCACHEPROG=''
+2026-10-11T09:06:56.9101856Z GODEBUG=''
+2026-10-11T09:06:56.9102591Z GOENV='/home/runner/.config/go/env'
+2026-10-11T09:06:56.9103360Z GOEXE=''
+2026-10-11T09:06:56.9125126Z GOEXPERIMENT=''
+2026-10-11T09:06:56.9134599Z GOFIPS140='off'
+2026-10-11T09:06:56.9154838Z GOFLAGS=''
+2026-10-11T09:06:56.9175195Z GOGCCFLAGS='-fPIC -m64 -pthread -Wl,--no-gc-sections -fmessage-length=0 -ffile-prefix-map=/tmp/go-build1496182621=/tmp/go-build -gno-record-gcc-switches'
+2026-10-11T09:06:56.9195095Z GOHOSTARCH='amd64'
+2026-10-11T09:06:56.9195823Z GOHOSTOS='linux'
+2026-10-11T09:06:56.9214227Z GOINSECURE=''
+2026-10-11T09:06:56.9224509Z GOMOD='/home/runner/work/gosqlite/gosqlite/go.mod'
+2026-10-11T09:06:56.9242588Z GOMODCACHE='/home/runner/go/pkg/mod'
+2026-10-11T09:06:56.9243401Z GONOPROXY=''
+2026-10-11T09:06:56.9244240Z GONOSUMDB=''
+2026-10-11T09:06:56.9244848Z GOOS='linux'
+2026-10-11T09:06:56.9245461Z GOPACKAGESDRIVER=''
+2026-10-11T09:06:56.9246222Z GOPATH='/home/runner/go'
+2026-10-11T09:06:56.9246931Z GOPRIVATE=''
+2026-10-11T09:06:56.9247622Z GOPROXY='https://proxy.golang.org,direct'
+2026-10-11T09:06:56.9248485Z GOROOT='/opt/hostedtoolcache/go/1.27.2/x64'
+2026-10-11T09:06:56.9249264Z GOSUMDB='sum.golang.org'
+2026-10-11T09:06:56.9249896Z GOTELEMETRY='local'
+2026-10-11T09:06:56.9250591Z GOTELEMETRYDIR='/home/runner/.config/go/telemetry'
+2026-10-11T09:06:56.9251374Z GOTMPDIR=''
+2026-10-11T09:06:56.9251937Z GOTOOLCHAIN='auto'
+2026-10-11T09:06:56.9252754Z GOTOOLDIR='/opt/hostedtoolcache/go/1.27.2/x64/pkg/tool/linux_amd64'
+2026-10-11T09:06:56.9253646Z GOVCS=''
+2026-10-11T09:06:56.9254504Z GOVERSION='go1.27.2'
+2026-10-11T09:06:56.9255695Z GOWORK=''
+2026-10-11T09:06:56.9256304Z PKG_CONFIG='pkg-config'
+2026-10-11T09:06:56.9256772Z 
+2026-10-11T09:06:56.9257668Z ##[endgroup]
+2026-10-11T09:06:56.9447557Z ##[group]Run ./scripts/check.sh
+2026-10-11T09:06:56.9448189Z [36;1m./scripts/check.sh[0m
+2026-10-11T09:06:56.9771299Z shell: /usr/bin/bash -e {0}
+2026-10-11T09:06:56.9771756Z ##[endgroup]
+2026-10-11T09:07:08.4265090Z Ordinary test source-reference guard PASS; behavioral review is still required.
+2026-10-11T09:07:08.5566255Z go: downloading golang.org/x/text v0.43.0
+2026-10-11T09:07:08.5826443Z go: downloading golang.org/x/crypto v0.58.0
+2026-10-11T09:07:09.3784772Z go: downloading golang.org/x/sys v0.49.0
+2026-10-11T09:07:24.7639729Z ?   	github.com/ms-xiaosnow/gosqlite/benchmarks/ann	[no test files]
+2026-10-11T09:09:01.5815826Z ok  	github.com/ms-xiaosnow/gosqlite/benchmarks/grams	33.395s
+2026-10-11T09:09:01.5822462Z ok  	github.com/ms-xiaosnow/gosqlite/benchmarks/transactions	0.225s
+2026-10-11T09:09:01.5824338Z ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	1.118s
+2026-10-11T09:09:01.5825564Z ok  	github.com/ms-xiaosnow/gosqlite/driver	5.964s
+2026-10-11T09:09:01.5826906Z ok  	github.com/ms-xiaosnow/gosqlite/encryption	1.302s
+2026-10-11T09:09:01.5828093Z ok  	github.com/ms-xiaosnow/gosqlite/examples/ann	0.680s
+2026-10-11T09:09:01.5829292Z ok  	github.com/ms-xiaosnow/gosqlite/examples/bit-rerank	0.013s
+2026-10-11T09:09:01.5830623Z ?   	github.com/ms-xiaosnow/gosqlite/examples/encrypted	[no test files]
+2026-10-11T09:09:01.5832113Z ?   	github.com/ms-xiaosnow/gosqlite/examples/encrypted-cli	[no test files]
+2026-10-11T09:09:01.5833448Z ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-shared	0.028s
+2026-10-11T09:09:01.5834915Z ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-wal	0.023s
+2026-10-11T09:09:01.5835931Z ?   	github.com/ms-xiaosnow/gosqlite/examples/grams	[no test files]
+2026-10-11T09:09:01.5836780Z ok  	github.com/ms-xiaosnow/gosqlite/examples/half-rerank	0.012s
+2026-10-11T09:09:01.5837718Z ok  	github.com/ms-xiaosnow/gosqlite/examples/internal/fixturecleanup	0.011s
+2026-10-11T09:09:01.5838817Z ok  	github.com/ms-xiaosnow/gosqlite/examples/ivfflat	0.387s
+2026-10-11T09:09:01.5839932Z ok  	github.com/ms-xiaosnow/gosqlite/examples/migrate-pgembedding	0.025s
+2026-10-11T09:09:01.5841105Z ok  	github.com/ms-xiaosnow/gosqlite/examples/migration-full-table	0.028s
+2026-10-11T09:09:01.5842357Z ?   	github.com/ms-xiaosnow/gosqlite/examples/migration-transition	[no test files]
+2026-10-11T09:09:01.5847357Z ?   	github.com/ms-xiaosnow/gosqlite/examples/native-check	[no test files]
+2026-10-11T09:09:01.5849011Z ?   	github.com/ms-xiaosnow/gosqlite/examples/pgembedding-import	[no test files]
+2026-10-11T09:09:01.5850260Z ok  	github.com/ms-xiaosnow/gosqlite/examples/readonly	0.062s
+2026-10-11T09:09:01.5851357Z ?   	github.com/ms-xiaosnow/gosqlite/examples/similarity	[no test files]
+2026-10-11T09:09:01.5852570Z ok  	github.com/ms-xiaosnow/gosqlite/examples/sparse-exact	0.013s
+2026-10-11T09:09:01.5853703Z ok  	github.com/ms-xiaosnow/gosqlite/examples/typed-ann-rerank	0.425s
+2026-10-11T09:09:01.5855093Z ok  	github.com/ms-xiaosnow/gosqlite/examples/vector	0.086s
+2026-10-11T09:09:01.5856098Z ?   	github.com/ms-xiaosnow/gosqlite/examples/wal	[no test files]
+2026-10-11T09:09:01.5857048Z ok  	github.com/ms-xiaosnow/gosqlite/examples/write	0.019s
+2026-10-11T09:09:01.5858007Z ok  	github.com/ms-xiaosnow/gosqlite/extension/grams13	0.903s
+2026-10-11T09:09:01.5858957Z ok  	github.com/ms-xiaosnow/gosqlite/extension/registry	0.042s
+2026-10-11T09:09:01.5860542Z ok  	github.com/ms-xiaosnow/gosqlite/extension/similarity	2.548s
+2026-10-11T09:09:01.5862475Z ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	0.635s
+2026-10-11T09:09:01.5863775Z ok  	github.com/ms-xiaosnow/gosqlite/extension/vector/ann	9.895s
+2026-10-11T09:09:06.2568329Z ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	22.843s
+2026-10-11T09:09:06.2587242Z ?   	github.com/ms-xiaosnow/gosqlite/internal/buildinfo	[no test files]
+2026-10-11T09:09:06.2619249Z ok  	github.com/ms-xiaosnow/gosqlite/internal/darwinfile	0.041s
+2026-10-11T09:09:06.2658668Z ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	0.255s
+2026-10-11T09:09:06.2685759Z ok  	github.com/ms-xiaosnow/gosqlite/internal/journal	0.130s
+2026-10-11T09:09:11.1904742Z ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	1.170s
+2026-10-11T09:09:11.1966225Z ok  	github.com/ms-xiaosnow/gosqlite/internal/record	0.006s
+2026-10-11T09:09:11.1984624Z ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.122s
+2026-10-11T09:09:11.2024728Z ?   	github.com/ms-xiaosnow/gosqlite/internal/testkit/fileview	[no test files]
+2026-10-11T09:09:11.2055586Z ok  	github.com/ms-xiaosnow/gosqlite/internal/testscope	0.005s
+2026-10-11T09:09:11.2104506Z ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.142s
+2026-10-11T09:09:12.0017474Z ok  	github.com/ms-xiaosnow/gosqlite/internal/wal	0.466s
+2026-10-11T09:09:13.1106386Z ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	0.297s
+2026-10-11T09:09:40.9709920Z ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	17.361s
+2026-10-11T09:13:36.2550369Z ok  	github.com/ms-xiaosnow/gosqlite/sqlite	104.744s
+2026-10-11T09:14:38.5857090Z ?   	github.com/ms-xiaosnow/gosqlite/benchmarks/ann	[no test files]
+2026-10-11T09:17:29.3525708Z ok  	github.com/ms-xiaosnow/gosqlite/benchmarks/grams	109.196s
+2026-10-11T09:17:29.3534459Z ok  	github.com/ms-xiaosnow/gosqlite/benchmarks/transactions	1.676s
+2026-10-11T09:17:29.3535950Z ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	4.410s
+2026-10-11T09:17:29.3537253Z ok  	github.com/ms-xiaosnow/gosqlite/driver	22.340s
+2026-10-11T09:17:29.3538551Z ok  	github.com/ms-xiaosnow/gosqlite/encryption	3.642s
+2026-10-11T09:17:29.3539812Z ok  	github.com/ms-xiaosnow/gosqlite/examples/ann	4.689s
+2026-10-11T09:17:29.3541253Z ok  	github.com/ms-xiaosnow/gosqlite/examples/bit-rerank	1.035s
+2026-10-11T09:17:29.3542792Z ?   	github.com/ms-xiaosnow/gosqlite/examples/encrypted	[no test files]
+2026-10-11T09:17:29.3544802Z ?   	github.com/ms-xiaosnow/gosqlite/examples/encrypted-cli	[no test files]
+2026-10-11T09:17:29.3546395Z ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-shared	1.080s
+2026-10-11T09:17:29.3548088Z ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-wal	1.063s
+2026-10-11T09:17:29.3549638Z ?   	github.com/ms-xiaosnow/gosqlite/examples/grams	[no test files]
+2026-10-11T09:17:29.3551112Z ok  	github.com/ms-xiaosnow/gosqlite/examples/half-rerank	1.031s
+2026-10-11T09:17:29.3552621Z ok  	github.com/ms-xiaosnow/gosqlite/examples/internal/fixturecleanup	1.060s
+2026-10-11T09:17:29.3554272Z ok  	github.com/ms-xiaosnow/gosqlite/examples/ivfflat	2.552s
+2026-10-11T09:17:29.3556806Z ok  	github.com/ms-xiaosnow/gosqlite/examples/migrate-pgembedding	1.075s
+2026-10-11T09:17:29.3558203Z ok  	github.com/ms-xiaosnow/gosqlite/examples/migration-full-table	1.238s
+2026-10-11T09:17:29.3562956Z ?   	github.com/ms-xiaosnow/gosqlite/examples/migration-transition	[no test files]
+2026-10-11T09:17:29.3564739Z ?   	github.com/ms-xiaosnow/gosqlite/examples/native-check	[no test files]
+2026-10-11T09:17:29.3566227Z ?   	github.com/ms-xiaosnow/gosqlite/examples/pgembedding-import	[no test files]
+2026-10-11T09:17:29.3567638Z ok  	github.com/ms-xiaosnow/gosqlite/examples/readonly	1.249s
+2026-10-11T09:17:29.3568910Z ?   	github.com/ms-xiaosnow/gosqlite/examples/similarity	[no test files]
+2026-10-11T09:17:29.3570285Z ok  	github.com/ms-xiaosnow/gosqlite/examples/sparse-exact	1.032s
+2026-10-11T09:17:29.3571715Z ok  	github.com/ms-xiaosnow/gosqlite/examples/typed-ann-rerank	3.031s
+2026-10-11T09:17:29.3573155Z ok  	github.com/ms-xiaosnow/gosqlite/examples/vector	1.394s
+2026-10-11T09:17:29.3574509Z ?   	github.com/ms-xiaosnow/gosqlite/examples/wal	[no test files]
+2026-10-11T09:17:29.3575968Z ok  	github.com/ms-xiaosnow/gosqlite/examples/write	1.096s
+2026-10-11T09:17:29.3577191Z ok  	github.com/ms-xiaosnow/gosqlite/extension/grams13	5.536s
+2026-10-11T09:17:29.3578585Z ok  	github.com/ms-xiaosnow/gosqlite/extension/registry	1.285s
+2026-10-11T09:17:29.3579833Z ok  	github.com/ms-xiaosnow/gosqlite/extension/similarity	11.736s
+2026-10-11T09:17:29.3581090Z ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	8.798s
+2026-10-11T09:18:04.0322593Z ok  	github.com/ms-xiaosnow/gosqlite/extension/vector/ann	74.748s
+2026-10-11T09:19:03.4975552Z ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	77.181s
+2026-10-11T09:19:03.4981184Z ?   	github.com/ms-xiaosnow/gosqlite/internal/buildinfo	[no test files]
+2026-10-11T09:19:03.4982328Z ok  	github.com/ms-xiaosnow/gosqlite/internal/darwinfile	1.164s
+2026-10-11T09:19:03.4983648Z ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	2.064s
+2026-10-11T09:19:03.4985123Z ok  	github.com/ms-xiaosnow/gosqlite/internal/journal	2.427s
+2026-10-11T09:19:03.4985871Z ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	3.888s
+2026-10-11T09:19:03.4986538Z ok  	github.com/ms-xiaosnow/gosqlite/internal/record	1.028s
+2026-10-11T09:19:03.4987365Z ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	1.444s
+2026-10-11T09:19:03.4988340Z ?   	github.com/ms-xiaosnow/gosqlite/internal/testkit/fileview	[no test files]
+2026-10-11T09:19:03.4989250Z ok  	github.com/ms-xiaosnow/gosqlite/internal/testscope	1.023s
+2026-10-11T09:19:03.4990244Z ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	1.863s
+2026-10-11T09:19:03.4991176Z ok  	github.com/ms-xiaosnow/gosqlite/internal/wal	8.553s
+2026-10-11T09:19:03.4992562Z ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	3.478s
+2026-10-11T09:20:37.3237171Z ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	94.831s
+2026-10-11T09:29:29.3438810Z ok  	github.com/ms-xiaosnow/gosqlite/sqlite	467.898s
+2026-10-11T09:29:29.5340027Z Post job cleanup.
+2026-10-11T09:29:29.6905253Z (node:10708) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-11T09:29:29.6910566Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-11T09:29:29.7429951Z Post job cleanup.
+2026-10-11T09:29:29.8968413Z [command]/usr/bin/git version
+2026-10-11T09:29:29.9060636Z git version 2.55.0
+2026-10-11T09:29:29.9122141Z Temporarily overriding HOME='/home/runner/work/_temp/4a416a6e-90b0-4462-a81d-21708edeb754' before making global git config changes
+2026-10-11T09:29:29.9131884Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-11T09:29:29.9139978Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/gosqlite/gosqlite
+2026-10-11T09:29:29.9199152Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-11T09:29:29.9255310Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-11T09:29:29.9705242Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-11T09:29:29.9728427Z http.https://github.com/.extraheader
+2026-10-11T09:29:29.9794663Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-11T09:29:29.9895854Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-11T09:29:30.0705110Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-11T09:29:30.0824634Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-11T09:29:30.1511345Z Cleaning up orphan processes
+2026-10-11T09:29:30.1782056Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-go@v5. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

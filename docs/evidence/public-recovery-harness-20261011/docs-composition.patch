@@ -1,0 +1,431 @@
+diff --git a/docs/acceptance-status.md b/docs/acceptance-status.md
+index 164fc411e45009d6e884a0fc91cd25d79b6fc145..b3c4c817f91035f46f863d433caf5adb859df731 100644
+--- a/docs/acceptance-status.md
++++ b/docs/acceptance-status.md
+@@ -1,4 +1,10 @@
+ # 当前实现与验收矩阵
++
++当前后续状态（2026-10-11）：有限公开恢复手工 harness 源码及中文步骤已补齐，
++独立源码审阅和六项 AST/选择/编译/符号检查 PASS，四个物理场景全部
++**BLOCKED / NOT_RUN**。旧 P0 段落中的整个 public harness
++`IMPLEMENTATION_MISSING` 是当时状态；当前精确范围和组合/持久证据分层见
++[本次补记](#2026-10-11-有限公开恢复-harness-源码与编译资格)。
+ 
+ 核对时间：2026-10-11；以下历史开发基点为 `63c2ebb10e3a2c4ff2378ee9f33c46133134c70f`，tree `d735409ebd1c43d90ee1650c8a7c2a084e270674`。该历史检查点的恢复与 CI 已闭合，详见文末；本轮新源码、提交、恢复及 CI 仍须分别核验，不预写自指提交。旧 `7a9972547f49531df04cf1b624dfa662b483907b` 与 `1352ae524575e4d6fe8b5434fd930c3b07be4ac8` 保留为历史基点。
+ 63c2 历史检查点叠加三项有限收尾：四项 CLI/示例资源修正、三份必需入口文档对账、五例目录终结与输出错误修正。四项 CLI 固定树完整普通门、三份文档独立静态审阅、五例独立源码和限定普通/race 审阅分别 PASS；最终组合与新提交持久门见文末，不能沿用基点结果。四项 CLI 的精确结果见[组合证据](evidence/cli-resources-20261011.md)，五例的操作边界见[留存限定复验](example-retention-verification-zh.md)。
+@@ -49,7 +55,7 @@
+ 
+ | 原规范条款 | main 已有能力 | 剩余代码 / 状态 |
+ |---|---|---|
+-| G1、§3、§4.1、M3 | 有界多段解析及 internal 恢复所有权；新增默认关闭的 Linux 可写明文 Open/Connector 恢复源码、准确 path 的退休 proof 和一次 fresh no-create probe，源码/模型独立 PASS | `PARTIAL / experimental`：更多 journal 形式、默认开启策略、其他原生平台与 native exclusive WAL 尾部安全发布仍未完成；public physical harness 为 IMPLEMENTATION_MISSING，实际恢复/开启选项的真实 Open 均 BLOCKED / NOT_RUN |
++| G1、§3、§4.1、M3 | 有界多段解析及 internal 恢复所有权；新增默认关闭的 Linux 可写明文 Open/Connector 恢复源码、准确 path 的退休 proof 和一次 fresh no-create probe，源码/模型独立 PASS | `PARTIAL / experimental`：更多 journal 形式、默认开启策略、其他原生平台与 native exclusive WAL 尾部安全发布仍未完成；四场景 public manual harness 已实现并独立 source/compiler-only PASS；driver Connector 物理 harness 与更广覆盖仍缺，实际恢复/开启选项的真实 Open/Connect 均 BLOCKED / NOT_RUN |
+ | G1、§4.2、§11.1/11.3 | 索引范围、有限 JOIN/GROUP BY/HAVING、连接计数和 cached preparation 的限定普通门通过 | `已知差异`：支持查询的 planner 错误/排序/阶段一致性仍待修正。V4c 树 `552286a…` 有独立有限 PASS，但没有和 main 新 grouped/counter 组合；不能替代 main 结果。新 LIMIT 转换/ErrMismatch 三文件修正独立限定PASS，组合完整普通18阶段PASS；不覆盖其余绑定/执行阶段缺口 |
+ | §4.2、§8.1、§12.2 | correct-key 加密 backup/rekey CLI、native DB/Tx/CLI Check V2 已合入 | `未实现/未合入`：main 明文 backup 命令仍明确 unsupported；Linux rollback V2 候选终审未完成，WAL/非 Linux backup 和真正只读 plaintext-WAL CLI 缺代码。native VACUUM 未实现 |
+ | G1、§3.6、§12.2 | query/check/inspect CLI 均使用 OpenContext；DB.Inspect 和 inspect --extensions 在单快照呈现持久 method/version/config/generation，默认 JSON 保持 | `PARTIAL`：本次实测只涵盖 Linux plaintext rollback、grams/custom metadata；加密 inspect CLI 的密钥/profile 路由、真正只读 WAL 及其余已选 CLI 目标仍有实现缺口。持久 metadata 不证明索引可用或正确，中途 I/O 取消未动态验证 |
+@@ -85,7 +91,7 @@
+ 
+ | 原规范条款 | 状态 | 自测入口和限制 |
+ |---|---|---|
+-| §4.1、M3、§11.1 | `平台阻塞 / NOT_RUN`：实际 native rollback replay、public production bridge 和开启恢复的真实 Open | 内部 harness 的 manual_recovery 标签、显式门和真实测试名保留；public physical harness 为 IMPLEMENTATION_MISSING。内部 deterministic harness 不覆盖公开桥接、真实断电、强杀、短写、Sync/ENOSPC/torn write |
++| §4.1、M3、§11.1 | `平台阻塞 / NOT_RUN`：实际 native rollback replay、public production bridge 和开启恢复的真实 Open | 内部 harness 的原门控/命令保留；新增 [TestManualPublicRollbackRecovery 的四场景规程](public-rollback-manual-zh.md)已有独立源码/编译资格，物理全部 NOT_RUN。它不覆盖 Connector、真实断电、强杀、短写、Sync/ENOSPC/torn write；完整设施仍缺 |
+ | §4.1、§11.1 | `平台阻塞 / NOT_RUN（当前）`：已有 plaintext namespace 测试 | 手册列出 manual_namespace 独立门。历史 M2 至 7addc493 全套曾包含两项 namespace 测试，原 PASS 是事实，不能改称当时全都未运行或当时范围完全干净 |
+ | §4.1、§8、§11.3 | `平台阻塞 / NOT_RUN`：Windows/Darwin 两个 encstore raw namespace 测试 | 本批完整移动原函数，manual_namespace 加显式环境门；default/oracle 刻意减少这两个声明，其余原声明保持。source/model/race、188 项选择和六项外平台编译/符号独立 PASS；[中文第 19 节](manual-verification-zh.md#19-os-raw-namespace-门控与独立原生验收2026-10-11) 给独立用户步骤，编译不是 native PASS |
+ | M3/M4/M7/M8、§8.3、§11.1 | `未实现设施 + 平台阻塞`：完整物理故障/崩溃/重启、checkpoint/rekey 中断、安全篡改矩阵 | 没有现成 harness 的项先补源码和独立审阅；只提供实验前置/断言，不编造现成测试名或成功命令 |
+@@ -175,3 +181,46 @@
+ 运行冻结 tree `697e45c6aba7a5cf62ebbf2bab2662f10903c5be` 于09:01完成独立核验：3070文件、788非docs与已审候选完整字节/Git/POSIX模式相同；guard、4项纯模型及同集合race PASS，manual GOFLAGS按预期拒绝。实际7条Go工具调用含早于后发5条限定的只读version/env前检，完整记录保留。另157链接、45shell语法块、29选录工件/617前置原件哈希PASS。没有运行该组合完整aggregate/oracle、外平台二进制或手工物理测试。报告见[最终组合限定证据](evidence/namespace-gating-20261011/final-composition-report.md)。此后仅追加终态文档/证据；最终提交的788非docs须逐字节核验等同该运行冻结源。
+ 
+ 父P0提交 `56bbcf3febe233197aa0a5eac965c67a67a88011` 的 CI `38125268420` 已于08:56:41 UTC SUCCESS，两job ordinary114428206934/oracle114428207050均SUCCESS；精确Library恢复21条命令PASS。终态证据归档 `libfile_4a413988d4608191aebf695542a04caf`，10211483B，SHA256 `0d6579c338465be5df401b4f2a594df8fe63737900a78dbcc9e4ef28e85bbfb3`，读回411条/410文件哈希PASS。原08:44/08:45 PENDING是先前写作时点，现仅对父P0闭合，不能当作namespace新提交CI。
++
++
++## 2026-10-11 有限公开恢复 harness 源码与编译资格
++
++- 本次组合基点是已保存的 namespace 提交
++  `50b627e11e9dbce7f2fde8df35c4634c52a06d52`，tree
++  `8f2709293287a3517a52b3f989888ded8230ef53`。仅新增一个手工测试源码和
++  配套专题手册，保留 LIMIT、P0、namespace 源码及历史；没有生产行为或 CI 改动。
++- 独立 V3 候选 tree `1755d67431f9de082449b08fa24b26b2b35eb612`
++  是 P0 `56bbcf3febe233197aa0a5eac965c67a67a88011` 加两项新增文件，
++  **不是**当前 namespace 组合或新提交的 tree。单一测试源码 SHA-256
++  `dd5a63e2a8e7d4fdd969ba03273a8f8147d5eff81babf8fce44a5228c5cdaf5e`；
++  原 V3 审阅手册 SHA-256
++  `a49ae1882c4a5dcb8c58860fa8df3b011f88c9ee99963a5721831049477ec4d2`。
++- V1 的三项阻断发现原样保留；V2 修正 fail-open 选择检查、备份及 manifest
++  全量核对、失败即停与一次 Close；V3 仅改手册的环境设置先后和 archive
++  分步检查。六项检查于 08:58:38 UTC 自然完成：AST inspector、三次
++  go list、go test -c、go tool nm 全部 PASS；default/oracle/manual 文件次数
++  为 0/0/1，精确顶层测试符号唯一。未执行任何 test binary、fixture 生成器、
++  gate-off、-test.list、无匹配选择器或物理用例。
++- 实际源码是 [TestManualPublicRollbackRecovery](../sqlite/rollback_recovery_manual_linux_test.go)，
++  首行 `//go:build manual_recovery && linux`，首语句环境门缺值即 Fatal。
++  只含 nil-default 拒绝并保留输入、opt-in 恢复及只读重开、journal 配额拒绝、
++  NoCreate 保持缺失四场景；源码/编译 PASS 不等于四场景运行 PASS。
++- [证据摘要](evidence/public-recovery-harness-20261011.md)、
++  [V3 独立报告](evidence/public-recovery-harness-20261011/v3-compiler-review.md)
++  和[精确命令](evidence/public-recovery-harness-20261011/compiler-commands.json)
++  分开记录候选资格与当前组合身份。[中文步骤](public-rollback-manual-zh.md)
++  的发布状态段单独更新，命令及断言保持；[原 V3 审阅手册](evidence/public-recovery-harness-20261011/v3-reviewed-manual.md.txt)
++  保存当时原字节。旧审阅身份与当前发布文档不混同，物理 NOT_RUN 不变。
++- 本次写作时，namespace 提交的 Library
++  `libfile_e5dcbc0ac16c8191bce977aa165163f9` 已读回核验字节身份；其精确限定
++  恢复的 207 项调用于 09:14:09 UTC 完成 PASS，涵盖纯模型/选择/编译/符号，
++  不含完整普通/oracle 运行或原生物理测试。CI `38127196102` 尚无已核验终态，
++  本次最后已知为 in_progress，不能写为 SUCCESS。
++  父 P0 的 CI `38125268420` 于 08:56:41 UTC SUCCESS 及恢复 PASS 已在上一节
++  闭合，只属于父 P0。本次新增 harness 的组合、新提交/保存/恢复/CI
++  仍须各自按实际身份追加，不能继承上述任何结果。
++
++公开 Open 四场景不再整体列为 IMPLEMENTATION_MISSING；driver Connector
++真实恢复 harness、更广 journal/平台/native WAL-tail publisher 和完整 fault/crash
++设施仍有实现缺口。实际 public bridge、恢复启用的 Open/Connect 与全部物理场景
++仍 BLOCKED / NOT_RUN。M3、M10 和原始目标未完整验收。
+diff --git a/docs/progress.md b/docs/progress.md
+index 564f50cf7258c3050d0241f65cc256f0a1d38f35..6c4dfee9adc9308ceaf4f2ad5491319eaa6412de 100644
+--- a/docs/progress.md
++++ b/docs/progress.md
+@@ -1349,3 +1349,17 @@
+ 运行冻结 tree `697e45c6aba7a5cf62ebbf2bab2662f10903c5be` 于09:01完成独立核验：3070文件、788非docs与已审候选完整字节/Git/POSIX模式相同；guard、4项纯模型及同集合race PASS，manual GOFLAGS按预期拒绝。实际7条Go工具调用含早于后发5条限定的只读version/env前检，完整记录保留。另157链接、45shell语法块、29选录工件/617前置原件哈希PASS。没有运行该组合完整aggregate/oracle、外平台二进制或手工物理测试。报告见[最终组合限定证据](evidence/namespace-gating-20261011/final-composition-report.md)。此后仅追加终态文档/证据；最终提交的788非docs须逐字节核验等同该运行冻结源。
+ 
+ 父P0提交 `56bbcf3febe233197aa0a5eac965c67a67a88011` 的 CI `38125268420` 已于08:56:41 UTC SUCCESS，两job ordinary114428206934/oracle114428207050均SUCCESS；精确Library恢复21条命令PASS。终态证据归档 `libfile_4a413988d4608191aebf695542a04caf`，10211483B，SHA256 `0d6579c338465be5df401b4f2a594df8fe63737900a78dbcc9e4ef28e85bbfb3`，读回411条/410文件哈希PASS。原08:44/08:45 PENDING是先前写作时点，现仅对父P0闭合，不能当作namespace新提交CI。
++
++
++### 2026-10-11 公开恢复四场景手工 harness：源码与编译资格
++
++- 状态：有限源码已实现，独立 SOURCE_REVIEW/AST/SELECTION/COMPILE/SYMBOL PASS；四个物理场景全部 BLOCKED / NOT_RUN，M3/M10/原目标未完整验收。
++- 本批基点：已保存 namespace 提交 `50b627e11e9dbce7f2fde8df35c4634c52a06d52`，tree `8f2709293287a3517a52b3f989888ded8230ef53`。完整保留本文件已有前缀、LIMIT/P0/namespace 源码及历史，不将旧候选整树覆盖当前版本；没有生产行为或 CI 改动。
++- 新增实现：仅 `sqlite/rollback_recovery_manual_linux_test.go` 与 `docs/public-rollback-manual-zh.md`。单一测试 `TestManualPublicRollbackRecovery`，精确首行 `//go:build manual_recovery && linux`，函数首语句环境门先于任何 fixture/Open，缺门即 Fatal。四项只有 nil-default/input-preservation、opt-in/只读重开、journal quota refusal、NoCreate absence；没有新增 Connector 或完整 fault/crash 覆盖。
++- 已审源码 SHA-256 `dd5a63e2a8e7d4fdd969ba03273a8f8147d5eff81babf8fce44a5228c5cdaf5e`，10657字节；原 V3 审阅中文专题 SHA-256 `a49ae1882c4a5dcb8c58860fa8df3b011f88c9ee99963a5721831049477ec4d2`，9711字节，原件另存证据；当前发布手册仅更新状态段，命令/断言保持。独立 V3 tree `1755d67431f9de082449b08fa24b26b2b35eb612` 属于 P0 基点加这两项，不是当前 namespace 组合 tree。
++- 原失败历史：V1 三项阻断为 fail-open 选择检查、备份/manifest 核对不完整、fatal/Close 后仍可启动后续场景。V2 均已修正；V3 只将环境 export/unset 提前、archive/extract 拆开，测试源码与 V2 同字节。原 V1/V2 报告不改写。
++- 实际验证：V3 独立六条 Go 工具命令于08:58:38 UTC自然完成，AST文本检查、default/oracle/manual三次list、go test -c、go tool nm均exit0；选择次数0/0/1，精确顶层符号唯一。编译二进制SHA-256 `a7a9a4813ec9550708ff2d2addc97d957b686e48ec16aa9b8e2c94710a0c226e`，14757553字节，NEVER EXECUTED。未运行 gate-off、-test.list、无匹配selector、fixture生成或实际public Open。
++- 文档与证据：[当前验收补记](acceptance-status.md#2026-10-11-有限公开恢复-harness-源码与编译资格)、[中文第20节](manual-verification-zh.md#20-公开-open-四场景-harness-源码与编译资格2026-10-11)、[专题人工步骤](public-rollback-manual-zh.md)、[具名证据](evidence/public-recovery-harness-20261011.md)。历史 V1/V2/V3 报告与原 V3 手册分别保留，当前发布状态段与已审原件身份分开；物理 NOT_RUN 不变。本轮文档对账仅静态读取/编辑/差异/身份/链接/语法，不运行 Go 或数据库。
++- 身份分层：父 P0 CI `38125268420` 于08:56:41 UTC SUCCESS、精确恢复PASS已在上段闭合；namespace提交50b的bundle `libfile_e5dcbc0ac16c8191bce977aa165163f9`已读回字节身份PASS，207项纯模型/选择/编译/符号限定恢复于09:14:09 UTC PASS，不含完整普通/oracle或原生物理运行；CI `38127196102`最后已知仍in_progress，尚无已核验终态。上述各自结果不能替代新增harness当前组合或新提交的保存/恢复/CI。
++- 剩余边界：公开四场景harness不再整体IMPLEMENTATION_MISSING；driver Connector物理harness、更广journal/其他平台/native WAL-tail publisher与完整故障设施仍缺。真实RecoverRollback/public bridge/启用恢复Open或Connect均BLOCKED / NOT_RUN；ANN V4、41目标fuzz、未知触发及其他物理执行限制不变。
++- 下一步：独立静态核对本次namespace基点组合的精确差异/原字节/选择隔离和相对链接；按实际授权范围核验后，逐项记录新提交、持久保存、恢复与CI终态。不得从本条候选compiler PASS推定新组合完整普通门或物理验收通过。
+diff --git a/docs/restriction-provenance-20261011.md b/docs/restriction-provenance-20261011.md
+index 7720098db414ed03948ccf37063b5c2eb8275e83..4e4079060c2513bd5127be3e2b50edda7fb37836 100644
+--- a/docs/restriction-provenance-20261011.md
++++ b/docs/restriction-provenance-20261011.md
+@@ -34,8 +34,9 @@
+ 
+ ## 三 逐项源码待办分类
+ 
+-2026-10-11 后续对账：下表公开恢复一行按有限 source/model 集成更新，
+-OS namespace 行按当前六路径门控更新；其他行保留其已有证据身份。
++2026-10-11 后续对账：下表公开恢复一行按有限 source/model 集成及四场景
++manual harness 源码/编译资格更新；OS namespace 行保留六路径门控状态，
++其他行保留其已有证据身份。
+ 第四至六节保留 LIMIT/分类批次的历史时点；新增 P0 和 namespace 范围分别
+ 见第七、八节，组合/持久/CI 门必须按对应身份闭合。
+ 
+@@ -45,7 +46,7 @@
+ 
+ | 剩余项及源码位置 | ③ 源码或集成待办 | ② 仍受限的执行 | 依赖及溯源 |
+ |---|---|---|---|
+-| public Open rollback 恢复 | 已接入 `sqlite/rollback_recovery.go` 的 nil-default Linux 可写明文有限 opt-in、pager retired-reader/path proof 和 driver 配置复制；独立 source/model/compile PASS，仍属实验性实现 | 实际 RecoverRollback、启用恢复的真实 Open/Connect、生产桥接均 BLOCKED / NOT_RUN；public physical harness 为 IMPLEMENTATION_MISSING | 依赖既有 retirement/admission、路径身份和有限记录数恢复，不依赖 ANN。旧V2 tree `5f2766d…`保留历史；本次独立候选 tree `75c074548e8b5208beb06e6ead314d835cd16f4f`，c150组合另验，见[专题](rollback-recovery-open.md)及第七节 |
++| public Open rollback 恢复 | 已接入 `sqlite/rollback_recovery.go` 的 nil-default Linux 可写明文有限 opt-in、pager retired-reader/path proof 和 driver 配置复制；独立 source/model/compile PASS，仍属实验性实现 | 实际 RecoverRollback、启用恢复的真实 Open/Connect、生产桥接均 BLOCKED / NOT_RUN；四场景 public Open manual harness 源码/编译资格已补齐，Connector 物理 harness 和更广覆盖仍缺 | 依赖既有 retirement/admission、路径身份和有限记录数恢复，不依赖 ANN。旧V2 tree `5f2766d…`及 P0 source/model 候选 `75c074548e8b5208beb06e6ead314d835cd16f4f`保留原身份；新增 harness 资格见第九节和[专题](rollback-recovery-open.md) |
+ | 更广 rollback journal 形式 | `internal/journal/replay.go:59–74` 仍排除 super/master journal、no-sync 记录数和旧式未指定页大小；真实解析/恢复兼容性缺口 | 物理 replay 受限；字节解析与磁盘执行是不同动作 | 需明确定义受支持格式与恢复边界。没有定位到该 parser 编辑的原始拒绝 |
+ | Linux rollback plaintext Backup V2 | `sqlite/backup.go`、`internal/pager/plain_backup.go`、namespace identity 和 CLI 接线候选未完成最终审阅/集成；main 明文 backup 仍 unsupported | 原生故障、namespace 碰撞、恢复/发布负向场景受限 | V1 P1 为源/目标 sidecar 家族重叠的工程缺陷；V2 局部修正不补齐终审。`plaintext-backup-ownership-review-v1/review.md:5–52`、`plaintext-backup-api-v2-report.md:20–49,61–84`、原交接 `:94–100,115`。V2 tree `d73faa3d653df5382b01ebc318145ed921833732` |
+ | WAL plaintext backup | 缺 WAL 快照/复制所有权协议与 API profile dispatch，不能只运行现有 rollback backup | 物理失败/恢复资格受限 | 依赖 WAL 快照、发布和目录所有权设计。`plaintext-backup-api-v2-report.md:83–84`；63c2 版 acceptance 第29行 |
+@@ -189,3 +190,22 @@
+ 未执行任何 manual binary、恢复、故障、错密钥、篡改、中断发布/rekey，亦未继续
+ ANN V4、41-target fuzz 或未知触发链路。更广 backend/目录协议和缺失物理 harness
+ 仍有真实实现/资格缺口；该门控 PASS 不将它们改写成只差测试机。
++
++
++## 九 2026-10-11 公开恢复四场景 harness 的独立资格
++
++在 namespace 提交 `50b627e11e9dbce7f2fde8df35c4634c52a06d52` 上只组合
++已审阅的一个 manual Go 文件及[中文步骤](public-rollback-manual-zh.md)，
++没有放宽生产代码、普通测试选择或 CI。候选 V3 仍以 P0 为基点，不能把其
++`1755d67431f9de082449b08fa24b26b2b35eb612` 记为本次 namespace 组合。
++准确源码/手册哈希、V1 阻断与 V2/V3 修正、六项 AST/list/compile/nm PASS
++见[本批证据](evidence/public-recovery-harness-20261011.md)。
++
++本次闭合的是四场景 public Open harness 的源码缺口及有限编译资格；
++不再把这一有限入口整体标为 IMPLEMENTATION_MISSING。第七节的同名缺口
++是此前 P0 阶段的记录，保留不改写。整个第 3.4 节的完整物理安全设施、
++Connector 实际恢复覆盖、更广 journal、其他平台及 native WAL publisher
++未因此补齐。设置 `GOSQLITE_MANUAL_RECOVERY=independently_authorized`
++不是执行授权；任何 test binary、fixture 生成或物理场景均未执行。
++实际 RecoverRollback/public bridge/启用恢复的 Open/Connect 仍 BLOCKED / NOT_RUN。
++ANN V4、41-target fuzz、未知触发链路及其他执行限制均保持。
+diff --git a/docs/closeout-scope-20261011.md b/docs/closeout-scope-20261011.md
+index e3e557d7f093e8cc2c9862bfd144a2cc13c61cde..ee68553ce43eddf2802cacec9281c5b4d7ce5d25 100644
+--- a/docs/closeout-scope-20261011.md
++++ b/docs/closeout-scope-20261011.md
+@@ -19,7 +19,7 @@
+ 
+ | 优先项 | 真实状态 | 当前分类与下一步边界 |
+ |---|---|---|
+-| §4.1 P0 恢复与安全发布 | 有限 Linux 可写明文 public Open/Connector opt-in 源码已接入，nil 默认拒绝；独立 source/model/compile PASS。native exclusive WAL-tail publisher、broader journals/default-on/其他平台仍缺 | 实验性源码实现不等于物理资格；public physical harness 为 IMPLEMENTATION_MISSING，真实 RecoverRollback/bridge/启用恢复的真实 Open 均 BLOCKED / NOT_RUN。新组合普通门及新提交恢复/CI另验，不整树恢复旧候选 |
++| §4.1 P0 恢复与安全发布 | 有限 Linux 可写明文 public Open/Connector opt-in 源码已接入，nil 默认拒绝；独立 source/model/compile PASS。native exclusive WAL-tail publisher、broader journals/default-on/其他平台仍缺 | 实验性源码实现不等于物理资格；四场景 public Open harness 已实现并独立 source/compiler-only PASS，Connector 物理 harness 与完整故障设施仍缺。真实 RecoverRollback/bridge/启用恢复的 Open/Connect 均 BLOCKED / NOT_RUN；新组合及持久门按各自身份另验 |
+ | 已声明支持 SQL 的正确性 | CAST/IPK、LEFT-ON/WHERE、排序/执行阶段等差异；planner V4c 尚未与 main grouped/counter 组合 | 属于工程正确性/集成待办，未定位planner编辑拒绝；当前limitValue数值转换/ErrMismatch三文件修正已独立限定PASS，组合完整普通18阶段PASS。其余phase/order/binding逐批审阅，不能仅靠测试机补齐 |
+ | 明文备份、真正只读 WAL | main plaintext backup 仍 unsupported；rollback V2 未终审/合入；WAL/非 Linux 备份及真正只读 WAL 入口缺实现 | 与旧backup/WAL/目录协议有依赖，属于具体审阅/集成待办；未定位编辑拒绝，仍须逐项划定源码范围。已有可写协调named Check不称为只读；物理负向执行受限 |
+ | 原生 backend/目录所有权 | Windows shared rekey、Darwin V3 仍未合入；retained-directory 未完整冻结/整合。本批仅两个 OS namespace 测试门控已逐 hunk 接入，原生执行仍 NOT_RUN | 属源码/集成待办及受限原生资格，未定位编辑拒绝；不能整树复制旧组合、把交叉编译称为原生运行或直接开启新OS全套 |
+@@ -31,7 +31,7 @@
+ 
+ ## 三、代码已有的人工门与真实外部资格
+ 
+-- 已存在的有限 manual rollback recovery、两个 plaintext namespace 回归，以及本批另两个 Windows/Darwin encstore namespace 回归，分别按主手册 12.1、12.2、19 节的双门、单项选择和实际覆盖记录；它们不覆盖上表缺失的完整物理故障设施，原生执行仍 NOT_RUN。
++- 已存在的内部 manual rollback recovery、四场景 public Open manual harness、两个 plaintext namespace 回归和两个 Windows/Darwin encstore namespace 回归，分别按主手册 12.1、20、12.2、19 节的双门、单项选择和实际覆盖记录；它们不覆盖上表缺失的完整物理故障设施，物理执行仍 NOT_RUN。
+ - 已实现 backend 在真实目标 OS/架构、文件系统和持久性硬件上的锁、mapping、目录同步、恢复边界验证。
+ - 已有普通长测工具的长期并发 soak、固定硬件和数据集的大规模测量；短样本和有界正确性测试不替代。
+ - 现有加密、事务和索引实现对应的物理安全资格及独立数据安全/密码学/威胁模型审查；不能用正确密钥 round-trip 或无明文 marker 代替。
+@@ -55,7 +55,7 @@
+ 
+ 2026-10-11 后续 P0 批次以已保存 c150 为组合基点，有限公开恢复源码及独立 source/model/compile 已完成；新组合普通门、提交恢复/CI另列待核验，详见[专题边界](rollback-recovery-open.md)。默认拒绝、ErrRecoveryRequired/CodeIOErr保持，诊断文本及私有包装有变化。
+ 
+-旧有限结论不表示所有当前可实现功能已完成，也不表示只剩人工测试或已证明源码编辑被平台全面禁止。更广公开恢复配置与物理harness、WAL-tail publisher、支持域 SQL 正确性、明文备份、真正只读 WAL、部分 backend 和完整故障设施仍有实现或集成缺口；ANN V3原始FAIL、ANN V4/41目标fuzz/未知中断禁重试，以及真实物理执行限制不变。当前 M10 未完成，不能宣布生产安全、原始 goal 或 M0–M10 全部 VERIFIED。
++旧有限结论不表示所有当前可实现功能已完成，也不表示只剩人工测试或已证明源码编辑被平台全面禁止。更广公开恢复配置与超出四场景的物理 harness、WAL-tail publisher、支持域 SQL 正确性、明文备份、真正只读 WAL、部分 backend 和完整故障设施仍有实现或集成缺口；ANN V3原始FAIL、ANN V4/41目标fuzz/未知中断禁重试，以及真实物理执行限制不变。当前 M10 未完成，不能宣布生产安全、原始 goal 或 M0–M10 全部 VERIFIED。
+ 
+ ## 六、维护者的实际下一步
+ 
+@@ -63,7 +63,8 @@
+ 
+ ### 已有可执行入口但当前受限或未运行
+ 
+-- Linux 有限 rollback recovery：`internal/pager/recovery_manual_test.go` 的 `TestManualRollbackRecovery`，独立 manual_recovery gate；具体已实现断言与限制见中文主手册 12.1。当前 BLOCKED / NOT_RUN。
++- Linux 内部有限 rollback recovery：`internal/pager/recovery_manual_test.go` 的 `TestManualRollbackRecovery`，独立 manual_recovery gate；具体已实现断言与限制见中文主手册 12.1。当前 BLOCKED / NOT_RUN。
++- Linux 公开 Open 四场景：`sqlite/rollback_recovery_manual_linux_test.go` 的 `TestManualPublicRollbackRecovery` 已独立 source/compiler-only PASS，实际步骤见[专门规程](public-rollback-manual-zh.md)及主手册第20节；没有运行二进制或 fixture，四场景全部 BLOCKED / NOT_RUN。它不覆盖 Connector 物理恢复或完整故障矩阵。
+ - 两个 plaintext namespace 回归：`sqlite/write_namespace_manual_test.go` 中两个真实具名测试，见主手册 12.2；当前 BLOCKED / NOT_RUN，历史曾运行事实单独保留。
+ - 两个 encstore 原生 namespace 回归：Windows `TestWindowsEncryptedRelativePublicationAndRetainedRoot` 与 Darwin `TestDarwinEncryptedRelativePublicationAndParentLifetime`，见[主手册 19 节](manual-verification-zh.md#19-os-raw-namespace-门控与独立原生验收2026-10-11)；manual_namespace 加环境门已存在，编译/符号 PASS，全部原生执行 BLOCKED / NOT_RUN。
+ - 现有普通 SQL/互操作、grams/精确向量、正确密钥维护和离线迁移入口见主手册 5–10；未来只对所选提交和授权范围逐项复验，不把这份清单当作立即重跑整套的指令。
+@@ -71,7 +72,7 @@
+ 
+ ### 首先需要实际代码或 harness 并重新审阅
+ 
+-- 有限 public Open rollback opt-in 源码已接入且通过独立 source/model/compile 审阅；其 public physical harness 仍为 IMPLEMENTATION_MISSING。broader journals/default-on/其他平台、native exclusive WAL-tail publisher、支持SQL域内已知planner/阶段/排序错误仍是实际源码或策略待办。其余候选先核定原暂停/工程缺陷/依赖，不能整体放行或重建同义被阻链路。
++- 有限 public Open rollback opt-in 和四场景 manual harness 源码已接入并分别取得独立 source/model 与 compiler-only 资格；Connector 物理恢复 harness、更广 journals/default-on/其他平台、native exclusive WAL-tail publisher、完整故障设施和支持SQL域内已知planner/阶段/排序错误仍是实际源码或策略待办。其余候选先核定原暂停/工程缺陷/依赖，不能整体放行或重建同义被阻链路。
+ - main 明文 backup、WAL/非 Linux backup、真正只读 plaintext-WAL 入口、尚未整合的 backend/目录所有权候选及完整格式升级/回退覆盖。
+ - 完整 crash/power-loss/process-exit、短写/Sync/ENOSPC/torn-write、checkpoint/rekey 中断与磁盘认证负面矩阵：IMPLEMENTATION_MISSING 加受限执行；先补具体协议、实现、断言与独立审阅，不能编造命令。
+ - ANN V3 的三个源码/报告准入 FAIL 保留；V4 未完成，41 目标 fuzz 和未知中断链路没有明确操作/目标。对应链路继续HOLD/UNKNOWN/BLOCKED，不能以纯内存修复、缩小任务或新测试机重试。
+@@ -105,3 +106,14 @@
+ [验收矩阵当前补记](acceptance-status.md#2026-10-11-os-namespace-六路径批次)。
+ 原 LIMIT/P0 段落的 PENDING 是其写作时点；不改写历史，也不将后来候选的
+ 有限结果填入父基点或本批新身份。后续仅按真实组合/提交/恢复/CI 证据追加。
++
++
++## 八 当前公开恢复四场景 harness 批次
++
++本批基于已保存 namespace 提交 `50b627e11e9dbce7f2fde8df35c4634c52a06d52`，
++保留原 LIMIT/P0/namespace 成果与历史，只补一个手工测试源码和中文步骤。
++[验收补记](acceptance-status.md#2026-10-11-有限公开恢复-harness-源码与编译资格)
++区分 P0-base V3 候选、当前组合及每个提交的保存/恢复/CI 状态；
++[独立 V3 报告](evidence/public-recovery-harness-20261011/v3-compiler-review.md)
++只给 source/AST/selection/compile/symbol PASS，没有物理 PASS。
++这关闭一个有限测试入口的源码缺口，原目标、完整 M3/M10 与真实外部资格仍未完成。
+diff --git a/docs/compatibility.md b/docs/compatibility.md
+index 6805e6e1886ee0d01cefeacfca1ab1a188a9b786..71e72d15e35088bcf9e7fc3ca8faee255504393b 100644
+--- a/docs/compatibility.md
++++ b/docs/compatibility.md
+@@ -32,7 +32,7 @@
+ | Unsupported file/schema forms | unsupported | UTF-16, WITHOUT ROWID, autovacuum and unlisted schema/format semantics fail closed; support is never inferred from the version number |
+ | Table and index mutation | partial | Native page split/merge, table/index creation and maintained nonunique BINARY ASC indices; test-oracle integrity_check and the separately bounded native DB/Tx/CLI Check V2 provide distinct checks, neither implies universal SQLite feature support |
+ | Rollback journal | partial | Standard DELETE-journal normal commit/rollback and sector assumptions; nil-default Open still refuses existing journals with ErrRecoveryRequired / CodeIOErr. Explicit RollbackRecovery opts into the bounded source-only profile below; existing zero-byte databases remain rejected |
+-| Hot rollback recovery | partial experimental source/model | Open/OpenContext and configured Connector now have a nil-default, Linux writable-plaintext rollback opt-in, with retired-reader path proof and at most one recovery plus one fresh no-create probe. Independent descriptor-free model/source/compile checks PASS; real RecoverRollback, the production bridge and recovery-enabled real Open remain BLOCKED / NOT_RUN. Public physical harness is IMPLEMENTATION_MISSING; default-on recovery, broader journals, WAL-tail publication and other native platforms remain separate gaps |
++| Hot rollback recovery | partial experimental source/model | Open/OpenContext and configured Connector now have a nil-default, Linux writable-plaintext rollback opt-in, with retired-reader path proof and at most one recovery plus one fresh no-create probe. Independent descriptor-free model/source/compile checks PASS; real RecoverRollback, the production bridge and recovery-enabled real Open remain BLOCKED / NOT_RUN. The four-case public Open manual harness is implemented with independent source/compiler-only PASS; all physical cases remain NOT_RUN. Driver Connector physical coverage, default-on recovery, broader journals, native WAL-tail publication, other native platforms and full fault harnesses remain separate gaps |
+ | Exclusive WAL | partial | Explicit writable WALExclusive, lifetime EXCLUSIVE lock, one active lease, ordinary append/read/checkpoint/close/interoperability; not shared concurrency |
+ | Shared WAL | partial | Actual dual-header/hash/readmark SHM protocol, single writer/multiple independent snapshots, ordinary live official-reader/writer interoperability and reader-safe checkpoint/reset; one active lease per connection |
+ | Ambiguous WAL tails | partial | Accepted ordinary committed/discarded/reset cases are bounded; incomplete/current-generation ambiguous tails fail closed; broader recovery handling remains code work |
+@@ -156,3 +156,15 @@
+ | 两个 encstore 原生 namespace 回归的默认选择 | verified scoped source/model/compile | default 与仅 oracle 在适用平台排除这两个完整移走的函数；manual_namespace 加 env gate 保留它们，其他原声明保持。测试覆盖变化被明确记录 |
+ | Rename/rename source-reference guard | verified scoped | 追加通用 selector 检查，当前 P0 recovery guard 全部保持；bare helper/wrapper/reflection 等仍需行为审阅，不是完整安全证明 |
+ | Windows/amd64、Darwin/amd64、Darwin/arm64 原生 namespace 行为 | unqualified / NOT_RUN | 两种 manual tag 的六项外平台编译与符号核对仅证明编译/链接；不证明文件锁、持久性、加密安全或原生故障资格 |
++
++
++## 2026-10-11 公开恢复手工测试的有限补齐
++
++[TestManualPublicRollbackRecovery](../sqlite/rollback_recovery_manual_linux_test.go)
++只覆盖 nil-default/input-preservation、opt-in/只读重开、journal quota refusal、
++NoCreate absence 四个拟议物理场景。独立 V3 的源码审阅、AST、选择 0/0/1、
++编译及唯一顶层符号 PASS；没有执行 test binary 或生成 fixture，全部物理
++**NOT_RUN**。没有生产行为改动，不新增兼容格式、平台或自动恢复策略。
++[中文步骤](public-rollback-manual-zh.md)只追加当前发布状态，原命令/断言保持；
++原 V3 手册字节另存证据。当前资格、准确候选与 namespace 组合身份见
++[验收补记](acceptance-status.md#2026-10-11-有限公开恢复-harness-源码与编译资格)。
+diff --git a/docs/rollback-recovery-open.md b/docs/rollback-recovery-open.md
+index 3acb3b2163e5ebf7fdfe8a5c26abe58e329f3a44..4a83b22ef2767298e53119956d7e657a6347161c 100644
+--- a/docs/rollback-recovery-open.md
++++ b/docs/rollback-recovery-open.md
+@@ -1,4 +1,10 @@
+ # Opt-in rollback recovery during Open
++
++Current follow-on: the four-case public Open manual harness now exists with
++independent source/AST/selection/compile/symbol PASS; every physical case remains
++BLOCKED / NOT_RUN. Earlier implementation-missing and pending statements below
++retain their original P0/namespace checkpoint scope. See the
++[current harness addendum](#2026-10-11-有限-public-open-手工-harness-补记).
+ 
+ Status (2026-10-11): bounded experimental public Open source is implemented;
+ independent source/model/compile review PASS. The reviewed candidate was based
+@@ -244,3 +250,39 @@
+ [中文手册第 19 节](manual-verification-zh.md#19-os-raw-namespace-门控与独立原生验收2026-10-11)；该切片不增加 public physical harness，
+ 所有真实恢复、启用恢复的 Open/Connect、namespace 原生执行仍 BLOCKED / NOT_RUN。
+ P0 完整普通门、已保存基点、精确恢复及尚待终态的 CI，按[当前验收补记](acceptance-status.md#2026-10-11-os-namespace-六路径批次)分别记录；不将新候选 PASS 归入旧切片。
++
++
++## 2026-10-11 有限 public Open 手工 harness 补记
++
++实际新增源码为
++[`sqlite/rollback_recovery_manual_linux_test.go`](../sqlite/rollback_recovery_manual_linux_test.go)，
++仅有 `TestManualPublicRollbackRecovery`，没有生产行为变化。
++它使用公开 OpenContext/Options 路径，不直接调用内部 RecoverRollback，
++首行是 `//go:build manual_recovery && linux`；函数首语句核对
++`GOSQLITE_MANUAL_RECOVERY=independently_authorized`，不满足即 Fatal，
++在目录查询、fixture 或公开调用之前拒绝。设置 gate 本身不授予执行权限。
++
++四个子场景只有 nil-default 拒绝并保留输入、显式 opt-in 恢复与只读 NoCreate
++重开、MaxJournalBytes=1 拒绝并保留输入、NoCreate 缺失路径不创建任何条目。
++合成原始输入、工作文件与 SHA-256 manifest 在成功/失败后都保留；
++已建成的三份输入备份和 manifest 逐项核对。失败子场景终止后续场景，
++Close 只尝试一次，失败不继续只读重开；最终 pending-owner 查询只记录、不重试。
++这些是审阅过的源码断言，全部物理运行仍 **BLOCKED / NOT_RUN**。
++
++独立 V3 的 source review 与六项 AST/list/compile/nm 检查于 08:58:38 UTC PASS；
++Linux/amd64、Go 1.27.2、CGO0，default/oracle/manual 选择次数 0/0/1，
++精确顶层函数符号唯一。只运行标准库 AST 文本检查器，随后编译/链接和读取符号；
++从未执行所产 test binary，包括 gate-off、-test.list 或未匹配 selector。
++候选 tree `1755d67431f9de082449b08fa24b26b2b35eb612` 属于 P0 加两文件，
++不属于当前 namespace 基点 `50b627e11e9dbce7f2fde8df35c4634c52a06d52` 的新组合。
++准确身份、原始 V1 三项阻断、V2 修正及 V3 文档修正见
++[证据摘要](evidence/public-recovery-harness-20261011.md)。
++
++[中文手工步骤](public-rollback-manual-zh.md)只更新发布状态段，命令及断言保持；
++[原 V3 手册](evidence/public-recovery-harness-20261011/v3-reviewed-manual.md.txt)
++另存审阅原字节，历史身份与当前发布状态分开，当前资格见
++[V3 报告](evidence/public-recovery-harness-20261011/v3-compiler-review.md)。
++原内部 harness 不因新增入口改变范围。公开四场景入口的源码不再缺失，
++但 driver Connector 的物理恢复 harness、更广 journal、其他平台、native WAL-tail
++publisher、完整故障/崩溃/重启矩阵仍未补齐；既有真实恢复执行限制不变。
++新组合、新提交、Library 恢复和 CI 必须独立核验，不能继承候选编译或父提交 PASS。
+diff --git a/docs/manual-verification-zh.md b/docs/manual-verification-zh.md
+index ff99ce3d3de4b44f0d7b866aa8e7bcc26c11dba4..31f316cfa39461374042a9e861385f330511df9e 100644
+--- a/docs/manual-verification-zh.md
++++ b/docs/manual-verification-zh.md
+@@ -1,4 +1,10 @@
+ # gosqlite 中文手工验收操作手册
++
++2026-10-11 后续补记：公开 Open 四场景手工测试入口现已补齐并通过独立
++源码/AST/选择/编译/符号检查，全部物理运行仍 **BLOCKED / NOT_RUN**。
++当前身份及步骤索引见[第20节](#20-公开-open-四场景-harness-源码与编译资格2026-10-11)；
++下面 P0/第18节中“整个 public harness 未实现”的文字保留原阶段时点，
++不能据其旧状态否定新入口，也不能把编译资格改成运行 PASS。
+ 
+ 五个示例目录终结的后续限定普通复验见[补充规程](example-retention-verification-zh.md)；其真实失败现场仍未动态验证，旧受限门与缺失设施保持原状态。
+ 
+@@ -1205,3 +1211,70 @@
+ - 只有进程自然结束、已知资源正常收尾且日志/身份归档核对完成后，用户才决定
+   是否删除自己本次新建的 RUNROOT。失败/不确定时不额外删除残留，不清原仓库、
+   活库 sidecar、历史证据或其他任务缓存；不提供宽泛删除命令。不把删除当安全擦除。
++
++
++## 20 公开 Open 四场景 harness 源码与编译资格（2026-10-11）
++
++本节补充第18节的历史状态，保留第12节内部 harness、第19节 namespace
++规程及全部既有命令。新测试保持独立 V3 审阅原字节；专题手册仅更新
++发布状态段，命令/断言不改，V3 审阅手册原字节另存证据。
++该 V3 基于 P0 提交 `56bbcf3febe233197aa0a5eac965c67a67a88011`，
++候选 tree `1755d67431f9de082449b08fa24b26b2b35eb612`。
++本次组合基点为已保存 namespace 提交
++`50b627e11e9dbce7f2fde8df35c4634c52a06d52` / tree
++`8f2709293287a3517a52b3f989888ded8230ef53`，不整树覆盖 namespace 成果。
++
++### 20.1 已有入口与严格有限覆盖
++
++[`TestManualPublicRollbackRecovery`](../sqlite/rollback_recovery_manual_linux_test.go)
++位于单一新增 Linux 手工文件，实际通过公开 `sqlite.OpenContext` 和
++`Options.RollbackRecovery`；没有直接调用内部恢复函数或改变生产行为。
++首行必须为 `//go:build manual_recovery && linux`，函数首语句必须先核对
++`GOSQLITE_MANUAL_RECOVERY=independently_authorized`，缺值即 Fatal。
++它先拒绝误启动，再检查全新、空、绝对且无符号链接的 fixture 根目录。
++
++| 真实子测试名 | 已实现的断言 | 当前执行 |
++|---|---|---|
++| `nil-default-preserves-input` | nil DB、ErrRecoveryRequired、CodeIOErr，工作 DB/journal 字节保持 | BLOCKED / NOT_RUN |
++| `opt-in-restores-and-reopens` | 恢复到原两页、元数据/空 schema/完整字节、journal 消失；一次正常关闭后只读 NoCreate 重开 | BLOCKED / NOT_RUN |
++| `journal-limit-preserves-input` | MaxJournalBytes=1，nil DB，ErrRecoveryRequired 与 ErrMemoryLimit/CodeIOErr，输入保持 | BLOCKED / NOT_RUN |
++| `no-create-preserves-absence` | nil DB、os.ErrNotExist，主库/journal/WAL/SHM 与隔离目录其他条目均不创建 | BLOCKED / NOT_RUN |
++
++恰这四项没有覆盖 Connector 真实恢复、更广 journal 形式、其他平台、native
++WAL-tail publisher、短写/Sync/ENOSPC、断电/强杀/torn-write、恶意目录替换
++或完整加密故障矩阵。该有限入口不再是 IMPLEMENTATION_MISSING；
++其余缺失设施和原执行限制保持。
++
++### 20.2 实际通过的是审阅与编译
++
++- [V1 原报告](evidence/public-recovery-harness-20261011/v1-source-review.md)
++  的三项阻断保留。[V2](evidence/public-recovery-harness-20261011/v2-source-review.md)
++  修正 fail-open 检查、所有备份及 manifest 核对、失败即停/Close/pending 处理；
++  [V3](evidence/public-recovery-harness-20261011/v3-compiler-review.md)只移动
++  手册环境设置到首个 Go 命令之前，并将 archive 与提取拆开，Go 源码未再改动。
++- 六项获准 Go 工具调用为外置标准库 AST 文本检查器、default/oracle/manual
++  三次 go list、只编译的 go test -c、只读符号的 go tool nm；08:58:38 UTC
++  自然完成，全部 exit 0。独立文本检查要求文件次数恰 0/0/1，具名顶层符号唯一。
++- 没有执行 test binary、gate-off、-test.list、无匹配 selector、fixture
++  生成器或任何物理测试。本次文档对账本身也没有调用 Go 或运行数据库。
++- 源码 SHA-256 为
++  `dd5a63e2a8e7d4fdd969ba03273a8f8147d5eff81babf8fce44a5228c5cdaf5e`；
++  原 V3 审阅手册 SHA-256 为
++  `a49ae1882c4a5dcb8c58860fa8df3b011f88c9ee99963a5721831049477ec4d2`。
++  候选、当前组合及后来提交须分别记录，不能互借 PASS。
++
++### 20.3 人工步骤、证据留存与停止
++
++完整步骤见[独立中文规程](public-rollback-manual-zh.md)：环境/资源与独立授权、
++固定干净提交的隔离副本、fail-closed 选择计数、compile/nm、精确单项选择、
++预期断言、排查及整个 RUN 目录留存。该手册当前发布状态段与
++[原 V3 审阅手册](evidence/public-recovery-harness-20261011/v3-reviewed-manual.md.txt)
++分开记录，历史 V1/V2/V3 身份保留；资格以本节、[当前验收](acceptance-status.md)与 V3 报告为准。
++它的执行命令仍仅供用户在另行批准环境自行使用，不能由代理执行或迁移 CI 绕行。
++
++发生失败即停止后续场景；Close 失败不得继续重开，pending-owner 只记录，
++不隐式重试恢复或清理。所有已构造输入备份、manifest、工作文件和目录成功后
++仍保留；核对证据归档和资源状态后，才由操作者决定清理自己创建的目录。
++四个具名子项全部实际运行且通过、零 FAIL/SKIP、身份/日志/退出码齐备，
++才可对该精确提交及实际 Linux/架构/文件系统记四场景 PASS；编译、空匹配或
++部分 PASS 均不符合。当前没有这份物理运行证据，M3/M10/整体仍未验收。
+diff --git a/docs/manual-verification.md b/docs/manual-verification.md
+index 1257767b9919e2fc00f8115780401fbb708ed4ea..bfe897c019146a84a0c00ba121a7b2cb09de047c 100644
+--- a/docs/manual-verification.md
++++ b/docs/manual-verification.md
+@@ -1,4 +1,11 @@
+ # Manual verification and release-blocking gates
++
++Current follow-on (2026-10-11): the limited public Open four-case manual harness
++has been implemented and independently source-reviewed/compiler-qualified.
++Every physical scenario remains BLOCKED / NOT_RUN. Earlier public-harness
++IMPLEMENTATION_MISSING statements below are retained P0-stage history; use
++[Chinese section 20](manual-verification-zh.md#20-公开-open-四场景-harness-源码与编译资格2026-10-11)
++and the [dedicated steps](public-rollback-manual-zh.md) for the bounded new entrypoint.
+ 
+ ## 2026-10-11 中文入口与当前边界
+ 
+@@ -710,3 +717,29 @@
+ 旧 P0 段落的 namespace 未纳入是该切片范围，不反推当前仍未门控。
+ 真实原生测试须用户独立批准环境，具体平台、tag、env、隔离副本、命令、原断言、
+ 失败保留局限和清理条件都在中文第 19 节；设置 gate 本身不是授权。
++
++
++## 2026-10-11 limited public Open harness follow-on
++
++The new Linux-only `TestManualPublicRollbackRecovery` covers exactly nil-default
++refusal/input preservation, opt-in restoration/read-only reopen, journal-budget
++refusal, and NoCreate absence. It has the exact manual_recovery/linux constraint
++and a first-statement environment refusal before any fixture or public operation.
++The four runtime cases are all NOT_RUN; no generated test binary was executed,
++including gate-off, -test.list or unmatched-selector probes.
++
++Independent V3 source/AST/selection/compile/symbol checks passed, with selection
++counts 0/0/1 and one exact top-level function symbol. V1 findings, V2 corrections
++and the V3 documentation-only delta remain separate
++[review evidence](evidence/public-recovery-harness-20261011.md).
++V3 tree `1755d67431f9de082449b08fa24b26b2b35eb612` is P0 plus two additions,
++not the namespace-based current composition or its new commit. The dedicated
++manual updates only its publication-status paragraph, preserving commands and
++assertions. The original V3-reviewed manual is retained separately in the evidence
++archive; historical review identity is distinct from current publication status.
++Every physical case remains NOT_RUN.
++
++Driver Connector physical coverage, broader journal/platform support, native
++WAL-tail publication and complete physical fault/crash harnesses remain gaps.
++Neither this entrypoint nor its compilation waives the existing execution
++restrictions, qualifies M3/M10, or replaces per-commit restore and CI evidence.

@@ -1,0 +1,21 @@
+{
+  "utc": "2026-10-11T09:32:51.657827+00:00",
+  "status": "PASS",
+  "Go_command_count": 6,
+  "exits": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "pre_post_3104_files_git_and_POSIX_equal": true,
+  "post_tree": "0af9b064bebfbec9c8270c4bf2f10ec2055fb186",
+  "post_non_docs": 789,
+  "test_binary_executed": false,
+  "physical_scenarios": "BLOCKED / NOT_RUN",
+  "no_main_edit": true,
+  "compiler_lease": "terminal; release to lead"
+}

@@ -1,0 +1,181 @@
+--- v1/docs/public-rollback-manual-zh.md
++++ v2/docs/public-rollback-manual-zh.md
+@@ -65,9 +65,16 @@
+ go list -f '{{join .XTestGoFiles "\n"}}' ./sqlite > "$EVIDENCE/default-files.txt"
+ go list -tags oracle -f '{{join .XTestGoFiles "\n"}}' ./sqlite > "$EVIDENCE/oracle-files.txt"
+ go list -tags manual_recovery -f '{{join .XTestGoFiles "\n"}}' ./sqlite > "$EVIDENCE/manual-files.txt"
+-! grep -Fx rollback_recovery_manual_linux_test.go "$EVIDENCE/default-files.txt"
+-! grep -Fx rollback_recovery_manual_linux_test.go "$EVIDENCE/oracle-files.txt"
+-grep -Fx rollback_recovery_manual_linux_test.go "$EVIDENCE/manual-files.txt"
++python3 - "$EVIDENCE" <<'PY'
++import pathlib, sys
++root = pathlib.Path(sys.argv[1])
++name = 'rollback_recovery_manual_linux_test.go'
++for file, expected in [('default-files.txt', 0), ('oracle-files.txt', 0), ('manual-files.txt', 1)]:
++    actual = (root / file).read_text().splitlines().count(name)
++    if actual != expected:
++        raise SystemExit(f'{file}: expected {expected}, got {actual}; STOP')
++print('source selection: PASS (default=0 oracle=0 manual=1)')
++PY
+ go test -c -p=1 -vet=off -tags manual_recovery -o "$EVIDENCE/public-recovery.test" ./sqlite
+ go tool nm "$EVIDENCE/public-recovery.test" > "$EVIDENCE/symbols.txt"
+ grep -F 'sqlite_test.TestManualPublicRollbackRecovery' "$EVIDENCE/symbols.txt"
+@@ -104,7 +111,7 @@
+ printf '退出码=%s；证据保留于 %s\n' "$RC" "$EVIDENCE"
+ ```
+ 
+-通过标准：退出码0，具名顶层测试及上述四个子测试全部 PASS，没有 SKIP/FAIL；字节、错误码/原因、journal 消失、NoCreate 路径、Close 与 pending-owner 断言均被执行；输入清单及运行前后环境、源码/二进制身份齐全。输出仅有顶层 PASS 而没有四个子项、选择器没有匹配、门控导致停止或未运行，都不得记 PASS。即使四项通过，也只属于这个提交、Linux/实际架构、所用文件系统及有限场景。
++通过标准：退出码0，具名顶层测试及上述四个子测试全部 PASS，没有 SKIP/FAIL；字节、错误码/原因、journal 消失、NoCreate 路径、Close 与 pending-owner 断言均被执行；输入清单及运行前后环境、源码/二进制身份齐全。任一场景失败后停止后续场景；Close 失败不继续只读重开；最终只读记录 pending-owner，不隐式重试清理。已建成的三份原始输入备份及 input-sha256.json 在清理阶段全部检查，单项失败不阻止检查其他备份。输出仅有顶层 PASS 而没有四个子项、选择器没有匹配、门控导致停止或未运行，都不得记 PASS。即使四项通过，也只属于这个提交、Linux/实际架构、所用文件系统及有限场景。
+ 
+ ## 6. 失败排查与清理
+ 
+--- v1/sqlite/rollback_recovery_manual_linux_test.go
++++ v2/sqlite/rollback_recovery_manual_linux_test.go
+@@ -47,17 +47,24 @@
+ 		t.Fatalf("disposable root must be empty: entries=%d error=%v", len(entries), err)
+ 	}
+ 	manualPublicRecoveryNoPending(t)
++	t.Cleanup(func() {
++		for _, pending := range sqlite.PendingPlaintextCleanups() {
++			t.Errorf("pending owner after scenario cleanup; retain all fixtures: %v", pending)
++		}
++	})
+ 	t.Logf("retaining every input and working file under %s; no automatic deletion", root)
+ 
+-	t.Run("nil-default-preserves-input", func(t *testing.T) {
++	if !t.Run("nil-default-preserves-input", func(t *testing.T) {
+ 		path, _, current, data := manualPublicRecoveryFiles(t, root)
+ 		db, err := sqlite.OpenContext(context.Background(), path, sqlite.Options{NoCreate: true})
+ 		manualPublicRecoveryRefusal(t, db, err, sqlite.ErrRecoveryRequired)
+ 		manualPublicRecoveryEqual(t, path, current)
+ 		manualPublicRecoveryEqual(t, path+"-journal", data)
+ 		manualPublicRecoveryNoPending(t)
+-	})
+-	t.Run("opt-in-restores-and-reopens", func(t *testing.T) {
++	}) {
++		return
++	}
++	if !t.Run("opt-in-restores-and-reopens", func(t *testing.T) {
+ 		path, original, _, _ := manualPublicRecoveryFiles(t, root)
+ 		db, err := sqlite.OpenContext(context.Background(), path, sqlite.Options{
+ 			NoCreate: true, RollbackRecovery: &sqlite.RollbackRecoveryOptions{},
+@@ -70,7 +77,9 @@
+ 		if err != nil || len(schema) != 0 {
+ 			t.Fatalf("restored empty sqlite_schema: entries=%d error=%v", len(schema), err)
+ 		}
+-		closeDB()
++		if !closeDB() {
++			return
++		}
+ 		manualPublicRecoveryEqual(t, path, original)
+ 		manualPublicRecoveryAbsent(t, path+"-journal")
+ 		db, err = sqlite.OpenContext(context.Background(), path, sqlite.Options{ReadOnly: true, NoCreate: true})
+@@ -78,12 +87,16 @@
+ 		if got := db.Info(); got.PageCount != 2 || got.PageSize != 512 {
+ 			t.Fatalf("read-only reopen metadata: %+v", got)
+ 		}
+-		closeDB()
++		if !closeDB() {
++			return
++		}
+ 		manualPublicRecoveryEqual(t, path, original)
+ 		manualPublicRecoveryAbsent(t, path+"-journal")
+ 		manualPublicRecoveryNoPending(t)
+-	})
+-	t.Run("journal-limit-preserves-input", func(t *testing.T) {
++	}) {
++		return
++	}
++	if !t.Run("journal-limit-preserves-input", func(t *testing.T) {
+ 		path, _, current, data := manualPublicRecoveryFiles(t, root)
+ 		db, err := sqlite.OpenContext(context.Background(), path, sqlite.Options{
+ 			NoCreate: true, RollbackRecovery: &sqlite.RollbackRecoveryOptions{MaxJournalBytes: 1},
+@@ -92,8 +105,10 @@
+ 		manualPublicRecoveryEqual(t, path, current)
+ 		manualPublicRecoveryEqual(t, path+"-journal", data)
+ 		manualPublicRecoveryNoPending(t)
+-	})
+-	t.Run("no-create-preserves-absence", func(t *testing.T) {
++	}) {
++		return
++	}
++	if !t.Run("no-create-preserves-absence", func(t *testing.T) {
+ 		dir, err := os.MkdirTemp(root, "no-create-")
+ 		if err != nil {
+ 			t.Fatal(err)
+@@ -121,7 +136,9 @@
+ 			t.Fatalf("NoCreate created an unexpected entry: %v %v", entries, err)
+ 		}
+ 		manualPublicRecoveryNoPending(t)
+-	})
++	}) {
++		return
++	}
+ }
+ 
+ // This deterministic two-page fixture follows the already documented internal
+@@ -173,16 +190,22 @@
+ 		manualPublicRecoveryWrite(t, filepath.Join(dir, name), contents)
+ 		hashes[name] = fmt.Sprintf("%x", sha256.Sum256(contents))
+ 	}
++	manifest, err := json.MarshalIndent(hashes, "", "  ")
++	if err != nil {
++		t.Fatal(err)
++	}
++	manifest = append(manifest, '\n')
++	manualPublicRecoveryWrite(t, filepath.Join(dir, "input-sha256.json"), manifest)
++	inputs["input-sha256.json"] = manifest
+ 	t.Cleanup(func() {
+-		for name, contents := range inputs {
+-			manualPublicRecoveryEqual(t, filepath.Join(dir, name), contents)
++		for _, name := range []string{"original.input.db", "current.input.db", "journal.input.bin", "input-sha256.json"} {
++			want := inputs[name]
++			got, err := os.ReadFile(filepath.Join(dir, name))
++			if err != nil || !bytes.Equal(got, want) {
++				t.Errorf("retained input %s: error=%v gotSHA256=%x wantSHA256=%x", name, err, sha256.Sum256(got), sha256.Sum256(want))
++			}
+ 		}
+ 	})
+-	manifest, err := json.MarshalIndent(hashes, "", "  ")
+-	if err != nil {
+-		t.Fatal(err)
+-	}
+-	manualPublicRecoveryWrite(t, filepath.Join(dir, "input-sha256.json"), append(manifest, '\n'))
+ 	path := filepath.Join(dir, "recovery.db")
+ 	manualPublicRecoveryWrite(t, path, current)
+ 	manualPublicRecoveryWrite(t, path+"-journal", data)
+@@ -250,7 +273,7 @@
+ 	}
+ }
+ 
+-func manualPublicRecoveryOwnDB(t *testing.T, db *sqlite.DB, err error) func() {
++func manualPublicRecoveryOwnDB(t *testing.T, db *sqlite.DB, err error) func() bool {
+ 	t.Helper()
+ 	if err != nil || db == nil {
+ 		if db != nil {
+@@ -259,15 +282,18 @@
+ 		t.Fatalf("expected public Open success: %v", err)
+ 	}
+ 	closed := false
+-	closeDB := func() {
++	var closeErr error
++	closeDB := func() bool {
+ 		if closed {
+-			return
++			return closeErr == nil
+ 		}
+ 		closed = true
+-		if err := db.Close(); err != nil {
+-			t.Errorf("Close failed; retain fixtures and diagnostics: %v", err)
+-		}
+-	}
+-	t.Cleanup(closeDB)
++		closeErr = db.Close()
++		if closeErr != nil {
++			t.Errorf("Close failed; retain fixtures and diagnostics: %v", closeErr)
++		}
++		return closeErr == nil
++	}
++	t.Cleanup(func() { closeDB() })
+ 	return closeDB
+ }

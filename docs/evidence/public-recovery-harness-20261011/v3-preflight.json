@@ -1,0 +1,58 @@
+{
+  "utc": "2026-10-11T08:58:28.653278+00:00",
+  "resources": {
+    "/tmp": {
+      "bytes": 1413267456,
+      "inodes": 1243461,
+      "writable": true,
+      "minimum_bytes": 1073741824,
+      "minimum_inodes": 10000
+    },
+    "/workspace/scratch/5e06a74e5f65/durable-restart": {
+      "bytes": 11326042112,
+      "inodes": 1161008,
+      "writable": true,
+      "minimum_bytes": 2147483648,
+      "minimum_inodes": 10000
+    }
+  },
+  "controls": {
+    "GOTOOLCHAIN": "local",
+    "GOPROXY": "off",
+    "GOSUMDB": "off",
+    "GOENV": "off",
+    "GOWORK": "off",
+    "GOFLAGS": "-buildvcs=false",
+    "GOMAXPROCS": "2",
+    "CGO_ENABLED": "0",
+    "GOOS": "linux",
+    "GOARCH": "amd64",
+    "GOPATH": "/workspace/scratch/5e06a74e5f65/durable-restart/go-path",
+    "GOCACHE": "/workspace/scratch/5e06a74e5f65/durable-restart/go-cache"
+  },
+  "TMPDIR": "/tmp",
+  "GOTMPDIR": "unset",
+  "manual_environment": "all GOSQLITE_MANUAL_* unset",
+  "tool_VERSION": "go1.27.2\ntime 2026-10-02T20:28:03Z\n",
+  "tool_sha256": "548d3c32f83fa81152f543eb1526be7884cfe0526eb5e9ce29d3eca14786e7e0",
+  "inspector_sha256": "27ba99f1bb558f2720e6382722ff61dfd693f1a006ff48bdadd8a071f7d552fb",
+  "module_pins": "module github.com/ms-xiaosnow/gosqlite\n\ngo 1.27.2\n\nrequire (\n\tgolang.org/x/crypto v0.58.0\n\tgolang.org/x/sys v0.49.0\n\tgolang.org/x/text v0.43.0\n)\n",
+  "go_sum_sha256": "c89d6859061226d04dcd09404790a57c6ec323d79d16fe2f9ac2e84239695e7f",
+  "custom_go_proxy_overrides": "none",
+  "V1_unchanged": true,
+  "V2_unchanged": true,
+  "V3_source_unchanged_from_V2": true,
+  "candidate_files": 3038,
+  "owned": {
+    "docs/public-rollback-manual-zh.md": {
+      "mode": 420,
+      "bytes": 9711,
+      "sha256": "a49ae1882c4a5dcb8c58860fa8df3b011f88c9ee99963a5721831049477ec4d2"
+    },
+    "sqlite/rollback_recovery_manual_linux_test.go": {
+      "mode": 420,
+      "bytes": 10657,
+      "sha256": "dd5a63e2a8e7d4fdd969ba03273a8f8147d5eff81babf8fce44a5228c5cdaf5e"
+    }
+  }
+}

@@ -1,0 +1,1178 @@
+[
+  {
+    "source": "docs/acceptance-status.md",
+    "target": "#2026-10-11-有限公开恢复-harness-源码与编译资格",
+    "resolved_relative": "docs/acceptance-status.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/acceptance-status.md",
+    "target": "evidence/cli-resources-20261011.md",
+    "resolved_relative": "docs/evidence/cli-resources-20261011.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/acceptance-status.md",
+    "target": "example-retention-verification-zh.md",
+    "resolved_relative": "docs/example-retention-verification-zh.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/acceptance-status.md",
+    "target": "evidence/inspect-metadata-20261011.md",
+    "resolved_relative": "docs/evidence/inspect-metadata-20261011.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/acceptance-status.md",
+    "target": "evidence/inspect-context-20261011.md",
+    "resolved_relative": "docs/evidence/inspect-context-20261011.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/acceptance-status.md",
+    "target": "../goal.md",
+    "resolved_relative": "goal.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/acceptance-status.md",
+    "target": "restriction-provenance-20261011.md",
+    "resolved_relative": "docs/restriction-provenance-20261011.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/acceptance-status.md",
+    "target": "evidence/limit-conversion-20261011.md",
+    "resolved_relative": "docs/evidence/limit-conversion-20261011.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/acceptance-status.md",
+    "target": "rollback-recovery-open.md",
+    "resolved_relative": "docs/rollback-recovery-open.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/acceptance-status.md",
+    "target": "manual-verification-zh.md",
+    "resolved_relative": "docs/manual-verification-zh.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/acceptance-status.md",
+    "target": "evidence/goal-acceptance-audit-20261010.md",
+    "resolved_relative": "docs/evidence/goal-acceptance-audit-20261010.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/acceptance-status.md",
+    "target": "checkpoints.json",
+    "resolved_relative": "docs/checkpoints.json",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/acceptance-status.md",
+    "target": "progress.md",
+    "resolved_relative": "docs/progress.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/acceptance-status.md",
+    "target": "interruption-20261010.md",
+    "resolved_relative": "docs/interruption-20261010.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/acceptance-status.md",
+    "target": "public-rollback-manual-zh.md",
+    "resolved_relative": "docs/public-rollback-manual-zh.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/acceptance-status.md",
+    "target": "manual-verification-zh.md#19-os-raw-namespace-门控与独立原生验收2026-10-11",
+    "resolved_relative": "docs/manual-verification-zh.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/acceptance-status.md",
+    "target": "manual-verification-zh.md",
+    "resolved_relative": "docs/manual-verification-zh.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/acceptance-status.md",
+    "target": "manual-verification.md",
+    "resolved_relative": "docs/manual-verification.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/acceptance-status.md",
+    "target": "closeout-scope-20261011.md",
+    "resolved_relative": "docs/closeout-scope-20261011.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/acceptance-status.md",
+    "target": "evidence/example-retention-20261011.md",
+    "resolved_relative": "docs/evidence/example-retention-20261011.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/acceptance-status.md",
+    "target": "evidence/cli-resources-20261011/persistence.json",
+    "resolved_relative": "docs/evidence/cli-resources-20261011/persistence.json",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/acceptance-status.md",
+    "target": "restriction-provenance-20261011.md",
+    "resolved_relative": "docs/restriction-provenance-20261011.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/acceptance-status.md",
+    "target": "evidence/public-open-integration-20261011.md",
+    "resolved_relative": "docs/evidence/public-open-integration-20261011.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/acceptance-status.md",
+    "target": "manual-verification-zh.md#19-os-raw-namespace-门控与独立原生验收2026-10-11",
+    "resolved_relative": "docs/manual-verification-zh.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/acceptance-status.md",
+    "target": "test-scope-audit.md",
+    "resolved_relative": "docs/test-scope-audit.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/acceptance-status.md",
+    "target": "evidence/namespace-gating-20261011/final-composition-report.md",
+    "resolved_relative": "docs/evidence/namespace-gating-20261011/final-composition-report.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/acceptance-status.md",
+    "target": "../sqlite/rollback_recovery_manual_linux_test.go",
+    "resolved_relative": "sqlite/rollback_recovery_manual_linux_test.go",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/acceptance-status.md",
+    "target": "evidence/public-recovery-harness-20261011.md",
+    "resolved_relative": "docs/evidence/public-recovery-harness-20261011.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/acceptance-status.md",
+    "target": "evidence/public-recovery-harness-20261011/v3-compiler-review.md",
+    "resolved_relative": "docs/evidence/public-recovery-harness-20261011/v3-compiler-review.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/acceptance-status.md",
+    "target": "evidence/public-recovery-harness-20261011/compiler-commands.json",
+    "resolved_relative": "docs/evidence/public-recovery-harness-20261011/compiler-commands.json",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/acceptance-status.md",
+    "target": "public-rollback-manual-zh.md",
+    "resolved_relative": "docs/public-rollback-manual-zh.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/acceptance-status.md",
+    "target": "evidence/public-recovery-harness-20261011/v3-reviewed-manual.md.txt",
+    "resolved_relative": "docs/evidence/public-recovery-harness-20261011/v3-reviewed-manual.md.txt",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/progress.md",
+    "target": "test-scope-audit.md",
+    "resolved_relative": "docs/test-scope-audit.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/progress.md",
+    "target": "evidence/inspect-context-20261011.md",
+    "resolved_relative": "docs/evidence/inspect-context-20261011.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/progress.md",
+    "target": "cli-inspect.md",
+    "resolved_relative": "docs/cli-inspect.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/progress.md",
+    "target": "evidence/inspect-metadata-20261011.md",
+    "resolved_relative": "docs/evidence/inspect-metadata-20261011.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/progress.md",
+    "target": "evidence/query-close-20261011.md",
+    "resolved_relative": "docs/evidence/query-close-20261011.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/progress.md",
+    "target": "../examples/write/README.md",
+    "resolved_relative": "examples/write/README.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/progress.md",
+    "target": "evidence/cli-resources-20261011.md",
+    "resolved_relative": "docs/evidence/cli-resources-20261011.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/progress.md",
+    "target": "migration-pgembedding.md",
+    "resolved_relative": "docs/migration-pgembedding.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/progress.md",
+    "target": "evidence/m9-converter-review.txt",
+    "resolved_relative": "docs/evidence/m9-converter-review.txt",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/progress.md",
+    "target": "evidence/m9-import-review.txt",
+    "resolved_relative": "docs/evidence/m9-import-review.txt",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/progress.md",
+    "target": "evidence/m9-transition-cli-independent-review.txt",
+    "resolved_relative": "docs/evidence/m9-transition-cli-independent-review.txt",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/progress.md",
+    "target": "evidence/m9-full-table-independent-review.md",
+    "resolved_relative": "docs/evidence/m9-full-table-independent-review.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/progress.md",
+    "target": "evidence/import-distance-v2-handoff.md",
+    "resolved_relative": "docs/evidence/import-distance-v2-handoff.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/progress.md",
+    "target": "evidence/m8-wal-components.txt",
+    "resolved_relative": "docs/evidence/m8-wal-components.txt",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/progress.md",
+    "target": "evidence/m8-shared-review.txt",
+    "resolved_relative": "docs/evidence/m8-shared-review.txt",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/progress.md",
+    "target": "typed-ann.md",
+    "resolved_relative": "docs/typed-ann.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/progress.md",
+    "target": "evidence/m9-typed-ann-aggregate.txt",
+    "resolved_relative": "docs/evidence/m9-typed-ann-aggregate.txt",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/progress.md",
+    "target": "evidence/shared-absence-lead-review/REVIEW.md",
+    "resolved_relative": "docs/evidence/shared-absence-lead-review/REVIEW.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/progress.md",
+    "target": "evidence/rollback-reader-acquisition-lead-review/REVIEW.md",
+    "resolved_relative": "docs/evidence/rollback-reader-acquisition-lead-review/REVIEW.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/progress.md",
+    "target": "evidence/rollback-reader-acquisition-evidence/handoff-v1.md",
+    "resolved_relative": "docs/evidence/rollback-reader-acquisition-evidence/handoff-v1.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/progress.md",
+    "target": "acceptance-status.md",
+    "resolved_relative": "docs/acceptance-status.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/progress.md",
+    "target": "interruption-20261010.md",
+    "resolved_relative": "docs/interruption-20261010.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/progress.md",
+    "target": "example-retention-verification-zh.md",
+    "resolved_relative": "docs/example-retention-verification-zh.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/progress.md",
+    "target": "evidence/example-retention-20261011.md",
+    "resolved_relative": "docs/evidence/example-retention-20261011.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/progress.md",
+    "target": "evidence/cli-resources-20261011/persistence.json",
+    "resolved_relative": "docs/evidence/cli-resources-20261011/persistence.json",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/progress.md",
+    "target": "restriction-provenance-20261011.md",
+    "resolved_relative": "docs/restriction-provenance-20261011.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/progress.md",
+    "target": "evidence/limit-conversion-20261011.md",
+    "resolved_relative": "docs/evidence/limit-conversion-20261011.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/progress.md",
+    "target": "limit-conversion-verification-zh.md",
+    "resolved_relative": "docs/limit-conversion-verification-zh.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/progress.md",
+    "target": "evidence/limit-conversion-20261011.md",
+    "resolved_relative": "docs/evidence/limit-conversion-20261011.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/progress.md",
+    "target": "rollback-recovery-open.md",
+    "resolved_relative": "docs/rollback-recovery-open.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/progress.md",
+    "target": "manual-verification-zh.md",
+    "resolved_relative": "docs/manual-verification-zh.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/progress.md",
+    "target": "rollback-recovery-open.md",
+    "resolved_relative": "docs/rollback-recovery-open.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/progress.md",
+    "target": "evidence/public-open-integration-20261011.md",
+    "resolved_relative": "docs/evidence/public-open-integration-20261011.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/progress.md",
+    "target": "manual-verification-zh.md#19-os-raw-namespace-门控与独立原生验收2026-10-11",
+    "resolved_relative": "docs/manual-verification-zh.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/progress.md",
+    "target": "evidence/namespace-gating-20261011/final-composition-report.md",
+    "resolved_relative": "docs/evidence/namespace-gating-20261011/final-composition-report.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/progress.md",
+    "target": "acceptance-status.md#2026-10-11-有限公开恢复-harness-源码与编译资格",
+    "resolved_relative": "docs/acceptance-status.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/progress.md",
+    "target": "manual-verification-zh.md#20-公开-open-四场景-harness-源码与编译资格2026-10-11",
+    "resolved_relative": "docs/manual-verification-zh.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/progress.md",
+    "target": "public-rollback-manual-zh.md",
+    "resolved_relative": "docs/public-rollback-manual-zh.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/progress.md",
+    "target": "evidence/public-recovery-harness-20261011.md",
+    "resolved_relative": "docs/evidence/public-recovery-harness-20261011.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/restriction-provenance-20261011.md",
+    "target": "../goal.md",
+    "resolved_relative": "goal.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/restriction-provenance-20261011.md",
+    "target": "manual-verification.md",
+    "resolved_relative": "docs/manual-verification.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/restriction-provenance-20261011.md",
+    "target": "test-scope-audit.md",
+    "resolved_relative": "docs/test-scope-audit.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/restriction-provenance-20261011.md",
+    "target": "rollback-recovery-open.md",
+    "resolved_relative": "docs/rollback-recovery-open.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/restriction-provenance-20261011.md",
+    "target": "manual-verification-zh.md#19-os-raw-namespace-门控与独立原生验收2026-10-11",
+    "resolved_relative": "docs/manual-verification-zh.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/restriction-provenance-20261011.md",
+    "target": "compatibility.md",
+    "resolved_relative": "docs/compatibility.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/restriction-provenance-20261011.md",
+    "target": "file-formats.md",
+    "resolved_relative": "docs/file-formats.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/restriction-provenance-20261011.md",
+    "target": "manual-verification-zh.md",
+    "resolved_relative": "docs/manual-verification-zh.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/restriction-provenance-20261011.md",
+    "target": "evidence/limit-conversion-20261011.md",
+    "resolved_relative": "docs/evidence/limit-conversion-20261011.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/restriction-provenance-20261011.md",
+    "target": "manual-verification-zh.md",
+    "resolved_relative": "docs/manual-verification-zh.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/restriction-provenance-20261011.md",
+    "target": "cli-resource-verification-zh.md",
+    "resolved_relative": "docs/cli-resource-verification-zh.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/restriction-provenance-20261011.md",
+    "target": "example-retention-verification-zh.md",
+    "resolved_relative": "docs/example-retention-verification-zh.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/restriction-provenance-20261011.md",
+    "target": "rollback-recovery-open.md",
+    "resolved_relative": "docs/rollback-recovery-open.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/restriction-provenance-20261011.md",
+    "target": "manual-verification-zh.md#19-os-raw-namespace-门控与独立原生验收2026-10-11",
+    "resolved_relative": "docs/manual-verification-zh.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/restriction-provenance-20261011.md",
+    "target": "test-scope-audit.md",
+    "resolved_relative": "docs/test-scope-audit.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/restriction-provenance-20261011.md",
+    "target": "public-rollback-manual-zh.md",
+    "resolved_relative": "docs/public-rollback-manual-zh.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/restriction-provenance-20261011.md",
+    "target": "evidence/public-recovery-harness-20261011.md",
+    "resolved_relative": "docs/evidence/public-recovery-harness-20261011.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/closeout-scope-20261011.md",
+    "target": "restriction-provenance-20261011.md",
+    "resolved_relative": "docs/restriction-provenance-20261011.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/closeout-scope-20261011.md",
+    "target": "acceptance-status.md",
+    "resolved_relative": "docs/acceptance-status.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/closeout-scope-20261011.md",
+    "target": "checkpoints.json",
+    "resolved_relative": "docs/checkpoints.json",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/closeout-scope-20261011.md",
+    "target": "example-retention-verification-zh.md",
+    "resolved_relative": "docs/example-retention-verification-zh.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/closeout-scope-20261011.md",
+    "target": "interruption-20261010.md",
+    "resolved_relative": "docs/interruption-20261010.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/closeout-scope-20261011.md",
+    "target": "acceptance-status.md",
+    "resolved_relative": "docs/acceptance-status.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/closeout-scope-20261011.md",
+    "target": "restriction-provenance-20261011.md",
+    "resolved_relative": "docs/restriction-provenance-20261011.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/closeout-scope-20261011.md",
+    "target": "manual-verification-zh.md",
+    "resolved_relative": "docs/manual-verification-zh.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/closeout-scope-20261011.md",
+    "target": "cli-resource-verification-zh.md",
+    "resolved_relative": "docs/cli-resource-verification-zh.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/closeout-scope-20261011.md",
+    "target": "evidence/limit-conversion-20261011.md",
+    "resolved_relative": "docs/evidence/limit-conversion-20261011.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/closeout-scope-20261011.md",
+    "target": "rollback-recovery-open.md",
+    "resolved_relative": "docs/rollback-recovery-open.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/closeout-scope-20261011.md",
+    "target": "public-rollback-manual-zh.md",
+    "resolved_relative": "docs/public-rollback-manual-zh.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/closeout-scope-20261011.md",
+    "target": "manual-verification-zh.md#19-os-raw-namespace-门控与独立原生验收2026-10-11",
+    "resolved_relative": "docs/manual-verification-zh.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/closeout-scope-20261011.md",
+    "target": "evidence/example-retention-20261011.md",
+    "resolved_relative": "docs/evidence/example-retention-20261011.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/closeout-scope-20261011.md",
+    "target": "evidence/cli-resources-20261011/persistence.json",
+    "resolved_relative": "docs/evidence/cli-resources-20261011/persistence.json",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/closeout-scope-20261011.md",
+    "target": "restriction-provenance-20261011.md",
+    "resolved_relative": "docs/restriction-provenance-20261011.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/closeout-scope-20261011.md",
+    "target": "manual-verification-zh.md#19-os-raw-namespace-门控与独立原生验收2026-10-11",
+    "resolved_relative": "docs/manual-verification-zh.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/closeout-scope-20261011.md",
+    "target": "test-scope-audit.md",
+    "resolved_relative": "docs/test-scope-audit.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/closeout-scope-20261011.md",
+    "target": "acceptance-status.md#2026-10-11-os-namespace-六路径批次",
+    "resolved_relative": "docs/acceptance-status.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/closeout-scope-20261011.md",
+    "target": "acceptance-status.md#2026-10-11-有限公开恢复-harness-源码与编译资格",
+    "resolved_relative": "docs/acceptance-status.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/closeout-scope-20261011.md",
+    "target": "evidence/public-recovery-harness-20261011/v3-compiler-review.md",
+    "resolved_relative": "docs/evidence/public-recovery-harness-20261011/v3-compiler-review.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/compatibility.md",
+    "target": "acceptance-status.md",
+    "resolved_relative": "docs/acceptance-status.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/compatibility.md",
+    "target": "interruption-20261010.md",
+    "resolved_relative": "docs/interruption-20261010.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/compatibility.md",
+    "target": "manual-verification-zh.md",
+    "resolved_relative": "docs/manual-verification-zh.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/compatibility.md",
+    "target": "rollback-recovery-open.md",
+    "resolved_relative": "docs/rollback-recovery-open.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/compatibility.md",
+    "target": "history/compatibility-before-sql-ranges.md",
+    "resolved_relative": "docs/history/compatibility-before-sql-ranges.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/compatibility.md",
+    "target": "progress.md",
+    "resolved_relative": "docs/progress.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/compatibility.md",
+    "target": "checkpoints.json",
+    "resolved_relative": "docs/checkpoints.json",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/compatibility.md",
+    "target": "rollback-recovery-open.md",
+    "resolved_relative": "docs/rollback-recovery-open.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/compatibility.md",
+    "target": "manual-verification.md",
+    "resolved_relative": "docs/manual-verification.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/compatibility.md",
+    "target": "relational-sql.md",
+    "resolved_relative": "docs/relational-sql.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/compatibility.md",
+    "target": "boolean-expressions.md",
+    "resolved_relative": "docs/boolean-expressions.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/compatibility.md",
+    "target": "affinity-comparisons.md",
+    "resolved_relative": "docs/affinity-comparisons.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/compatibility.md",
+    "target": "aggregate-sql.md",
+    "resolved_relative": "docs/aggregate-sql.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/compatibility.md",
+    "target": "ordinary-index.md",
+    "resolved_relative": "docs/ordinary-index.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/compatibility.md",
+    "target": "sql-rowid-ranges.md",
+    "resolved_relative": "docs/sql-rowid-ranges.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/compatibility.md",
+    "target": "security.md",
+    "resolved_relative": "docs/security.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/compatibility.md",
+    "target": "file-formats.md",
+    "resolved_relative": "docs/file-formats.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/compatibility.md",
+    "target": "ann.md",
+    "resolved_relative": "docs/ann.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/compatibility.md",
+    "target": "typed-ann.md",
+    "resolved_relative": "docs/typed-ann.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/compatibility.md",
+    "target": "migration-pgembedding.md",
+    "resolved_relative": "docs/migration-pgembedding.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/compatibility.md",
+    "target": "../goal.md",
+    "resolved_relative": "goal.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/compatibility.md",
+    "target": "acceptance-status.md",
+    "resolved_relative": "docs/acceptance-status.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/compatibility.md",
+    "target": "sql-connection-counters.md",
+    "resolved_relative": "docs/sql-connection-counters.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/compatibility.md",
+    "target": "sql-cached-preparation.md",
+    "resolved_relative": "docs/sql-cached-preparation.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/compatibility.md",
+    "target": "grouped-aggregates.md",
+    "resolved_relative": "docs/grouped-aggregates.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/compatibility.md",
+    "target": "manual-verification-zh.md#19-os-raw-namespace-门控与独立原生验收2026-10-11",
+    "resolved_relative": "docs/manual-verification-zh.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/compatibility.md",
+    "target": "test-scope-audit.md",
+    "resolved_relative": "docs/test-scope-audit.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/compatibility.md",
+    "target": "../sqlite/rollback_recovery_manual_linux_test.go",
+    "resolved_relative": "sqlite/rollback_recovery_manual_linux_test.go",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/compatibility.md",
+    "target": "public-rollback-manual-zh.md",
+    "resolved_relative": "docs/public-rollback-manual-zh.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/compatibility.md",
+    "target": "acceptance-status.md#2026-10-11-有限公开恢复-harness-源码与编译资格",
+    "resolved_relative": "docs/acceptance-status.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/rollback-recovery-open.md",
+    "target": "#2026-10-11-有限-public-open-手工-harness-补记",
+    "resolved_relative": "docs/rollback-recovery-open.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/rollback-recovery-open.md",
+    "target": "manual-verification.md",
+    "resolved_relative": "docs/manual-verification.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/rollback-recovery-open.md",
+    "target": "manual-verification-zh.md",
+    "resolved_relative": "docs/manual-verification-zh.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/rollback-recovery-open.md",
+    "target": "evidence/public-open-integration-20261011.md",
+    "resolved_relative": "docs/evidence/public-open-integration-20261011.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/rollback-recovery-open.md",
+    "target": "manual-verification-zh.md#19-os-raw-namespace-门控与独立原生验收2026-10-11",
+    "resolved_relative": "docs/manual-verification-zh.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/rollback-recovery-open.md",
+    "target": "acceptance-status.md#2026-10-11-os-namespace-六路径批次",
+    "resolved_relative": "docs/acceptance-status.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/rollback-recovery-open.md",
+    "target": "../sqlite/rollback_recovery_manual_linux_test.go",
+    "resolved_relative": "sqlite/rollback_recovery_manual_linux_test.go",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/rollback-recovery-open.md",
+    "target": "evidence/public-recovery-harness-20261011.md",
+    "resolved_relative": "docs/evidence/public-recovery-harness-20261011.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/rollback-recovery-open.md",
+    "target": "public-rollback-manual-zh.md",
+    "resolved_relative": "docs/public-rollback-manual-zh.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/rollback-recovery-open.md",
+    "target": "evidence/public-recovery-harness-20261011/v3-reviewed-manual.md.txt",
+    "resolved_relative": "docs/evidence/public-recovery-harness-20261011/v3-reviewed-manual.md.txt",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/rollback-recovery-open.md",
+    "target": "evidence/public-recovery-harness-20261011/v3-compiler-review.md",
+    "resolved_relative": "docs/evidence/public-recovery-harness-20261011/v3-compiler-review.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "target": "#20-公开-open-四场景-harness-源码与编译资格2026-10-11",
+    "resolved_relative": "docs/manual-verification-zh.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "target": "example-retention-verification-zh.md",
+    "resolved_relative": "docs/example-retention-verification-zh.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "target": "rollback-recovery-open.md",
+    "resolved_relative": "docs/rollback-recovery-open.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "target": "cli-resource-verification-zh.md",
+    "resolved_relative": "docs/cli-resource-verification-zh.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "target": "evidence/cli-resources-20261011.md",
+    "resolved_relative": "docs/evidence/cli-resources-20261011.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "target": "acceptance-status.md",
+    "resolved_relative": "docs/acceptance-status.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "target": "interruption-20261010.md",
+    "resolved_relative": "docs/interruption-20261010.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "target": "#19-os-raw-namespace-门控与独立原生验收2026-10-11",
+    "resolved_relative": "docs/manual-verification-zh.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "target": "rollback-recovery-open.md",
+    "resolved_relative": "docs/rollback-recovery-open.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "target": "rollback-recovery-open.md",
+    "resolved_relative": "docs/rollback-recovery-open.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "target": "../internal/encstore/namespace_manual_windows_amd64_test.go",
+    "resolved_relative": "internal/encstore/namespace_manual_windows_amd64_test.go",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "target": "../internal/encstore/namespace_manual_darwin_test.go",
+    "resolved_relative": "internal/encstore/namespace_manual_darwin_test.go",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "target": "evidence/namespace-gating-20261011/owner-report.md",
+    "resolved_relative": "docs/evidence/namespace-gating-20261011/owner-report.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "target": "evidence/namespace-gating-20261011/independent-source-review.md",
+    "resolved_relative": "docs/evidence/namespace-gating-20261011/independent-source-review.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "target": "evidence/namespace-gating-20261011/independent-checks-addendum.md",
+    "resolved_relative": "docs/evidence/namespace-gating-20261011/independent-checks-addendum.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "target": "evidence/namespace-gating-20261011/evidence-files.json",
+    "resolved_relative": "docs/evidence/namespace-gating-20261011/evidence-files.json",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "target": "../sqlite/rollback_recovery_manual_linux_test.go",
+    "resolved_relative": "sqlite/rollback_recovery_manual_linux_test.go",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "target": "evidence/public-recovery-harness-20261011/v1-source-review.md",
+    "resolved_relative": "docs/evidence/public-recovery-harness-20261011/v1-source-review.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "target": "evidence/public-recovery-harness-20261011/v2-source-review.md",
+    "resolved_relative": "docs/evidence/public-recovery-harness-20261011/v2-source-review.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "target": "evidence/public-recovery-harness-20261011/v3-compiler-review.md",
+    "resolved_relative": "docs/evidence/public-recovery-harness-20261011/v3-compiler-review.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "target": "public-rollback-manual-zh.md",
+    "resolved_relative": "docs/public-rollback-manual-zh.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "target": "evidence/public-recovery-harness-20261011/v3-reviewed-manual.md.txt",
+    "resolved_relative": "docs/evidence/public-recovery-harness-20261011/v3-reviewed-manual.md.txt",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/manual-verification-zh.md",
+    "target": "acceptance-status.md",
+    "resolved_relative": "docs/acceptance-status.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/manual-verification.md",
+    "target": "manual-verification-zh.md#20-公开-open-四场景-harness-源码与编译资格2026-10-11",
+    "resolved_relative": "docs/manual-verification-zh.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/manual-verification.md",
+    "target": "public-rollback-manual-zh.md",
+    "resolved_relative": "docs/public-rollback-manual-zh.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/manual-verification.md",
+    "target": "manual-verification-zh.md",
+    "resolved_relative": "docs/manual-verification-zh.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/manual-verification.md",
+    "target": "acceptance-status.md",
+    "resolved_relative": "docs/acceptance-status.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/manual-verification.md",
+    "target": "interruption-20261010.md",
+    "resolved_relative": "docs/interruption-20261010.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/manual-verification.md",
+    "target": "manual-verification-zh.md#19-os-raw-namespace-门控与独立原生验收2026-10-11",
+    "resolved_relative": "docs/manual-verification-zh.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/manual-verification.md",
+    "target": "test-scope-audit.md",
+    "resolved_relative": "docs/test-scope-audit.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/manual-verification.md",
+    "target": "rollback-recovery-open.md",
+    "resolved_relative": "docs/rollback-recovery-open.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/manual-verification.md",
+    "target": "manual-verification-zh.md",
+    "resolved_relative": "docs/manual-verification-zh.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/manual-verification.md",
+    "target": "manual-verification-zh.md#19-os-raw-namespace-门控与独立原生验收2026-10-11",
+    "resolved_relative": "docs/manual-verification-zh.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/manual-verification.md",
+    "target": "test-scope-audit.md",
+    "resolved_relative": "docs/test-scope-audit.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/manual-verification.md",
+    "target": "evidence/public-recovery-harness-20261011.md",
+    "resolved_relative": "docs/evidence/public-recovery-harness-20261011.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/public-rollback-manual-zh.md",
+    "target": "evidence/public-recovery-harness-20261011.md",
+    "resolved_relative": "docs/evidence/public-recovery-harness-20261011.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/public-rollback-manual-zh.md",
+    "target": "../sqlite/rollback_recovery_manual_linux_test.go",
+    "resolved_relative": "sqlite/rollback_recovery_manual_linux_test.go",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/public-rollback-manual-zh.md",
+    "target": "rollback-recovery-open.md",
+    "resolved_relative": "docs/rollback-recovery-open.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/public-rollback-manual-zh.md",
+    "target": "acceptance-status.md",
+    "resolved_relative": "docs/acceptance-status.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/evidence/public-recovery-harness-20261011.md",
+    "target": "../../sqlite/rollback_recovery_manual_linux_test.go",
+    "resolved_relative": "sqlite/rollback_recovery_manual_linux_test.go",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/evidence/public-recovery-harness-20261011.md",
+    "target": "../public-rollback-manual-zh.md",
+    "resolved_relative": "docs/public-rollback-manual-zh.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/evidence/public-recovery-harness-20261011.md",
+    "target": "../manual-verification-zh.md",
+    "resolved_relative": "docs/manual-verification-zh.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/evidence/public-recovery-harness-20261011.md",
+    "target": "public-recovery-harness-20261011/v1-source-review.md",
+    "resolved_relative": "docs/evidence/public-recovery-harness-20261011/v1-source-review.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/evidence/public-recovery-harness-20261011.md",
+    "target": "public-recovery-harness-20261011/v3-compiler-review.md",
+    "resolved_relative": "docs/evidence/public-recovery-harness-20261011/v3-compiler-review.md",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/evidence/public-recovery-harness-20261011.md",
+    "target": "public-recovery-harness-20261011/v3-reviewed-manual.md.txt",
+    "resolved_relative": "docs/evidence/public-recovery-harness-20261011/v3-reviewed-manual.md.txt",
+    "result": "PASS"
+  },
+  {
+    "source": "docs/evidence/public-recovery-harness-20261011.md",
+    "target": "public-recovery-harness-20261011/evidence-files.json",
+    "resolved_relative": "docs/evidence/public-recovery-harness-20261011/evidence-files.json",
+    "result": "PASS"
+  }
+]

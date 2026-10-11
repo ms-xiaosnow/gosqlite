@@ -1349,3 +1349,27 @@ ANN/performance-CI sources remain separate increments.
 运行冻结 tree `697e45c6aba7a5cf62ebbf2bab2662f10903c5be` 于09:01完成独立核验：3070文件、788非docs与已审候选完整字节/Git/POSIX模式相同；guard、4项纯模型及同集合race PASS，manual GOFLAGS按预期拒绝。实际7条Go工具调用含早于后发5条限定的只读version/env前检，完整记录保留。另157链接、45shell语法块、29选录工件/617前置原件哈希PASS。没有运行该组合完整aggregate/oracle、外平台二进制或手工物理测试。报告见[最终组合限定证据](evidence/namespace-gating-20261011/final-composition-report.md)。此后仅追加终态文档/证据；最终提交的788非docs须逐字节核验等同该运行冻结源。
 
 父P0提交 `56bbcf3febe233197aa0a5eac965c67a67a88011` 的 CI `38125268420` 已于08:56:41 UTC SUCCESS，两job ordinary114428206934/oracle114428207050均SUCCESS；精确Library恢复21条命令PASS。终态证据归档 `libfile_4a413988d4608191aebf695542a04caf`，10211483B，SHA256 `0d6579c338465be5df401b4f2a594df8fe63737900a78dbcc9e4ef28e85bbfb3`，读回411条/410文件哈希PASS。原08:44/08:45 PENDING是先前写作时点，现仅对父P0闭合，不能当作namespace新提交CI。
+
+
+### 2026-10-11 公开恢复四场景手工 harness：源码与编译资格
+
+- 状态：有限源码已实现，独立 SOURCE_REVIEW/AST/SELECTION/COMPILE/SYMBOL PASS；四个物理场景全部 BLOCKED / NOT_RUN，M3/M10/原目标未完整验收。
+- 本批基点：已保存 namespace 提交 `50b627e11e9dbce7f2fde8df35c4634c52a06d52`，tree `8f2709293287a3517a52b3f989888ded8230ef53`。完整保留本文件已有前缀、LIMIT/P0/namespace 源码及历史，不将旧候选整树覆盖当前版本；没有生产行为或 CI 改动。
+- 新增实现：仅 `sqlite/rollback_recovery_manual_linux_test.go` 与 `docs/public-rollback-manual-zh.md`。单一测试 `TestManualPublicRollbackRecovery`，精确首行 `//go:build manual_recovery && linux`，函数首语句环境门先于任何 fixture/Open，缺门即 Fatal。四项只有 nil-default/input-preservation、opt-in/只读重开、journal quota refusal、NoCreate absence；没有新增 Connector 或完整 fault/crash 覆盖。
+- 已审源码 SHA-256 `dd5a63e2a8e7d4fdd969ba03273a8f8147d5eff81babf8fce44a5228c5cdaf5e`，10657字节；原 V3 审阅中文专题 SHA-256 `a49ae1882c4a5dcb8c58860fa8df3b011f88c9ee99963a5721831049477ec4d2`，9711字节，原件另存证据；当前发布手册仅更新状态段，命令/断言保持。独立 V3 tree `1755d67431f9de082449b08fa24b26b2b35eb612` 属于 P0 基点加这两项，不是当前 namespace 组合 tree。
+- 原失败历史：V1 三项阻断为 fail-open 选择检查、备份/manifest 核对不完整、fatal/Close 后仍可启动后续场景。V2 均已修正；V3 只将环境 export/unset 提前、archive/extract 拆开，测试源码与 V2 同字节。原 V1/V2 报告不改写。
+- 实际验证：V3 独立六条 Go 工具命令于08:58:38 UTC自然完成，AST文本检查、default/oracle/manual三次list、go test -c、go tool nm均exit0；选择次数0/0/1，精确顶层符号唯一。编译二进制SHA-256 `a7a9a4813ec9550708ff2d2addc97d957b686e48ec16aa9b8e2c94710a0c226e`，14757553字节，NEVER EXECUTED。未运行 gate-off、-test.list、无匹配selector、fixture生成或实际public Open。
+- 文档与证据：[当前验收补记](acceptance-status.md#2026-10-11-有限公开恢复-harness-源码与编译资格)、[中文第20节](manual-verification-zh.md#20-公开-open-四场景-harness-源码与编译资格2026-10-11)、[专题人工步骤](public-rollback-manual-zh.md)、[具名证据](evidence/public-recovery-harness-20261011.md)。历史 V1/V2/V3 报告与原 V3 手册分别保留，当前发布状态段与已审原件身份分开；物理 NOT_RUN 不变。本轮文档对账仅静态读取/编辑/差异/身份/链接/语法，不运行 Go 或数据库。
+- 身份分层：父 P0 CI `38125268420` 于08:56:41 UTC SUCCESS、精确恢复PASS已在上段闭合；namespace提交50b的bundle `libfile_e5dcbc0ac16c8191bce977aa165163f9`已读回字节身份PASS，207项纯模型/选择/编译/符号限定恢复于09:14:09 UTC PASS，不含完整普通/oracle或原生物理运行；CI `38127196102`最后已知仍in_progress，尚无已核验终态。上述各自结果不能替代新增harness当前组合或新提交的保存/恢复/CI。
+- 剩余边界：公开四场景harness不再整体IMPLEMENTATION_MISSING；driver Connector物理harness、更广journal/其他平台/native WAL-tail publisher与完整故障设施仍缺。真实RecoverRollback/public bridge/启用恢复Open或Connect均BLOCKED / NOT_RUN；ANN V4、41目标fuzz、未知触发及其他物理执行限制不变。
+- 下一步：独立静态核对本次namespace基点组合的精确差异/原字节/选择隔离和相对链接；按实际授权范围核验后，逐项记录新提交、持久保存、恢复与CI终态。不得从本条候选compiler PASS推定新组合完整普通门或物理验收通过。
+
+
+## 2026-10-11 09:32 UTC：namespace 父检查点终态闭合
+
+提交 `50b627e11e9dbce7f2fde8df35c4634c52a06d52`、tree `8f2709293287a3517a52b3f989888ded8230ef53` 的 CI `38127196102` 于09:29:33Z自然完成 SUCCESS；ordinary `114433911927`、oracle `114433912045` 均SUCCESS。Library bundle `libfile_e5dcbc0ac16c8191bce977aa165163f9` 已读回并精确恢复，207条限定检查PASS。全部manual/真实namespace仍NOT_RUN。终态证据归档 `libfile_6b7a1c37d8fc8191bed2389e8dbe14dd`，15356765字节，SHA256 `21cd1a73b622123605eb48a5031b0cc38314a04eac8a9b71c72f873ecaa3d701`，Library读回843项/842清单哈希PASS。此前“运行中”只表示当时观测；此终态不属于新增public harness提交，不代替它的保存/恢复/CI。
+
+
+## 2026-10-11 09:35 UTC：public harness 精确组合限定检查完成
+
+独立组合树 `0af9b064bebfbec9c8270c4bf2f10ec2055fb186`，3104文件/789非docs（原788全部保持，加唯一手工测试源码），于09:32:51完成六条AST/list/编译/符号命令 PASS；196相对链接和48shell块仅静态检查PASS。独立报告SHA256 `ba6e3c4458d8d192b9dd2f231936c61706d9f6b2fdb64249f34ea34d1b71d765`，81项证据清单SHA256 `394e491d4564c594cb7f7e1e304495f95c8b620122c7e7408a14bcae30f6279e`。物理四场景全部BLOCKED/NOT_RUN，二进制从未执行。随后仅追加文档和证据；发布前逐路径核对全部789非docs不变，文档另做最终静态读回。精确新提交、Library恢复和CI在实际完成后另记，不继承父namespace的成功。

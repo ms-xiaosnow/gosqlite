@@ -1,5 +1,12 @@
 # Manual verification and release-blocking gates
 
+Current follow-on (2026-10-11): the limited public Open four-case manual harness
+has been implemented and independently source-reviewed/compiler-qualified.
+Every physical scenario remains BLOCKED / NOT_RUN. Earlier public-harness
+IMPLEMENTATION_MISSING statements below are retained P0-stage history; use
+[Chinese section 20](manual-verification-zh.md#20-公开-open-四场景-harness-源码与编译资格2026-10-11)
+and the [dedicated steps](public-rollback-manual-zh.md) for the bounded new entrypoint.
+
 ## 2026-10-11 中文入口与当前边界
 
 请先阅读[中文手工验收手册](manual-verification-zh.md)、
@@ -710,3 +717,29 @@ Windows/Darwin raw namespace 测试并追加通用 Rename/rename selector guard�
 旧 P0 段落的 namespace 未纳入是该切片范围，不反推当前仍未门控。
 真实原生测试须用户独立批准环境，具体平台、tag、env、隔离副本、命令、原断言、
 失败保留局限和清理条件都在中文第 19 节；设置 gate 本身不是授权。
+
+
+## 2026-10-11 limited public Open harness follow-on
+
+The new Linux-only `TestManualPublicRollbackRecovery` covers exactly nil-default
+refusal/input preservation, opt-in restoration/read-only reopen, journal-budget
+refusal, and NoCreate absence. It has the exact manual_recovery/linux constraint
+and a first-statement environment refusal before any fixture or public operation.
+The four runtime cases are all NOT_RUN; no generated test binary was executed,
+including gate-off, -test.list or unmatched-selector probes.
+
+Independent V3 source/AST/selection/compile/symbol checks passed, with selection
+counts 0/0/1 and one exact top-level function symbol. V1 findings, V2 corrections
+and the V3 documentation-only delta remain separate
+[review evidence](evidence/public-recovery-harness-20261011.md).
+V3 tree `1755d67431f9de082449b08fa24b26b2b35eb612` is P0 plus two additions,
+not the namespace-based current composition or its new commit. The dedicated
+manual updates only its publication-status paragraph, preserving commands and
+assertions. The original V3-reviewed manual is retained separately in the evidence
+archive; historical review identity is distinct from current publication status.
+Every physical case remains NOT_RUN.
+
+Driver Connector physical coverage, broader journal/platform support, native
+WAL-tail publication and complete physical fault/crash harnesses remain gaps.
+Neither this entrypoint nor its compilation waives the existing execution
+restrictions, qualifies M3/M10, or replaces per-commit restore and CI evidence.

@@ -1,0 +1,17 @@
+{
+  "utc": "2026-10-11T08:59:46.537293+00:00",
+  "base_commit": "56bbcf3febe233197aa0a5eac965c67a67a88011",
+  "base_tree": "c31e7dcbeed9732688681741ee38ec60ff0bfb49",
+  "candidate_tree": "1755d67431f9de082449b08fa24b26b2b35eb612",
+  "base_file_count": 3036,
+  "candidate_file_count": 3038,
+  "delta": {
+    "added": [
+      "docs/public-rollback-manual-zh.md",
+      "sqlite/rollback_recovery_manual_linux_test.go"
+    ],
+    "deleted": [],
+    "changed": []
+  },
+  "method": "Read local git ls-tree metadata; calculate Git blob/tree hashes in Python without writing Git objects or refs"
+}

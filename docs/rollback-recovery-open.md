@@ -1,5 +1,11 @@
 # Opt-in rollback recovery during Open
 
+Current follow-on: the four-case public Open manual harness now exists with
+independent source/AST/selection/compile/symbol PASS; every physical case remains
+BLOCKED / NOT_RUN. Earlier implementation-missing and pending statements below
+retain their original P0/namespace checkpoint scope. See the
+[current harness addendum](#2026-10-11-有限-public-open-手工-harness-补记).
+
 Status (2026-10-11): bounded experimental public Open source is implemented;
 independent source/model/compile review PASS. The reviewed candidate was based
 on `63c2ebb10e3a2c4ff2378ee9f33c46133134c70f`; the subsequent composition uses
@@ -244,3 +250,39 @@ recovery/native-failure workflow, all of which remain **BLOCKED / NOT_RUN**.
 [中文手册第 19 节](manual-verification-zh.md#19-os-raw-namespace-门控与独立原生验收2026-10-11)；该切片不增加 public physical harness，
 所有真实恢复、启用恢复的 Open/Connect、namespace 原生执行仍 BLOCKED / NOT_RUN。
 P0 完整普通门、已保存基点、精确恢复及尚待终态的 CI，按[当前验收补记](acceptance-status.md#2026-10-11-os-namespace-六路径批次)分别记录；不将新候选 PASS 归入旧切片。
+
+
+## 2026-10-11 有限 public Open 手工 harness 补记
+
+实际新增源码为
+[`sqlite/rollback_recovery_manual_linux_test.go`](../sqlite/rollback_recovery_manual_linux_test.go)，
+仅有 `TestManualPublicRollbackRecovery`，没有生产行为变化。
+它使用公开 OpenContext/Options 路径，不直接调用内部 RecoverRollback，
+首行是 `//go:build manual_recovery && linux`；函数首语句核对
+`GOSQLITE_MANUAL_RECOVERY=independently_authorized`，不满足即 Fatal，
+在目录查询、fixture 或公开调用之前拒绝。设置 gate 本身不授予执行权限。
+
+四个子场景只有 nil-default 拒绝并保留输入、显式 opt-in 恢复与只读 NoCreate
+重开、MaxJournalBytes=1 拒绝并保留输入、NoCreate 缺失路径不创建任何条目。
+合成原始输入、工作文件与 SHA-256 manifest 在成功/失败后都保留；
+已建成的三份输入备份和 manifest 逐项核对。失败子场景终止后续场景，
+Close 只尝试一次，失败不继续只读重开；最终 pending-owner 查询只记录、不重试。
+这些是审阅过的源码断言，全部物理运行仍 **BLOCKED / NOT_RUN**。
+
+独立 V3 的 source review 与六项 AST/list/compile/nm 检查于 08:58:38 UTC PASS；
+Linux/amd64、Go 1.27.2、CGO0，default/oracle/manual 选择次数 0/0/1，
+精确顶层函数符号唯一。只运行标准库 AST 文本检查器，随后编译/链接和读取符号；
+从未执行所产 test binary，包括 gate-off、-test.list 或未匹配 selector。
+候选 tree `1755d67431f9de082449b08fa24b26b2b35eb612` 属于 P0 加两文件，
+不属于当前 namespace 基点 `50b627e11e9dbce7f2fde8df35c4634c52a06d52` 的新组合。
+准确身份、原始 V1 三项阻断、V2 修正及 V3 文档修正见
+[证据摘要](evidence/public-recovery-harness-20261011.md)。
+
+[中文手工步骤](public-rollback-manual-zh.md)只更新发布状态段，命令及断言保持；
+[原 V3 手册](evidence/public-recovery-harness-20261011/v3-reviewed-manual.md.txt)
+另存审阅原字节，历史身份与当前发布状态分开，当前资格见
+[V3 报告](evidence/public-recovery-harness-20261011/v3-compiler-review.md)。
+原内部 harness 不因新增入口改变范围。公开四场景入口的源码不再缺失，
+但 driver Connector 的物理恢复 harness、更广 journal、其他平台、native WAL-tail
+publisher、完整故障/崩溃/重启矩阵仍未补齐；既有真实恢复执行限制不变。
+新组合、新提交、Library 恢复和 CI 必须独立核验，不能继承候选编译或父提交 PASS。

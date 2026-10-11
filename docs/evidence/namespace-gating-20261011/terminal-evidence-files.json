@@ -1,0 +1,33 @@
+{
+  "files": {
+    "terminal-persistence.json": {
+      "bytes": 3560,
+      "sha256": "5b1d1b54ecd9994049017787b4acfa282e66472398c25b6630dbe8e8213d7f24"
+    },
+    "restore-report.md": {
+      "bytes": 8818,
+      "sha256": "210650ca7c794a53e9d7aed4a3ed0c34d03b74a9cee173a01d255eec08ed8855"
+    },
+    "restore-evidence-manifest.json": {
+      "bytes": 41766,
+      "sha256": "3e971ba2242b6465b15b1a3872a995db6b622eefeff1dacad0bd76280e4d4ead"
+    },
+    "ci-run-terminal.json": {
+      "bytes": 26563,
+      "sha256": "567c8ae21613111a0e06243f9a316051c9f7350638e47b9e2178955cbfcf095b"
+    },
+    "ci-jobs-terminal.json": {
+      "bytes": 3137,
+      "sha256": "330f57d102ecbd97ce3219aa68eb6bac26dcdce892fea0c6eb618e425043dcc8"
+    },
+    "ci-ordinary-terminal.log": {
+      "bytes": 23988,
+      "sha256": "6b6be5aaa673b7e82873e4f262d11a1a114cd388a92f8bba2780d47bdffe9019"
+    },
+    "ci-oracle-terminal.log": {
+      "bytes": 21227,
+      "sha256": "ed5dbd21690e8616c5903bd8ff4c633a9fa2e8bcc47ea0e14ea65e249efab558"
+    }
+  },
+  "scope": "exact namespace commit terminal CI and narrow restore; no native/manual execution"
+}
