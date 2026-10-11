@@ -1,0 +1,24 @@
+{
+  "candidate_tree": "0124d04f32966846bc38537863274390ca5daccc",
+  "files": 2879,
+  "base_commit": "e40b0081e173d171e05816a04bcd1a188d14609f",
+  "base_tree": "dae555aa4568a21d8bacd0082a281d18669f148a",
+  "base_changed_paths": [
+    "cmd/gosqlite/inspect_context_test.go",
+    "cmd/gosqlite/main.go"
+  ],
+  "independent_review_tree": "df90e7980520c872c0c21647ab57f892306bb14f",
+  "owned_files_identical_to_reviewed_source": true,
+  "other_changes_from_reviewed_source_are_documentation_only": [
+    "docs/acceptance-status.md",
+    "docs/checkpoints.json",
+    "docs/compatibility.md",
+    "docs/evidence/chinese-manual-review-20261011.md",
+    "docs/interruption-20261010.md",
+    "docs/manual-verification-zh.md",
+    "docs/manual-verification.md",
+    "docs/progress.md"
+  ],
+  "ordinary_scope": "Unchanged Linux ordinary suites plus three reviewed inspect regressions. No manual tags, no new fuzz or soak, no other-OS execution.",
+  "default_temporary_directory": "/tmp"
+}

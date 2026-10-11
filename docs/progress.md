@@ -1050,3 +1050,27 @@ ANN/performance-CI sources remain separate increments.
 - 获明确范围批准后，inspect context 的一行修正只在独立副本进行普通
   定名/只读验证。基线 AST 确认原调用丢失 ctx，运行回归原本通过；不把
   此发现夸大成实测取消时限故障。结果和精确修正树将在独立审阅后单列。
+
+
+### 2026-10-11：inspect 调用者上下文独立修正
+
+- 中文文档检查点 `e40b0081e173d171e05816a04bcd1a188d14609f` 已精确保存，
+  Library `libfile_97cea3b84bd88191bb860da15f8fa20a` 字节恢复通过；
+  CI `38103659605` 于 02:13:13 SUCCESS，两项 ordinary/oracle 均成功。
+  docs/checkpoints.json 保留完整 bundle/恢复/CI 身份及初次 clone 操作错误。
+- 生产仅将 inspect 的 Open 改为 OpenContext(ctx, …)，readonly 和输出不变。
+  原码 AST 真实 FAIL、同断言修正后 PASS；原码运行回归也通过，未夸大为
+  实测中途 I/O 取消故障。新增三个测试；350 个既有测试文件字节保持。
+- 独立审阅 tree `df90e7980520c872c0c21647ab57f892306bb14f` 通过；
+  两份独立 CLI 的四种完整 fixture 输出均逐字节相同，整个 fixture 目录
+  inventory/SHA/manifest 前后保持。首次默认 GOPATH 只读错误原样保留。
+- 在 e40 文档上只合入两个源码路径的组合 tree
+  `0124d04f32966846bc38537863274390ca5daccc` 通过全普通测试/vet/build、
+  完整 pinned oracle、全 race（sqlite 405.029s）、五目标编译、模块核验和
+  2,879 文件前后字节/模式/目录清单。02:21:52 UTC 自然 exit 0，无重跑。
+- [完整证据](evidence/inspect-context-20261011.md) 保存原始负对照和全门日志。
+  最终记录新增文档，因此完整提交 tree 另计；非文档源与通过门的组合一致。
+  该源码检查点的远端/Library/CI 验证随后逐项登记，不提前声称其通过。
+- inspect 扩展元数据、公开恢复、明文 backup/只读 WAL 等仍有真实缺口；
+  被中止的 ANN V4、41 目标 fuzz、未知链路未恢复。未运行物理故障、
+  新 OS/performance runner 或长测，M10 仍未完成。

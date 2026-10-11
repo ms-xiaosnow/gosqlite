@@ -96,7 +96,7 @@ func runContext(ctx context.Context, args []string, out io.Writer) (resultErr er
 		if len(args) != 2 {
 			return fmt.Errorf("usage: gosqlite inspect <db>")
 		}
-		db, err := sqlite.Open(args[1], sqlite.Options{ReadOnly: true})
+		db, err := sqlite.OpenContext(ctx, args[1], sqlite.Options{ReadOnly: true})
 		if err != nil {
 			return err
 		}

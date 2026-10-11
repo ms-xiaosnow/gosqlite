@@ -494,5 +494,19 @@
     "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38091940645",
     "remote_ci_status": "COMPLETED SUCCESS；2026-10-10T22:52:30Z 自然终态，22:53:47Z 两项 job 读回：oracle114329976910、ordinary114329977006 SUCCESS。无取消、重试。",
     "open_gates": "中断/恢复边界见 docs/interruption-20261010.md 与中文自测手册。受阻 ANN V4、新41目标fuzz和未知触发链路不恢复。main 仍缺公开恢复、明文备份、真正只读 plaintext-WAL 等代码；未发布候选不计入。物理故障、安全、真实目标OS、长测/大型性能和独立M10未验收。"
+  },
+  {
+    "stage": "中文受限验收手册与中断/四类矩阵；仅文档",
+    "remote_commit": "e40b0081e173d171e05816a04bcd1a188d14609f",
+    "local_commit": "e40b0081e173d171e05816a04bcd1a188d14609f",
+    "tree": "dae555aa4568a21d8bacd0082a281d18669f148a",
+    "bundle_sha256": "259ffa18637763f78a1871c3f22b7488a689809f12280f8dfd437a6250fc2c02",
+    "bundle_bytes": 4997867,
+    "library_file_id": "libfile_97cea3b84bd88191bb860da15f8fa20a",
+    "library_version": 0,
+    "verified": "2026-10-11T01:59:21Z expected-SHA 非强制远端更新；01:59:43Z 精确镜像读回。02:01:18Z Library 字节读回、显式 main checkout、fsck、原 goal/中文手册 SHA/JSON/链接 PASS，无数据库测试。初次 clone 未指定 main 产生 unborn master，HEAD 核验 exit128；原错误保留，同一 clone 核对 origin/main 后显式检出成功。",
+    "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38103659605",
+    "remote_ci_status": "COMPLETED SUCCESS；2026-10-11T02:13:13Z 自然终态，02:17:25Z 读回；ordinary114364553029 与 oracle114364552820 均 SUCCESS。",
+    "open_gates": "仅文档，未关闭任何真实实现、物理故障、原生 OS、长测、独立 M10 验收项。受阻 ANN V4、新41目标fuzz/未知触发链路保持暂停。"
   }
 ]

@@ -1,0 +1,46 @@
+#!/bin/bash
+set -euo pipefail
+ROOT=/workspace/scratch/5e06a74e5f65/durable-restart
+cd "$ROOT/inspect-context-combined-verify"
+export PATH="$ROOT/toolchains/go1.27.2/bin:$PATH"
+export GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off
+export GOCACHE="$ROOT/go-cache" GOPATH="$ROOT/go-path"
+export CGO_ENABLED=0 GOFLAGS=-buildvcs=false GOMAXPROCS=2
+export SQLITE_ORACLE="$ROOT/toolchains/sqlite-build-3540000/sqlite3"
+stage=initialization
+trap 'rc=$?; printf "STAGE %s EXIT %s AT %s\n" "$stage" "$rc" "$(date -u +%FT%TZ)"; printf "%s\n" "$rc" > "$ROOT/inspect-context-combined-checks.exit"' EXIT
+run_stage() {
+    stage=$1
+    shift
+    printf '\nSTAGE %s START %s\nCOMMAND ' "$stage" "$(date -u +%FT%TZ)"
+    printf '%q ' "$@"
+    printf '\n'
+    "$@"
+    printf 'STAGE %s PASS %s\n' "$stage" "$(date -u +%FT%TZ)"
+}
+echo 'Fixed inspect caller-context composition; serial existing Linux ordinary gates only.'
+echo 'No manual tags, new fuzz/soak, other-OS execution, blocked-candidate composition, source edits, Git writes, or retries.'
+run_stage source-identity-before python3 "$ROOT/inspect-context-combined-identity.py" before
+stage=environment
+go version
+test "$(go env GOVERSION)" = go1.27.2
+test "$(go env GOOS)/$(go env GOARCH)" = linux/amd64
+go env GOVERSION GOOS GOARCH GOTOOLCHAIN GOPROXY GOSUMDB GOPATH GOCACHE CGO_ENABLED GOFLAGS
+printf 'GOMAXPROCS=%s\nSQLITE_ORACLE=%s\nTMPDIR=%s\n' "$GOMAXPROCS" "$SQLITE_ORACLE" "${TMPDIR:-/tmp (default)}"
+sha256sum "$ROOT/toolchains/go1.27.2/bin/go" "$SQLITE_ORACLE"
+df -B1 /tmp
+run_stage sourceguard-before go run ./internal/testscope
+run_stage cgo0-unit go test ./... -count=1 -timeout=0
+run_stage cgo0-vet go vet ./...
+run_stage cgo0-build go build -trimpath ./...
+run_stage full-ordinary-oracle ./scripts/test-oracle.sh
+run_stage sourceguard-before-race go run ./internal/testscope
+run_stage cgo1-race env CGO_ENABLED=1 go test -race ./... -count=1 -timeout=0
+for target in linux/arm64 darwin/arm64 darwin/amd64 windows/amd64 windows/arm64; do
+    run_stage "cross-build-$target" env GOOS="${target%/*}" GOARCH="${target#*/}" go build ./...
+done
+run_stage module-integrity go mod verify
+run_stage original-sha256-list sha256sum -c "$ROOT/inspect-context-combined-all-sha256.txt"
+run_stage source-identity-after python3 "$ROOT/inspect-context-combined-identity.py" after
+stage=complete
+echo 'INSPECT-CONTEXT-COMBINED FULL FROZEN ORDINARY AGGREGATE PASS'

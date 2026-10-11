@@ -1,6 +1,8 @@
 # 当前实现与验收矩阵
 
-核对时间：2026-10-11；源码基点为 `776b23eb59ce9613bf4498d352a716a193cdc9c3`。
+核对时间：2026-10-11；最新已保存文档基点为 `e40b0081e173d171e05816a04bcd1a188d14609f`。
+本检查点叠加已独立审阅并通过完整普通门的 inspect 上下文修正；精确源码和边界见
+[inspect 证据](evidence/inspect-context-20261011.md)。
 这是开发检查点清单，不是最终交付。原始 [goal.md](../goal.md) 不变。
 平台受限项目可以暂停执行并记录用户自测步骤，不能取消真实实现义务。
 
@@ -24,7 +26,7 @@
 | G1、§3、§4.1、M3 | 有界有限计数多段 rollback 字节解析、internal 恢复所有权；Reader post-SHARED stat/shared 初始不存在来源已修正 | `PARTIAL`：公开 Open 恢复尚未合入，更多 journal 形式及 native exclusive WAL 尾部安全发布缺实现。物理恢复另列人工门 |
 | G1、§4.2、§11.1/11.3 | 索引范围、有限 JOIN/GROUP BY/HAVING、连接计数和 cached preparation 的限定普通门通过 | `已知差异`：支持查询的 planner 错误/排序/阶段一致性仍待修正。V4c 树 `552286a…` 有独立有限 PASS，但没有和 main 新 grouped/counter 组合；不能替代 main 结果 |
 | §4.2、§8.1、§12.2 | correct-key 加密 backup/rekey CLI、native DB/Tx/CLI Check V2 已合入 | `未实现/未合入`：main 明文 backup 命令仍明确 unsupported；Linux rollback V2 候选终审未完成，WAL/非 Linux backup 和真正只读 plaintext-WAL CLI 缺代码。native VACUUM 未实现 |
-| G1、§3.6、§12.2 | query/check CLI 使用 OpenContext | `待合入独立修正`：inspect 打开使用 sqlite.Open，未向打开阶段传递 caller context；当前只输出 header/schema，扩展配置/代际可见性有限。原码在新增 AST 传递断言中 FAIL；既有只读运行回归通过，尚无实测取消时限失败证据 |
+| G1、§3.6、§12.2 | query/check/inspect CLI 均使用 OpenContext；inspect 最小修正有独立负对照和完整普通门 | `PARTIAL`：inspect 仍只输出 header/schema，扩展配置/代际呈现未实现。原码 AST FAIL 保留；原码只读运行回归也通过，中途 I/O 取消未动态验证 |
 | §12.1、§14 | 可运行示例存在，普通功能样本有历史证据 | `示例报告/证据缺口`：sparse-exact 错误可能仍返回 0；write 示例忽略 Close，log.Fatal 绕过 defer；部分加密/native-check 示例错误时也删除临时 fixture。手册精确披露，不把这些示例当完整失败现场或资源退休证明；独立修正另计 |
 | §9.2(2/5) | caller-dataset 范数、完整精确距离与 Top-K v2 已合入；高维 v1 失败保留，v2 有有理数参考验证 | `PARTIAL`：ANN caller-dataset recall 及真实 PG/Neon 验证单列；精确距离不能替代 ANN |
 | §5.2、§7.2、§11.3 | NFC 组合语料、真实 grams build/空间/P50/P95 工具和普通事务 V4 已合入 | `FAIL/HOLD（候选工具）`：ANN 报告 V3 三类实质准入缺陷未修，V4 链路受阻。性能报告 V3 有限审阅通过但未合入/部署；没有可采信测量不得宣称完整基准通过 |
@@ -42,7 +44,11 @@
 | §5.2、M4–M6 | 100×128 组合成员核验、NFC 改变输入、数学参考及实际索引对 scan 证据 | 规范是至少 10,000 个规范化随机组合，不是 10,000 条 query。新 41 目标 fuzz 被阻塞，旧内存测试通过不是重新启动许可 |
 | §11.3 | no-CGO 五目标构建和精确 Library 恢复曾通过 | 构建、备份字节身份与运行分别报告；交叉编译不等于原生文件锁/恢复验收 |
 
-2026-10-11 首轮仅核对源码身份、Library 和文档，不把旧结果登记为新执行。
+2026-10-11 首轮仅核对源码身份、Library 和文档；其后独立 inspect 修正完成
+完整普通单元/vet/build、完整 pinned oracle、全 race、五目标编译与全源身份门，
+组合 tree `0124d04f32966846bc38537863274390ca5daccc` 于 02:21:52 exit 0。
+文档提交 e40 的 CI `38103659605` 于 02:13:13 SUCCESS，Library 恢复亦通过。
+这些新结果范围明确，不改变旧结果身份或下列未完成项。
 独立后续任务必须先写清源码范围、测试选择以及与被中断链路无关的理由。
 不因允许普通测试就运行新的广泛 fuzz、soak 或此前未收尾的冻结候选。
 
