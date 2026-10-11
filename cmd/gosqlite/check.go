@@ -12,19 +12,20 @@ import (
 	"github.com/ms-xiaosnow/gosqlite/sqlite"
 )
 
-const checkUsage = "usage: gosqlite check <db> [<extension-index>] [--key-provider <provider>] [--mode snapshot|wal|shared]; named extension checks also accept leading --wal-exclusive or --wal-shared"
+const checkUsage = "usage: gosqlite check [--wal-readonly] <db> [<extension-index>] [--key-provider <provider>] [--mode snapshot|wal|shared]; named extension checks also accept leading --wal-exclusive or --wal-shared"
 
 type checkCommandOptions struct {
 	path, index, provider   string
 	mode                    sqlite.EncryptionMode
-	walExclusive, walShared bool
+	walExclusive, walShared, walReadOnly bool
 }
 
 func parseCheck(args []string) (checkCommandOptions, error) {
 	var o checkCommandOptions
-	if len(args) > 0 && (args[0] == "--wal-exclusive" || args[0] == "--wal-shared") {
+	if len(args) > 0 && (args[0] == "--wal-exclusive" || args[0] == "--wal-shared" || args[0] == "--wal-readonly") {
 		o.walExclusive = args[0] == "--wal-exclusive"
 		o.walShared = args[0] == "--wal-shared"
+		o.walReadOnly = args[0] == "--wal-readonly"
 		args = args[1:]
 	}
 	if len(args) == 0 || args[0] == "" || strings.HasPrefix(args[0], "--") {
@@ -64,11 +65,11 @@ func parseCheck(args []string) (checkCommandOptions, error) {
 		}
 		args = args[2:]
 	}
-	if seen["--mode"] && o.provider == "" || o.provider != "" && (o.walExclusive || o.walShared) {
+	if seen["--mode"] && o.provider == "" || o.provider != "" && (o.walExclusive || o.walShared || o.walReadOnly) {
 		return checkCommandOptions{}, errors.New(checkUsage)
 	}
 	if o.index == "" && (o.walExclusive || o.walShared) {
-		return checkCommandOptions{}, fmt.Errorf("%w: full check requires a read-only open; plaintext WAL CLI opens require writable coordination; use DB.Check on an existing configured WAL connection", sqlite.ErrUnsupported)
+		return checkCommandOptions{}, fmt.Errorf("%w: full check requires a read-only open; --wal-exclusive/--wal-shared require writable coordination; use --wal-readonly for the Linux live-index subset or DB.Check on an existing configured connection", sqlite.ErrUnsupported)
 	}
 	return o, nil
 }
@@ -108,7 +109,7 @@ func runCheckWithInput(ctx context.Context, args []string, out io.Writer, input 
 	return json.NewEncoder(out).Encode(result)
 }
 func executeCheck(ctx context.Context, o checkCommandOptions, provider *cliKeyProvider) (_ any, resultErr error) {
-	opts := sqlite.Options{ReadOnly: !o.walExclusive && !o.walShared, NoCreate: true, WALExclusive: o.walExclusive, WALShared: o.walShared, KeepWALOnClose: o.walExclusive || o.walShared}
+	opts := sqlite.Options{ReadOnly: !o.walExclusive && !o.walShared, NoCreate: true, WALExclusive: o.walExclusive, WALShared: o.walShared || o.walReadOnly, KeepWALOnClose: o.walExclusive || o.walShared}
 	if provider != nil {
 		opts.Encryption = &sqlite.EncryptionOptions{KeyProvider: provider, CredentialKind: provider.kind, Mode: o.mode}
 		opts.KeepWALOnClose = o.mode != sqlite.EncryptionSnapshot

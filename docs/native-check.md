@@ -153,13 +153,18 @@ checks retain the historical leading `--wal-exclusive`/`--wal-shared` syntax;
 those routes require writable native WAL coordination and are not filesystem
 read-only opens. `inspect` remains metadata inspection only.
 
-A full plaintext WAL CLI check is explicitly unsupported. Leading WAL flags
-without a named extension index reject **before opening** the DB, avoiding mode
-conversion or writable session/SHM initialization. Plain read-only opens already
-refuse WAL files. `DB.Check`/`Tx.Check` work on an already configured WAL session
-without writer promotion, but a native filesystem-read-only plaintext WAL opener
-and corresponding full CLI route remain an actual implementation gap. They are
-not a manual-test gate and are not claimed as delivered.
+显式 `gosqlite check --wal-readonly <db> [<extension-index>]` 已接入
+Linux 活动且初始化 SHM 的真只读有限入口。当前冻结树
+`cace45621c10259231a2e764cfbefdcdbe312ccf` 已有普通门与健康官方 live-writer
+实际 PASS；完整 26 项于 **22:05:15 UTC 自然 PASS**，真实只读媒体/非特权身份
+仍未验证。V2 输入与本树结果分开，完整合同与资格分层见
+[明文 WAL 只读范围](plain-readonly-wal.md)和[本次证据](evidence/readonly-ipk-combined-20261011.md)。
+它通过 `ReadOnly:true, NoCreate:true, WALShared:true` 使用现有快照 checker，
+不转换模式、不创建/重建 sidecar、不写 readmark，也不在 Close checkpoint。
+缺失/冷/未初始化 sidecar、其他 OS 和无 SHM fallback 仍 unsupported。
+原 `--wal-shared/--wal-exclusive` 无 named index 时继续在打开前拒绝，
+其 named route 仍需可写权限；默认无 flag 的只读打开仍不自动识别 WAL。
+这项新源码不能继承本页以下历史 ordinary 结果。
 
 ## Ordinary evidence and unexecuted gates
 

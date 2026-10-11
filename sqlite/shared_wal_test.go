@@ -133,8 +133,9 @@ func TestSharedWALSnapshotsAndWriterContention(t *testing.T) {
 	}
 }
 
+// ReadOnly+WALShared absence is covered by the explicit readonly no-create tests.
 func TestSharedWALOptionBoundaries(t *testing.T) {
-	for _, opts := range []sqlite.Options{{WALShared: true, WALExclusive: true}, {WALShared: true, ReadOnly: true}, {WALPowersafeOverwrite: true}} {
+	for _, opts := range []sqlite.Options{{WALShared: true, WALExclusive: true}, {WALPowersafeOverwrite: true}} {
 		if _, err := sqlite.Open(filepath.Join(t.TempDir(), "none.db"), opts); err == nil {
 			t.Fatalf("invalid options accepted: %+v", opts)
 		}

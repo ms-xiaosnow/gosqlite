@@ -3,7 +3,6 @@ package walindex
 import (
 	"errors"
 	"fmt"
-	"os"
 
 	"github.com/ms-xiaosnow/gosqlite/internal/vfs"
 )
@@ -15,6 +14,8 @@ func nativeError(err error) error {
 	switch {
 	case errors.Is(err, vfs.ErrPoisoned):
 		return fmt.Errorf("%w: %w", ErrPoisoned, err)
+	case errors.Is(err, vfs.ErrReadOnly):
+		return fmt.Errorf("%w: %w", ErrReadOnly, err)
 	case errors.Is(err, vfs.ErrBusy):
 		return fmt.Errorf("%w: %w", ErrBusy, err)
 	case errors.Is(err, vfs.ErrLinks):
@@ -31,7 +32,7 @@ func nativeError(err error) error {
 		return err
 	}
 }
-func openFile(path string) (*vfs.File, error) {
-	f, err := vfs.Open(path, vfs.OpenOptions{Role: vfs.SHM, Flags: os.O_RDWR | os.O_CREATE})
+func openFile(path string, readOnly bool) (*vfs.File, error) {
+	f, err := vfs.Open(path, vfs.OpenOptions{Role: vfs.SHM, Flags: readonlyIndexOpenFlags(readOnly)})
 	return f, nativeError(err)
 }

@@ -7,7 +7,27 @@ unary signed literals/parameters. Physical shadowing and direct physical-column
 result aliases follow the existing binder. OR, general BETWEEN extraction,
 expression bounds, secondary-index inequalities, covering access, and JOIN range
 pushdown are not introduced. Existing equality, grams and ANN access keep their
-precedence. NOT INDEXED still forces the old complete table source and sorter.
+precedence. For this range path, NOT INDEXED still forces the old complete
+table source and sorter. The separate bounded direct IPK equality exception in
+[ordinary access](ordinary-index.md) can seek under NOT INDEXED; it does not
+expand this range path.
+
+## 2026-10-11：NOT INDEXED 的有限 IPK 等值例外
+
+本次是组合测试合同纠正，未改变本页区间规划的生产源码。原 1,800 行
+fixture 的 `SELECT id FROM t WHERE k>88 AND id=1`，以及在表后插入
+`NOT INDEXED` 的精确对应 SQL，都允许直接 IPK seek；id=1 的 k=1，
+完整 residual 复核后应为空。匹配对照 id=899 的 k=89，应返回 899。
+官方 SQLite 3.54.0 的新固定根实际执行原 SQL、NOT INDEXED、`id+0` 真扫描
+两组结果及两次 EXPLAIN，加一次身份查询，共九个正常完成的官方进程；
+一根八子项 9 named PASS。不能用原 24-case IPK oracle 冒充这条原 SQL 的证据。
+
+native 普通与精确 NOT INDEXED 形式分别断言 SEARCH/rowid、一次 seek/fetch、
+无 secondary work 和原 WHERE 复核；`id+0` 形式独立断言 SCAN、1,800 fetch、
+零 seek/index work。值不变的说明仅限该已知小整数 fixture，未修改通用
+`ordinaryCompare` 的 genuine-scan 合同，未扩大 NOT INDEXED 范围路径。
+原四根 FAIL、四个测试文件 delta 与新树阶段结果见
+[组合证据](evidence/readonly-ipk-combined-20261011.md)。完整 26 项已于 22:05:15 UTC 自然 PASS。
 
 ## Exact bounds
 

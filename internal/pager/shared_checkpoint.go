@@ -21,6 +21,9 @@ func (s *SharedSession) Checkpoint(ctx context.Context) error {
 	return s.checkpointLocked(ctx)
 }
 func (s *SharedSession) checkpointLocked(ctx context.Context) (err error) {
+	if s.readOnly {
+		return ErrReadOnly
+	}
 	if err := ctx.Err(); err != nil {
 		return err
 	}

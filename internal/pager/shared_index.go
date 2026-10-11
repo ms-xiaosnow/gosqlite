@@ -20,6 +20,24 @@ func (s *SharedSession) readIndexHeaderLocked(ctx context.Context) (h walindex.H
 	if err == nil {
 		return h, nil
 	}
+	if s.readOnly {
+		// A shared WRITE-slot probe distinguishes an in-flight publication from
+		// a stable invalid index. It grants no publishing/rebuild authority.
+		if !errors.Is(err, walindex.ErrUninitialized) && !errors.Is(err, walindex.ErrHeader) {
+			return h, sharedIndexError(err)
+		}
+		if err = ctx.Err(); err != nil {
+			return h, err
+		}
+		if err = s.index.Lock(walindex.WriteLock, 1, false); err != nil {
+			return h, sharedIndexError(err)
+		}
+		h, err = s.index.ReadHeader()
+		if errors.Is(err, walindex.ErrUninitialized) {
+			err = fmt.Errorf("%w: readonly WAL requires an initialized live index", ErrUnsupported)
+		}
+		return h, errors.Join(sharedIndexError(err), sharedIndexError(s.unlockLocked(walindex.WriteLock, 1)))
+	}
 	if errors.Is(err, walindex.ErrUnsupported) || (!errors.Is(err, walindex.ErrUninitialized) && !errors.Is(err, walindex.ErrHeader)) {
 		return h, sharedIndexError(err)
 	}

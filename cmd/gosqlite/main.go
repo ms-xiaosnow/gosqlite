@@ -24,7 +24,7 @@ func runContext(ctx context.Context, args []string, out io.Writer) (resultErr er
 		return err
 	}
 	if len(args) == 0 || (len(args) == 1 && args[0] == "help") {
-		_, err := fmt.Fprintln(out, "usage: gosqlite version\n       gosqlite query [--wal-exclusive|--wal-shared] <db> '<sql>'\n       gosqlite inspect [--extensions] <db>\n       gosqlite backup <db> --out <new-archive> --key-provider <provider> [--out-key-provider <provider>] [--mode snapshot|wal|shared]\n       gosqlite rekey <db> --key-provider <new-provider> --current-key-provider <provider> [--mode snapshot|wal|shared]\n       gosqlite migrate pgembedding inspect --catalog <catalog.json> [--format json|markdown]\n       gosqlite migrate pgembedding --input <export> --manifest <manifest.json> [--output <new.db> --apply [--resume]]\n       gosqlite migrate pgembedding verify --input <export> --manifest <manifest.json> --output <db>\n       gosqlite migrate pgembedding transition --catalog <catalog.json> --options <options.json> [--report <new.json>]\n       gosqlite check <db> [<extension-index>] [--key-provider <provider> --mode snapshot|wal|shared]\n       gosqlite check [--wal-exclusive|--wal-shared] <db> <extension-index>\nSQLite SQL MVP. One statement per invocation; SELECT emits JSON Lines, writes emit a result.\nEncrypted maintenance: env-hex:NAME, env-password:NAME, stdin-hex, stdin-password. See docs/cli-encryption.md; plaintext backup is unsupported.")
+		_, err := fmt.Fprintln(out, "usage: gosqlite version\n       gosqlite query [--wal-exclusive|--wal-shared|--wal-readonly] <db> '<sql>'\n       gosqlite inspect [--wal-readonly] [--extensions] <db>\n       gosqlite backup <db> --out <new-archive> --key-provider <provider> [--out-key-provider <provider>] [--mode snapshot|wal|shared]\n       gosqlite rekey <db> --key-provider <new-provider> --current-key-provider <provider> [--mode snapshot|wal|shared]\n       gosqlite migrate pgembedding inspect --catalog <catalog.json> [--format json|markdown]\n       gosqlite migrate pgembedding --input <export> --manifest <manifest.json> [--output <new.db> --apply [--resume]]\n       gosqlite migrate pgembedding verify --input <export> --manifest <manifest.json> --output <db>\n       gosqlite migrate pgembedding transition --catalog <catalog.json> --options <options.json> [--report <new.json>]\n       gosqlite check [--wal-readonly] <db> [<extension-index>] [--key-provider <provider> --mode snapshot|wal|shared]\n       gosqlite check [--wal-exclusive|--wal-shared|--wal-readonly] <db> <extension-index>\nSQLite SQL MVP. One statement per invocation; SELECT emits JSON Lines, writes emit a result.\nEncrypted maintenance: env-hex:NAME, env-password:NAME, stdin-hex, stdin-password. See docs/cli-encryption.md; plaintext backup is unsupported.")
 		return err
 	}
 	switch args[0] {
@@ -33,14 +33,11 @@ func runContext(ctx context.Context, args []string, out io.Writer) (resultErr er
 	case "migrate":
 		return runMigrate(ctx, args[1:], out)
 	case "query":
-		walExclusive := len(args) > 1 && args[1] == "--wal-exclusive"
-		walShared := len(args) > 1 && args[1] == "--wal-shared"
-		if walExclusive || walShared {
-			args = append([]string{args[0]}, args[2:]...)
+		flags, tail, err := parseReadOnlyWALFlags(args[1:], false)
+		if err != nil || len(tail) != 2 {
+			return fmt.Errorf("usage: gosqlite query [--wal-exclusive|--wal-shared|--wal-readonly] <db> '<sql>'")
 		}
-		if len(args) != 3 {
-			return fmt.Errorf("usage: gosqlite query [--wal-exclusive|--wal-shared] <db> '<sql>'")
-		}
+		args = append([]string{args[0]}, tail...)
 		stmt, err := sqlast.Parse(args[2])
 		if err != nil {
 			return err
@@ -49,7 +46,11 @@ func runContext(ctx context.Context, args []string, out io.Writer) (resultErr er
 			return fmt.Errorf("CLI executes one statement per connection; use the Go API for explicit transactions")
 		}
 		_, selectOnly := stmt.(*sqlast.Select)
-		db, err := sqlite.OpenContext(ctx, args[1], sqlite.Options{ReadOnly: selectOnly && !walExclusive && !walShared, NoCreate: selectOnly, WALExclusive: walExclusive, WALShared: walShared})
+		opts, err := flags.queryOptions(selectOnly)
+		if err != nil {
+			return err
+		}
+		db, err := sqlite.OpenContext(ctx, args[1], opts)
 		if err != nil {
 			return err
 		}
@@ -93,14 +94,12 @@ func runContext(ctx context.Context, args []string, out io.Writer) (resultErr er
 	case "check":
 		return runCheck(ctx, args[1:], out)
 	case "inspect":
-		includeExtensions := len(args) > 1 && args[1] == "--extensions"
-		if includeExtensions {
-			args = append([]string{args[0]}, args[2:]...)
+		flags, tail, err := parseReadOnlyWALFlags(args[1:], true)
+		if err != nil || len(tail) != 1 || flags.walExclusive || flags.walShared {
+			return fmt.Errorf("usage: gosqlite inspect [--wal-readonly] [--extensions] <db>")
 		}
-		if len(args) != 2 {
-			return fmt.Errorf("usage: gosqlite inspect [--extensions] <db>")
-		}
-		db, err := sqlite.OpenContext(ctx, args[1], sqlite.Options{ReadOnly: true})
+		includeExtensions := flags.extensions
+		db, err := sqlite.OpenContext(ctx, tail[0], sqlite.Options{ReadOnly: true, NoCreate: true, WALShared: flags.walReadOnly})
 		if err != nil {
 			return err
 		}

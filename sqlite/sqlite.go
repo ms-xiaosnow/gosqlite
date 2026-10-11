@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"runtime"
 	"sync"
 
 	"github.com/ms-xiaosnow/gosqlite/encryption"
@@ -73,6 +74,9 @@ func wrap(op string, err error) error {
 		return nil
 	}
 	err = classifyEncryptedCleanup(err)
+	if errors.Is(err, pager.ErrReadOnly) {
+		err = fmt.Errorf("%w: %w", ErrReadOnly, err)
+	}
 	var unsupported *sqlast.ErrUnsupported
 	if errors.Is(err, record.ErrCorrupt) || errors.Is(err, ann.ErrCorrupt) || errors.Is(err, encryption.ErrFormat) || errors.Is(err, encryption.ErrIdentity) {
 		err = fmt.Errorf("%w: %w", ErrCorrupt, err)
@@ -127,7 +131,8 @@ func wrapCleanup(op string, cause, cleanup error) error {
 }
 
 // Options configures a connection. Zero-value options open read/write and
-// create an absent database. ReadOnly never creates or modifies files.
+// create an absent database. ReadOnly never creates or modifies file contents;
+// OS-managed access timestamps are outside that guarantee.
 type Options struct {
 	// Encryption explicitly selects the independent authenticated snapshot container.
 	// Nil preserves the ordinary plaintext engine. Native WAL options are incompatible.
@@ -147,7 +152,9 @@ type Options struct {
 	// query or transaction lease. It requires writable access even for reads.
 	WALExclusive bool
 	// WALShared requests native shared-memory WAL coordination. Independent
-	// connections may retain read snapshots while one writer commits.
+	// connections may retain read snapshots while one writer commits. Combined
+	// with ReadOnly, only Linux live initialized SHM attachment is supported.
+	// Main, WAL, and SHM must already exist; a live peer must hold DMS.
 	WALShared bool
 	// WALPowersafeOverwrite is an explicit storage assertion for shared WAL:
 	// writes cannot damage bytes outside their requested range. Default false
@@ -156,7 +163,8 @@ type Options struct {
 	// KeepWALOnClose retains normally committed, synced WAL data without an
 	// implicit checkpoint. Only meaningful in a WAL mode; default Close
 	// attempts a checkpoint. WALExclusive then removes sidecars; WALShared
-	// retains their inodes. This is not a crash-safety guarantee.
+	// retains their inodes. ReadOnly+WALShared never checkpoints, for either
+	// value of this option. This is not a crash-safety guarantee.
 	KeepWALOnClose bool
 	// MaxSortBytes bounds retained ORDER BY rows and UPDATE/DELETE rowid lists.
 	// Zero selects 64 MiB. Sorting never spills plaintext to disk.
@@ -243,8 +251,8 @@ func OpenContext(ctx context.Context, path string, opts Options) (result *DB, re
 	if opts.WALPowersafeOverwrite && !opts.WALShared {
 		return nil, wrap("open", fmt.Errorf("WALPowersafeOverwrite requires WALShared"))
 	}
-	if opts.ReadOnly && (opts.WALExclusive || opts.WALShared) {
-		return nil, wrap("open", fmt.Errorf("%w: native WAL modes currently require writable access", ErrUnsupported))
+	if err := readOnlyWALOptionPolicy(runtime.GOOS, opts); err != nil {
+		return nil, wrap("open", err)
 	}
 	if opts.KeepWALOnClose && !opts.WALExclusive && !opts.WALShared && (opts.Encryption == nil || (opts.Encryption.Mode != EncryptionWAL && opts.Encryption.Mode != EncryptionWALShared)) {
 		return nil, wrap("open", fmt.Errorf("KeepWALOnClose requires a WAL mode"))
@@ -312,7 +320,9 @@ func OpenContext(ctx context.Context, path string, opts Options) (result *DB, re
 	if opts.WALExclusive || opts.WALShared {
 		var session pageSession
 		var err error
-		if opts.WALShared {
+		if opts.WALShared && opts.ReadOnly {
+			session, err = pager.OpenReadOnlySharedSessionAdmitted(ctx, path, d.pagerOptions(), closeAdmission)
+		} else if opts.WALShared {
 			session, err = pager.OpenSharedSessionAdmitted(ctx, path, d.pagerOptions(), closeAdmission)
 		} else {
 			session, err = pager.OpenSessionAdmitted(ctx, path, d.pagerOptions(), plainAdmission)
@@ -525,6 +535,9 @@ func (d *DB) Checkpoint(ctx context.Context) error {
 	defer d.mu.Unlock()
 	if d.closed {
 		return wrap("checkpoint", ErrClosed)
+	}
+	if d.opts.ReadOnly {
+		return wrap("checkpoint", ErrReadOnly)
 	}
 	if d.session == nil {
 		return wrap("checkpoint", fmt.Errorf("%w: checkpoint requires a WAL mode", ErrUnsupported))

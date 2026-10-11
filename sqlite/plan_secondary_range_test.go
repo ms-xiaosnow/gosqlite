@@ -88,10 +88,45 @@ func TestSecondaryRangeWorkOrderingPrecedenceAndBinding(t *testing.T) {
 		}
 		t.Logf("%q: %d index keys/%d pages/%d source rows versus %d forced-scan rows", tail, s.IndexKeysRead, s.IndexPageReads, s.BaseRowFetches, ss.BaseRowFetches)
 	}
+	// NOT INDEXED still permits a declared IPK lookup. Keep this case separate
+	// from ordinaryCompare's unchanged genuine-scan contract for every range
+	// case. Integer id+0 is value-preserving for these bounded fixture keys and
+	// deliberately prevents direct-key admission in the scan control.
+	for _, probe := range []struct {
+		name, query, scan string
+		want              [][]any
+	}{
+		{"ipk_rejecting_residual", "SELECT id FROM t WHERE k>88 AND id=1", "SELECT id FROM t NOT INDEXED WHERE k>88 AND id+0=1", nil},
+		{"ipk_matching_residual", "SELECT id FROM t WHERE k>88 AND id=899", "SELECT id FROM t NOT INDEXED WHERE k>88 AND id+0=899", [][]any{{int64(899)}}},
+	} {
+		t.Run(probe.name, func(t *testing.T) {
+			got, p, s := gramResults(t, db, probe.query)
+			notIndexed, np, ns := gramResults(t, db, strings.Replace(probe.query, "FROM t", "FROM t NOT INDEXED", 1))
+			scan, sp, ss := gramResults(t, db, probe.scan)
+			if !reflect.DeepEqual(got, probe.want) || !reflect.DeepEqual(notIndexed, probe.want) || !reflect.DeepEqual(scan, probe.want) {
+				t.Fatal("IPK/NOT INDEXED/genuine scan result mismatch", got, notIndexed, scan, probe.want)
+			}
+			for _, actual := range []struct {
+				plan  sqlite.QueryPlan
+				stats sqlite.QueryStats
+			}{{p, s}, {np, ns}} {
+				p, s := actual.plan, actual.stats
+				if p.Access != "SEARCH" || p.Method != "rowid" || p.MethodVersion != 1 || !p.Recheck || len(p.Indexes) != 0 || !reflect.DeepEqual(p.Fields, []string{"rowid"}) || p.EstimatedCandidates != 1 {
+					t.Fatal("IPK precedence or recheck lost", p)
+				}
+				if s.IndexKeysRead != 0 || s.IndexPageReads != 0 || s.RowIDSeeks != 1 || s.BaseRowFetches != 1 || s.Candidates != 1 || s.ReturnedRows != int64(len(probe.want)) {
+					t.Fatal("IPK attempted work changed", s)
+				}
+			}
+			if sp.Access != "SCAN" || sp.Method != "" || sp.Reason != "NOT INDEXED requested" || ss.IndexKeysRead != 0 || ss.IndexPageReads != 0 || ss.RowIDSeeks != 0 || ss.BaseRowFetches != 1800 || ss.ReturnedRows != int64(len(probe.want)) {
+				t.Fatal("independent control is not a genuine complete scan", sp, ss)
+			}
+			t.Logf("SQL=%q rows=%#v IPK=%+v NOT_INDEXED=%+v full_scan=%+v", probe.query, got, s, ns, ss)
+		})
+	}
 	for _, tc := range []struct{ q, method string }{
 		{"SELECT id FROM t WHERE k>88 AND id>0", "rowid_range"},
 		{"SELECT id FROM t WHERE k>88 ORDER BY id DESC", "rowid_range"},
-		{"SELECT id FROM t WHERE k>88 AND id=1", "rowid"},
 		{"SELECT id FROM t WHERE k=89 AND suffix>1000", "btree"},
 		{"SELECT k AS renamed,id FROM t WHERE renamed>88 ORDER BY k,id", "btree_range"},
 		{"SELECT id FROM t WHERE rowid>'s'", "btree_range"},

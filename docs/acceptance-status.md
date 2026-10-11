@@ -1,5 +1,101 @@
 # 当前实现与验收矩阵
 
+## 2026-10-11 RO-WAL / IPK 组合：当前执行证据与终态边界
+
+本次实际运行冻结树为 `cace45621c10259231a2e764cfbefdcdbe312ccf`，
+3,178 文件；基于原组合 `9ca02ee7fee55f0eb4abe83330b37b80d02aa4bd`，
+只修三个既有测试文件并新增一个 oracle 测试文件，生产源码零差异。
+本段是该精确树的新执行记录；后面的作者阶段 SOURCE_ONLY / NOT_RUN、
+输入切片与其他检查点结果分别保留自己的时间和源码身份。
+
+- 四个修复普通根及 43 子项已实际取得 47 named PASS，零 SKIP/FAIL。
+- 新原 SQL 对照根及八子项已实际取得 9 named PASS；一次身份查询、
+  六次结果查询、两次 EXPLAIN 共九个官方进程正常完成。
+- 新鲜 live-writer 只读 WAL 单根及六子项已实际取得 7 named PASS；
+  三种页大小 × 两种 KeepWALOnClose，六个健康 peer 加一次身份查询。
+- **完整 26 项于 22:05:15 UTC 自然完成 PASS**，28 次实际 Go 调用，
+  lease RELEASED；所有阶段 exit 0，无强制终止或重试。
+- ordinary/race 各 5,758 PASS / 7 个固定 oracle SKIP；完整 pinned oracle
+  7,431 PASS / 零 SKIP，LIMIT oracle/race 394 PASS。
+- guard、vet、CGO0 build、五目标生产编译、模块核验、两个无 CGO 依赖闭包、
+  Darwin 两架构和 Windows 的六条 test-compile/nm 门均 PASS。
+  外平台测试镜像仅编译/读符号，未执行；全部结果只绑定本次冻结树。
+
+原 9ca02ee7 在新环境的普通门真实结果仍为 5,711 PASS / 7 SKIP /
+四根 FAIL，exit 1；后续 19 项未运行。四项修正有独立源码审阅和上述
+重新执行证据，未删弱断言、未改生产代码或用旧 PASS 替代新门。
+新提交、精确恢复与 hosted CI 在取得各自实际身份前仍 **NOT_RUN**。
+
+[本次证据、失败分层与归档](evidence/readonly-ipk-combined-20261011.md)
+列出准确阶段、原 SQL、工具身份和剩余验收。
+[环境替换原始记录](history/ENVIRONMENT-REPLACEMENT-20261011.md)
+保留旧会话 54102 **UNKNOWN**，不推定其退出或成功。
+本有限开发资格不等于完整 SQLite 兼容、M3/M10、生产、安全或持久性验收；
+ANN V4、41 目标持续 fuzz、未知中断链、全部物理/原生手工限制保持。
+以下历史段落中的“当前”“最新”“待运行”均只指其自身写作时点。
+
+## 历史组合作者阶段记录（运行前）：只读 WAL、IPK equality 与 live-writer 测试源码
+
+本组合以 main `1e8e7fbb694b9234b7797414ae7422a38e08ab7e`、tree
+`4e82f2859975a1d8df11b692f732ed29f6a83e6d` 为基点，纳入只读 WAL V2、
+IPK equality V4 和一个 `oracle && linux` 的健康官方 live-writer 测试文件。
+本次只组合已审字节并修正文档；新组合的编译、普通/race/完整 oracle、
+精确恢复及 CI 均 **NOT_RUN**。输入切片的下列结果不转移为本组合 PASS。
+
+- 只读 WAL V2 tree `b19ee07536c83d554f70b40d461b0b96ee4e2872` 的有限
+  14 门组合已闭合：23 根 + 27 子项 = 50 named PASS，零 SKIP/FAIL。
+  其中普通 Linux 选择为 8 根 + 6 子项；compile/list 只列根，不算测试体 PASS。
+  保留 V3/V4 原始中断与未资格结果，不把它们改写为一次完整成功运行。
+- IPK V4 tree `96e039f2a0b0990789579bfa5fe20746b6b1ecdb` 的原始 baseline
+  为预期 RED：22 PASS、29 FAIL（含两根），exit 1；candidate 普通六根及
+  49 子项共 55 PASS、exit 0。仅修正记录器 Candidates 计数期待后重新核对
+  已闭合原流；原 STOP_HOLD 和错误记录保留。随后仅执行原第三条官方 oracle：
+  24 个 SQL 比较加一次身份查询，25 named PASS、零 SKIP/FAIL，20:24:46 UTC
+  自然结束并释放；没有重跑前两条。这只属于 IPK V4 输入，不是新组合资格。
+- 新 live-writer 文件 SHA-256 `b36e8739e69e67f77ed539d2a9e768de92ac9f5675a5ee3d5a557b112b455006`
+  已独立源码审阅，实际运行 **NOT_RUN**：一根、六个串行子项，正常选择运行
+  时为六个健康 peer 加一次身份查询，共七个官方进程，均要求正常结束。
+  它不是缺失的源码，但尚无互操作 PASS；保留成功/失败 fixture，不进行物理故障。
+
+Linux 活动且已初始化 SHM 的[只读契约](plain-readonly-wal.md)与
+[有限 IPK equality 边界](ordinary-index.md)保持分开。IPK 只放宽有界直接
+等值/LIKE 条件，保留 residual 顺序和 startup 行为；CAST、一般函数、
+二级/范围索引与 LEFT JOIN pushdown 不因此取得更广资格。
+Darwin/Windows 原生执行、真实只读媒体/非特权身份、物理故障/恢复、
+M3/M10 和安全验收仍 **NOT_RUN / 未验收**。以下有日期的旧记录保留各自
+当时状态；“harness 缺失”“尚未运行”等旧文不覆盖本段当前源码说明。
+
+## 历史源码准备记录（运行前）：2026-10-11 只读 WAL V2
+
+本次源码组合以已发布 main `1e8e7fbb694b9234b7797414ae7422a38e08ab7e`、tree
+`4e82f2859975a1d8df11b692f732ed29f6a83e6d` 为新基点；保留全部 Darwin 代码与
+证据。Darwin/Windows 原生执行仍 **NOT_RUN**，新的精确恢复/CI 终态另记，
+不能用下文较早普通资格或 bundle 字节身份代替。
+
+只读 WAL 的 30 个非重叠变更路径与已封存 V1 逐字节/模式相同；只对本页及
+另外两份中央状态文档作 hunk 组合，没有新增函数、harness、测试根或 API。
+V1 的 `3ea6d3…` 基点与专题手册中的 SOURCE_ONLY 记录保留为首次实现来源；
+本 V2 不是该旧树，也不是已发布 main 的只读 WAL 能力。23 根/27 子项保持，
+其中 8 根普通 Linux 生命周期只有测试源码；此功能编译、模型、native、race、
+oracle 仍 **NOT_RUN**。官方 live-writer harness 仍缺，真实只读媒体/非特权
+身份另待外部资格。冷 WAL、无/未初始化 SHM、其他 OS 与 M3/M10 边界保持。
+本次没有运行 Go、gofmt、parser/compiler、Git、项目脚本、测试或原生操作；
+后续仅在固定新树独立复审与队列释放后，按不扩大的 14 条提案另行安排。
+
+
+## 历史首次实现记录（运行前）：Linux 明文 WAL live-index 真只读（2026-10-11）
+
+本独立未发布候选基于 3ea6d3ab15f678fe48bee312921da60828845869；实现显式
+ReadOnly/WALShared 的三文件 O_RDONLY、Linux live DMS、PROT_READ mapping、
+旧 readmark 复用与无 checkpoint 生命周期，及 query/check/inspect 的
+`--wal-readonly`。源码/纯模型/普通 Linux 测试源已写，编译、模型、native、
+race、oracle 全部 **NOT_RUN**，等待独立复审和逐项许可。
+[专题合同](plain-readonly-wal.md)明确 cold/缺失/未初始化 SHM、其他 OS、
+immutable/heap fallback 仍是实现缺口。下文“真只读 WAL 缺代码”属于较早
+main 时点，本有限候选不能替代 main、通用只读 WAL 或 M3/M10 的完成证明。
+真实只读媒体/非特权身份、官方 live writer 互操作、物理故障和原生外平台
+分别待验收；没有新增自动恢复、publisher、Backup 或新 DSN mode。
+
 ## 2026-10-11 17:02 UTC 开发资格补记
 
 本次 Darwin 有界清单/诊断源码组合 `8a324a8cedeccc8ba46234924c8074890aefa1da`
@@ -149,8 +245,8 @@ API、预算、诊断兼容边界与精确 source/model 命令见
 |---|---|---|
 | G1、§3、§4.1、M3 | 有界多段解析及 internal 恢复所有权；新增默认关闭的 Linux 可写明文 Open/Connector 恢复源码、准确 path 的退休 proof 和一次 fresh no-create probe，源码/模型独立 PASS | `PARTIAL / experimental`：更多 journal 形式、默认开启策略、其他原生平台与 native exclusive WAL 尾部安全发布仍未完成；四场景 public manual harness 已实现并独立 source/compiler-only PASS；driver Connector 物理 harness 与更广覆盖仍缺，实际恢复/开启选项的真实 Open/Connect 均 BLOCKED / NOT_RUN |
 | G1、§4.2、§11.1/11.3 | 索引范围、有限 JOIN/GROUP BY/HAVING、连接计数和 cached preparation 的限定普通门通过 | `已知差异`：支持查询的 planner 错误/排序/阶段一致性仍待修正。V4c 树 `552286a…` 有独立有限 PASS，但没有和 main 新 grouped/counter 组合；不能替代 main 结果。新 LIMIT 转换/ErrMismatch 三文件修正独立限定PASS，组合完整普通18阶段PASS；不覆盖其余绑定/执行阶段缺口 |
-| §4.2、§8.1、§12.2 | correct-key 加密 backup/rekey CLI、native DB/Tx/CLI Check V2 已合入 | `未实现/未合入`：main 明文 backup 命令仍明确 unsupported；Linux rollback V2 候选终审未完成，WAL/非 Linux backup 和真正只读 plaintext-WAL CLI 缺代码。native VACUUM 未实现 |
-| G1、§3.6、§12.2 | query/check/inspect CLI 均使用 OpenContext；DB.Inspect 和 inspect --extensions 在单快照呈现持久 method/version/config/generation，默认 JSON 保持 | `PARTIAL`：本次实测只涵盖 Linux plaintext rollback、grams/custom metadata；加密 inspect CLI 的密钥/profile 路由、真正只读 WAL 及其余已选 CLI 目标仍有实现缺口。持久 metadata 不证明索引可用或正确，中途 I/O 取消未动态验证 |
+| §4.2、§8.1、§12.2 | correct-key 加密 backup/rekey CLI、native DB/Tx/CLI Check V2 已合入 | `未实现/未合入`：main 明文 backup 命令仍明确 unsupported；Linux rollback V2 候选终审未完成，WAL/非 Linux backup 仍有缺口；Linux 活动 SHM 真只读 WAL 与 CLI 已实现并有本树普通/live-writer 证据，冷 WAL/其他 OS 仍 unsupported。native VACUUM 未实现 |
+| G1、§3.6、§12.2 | query/check/inspect CLI 均使用 OpenContext；DB.Inspect 和 inspect --extensions 在单快照呈现持久 method/version/config/generation，默认 JSON 保持 | `PARTIAL`：本次实测只涵盖 Linux plaintext rollback、grams/custom metadata；加密 inspect CLI 的密钥/profile 路由及其余已选 CLI 目标仍有实现缺口；Linux 活动 SHM 真只读 WAL 路由本次已补齐，真实只读媒体/非特权身份、冷 WAL 与其他 OS 未取得资格。持久 metadata 不证明索引可用或正确，中途 I/O 取消未动态验证 |
 | §12.1、§14 | 四项 CLI/示例资源修正与五例目录终结/输出错误修正已完成，各自取得限定独立审阅与普通证据 | `限定修正 PASS，完整验收未完成`：sparse 状态、readonly 显式只读、write/query 关闭错误及五例目录终结已有证据。实际失败进程/原生关闭失败/真实失败目录保留未执行；WAL 原 t.TempDir 清理和清除进程密钥不允许推断失败现场完整或可解密 |
 | §9.2(2/5) | caller-dataset 范数、完整精确距离与 Top-K v2 已合入；高维 v1 失败保留，v2 有有理数参考验证 | `PARTIAL`：ANN caller-dataset recall 及真实 PG/Neon 验证单列；精确距离不能替代 ANN |
 | §5.2、§7.2、§11.3 | NFC 组合语料、真实 grams build/空间/P50/P95 工具和普通事务 V4 已合入 | `FAIL/待集成/部署HOLD分列`：ANN 报告 V3 三类实质准入缺陷未修，V4 链路禁重试。性能报告 V3 限定源码审阅通过但未合入；自动性能 CI 部署另受操作许可限制。没有可采信测量不得宣称完整基准通过 |

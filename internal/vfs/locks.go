@@ -163,6 +163,9 @@ func (f *File) LockSHM(slot, n int, exclusive bool) error {
 	if f.role != SHM || !f.dms {
 		return ErrLock
 	}
+	if err := readonlySHMLockAccess(f.writable, exclusive); err != nil {
+		return err
+	}
 	mode, missing, err := f.slots.prepare(slot, n, exclusive)
 	if err != nil {
 		return err

@@ -16,13 +16,22 @@ import (
 
 func ordinaryCompare(t *testing.T, db gramQuerier, sql string, args ...any) (sqlite.QueryPlan, sqlite.QueryStats, sqlite.QueryStats) {
 	t.Helper()
+	return ordinaryComparePlan(t, db, sql, false, args...)
+}
+
+func ordinaryComparePlan(t *testing.T, db gramQuerier, sql string, notIndexedRowID bool, args ...any) (sqlite.QueryPlan, sqlite.QueryStats, sqlite.QueryStats) {
+	t.Helper()
 	got, p, s := gramResults(t, db, sql, args...)
 	forced := strings.Replace(sql, "FROM t", "FROM t NOT INDEXED", 1)
 	want, sp, ss := gramResults(t, db, forced, args...)
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("ordinary/scan mismatch %s %#v\nindexed=%#v\nscan=%#v\nplan=%+v", sql, args, got, want, p)
 	}
-	if sp.Access != "SCAN" || sp.Reason != "NOT INDEXED requested" || ss.IndexKeysRead != 0 || ss.RowIDSeeks != 0 {
+	if notIndexedRowID {
+		if sp.Access != "SEARCH" || sp.Method != "rowid" || !sp.Recheck || ss.IndexKeysRead != 0 || ss.IndexPageReads != 0 || ss.RowIDSeeks > 1 || ss.BaseRowFetches > 1 || ss.RowIDSeeks != s.RowIDSeeks || ss.BaseRowFetches != s.BaseRowFetches {
+			t.Fatalf("NOT INDEXED lost its eligible IPK seek: %+v %+v", sp, ss)
+		}
+	} else if sp.Access != "SCAN" || sp.Reason != "NOT INDEXED requested" || ss.IndexKeysRead != 0 || ss.RowIDSeeks != 0 {
 		t.Fatalf("NOT INDEXED was not a genuine scan: %+v %+v", sp, ss)
 	}
 	return p, s, ss
@@ -81,7 +90,7 @@ func TestOrdinaryIndexRowIDAndShadowedNames(t *testing.T) {
 	for _, col := range []string{"id", "_rowid_", "oid"} {
 		for _, arg := range probes {
 			for _, where := range []string{col + "=?", "?=" + col, col + " IS ?"} {
-				p, s, _ := ordinaryCompare(t, db, "SELECT id,k FROM t WHERE "+where, arg)
+				p, s, _ := ordinaryComparePlan(t, db, "SELECT id,k FROM t WHERE "+where, !strings.Contains(where, " IS "), arg)
 				if p.Method != "rowid" || p.Access != "SEARCH" || s.BaseRowFetches > 1 || s.RowIDSeeks > 1 || s.IndexKeysRead != 0 {
 					t.Fatal(where, arg, p, s)
 				}
@@ -102,11 +111,11 @@ func TestOrdinaryIndexRowIDAndShadowedNames(t *testing.T) {
 	if p.Method != "btree" || s.BaseRowFetches != int64(len(ids)) {
 		t.Fatal("physical rowid shadow", p, s)
 	}
-	p, _, _ = ordinaryCompare(t, db, "SELECT id AS rid FROM t WHERE rid=42")
+	p, _, _ = ordinaryComparePlan(t, db, "SELECT id AS rid FROM t WHERE rid=42", true)
 	if p.Method != "rowid" {
 		t.Fatal("simple WHERE alias was not bound to physical slot", p)
 	}
-	p, _, _ = ordinaryCompare(t, db, "SELECT 42 AS id FROM t WHERE id=1")
+	p, _, _ = ordinaryComparePlan(t, db, "SELECT 42 AS id FROM t WHERE id=1", true)
 	if p.Method != "rowid" {
 		t.Fatal("physical column should shadow result alias", p)
 	}
@@ -193,7 +202,12 @@ func TestOrdinaryIndexBudgetsCancellationAndResidualErrors(t *testing.T) {
 				for r.Next() {
 				}
 				err = r.Err()
-				r.Close()
+				if r.Stats().RowIDSeeks != 0 || r.Stats().BaseRowFetches != 0 {
+					t.Fatal("startup error touched source rows", where, r.Stats())
+				}
+				if closeErr := r.Close(); closeErr != nil {
+					t.Fatal(closeErr)
+				}
 			}
 			if err == nil {
 				t.Fatalf("error suppressed for %s", where)
@@ -211,11 +225,11 @@ func TestOrdinaryIndexBudgetsCancellationAndResidualErrors(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if r.Plan().Access != "SCAN" {
-			t.Fatal("conservative residual admission changed", r.Plan())
+		if r.Plan().Access != "SEARCH" || r.Plan().Method != "rowid" || !r.Plan().Recheck {
+			t.Fatal("missing IPK equality seek", r.Plan())
 		}
-		if r.Next() || r.Err() != nil {
-			t.Fatal("dead row-dependent residual evaluated", r.Err())
+		if r.Next() || r.Err() != nil || r.Stats().RowIDSeeks != 1 || r.Stats().BaseRowFetches != 0 {
+			t.Fatal("dead row-dependent residual evaluated", r.Err(), r.Stats())
 		}
 		if err := r.Close(); err != nil {
 			t.Fatal(err)

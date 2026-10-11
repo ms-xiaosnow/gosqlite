@@ -35,7 +35,23 @@ var errOrdinaryIndexBudget = errors.New("ordinary index candidate/work budget")
 // the stable tie order of the existing sorter. No covering/order-elision claim
 // is made, and the original WHERE is always evaluated again.
 func (d *DB) planOrdinarySource(ctx context.Context, reader btree.PageReader, r *Rows) error {
-	if r.table == nil || r.sel.NotIndexed || r.sel.Where == nil || r.queryPlan.Access != "SCAN" || (r.vectorRank != nil && r.vectorRank.ann != nil) {
+	if r.table == nil || r.sel.Where == nil || r.queryPlan.Access != "SCAN" || (r.vectorRank != nil && r.vectorRank.ann != nil) {
+		return nil
+	}
+	// A declared IPK equality positions the table itself, including under NOT
+	// INDEXED. Admit only the bounded ordinary/LIKE envelope before the general
+	// total-residual gate. Startup predicates and residual order are untouched.
+	if ordinaryIPKEquality(r) && ordinarySafeDefaults(ctx, r.table) {
+		constraints := make(map[int]any)
+		ordinaryEqualities(ctx, r, r.sel.Where, constraints)
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		if value, ok := constraints[-1]; ok {
+			return ordinaryInstallRowID(ctx, reader, r, value)
+		}
+	}
+	if r.sel.NotIndexed {
 		return nil
 	}
 	constraints := make(map[int]any)
@@ -59,28 +75,7 @@ func (d *DB) planOrdinarySource(ctx context.Context, reader btree.PageReader, r 
 		return nil
 	}
 	if value, ok := constraints[-1]; ok {
-		id, possible := ordinaryRowID(value)
-		p := r.queryPlan
-		p.Access, p.Method, p.MethodVersion = "SEARCH", "rowid", 1
-		p.Indexes, p.Fields = nil, []string{"rowid"}
-		p.EstimatedCandidates, p.Recheck = 1, true
-		p.Reason = "rowid equality seek; ANN and grams retain precedence"
-		var ids []int64
-		if possible {
-			ids = []int64{id}
-		} else {
-			p.EstimatedCandidates = 0
-			p.Reason = "rowid equality is impossible after comparison affinity"
-		}
-		if !r.sel.Explain {
-			if err := r.source.Close(); err != nil {
-				return err
-			}
-			r.source = &ordinaryRowSource{ctx: ctx, reader: reader, root: r.table.root, rowids: ids, stats: &r.queryStats, missingOK: true}
-			r.queryStats.Candidates = int64(len(ids))
-		}
-		r.queryPlan = p
-		return nil
+		return ordinaryInstallRowID(ctx, reader, r, value)
 	}
 	idx, why, err := ordinaryReadIndex(ctx, reader, r.table, constraints)
 	if err != nil {
@@ -127,6 +122,107 @@ func (d *DB) planOrdinarySource(ctx context.Context, reader btree.PageReader, r 
 	r.queryStats.Candidates = int64(len(ids))
 	r.queryPlan = p
 	return nil
+}
+
+// ordinaryInstallRowID retains one snapshot's reader and the existing lazy
+// source. Only the source cursor is replaced; Rows still owns reader release.
+func ordinaryInstallRowID(ctx context.Context, reader btree.PageReader, r *Rows, value any) error {
+	id, possible := ordinaryRowID(value)
+	p := r.queryPlan
+	p.Access, p.Method, p.MethodVersion = "SEARCH", "rowid", 1
+	p.Indexes, p.Fields = nil, []string{"rowid"}
+	p.EstimatedCandidates, p.Recheck = 1, true
+	p.Reason = "rowid equality seek; ANN and grams retain precedence"
+	var ids []int64
+	if possible {
+		ids = []int64{id}
+	} else {
+		p.EstimatedCandidates = 0
+		p.Reason = "rowid equality is impossible after comparison affinity"
+	}
+	if !r.sel.Explain {
+		if err := r.source.Close(); err != nil {
+			return err
+		}
+		r.source = &ordinaryRowSource{ctx: ctx, reader: reader, root: r.table.root, rowids: ids, stats: &r.queryStats, missingOK: true}
+		r.queryStats.Candidates = int64(len(ids))
+	}
+	r.queryPlan = p
+	return nil
+}
+
+// ordinaryIPKEquality is a separate, deliberately narrower admission proof.
+// Exactly one direct top-level conjunct supplies the key. Other rowid
+// comparisons, IS, calls, casts, typed columns and relational/vector plans keep
+// their old path. This does not make LIKE safe for secondary/range filtering.
+func ordinaryIPKEquality(r *Rows) bool {
+	if r.relational != nil || r.sel.Relation != nil || r.table.ipk < 0 || r.vectorRank != nil {
+		return false
+	}
+	for _, col := range r.table.columns {
+		if sqlast.IsVectorDeclaration(col.Type) {
+			return false
+		}
+	}
+	keys := 0
+	var conjunct func(sqlast.Expr) bool
+	conjunct = func(e sqlast.Expr) bool {
+		if x, ok := e.(*sqlast.Binary); ok {
+			if x.Op == "AND" {
+				return conjunct(x.Left) && conjunct(x.Right)
+			}
+			if x.Op == "=" || x.Op == "==" {
+				col, ok := x.Left.(*sqlast.Column)
+				constant := x.Right
+				if !ok {
+					col, ok = x.Right.(*sqlast.Column)
+					constant = x.Left
+				}
+				if ok {
+					if ordinal, bound := ordinaryColumn(r, col); bound && ordinal == -1 {
+						keys++
+						return keys == 1 && ordinaryConstant(constant)
+					}
+				}
+			}
+		}
+		return ordinaryIPKResidual(r, e)
+	}
+	return conjunct(r.sel.Where) && keys == 1
+}
+
+func ordinaryIPKResidual(r *Rows, e sqlast.Expr) bool {
+	switch x := e.(type) {
+	case *sqlast.Literal, *sqlast.Parameter, *sqlast.Column:
+		return ordinarySafeWhere(r, e)
+	case *sqlast.Unary:
+		switch x.Op {
+		case "+", "-", "~", "NOT":
+			return ordinaryIPKResidual(r, x.Expr)
+		}
+	case *sqlast.Binary:
+		switch x.Op {
+		case "=", "==", "!=", "<>", "<", "<=", ">", ">=":
+			for _, operand := range []sqlast.Expr{x.Left, x.Right} {
+				if col, ok := operand.(*sqlast.Column); ok {
+					if ordinal, bound := ordinaryColumn(r, col); bound && ordinal == -1 {
+						return false
+					}
+				}
+			}
+		case "AND", "OR", "+", "-", "*", "/", "%", "&", "|", "<<", ">>", "||":
+		default:
+			return false
+		}
+		return ordinaryIPKResidual(r, x.Left) && ordinaryIPKResidual(r, x.Right)
+	case *sqlast.Like:
+		// Keep the older proof to exclude nested LIKE, and apply the narrow
+		// proof so operands cannot hide IS or another direct rowid comparison.
+		return ordinarySafeWhere(r, x.Expr) && ordinaryIPKResidual(r, x.Expr) &&
+			ordinarySafeWhere(r, x.Pattern) && ordinaryIPKResidual(r, x.Pattern) &&
+			(x.Escape == nil || ordinarySafeWhere(r, x.Escape) && ordinaryIPKResidual(r, x.Escape))
+	}
+	return false
 }
 
 // Resolve physical slots first, matching WHERE's alias and rowid-shadow rules.

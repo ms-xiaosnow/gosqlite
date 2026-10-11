@@ -127,25 +127,37 @@ func TestBooleanConservativeIndexErrorBoundary(t *testing.T) {
 	for _, q := range []string{"CREATE TABLE t(id INTEGER PRIMARY KEY,k INTEGER)", "INSERT INTO t VALUES(1,1)", "CREATE INDEX bool_k ON t(k)"} {
 		reviewVectorExec(t, db, q)
 	}
-	// Explicit remaining boundary: the native total-residual gate retains scan
-	// order. SQLite's IPK seek suppresses this earlier row-dependent error even
-	// with NOT INDEXED. Do not present this native contract as oracle equality.
+	// Candidate correction of the retained original SQL. Baseline source bytes
+	// remain separate evidence; execution/oracle qualification is still required.
 	for _, modifier := range []string{"", " NOT INDEXED"} {
 		r, err := db.Query(context.Background(), "SELECT id FROM t"+modifier+" WHERE k LIKE 'x' ESCAPE 'ab' AND id=9999")
 		if err != nil {
 			t.Fatal(err)
 		}
-		if r.Plan().Access != "SCAN" {
-			t.Fatal("separate index admission contract changed", r.Plan())
+		if r.Plan().Access != "SEARCH" || r.Plan().Method != "rowid" || !r.Plan().Recheck {
+			t.Fatal("missing IPK equality seek", r.Plan())
 		}
-		if r.Next() || r.Err() == nil || !strings.Contains(r.Err().Error(), "ESCAPE") {
-			t.Fatal(r.Err())
+		if r.Next() || r.Err() != nil || r.Stats().RowIDSeeks != 1 || r.Stats().BaseRowFetches != 0 {
+			t.Fatal(r.Err(), r.Stats())
 		}
-		r.Close()
-		// Reversing source order makes the row-dependent error unreachable.
+		if err := r.Close(); err != nil {
+			t.Fatal(err)
+		}
+		// Keep the original reversed-conjunct result assertion.
 		got, _, _ := reviewVectorQuery(t, db, "SELECT id FROM t"+modifier+" WHERE id=9999 AND k LIKE 'x' ESCAPE 'ab'")
 		if len(got) != 0 {
 			t.Fatal(got)
+		}
+		// The same residual still errors after a matching source row is fetched.
+		r, err = db.Query(context.Background(), "SELECT id FROM t"+modifier+" WHERE k LIKE 'x' ESCAPE 'ab' AND id=1")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if r.Next() || r.Err() == nil || !strings.Contains(r.Err().Error(), "ESCAPE") || r.Stats().RowIDSeeks != 1 || r.Stats().BaseRowFetches != 1 {
+			t.Fatal(r.Err(), r.Stats())
+		}
+		if err := r.Close(); err != nil {
+			t.Fatal(err)
 		}
 	}
 }

@@ -1,5 +1,17 @@
 # gosqlite
 
+2026-10-11 当前未发布组合：Linux 显式 `ReadOnly + WALShared` 的 live-index
+真只读连接、`--wal-readonly` query/check/inspect、有限 IPK equality 修正与
+健康官方 live-writer 测试已纳入。精确冻结树 `cace45621c10259231a2e764cfbefdcdbe312ccf`
+已取得普通门 5,758 PASS / 7 个固定 oracle SKIP、live-writer 7 named PASS、
+原 SQL 九进程 oracle 9 PASS；完整 26 项于 **22:05:15 UTC 自然 PASS**，
+race 5,758 PASS / 7 SKIP、完整 pinned oracle 7,431 PASS / 零 SKIP。
+原组合四根 FAIL、测试专用四文件修正和输入切片结果分别保留，见
+[进展](docs/progress.md)和[精确证据](docs/evidence/readonly-ipk-combined-20261011.md)。
+冷 WAL、缺失/未初始化 SHM、其他 OS 的只读组合仍不支持；真实只读媒体/
+非特权身份、持久性、安全、M3/M10 与完整目标仍未验收，见
+[准确边界](docs/plain-readonly-wal.md)。本段更新不继承下列旧检查点资格。
+
 Current source update (2026-10-11): this unpublished Windows shared-rekey
 composition adds guarded lifecycle admission/conversion and a post-conversion
 same-source-key authority check. Native Windows execution remains **NOT_RUN**.
@@ -92,7 +104,7 @@ CGO_ENABLED=0 go run ./examples/wal disposable-wal.db
 CGO_ENABLED=0 go run ./cmd/gosqlite query --wal-exclusive disposable-wal.db 'SELECT id,text FROM notes'
 ```
 
-Native DB.Checkpoint(ctx) performs an explicit normal checkpoint. Default Close checkpoints; KeepWALOnClose retains successful committed frames after normal close. A WAL connection requires writable file access even for SELECT. Plain read-only Open/CLI inspect still refuse mode2. Unsupported WAL tails and existing journals fail closed. Hot rollback-recovery code is isolated and source-only; no crash/fault durability gate has passed. See ADR0004 and manual-verification.md.
+Native DB.Checkpoint(ctx) performs an explicit normal checkpoint. Default Close checkpoints; KeepWALOnClose retains successful committed frames after normal close. An exclusive WAL connection requires writable access even for SELECT. The default rollback-only ReadOnly entry still refuses mode2; the new explicit Linux live-index readonly subset is described separately above. Unsupported WAL tails and existing journals fail closed. Hot rollback-recovery code is isolated and source-only; no crash/fault durability gate has passed. See ADR0004 and manual-verification.md.
 
 ## Explicit shared WAL
 
@@ -103,7 +115,7 @@ CGO_ENABLED=0 go run ./cmd/gosqlite query --wal-shared disposable-shared.db 'CRE
 CGO_ENABLED=0 go run ./cmd/gosqlite query --wal-shared disposable-shared.db "INSERT INTO notes VALUES(1,'共享 WAL')"
 ```
 
-DB.Checkpoint is nonblocking and may safely backfill some frames before returning BUSY for readers. Close attempts a checkpoint unless KeepWALOnClose and retains WAL/SHM inodes. Writable access is required, including for read transactions. Conservative storage-sector protection defaults on; WALPowersafeOverwrite is an explicit storage assertion and is never autodetected. Live official SQLite reader/writer interoperability is tested, but crash/fault durability and broader cold recovery remain unqualified. See ADR0006 and the compatibility matrix.
+DB.Checkpoint is nonblocking and may safely backfill some frames before returning BUSY for readers. Close attempts a checkpoint unless KeepWALOnClose and retains WAL/SHM inodes. Without ReadOnly, this existing WALShared route requires writable access, including for read transactions. The explicit ReadOnly combination is a bounded Linux live-index subset with exact combined-tree ordinary and healthy live-writer evidence above; denied-write media, other native platforms and broader acceptance remain unqualified. Conservative storage-sector protection defaults on; WALPowersafeOverwrite is an explicit storage assertion and is never autodetected. Live official SQLite reader/writer interoperability is tested, but crash/fault durability and broader cold recovery remain unqualified. See ADR0006 and the compatibility matrix.
 
 ## Persistent text indexing
 
@@ -359,7 +371,7 @@ explicitly partial; final M10 qualification is outstanding.
 Required tooling now includes [encrypted CLI backup/rekey](docs/cli-encryption.md),
 [caller-dataset numerical verification](docs/import-distance-verification.md) and
 [grams measurements](benchmarks/grams/README.md). Generic plaintext backup,
-full plaintext-WAL read-only CLI and final release qualification remain open.
+general/cold plaintext-WAL read-only CLI and final release qualification remain open; the explicit Linux live-index subset now has unexecuted source above.
 
 [Native full-profile DB/Tx/CLI checks](docs/native-check.md) and the
 [ordinary transaction/concurrent-soak harness](benchmarks/transactions/README.md)

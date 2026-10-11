@@ -95,23 +95,21 @@ func nativeAttachDMS(f *File) error {
 	if err := syscall.FcntlFlock(f.raw.Fd(), 36, &l); err != nil {
 		return fmt.Errorf("DMS probe: %w", err)
 	}
-	initialWriter := false
-	switch l.Type {
-	case syscall.F_UNLCK:
+	// Read-only attach must observe a live shared DMS holder. It cannot become
+	// the first opener or trust a retained index after its last owner closed.
+	initialWriter, err := readonlySHMDMSDecision(f.writable, l.Type)
+	if err != nil {
+		return err
+	}
+	if initialWriter {
 		if err := ofdLock(f, syscall.F_WRLCK, DMSByte, 1); err != nil {
 			return err
 		}
-		initialWriter = true
 		if err := f.raw.Truncate(3); err != nil {
 			return errors.Join(ErrPoisoned, fmt.Errorf("initialize WAL-index: %w", err))
 		}
-	case syscall.F_RDLCK:
-	case syscall.F_WRLCK:
-		return ErrBusy
-	default:
-		return ErrUnsupported
 	}
-	err := ofdLock(f, syscall.F_RDLCK, DMSByte, 1)
+	err = ofdLock(f, syscall.F_RDLCK, DMSByte, 1)
 	if err != nil && initialWriter {
 		return errors.Join(ErrPoisoned, err)
 	}
@@ -132,7 +130,7 @@ type nativeMapping struct{ view []byte }
 
 func nativeMapGranularity() int64 { return int64(os.Getpagesize()) }
 func nativeMap(f *File, off int64, n int) (nativeMapping, []byte, error) {
-	b, err := syscall.Mmap(int(f.raw.Fd()), off, n, syscall.PROT_READ|syscall.PROT_WRITE, syscall.MAP_SHARED)
+	b, err := syscall.Mmap(int(f.raw.Fd()), off, n, readonlySHMProtection(f.writable), syscall.MAP_SHARED)
 	return nativeMapping{view: b}, b, err
 }
 func nativeUnmap(m *nativeMapping) error {

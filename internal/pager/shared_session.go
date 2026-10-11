@@ -6,7 +6,6 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"os"
 	"path/filepath"
 	"runtime"
 	"sync"
@@ -21,7 +20,8 @@ import (
 // protocol. Each connection retains a database SHARED lock and a SHM DMS lock;
 // each transaction independently locks its immutable WAL read-mark snapshot.
 // A connection permits one local lease. Use independent connections for
-// concurrent transactions. Shared WAL currently requires writable sidecars.
+// concurrent transactions. An explicit readonly session joins a live Linux index
+// without creating files, publishing readmarks, or checkpointing.
 type SharedSession struct {
 	mu         sync.Mutex
 	file       *vfs.File
@@ -33,6 +33,7 @@ type SharedSession struct {
 	active     *Tx
 	poisoned   error
 	closed     bool
+	readOnly   bool
 	closeGroup *sharedCloseRetirement
 }
 
@@ -51,6 +52,8 @@ func sharedIndexError(err error) error {
 		return err
 	}
 	switch {
+	case errors.Is(err, walindex.ErrReadOnly):
+		return fmt.Errorf("%w: %w", ErrReadOnly, err)
 	case errors.Is(err, walindex.ErrPoisoned):
 		return fmt.Errorf("%w: %w", ErrPoisoned, err)
 	case errors.Is(err, walindex.ErrBusy):
@@ -71,7 +74,17 @@ func sharedIndexError(err error) error {
 // OpenSharedSessionAdmitted consumes a close admission and enters standard shared WAL. Mode changes require
 // the database EXCLUSIVE lock, but an already-WAL database does not. The WAL
 // and SHM inodes are never replaced or unlinked by a SharedSession.
-func OpenSharedSessionAdmitted(ctx context.Context, path string, opts Options, admission *SharedCloseAdmission) (result *SharedSession, retErr error) {
+func OpenSharedSessionAdmitted(ctx context.Context, path string, opts Options, admission *SharedCloseAdmission) (*SharedSession, error) {
+	return openSharedSessionAdmitted(ctx, path, opts, admission, false)
+}
+
+// OpenReadOnlySharedSessionAdmitted joins an existing live initialized Linux
+// WAL generation. It consumes the same admission as writable shared sessions.
+func OpenReadOnlySharedSessionAdmitted(ctx context.Context, path string, opts Options, admission *SharedCloseAdmission) (*SharedSession, error) {
+	return openSharedSessionAdmitted(ctx, path, opts, admission, true)
+}
+
+func openSharedSessionAdmitted(ctx context.Context, path string, opts Options, admission *SharedCloseAdmission, readOnly bool) (result *SharedSession, retErr error) {
 	closeGroup, err := admission.take()
 	if err != nil {
 		return nil, err
@@ -82,6 +95,9 @@ func OpenSharedSessionAdmitted(ctx context.Context, path string, opts Options, a
 		}
 	}()
 	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	if err := sharedReadOnlyOpenPolicy(runtime.GOOS, readOnly, opts); err != nil {
 		return nil, err
 	}
 	opts, err = normalizedOptions(opts)
@@ -117,15 +133,12 @@ func OpenSharedSessionAdmitted(ctx context.Context, path string, opts Options, a
 	} else {
 		return nil, err
 	}
-	flags := os.O_RDWR
-	if opts.Create {
-		flags |= os.O_CREATE
-	}
+	flags := sharedMainOpenFlags(readOnly, opts.Create)
 	f, err := openWritableDatabase(path, flags)
 	if err != nil {
 		return nil, err
 	}
-	s := &SharedSession{file: f, path: path, opts: opts, closeGroup: closeGroup}
+	s := &SharedSession{file: f, path: path, opts: opts, closeGroup: closeGroup, readOnly: readOnly}
 	cleanup.main = sharedOpenFileOwner{file: f}
 	if err = lockShared(f); err != nil {
 		return nil, err
@@ -140,6 +153,9 @@ func OpenSharedSessionAdmitted(ctx context.Context, path string, opts Options, a
 		return nil, err
 	}
 	if main.info.Size() == 0 || (main.rawHeader[18] == 1 && main.rawHeader[19] == 1) {
+		if readOnly {
+			return nil, fmt.Errorf("%w: readonly shared WAL requires an existing mode-2 database", ErrUnsupported)
+		}
 		if err = lockExclusive(f); err != nil {
 			return nil, err
 		}
@@ -172,12 +188,16 @@ func OpenSharedSessionAdmitted(ctx context.Context, path string, opts Options, a
 		return nil, fmt.Errorf("%w: main page size", ErrCorrupt)
 	}
 	s.header.PageSize = size
-	s.walFile, err = openWALFile(path+"-wal", os.O_RDWR|os.O_CREATE, false)
+	s.walFile, err = openWALFile(path+"-wal", sharedWALOpenFlags(readOnly), false)
 	if err != nil {
 		return nil, err
 	}
 	cleanup.wal = sharedOpenFileOwner{file: s.walFile}
-	s.index, err = walindex.Open(path + "-shm")
+	if readOnly {
+		s.index, err = walindex.OpenReadOnly(path + "-shm")
+	} else {
+		s.index, err = walindex.Open(path + "-shm")
+	}
 	if err != nil {
 		return nil, sharedIndexError(err)
 	}
@@ -270,6 +290,10 @@ func (s *SharedSession) begin(ctx context.Context, readOnly bool) (*Tx, error) {
 		return nil, err
 	}
 	s.mu.Lock()
+	if s.readOnly && !readOnly {
+		s.mu.Unlock()
+		return nil, ErrReadOnly
+	}
 	if err := s.checkStableLocked(); err != nil {
 		s.mu.Unlock()
 		return nil, err
@@ -376,6 +400,9 @@ func (s *SharedSession) promote(ctx context.Context, t *Tx) error {
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	if s.readOnly {
+		return ErrReadOnly
+	}
 	if err := s.checkStableLocked(); err != nil {
 		return err
 	}
@@ -444,7 +471,7 @@ func (s *SharedSession) closeLocked(cause error, checkpoint func() error) error 
 		return ErrBusy
 	}
 	err := errors.Join(cause, s.poisoned)
-	if err == nil && !s.opts.KeepWALOnClose {
+	if err == nil && sharedCloseMayCheckpoint(s.readOnly, s.opts.KeepWALOnClose) {
 		err = checkpoint()
 		if errors.Is(err, ErrBusy) && s.poisoned == nil {
 			err = nil
@@ -468,6 +495,10 @@ func (s *SharedSession) beginReadLocked(ctx context.Context, forceWAL bool) (sha
 		}
 		h, err := s.readIndexHeaderLocked(ctx)
 		if err != nil {
+			if s.readOnly && errors.Is(err, ErrBusy) && !errors.Is(err, ErrPoisoned) {
+				runtime.Gosched()
+				continue
+			}
 			return sharedRead{}, err
 		}
 		backfill, err := s.index.Backfill()
@@ -501,11 +532,11 @@ func (s *SharedSession) beginReadLocked(ctx context.Context, forceWAL bool) (sha
 			if e != nil {
 				return sharedRead{}, sharedIndexError(e)
 			}
-			if m <= h.MaxFrame && (chosen == 0 || m >= mark) {
+			if sharedReadMarkPreferred(h.MaxFrame, chosen, mark, m) {
 				chosen, mark = i, m
 			}
 		}
-		if chosen == 0 || mark < h.MaxFrame {
+		if !s.readOnly && (chosen == 0 || mark < h.MaxFrame) {
 			for i := 1; i < walindex.ReaderCount; i++ {
 				if e := s.index.Lock(walindex.ReadLock0+i, 1, true); e == nil {
 					e = s.index.SetReadMark(i, h.MaxFrame)
@@ -521,6 +552,9 @@ func (s *SharedSession) beginReadLocked(ctx context.Context, forceWAL bool) (sha
 			}
 		}
 		if chosen == 0 {
+			if err := sharedReadOnlyMarkError(s.readOnly, chosen); err != nil {
+				return sharedRead{}, err
+			}
 			runtime.Gosched()
 			continue
 		}
@@ -534,7 +568,7 @@ func (s *SharedSession) beginReadLocked(ctx context.Context, forceWAL bool) (sha
 		backfill, e1 := s.index.Backfill()
 		m, e2 := s.index.ReadMark(chosen)
 		current, e3 := s.index.ReadHeader()
-		if e1 == nil && e2 == nil && e3 == nil && m == mark && current == h && backfill <= h.MaxFrame {
+		if e1 == nil && e2 == nil && e3 == nil && sharedReadSnapshotStable(h, current, mark, m, backfill) {
 			return sharedRead{hdr: h, slot: chosen, minFrame: backfill + 1}, nil
 		}
 		if err = s.unlockLocked(walindex.ReadLock0+chosen, 1); err != nil {

@@ -1,5 +1,94 @@
 # Current compatibility matrix
 
+## 2026-10-11 RO-WAL / IPK 组合：当前执行证据与终态边界
+
+本次实际运行冻结树为 `cace45621c10259231a2e764cfbefdcdbe312ccf`，
+3,178 文件；基于原组合 `9ca02ee7fee55f0eb4abe83330b37b80d02aa4bd`，
+只修三个既有测试文件并新增一个 oracle 测试文件，生产源码零差异。
+本段是该精确树的新执行记录；后面的作者阶段 SOURCE_ONLY / NOT_RUN、
+输入切片与其他检查点结果分别保留自己的时间和源码身份。
+
+- 四个修复普通根及 43 子项已实际取得 47 named PASS，零 SKIP/FAIL。
+- 新原 SQL 对照根及八子项已实际取得 9 named PASS；一次身份查询、
+  六次结果查询、两次 EXPLAIN 共九个官方进程正常完成。
+- 新鲜 live-writer 只读 WAL 单根及六子项已实际取得 7 named PASS；
+  三种页大小 × 两种 KeepWALOnClose，六个健康 peer 加一次身份查询。
+- **完整 26 项于 22:05:15 UTC 自然完成 PASS**，28 次实际 Go 调用，
+  lease RELEASED；所有阶段 exit 0，无强制终止或重试。
+- ordinary/race 各 5,758 PASS / 7 个固定 oracle SKIP；完整 pinned oracle
+  7,431 PASS / 零 SKIP，LIMIT oracle/race 394 PASS。
+- guard、vet、CGO0 build、五目标生产编译、模块核验、两个无 CGO 依赖闭包、
+  Darwin 两架构和 Windows 的六条 test-compile/nm 门均 PASS。
+  外平台测试镜像仅编译/读符号，未执行；全部结果只绑定本次冻结树。
+
+原 9ca02ee7 在新环境的普通门真实结果仍为 5,711 PASS / 7 SKIP /
+四根 FAIL，exit 1；后续 19 项未运行。四项修正有独立源码审阅和上述
+重新执行证据，未删弱断言、未改生产代码或用旧 PASS 替代新门。
+新提交、精确恢复与 hosted CI 在取得各自实际身份前仍 **NOT_RUN**。
+
+[本次证据、失败分层与归档](evidence/readonly-ipk-combined-20261011.md)
+列出准确阶段、原 SQL、工具身份和剩余验收。
+[环境替换原始记录](history/ENVIRONMENT-REPLACEMENT-20261011.md)
+保留旧会话 54102 **UNKNOWN**，不推定其退出或成功。
+本有限开发资格不等于完整 SQLite 兼容、M3/M10、生产、安全或持久性验收；
+ANN V4、41 目标持续 fuzz、未知中断链、全部物理/原生手工限制保持。
+以下历史段落中的“当前”“最新”“待运行”均只指其自身写作时点。
+
+## 历史组合作者阶段记录（运行前）：只读 WAL、IPK equality 与 live-writer 测试源码
+
+本组合以 main `1e8e7fbb694b9234b7797414ae7422a38e08ab7e`、tree
+`4e82f2859975a1d8df11b692f732ed29f6a83e6d` 为基点，纳入只读 WAL V2、
+IPK equality V4 和一个 `oracle && linux` 的健康官方 live-writer 测试文件。
+本次只组合已审字节并修正文档；新组合的编译、普通/race/完整 oracle、
+精确恢复及 CI 均 **NOT_RUN**。输入切片的下列结果不转移为本组合 PASS。
+
+- 只读 WAL V2 tree `b19ee07536c83d554f70b40d461b0b96ee4e2872` 的有限
+  14 门组合已闭合：23 根 + 27 子项 = 50 named PASS，零 SKIP/FAIL。
+  其中普通 Linux 选择为 8 根 + 6 子项；compile/list 只列根，不算测试体 PASS。
+  保留 V3/V4 原始中断与未资格结果，不把它们改写为一次完整成功运行。
+- IPK V4 tree `96e039f2a0b0990789579bfa5fe20746b6b1ecdb` 的原始 baseline
+  为预期 RED：22 PASS、29 FAIL（含两根），exit 1；candidate 普通六根及
+  49 子项共 55 PASS、exit 0。仅修正记录器 Candidates 计数期待后重新核对
+  已闭合原流；原 STOP_HOLD 和错误记录保留。随后仅执行原第三条官方 oracle：
+  24 个 SQL 比较加一次身份查询，25 named PASS、零 SKIP/FAIL，20:24:46 UTC
+  自然结束并释放；没有重跑前两条。这只属于 IPK V4 输入，不是新组合资格。
+- 新 live-writer 文件 SHA-256 `b36e8739e69e67f77ed539d2a9e768de92ac9f5675a5ee3d5a557b112b455006`
+  已独立源码审阅，实际运行 **NOT_RUN**：一根、六个串行子项，正常选择运行
+  时为六个健康 peer 加一次身份查询，共七个官方进程，均要求正常结束。
+  它不是缺失的源码，但尚无互操作 PASS；保留成功/失败 fixture，不进行物理故障。
+
+Linux 活动且已初始化 SHM 的[只读契约](plain-readonly-wal.md)与
+[有限 IPK equality 边界](ordinary-index.md)保持分开。IPK 只放宽有界直接
+等值/LIKE 条件，保留 residual 顺序和 startup 行为；CAST、一般函数、
+二级/范围索引与 LEFT JOIN pushdown 不因此取得更广资格。
+Darwin/Windows 原生执行、真实只读媒体/非特权身份、物理故障/恢复、
+M3/M10 和安全验收仍 **NOT_RUN / 未验收**。以下有日期的旧记录保留各自
+当时状态；“harness 缺失”“尚未运行”等旧文不覆盖本段当前源码说明。
+
+## 历史源码准备记录（运行前）：2026-10-11 只读 WAL V2
+
+本次源码组合以已发布 main `1e8e7fbb694b9234b7797414ae7422a38e08ab7e`、tree
+`4e82f2859975a1d8df11b692f732ed29f6a83e6d` 为新基点；保留全部 Darwin 代码与
+证据。Darwin/Windows 原生执行仍 **NOT_RUN**，新的精确恢复/CI 终态另记，
+不能用下文较早普通资格或 bundle 字节身份代替。
+
+只读 WAL 的 30 个非重叠变更路径与已封存 V1 逐字节/模式相同；只对本页及
+另外两份中央状态文档作 hunk 组合，没有新增函数、harness、测试根或 API。
+V1 的 `3ea6d3…` 基点与专题手册中的 SOURCE_ONLY 记录保留为首次实现来源；
+本 V2 不是该旧树，也不是已发布 main 的只读 WAL 能力。23 根/27 子项保持，
+其中 8 根普通 Linux 生命周期只有测试源码；此功能编译、模型、native、race、
+oracle 仍 **NOT_RUN**。官方 live-writer harness 仍缺，真实只读媒体/非特权
+身份另待外部资格。冷 WAL、无/未初始化 SHM、其他 OS 与 M3/M10 边界保持。
+本次没有运行 Go、gofmt、parser/compiler、Git、项目脚本、测试或原生操作；
+后续仅在固定新树独立复审与队列释放后，按不扩大的 14 条提案另行安排。
+
+
+2026-10-11 当前未发布组合：Linux `ReadOnly + WALShared` 的 live-index 子集及
+`--wal-readonly` query/check/inspect 已纳入；本树实际普通与 live-writer 结果见页首，
+输入切片与运行前记录单列，完整 26 项已于 22:05:15 UTC 自然 PASS。
+冷 WAL、缺/未初始化 SHM、其他 OS 仍 unsupported；详见
+[只读契约](plain-readonly-wal.md)。此项不继承下面 writable WAL 的既有资格。
+
 ## 2026-10-11 17:02 UTC 开发资格补记
 
 本次 Darwin 有界清单/诊断源码组合 `8a324a8cedeccc8ba46234924c8074890aefa1da`
@@ -57,6 +146,7 @@ Exact source, command, CI and restored-commit evidence remains in
 | Hot rollback recovery | partial experimental source/model | Open/OpenContext and configured Connector now have a nil-default, Linux writable-plaintext rollback opt-in, with retired-reader path proof and at most one recovery plus one fresh no-create probe. Independent descriptor-free model/source/compile checks PASS; real RecoverRollback, the production bridge and recovery-enabled real Open remain BLOCKED / NOT_RUN. The four-case public Open manual harness is implemented with independent source/compiler-only PASS; all physical cases remain NOT_RUN. Driver Connector physical coverage, default-on recovery, broader journals, native WAL-tail publication, other native platforms and full fault harnesses remain separate gaps |
 | Exclusive WAL | partial | Explicit writable WALExclusive, lifetime EXCLUSIVE lock, one active lease, ordinary append/read/checkpoint/close/interoperability; not shared concurrency |
 | Shared WAL | partial | Actual dual-header/hash/readmark SHM protocol, single writer/multiple independent snapshots, ordinary live official-reader/writer interoperability and reader-safe checkpoint/reset; one active lease per connection |
+| ReadOnly + Shared WAL | partial / scoped Linux ordinary + live-writer PASS | 显式加入活动已初始化 SHM；三个 O_RDONLY 句柄、只读 mmap、旧 mark 保护完整 header 快照、无 checkpoint。新树健康官方 live-writer 一根六子项实际 PASS；真实只读媒体/非特权身份未验证。冷/缺失/未初始化 sidecar 和其他 OS 不支持；不是通用 readonly WAL |
 | Ambiguous WAL tails | partial | Accepted ordinary committed/discarded/reset cases are bounded; incomplete/current-generation ambiguous tails fail closed; broader recovery handling remains code work |
 | Locking/native platforms | partial | Linux managed OFD locks; Darwin process-fcntl/deferred-close registry; Windows/amd64 LockFileEx, full file identity and managed mapping/metadata handles. Linux/amd64 ordinary runtime only; other target builds are not runtime evidence |
 | Managed cleanup ownership | partial | Bounded shared failed-open/successful-close, encrypted and plaintext Reader/Tx/exclusive minimal-owner registries/retry APIs are implemented, including pre-acquisition public metadata adoption. Native recovery now shares bounded ownership and explicit initial-absence provenance; shared-session initial-absence provenance and rollback Reader post-SHARED metadata timing are corrected with independent source/ordinary/race evidence. Native failure execution remains unqualified |
@@ -73,7 +163,9 @@ limits, supported journals and evidence boundaries.
 Plaintext paths are resolved once per connection. Idle rollback connections do
 not hold a shared snapshot. Query Rows and explicit Tx retain their snapshot;
 active transaction Rows still prevent mutation/control/Commit. Shared WAL retains
-sidecar inodes and requires writable access. Conservative storage-sector
+sidecar inodes. Its normal writable route requires writable access; the explicit
+ReadOnly live-index subset has exact combined-tree ordinary/live-writer evidence above;
+real denied-write media and other native platforms remain unqualified. Conservative storage-sector
 protection defaults on; WALPowersafeOverwrite is an explicit caller assertion,
 not hardware detection. Darwin fsync is not F_FULLFSYNC; Windows has no claimed
 Unix directory barrier. Default Windows cross-vet's disclosed mapping
@@ -89,10 +181,10 @@ ADR0015](decisions/0015-native-darwin-windows-backends.md) and
 | Constraints/schema | partial | INTEGER PRIMARY KEY rowid alias, NOT NULL and supported literal DEFAULT; noninteger PK metadata can be read but does not imply enforcement. UNIQUE/CHECK/FK/compound PK/generated columns/STRICT/general schema alterations remain unsupported |
 | Transaction control | partial | Native/driver and retained-connection BEGIN, COMMIT/END, ROLLBACK, SAVEPOINT, RELEASE, ROLLBACK TO; bounded statement/savepoint undo and read-own-writes. Connection changes()/total_changes()/last_insert_rowid() now have bounded native/driver state. General cursor relaxation remains code work |
 | SELECT and JOIN | partial | No FROM/single table and bounded named-table comma/INNER/CROSS/LEFT nested loops, aliases/qualified columns/stars, WHERE/ON, binds, ordering/NULL placement/LIMIT/OFFSET; one root snapshot/Tx lease. USING/NATURAL/RIGHT/FULL/derived/subquery relations remain unsupported |
-| Boolean and affinity semantics | partial | Context-sensitive scalar versus predicate/CASE branching, three-valued logic, bounded constant startup/substitution and declared-versus-absent comparison affinity; unquoted TRUE/FALSE identifier precedence and scoped SQLite direct LEFT-ON result-alias provenance are implemented. Known remaining planner-dependent differences include CAST/IPK equality suppressing an earlier error in SQLite and LEFT-only WHERE pushdown ahead of an error-producing ON; these are code gaps, not full oracle parity |
+| Boolean and affinity semantics | partial | Context-sensitive scalar versus predicate/CASE branching, three-valued logic, bounded constant startup/substitution and declared-versus-absent comparison affinity; unquoted TRUE/FALSE identifier precedence and scoped SQLite direct LEFT-ON result-alias provenance are implemented. The current unpublished composition adds a bounded direct IPK equality/LIKE admission correction, including under NOT INDEXED; the exact combined tree now has normal and fixed original-SQL oracle evidence, separately recorded above. CAST/general-expression planning and LEFT-only WHERE pushdown ahead of an error-producing ON remain gaps, not full oracle parity |
 | Other scalar expressions | partial | CASE/CAST/BETWEEN/IN-list, arithmetic/bitwise/concat, default BINARY comparisons, supported scalar functions and rune LIKE/ESCAPE; scalar COLLATE/general collation registration and unlisted functions remain unsupported |
 | Global aggregates | partial | Bounded native COUNT(*)/COUNT(expr)/SUM/TOTAL/AVG/MIN/MAX, supported scalar result wrappers and existing joins; exact storage-class/NULL/arithmetic/error comparisons against pinned SQLite. GROUP BY/HAVING are implemented for bounded declared key/expression profiles, including proved rowid grouping/ordering and top-K projection admission. DISTINCT/FILTER/windows and ambiguous bare-column projections remain unsupported |
-| Rowid equality/ranges/order | partial | Genuine equality seeks and signed bounded forward/reverse inequality cursors, conservative residual recheck and proven rowid ORDER BY elimination. Error-capable projections/residuals retain the original path; NOT INDEXED forces scan/sort |
+| Rowid equality/ranges/order | partial | Genuine equality seeks and signed bounded forward/reverse inequality cursors, conservative residual recheck and proven rowid ORDER BY elimination. The bounded direct IPK equality/LIKE envelope can seek under NOT INDEXED, with original residual/startup semantics; broader error-capable shapes and NOT INDEXED range/secondary paths retain their previous scan/sort behavior |
 | Secondary equality | partial | Genuine leading equality-prefix B-tree cursor, bounded rowid candidates and source seeks with residual recheck; ANN/grams precedence preserved |
 | Secondary leading inequalities | partial | Genuine leading BINARY ASC index bounds, bounded signed-rowid candidates and base seeks with complete residual recheck; existing ordering remains materialized and diagnostics count actual attempted work |
 | Composite ranges/covering/join plans/statistics | unsupported | Composite equality-plus-range, general secondary reverse/covering/order plans, join index pushdown and ANALYZE statistics remain code work |

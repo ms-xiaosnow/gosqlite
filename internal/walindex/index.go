@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sync"
 	"sync/atomic"
 	"unsafe"
@@ -32,14 +33,29 @@ type Index struct {
 	maxFrames uint32
 	held      [8]uint8 // 0=unlocked, 1=shared, 2=exclusive
 	closed    bool
+	readOnly  bool // immutable access capability; inspected under mu
 }
 
 func Open(path string) (*Index, error) { return OpenWithLimit(path, DefaultMaxFrames) }
 
+// OpenReadOnly joins an existing live Linux SHM generation without create or
+// write access. A shared DMS peer must already exist; retained cold SHM is not
+// initialization authority. The caller must retain the main DB SHARED lock.
+func OpenReadOnly(path string) (*Index, error) {
+	return openIndex(path, DefaultMaxFrames, true)
+}
+
 // OpenWithLimit takes a SHM pathname (normally databasePath+"-shm"), not a
 // database pathname. Zero selects DefaultMaxFrames. It acquires the DMS lock
 // using SQLite's first-opener protocol without extending or mapping the file.
-func OpenWithLimit(path string, maxFrames uint32) (result *Index, retErr error) {
+func OpenWithLimit(path string, maxFrames uint32) (*Index, error) {
+	return openIndex(path, maxFrames, false)
+}
+
+func openIndex(path string, maxFrames uint32, readOnly bool) (result *Index, retErr error) {
+	if err := readonlyIndexOpenProfile(readOnly, runtime.GOOS); err != nil {
+		return nil, err
+	}
 	if maxFrames == 0 {
 		maxFrames = DefaultMaxFrames
 	}
@@ -53,7 +69,7 @@ func OpenWithLimit(path string, maxFrames uint32) (result *Index, retErr error) 
 		return nil, nativeError(err)
 	}
 	p = filepath.Join(dir, filepath.Base(p))
-	f, err := openFile(p)
+	f, err := openFile(p, readOnly)
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +86,7 @@ func OpenWithLimit(path string, maxFrames uint32) (result *Index, retErr error) 
 	if unit%BlockSize != 0 || unit&(unit-1) != 0 {
 		return nil, ErrUnsupported
 	}
-	x := &Index{file: f, path: p, maps: make(map[int64]*vfs.Mapping), mapSize: unit, maxFrames: maxFrames}
+	x := &Index{file: f, path: p, maps: make(map[int64]*vfs.Mapping), mapSize: unit, maxFrames: maxFrames, readOnly: readOnly}
 	info, err := x.statLocked()
 	if err != nil {
 		return nil, err
@@ -155,6 +171,14 @@ func (x *Index) Lock(slot, n int, exclusive bool) error {
 	if !validRange(slot, n) || (!exclusive && n != 1) {
 		return fmt.Errorf("%w: invalid lock range", ErrLock)
 	}
+	if x.closed {
+		return ErrClosed
+	}
+	if exclusive {
+		if err := readonlyIndexWriteAccess(x.readOnly); err != nil {
+			return err
+		}
+	}
 	if _, err := x.statLocked(); err != nil {
 		return err
 	}
@@ -192,6 +216,9 @@ func (x *Index) writerLocked() error {
 	if x.closed {
 		return ErrClosed
 	}
+	if err := readonlyIndexWriteAccess(x.readOnly); err != nil {
+		return err
+	}
 	if x.held[WriteLock] != 2 {
 		return ErrLock
 	}
@@ -210,6 +237,16 @@ func (x *Index) checkFrame(frame uint32) error {
 func (x *Index) blockLocked(block uint32, extend bool) ([]byte, error) {
 	if block > frameBlock(x.maxFrames) {
 		return nil, ErrLimit
+	}
+	if x.closed {
+		return nil, ErrClosed
+	}
+	// Reject extension authority before stat, cached-map access, or growth.
+	// Read-only callers may map only already allocated backing storage.
+	if extend {
+		if err := readonlyIndexWriteAccess(x.readOnly); err != nil {
+			return nil, err
+		}
 	}
 	info, err := x.statLocked()
 	if err != nil {
@@ -409,6 +446,9 @@ func (x *Index) setCheckpoint(off int, value uint32) error {
 	if x.closed {
 		return ErrClosed
 	}
+	if err := readonlyIndexWriteAccess(x.readOnly); err != nil {
+		return err
+	}
 	if x.held[CheckpointLock] != 2 && x.held[WriteLock] != 2 {
 		return ErrLock
 	}
@@ -432,6 +472,9 @@ func (x *Index) SetReadMark(mark int, value uint32) error {
 	defer x.mu.Unlock()
 	if x.closed {
 		return ErrClosed
+	}
+	if err := readonlyIndexWriteAccess(x.readOnly); err != nil {
+		return err
 	}
 	if mark < 0 || mark >= ReaderCount || x.held[ReadLock0+mark] != 2 {
 		return ErrLock

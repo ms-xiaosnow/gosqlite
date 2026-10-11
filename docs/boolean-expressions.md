@@ -51,21 +51,23 @@ with ErrQueryWorkLimit, including legacy single-source queries. New predicate me
 work/retained-memory limits. No index admission expansion or new join pushdown
 is included.
 
-## Explicit remaining planner boundary
+## Current bounded IPK correction and remaining planner boundary
 
-The native ordinary-index planner retains its conservative total-residual
-admission gate. It may scan where SQLite seeks, including SQLite's INTEGER
-PRIMARY KEY seek even under NOT INDEXED. On intact `t(id INTEGER PRIMARY KEY,
-k INTEGER)` containing `(1,1)`:
+The current unpublished composition adds the [bounded direct IPK equality
+exception](ordinary-index.md) before the conservative general total-residual gate,
+including under NOT INDEXED. On intact `t(id INTEGER PRIMARY KEY,k INTEGER)`
+containing `(1,1)`, the retained regression is:
 
     SELECT id FROM t [NOT INDEXED]
     WHERE k LIKE 'x' ESCAPE 'ab' AND id=9999
 
-Native retains a scan and reports the preceding row-dependent ESCAPE error;
-pinned SQLite returns no rows. Reversing those terms now returns no rows in both
-engines. The explicit regression retains the actual native contract and does not
-label it oracle equivalence. Equality/CAST/index choices can similarly change
-row-dependent error visibility. A separate planner-admission increment is needed.
+The bounded candidate now seeks the missing IPK and returns no rows without
+evaluating the row-dependent ESCAPE error. Reversing the conjuncts also returns
+no rows. A matching id still evaluates the residual in order and reports the
+error when reached; row-independent startup errors still occur before row access.
+The separate V4 input has finite normal and 24-case pinned-oracle PASS; those
+results do not qualify the new composition. CAST/general-expression
+planning and broader index/error-order transformations remain outside the fix.
 
 Join reordering/WHERE pushdown remains absent. For a LEFT JOIN with ON
 `abs(t.v) AND t.flag`, row `(flag=0,v=minint)`, and WHERE `t.flag=99`, native ON
