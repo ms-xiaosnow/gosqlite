@@ -1,0 +1,13 @@
+{
+  "status": "STATIC_PASS",
+  "manual_sha256": "126fa5418fb174c208b97926845cd9b9182e78efcd4cbc5c7a2f529b8f0f4f43",
+  "bash_blocks_syntax_checked": 2,
+  "links_checked": 62,
+  "exact_test_names_exist": [
+    "TestLimitConversionTypes",
+    "TestLimitConversionErrorOwnership",
+    "TestLimitConversionPublicSQL",
+    "TestLimitConversionPinnedOracle"
+  ],
+  "scope": "Only Markdown/paths/test-name reads and bash -n; no documented command or project code executed"
+}

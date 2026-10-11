@@ -1,0 +1,19 @@
+--- v1/sqlite/limit_conversion_oracle_test.go
++++ v2/sqlite/limit_conversion_oracle_test.go
+@@ -19,14 +19,14 @@
+ // helper has no cancellation, timeout, signal, extension, or observer dependency.
+ func limitConversionOracle(t *testing.T, executable, query string) ([][]any, bool) {
+ 	t.Helper()
+-	cmd := exec.Command(executable, "-batch", "-bail", "-json", ":memory:")
++	cmd := exec.Command(executable, "-batch", "-bail", "-json", "-cmd", ".log stderr", ":memory:")
+ 	cmd.Stdin = strings.NewReader(limitConversionSeed + "\n" + query + ";\n")
+ 	var stdout, stderr bytes.Buffer
+ 	cmd.Stdout, cmd.Stderr = &stdout, &stderr
+ 	err := cmd.Run()
+ 	if err != nil {
+ 		var exit *exec.ExitError
+-		if !errors.As(err, &exit) || exit.ExitCode() != 1 || !strings.Contains(stderr.String(), "datatype mismatch (20)") || stdout.Len() != 0 {
++		if !errors.As(err, &exit) || exit.ExitCode() != 1 || !strings.HasPrefix(stderr.String(), "(20) ") || !strings.Contains(stderr.String(), "datatype mismatch") || stdout.Len() != 0 {
+ 			t.Fatalf("oracle %s: exit=%v stdout=%q stderr=%q", query, err, stdout.String(), stderr.String())
+ 		}
+ 		return nil, true

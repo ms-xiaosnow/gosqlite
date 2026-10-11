@@ -1,0 +1,33 @@
+{
+  "phase": "after",
+  "baseline_commit": "63c2ebb10e3a2c4ff2378ee9f33c46133134c70f",
+  "baseline_tree": "d735409ebd1c43d90ee1650c8a7c2a084e270674",
+  "exact_tree": "ca8947811d60266c19db2d6b155bd62b843d6e48",
+  "source_files": 2965,
+  "source_directories": 142,
+  "changed_paths": [
+    "docs/acceptance-status.md",
+    "docs/closeout-scope-20261011.md",
+    "docs/interruption-20261010.md",
+    "docs/progress.md",
+    "docs/restriction-provenance-20261011.md",
+    "sqlite/limit_conversion_oracle_test.go",
+    "sqlite/limit_conversion_test.go",
+    "sqlite/query.go"
+  ],
+  "new_test_paths": [
+    "sqlite/limit_conversion_oracle_test.go",
+    "sqlite/limit_conversion_test.go"
+  ],
+  "owner_tree": "3fc9087ad121d423174a658e118ac455d1ace8c2",
+  "non_doc_files_exact_owner_match": 779,
+  "old_test_files_byte_mode_unchanged": 360,
+  "module_scripts_workflows_sourceguard_goal_unchanged": true,
+  "owner_inventory_matches": true,
+  "freeze_copy_bytes_git_modes_actual_modes_directory_inventory_match": true,
+  "copy_has_git": false,
+  "git_commands_run": 0,
+  "manifest_sha256": "b9d3bbcbd38a96681f8409f2f9f9d2c02c465f05f00a2509bc5b366c322d4926",
+  "baseline_inventory_sha256": "2043b0fb276a17d4744b2135b5b1e70c50c2e7a487a7ba01b53ab9593f7ed9dc",
+  "frozen_inventory_sha256": "e628a49128c10ddc4e249f878ca14d0d3322e0fdfe8c1e9ce565ba1ce33d0bd8"
+}

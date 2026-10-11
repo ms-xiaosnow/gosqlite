@@ -1,0 +1,122 @@
+{
+  "aggregate-command.sh": {
+    "sha256": "63d7d841910f3826f982f0068e15ba045ab96a3f9d92c06d8826234a1340030a",
+    "bytes": 3636
+  },
+  "aggregate-identity-after.json": {
+    "sha256": "1cbc7e0080a403b50d9f5ddaa35d2d1a4837b1d063412816c80836e6b8b7271a",
+    "bytes": 1346
+  },
+  "aggregate-report.md": {
+    "sha256": "acfd3b0bb18868730258d0af578a9f6d06a7da1b44831e3963008fd72a228260",
+    "bytes": 6196
+  },
+  "aggregate-source-review.md": {
+    "sha256": "42aafd8ce0a16b9e27a43614ab717e032dadb5cc2681885884752bf9831a14c0",
+    "bytes": 6897
+  },
+  "aggregate-stages.tsv": {
+    "sha256": "fe927668ecbc02c70ec20e2b2c9886af47ecc345f90cfe7b333ea4326726b8de",
+    "bytes": 1132
+  },
+  "aggregate-summary.json": {
+    "sha256": "eed5c1b7fcce77bf1a075504300b8c5231e68d4a4adfa6803faf1949dd1472b8",
+    "bytes": 8849
+  },
+  "aggregate.stderr.gz": {
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+    "bytes": 20
+  },
+  "aggregate.stdout.gz": {
+    "sha256": "90747ea4ace7b6068e920d96fd52948ec648bcda766b2a85c278dce25a6a5ffc",
+    "bytes": 3677
+  },
+  "baseline-normal.log.gz": {
+    "sha256": "31edac0b858c15e6b165ce14ce598b623caea94f9cffe318af8b22c4929dfe6f",
+    "bytes": 9527
+  },
+  "baseline-oracle.log.gz": {
+    "sha256": "7bf1c87e9a8eb3cf28e01348e90ea1e742f476f6eff383253f60f44a4296bc90",
+    "bytes": 3778
+  },
+  "baseline-v2-normal.log.gz": {
+    "sha256": "e282e8e5fcb8ebcea4356dadf04e1ce582536a09085f81db1c721591c05e2909",
+    "bytes": 9633
+  },
+  "baseline-v2-oracle.log.gz": {
+    "sha256": "d74579c03e30870d45e934a85ffa3757a52a48cb4dc669594857c54056dda5ad",
+    "bytes": 3895
+  },
+  "cache-maintenance-command.txt": {
+    "sha256": "c428948bc16c4d938301a993edb0ec77c2686d6d2d1e0d9f5b054e8d16ee2031",
+    "bytes": 153
+  },
+  "cache-maintenance-result.json": {
+    "sha256": "623bfcfbdec47df79c4d06a29104183521ab20ab092412298a0fee1df798798b",
+    "bytes": 536
+  },
+  "combined-source-manifest.json": {
+    "sha256": "b9d3bbcbd38a96681f8409f2f9f9d2c02c465f05f00a2509bc5b366c322d4926",
+    "bytes": 1156
+  },
+  "document-classification-static.json": {
+    "sha256": "82e2e87225f4c82a901a838b62d9e3767ae0fe6b5113ac0cb0836fc82e77d410",
+    "bytes": 2597
+  },
+  "fixed-oracle.log.gz": {
+    "sha256": "21404590368c81f23693922ab4076a0251a9e570a57c781bcadd962bdffd991e",
+    "bytes": 3578
+  },
+  "fixed-v2-normal.log.gz": {
+    "sha256": "ff912a273152c4c05f04e8f451fb378f3917ef1a8c445d9cb2dbc58d8ab7c84f",
+    "bytes": 8362
+  },
+  "fixed-v2-oracle-race.log.gz": {
+    "sha256": "ddcc6dc0a7e2a51e852d893d7ad37d458322c428585be433f5b015b9dcf9c29b",
+    "bytes": 2295
+  },
+  "fixed-v2-oracle.log.gz": {
+    "sha256": "d25b2d385f72f7352fc59d0ffe606ac484eec762bd479daa2af0ac843b796ca3",
+    "bytes": 2226
+  },
+  "fixed-v2-race.log.gz": {
+    "sha256": "a03eba0da39f24aadfca47516cd1a669e7804dad6b6ce4911f37f4ada5299c32",
+    "bytes": 8453
+  },
+  "independent-review.md": {
+    "sha256": "2a00770dd9331d9afffb3934925d6417b56dfd62947d5400e329f66acb3c4137",
+    "bytes": 11618
+  },
+  "manual-static-check.json": {
+    "sha256": "fd322dd708807f9b90d5c4462edca3ed9878b09defdba2e26718c935c643b22d",
+    "bytes": 467
+  },
+  "oracle-harness-v1-v2.patch": {
+    "sha256": "1a6fc907bcc7438cdf667cc8942fd11a26f8331982a6d71deb53463b479a6a32",
+    "bytes": 1134
+  },
+  "owner-handoff.md": {
+    "sha256": "228a6a51279803de55392fa2fa29c981311e807688628c4bddd59b64294e6076",
+    "bytes": 7443
+  },
+  "owner-test-summary.json": {
+    "sha256": "85c7c37e92b8802977a37891e821232d3e0d06b1f1e276094f500c833fc86a3c",
+    "bytes": 3060
+  },
+  "prior-checkpoint-persistence.json": {
+    "sha256": "e6f965c930926139b5e21964fa335be862757fde297c965b8ce129c58069cd59",
+    "bytes": 2752
+  },
+  "source-provenance.json": {
+    "sha256": "643608f21823226300e8b090a212f53250ac57de5973d48490d9bc9421d2f0a8",
+    "bytes": 1654
+  },
+  "source-scope.md": {
+    "sha256": "cf3e466ecc1f85f75401b231984335af17676377121fa2ad69766e7e96c0e7e6",
+    "bytes": 4624
+  },
+  "source.patch": {
+    "sha256": "b712838805fadd0215464c828169226425170df00377a3c13df424cb0a4bc4bc",
+    "bytes": 18737
+  }
+}

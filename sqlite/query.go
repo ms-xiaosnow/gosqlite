@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"math"
-	"strconv"
 	"strings"
 
 	"github.com/ms-xiaosnow/gosqlite/internal/btree"
@@ -340,24 +339,28 @@ func limitValue(ctx context.Context, expr sqlast.Expr, params []any) (int64, err
 	if err := sqlast.PreflightValueContext(ctx, "LIMIT", value); err != nil {
 		return 0, err
 	}
-	switch v := value.(type) {
-	case int64:
-		return v, nil
-	case string:
-		s := strings.TrimSpace(v)
-		if n, e := strconv.ParseInt(s, 10, 64); e == nil {
-			return n, nil
-		}
-		f, e := strconv.ParseFloat(s, 64)
-		if e == nil && f >= -9223372036854775808.0 && f < 9223372036854775808.0 && math.Trunc(f) == f {
-			return int64(f), nil
-		}
-	case float64:
-		if v >= -9223372036854775808.0 && v < 9223372036854775808.0 && math.Trunc(v) == v {
-			return int64(v), nil
+	// OP_MustBeInt applies NUMERIC affinity and requires INTEGER storage.
+	// Reuse the ordinary affinity grammar and exact REAL endpoint rules;
+	// Go ParseFloat accepts spellings SQLite does not (hex/underscores).
+	// The pinned UTF-8 sqlite3MemRealValueRC parser stops at an embedded
+	// NUL. The length-aware exact-integer fallback then fails, so such a
+	// string takes the REAL-to-integer affinity path, including endpoints.
+	if text, ok := value.(string); ok {
+		if end := strings.IndexByte(text, 0); end >= 0 {
+			value, err = sqlast.ApplyAffinity(text[:end], "REAL")
+			if err != nil {
+				return 0, err
+			}
 		}
 	}
-	return 0, fmt.Errorf("LIMIT/OFFSET requires an integer")
+	value, err = sqlast.ApplyAffinity(value, "NUMERIC")
+	if err != nil {
+		return 0, err
+	}
+	if n, ok := value.(int64); ok {
+		return n, nil
+	}
+	return 0, fmt.Errorf("%w: LIMIT/OFFSET requires an integer", ErrMismatch)
 }
 
 func validate(e sqlast.Expr, t *table, aliases map[string]int) error {

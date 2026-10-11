@@ -1,0 +1,83 @@
+{
+  "verified_utc": "2026-10-11T07:16:55.127625+00:00",
+  "status": "STATIC_PASS",
+  "changed_paths": [
+    "docs/acceptance-status.md",
+    "docs/closeout-scope-20261011.md",
+    "docs/interruption-20261010.md",
+    "docs/progress.md",
+    "docs/restriction-provenance-20261011.md"
+  ],
+  "non_docs_files_unchanged": 777,
+  "before_files": 2962,
+  "after_files": 2963,
+  "existing_progress_prefix_byte_identical": true,
+  "relative_links_checked": 72,
+  "relative_links_all_exist": true,
+  "external_evidence_paths_linebounds_checked": 20,
+  "goal": {
+    "bytes": 43100,
+    "mode": 420,
+    "sha256": "9ae7b1d776856669a10eb753408c7754d015d266f8783240165450e96e4bac81"
+  },
+  "patch_sha256": "fcebe9a65f3ea6a7655c3df2d0b47da3f91e48e772ee59090a89734f5648010e",
+  "changed_before_after": {
+    "docs/acceptance-status.md": {
+      "before": {
+        "bytes": 13772,
+        "mode": 420,
+        "sha256": "380c8087d1c8c13df99de6ea84051c318b310d215256094d3aad468d9d1d153f"
+      },
+      "after": {
+        "bytes": 16374,
+        "mode": 420,
+        "sha256": "7bbc70ffb85b352c9cf57edd86d22b3c4c1ef5f037d6b9ae573640f190d2318b"
+      }
+    },
+    "docs/closeout-scope-20261011.md": {
+      "before": {
+        "bytes": 11354,
+        "mode": 420,
+        "sha256": "a51c636e5b91ba7ab8c6a443afebc5bb8f9e3977b86386fa9eb4147de5a845a9"
+      },
+      "after": {
+        "bytes": 13722,
+        "mode": 420,
+        "sha256": "4b449badbad802de61f2578f2d4085c2bcd377a3055f8b0de525dfdd9a8abb6e"
+      }
+    },
+    "docs/interruption-20261010.md": {
+      "before": {
+        "bytes": 11346,
+        "mode": 420,
+        "sha256": "4b8d678077e94bea356b648fc78cf62a03f80167ed855e48c0b1f80830a01737"
+      },
+      "after": {
+        "bytes": 14178,
+        "mode": 420,
+        "sha256": "2de239fc9ec46c551dfc849cf67aebb570d8cf4e67233d9d38ad32ff1ef6e0b3"
+      }
+    },
+    "docs/progress.md": {
+      "before": {
+        "bytes": 127315,
+        "mode": 420,
+        "sha256": "9100ae057dc18f91085670da80952f57c625ff0b27fbae7185a55bd6f27e3354"
+      },
+      "after": {
+        "bytes": 131681,
+        "mode": 420,
+        "sha256": "de78281a374d5dc6c9e8651949e9e2a794a065760ded9549d5acb46236f8acdf"
+      }
+    },
+    "docs/restriction-provenance-20261011.md": {
+      "before": null,
+      "after": {
+        "bytes": 24445,
+        "mode": 420,
+        "sha256": "62bb45db31d7733269af7db481f6887a391a2f2b80f1d9167601c331f67d97e0"
+      }
+    }
+  },
+  "checks": "Static standard-library file/hash/link/diff checks only; no project execution, tests/build/database, Git changes or remote/CI actions."
+}

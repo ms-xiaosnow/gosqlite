@@ -1,0 +1,1 @@
+GOCACHE=/workspace/scratch/5e06a74e5f65/durable-restart/go-cache /workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go clean -cache

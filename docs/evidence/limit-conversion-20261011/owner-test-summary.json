@@ -1,0 +1,177 @@
+{
+  "baseline-normal.log": {
+    "classification": "VALID_TEST_RESULT",
+    "top_level": {
+      "PASS": 1,
+      "FAIL": 2,
+      "SKIP": 0
+    },
+    "leaf_counts": {
+      "PASS": 386,
+      "FAIL": 630
+    },
+    "terminal_counts": {
+      "FAIL": 634,
+      "PASS": 387
+    },
+    "exit": 1
+  },
+  "baseline-oracle.log": {
+    "classification": "HARNESS_FAIL",
+    "top_level": {
+      "PASS": 0,
+      "FAIL": 1,
+      "SKIP": 0
+    },
+    "leaf_counts": {
+      "PASS": 136,
+      "FAIL": 208
+    },
+    "terminal_counts": {
+      "FAIL": 209,
+      "PASS": 136
+    },
+    "exit": 1
+  },
+  "fixed-normal.log": {
+    "classification": "VALID_TEST_RESULT",
+    "top_level": {
+      "PASS": 3,
+      "FAIL": 0,
+      "SKIP": 0
+    },
+    "leaf_counts": {
+      "PASS": 1016
+    },
+    "terminal_counts": {
+      "PASS": 1021
+    },
+    "exit": 0
+  },
+  "fixed-race.log": {
+    "classification": "VALID_TEST_RESULT",
+    "top_level": {
+      "PASS": 3,
+      "FAIL": 0,
+      "SKIP": 0
+    },
+    "leaf_counts": {
+      "PASS": 1016
+    },
+    "terminal_counts": {
+      "PASS": 1021
+    },
+    "exit": 0
+  },
+  "fixed-oracle.log": {
+    "classification": "HARNESS_FAIL",
+    "top_level": {
+      "PASS": 0,
+      "FAIL": 1,
+      "SKIP": 0
+    },
+    "leaf_counts": {
+      "PASS": 160,
+      "FAIL": 184
+    },
+    "terminal_counts": {
+      "FAIL": 185,
+      "PASS": 160
+    },
+    "exit": 1
+  },
+  "baseline-v2-normal.log": {
+    "classification": "VALID_TEST_RESULT",
+    "top_level": {
+      "PASS": 1,
+      "FAIL": 2,
+      "SKIP": 0
+    },
+    "leaf_counts": {
+      "PASS": 386,
+      "FAIL": 630
+    },
+    "terminal_counts": {
+      "FAIL": 634,
+      "PASS": 387
+    },
+    "exit": 1
+  },
+  "baseline-v2-oracle.log": {
+    "classification": "VALID_TEST_RESULT",
+    "top_level": {
+      "PASS": 0,
+      "FAIL": 1,
+      "SKIP": 0
+    },
+    "leaf_counts": {
+      "PASS": 136,
+      "FAIL": 208
+    },
+    "terminal_counts": {
+      "FAIL": 209,
+      "PASS": 136
+    },
+    "exit": 1
+  },
+  "fixed-v2-normal.log": {
+    "classification": "VALID_TEST_RESULT",
+    "top_level": {
+      "PASS": 3,
+      "FAIL": 0,
+      "SKIP": 0
+    },
+    "leaf_counts": {
+      "PASS": 1016
+    },
+    "terminal_counts": {
+      "PASS": 1021
+    },
+    "exit": 0
+  },
+  "fixed-v2-race.log": {
+    "classification": "VALID_TEST_RESULT",
+    "top_level": {
+      "PASS": 3,
+      "FAIL": 0,
+      "SKIP": 0
+    },
+    "leaf_counts": {
+      "PASS": 1016
+    },
+    "terminal_counts": {
+      "PASS": 1021
+    },
+    "exit": 0
+  },
+  "fixed-v2-oracle.log": {
+    "classification": "VALID_TEST_RESULT",
+    "top_level": {
+      "PASS": 1,
+      "FAIL": 0,
+      "SKIP": 0
+    },
+    "leaf_counts": {
+      "PASS": 344
+    },
+    "terminal_counts": {
+      "PASS": 345
+    },
+    "exit": 0
+  },
+  "fixed-v2-oracle-race.log": {
+    "classification": "VALID_TEST_RESULT",
+    "top_level": {
+      "PASS": 1,
+      "FAIL": 0,
+      "SKIP": 0
+    },
+    "leaf_counts": {
+      "PASS": 344
+    },
+    "terminal_counts": {
+      "PASS": 345
+    },
+    "exit": 0
+  }
+}

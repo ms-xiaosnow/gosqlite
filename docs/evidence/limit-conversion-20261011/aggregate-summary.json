@@ -1,0 +1,209 @@
+{
+  "status": "PASS",
+  "aggregate_exit": 0,
+  "base_commit": "63c2ebb10e3a2c4ff2378ee9f33c46133134c70f",
+  "base_tree": "d735409ebd1c43d90ee1650c8a7c2a084e270674",
+  "exact_tree": "ca8947811d60266c19db2d6b155bd62b843d6e48",
+  "files": 2965,
+  "directories": 142,
+  "old_test_files_preserved": 360,
+  "new_test_files": 2,
+  "total_test_files": 362,
+  "non_doc_files_exact_reviewed_owner": 779,
+  "changed_paths": [
+    "docs/acceptance-status.md",
+    "docs/closeout-scope-20261011.md",
+    "docs/interruption-20261010.md",
+    "docs/progress.md",
+    "docs/restriction-provenance-20261011.md",
+    "sqlite/limit_conversion_oracle_test.go",
+    "sqlite/limit_conversion_test.go",
+    "sqlite/query.go"
+  ],
+  "started": "2026-10-11T07:23:25Z",
+  "finished": "2026-10-11T07:39:21Z",
+  "completed_stage_count": 18,
+  "expected_stage_count": 18,
+  "stages": [
+    {
+      "stage": "resource-precheck",
+      "started": "2026-10-11T07:23:25Z",
+      "finished": "2026-10-11T07:23:25Z",
+      "exit": 0,
+      "duration_seconds": 0.0,
+      "command": "python3 /workspace/scratch/5e06a74e5f65/durable-restart/limit-combined-independent-v1/precheck.py"
+    },
+    {
+      "stage": "resource-snapshot",
+      "started": "2026-10-11T07:23:25Z",
+      "finished": "2026-10-11T07:23:25Z",
+      "exit": 0,
+      "duration_seconds": 0.0,
+      "command": "bash -c df\\ -B1\\ /tmp\\ \\\"\\$1\\\"\\;\\ df\\ -i\\ /tmp\\ \\\"\\$1\\\"\\;\\ free\\ -b\\;\\ printf\\ \\\"TMPDIR=%s\\\\nGOTMPDIR=%s\\\\n\\\"\\ \\\"\\$\\{TMPDIR:-/tmp\\ \\(default\\)\\}\\\"\\ \\\"\\$\\{GOTMPDIR:-unset\\}\\\" _ /workspace/scratch/5e06a74e5f65/durable-restart"
+    },
+    {
+      "stage": "source-identity-before",
+      "started": "2026-10-11T07:23:25Z",
+      "finished": "2026-10-11T07:23:28Z",
+      "exit": 0,
+      "duration_seconds": 3.0,
+      "command": "python3 /workspace/scratch/5e06a74e5f65/durable-restart/limit-combined-independent-v1/identity.py before"
+    },
+    {
+      "stage": "environment",
+      "started": "2026-10-11T07:23:28Z",
+      "finished": "2026-10-11T07:23:28Z",
+      "exit": 0,
+      "duration_seconds": 0.0,
+      "command": "bash -c set\\ -e\\;\\ go\\ version\\;\\ test\\ \\\"\\$\\(go\\ env\\ GOVERSION\\)\\\"\\ =\\ go1.27.2\\;\\ test\\ \\\"\\$\\(go\\ env\\ GOOS\\)/\\$\\(go\\ env\\ GOARCH\\)\\\"\\ =\\ linux/amd64\\;\\ go\\ env\\ GOVERSION\\ GOOS\\ GOARCH\\ GOTOOLCHAIN\\ GOPROXY\\ GOSUMDB\\ GOPATH\\ GOCACHE\\ CGO_ENABLED\\ GOFLAGS\\;\\ printf\\ \\\"GOMAXPROCS=%s\\\\nSQLITE_ORACLE=%s\\\\n\\\"\\ \\\"\\$GOMAXPROCS\\\"\\ \\\"\\$SQLITE_ORACLE\\\"\\;\\ sha256sum\\ \\\"\\$1/toolchains/go1.27.2/bin/go\\\"\\ \\\"\\$SQLITE_ORACLE\\\"\\ \\\"\\$EVIDENCE/run.sh\\\"\\ \\\"\\$EVIDENCE/identity.py\\\"\\ \\\"\\$EVIDENCE/precheck.py\\\"\\ \\\"\\$CONFIG\\\"\\ \\\"\\$EVIDENCE/SOURCE_REVIEW.md\\\" _ /workspace/scratch/5e06a74e5f65/durable-restart"
+    },
+    {
+      "stage": "sourceguard-before",
+      "started": "2026-10-11T07:23:28Z",
+      "finished": "2026-10-11T07:23:28Z",
+      "exit": 0,
+      "duration_seconds": 0.0,
+      "command": "go run ./internal/testscope"
+    },
+    {
+      "stage": "cgo0-unit",
+      "started": "2026-10-11T07:23:28Z",
+      "finished": "2026-10-11T07:25:25Z",
+      "exit": 0,
+      "duration_seconds": 117.0,
+      "command": "go test ./... -count=1 -timeout=0"
+    },
+    {
+      "stage": "cgo0-vet",
+      "started": "2026-10-11T07:25:25Z",
+      "finished": "2026-10-11T07:25:27Z",
+      "exit": 0,
+      "duration_seconds": 2.0,
+      "command": "go vet ./..."
+    },
+    {
+      "stage": "cgo0-build",
+      "started": "2026-10-11T07:25:27Z",
+      "finished": "2026-10-11T07:25:35Z",
+      "exit": 0,
+      "duration_seconds": 8.0,
+      "command": "go build -trimpath ./..."
+    },
+    {
+      "stage": "full-ordinary-oracle",
+      "started": "2026-10-11T07:25:35Z",
+      "finished": "2026-10-11T07:29:32Z",
+      "exit": 0,
+      "duration_seconds": 237.0,
+      "command": "./scripts/test-oracle.sh"
+    },
+    {
+      "stage": "sourceguard-before-race",
+      "started": "2026-10-11T07:29:32Z",
+      "finished": "2026-10-11T07:29:32Z",
+      "exit": 0,
+      "duration_seconds": 0.0,
+      "command": "go run ./internal/testscope"
+    },
+    {
+      "stage": "cgo1-race",
+      "started": "2026-10-11T07:29:32Z",
+      "finished": "2026-10-11T07:38:33Z",
+      "exit": 0,
+      "duration_seconds": 541.0,
+      "command": "env CGO_ENABLED=1 go test -race ./... -count=1 -timeout=0"
+    },
+    {
+      "stage": "cross-build-linux-arm64",
+      "started": "2026-10-11T07:38:33Z",
+      "finished": "2026-10-11T07:38:43Z",
+      "exit": 0,
+      "duration_seconds": 10.0,
+      "command": "env CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build ./..."
+    },
+    {
+      "stage": "cross-build-darwin-arm64",
+      "started": "2026-10-11T07:38:43Z",
+      "finished": "2026-10-11T07:38:52Z",
+      "exit": 0,
+      "duration_seconds": 9.0,
+      "command": "env CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build ./..."
+    },
+    {
+      "stage": "cross-build-darwin-amd64",
+      "started": "2026-10-11T07:38:52Z",
+      "finished": "2026-10-11T07:39:01Z",
+      "exit": 0,
+      "duration_seconds": 9.0,
+      "command": "env CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build ./..."
+    },
+    {
+      "stage": "cross-build-windows-amd64",
+      "started": "2026-10-11T07:39:01Z",
+      "finished": "2026-10-11T07:39:10Z",
+      "exit": 0,
+      "duration_seconds": 9.0,
+      "command": "env CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build ./..."
+    },
+    {
+      "stage": "cross-build-windows-arm64",
+      "started": "2026-10-11T07:39:10Z",
+      "finished": "2026-10-11T07:39:18Z",
+      "exit": 0,
+      "duration_seconds": 8.0,
+      "command": "env CGO_ENABLED=0 GOOS=windows GOARCH=arm64 go build ./..."
+    },
+    {
+      "stage": "module-integrity",
+      "started": "2026-10-11T07:39:18Z",
+      "finished": "2026-10-11T07:39:19Z",
+      "exit": 0,
+      "duration_seconds": 1.0,
+      "command": "go mod verify"
+    },
+    {
+      "stage": "source-identity-after",
+      "started": "2026-10-11T07:39:19Z",
+      "finished": "2026-10-11T07:39:21Z",
+      "exit": 0,
+      "duration_seconds": 2.0,
+      "command": "python3 /workspace/scratch/5e06a74e5f65/durable-restart/limit-combined-independent-v1/identity.py after"
+    }
+  ],
+  "pending_stages": [],
+  "package_counts": {
+    "cgo0-unit": {
+      "ok_packages": 37,
+      "no_test_packages": 11,
+      "fail_lines": 0,
+      "test_leaf_count": "Not emitted by the unchanged non-verbose aggregate commands; independent scoped review counts are separate evidence."
+    },
+    "full-ordinary-oracle": {
+      "ok_packages": 38,
+      "no_test_packages": 11,
+      "fail_lines": 0,
+      "test_leaf_count": "Not emitted by the unchanged non-verbose aggregate commands; independent scoped review counts are separate evidence."
+    },
+    "cgo1-race": {
+      "ok_packages": 37,
+      "no_test_packages": 11,
+      "fail_lines": 0,
+      "test_leaf_count": "Not emitted by the unchanged non-verbose aggregate commands; independent scoped review counts are separate evidence."
+    }
+  },
+  "full_before_after_identity_equal": true,
+  "source_review_sha256": "42aafd8ce0a16b9e27a43614ab717e032dadb5cc2681885884752bf9831a14c0",
+  "config_sha256": "2c5be16623a972404afc8cbba8c82ed814b7e6b5c9594f6f2695756c334ab1c5",
+  "completed_independent_review": [
+    {
+      "path": "/workspace/scratch/5e06a74e5f65/durable-restart/limit-conversion-independent-review-v1/REVIEW.md",
+      "sha256": "2a00770dd9331d9afffb3934925d6417b56dfd62947d5400e329f66acb3c4137"
+    },
+    {
+      "path": "/workspace/scratch/5e06a74e5f65/durable-restart/limit-conversion-independent-review-v1/EVIDENCE-MANIFEST.json",
+      "sha256": "709d50a658f096a8d164ae1d8548082852f0e341de224477f4b8cc8f60cb83d1"
+    }
+  ],
+  "resource_precheck": "{\n  \"/tmp\": {\n    \"available_bytes\": 1419169792,\n    \"available_inodes\": 1243517,\n    \"writable_by_current_user\": true\n  },\n  \"/workspace/scratch/5e06a74e5f65/durable-restart\": {\n    \"available_bytes\": 2641399808,\n    \"available_inodes\": 1167887,\n    \"writable_by_current_user\": true\n  },\n  \"/workspace/scratch/5e06a74e5f65/durable-restart/go-cache\": {\n    \"available_bytes\": 2641399808,\n    \"available_inodes\": 1167887,\n    \"writable_by_current_user\": true\n  },\n  \"/workspace/scratch/5e06a74e5f65/durable-restart/go-path\": {\n    \"available_bytes\": 2641399808,\n    \"available_inodes\": 1167887,\n    \"writable_by_current_user\": true\n  }\n}\nRead-only resource precheck PASS. Default /tmp retained; no cleanup, relocation, or retry.\n",
+  "scope": "Existing Linux ordinary full suite plus the two reviewed LIMIT conversion files. Complete current oracle script. Five foreign-target production builds only. No new campaigns or restricted physical workflows; no wider completion or safety claim."
+}

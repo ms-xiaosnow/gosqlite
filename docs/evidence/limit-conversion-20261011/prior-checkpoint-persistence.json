@@ -1,0 +1,64 @@
+{
+  "commit": "63c2ebb10e3a2c4ff2378ee9f33c46133134c70f",
+  "tree": "d735409ebd1c43d90ee1650c8a7c2a084e270674",
+  "parent": "7a9972547f49531df04cf1b624dfa662b483907b",
+  "remote_verified_utc": "2026-10-11T04:33:52Z",
+  "library_file_id": "libfile_ce332d051b4c8191a833e09094b5722e",
+  "file_id": "file_00000000919481f5b7aad5a3fb2a3492",
+  "version": 0,
+  "bundle_bytes": 5334849,
+  "bundle_sha256": "5c0c18551f6874a6bc2e5766362e47308432424c366eec5eff448010376bfbf7",
+  "bundle_restore_integrity": "PASS",
+  "runtime_restore": {
+    "status": "PASS",
+    "version": 2,
+    "finished_utc": "2026-10-11T04:41:10Z",
+    "stages": 36,
+    "selected_top_level_tests_per_mode": 23,
+    "selected_subtests_per_mode": 40,
+    "source_files": 2962,
+    "source_directories": 142,
+    "sourceguards": 10,
+    "extra_AST_guards": 2,
+    "scope": "exact23 ordinary/race, fullvet/trimpathbuild, five crossbuilds, beforeaftermodules and full restored identity",
+    "raw_log_sha256": "e31f3250a60174e9dd91b276ad7b05656957bb9755e577be77a93b5fcd9199db"
+  },
+  "ci": {
+    "id": 38111973546,
+    "status": "completed",
+    "conclusion": "success",
+    "updated_at": "2026-10-11T04:55:57Z",
+    "readback_utc": "2026-10-11T04:56:45Z",
+    "jobs": [
+      {
+        "id": 114389234442,
+        "name": "oracle",
+        "conclusion": "success"
+      },
+      {
+        "id": 114389234612,
+        "name": "ordinary",
+        "conclusion": "success"
+      }
+    ],
+    "decoded_log_sha256": {
+      "ordinary": "01f1a2cb9013c683c5da0c52cbf24b160573458ecd1211b35545707a86b94db0",
+      "oracle": "89bf171ea0cfd369cc5b4330ed5286a9195f631237df0d6bed2533cd1964cd59"
+    }
+  },
+  "source_gate": {
+    "tree": "d7393c254a6fca4452ae194d64d9045659f9781d",
+    "status": "PASS",
+    "finished_utc": "2026-10-11T04:23:35Z",
+    "stages": 18,
+    "nondoc_identity_files": 777,
+    "log_sha256": "0a77721969a0ad05f3bdbaf755f501ad825182ccda5644a3c48c34560e8d5a17"
+  },
+  "acceptance": "在现有限制下完成了独立可推进项，整体未验收。",
+  "restore_verifier_history": {
+    "v1": "FAIL exit1 at first identity stage04:37:10Z; noGo checks executed; incorrect .md exclusion yielded745 versus intended777. Fullcommit/tree/goal/module assertions preceding failure passed. Originalfailure and exact script/diagnosis preserved.",
+    "v2_fix": "Only predicate restored to exclude docs/;777 assertion/fulltree checks retained, newevidenceprefix. No production/test source edits.",
+    "raw_POSIX_checkout_normalization": "30 files differ from original runtime snapshot raw permissions (28x0600->0644,2x0444->0644); unchanged byte/Gitmode identity and v2beforeafter rawmodes; no chmod."
+  },
+  "final_remote_readback_observed_from_tool_completion_utc": "2026-10-11T04:57:31Z"
+}

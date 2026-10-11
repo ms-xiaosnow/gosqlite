@@ -1,17 +1,18 @@
 # 当前实现与验收矩阵
 
-核对时间：2026-10-11；本次修改的已保存父基点为 `7a9972547f49531df04cf1b624dfa662b483907b`。
-本次最终保存提交与 current CI 发布时仍待按精确 commit 确认；这里不预写尚未生成的自指提交。旧 `1352ae524575e4d6fe8b5434fd930c3b07be4ac8` 保留为历史基点。
-本检查点叠加三项有限收尾：四项 CLI/示例资源修正、三份必需入口文档对账、五例目录终结与输出错误修正。四项 CLI 固定树完整普通门、三份文档独立静态审阅、五例独立源码和限定普通/race 审阅分别 PASS；最终组合与新提交持久门见文末，不能沿用基点结果。四项 CLI 的精确结果见[组合证据](evidence/cli-resources-20261011.md)，五例的操作边界见[留存限定复验](example-retention-verification-zh.md)。
+核对时间：2026-10-11；当前开发基点为 `63c2ebb10e3a2c4ff2378ee9f33c46133134c70f`，tree `d735409ebd1c43d90ee1650c8a7c2a084e270674`。该历史检查点的恢复与 CI 已闭合，详见文末；本轮新源码、提交、恢复及 CI 仍须分别核验，不预写自指提交。旧 `7a9972547f49531df04cf1b624dfa662b483907b` 与 `1352ae524575e4d6fe8b5434fd930c3b07be4ac8` 保留为历史基点。
+63c2 历史检查点叠加三项有限收尾：四项 CLI/示例资源修正、三份必需入口文档对账、五例目录终结与输出错误修正。四项 CLI 固定树完整普通门、三份文档独立静态审阅、五例独立源码和限定普通/race 审阅分别 PASS；最终组合与新提交持久门见文末，不能沿用基点结果。四项 CLI 的精确结果见[组合证据](evidence/cli-resources-20261011.md)，五例的操作边界见[留存限定复验](example-retention-verification-zh.md)。
 已有 inspect 精确源码和边界见[元数据证据](evidence/inspect-metadata-20261011.md)和[上下文证据](evidence/inspect-context-20261011.md)。
 这是开发检查点清单，不是最终交付。原始 [goal.md](../goal.md) 不变。
 平台受限项目可以暂停执行并记录用户自测步骤，不能取消真实实现义务。
+
+06:53 UTC 用户要求跳过并记录受限测试，其余继续分批编码、提交并报告。已将过宽的源码 HOLD 分类纠正为[逐项限制溯源](restriction-provenance-20261011.md)：可访问证据中未定位到 recovery/backup/WAL/planner/backend/harness 的精确源码编辑拒绝，不能据此断言它们从未被拒绝或一揽子解限。实际受限执行和 ANN V4、41目标 fuzz、未知中断的禁重试保持。当前 LIMIT/OFFSET 数值转换与 ErrMismatch 的三文件候选已取得限定普通/race与独立审阅PASS；精确组合普通18阶段已于07:39:21 UTC全部PASS；提交及恢复/CI仍待本批精确身份闭合。具体原始失败、包装器纠正及范围见[新切片证据](evidence/limit-conversion-20261011.md)。
 
 ## 状态定义与证据
 
 - `PASS（限定范围）`：有精确源码、实际命令与结果；仅覆盖记录的范围。
 - `PARTIAL / 未实现`：必需代码未完成、未合入或仅支持部分配置；文档不能替代实现。
-- `FAIL / HOLD`：已有失败或审阅阻断；后续有限通过不能抹去历史失败。
+- `FAIL`：已有真实失败；后续有限通过不能抹去历史失败。`HOLD` 必须注明是精确动作拒绝、执行限制、开发暂停还是工程审阅/集成待办，不能单凭这个标签声称源码禁止编辑。
 - `NOT_RUN`：没有执行证据。`平台阻塞` 还表示禁止在本环境重试或换路执行。
 - `需真实外部环境`：缺少实际目标 OS、持久性硬件、独立审计或授权服务证据。
 
@@ -25,12 +26,12 @@
 | 原规范条款 | main 已有能力 | 剩余代码 / 状态 |
 |---|---|---|
 | G1、§3、§4.1、M3 | 有界有限计数多段 rollback 字节解析、internal 恢复所有权；Reader post-SHARED stat/shared 初始不存在来源已修正 | `PARTIAL`：公开 Open 恢复尚未合入，更多 journal 形式及 native exclusive WAL 尾部安全发布缺实现。物理恢复另列人工门 |
-| G1、§4.2、§11.1/11.3 | 索引范围、有限 JOIN/GROUP BY/HAVING、连接计数和 cached preparation 的限定普通门通过 | `已知差异`：支持查询的 planner 错误/排序/阶段一致性仍待修正。V4c 树 `552286a…` 有独立有限 PASS，但没有和 main 新 grouped/counter 组合；不能替代 main 结果 |
+| G1、§4.2、§11.1/11.3 | 索引范围、有限 JOIN/GROUP BY/HAVING、连接计数和 cached preparation 的限定普通门通过 | `已知差异`：支持查询的 planner 错误/排序/阶段一致性仍待修正。V4c 树 `552286a…` 有独立有限 PASS，但没有和 main 新 grouped/counter 组合；不能替代 main 结果。新 LIMIT 转换/ErrMismatch 三文件修正独立限定PASS，组合完整普通18阶段PASS；不覆盖其余绑定/执行阶段缺口 |
 | §4.2、§8.1、§12.2 | correct-key 加密 backup/rekey CLI、native DB/Tx/CLI Check V2 已合入 | `未实现/未合入`：main 明文 backup 命令仍明确 unsupported；Linux rollback V2 候选终审未完成，WAL/非 Linux backup 和真正只读 plaintext-WAL CLI 缺代码。native VACUUM 未实现 |
-| G1、§3.6、§12.2 | query/check/inspect CLI 均使用 OpenContext；DB.Inspect 和 inspect --extensions 在单快照呈现持久 method/version/config/generation，默认 JSON 保持 | `PARTIAL`：本次实测只涵盖 Linux plaintext rollback、grams/custom metadata；加密 inspect、真正只读 WAL、完整 CLI 目标仍缺实现。持久 metadata 不证明索引可用或正确，中途 I/O 取消未动态验证 |
+| G1、§3.6、§12.2 | query/check/inspect CLI 均使用 OpenContext；DB.Inspect 和 inspect --extensions 在单快照呈现持久 method/version/config/generation，默认 JSON 保持 | `PARTIAL`：本次实测只涵盖 Linux plaintext rollback、grams/custom metadata；加密 inspect CLI 的密钥/profile 路由、真正只读 WAL 及其余已选 CLI 目标仍有实现缺口。持久 metadata 不证明索引可用或正确，中途 I/O 取消未动态验证 |
 | §12.1、§14 | 四项 CLI/示例资源修正与五例目录终结/输出错误修正已完成，各自取得限定独立审阅与普通证据 | `限定修正 PASS，完整验收未完成`：sparse 状态、readonly 显式只读、write/query 关闭错误及五例目录终结已有证据。实际失败进程/原生关闭失败/真实失败目录保留未执行；WAL 原 t.TempDir 清理和清除进程密钥不允许推断失败现场完整或可解密 |
 | §9.2(2/5) | caller-dataset 范数、完整精确距离与 Top-K v2 已合入；高维 v1 失败保留，v2 有有理数参考验证 | `PARTIAL`：ANN caller-dataset recall 及真实 PG/Neon 验证单列；精确距离不能替代 ANN |
-| §5.2、§7.2、§11.3 | NFC 组合语料、真实 grams build/空间/P50/P95 工具和普通事务 V4 已合入 | `FAIL/HOLD（候选工具）`：ANN 报告 V3 三类实质准入缺陷未修，V4 链路受阻。性能报告 V3 有限审阅通过但未合入/部署；没有可采信测量不得宣称完整基准通过 |
+| §5.2、§7.2、§11.3 | NFC 组合语料、真实 grams build/空间/P50/P95 工具和普通事务 V4 已合入 | `FAIL/待集成/部署HOLD分列`：ANN 报告 V3 三类实质准入缺陷未修，V4 链路禁重试。性能报告 V3 限定源码审阅通过但未合入；自动性能 CI 部署另受操作许可限制。没有可采信测量不得宣称完整基准通过 |
 | §8、§11.3、§12.3 | Linux/Darwin/Windows 有受支持 backend 源码，只有 Linux 普通运行证据 | `PARTIAL`：main Windows shared rekey 及 Darwin 名称配置受限；修正版在未发布 `a314028…` 组合。更广 Unicode root 支持未实现，但不能虚构为规范要求任意无限名字。保留目录 VFS 未冻结/整合 |
 | G1、§4.2 | 明确的 phased SQL/格式矩阵 | UNIQUE/CHECK/FK、CTE/UPSERT/view/trigger/window/JSON/FTS5/ATTACH 等和 UTF-16/WITHOUT ROWID/autovacuum 未实现；保留分期状态，优先现有支持域正确性 |
 | §11.1、M3/M8/M10 | 有限手工 replay/namespace 测试源已存在 | 完整故障点、断电、短写/Sync、ENOSPC、错位/torn write、checkpoint/rekey 中断的 harness 仍有源码缺口；不能全部称为已有命令只待运行 |
@@ -54,7 +55,7 @@
 完整普通/oracle/race/五目标/模块/身份门于 03:05:03 exit 0。基点 7a3c457
 的 CI `38105152184` 已于 02:48:20 SUCCESS，精确 Library 恢复 02:29:59 PASS。
 独立后续任务必须先写清源码范围、测试选择以及与被中断链路无关的理由。
-不因允许普通测试就运行新的广泛 fuzz、soak 或此前未收尾的冻结候选。
+不因允许普通测试就运行新的广泛 fuzz、soak 或此前未收尾的冻结候选。新增源码批次按具体动作及依赖审阅；旧谨慎暂停不能反推为已证明的源码编辑禁令，也不能以本次纠正重试未知被阻动作。
 
 ## 三、受限待人工：已有测试与未实现设施分开
 
@@ -102,16 +103,18 @@
 历史源码、失败及修正身份保留在证据与 Git 历史。只有满足必要实现和
 安全门才能把整个里程碑标为 VERIFIED；当前 M10 尚未完成。
 
-## 有限收尾
+## 历史有限收尾与继续编码
 
 [有限清单](closeout-scope-20261011.md)的三项独立改动及各自 scoped/static 审阅已完成。四项资源 tree `4c2af13646c973c53340450f8f1310492aae5628` 的完整普通门于 03:53:38 UTC PASS；三份合同文档静态 PASS；五例目录终结取得源码、精选五项普通/race 与限定 vet/build 独立 PASS，真实失败目录保留仍未动态验证。
 
-最终组合 tree `d7393c254a6fca4452ae194d64d9045659f9781d` 完整普通门 PASS（2026-10-11 04:23:35 UTC，18阶段全部自然 exit 0）；最终新提交的精确持久恢复和 current CI PENDING。基点 `1352ae524575e4d6fe8b5434fd930c3b07be4ac8` 的 CI `38108065647` 于 03:42:12 UTC SUCCESS，以及该基点的恢复 PASS，各自只证明原身份。
+历史最终组合 tree `d7393c254a6fca4452ae194d64d9045659f9781d` 完整普通门 PASS（2026-10-11 04:23:35 UTC，18阶段全部自然 exit 0）。随后保存的63c2检查点，其精确恢复V2于04:41:10 UTC通过36阶段，CI `38111973546` 于04:55:57 UTC SUCCESS，ordinary `114389234612` 和oracle `114389234442` 均成功。原“PENDING”是当时发布前状态，现按后续证据闭合；这些结果不能用于尚在开发的新LIMIT源码。基点 `1352ae524575e4d6fe8b5434fd930c3b07be4ac8` 的 CI `38108065647` 于 03:42:12 UTC SUCCESS，以及该基点的恢复 PASS，各自只证明原身份。
 
-在现有限制下完成了独立可推进项，整体未验收。
+当时“在现有限制下完成了独立可推进项，整体未验收”的结论，只在旧有限清单与过宽暂停分类下成立；它不表示原目标完成、所有源码已完成或存在已证明的全面编码禁令。现按06:53 UTC指示继续逐批推进，其余实现、集成和受限验收义务保留。
 
-其余真实代码缺口、原始 FAIL/HOLD、已有但受限的人工门、IMPLEMENTATION_MISSING 和真实外部资格分别保留。ANN V4、41 目标 fuzz 与未知中断的操作/目标没有新增证据，不重发、不换路，不作通过推断。
+其余真实代码缺口、原始 FAIL、具体工程 HOLD/集成待办、已有但受限的人工门、IMPLEMENTATION_MISSING 和真实外部资格分别保留；不再用未定位的源码编辑拒绝统一解释这些待办。ANN V4、41 目标 fuzz 与未知中断的操作/目标没有新增证据，不重发、不换路，不作通过推断。
 
-本次组合普通门原始记录见[五例组合证据](evidence/example-retention-20261011.md)。后续仅文档/证据变更；777个非 docs 文件的字节、权限、Git模式与清单已独立核对相同，仍按实际新提交另行核验恢复和CI。
+本次组合普通门原始记录见[五例组合证据](evidence/example-retention-20261011.md)。该次运行之后至63c2发布仅追加文档/证据；777个非 docs 文件的字节、路径、大小与Git模式已独立核对相同。精确恢复曾有30文件的POSIX权限常规归一化，不概括为所有元数据相同。当前新批次须按实际新源码、提交、恢复和CI另行核验。
 
 父基点 `7a9972547f49531df04cf1b624dfa662b483907b` 的 Library `libfile_f28c9a0df2108191981d41eb76fafc58` 已读回并精确恢复；30阶段、18项每模式具名测试/29子项、8 sourceguard、vet/build/五目标/模块/全部身份于04:13:29 UTC PASS。该提交 CI `38110617335` ordinary/oracle 均 SUCCESS（04:30:02 UTC）；[闭合证据](evidence/cli-resources-20261011/persistence.json)只属于父基点，不替代本次新提交。
+
+63c2 的全历史 bundle 为 Library `libfile_ce332d051b4c8191a833e09094b5722e`，5,334,849字节，SHA-256 `5c0c18551f6874a6bc2e5766362e47308432424c366eec5eff448010376bfbf7`；终态证据归档为 `libfile_7fea2541ad7881919b7236a66499c138`，SHA-256 `d1a8e98dae0d1260006f75c938360e04b3b40744b69b1c7d1b4e286800e6bd45`。首次恢复V1的验证器FAIL保留：745/777计数差来自额外排除32个Markdown，在任何Go检查前失败；V2只修筛选谓词。完整身份、分类依据及下一批边界见[限制溯源](restriction-provenance-20261011.md)。

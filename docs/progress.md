@@ -1267,3 +1267,36 @@ ANN/performance-CI sources remain separate increments.
 本次组合普通门原始记录见[五例组合证据](evidence/example-retention-20261011.md)。后续仅文档/证据变更；777个非 docs 文件的字节、权限、Git模式与清单已独立核对相同，仍按实际新提交另行核验恢复和CI。
 
 父基点 `7a9972547f49531df04cf1b624dfa662b483907b` 的 Library `libfile_f28c9a0df2108191981d41eb76fafc58` 已读回并精确恢复；30阶段、18项每模式具名测试/29子项、8 sourceguard、vet/build/五目标/模块/全部身份于04:13:29 UTC PASS。该提交 CI `38110617335` ordinary/oracle 均 SUCCESS（04:30:02 UTC）；[闭合证据](evidence/cli-resources-20261011/persistence.json)只属于父基点，不替代本次新提交。
+
+
+### 2026-10-11 源码开发与受限执行的分类纠正
+
+- 状态：IN_PROGRESS。06:53 UTC用户要求“受限于平台安全问题的测试，你跳过并记录文档就行（附带详细测试步骤供我自行测试）”，其余继续编码，每完成一定量提交并报告，直到整个项目编码完成。原始goal内容不变。
+- 新增[限制溯源](restriction-provenance-20261011.md)，并纠正acceptance-status、closeout-scope和interruption当前摘要。四类分开：①精确编辑拒绝；②执行/测试限制；③谨慎开发暂停、工程缺陷与审阅/集成待办；④动作/目标不明的整轮flag。逐项记录实际代码、缺失harness、依赖、原证据文件/行号与适用身份。
+- 已搜索的可访问证据没有定位到recovery/backup/WAL/planner/backend/harness精确源码编辑被拒绝的原始记录；不能把这个有限发现说成“从未拒绝”或新增许可。原始22:39触发动作/目标仍UNKNOWN；41目标fuzz的原错误文字保留，未知执行不记次数或PASS。ANN V4、41目标fuzz、未知链路与真实物理故障/恢复/namespace/磁盘负向/中断发布rekey执行限制不变，禁止改名、拆小或迁移重试。
+- 此前“三项有限收尾之外不新增功能”及“完成了独立可推进项”仅是当时有限范围和过宽暂停分类下的判断，不代表目标完成、所有可编码项完成或源码被全面禁止。旧文字与原始失败保留为历史，本次当前摘要改为依照用户新指示继续逐项编码。没有把缺代码转写成只差手工测试。
+- 分类细节：public Open rollback、WAL-tail publisher、明文backup、真正只读WAL、planner及部分backend/目录协议仍有源码/集成缺口；缺失物理harness为IMPLEMENTATION_MISSING，执行另列BLOCKED/NOT_RUN。Performance V3的源码审阅通过与自动部署HOLD分开；普通transaction V4工具已实现，两小时soak未运行，原具体阻塞为fixture位置/空间等资源预检。Encrypted inspect只记未来候选，未开始或取得验证许可。
+- 当前开发基点：`63c2ebb10e3a2c4ff2378ee9f33c46133134c70f`，tree `d735409ebd1c43d90ee1650c8a7c2a084e270674`；07:01:55 UTC远端只读记录相同。唯一已开始的新源码切片为`sqlite/query.go:limitValue`的NUMERIC affinity与ErrMismatch加专用回归，IN_PROGRESS；已取得的限定本地结果另行归档，独立审阅及整合仍待完成，尚无本批整合验收/发布结果。只读依赖不涉及VFS/recovery/backup/ANN；有界普通/fixed-oracle/race选择在实际测试/helper审阅后执行。其余phase/binding/sort问题不冒称由此覆盖，后续批次按具体动作审阅。
+- 历史63c2证据现在闭合：精确Library恢复V2于04:41:10 UTC通过36阶段，每模式23顶层/40子测试；CI38111973546于04:55:57 UTC SUCCESS，ordinary114389234612与oracle114389234442成功。Bundle Library `libfile_ce332d051b4c8191a833e09094b5722e`，5,334,849字节，SHA-256 `5c0c18551f6874a6bc2e5766362e47308432424c366eec5eff448010376bfbf7`。这些只属于63c2，不能证明新的LIMIT tree通过。
+- 原始恢复V1 FAIL保留：04:37:10 UTC首个身份阶段exit1、尚未运行Go；额外排除32个非docs Markdown使集合为745而断言为777。V2只修筛选谓词，没改源码/测试。终态证据归档Library `libfile_7fea2541ad7881919b7236a66499c138`，SHA-256 `d1a8e98dae0d1260006f75c938360e04b3b40744b69b1c7d1b4e286800e6bd45`，378entry/377文件哈希已核验。静态保存不是运行验收；恢复的POSIX权限归一化与Git模式区别保留。
+- 本次文档任务仅静态读取、编辑五份约定文档和核对路径/链接/字节；没有项目代码/测试/build/数据库/候选脚本执行，没有Git/远端/CI改动。原始goal SHA-256为`9ae7b1d776856669a10eb753408c7754d015d266f8783240165450e96e4bac81`，43,100字节。既有失败、unsafe-scope事实及完整中文自测步骤保留。
+- 下一步：审阅并保存本次分类文档，完成当前LIMIT小批次的独立源码/普通证据核验，按真实新提交保存与报告；随后逐项选择原目标剩余代码。新OS/perf runner、计费/额度读取、新费用与权限仍分别待许可。受限测试继续跳过并记录；尚未齐备的物理与外部资格不能标为VERIFIED，M3/M8/M10完整验收未完成。
+
+
+### 2026-10-11 LIMIT 数值转换独立修正与组合验证
+
+- 状态：IN_PROGRESS，三文件源码限定审阅/普通证据PASS；整体未验收。仅修`sqlite/query.go:limitValue`和无用import，新增两个专用回归；原360个测试与其余2,961个原文件字节/Git模式保持。未移植旧planner全树，grouping/counter/preparation、VFS/recovery/backup/ANN/backend未改。
+- 候选tree`3fc9087ad121d423174a658e118ac455d1ace8c2`，原代码加最终测试tree`80d2ac039453de28581ea6f499d3914f65fee965`。相同断言在原代码630/1016叶案例FAIL、208/344有效oracle比较FAIL；修正后1016和344分别普通/race全PASS。额外独立118个有限值/配额/正常同文件peer-write读锁归还控制普通/racePASS，仅属审阅证据。
+- 最初oracle包装器误要求CLI普通stdin错误文本含数字码，原v1日志/源码保留为HARNESS_FAIL。v2只加官方`.log stderr`并读取真实前缀Code20；自然exit1/空输出、原生Code20/ErrMismatch/nilRows及所有成功行/租约断言保持。精确相同v2测试在原/修正代码重新运行，不能把旧包装器失败全归生产。
+- 固定Go1.27.2与SQLite3.54.0。具名普通选择为`TestLimitConversionTypes`、`TestLimitConversionErrorOwnership`、`TestLimitConversionPublicSQL`；oracle为`TestLimitConversionPinnedOracle`。独立guard、限定vet/build、CGO0依赖闭包与全补丁重放PASS，零skip。完整命令、源码/结果及审阅见[证据](evidence/limit-conversion-20261011.md)；可复制步骤见[中文限定复验](limit-conversion-verification-zh.md)。
+- 07:21:19 UTC组合冻结tree`ca8947811d60266c19db2d6b155bd62b843d6e48`，2,965文件/142目录；仅三源码与五文档路径差异，779个非docs文件与接受候选完全相同。07:23:25 UTC开始既有18阶段完整普通门，资源/身份/guard通过后进入测试；此处不预记终态。新增说明与证据不改冻结树运行源码。
+- 仍缺LIMIT=0/OFFSET抑制、EXPLAIN bound执行、完整名称/ON绑定顺序和其他planner排序/阶段修正。受限物理测试、ANN V4/41fuzz/未知链路不执行；新OS/perf/billing仍待许可。下一步等待精确组合门终态，通过后按已授权流程保存main、Library恢复并跟踪该提交CI，再选下一项真实源码缺口。
+
+
+### 2026-10-11 LIMIT 精确组合普通门完成
+
+- 固定tree`ca8947811d60266c19db2d6b155bd62b843d6e48`从07:23:25至07:39:21 UTC完成全部18阶段，均自然exit0：完整普通37测试包、完整pinned oracle38包、race37包、vet、trimpath build、两次sourceguard、五目标生产编译、模块与前后全源身份。2,965文件/142目录字节、路径、Git及实际POSIX模式不变；360旧测试保留，779非docs文件与独立接受候选完全一致。
+- 非verbose全套日志只统计package，专用1016/344及额外118叶案例为此前独立具名证据，未虚构全套叶数量。完整原日志/命令/阶段/身份与报告见[本批证据](evidence/limit-conversion-20261011.md)。本次source PASS不等物理安全、其他OS原生或完整SQL/M10验收。
+- 07:40:36 UTC在所有已知Go检查自然结束及可见Go进程为空后，按限定维护范围执行固定Go与显式本任务GOCACHE的`go clean -cache`，exit0。只清可再生成build cache，保留源码/Git/验收日志/备份/模块缓存，未使用其他删除或fuzzcache/modcache flags。workspace余量恢复14,975,832,064字节，默认/tmp余1,416,167,424字节；维护记录保存。不是重启受限soak或被拒链路。
+- 新源码三文件此后不变，仅追加文档与真实证据；接下来核对精确待提交tree、保存私库main与Library、恢复所选提交并跟踪其CI。未先填新commit或未发生结果。
+- 下一项P0 public rollback Open已另行开始逐hunk源码集成，先合入防误执行guard，仅descriptor-free模型、源码检查与编译在独立副本进行；本检查点没有纳入该候选，实际RecoverRollback、启用恢复真实Open、任何物理恢复保持NOT_RUN。

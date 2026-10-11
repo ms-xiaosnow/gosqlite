@@ -1,0 +1,16 @@
+{
+  "observed_utc": "2026-10-11T07:40:36.355650+00:00",
+  "status": "PASS",
+  "command_exit": 0,
+  "scope": "Only standard Go build-cache cleanup. No package/modcache/fuzzcache flags or manual deletion. Source, Git, evidence, Library backups and module cache unchanged by this operation.",
+  "space": {
+    "/tmp": {
+      "available_bytes": 1416167424,
+      "available_inodes": 1243493
+    },
+    "/workspace/scratch/5e06a74e5f65/durable-restart": {
+      "available_bytes": 14975832064,
+      "available_inodes": 1245479
+    }
+  }
+}
