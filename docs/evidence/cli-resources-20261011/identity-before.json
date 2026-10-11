@@ -1,0 +1,32 @@
+{
+  "phase": "before",
+  "baseline_commit": "1352ae524575e4d6fe8b5434fd930c3b07be4ac8",
+  "baseline_tree": "2b91b20abec4b2d651de1dd860fe86e79b62bac9",
+  "exact_tree": "4c2af13646c973c53340450f8f1310492aae5628",
+  "source_files": 2911,
+  "source_directories": 137,
+  "changed_paths": [
+    "README.md",
+    "cmd/gosqlite/main.go",
+    "cmd/gosqlite/query_close_test.go",
+    "docs/evidence/query-close-20261011.md",
+    "docs/progress.md",
+    "examples/readonly/legacy_source_test.go",
+    "examples/readonly/main.go",
+    "examples/readonly/main_test.go",
+    "examples/sparse-exact/README.md",
+    "examples/sparse-exact/main.go",
+    "examples/sparse-exact/main_status_test.go",
+    "examples/write/README.md",
+    "examples/write/main.go",
+    "examples/write/main_test.go"
+  ],
+  "old_test_files_byte_mode_unchanged": 353,
+  "owner_inventory_matches": true,
+  "freeze_copy_bytes_git_modes_actual_modes_directory_inventory_match": true,
+  "copy_has_git": false,
+  "git_commands_run": 0,
+  "manifest_sha256": "386cae4a471e3d7292deff2cc8721ba27c0bb4eb1054f5c0500a01449e1f8540",
+  "baseline_inventory_sha256": "952eca0c0b3732d16171a6b7e8da94345eee517312eadab9abbf5ff1c9ffda6f",
+  "frozen_inventory_sha256": "2fa969f5a5296e8a102309ad09d501674fa0d1d61a23cb98d7d8a3558108f574"
+}

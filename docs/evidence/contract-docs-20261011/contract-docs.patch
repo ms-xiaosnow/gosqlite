@@ -1,0 +1,339 @@
+--- a/docs/migration-pgembedding.md
++++ b/docs/migration-pgembedding.md
+@@ -1,28 +1,48 @@
+-# pg_embedding migration: offline inspection checkpoint
+-
+-Status: M9 checkpoint A implemented and locally tested. The full M9 migration
+-is **not complete**. SQL AST conversion, persisted CSV/NDJSON import/resume and
+-verification, and PostgreSQL migration bundle generation are the next distinct
+-checkpoints. The current CLI does not accept `--apply`, `--resume`, `--output`,
+-DSNs, credentials, or arbitrary SQL execution. Existing M3/M8 restricted physical
+-durability/security qualification and independent release gates remain open.
+-
+-## Two separate workflows
+-
+-1. **Export to local gosqlite.** Inspect a versioned offline PostgreSQL catalog,
+-   select verified real-array vector columns, convert every source value with
+-   explicit dimensions, and later import into a new real local database in
+-   bounded transactions. At A, inspection and value conversion work; database
+-   import/resume and full export verification are not implemented.
+-2. **PostgreSQL/Neon in-place migration.** Inspect dependencies and actual target
+-   availability, review extension transition/maintenance strategy, retain source
+-   arrays, backfill shadow vector columns, build/validate target indexes, and
+-   coordinate application cutover/rollback. At A, the inspector identifies the
+-   relevant hazards; it generates no runnable migration SQL and contacts no
+-   PostgreSQL server. The provided catalog exporter is a read-only SQL reference
+-   for manual review, not an automatic remote execution step.
+-
+-## Runnable CLI
++# pg_embedding 迁移：当前入口与离线合同
++
++核对基点：`1352ae524575e4d6fe8b5434fd930c3b07be4ac8`（2026-10-11）。
++M9 已有离线目录检查、受限 SQL AST 转换、持久 CSV/NDJSON 导入与正常续传、
++只读校验，以及 PostgreSQL 迁移审阅包生成；**完整 M9 迁移验收尚未完成**。
++这些工具不连接 PostgreSQL/Neon，不接收服务器 DSN/凭据，也不执行远端 SQL。
++M3/M8 物理持久性、安全审查和独立发布门仍未闭合。
++
++## 当前两条工作流
++
++1. **导出到本地 gosqlite。** 人工审阅并收集离线目录和不可变 CSV/NDJSON
++   导出；检查类型/扩展身份、维度与映射后，用 `convert` 转换支持的 SQL 子集，
++   或用 `import` 导入显式 manifest 所描述的数据。导入默认只读校验；写入新库
++   必须使用 `--apply --output`，匹配已提交作业的续传必须再给 `--resume`。
++   `verify` 只读校验完整导出/目标数据；可显式加 `--distances` 做有界范数、
++   完整精确距离和 Top-K 校验。普通导入报告的 `exact_distances`、`ann_recall`
++   仍为 `not_run`，精确距离扩展也不验证 ANN recall。
++2. **PostgreSQL/Neon 原地迁移审阅。** `transition` 已生成保留数组/cast 或
++   typed shadow-column 方案；加 `--full-table-evidence` 可生成受限 PG16
++   整表复制/换名方案。输出中的修改和安装后 SQL 保持逐行注释，人工门不自动
++   解除。成功只表示审阅包生成完成，不表示服务器能力、执行、切换或回滚已验证。
++   保留旧数组/表只有在写入仍同步且旧服务可恢复时才有回滚价值。
++
++| 当前入口 | API / 实现 | 详细合同 |
++|---|---|---|
++| `inspect` | `DecodeCatalog` / `Inspect`；[CLI 分派](../cmd/gosqlite/migrate.go) | 本页下方的目录检查、REAL[]、术语映射和风险 |
++| `convert` | [`Convert`](../migration/postgres/convert.go)、`Conversion.SQL`、`BindTransform.ConvertValue` | [AST、类型绑定和不支持语法](migration-converter.md) |
++| `import` / `verify` | [`Import`](../migration/postgres/import.go) / [`VerifyImport`](../migration/postgres/import_verify.go)；[CLI 参数](../cmd/gosqlite/migrate_import.go) | [manifest、CSV/NDJSON、事务/续传、校验](import-pgembedding.md) |
++| `verify --distances` | [`VerifyImportDistances`](../migration/postgres/import_distances.go) | [采样查询、全候选、误差界与跳过状态](import-distance-verification.md) |
++| `transition` | [`GenerateTransition`](../migration/postgres/transition.go)；[CLI](../cmd/gosqlite/migrate_transition.go) | [CLI](migration-transition-cli.md)、[阶段/校验/回滚](migration-transition.md) |
++| `transition --full-table-evidence` | [`GenerateFullTableTransition`](../migration/postgres/transition_full.go) | [PG16 依赖证据与整表示例](migration-full-table.md) |
++
++`--apply` / `--resume` 是本地导入参数，`--output` 是本地导入/校验目标；
++不能用于 `inspect`、`convert` 或 `transition`。这些只读/生成子命令使用
++`--report` 显式新建报告。具体参数、边界与错误由各入口分别检查，不能把
++检查器的参数限制推广为整个迁移 CLI 的限制。
++
++### 历史检查点 A
++
++检查点 A 当时只有目录检查和 REAL[] 转换；AST、CSV/NDJSON 导入/续传及
++迁移包生成确实属于后续工作。该历史状态不再代表当前 main。原检查器的
++合成目录、人工导出器和限定测试证据继续保留；下面仍适用的检查器合同
++不构成完整 PostgreSQL 方言或在线迁移支持。
++
++## 检查器示例与报告语义
+ 
+ From the repository root with the pinned Go 1.27.2 toolchain:
+ 
+@@ -51,7 +71,44 @@
+ fixture can demonstrate a proposed target configuration; tests separately
+ exercise invalid legacy defaults and published examples.
+ 
+-## Native APIs
++## 转换、导入/续传与原地迁移审阅示例
++
++下面均使用现有 CLI 参数；本次文档核对没有执行这些命令。转换/审阅例子
++读取仓库内明确标注的合成 fixture。导入例子的 `source.ndjson`、`export.json`
++由调用者准备并审阅；首次导入的 `imported.db` 必须不存在。
++
++```sh
++CGO_ENABLED=0 go run ./cmd/gosqlite migrate pgembedding convert \
++  --catalog examples/migrate-pgembedding/converter-catalog.json \
++  --input examples/migrate-pgembedding/source.sql \
++  --target local --table 30000=documents
++CGO_ENABLED=0 go run ./cmd/gosqlite migrate pgembedding import \
++  --input source.ndjson --manifest export.json
++CGO_ENABLED=0 go run ./cmd/gosqlite migrate pgembedding import \
++  --input source.ndjson --manifest export.json --output imported.db --apply
++# 仅对相同源和 manifest 的已提交作业，显式正常续传。
++CGO_ENABLED=0 go run ./cmd/gosqlite migrate pgembedding import \
++  --input source.ndjson --manifest export.json --output imported.db --apply --resume
++CGO_ENABLED=0 go run ./cmd/gosqlite migrate pgembedding verify \
++  --input source.ndjson --manifest export.json --output imported.db
++CGO_ENABLED=0 go run ./cmd/gosqlite migrate pgembedding transition \
++  --catalog testdata/pgembedding-0.3.6/catalog.json \
++  --options examples/migration-transition/options.json
++CGO_ENABLED=0 go run ./cmd/gosqlite migrate pgembedding transition \
++  --catalog examples/migration-full-table/catalog.json \
++  --options examples/migration-full-table/options.json \
++  --full-table-evidence examples/migration-full-table/evidence.json
++```
++
++本地导入按批将数据、拒绝记录、来源和游标放入同一原生事务；续传先重放并
++核对完整已提交前缀。`--stop-after-batches` 是正常提交后主动返回/关闭，
++不是崩溃恢复。未知提交结果返回错误，不自动重插或声称已回滚；后续显式
++续传仍可能被尚未支持的公开恢复路径阻塞。默认遇错停止，显式 quarantine
++只接纳限定的确定性行错误。已导入数据和源文件不被自动删除，索引失败保留
++`data_complete_index_pending`。细节和可运行合成端到端示例见
++[导入指南](import-pgembedding.md)。
++
++## 目录检查 API
+ 
+ `migration/postgres` contains:
+ 
+@@ -153,9 +210,9 @@
+ 
+ Pinned mappings are `ann_l2_ops` → `vector_l2_ops`, `ann_cos_ops` →
+ `vector_cosine_ops`, and `ann_manhattan_ops` → `vector_l1_ops`. Legacy Manhattan
+-`<~>` must later be converted only in a positively bound legacy-vector context
+-to dense `<+>`; modern bit `<~>` means Hamming. This inspector reports identities;
+-it does not yet rewrite SQL.
++`<~>` 在已确认的旧向量类型/扩展身份上下文中，由当前 `convert` 转为 dense
++`<+>`；现代 bit `<~>` 仍表示 Hamming。`inspect` 本身仅报告身份，SQL 改写由
++[独立 AST 转换入口](migration-converter.md) 完成，绝不全局替换同名运算符。
+ 
+ Effective legacy defaults are m=100, efconstruction=16, efsearch=64. Target HNSW
+ requires m=2..100, ef_construction=4..1000 and ef_construction >= 2*m. Both old
+@@ -177,7 +234,7 @@
+ Retained arrays help rollback only if later writes keep them current; restoring
+ old ANN service after a committed extension transition is a separate operation.
+ 
+-## Sources and exact checkpoint evidence
++## 固定来源与历史检查点证据
+ 
+ Pinned legacy source: `5d48508aeaeb86b9e9c630468ada7a124b905795`, extension 0.3.6.
+ Pinned target: pgvector v0.8.7, `f37c13f68b57d2c3472b2214fbcff699d6d34876`.
+@@ -197,3 +254,24 @@
+ remote write, crash/fault/forced-exit, recovery, wrong-key or physical-tamper
+ workflow was performed. Exact executed commands/results are recorded in the
+ checkpoint evidence by the integration lead.
++
++## 已有实现证据与尚未完成项
++
++以下均为仓库已保存的限定历史证据，不是本次静态文档核对新跑的测试，
++也不将旧源码上的 PASS 改写为本次基点的执行结果。
++
++| 范围 | 精确现有测试入口 | 已保存证据 |
++|---|---|---|
++| AST 与绑定转换 | [`TestConvertLocalExecuteExactAndNormalReopen`](../migration/postgres/convert_test.go)、[`TestMigrateConverterCLI`](../cmd/gosqlite/migrate_converter_test.go) | [转换器审阅与实际命令](evidence/m9-converter-review.txt) |
++| 导入/续传/校验 | [`TestImportNativeCommittedResumeAndVerify`](../migration/postgres/import_test.go)、[`TestMigrateImportDryRunApplyResumeVerifyCLI`](../cmd/gosqlite/migrate_import_test.go) | [导入独立审阅](evidence/m9-import-review.txt) |
++| 迁移模板和整表方案 | [`TestMigrateTransitionReviewOnlyArtifacts`](../cmd/gosqlite/migrate_transition_test.go)、[`TestFullTableCopySwapAndContracts`](../migration/postgres/transition_full_test.go) | [CLI 审阅](evidence/m9-transition-cli-independent-review.txt)、[整表独立审阅](evidence/m9-full-table-independent-review.md) |
++| 调用者数据精确距离 v2 | [`TestIndependentImportDistanceRationalOracle`](../migration/postgres/import_distance_independent_review_test.go)、[`TestImportDatasetDistancesMappedFormatsAndResume`](../migration/postgres/import_distances_test.go) | [v1 失败和 v2 修正](evidence/import-distance-v2-handoff.md) |
++
++转换器初轮失败、导入 CSV 内存保留[回归失败](evidence/m9-import-retention-before-fix.txt)
++及其[修正记录](evidence/m9-import-final-delta.txt)、16,000 维距离 v1 误拒绝均
++继续保留。它们与未完成 ANN 报告工具的 FAIL/HOLD 是不同证据边界。
++未知触发中断、新 fuzz/ANN V4 暂停链路仍按[中断记录](interruption-20261010.md)
++处理，不重试或换路。公开恢复、明文 backup、WAL-tail、planner 与部分 OS
++backend 修正候选尚未合入；完整物理故障 harness、原生 OS 验收、真实 PG/Neon
++执行和外部独立安全/法律审查仍有缺口。参见[验收矩阵](acceptance-status.md)
++及[中文人工验证边界](manual-verification-zh.md)。本页入口修正不关闭这些项目。
+--- a/docs/file-formats.md
++++ b/docs/file-formats.md
+@@ -1,8 +1,15 @@
+-# File formats
++# 文件格式与当前兼容边界
+ 
+ M2 reads and writes the tested rowid-table and BINARY ASC secondary-index subset of SQLite format 3, according to the [official specification](https://www.sqlite.org/fileformat2.html), with tested subsets recorded in compatibility.md. Future extension data must occupy legal transactional SQLite structures. Unknown feature bits, container versions, encodings, and index versions must be rejected instead of guessed.
+ 
+-The experimental encrypted snapshot format is an independent authenticated root/base container, distinct from SQLite plaintext and SEE. It supports layout-1 snapshots and explicit layout-2 authenticated dirty-page WAL; a stable encrypted-format promise remains open. See [encryption-storage.md](encryption-storage.md). Every format change requires an ADR, preserved snapshot, explicit migration and round-trip verification.
++当前加密存储是独立的 authenticated root/base/segment 容器，不与明文 SQLite 或
++SEE 密文兼容。公开 [`sqlite.EncryptionMode`](../sqlite/encryption.go) 明确区分
++`EncryptionSnapshot`（layout 1）、`EncryptionWAL`（layout 2，独占协调）和
++`EncryptionWALShared`（layout 3，并存读者/单写者）；后两者已实现认证的脏页
++WAL。不得把下文早期 snapshot 检查点当作当前能力上限。稳定加密格式承诺、
++完整升级/回滚矩阵和物理持久性验收仍未闭合。详见
++[存储/格式/API 合同](encryption-storage.md) 与[安全边界](security.md)。
++每次格式变更仍须 ADR、保留快照、显式迁移和往返验证。
+ 
+ ## M2 plaintext writes
+ 
+@@ -10,7 +17,7 @@
+ 
+ Writes require UTF-8, rollback mode, no reserved bytes, schema format 4 (or new empty format 0), no autovacuum, no unknown schema object/constraint, and a single-link regular file. A whole-file ownership preflight rejects overlapping live/free pages, cross-root reuse, duplicate roots and unowned physical pages before the first mutation. This is structural preflight, not a complete logical integrity checker.
+ 
+-The journal uses SQLite's documented magic, sector-aligned header, big-endian page numbers and nonce-seeded page checksums. Original pages and touched-sector neighbors precede physical database changes. Sector size defaults to an explicit 4096-byte assumption, configurable through SectorSize; hardware-specific atomicity is not certified. Existing journals are refused pending implemented recovery. Default rollback opens reject WAL; the explicit M3 exclusive mode is described below. Commit ordering and error outcomes are specified in ADR0003; interrupted/failed-I/O execution remains NOT_RUN.
++The journal uses SQLite's documented magic, sector-aligned header, big-endian page numbers and nonce-seeded page checksums. Original pages and touched-sector neighbors precede physical database changes. Sector size defaults to an explicit 4096-byte assumption, configurable through SectorSize; hardware-specific atomicity is not certified. 默认公开 rollback 打开路径拒绝已有 journal；内部 replay 源码不等于公开自动恢复已合入。 Default rollback opens reject WAL; the explicit M3 exclusive mode is described below. Commit ordering and error outcomes are specified in ADR0003; interrupted/failed-I/O execution remains NOT_RUN.
+ 
+ 
+ ## M3 WAL and recovery source
+@@ -19,7 +26,9 @@
+ 
+ The committed overlay selects the newest page image through the last complete commit marker, with logical extent from that marker and strict bounded scanning. Invalid, incomplete, uncommitted and salt-mismatching tails are classified and refused; this does not implement SQLite's full recovery policy. Checkpoint retains synced WAL images for every extant main-file sector neighbor before overwriting pages. Header mode2 remains after normal checkpoint/close, even when the WAL is removed.
+ 
+-Rollback replay plans support a bounded sequence of published finite-count segments with identical page/sector/original-extent geometry, globally unique original pages and per-segment nonce-seeded sparse checksums. The first header remains authoritative; cumulative limits and exact input consumption are required. Complete missing-original coverage is checked if the current extent is shorter. See [the memory-only supported/unsupported matrix](rollback-replay-memory.md). Physical replay is deliberately isolated and unqualified. See ADR0004 and the source-only manual harness. The separate [experimental authenticated snapshot format](encryption-storage.md) does not implement encrypted WAL.
++Rollback replay plans support a bounded sequence of published finite-count segments with identical page/sector/original-extent geometry, globally unique original pages and per-segment nonce-seeded sparse checksums. The first header remains authoritative; cumulative limits and exact input consumption are required. Complete missing-original coverage is checked if the current extent is shorter. See [the memory-only supported/unsupported matrix](rollback-replay-memory.md). Physical replay is deliberately isolated and unqualified. See ADR0004 and the source-only manual harness. 历史上单独的 layout-1 snapshot 检查点没有加密 WAL；当前已实现独立的
++layout-2 / layout-3 认证 WAL，见下方 M8 小节。它不复用这里的原生 SQLite
++WAL 字节或 SHM 协议。
+ 
+ ## M3 shared WAL-index
+ 
+@@ -122,20 +131,48 @@
+ 24-byte authenticated-record header plus AES256GCM ciphertext/tag. The snapshot
+ storage layer now uses authenticated root/base objects for database publication,
+ rekey, encrypted backup/restore and explicit plaintext import/export. Existing
+-plaintext files are not silently transformed. Explicit layout-2 WAL roots select
+-an ordered authenticated base/dirty-segment graph; snapshot layout-1 and portable
+-archive bytes remain unchanged. A stable format promise and physical crash/security
+-qualification remain open. See
+-[encryption-storage.md](encryption-storage.md) for root/base/segment formats
+-and [encryption-primitives.md](encryption-primitives.md) for record-codec offsets
+-and cryptographic scope.
++plaintext files are not silently transformed.
+ 
+-## Extended vector memory codecs
++当前 layout-2 / layout-3 roots
++选择有序认证的 base/dirty-segment 图；layout 3 的 `GSEMNF03` 根另绑定共享
++协调策略。snapshot layout 1 和 portable archive 合同保持独立，不能把活跃
++数据库 root 单文件当作备份。模式必须显式匹配；现有 API
++`UpgradeEncryptedWAL` 和 `UpgradeEncryptedWALShared` 在静止可写连接上显式
++发布新 base/root 并保留旧密文/逻辑身份，不承诺任意向前迁移、降级或历史撤销。
++布局实现分别见 [WAL](../internal/encstore/wal_format.go) 与
++[shared](../internal/encstore/shared_format.go)。稳定格式、物理崩溃和安全验收仍未完成。
++root/base/segment 格式详见 [encryption-storage.md](encryption-storage.md)；
++record-codec 偏移和密码学范围详见 [encryption-primitives.md](encryption-primitives.md)。
++
++## 扩展向量 codec、SQL 与持久 ANN
+ 
+ The distinct version-1 GSH/GSB/GSS codecs represent finite binary16 values,
+ canonical MSB-first packed bits, and sorted sparse binary32 entries. Existing
+-dense GSVv1 is unchanged. These codecs and nullable Go adapters do not yet enable
+-SQL column declarations or extended ANN storage. They are not PostgreSQL binary
+-COPY/wire and have no authentication/checksum claim. See
+-[extended-values.md](../extension/vector/extended-values.md) for exact byte layout,
+-limits and deliberate conversion/precision differences.
++dense GSVv1 is unchanged.
++
++最初检查点只提供内存 codec/nullable Go adapter；
++当前 [HALFVEC](half-vector.md)、[BIT](bit-vector.md)、[SPARSEVEC](sparse-vector.md)
++已有受限 SQL 列合同，且通过[typed ANN](typed-ann.md) 参与真实持久 HNSW 和
++受支持的 IVFFlat。具体维度、非零数、opclass、存储版本及不支持组合必须按
++该矩阵核对；例如 sparse IVFFlat 仍不支持。不得从 codec 存在推断完整 SQL
++或任意 ANN 支持。它们不是 PostgreSQL binary COPY/wire，也没有自身
++checksum/authentication 承诺。具体字节布局、限制和转换/精度差异见
++[extended-values.md](../extension/vector/extended-values.md)。
++
++## 格式证据与迁移限制
++
++核对基点：`1352ae524575e4d6fe8b5434fd930c3b07be4ac8`。本次只核对代码与
++既有资料，没有新运行数据库、升级或恢复测试。
++
++- layout-2 的 [`TestEncryptionWALReviewExplicitUpgradeAndCloseQuota`](../sqlite/encrypted_wal_review_test.go)
++  与 layout-3 的 [`TestEncryptionSharedExplicitUpgradeCopiesAndRestore`](../sqlite/encryption_shared_test.go)
++  是现有普通升级/复制入口；历史实际结果见 [WAL 组件记录](evidence/m8-wal-components.txt)
++  与 [shared 组件记录](evidence/m8-shared-components.txt)、[独立审阅记录](evidence/m8-shared-review.txt)。
++- [`TestTypedANNHNSWAllMetricsPersistentSQLAndNative`](../sqlite/ann_typed_test.go)
++  和 `TestTypedANNIVFPersistentListsAllMetricsAndDML` 覆盖受支持 typed 持久路径；
++  [历史组合记录](evidence/m9-typed-ann-aggregate.txt) 保留其精确树与实际范围。
++- 这些普通路径和内存格式负例不证明物理磁盘篡改、断电、恢复、native OS
++  行为或通用向前迁移安全。未知版本仍须拒绝；完整格式升级/回滚矩阵、
++  公开恢复及 native WAL-tail 等缺口见[验收矩阵](acceptance-status.md)。
++  [未知中断和 ANN harness FAIL/HOLD](interruption-20261010.md) 继续保留，
++  不因本文修正或持久索引已有实现而改为通过。
+--- a/docs/security.md
++++ b/docs/security.md
+@@ -1,4 +1,4 @@
+-# Security and release gates
++# 安全合同与发布门
+ 
+ Test-scope correction: historical full suites from M2 through 7addc493 included two namespace-mutation tests. Their PASS outputs remain factual, but are not clean ordinary-scope evidence. See [the audit and gating correction](test-scope-audit.md).
+ 
+@@ -81,6 +81,56 @@
+ separate bounded ownership correction. Encrypted acquisition/selection/copy/session retirement now has bounded scope
+ ownership and explicit discovery/retry, with native exceptional branches still
+ unexecuted. Rollback Reader/Tx, exclusive WAL and public metadata adoption now
+-have bounded ownership corrections. Recovery ownership is source-reviewed; automatic integration, remaining
+-shared absence provenance, rollback reader-open timing and physical native failures are still open; complete
+-public-lifecycle safety is not established.
++have bounded ownership corrections. Recovery ownership is source-reviewed; public automatic recovery integration and
++physical native-failure qualification remain open. The two earlier source gaps
++are reconciled below; complete public-lifecycle safety is not established.
++
++
++## 当前修正与历史失败的边界（2026-10-11）
++
++本次以 `1352ae524575e4d6fe8b5434fd930c3b07be4ac8` 核对实现与已保存证据，
++只修正文档，没有重跑测试，也没有把局部工程复审提升为外部安全审计。
++
++- **shared 初始不存在来源已修正。**
++  [`shared_session.go`](../internal/pager/shared_session.go) 的创建和 sidecar
++  判断只接受既有 VFS 的初始、尚无 handle 的 absence；
++  [`plain_session_cleanup.go`](../internal/pager/plain_session_cleanup.go) 的
++  私有 transition probe 同样传递该来源。后续检查/退休错误即使含 ENOENT
++  也不能授权创建或忽略。详见[当前合同](shared-absence-provenance.md)、
++  [`TestSharedAbsenceSourceInitialProvenance` 与 memory/source 控制](../internal/pager/shared_absence_test.go)，
++  以及[独立审阅与精确历史证据](evidence/shared-absence-lead-review/REVIEW.md)。
++- **rollback Reader 的 post-SHARED 元数据采集已修正。**
++  [`OpenAdmitted`](../internal/pager/pager.go) 在成功取得 SHARED 后立即对同一
++  已持有描述符重新 stat，再建立 Reader/header 快照；错误经原退休 owner
++  返回，没有把 `ErrChanged` 改成 BUSY 或静默重试。详见
++  [Reader 合同](rollback-reader-acquisition.md)、
++  [`TestReaderAcquisitionSourceSnapshotAfterShared` / `TestReaderAcquisitionOrdinaryCooperatingWriter`](../internal/pager/reader_acquisition_test.go)
++  和[独立审阅](evidence/rollback-reader-acquisition-lead-review/REVIEW.md)。
++
++历史尾段曾把上述两项列为 open，描述的是修正前状态。原 rollback 20 秒
++样本在 14.015854093 秒失败、两次 baseline 控制失败、四次修正后 20 秒
++样本通过，均保留在[原始修正交接](evidence/rollback-reader-acquisition-evidence/handoff-v1.md)。
++修正与 shared 来源处理还进入了[既有组合门](evidence/accepted-tools-combined-checks.txt)
++（其记录的精确 tree 为 `ddb957e2a1d804b236a295f7fe6ce383954b852c`，
++[exit 0](evidence/accepted-tools-combined-checks.exit)）；这不是本次基点新执行、
++长期 soak、原生异常路径或全部 public lifecycle 的验收。
++
++迁移的权限边界也须按当前入口区分：目录检查、转换与 PostgreSQL 审阅包
++不会执行数据库 SQL；本地 `import --apply` 则确实会创建并写入原生数据库，
++`--resume` 对匹配作业继续写入。精确参数与源/目标约束见
++[迁移入口](migration-pgembedding.md) 和[导入合同](import-pgembedding.md)。
++正常提交后关闭/续传不证明未知提交结果、崩溃或热恢复安全。
++
++## 仍未关闭的实现与验收门
++
++- 公开 Open 恢复、明文 backup、native WAL-tail 发布和 planner 修正仍有未
++  合入/未实现部分；Windows shared rekey、Darwin 名称处理等候选也不能当作
++  当前 main 能力。有关源码与状态以[验收矩阵](acceptance-status.md)及
++  [未发布候选记录](interruption-20261010.md)为准。
++- 未知触发中断、ANN 报告 V3 的 FAIL/HOLD 和被中断 V4/新 fuzz 链路继续
++  保留，不因普通测试历史或本文修正解除暂停，也不推断为 ANN 算法已损坏。
++- 完整物理故障/断电/短写/Sync/ENOSPC/torn write/checkpoint/rekey 中断
++  harness 仍有源码缺口；已有源码与尚无 harness 的项分别列在
++  [中文手工验收手册](manual-verification-zh.md)。这里未执行或转移任何受限流程。
++- 原生 OS 运行、真实持久性环境和外部独立数据安全/密码学/法律审查仍不完整。
++  跨编译、源审查、内存负例和普通正确密钥测试均不构成生产安全或稳定版认证。

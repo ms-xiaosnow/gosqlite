@@ -522,5 +522,35 @@
     "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38105152184",
     "remote_ci_status": "COMPLETED SUCCESS，2026-10-11T02:48:20Z；ordinary114368973335、oracle114368973527 均SUCCESS，02:50:52Z读回。ordinary sqlite race451.724s；GitHub Node20→24 action弃用警告保留，没有失败。",
     "open_gates": "仅caller-context转发和正常readonly输出；中途I/O取消未动态验证。元数据、公开恢复、明文备份/只读WAL等缺口分别记录；被阻断ANN V4/41fuzz/未知链路不恢复，其他OS/物理故障/长测/独立M10未验收。"
+  },
+  {
+    "observed_utc": "2026-10-11T03:21:15Z",
+    "remote_commit": "1352ae524575e4d6fe8b5434fd930c3b07be4ac8",
+    "tree": "2b91b20abec4b2d651de1dd860fe86e79b62bac9",
+    "parent": "7a3c45706b85104d3dc75d4947a333651226b69c",
+    "library_file_id": "libfile_f978e66501808191974c6b8b0dbf8b8d",
+    "library_version": 0,
+    "bundle_bytes": 5104841,
+    "bundle_sha256": "7abf7acdc7e9dffb742db9d63120419cf6a1fd20dd0e659960084466b4cc9853",
+    "main_readback_verified": true,
+    "local_mirror_exact": true,
+    "restore": "PASS exit0 2026-10-11T03:25:04Z: Library byte comparison/clone --branch main/fsck/exact SHA/tree/original goal; exactly 7 SQLite and 9 CLI named tests and same race selections, no skips; sourceguard, full vet/trimpath build, five cross-builds, modules; all 2904 files/137 non-root directories bytes/Git modes/inventory unchanged. No full test/oracle rerun.",
+    "source_gate": "Frozen tree 185944581731b5f21a5582ceb60ed340d4ad9012: full ordinary unit/vet/build/oracle/race/five builds/modules/inventory PASS exit0 2026-10-11T03:05:03Z. Final 768 non-doc files have exact same bytes, Git modes and name inventory; final docs added/translated/updated.",
+    "ci_run": 38108065647,
+    "ci_status": "COMPLETED SUCCESS, updated2026-10-11T03:42:12Z, readback2026-10-11T03:42:58Z",
+    "ci_jobs": [
+      {
+        "id": 114377684464,
+        "name": "ordinary",
+        "conclusion": "success"
+      },
+      {
+        "id": 114377684618,
+        "name": "oracle",
+        "conclusion": "success"
+      }
+    ],
+    "authorization_event": "Standing stage main/ordinary CI authorization. Guarded fast-forward update succeeded first call with expected prior SHA; no force or alternate route.",
+    "restore_log_sha256": "d38229f4f1b290b00f3aa5e0ebc8f52fb89469d233b579dc5e0dc56c8fc40ada"
   }
 ]

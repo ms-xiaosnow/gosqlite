@@ -1,0 +1,86 @@
+{
+  "status": "PASS",
+  "failure": null,
+  "tree": "4c2af13646c973c53340450f8f1310492aae5628",
+  "commands": [
+    {
+      "name": "toolchain",
+      "exit": 0
+    },
+    {
+      "name": "environment",
+      "exit": 0
+    },
+    {
+      "name": "sourceguard-before-ordinary",
+      "exit": 0
+    },
+    {
+      "name": "sparse-ordinary",
+      "exit": 0
+    },
+    {
+      "name": "query-ordinary",
+      "exit": 0
+    },
+    {
+      "name": "readonly-ordinary",
+      "exit": 0
+    },
+    {
+      "name": "write-ordinary",
+      "exit": 0
+    },
+    {
+      "name": "sourceguard-before-race",
+      "exit": 0
+    },
+    {
+      "name": "sparse-race",
+      "exit": 0
+    },
+    {
+      "name": "query-race",
+      "exit": 0
+    },
+    {
+      "name": "readonly-race",
+      "exit": 0
+    },
+    {
+      "name": "write-race",
+      "exit": 0
+    },
+    {
+      "name": "vet",
+      "exit": 0
+    },
+    {
+      "name": "sparse-build",
+      "exit": 0
+    },
+    {
+      "name": "query-build",
+      "exit": 0
+    },
+    {
+      "name": "readonly-build",
+      "exit": 0
+    },
+    {
+      "name": "write-build",
+      "exit": 0
+    }
+  ],
+  "identity": {
+    "before_after_exact": true,
+    "frozen_source_unchanged": true,
+    "tree_before": "4c2af13646c973c53340450f8f1310492aae5628",
+    "tree_after": "4c2af13646c973c53340450f8f1310492aae5628",
+    "files": 2911,
+    "directories": 137,
+    "baseline_tests_unchanged": true
+  },
+  "built_binaries_executed": false,
+  "scope": "18 exact top-level tests in ordinary and identical race; two sourceguards; four-package vet/build; no aggregate/oracle/extra execution"
+}

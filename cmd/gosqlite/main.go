@@ -70,7 +70,7 @@ func runContext(ctx context.Context, args []string, out io.Writer) (resultErr er
 		if err != nil {
 			return err
 		}
-		defer rows.Close()
+		defer func() { resultErr = errors.Join(resultErr, rows.Close()) }()
 		enc := json.NewEncoder(out)
 		if err = enc.Encode(struct {
 			Columns []string `json:"columns"`

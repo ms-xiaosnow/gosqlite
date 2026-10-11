@@ -1,0 +1,49 @@
+{
+  "created_utc": "2026-10-11T03:34:22.969555+00:00",
+  "baseline_commit": "1352ae524575e4d6fe8b5434fd930c3b07be4ac8",
+  "baseline_tree": "2b91b20abec4b2d651de1dd860fe86e79b62bac9",
+  "frozen_tree": "4c2af13646c973c53340450f8f1310492aae5628",
+  "files": 2911,
+  "directories": 137,
+  "changed_paths": [
+    "README.md",
+    "cmd/gosqlite/main.go",
+    "cmd/gosqlite/query_close_test.go",
+    "docs/evidence/query-close-20261011.md",
+    "docs/progress.md",
+    "examples/readonly/legacy_source_test.go",
+    "examples/readonly/main.go",
+    "examples/readonly/main_test.go",
+    "examples/sparse-exact/README.md",
+    "examples/sparse-exact/main.go",
+    "examples/sparse-exact/main_status_test.go",
+    "examples/write/README.md",
+    "examples/write/main.go",
+    "examples/write/main_test.go"
+  ],
+  "old_test_files_unchanged": 353,
+  "owners": {
+    "sparse-example-status-freeze-v1": [
+      "examples/sparse-exact/README.md",
+      "examples/sparse-exact/main.go",
+      "examples/sparse-exact/main_status_test.go"
+    ],
+    "query-close-freeze-v1": [
+      "cmd/gosqlite/main.go",
+      "cmd/gosqlite/query_close_test.go",
+      "docs/evidence/query-close-20261011.md"
+    ],
+    "readonly-example-freeze-v1": [
+      "README.md",
+      "examples/readonly/main.go",
+      "examples/readonly/main_test.go",
+      "examples/readonly/legacy_source_test.go"
+    ],
+    "write-example-freeze-v1": [
+      "examples/write/main.go",
+      "examples/write/main_test.go",
+      "examples/write/README.md"
+    ]
+  },
+  "status": "Independent combined review and ordinary aggregate NOT_RUN; owner scoped passes retained separately."
+}

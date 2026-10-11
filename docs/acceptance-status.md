@@ -1,7 +1,7 @@
 # 当前实现与验收矩阵
 
-核对时间：2026-10-11；最新已保存源码基点为 `7a3c45706b85104d3dc75d4947a333651226b69c`。
-本检查点叠加已独立审阅并通过完整普通门的 inspect 元数据；精确源码和边界见
+核对时间：2026-10-11；最新已保存源码基点为 `1352ae524575e4d6fe8b5434fd930c3b07be4ac8`。
+本检查点叠加已独立审阅并通过完整普通门的四项 CLI/示例资源修正；见[组合证据](evidence/cli-resources-20261011.md)。已有 inspect 精确源码和边界见
 [元数据证据](evidence/inspect-metadata-20261011.md) 和 [上下文证据](evidence/inspect-context-20261011.md)。
 这是开发检查点清单，不是最终交付。原始 [goal.md](../goal.md) 不变。
 平台受限项目可以暂停执行并记录用户自测步骤，不能取消真实实现义务。
@@ -27,7 +27,7 @@
 | G1、§4.2、§11.1/11.3 | 索引范围、有限 JOIN/GROUP BY/HAVING、连接计数和 cached preparation 的限定普通门通过 | `已知差异`：支持查询的 planner 错误/排序/阶段一致性仍待修正。V4c 树 `552286a…` 有独立有限 PASS，但没有和 main 新 grouped/counter 组合；不能替代 main 结果 |
 | §4.2、§8.1、§12.2 | correct-key 加密 backup/rekey CLI、native DB/Tx/CLI Check V2 已合入 | `未实现/未合入`：main 明文 backup 命令仍明确 unsupported；Linux rollback V2 候选终审未完成，WAL/非 Linux backup 和真正只读 plaintext-WAL CLI 缺代码。native VACUUM 未实现 |
 | G1、§3.6、§12.2 | query/check/inspect CLI 均使用 OpenContext；DB.Inspect 和 inspect --extensions 在单快照呈现持久 method/version/config/generation，默认 JSON 保持 | `PARTIAL`：本次实测只涵盖 Linux plaintext rollback、grams/custom metadata；加密 inspect、真正只读 WAL、完整 CLI 目标仍缺实现。持久 metadata 不证明索引可用或正确，中途 I/O 取消未动态验证 |
-| §12.1、§14 | 可运行示例存在，普通功能样本有历史证据 | `示例报告/证据缺口`：sparse-exact 错误可能仍返回 0；write 示例忽略 Close，log.Fatal 绕过 defer；部分加密/native-check 示例错误时也删除临时 fixture。手册精确披露，不把这些示例当完整失败现场或资源退休证明；独立修正另计 |
+| §12.1、§14 | 可运行示例存在，普通功能样本有历史证据 | `本次限定修正`：sparse 状态、readonly 显式只读、write/query 关闭错误已修；实际失败进程/原生关闭失败未执行，仅 AST/纯 helper 和普通路径。五个加密/native-check 示例目录保留候选另行进行，尚未合入；仍不作为完整故障现场证明 |
 | §9.2(2/5) | caller-dataset 范数、完整精确距离与 Top-K v2 已合入；高维 v1 失败保留，v2 有有理数参考验证 | `PARTIAL`：ANN caller-dataset recall 及真实 PG/Neon 验证单列；精确距离不能替代 ANN |
 | §5.2、§7.2、§11.3 | NFC 组合语料、真实 grams build/空间/P50/P95 工具和普通事务 V4 已合入 | `FAIL/HOLD（候选工具）`：ANN 报告 V3 三类实质准入缺陷未修，V4 链路受阻。性能报告 V3 有限审阅通过但未合入/部署；没有可采信测量不得宣称完整基准通过 |
 | §8、§11.3、§12.3 | Linux/Darwin/Windows 有受支持 backend 源码，只有 Linux 普通运行证据 | `PARTIAL`：main Windows shared rekey 及 Darwin 名称配置受限；修正版在未发布 `a314028…` 组合。更广 Unicode root 支持未实现，但不能虚构为规范要求任意无限名字。保留目录 VFS 未冻结/整合 |
@@ -100,3 +100,7 @@
 
 历史源码、失败及修正身份保留在证据与 Git 历史。只有满足必要实现和
 安全门才能把整个里程碑标为 VERIFIED；当前 M10 尚未完成。
+
+## 有限收尾
+
+[有限清单](closeout-scope-20261011.md)区分本轮独立修正、旧HOLD真实代码缺口、缺失harness与代码已有的人工/外部门。四项资源组合完整普通门于03:53:38 UTC PASS；1352基点CI38108065647于03:42:12 UTC SUCCESS。本环境独立项可按清单收口，整体未验收，不称只剩手工测试。

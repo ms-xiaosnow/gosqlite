@@ -1,0 +1,341 @@
+CLI RESOURCES EXISTING ORDINARY AGGREGATE START 2026-10-11T03:37:56Z
+Frozen tree 4c2af13646c973c53340450f8f1310492aae5628; source is never edited. No Git commands or remote actions.
+No manual tags, new tests, new fuzz/soak, benchmark campaigns, native other-OS execution, or blocked-candidate composition. Stop at first failure; no retries.
+
+STAGE resource-precheck START 2026-10-11T03:37:56Z
+COMMAND python3 /workspace/scratch/5e06a74e5f65/durable-restart/cli-resources-combined-checks.precheck.py 
+{
+  "/tmp": {
+    "available_bytes": 1425469440,
+    "available_inodes": 1243567,
+    "writable_by_current_user": true
+  },
+  "/workspace/scratch/5e06a74e5f65/durable-restart": {
+    "available_bytes": 5502472192,
+    "available_inodes": 1239492,
+    "writable_by_current_user": true
+  },
+  "/workspace/scratch/5e06a74e5f65/durable-restart/go-cache": {
+    "available_bytes": 5502472192,
+    "available_inodes": 1239492,
+    "writable_by_current_user": true
+  },
+  "/workspace/scratch/5e06a74e5f65/durable-restart/go-path": {
+    "available_bytes": 5502472192,
+    "available_inodes": 1239492,
+    "writable_by_current_user": true
+  }
+}
+Read-only resource precheck PASS. Default /tmp retained; no cleanup, relocation, or retry.
+STAGE resource-precheck EXIT 0 AT 2026-10-11T03:37:57Z
+
+STAGE resource-snapshot START 2026-10-11T03:37:57Z
+COMMAND bash -c df\ -B1\ /tmp\ \"\$1\"\;\ df\ -i\ /tmp\ \"\$1\"\;\ free\ -b\;\ printf\ \"TMPDIR=%s\\nGOTMPDIR=%s\\n\"\ \"\$\{TMPDIR:-/tmp\ \(default\)\}\"\ \"\$\{GOTMPDIR:-unset\}\" _ /workspace/scratch/5e06a74e5f65/durable-restart 
+Filesystem       1B-blocks        Used  Available Use% Mounted on
+tmpfs           5237919744  3812450304 1425469440  73% /tmp
+overlay        33770192896 26532982784 5502447616  83% /workspace/scratch/5e06a74e5f65
+Filesystem      Inodes  IUsed   IFree IUse% Mounted on
+tmpfs          1278789  35222 1243567    3% /tmp
+overlay        2097152 857667 1239485   41% /workspace/scratch/5e06a74e5f65
+               total        used        free      shared  buff/cache   available
+Mem:     10475843584  6324441088  1777037312  3836100608  6742720512  4151402496
+Swap:              0           0           0
+TMPDIR=/tmp
+GOTMPDIR=unset
+STAGE resource-snapshot EXIT 0 AT 2026-10-11T03:37:57Z
+
+STAGE source-identity-before START 2026-10-11T03:37:57Z
+COMMAND python3 /workspace/scratch/5e06a74e5f65/durable-restart/cli-resources-combined-checks.identity.py before 
+{
+  "phase": "before",
+  "baseline_commit": "1352ae524575e4d6fe8b5434fd930c3b07be4ac8",
+  "baseline_tree": "2b91b20abec4b2d651de1dd860fe86e79b62bac9",
+  "exact_tree": "4c2af13646c973c53340450f8f1310492aae5628",
+  "source_files": 2911,
+  "source_directories": 137,
+  "changed_paths": [
+    "README.md",
+    "cmd/gosqlite/main.go",
+    "cmd/gosqlite/query_close_test.go",
+    "docs/evidence/query-close-20261011.md",
+    "docs/progress.md",
+    "examples/readonly/legacy_source_test.go",
+    "examples/readonly/main.go",
+    "examples/readonly/main_test.go",
+    "examples/sparse-exact/README.md",
+    "examples/sparse-exact/main.go",
+    "examples/sparse-exact/main_status_test.go",
+    "examples/write/README.md",
+    "examples/write/main.go",
+    "examples/write/main_test.go"
+  ],
+  "old_test_files_byte_mode_unchanged": 353,
+  "owner_inventory_matches": true,
+  "freeze_copy_bytes_git_modes_actual_modes_directory_inventory_match": true,
+  "copy_has_git": false,
+  "git_commands_run": 0,
+  "manifest_sha256": "386cae4a471e3d7292deff2cc8721ba27c0bb4eb1054f5c0500a01449e1f8540",
+  "baseline_inventory_sha256": "952eca0c0b3732d16171a6b7e8da94345eee517312eadab9abbf5ff1c9ffda6f",
+  "frozen_inventory_sha256": "2fa969f5a5296e8a102309ad09d501674fa0d1d61a23cb98d7d8a3558108f574"
+}
+STAGE source-identity-before EXIT 0 AT 2026-10-11T03:37:59Z
+
+STAGE environment START 2026-10-11T03:37:59Z
+COMMAND bash -c set\ -e\;\ go\ version\;\ test\ \"\$\(go\ env\ GOVERSION\)\"\ =\ go1.27.2\;\ test\ \"\$\(go\ env\ GOOS\)/\$\(go\ env\ GOARCH\)\"\ =\ linux/amd64\;\ go\ env\ GOVERSION\ GOOS\ GOARCH\ GOTOOLCHAIN\ GOPROXY\ GOSUMDB\ GOPATH\ GOCACHE\ CGO_ENABLED\ GOFLAGS\;\ printf\ \"GOMAXPROCS=%s\\nSQLITE_ORACLE=%s\\n\"\ \"\$GOMAXPROCS\"\ \"\$SQLITE_ORACLE\"\;\ sha256sum\ \"\$1/toolchains/go1.27.2/bin/go\"\ \"\$SQLITE_ORACLE\"\ \"\$REVIEW_REPORT\"\ \"\$1/cli-resources-combined-evidence-v1/manifest.json\"\ \"\$1/cli-resources-combined-checks.sh\"\ \"\$1/cli-resources-combined-checks.identity.py\"\ \"\$1/cli-resources-combined-checks.precheck.py\" _ /workspace/scratch/5e06a74e5f65/durable-restart 
+go version go1.27.2 linux/amd64
+go1.27.2
+linux
+amd64
+local
+off
+off
+/workspace/scratch/5e06a74e5f65/durable-restart/go-path
+/workspace/scratch/5e06a74e5f65/durable-restart/go-cache
+0
+-buildvcs=false
+GOMAXPROCS=2
+SQLITE_ORACLE=/workspace/scratch/5e06a74e5f65/durable-restart/toolchains/sqlite-build-3540000/sqlite3
+548d3c32f83fa81152f543eb1526be7884cfe0526eb5e9ce29d3eca14786e7e0  /workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go
+470775f6ada29ccfb2d3046ac2b4c975df95a9c20b782332d4e8ba6b6233e6c6  /workspace/scratch/5e06a74e5f65/durable-restart/toolchains/sqlite-build-3540000/sqlite3
+e5580d0a1d3a9b98652fc8844e869bef3fba716b7aa57ebcc796042405f36d57  /workspace/scratch/5e06a74e5f65/durable-restart/cli-resources-independent-evidence-v1/summary.json
+386cae4a471e3d7292deff2cc8721ba27c0bb4eb1054f5c0500a01449e1f8540  /workspace/scratch/5e06a74e5f65/durable-restart/cli-resources-combined-evidence-v1/manifest.json
+edd6242b0b49c15c16368953d207a9ad8257d6d17f81b1f13118d3d0ac4c8566  /workspace/scratch/5e06a74e5f65/durable-restart/cli-resources-combined-checks.sh
+e992bcf9e574250f52d0bf2413c5485ae84aca76f493c3dfe927032f11bea13f  /workspace/scratch/5e06a74e5f65/durable-restart/cli-resources-combined-checks.identity.py
+fb48aa2f2c0dfa85de090afc6d3bc37b5a1ab70cfbafbde6b519158d4162ca4a  /workspace/scratch/5e06a74e5f65/durable-restart/cli-resources-combined-checks.precheck.py
+STAGE environment EXIT 0 AT 2026-10-11T03:37:59Z
+
+STAGE sourceguard-before START 2026-10-11T03:37:59Z
+COMMAND go run ./internal/testscope 
+Ordinary test source-reference guard PASS; behavioral review is still required.
+STAGE sourceguard-before EXIT 0 AT 2026-10-11T03:37:59Z
+
+STAGE cgo0-unit START 2026-10-11T03:37:59Z
+COMMAND go test ./... -count=1 -timeout=0 
+?   	github.com/ms-xiaosnow/gosqlite/benchmarks/ann	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/benchmarks/grams	15.137s
+ok  	github.com/ms-xiaosnow/gosqlite/benchmarks/transactions	0.098s
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.614s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	2.047s
+ok  	github.com/ms-xiaosnow/gosqlite/encryption	0.917s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ann	0.337s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/bit-rerank	0.007s
+?   	github.com/ms-xiaosnow/gosqlite/examples/encrypted	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/encrypted-cli	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-shared	0.012s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-wal	0.009s
+?   	github.com/ms-xiaosnow/gosqlite/examples/grams	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/half-rerank	0.005s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ivfflat	0.302s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/migrate-pgembedding	0.012s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/migration-full-table	0.017s
+?   	github.com/ms-xiaosnow/gosqlite/examples/migration-transition	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/native-check	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/pgembedding-import	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/readonly	0.039s
+?   	github.com/ms-xiaosnow/gosqlite/examples/similarity	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/sparse-exact	0.005s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/typed-ann-rerank	0.194s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/vector	0.039s
+?   	github.com/ms-xiaosnow/gosqlite/examples/wal	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/write	0.009s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/grams13	0.404s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/registry	0.019s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/similarity	1.174s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	0.311s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector/ann	5.841s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	11.846s
+?   	github.com/ms-xiaosnow/gosqlite/internal/buildinfo	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/darwinfile	0.028s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	0.091s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/journal	0.070s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.416s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/record	0.005s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.058s
+?   	github.com/ms-xiaosnow/gosqlite/internal/testkit/fileview	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testscope	0.003s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.160s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/wal	0.444s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	0.103s
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	7.584s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	74.820s
+STAGE cgo0-unit EXIT 0 AT 2026-10-11T03:39:56Z
+
+STAGE cgo0-vet START 2026-10-11T03:39:56Z
+COMMAND go vet ./... 
+STAGE cgo0-vet EXIT 0 AT 2026-10-11T03:39:59Z
+
+STAGE cgo0-build START 2026-10-11T03:39:59Z
+COMMAND go build -trimpath ./... 
+STAGE cgo0-build EXIT 0 AT 2026-10-11T03:40:03Z
+
+STAGE full-ordinary-oracle START 2026-10-11T03:40:03Z
+COMMAND ./scripts/test-oracle.sh 
+Ordinary test source-reference guard PASS; behavioral review is still required.
+?   	github.com/ms-xiaosnow/gosqlite/benchmarks/ann	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/benchmarks/grams	13.223s
+ok  	github.com/ms-xiaosnow/gosqlite/benchmarks/transactions	0.093s
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.726s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	1.652s
+ok  	github.com/ms-xiaosnow/gosqlite/encryption	1.052s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ann	0.305s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/bit-rerank	0.004s
+?   	github.com/ms-xiaosnow/gosqlite/examples/encrypted	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/encrypted-cli	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-shared	0.008s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-wal	0.016s
+?   	github.com/ms-xiaosnow/gosqlite/examples/grams	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/half-rerank	0.005s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ivfflat	0.165s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/migrate-pgembedding	0.010s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/migration-full-table	0.015s
+?   	github.com/ms-xiaosnow/gosqlite/examples/migration-transition	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/native-check	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/pgembedding-import	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/readonly	0.034s
+?   	github.com/ms-xiaosnow/gosqlite/examples/similarity	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/sparse-exact	0.006s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/typed-ann-rerank	0.203s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/vector	0.034s
+?   	github.com/ms-xiaosnow/gosqlite/examples/wal	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/write	0.010s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/grams13	0.350s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/registry	0.015s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/similarity	1.383s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	0.285s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector/ann	5.376s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	15.185s
+?   	github.com/ms-xiaosnow/gosqlite/internal/buildinfo	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/darwinfile	0.021s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	0.080s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/journal	0.052s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.386s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/record	0.003s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.969s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	209.300s
+?   	github.com/ms-xiaosnow/gosqlite/internal/testkit/fileview	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testscope	0.002s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.076s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/wal	0.300s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	0.092s
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	7.183s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	75.779s
+STAGE full-ordinary-oracle EXIT 0 AT 2026-10-11T03:43:57Z
+
+STAGE sourceguard-before-race START 2026-10-11T03:43:57Z
+COMMAND go run ./internal/testscope 
+Ordinary test source-reference guard PASS; behavioral review is still required.
+STAGE sourceguard-before-race EXIT 0 AT 2026-10-11T03:43:58Z
+
+STAGE cgo1-race START 2026-10-11T03:43:58Z
+COMMAND env CGO_ENABLED=1 go test -race ./... -count=1 -timeout=0 
+?   	github.com/ms-xiaosnow/gosqlite/benchmarks/ann	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/benchmarks/grams	63.357s
+ok  	github.com/ms-xiaosnow/gosqlite/benchmarks/transactions	1.258s
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	3.860s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	11.449s
+ok  	github.com/ms-xiaosnow/gosqlite/encryption	4.278s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ann	3.052s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/bit-rerank	1.019s
+?   	github.com/ms-xiaosnow/gosqlite/examples/encrypted	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/encrypted-cli	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-shared	1.053s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-wal	1.029s
+?   	github.com/ms-xiaosnow/gosqlite/examples/grams	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/half-rerank	1.023s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ivfflat	1.851s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/migrate-pgembedding	1.051s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/migration-full-table	1.147s
+?   	github.com/ms-xiaosnow/gosqlite/examples/migration-transition	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/native-check	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/pgembedding-import	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/readonly	1.124s
+?   	github.com/ms-xiaosnow/gosqlite/examples/similarity	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/sparse-exact	1.017s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/typed-ann-rerank	1.950s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/vector	1.215s
+?   	github.com/ms-xiaosnow/gosqlite/examples/wal	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/write	1.048s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/grams13	2.961s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/registry	1.118s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/similarity	7.417s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	4.866s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector/ann	42.469s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	48.829s
+?   	github.com/ms-xiaosnow/gosqlite/internal/buildinfo	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/darwinfile	1.112s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	1.497s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/journal	1.620s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	2.029s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/record	1.028s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	1.261s
+?   	github.com/ms-xiaosnow/gosqlite/internal/testkit/fileview	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testscope	1.028s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	1.570s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/wal	5.354s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	2.534s
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	49.377s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	388.713s
+STAGE cgo1-race EXIT 0 AT 2026-10-11T03:52:52Z
+
+STAGE cross-build-linux-arm64 START 2026-10-11T03:52:52Z
+COMMAND env CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build ./... 
+STAGE cross-build-linux-arm64 EXIT 0 AT 2026-10-11T03:53:02Z
+
+STAGE cross-build-darwin-arm64 START 2026-10-11T03:53:02Z
+COMMAND env CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build ./... 
+STAGE cross-build-darwin-arm64 EXIT 0 AT 2026-10-11T03:53:11Z
+
+STAGE cross-build-darwin-amd64 START 2026-10-11T03:53:11Z
+COMMAND env CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build ./... 
+STAGE cross-build-darwin-amd64 EXIT 0 AT 2026-10-11T03:53:20Z
+
+STAGE cross-build-windows-amd64 START 2026-10-11T03:53:20Z
+COMMAND env CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build ./... 
+STAGE cross-build-windows-amd64 EXIT 0 AT 2026-10-11T03:53:28Z
+
+STAGE cross-build-windows-arm64 START 2026-10-11T03:53:28Z
+COMMAND env CGO_ENABLED=0 GOOS=windows GOARCH=arm64 go build ./... 
+STAGE cross-build-windows-arm64 EXIT 0 AT 2026-10-11T03:53:36Z
+
+STAGE module-integrity START 2026-10-11T03:53:36Z
+COMMAND go mod verify 
+all modules verified
+STAGE module-integrity EXIT 0 AT 2026-10-11T03:53:37Z
+
+STAGE source-identity-after START 2026-10-11T03:53:37Z
+COMMAND python3 /workspace/scratch/5e06a74e5f65/durable-restart/cli-resources-combined-checks.identity.py after 
+{
+  "phase": "after",
+  "baseline_commit": "1352ae524575e4d6fe8b5434fd930c3b07be4ac8",
+  "baseline_tree": "2b91b20abec4b2d651de1dd860fe86e79b62bac9",
+  "exact_tree": "4c2af13646c973c53340450f8f1310492aae5628",
+  "source_files": 2911,
+  "source_directories": 137,
+  "changed_paths": [
+    "README.md",
+    "cmd/gosqlite/main.go",
+    "cmd/gosqlite/query_close_test.go",
+    "docs/evidence/query-close-20261011.md",
+    "docs/progress.md",
+    "examples/readonly/legacy_source_test.go",
+    "examples/readonly/main.go",
+    "examples/readonly/main_test.go",
+    "examples/sparse-exact/README.md",
+    "examples/sparse-exact/main.go",
+    "examples/sparse-exact/main_status_test.go",
+    "examples/write/README.md",
+    "examples/write/main.go",
+    "examples/write/main_test.go"
+  ],
+  "old_test_files_byte_mode_unchanged": 353,
+  "owner_inventory_matches": true,
+  "freeze_copy_bytes_git_modes_actual_modes_directory_inventory_match": true,
+  "copy_has_git": false,
+  "git_commands_run": 0,
+  "manifest_sha256": "386cae4a471e3d7292deff2cc8721ba27c0bb4eb1054f5c0500a01449e1f8540",
+  "baseline_inventory_sha256": "952eca0c0b3732d16171a6b7e8da94345eee517312eadab9abbf5ff1c9ffda6f",
+  "frozen_inventory_sha256": "2fa969f5a5296e8a102309ad09d501674fa0d1d61a23cb98d7d8a3558108f574"
+}
+STAGE source-identity-after EXIT 0 AT 2026-10-11T03:53:38Z
+CLI RESOURCES FULL FROZEN ORDINARY AGGREGATE PASS 2026-10-11T03:53:38Z
+AGGREGATE EXIT 0 AT 2026-10-11T03:53:38Z LAST_STAGE complete

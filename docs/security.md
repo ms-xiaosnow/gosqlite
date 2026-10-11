@@ -1,4 +1,4 @@
-# Security and release gates
+# 安全合同与发布门
 
 Test-scope correction: historical full suites from M2 through 7addc493 included two namespace-mutation tests. Their PASS outputs remain factual, but are not clean ordinary-scope evidence. See [the audit and gating correction](test-scope-audit.md).
 
@@ -81,6 +81,56 @@ raw OS close. Native WALShared successful Close and driver disposal now have a
 separate bounded ownership correction. Encrypted acquisition/selection/copy/session retirement now has bounded scope
 ownership and explicit discovery/retry, with native exceptional branches still
 unexecuted. Rollback Reader/Tx, exclusive WAL and public metadata adoption now
-have bounded ownership corrections. Recovery ownership is source-reviewed; automatic integration, remaining
-shared absence provenance, rollback reader-open timing and physical native failures are still open; complete
-public-lifecycle safety is not established.
+have bounded ownership corrections. Recovery ownership is source-reviewed; public automatic recovery integration and
+physical native-failure qualification remain open. The two earlier source gaps
+are reconciled below; complete public-lifecycle safety is not established.
+
+
+## 当前修正与历史失败的边界（2026-10-11）
+
+本次以 `1352ae524575e4d6fe8b5434fd930c3b07be4ac8` 核对实现与已保存证据，
+只修正文档，没有重跑测试，也没有把局部工程复审提升为外部安全审计。
+
+- **shared 初始不存在来源已修正。**
+  [`shared_session.go`](../internal/pager/shared_session.go) 的创建和 sidecar
+  判断只接受既有 VFS 的初始、尚无 handle 的 absence；
+  [`plain_session_cleanup.go`](../internal/pager/plain_session_cleanup.go) 的
+  私有 transition probe 同样传递该来源。后续检查/退休错误即使含 ENOENT
+  也不能授权创建或忽略。详见[当前合同](shared-absence-provenance.md)、
+  [`TestSharedAbsenceSourceInitialProvenance` 与 memory/source 控制](../internal/pager/shared_absence_test.go)，
+  以及[独立审阅与精确历史证据](evidence/shared-absence-lead-review/REVIEW.md)。
+- **rollback Reader 的 post-SHARED 元数据采集已修正。**
+  [`OpenAdmitted`](../internal/pager/pager.go) 在成功取得 SHARED 后立即对同一
+  已持有描述符重新 stat，再建立 Reader/header 快照；错误经原退休 owner
+  返回，没有把 `ErrChanged` 改成 BUSY 或静默重试。详见
+  [Reader 合同](rollback-reader-acquisition.md)、
+  [`TestReaderAcquisitionSourceSnapshotAfterShared` / `TestReaderAcquisitionOrdinaryCooperatingWriter`](../internal/pager/reader_acquisition_test.go)
+  和[独立审阅](evidence/rollback-reader-acquisition-lead-review/REVIEW.md)。
+
+历史尾段曾把上述两项列为 open，描述的是修正前状态。原 rollback 20 秒
+样本在 14.015854093 秒失败、两次 baseline 控制失败、四次修正后 20 秒
+样本通过，均保留在[原始修正交接](evidence/rollback-reader-acquisition-evidence/handoff-v1.md)。
+修正与 shared 来源处理还进入了[既有组合门](evidence/accepted-tools-combined-checks.txt)
+（其记录的精确 tree 为 `ddb957e2a1d804b236a295f7fe6ce383954b852c`，
+[exit 0](evidence/accepted-tools-combined-checks.exit)）；这不是本次基点新执行、
+长期 soak、原生异常路径或全部 public lifecycle 的验收。
+
+迁移的权限边界也须按当前入口区分：目录检查、转换与 PostgreSQL 审阅包
+不会执行数据库 SQL；本地 `import --apply` 则确实会创建并写入原生数据库，
+`--resume` 对匹配作业继续写入。精确参数与源/目标约束见
+[迁移入口](migration-pgembedding.md) 和[导入合同](import-pgembedding.md)。
+正常提交后关闭/续传不证明未知提交结果、崩溃或热恢复安全。
+
+## 仍未关闭的实现与验收门
+
+- 公开 Open 恢复、明文 backup、native WAL-tail 发布和 planner 修正仍有未
+  合入/未实现部分；Windows shared rekey、Darwin 名称处理等候选也不能当作
+  当前 main 能力。有关源码与状态以[验收矩阵](acceptance-status.md)及
+  [未发布候选记录](interruption-20261010.md)为准。
+- 未知触发中断、ANN 报告 V3 的 FAIL/HOLD 和被中断 V4/新 fuzz 链路继续
+  保留，不因普通测试历史或本文修正解除暂停，也不推断为 ANN 算法已损坏。
+- 完整物理故障/断电/短写/Sync/ENOSPC/torn write/checkpoint/rekey 中断
+  harness 仍有源码缺口；已有源码与尚无 harness 的项分别列在
+  [中文手工验收手册](manual-verification-zh.md)。这里未执行或转移任何受限流程。
+- 原生 OS 运行、真实持久性环境和外部独立数据安全/密码学/法律审查仍不完整。
+  跨编译、源审查、内存负例和普通正确密钥测试均不构成生产安全或稳定版认证。

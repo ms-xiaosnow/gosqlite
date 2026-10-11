@@ -1,0 +1,526 @@
+{
+  "scope": "文档静态核对；未执行示例命令、测试、build、数据库、网络或 Git 写操作",
+  "relative_links_checked": 79,
+  "broken_relative_links": [],
+  "links": [
+    {
+      "document": "docs/migration-pgembedding.md",
+      "target": "../cmd/gosqlite/migrate.go",
+      "exists": true
+    },
+    {
+      "document": "docs/migration-pgembedding.md",
+      "target": "../migration/postgres/convert.go",
+      "exists": true
+    },
+    {
+      "document": "docs/migration-pgembedding.md",
+      "target": "migration-converter.md",
+      "exists": true
+    },
+    {
+      "document": "docs/migration-pgembedding.md",
+      "target": "../migration/postgres/import.go",
+      "exists": true
+    },
+    {
+      "document": "docs/migration-pgembedding.md",
+      "target": "../migration/postgres/import_verify.go",
+      "exists": true
+    },
+    {
+      "document": "docs/migration-pgembedding.md",
+      "target": "../cmd/gosqlite/migrate_import.go",
+      "exists": true
+    },
+    {
+      "document": "docs/migration-pgembedding.md",
+      "target": "import-pgembedding.md",
+      "exists": true
+    },
+    {
+      "document": "docs/migration-pgembedding.md",
+      "target": "../migration/postgres/import_distances.go",
+      "exists": true
+    },
+    {
+      "document": "docs/migration-pgembedding.md",
+      "target": "import-distance-verification.md",
+      "exists": true
+    },
+    {
+      "document": "docs/migration-pgembedding.md",
+      "target": "../migration/postgres/transition.go",
+      "exists": true
+    },
+    {
+      "document": "docs/migration-pgembedding.md",
+      "target": "../cmd/gosqlite/migrate_transition.go",
+      "exists": true
+    },
+    {
+      "document": "docs/migration-pgembedding.md",
+      "target": "migration-transition-cli.md",
+      "exists": true
+    },
+    {
+      "document": "docs/migration-pgembedding.md",
+      "target": "migration-transition.md",
+      "exists": true
+    },
+    {
+      "document": "docs/migration-pgembedding.md",
+      "target": "../migration/postgres/transition_full.go",
+      "exists": true
+    },
+    {
+      "document": "docs/migration-pgembedding.md",
+      "target": "migration-full-table.md",
+      "exists": true
+    },
+    {
+      "document": "docs/migration-pgembedding.md",
+      "target": "import-pgembedding.md",
+      "exists": true
+    },
+    {
+      "document": "docs/migration-pgembedding.md",
+      "target": "migration-converter.md",
+      "exists": true
+    },
+    {
+      "document": "docs/migration-pgembedding.md",
+      "target": "../migration/postgres/convert_test.go",
+      "exists": true
+    },
+    {
+      "document": "docs/migration-pgembedding.md",
+      "target": "../cmd/gosqlite/migrate_converter_test.go",
+      "exists": true
+    },
+    {
+      "document": "docs/migration-pgembedding.md",
+      "target": "evidence/m9-converter-review.txt",
+      "exists": true
+    },
+    {
+      "document": "docs/migration-pgembedding.md",
+      "target": "../migration/postgres/import_test.go",
+      "exists": true
+    },
+    {
+      "document": "docs/migration-pgembedding.md",
+      "target": "../cmd/gosqlite/migrate_import_test.go",
+      "exists": true
+    },
+    {
+      "document": "docs/migration-pgembedding.md",
+      "target": "evidence/m9-import-review.txt",
+      "exists": true
+    },
+    {
+      "document": "docs/migration-pgembedding.md",
+      "target": "../cmd/gosqlite/migrate_transition_test.go",
+      "exists": true
+    },
+    {
+      "document": "docs/migration-pgembedding.md",
+      "target": "../migration/postgres/transition_full_test.go",
+      "exists": true
+    },
+    {
+      "document": "docs/migration-pgembedding.md",
+      "target": "evidence/m9-transition-cli-independent-review.txt",
+      "exists": true
+    },
+    {
+      "document": "docs/migration-pgembedding.md",
+      "target": "evidence/m9-full-table-independent-review.md",
+      "exists": true
+    },
+    {
+      "document": "docs/migration-pgembedding.md",
+      "target": "../migration/postgres/import_distance_independent_review_test.go",
+      "exists": true
+    },
+    {
+      "document": "docs/migration-pgembedding.md",
+      "target": "../migration/postgres/import_distances_test.go",
+      "exists": true
+    },
+    {
+      "document": "docs/migration-pgembedding.md",
+      "target": "evidence/import-distance-v2-handoff.md",
+      "exists": true
+    },
+    {
+      "document": "docs/migration-pgembedding.md",
+      "target": "evidence/m9-import-retention-before-fix.txt",
+      "exists": true
+    },
+    {
+      "document": "docs/migration-pgembedding.md",
+      "target": "evidence/m9-import-final-delta.txt",
+      "exists": true
+    },
+    {
+      "document": "docs/migration-pgembedding.md",
+      "target": "interruption-20261010.md",
+      "exists": true
+    },
+    {
+      "document": "docs/migration-pgembedding.md",
+      "target": "acceptance-status.md",
+      "exists": true
+    },
+    {
+      "document": "docs/migration-pgembedding.md",
+      "target": "manual-verification-zh.md",
+      "exists": true
+    },
+    {
+      "document": "docs/file-formats.md",
+      "target": "../sqlite/encryption.go",
+      "exists": true
+    },
+    {
+      "document": "docs/file-formats.md",
+      "target": "encryption-storage.md",
+      "exists": true
+    },
+    {
+      "document": "docs/file-formats.md",
+      "target": "security.md",
+      "exists": true
+    },
+    {
+      "document": "docs/file-formats.md",
+      "target": "rollback-replay-memory.md",
+      "exists": true
+    },
+    {
+      "document": "docs/file-formats.md",
+      "target": "ann.md",
+      "exists": true
+    },
+    {
+      "document": "docs/file-formats.md",
+      "target": "../extension/vector/ann/README.md",
+      "exists": true
+    },
+    {
+      "document": "docs/file-formats.md",
+      "target": "../internal/encstore/wal_format.go",
+      "exists": true
+    },
+    {
+      "document": "docs/file-formats.md",
+      "target": "../internal/encstore/shared_format.go",
+      "exists": true
+    },
+    {
+      "document": "docs/file-formats.md",
+      "target": "encryption-storage.md",
+      "exists": true
+    },
+    {
+      "document": "docs/file-formats.md",
+      "target": "encryption-primitives.md",
+      "exists": true
+    },
+    {
+      "document": "docs/file-formats.md",
+      "target": "half-vector.md",
+      "exists": true
+    },
+    {
+      "document": "docs/file-formats.md",
+      "target": "bit-vector.md",
+      "exists": true
+    },
+    {
+      "document": "docs/file-formats.md",
+      "target": "sparse-vector.md",
+      "exists": true
+    },
+    {
+      "document": "docs/file-formats.md",
+      "target": "typed-ann.md",
+      "exists": true
+    },
+    {
+      "document": "docs/file-formats.md",
+      "target": "../extension/vector/extended-values.md",
+      "exists": true
+    },
+    {
+      "document": "docs/file-formats.md",
+      "target": "../sqlite/encrypted_wal_review_test.go",
+      "exists": true
+    },
+    {
+      "document": "docs/file-formats.md",
+      "target": "../sqlite/encryption_shared_test.go",
+      "exists": true
+    },
+    {
+      "document": "docs/file-formats.md",
+      "target": "evidence/m8-wal-components.txt",
+      "exists": true
+    },
+    {
+      "document": "docs/file-formats.md",
+      "target": "evidence/m8-shared-components.txt",
+      "exists": true
+    },
+    {
+      "document": "docs/file-formats.md",
+      "target": "evidence/m8-shared-review.txt",
+      "exists": true
+    },
+    {
+      "document": "docs/file-formats.md",
+      "target": "../sqlite/ann_typed_test.go",
+      "exists": true
+    },
+    {
+      "document": "docs/file-formats.md",
+      "target": "evidence/m9-typed-ann-aggregate.txt",
+      "exists": true
+    },
+    {
+      "document": "docs/file-formats.md",
+      "target": "acceptance-status.md",
+      "exists": true
+    },
+    {
+      "document": "docs/file-formats.md",
+      "target": "interruption-20261010.md",
+      "exists": true
+    },
+    {
+      "document": "docs/security.md",
+      "target": "test-scope-audit.md",
+      "exists": true
+    },
+    {
+      "document": "docs/security.md",
+      "target": "encryption-primitives.md",
+      "exists": true
+    },
+    {
+      "document": "docs/security.md",
+      "target": "encryption-storage.md",
+      "exists": true
+    },
+    {
+      "document": "docs/security.md",
+      "target": "../internal/pager/shared_session.go",
+      "exists": true
+    },
+    {
+      "document": "docs/security.md",
+      "target": "../internal/pager/plain_session_cleanup.go",
+      "exists": true
+    },
+    {
+      "document": "docs/security.md",
+      "target": "shared-absence-provenance.md",
+      "exists": true
+    },
+    {
+      "document": "docs/security.md",
+      "target": "../internal/pager/shared_absence_test.go",
+      "exists": true
+    },
+    {
+      "document": "docs/security.md",
+      "target": "evidence/shared-absence-lead-review/REVIEW.md",
+      "exists": true
+    },
+    {
+      "document": "docs/security.md",
+      "target": "../internal/pager/pager.go",
+      "exists": true
+    },
+    {
+      "document": "docs/security.md",
+      "target": "rollback-reader-acquisition.md",
+      "exists": true
+    },
+    {
+      "document": "docs/security.md",
+      "target": "../internal/pager/reader_acquisition_test.go",
+      "exists": true
+    },
+    {
+      "document": "docs/security.md",
+      "target": "evidence/rollback-reader-acquisition-lead-review/REVIEW.md",
+      "exists": true
+    },
+    {
+      "document": "docs/security.md",
+      "target": "evidence/rollback-reader-acquisition-evidence/handoff-v1.md",
+      "exists": true
+    },
+    {
+      "document": "docs/security.md",
+      "target": "evidence/accepted-tools-combined-checks.txt",
+      "exists": true
+    },
+    {
+      "document": "docs/security.md",
+      "target": "evidence/accepted-tools-combined-checks.exit",
+      "exists": true
+    },
+    {
+      "document": "docs/security.md",
+      "target": "migration-pgembedding.md",
+      "exists": true
+    },
+    {
+      "document": "docs/security.md",
+      "target": "import-pgembedding.md",
+      "exists": true
+    },
+    {
+      "document": "docs/security.md",
+      "target": "acceptance-status.md",
+      "exists": true
+    },
+    {
+      "document": "docs/security.md",
+      "target": "interruption-20261010.md",
+      "exists": true
+    },
+    {
+      "document": "docs/security.md",
+      "target": "manual-verification-zh.md",
+      "exists": true
+    }
+  ],
+  "test_names_checked": [
+    "TestConvertLocalExecuteExactAndNormalReopen",
+    "TestEncryptionSharedExplicitUpgradeCopiesAndRestore",
+    "TestEncryptionWALReviewExplicitUpgradeAndCloseQuota",
+    "TestFullTableCopySwapAndContracts",
+    "TestImportDatasetDistancesMappedFormatsAndResume",
+    "TestImportNativeCommittedResumeAndVerify",
+    "TestIndependentImportDistanceRationalOracle",
+    "TestMigrateConverterCLI",
+    "TestMigrateImportDryRunApplyResumeVerifyCLI",
+    "TestMigrateTransitionReviewOnlyArtifacts",
+    "TestReaderAcquisitionOrdinaryCooperatingWriter",
+    "TestReaderAcquisitionSourceSnapshotAfterShared",
+    "TestSharedAbsenceSourceInitialProvenance",
+    "TestTypedANNHNSWAllMetricsPersistentSQLAndNative",
+    "TestTypedANNIVFPersistentListsAllMetricsAndDML"
+  ],
+  "missing_test_names": [],
+  "example_commands_checked": [
+    {
+      "command": "CGO_ENABLED=0 go run ./cmd/gosqlite migrate pgembedding inspect    --catalog testdata/pgembedding-0.3.6/catalog.json",
+      "mode": "inspect",
+      "flags": [
+        "catalog"
+      ],
+      "implementation": "cmd/gosqlite/migrate.go"
+    },
+    {
+      "command": "CGO_ENABLED=0 go run ./cmd/gosqlite migrate pgembedding    --catalog testdata/pgembedding-0.3.6/catalog.json --dry-run",
+      "mode": "inspect",
+      "flags": [
+        "catalog",
+        "dry-run"
+      ],
+      "implementation": "cmd/gosqlite/migrate.go"
+    },
+    {
+      "command": "CGO_ENABLED=0 go run ./cmd/gosqlite migrate pgembedding inspect    --catalog testdata/pgembedding-0.3.6/catalog.json --format markdown",
+      "mode": "inspect",
+      "flags": [
+        "catalog",
+        "format"
+      ],
+      "implementation": "cmd/gosqlite/migrate.go"
+    },
+    {
+      "command": "CGO_ENABLED=0 go run ./cmd/gosqlite migrate pgembedding convert    --catalog examples/migrate-pgembedding/converter-catalog.json    --input examples/migrate-pgembedding/source.sql    --target local --table 30000=documents",
+      "mode": "convert",
+      "flags": [
+        "catalog",
+        "input",
+        "target",
+        "table"
+      ],
+      "implementation": "cmd/gosqlite/migrate.go"
+    },
+    {
+      "command": "CGO_ENABLED=0 go run ./cmd/gosqlite migrate pgembedding import    --input source.ndjson --manifest export.json",
+      "mode": "import",
+      "flags": [
+        "input",
+        "manifest"
+      ],
+      "implementation": "cmd/gosqlite/migrate_import.go"
+    },
+    {
+      "command": "CGO_ENABLED=0 go run ./cmd/gosqlite migrate pgembedding import    --input source.ndjson --manifest export.json --output imported.db --apply",
+      "mode": "import",
+      "flags": [
+        "input",
+        "manifest",
+        "output",
+        "apply"
+      ],
+      "implementation": "cmd/gosqlite/migrate_import.go"
+    },
+    {
+      "command": "CGO_ENABLED=0 go run ./cmd/gosqlite migrate pgembedding import    --input source.ndjson --manifest export.json --output imported.db --apply --resume",
+      "mode": "import",
+      "flags": [
+        "input",
+        "manifest",
+        "output",
+        "apply",
+        "resume"
+      ],
+      "implementation": "cmd/gosqlite/migrate_import.go"
+    },
+    {
+      "command": "CGO_ENABLED=0 go run ./cmd/gosqlite migrate pgembedding verify    --input source.ndjson --manifest export.json --output imported.db",
+      "mode": "verify",
+      "flags": [
+        "input",
+        "manifest",
+        "output"
+      ],
+      "implementation": "cmd/gosqlite/migrate_import.go"
+    },
+    {
+      "command": "CGO_ENABLED=0 go run ./cmd/gosqlite migrate pgembedding transition    --catalog testdata/pgembedding-0.3.6/catalog.json    --options examples/migration-transition/options.json",
+      "mode": "transition",
+      "flags": [
+        "catalog",
+        "options"
+      ],
+      "implementation": "cmd/gosqlite/migrate_transition.go"
+    },
+    {
+      "command": "CGO_ENABLED=0 go run ./cmd/gosqlite migrate pgembedding transition    --catalog examples/migration-full-table/catalog.json    --options examples/migration-full-table/options.json    --full-table-evidence examples/migration-full-table/evidence.json",
+      "mode": "transition",
+      "flags": [
+        "catalog",
+        "options",
+        "full-table-evidence"
+      ],
+      "implementation": "cmd/gosqlite/migrate_transition.go"
+    }
+  ],
+  "main_documents_unchanged": {
+    "docs/migration-pgembedding.md": true,
+    "docs/file-formats.md": true,
+    "docs/security.md": true
+  },
+  "goal_sha256": "9ae7b1d776856669a10eb753408c7754d015d266f8783240165450e96e4bac81"
+}

@@ -88,12 +88,18 @@ func example(ctx context.Context, path string, out io.Writer) (err error) {
 	encoder.SetIndent("", "  ")
 	return encoder.Encode(result)
 }
+func run(ctx context.Context, args []string, stdout, stderr io.Writer, runExample func(context.Context, string, io.Writer) error) int {
+	if len(args) != 1 {
+		fmt.Fprintln(stderr, "usage: sparse-exact NEW_DATABASE_PATH")
+		return 2
+	}
+	if err := runExample(ctx, args[0], stdout); err != nil {
+		fmt.Fprintln(stderr, err)
+		return 1
+	}
+	return 0
+}
+
 func main() {
-	if len(os.Args) != 2 {
-		fmt.Fprintln(os.Stderr, "usage: sparse-exact NEW_DATABASE_PATH")
-		return
-	}
-	if err := example(context.Background(), os.Args[1], os.Stdout); err != nil {
-		fmt.Fprintln(os.Stderr, err)
-	}
+	os.Exit(run(context.Background(), os.Args[1:], os.Stdout, os.Stderr, example))
 }

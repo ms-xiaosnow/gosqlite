@@ -1117,3 +1117,109 @@ ANN/performance-CI sources remain separate increments.
   源码或测试，不解除 HOLD/BLOCKED，不算运行验收或 main 已有能力。
 - 此源码检查点的远端 main、完整 git bundle、恢复和 CI 结果仍须逐项确认；
   未提前声明它们已通过，未声明完成整体 §12.2、生产可用或 M10。
+
+### 稀疏精确搜索示例：退出状态修正（2026-10-11）
+- 对应目标：G1 错误行为与 §12.1 可运行示例。仅修正 `examples/sparse-exact` 的命令入口；原数据库示例与 `TestSparseExactExample` 保持不变。
+- 实现：可注入示例回调的 `run` 返回成功 0、参数用法错误 2、普通返回错误 1；`main` 通过 `os.Exit` 传递该状态。
+- 验证范围：内存假回调的参数、上下文、输出和状态断言；AST 入口接线与旧入口拒绝断言；原有普通成功 fixture。旧入口仅接受静态 AST 检查，没有运行失败子进程。
+- 实测（Linux/amd64，固定 Go 1.27.2）：两次 `CGO_ENABLED=0 go run ./internal/testscope` 均通过；`CGO_ENABLED=0 go test ./examples/sparse-exact -run '^(TestSparseExactExample|TestSparseExactRun|TestSparseExactMainStatusWiring|TestSparseExactMainStatusWiringRejectsLegacy)$' -count=1 -v` 通过（0.017s）；相同选择器的 `CGO_ENABLED=1 go test -race` 通过（1.034s）；`CGO_ENABLED=0 go vet ./examples/sparse-exact` 与 `go build -o <外置证据目录>/sparse-exact-build-only ./examples/sparse-exact` 均通过。构建的示例程序没有执行。完整命令、stdout、stderr 与退出值保存在源码外的 `sparse-example-status-evidence-v1`。
+- 限制：不执行失败子进程、崩溃／退出数据库流程、故障注入、缺失／篡改数据库、恢复、namespace 或手工标签测试；不运行新增 fuzz 或全套测试。下一步是独立核对该限定差异与结果。
+
+### 2026-10-11：query 行结果关闭错误传播（定名普通验证通过）
+
+- 在 `1352ae524575e4d6fe8b5434fd930c3b07be4ac8` 的独立副本中，将 query
+  的裸 `defer rows.Close()` 改为合并至 `runContext` 命名返回错误，避免 JSON
+  编码/文本检查提前返回时丢弃 Rows 关闭错误；正常 JSON/EOF 行为不变。
+- 新增生产 AST 断言、准确旧语句的内存静态负对照，以及完好只读 fixture 上
+  的内存输出 writer 错误传播验证。未改动现有测试，不注入数据库/原生故障。
+- 经主任务阅读测试/helper 并批准后，三个新测试和两个既有正对照以同一准确
+  selector 通过普通/race，source guard、scoped vet、CGO0 CLI build 通过；
+  03:27:42 UTC 自然 exit 0，无失败或重试。未运行全仓门。
+- [测试设计与证据](evidence/query-close-20261011.md) 记录范围及命令；检查前后
+  2,906 文件/137 目录、10 个 fixture 输入、353 个既有测试文件保持相同。
+  收尾只更新中文记录，随后冻结并交独立复审。未改动主树、Git、远端或其他候选。
+- 未运行长测、被中止链、数据库/原生故障、恢复或其他 OS 原生验证；静态错误合并
+  证据不冒充真实关闭故障验收，不声明 §12.2 或 M10 完成。
+
+### 2026-10-11：readonly 示例只读与资源归属独立修正（定名验证通过）
+
+- 对应 G1、§12.1：`examples/readonly` 改用显式
+  `driver.NewConnector(input, sqlite.Options{ReadOnly:true, NoCreate:true})`
+  与 `sql.OpenDB`。既有查询、参数和三行制表符输出不变。
+- 查询使用调用方上下文；先释放 Rows，再关闭 DB，迭代/输出/关闭错误合并
+  返回后才进行诊断和退出。诊断写入错误也保留；取消信号的注册在退出前释放。
+- 经逐项源码/helper 审阅后，6 个精确定名测试的 CGO0 和 race 均通过，
+  各自开跑前 sourceguard、scoped vet/build 通过。3 种页大小 × 4 种输入
+  模式只执行完整已提交 fixture 的三行正常读取，目录清单/模式/大小/字节
+  保持不变。纯参数/格式化/状态回调与 AST 生命周期断言不注入数据库故障。
+  353 个既有测试文件不变；精确旧源码 SHA256 被固定为 AST 输入，
+  负对照在通过的单元测试中确认原码不满足契约，未运行原 main 或失败子进程。
+- 最终同一源码定名普通测试 0.040s、race 1.132s；sourceguard、scoped
+  `go vet ./examples/readonly` 与 CGO0 `go build -trimpath` 通过，
+  03:30:37 UTC 自然 exit 0。首轮 5 项通过日志与末轮 6 项日志分别保留。
+  精确测试选择为以下 6 项，普通/race 均 `-count=1 -timeout=60s`：
+  `TestReadonlyExampleIntactFixtures`、`TestReadonlyRunArguments`、
+  `TestReadonlyWriteRow`、`TestReadonlyReportResult`、
+  `TestReadonlySourceContract`、`TestReadonlyLegacySourceContract`。
+- 真实存储关闭失败、迭代中断和信号取消并未运行注入测试；错误保留和调用
+  顺序由 AST 断言覆盖，输出错误仅由不连接数据库的纯回调验证。
+  外部 AST 进程方案在执行前未被采纳，改为同进程 AST 单元断言；该外部方案保留为 NOT_RUN，未构建或执行，未发生平台/工具拒绝。
+- 基线问题来自源码审阅，未执行旧的不安全 main，也未实测或宣称源库被修改。
+  此切片不改变驱动/内核语义，不扩大 SQLite 兼容或恢复保证。未运行全仓门、
+  故障/损坏输入、数据库失败子进程、crash/recovery/WAL 等验证。
+
+### 普通写入示例：关闭错误与成功输出顺序（G1 / §12.1，2026-10-11）
+
+- 源码：`examples/write/main.go` 将持有资源的逻辑移入具名错误返回 helper；延迟关闭和回滚合并错误，提交后的 `sql.ErrTxDone` 按正常结果处理。成功消息在 helper 释放资源后才交给外层输出，输出错误和非零退出状态保留。用法见 [普通写入示例](../examples/write/README.md)。
+- 回归：`examples/write/main_test.go` 对原始旧程序及八个变体只做 AST 分析；纯内存回调检查参数和状态；普通新临时明文库检查两次精确输出、再次打开、成功 CRUD 的正常事务回滚及受支持配置原生检查。原有测试未改动。
+- 定向验证：Go 1.27.2，Linux/amd64；`CGO_ENABLED=0 go run ./internal/testscope` 分别在普通测试和竞态测试之前通过；`CGO_ENABLED=0 go test ./examples/write -run '^TestWriteExample(LifecycleAST|ArgumentStatus|OrdinarySuccessReopen)$' -count=1 -v` 与相同选择器的 `CGO_ENABLED=1 go test -race` 均通过；`CGO_ENABLED=0 go vet ./examples/write` 及 `CGO_ENABLED=0 go build -trimpath -o <独立证据路径>/write-example-built-only ./examples/write` 通过。全部首次执行成功，未执行构建产物；没有运行全仓库测试。
+- 环境：`GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off GOFLAGS=-buildvcs=false GOMAXPROCS=2`，固定可写 GOPATH/GOCACHE，默认 `/tmp`。
+- 限制：没有原生关闭/I/O 故障注入、失败子进程或进程退出数据库工作流；不涉及恢复、命名空间、加密或 ANN 验收，也不构成崩溃耐久性/生产就绪证据。原生 `Check` 仅覆盖受支持配置，不能等同于 SQLite 全量 `integrity_check`。
+
+### 2026-10-11：四项 CLI / 示例资源组合普通门
+
+- 固定 tree `4c2af13646c973c53340450f8f1310492aae5628` 的独立18项普通/race及完整既有 unit/vet/build/oracle/race、五目标/模块/全源身份于03:53:38 UTC全部 exit0；2,911文件和137目录未变，353旧测试保持。具体边界与原始命令见[组合证据](evidence/cli-resources-20261011.md)。
+- 基点1352ae524575e4d6fe8b5434fd930c3b07be4ac8的CI38108065647于03:42:12 UTC SUCCESS；Library精确恢复已通过。本次源码的远端/恢复/CI结果仍按新commit单独确认，不能预先代用基点结果。
+- 提交前仅在冻结运行源码之外修正文档、追加真实证据；未执行失败数据库子进程或存储故障。AST/纯回调与正常运行的覆盖不同，原始限制保留。
+- 预发布候选Library libfile_04f3cc112b6c819195835806eb19903a 已读回并重建精确源码树；静态保存不算运行验收。三项有限收尾后停止新增功能，整体仍未验收。
+
+### 2026-10-11：三份必需入口文档的静态合同对账
+
+> 以下保留文档作者在独立副本中完成静态核对时的历史记录。主负责人现已整合三份文档，独立静态审阅 PASS；其中“待整合”仅描述作者交接时状态。当前提交的远端与恢复证据仍需按精确 commit 另行核验。
+
+- 状态：IN_PROGRESS（仅完成本次文档修正；M9/M10 和原始 goal 的最终验收未完成）。
+- 基点：`1352ae524575e4d6fe8b5434fd930c3b07be4ac8`。依据 goal §12.3，
+  本次只改 migration-pgembedding、file-formats、security 三份入口文档的独立副本；
+  未改运行源码、测试、原始 goal 或冻结候选。没有新架构/格式/API 变更。
+- 迁移入口补齐当前 inspect/convert/import/verify/transition 与 PG16
+  full-table-evidence 的职责、真实参数及已有示例；`--apply/--resume/--output`
+  的限制按子命令分别记录。保留 A 检查点的历史语境，不再写成当前能力上限。
+- 格式入口区分加密 snapshot/layout 1、WAL/layout 2、shared/layout 3；
+  修正“没有加密 WAL”和“扩展 codec 尚无 SQL/ANN”的过时叙述，保留具体
+  typed ANN 支持矩阵、未知版本拒绝、显式升级与完整迁移/安全门的限制。
+- 安全入口将 shared 初始不存在来源与 Reader post-SHARED stat 列为已合入
+  的窄源码修正，链接现有精确测试和历史审阅；原失败样本、负向控制与短时
+  通过各自保留。没有把这些修正推广为完整生命周期、长期 soak 或生产安全。
+
+| §12.3 要求 / 旧差异 | 当前合同与代码证据 | 既有测试/执行证据及限制 |
+|---|---|---|
+| migration：SQL/导入/模板仍写为下一阶段 | [迁移入口](migration-pgembedding.md)；migrate.go、migrate_import.go、migrate_transition.go | [转换审阅](evidence/m9-converter-review.txt)、[导入审阅](evidence/m9-import-review.txt)、[迁移 CLI](evidence/m9-transition-cli-independent-review.txt)、[整表审阅](evidence/m9-full-table-independent-review.md)；真实 PG/Neon NOT_RUN |
+| migration：校验/续传与回滚边界 | Import / VerifyImport / VerifyImportDistances；逐批原生事务和显式正常续传 | [距离 v1 失败/v2 修正](evidence/import-distance-v2-handoff.md)；完整精确距离不等于 ANN recall 或崩溃恢复 |
+| file-formats：否认加密 WAL/shared | sqlite/encryption.go、encstore/wal_format.go、shared_format.go | TestEncryptionWALReviewExplicitUpgradeAndCloseQuota、TestEncryptionSharedExplicitUpgradeCopiesAndRestore；[WAL](evidence/m8-wal-components.txt)、[shared](evidence/m8-shared-review.txt) 既有普通证据 |
+| file-formats：否认 typed SQL/ANN | [typed ANN 限定矩阵](typed-ann.md)、sqlite/ann_typed.go | TestTypedANNHNSWAllMetricsPersistentSQLAndNative、TestTypedANNIVFPersistentListsAllMetricsAndDML；[旧组合](evidence/m9-typed-ann-aggregate.txt)，不解除 ANN harness HOLD |
+| security：两项旧源码问题仍列 open | shared_session.go / plain_session_cleanup.go；pager.OpenAdmitted | [shared 独立审阅](evidence/shared-absence-lead-review/REVIEW.md)、[Reader 独立审阅](evidence/rollback-reader-acquisition-lead-review/REVIEW.md)、[Reader 原失败与有限通过](evidence/rollback-reader-acquisition-evidence/handoff-v1.md) |
+
+- 本次验证仅为文件内容/路径/参数静态核对：三份文档共 79 个仓库相对链接
+  均可定位；15 个精确测试名均在当前源码定义；10 条示例命令的子命令和参数
+  均对照现有 CLI，未执行。原始 goal SHA-256 仍为
+  `9ae7b1d776856669a10eb753408c7754d015d266f8783240165450e96e4bac81`。
+- 本次没有新增 SQLite/pgvector 对照、数据库测试、build、race、fuzz、soak、
+  native OS 运行或外部动作。所有链接日志保留原日期/源码身份，不算本次 PASS。
+  仅验证本任务三份 main 原文与 before 哈希相同，不声称其他并行工作的 main
+  工作树干净。进展片段由主负责人另行审阅整合。
+- 阻塞不变：未知中断、ANN V3 FAIL/HOLD 与 V4 暂停；公开恢复/明文 backup/
+  WAL-tail/planner/部分 backend 候选未合入；完整物理故障 harness 有缺口；
+  原生环境与外部独立数据安全/密码学/法律审查未完成。详见
+  [验收矩阵](acceptance-status.md) 和[中断记录](interruption-20261010.md)。
+- 下一步最小任务：审阅本次文档补丁及 before/after 哈希后按已授权流程保存；
+  不以文档收尾为理由恢复受阻候选、运行受限工作或宣称全目标已完成。

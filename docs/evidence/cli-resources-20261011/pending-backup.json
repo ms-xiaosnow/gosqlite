@@ -1,0 +1,10 @@
+{
+  "library_file_id": "libfile_04f3cc112b6c819195835806eb19903a",
+  "version": 0,
+  "archive_bytes": 3181408,
+  "archive_sha256": "a8f786b30d4a7f72eada013508c07eeb4a302a0d782ddf6ff21d5791b81b3c73",
+  "tree": "4c2af13646c973c53340450f8f1310492aae5628",
+  "base_commit": "1352ae524575e4d6fe8b5434fd930c3b07be4ac8",
+  "verification": "PASS static Library readback, all entries, baseline +14 source delta reconstructs exact candidate bytes/Git modes/inventory; no runtime execution",
+  "status": "UNPUBLISHED, full aggregate pending; not acceptance"
+}

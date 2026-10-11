@@ -1,8 +1,15 @@
-# File formats
+# 文件格式与当前兼容边界
 
 M2 reads and writes the tested rowid-table and BINARY ASC secondary-index subset of SQLite format 3, according to the [official specification](https://www.sqlite.org/fileformat2.html), with tested subsets recorded in compatibility.md. Future extension data must occupy legal transactional SQLite structures. Unknown feature bits, container versions, encodings, and index versions must be rejected instead of guessed.
 
-The experimental encrypted snapshot format is an independent authenticated root/base container, distinct from SQLite plaintext and SEE. It supports layout-1 snapshots and explicit layout-2 authenticated dirty-page WAL; a stable encrypted-format promise remains open. See [encryption-storage.md](encryption-storage.md). Every format change requires an ADR, preserved snapshot, explicit migration and round-trip verification.
+当前加密存储是独立的 authenticated root/base/segment 容器，不与明文 SQLite 或
+SEE 密文兼容。公开 [`sqlite.EncryptionMode`](../sqlite/encryption.go) 明确区分
+`EncryptionSnapshot`（layout 1）、`EncryptionWAL`（layout 2，独占协调）和
+`EncryptionWALShared`（layout 3，并存读者/单写者）；后两者已实现认证的脏页
+WAL。不得把下文早期 snapshot 检查点当作当前能力上限。稳定加密格式承诺、
+完整升级/回滚矩阵和物理持久性验收仍未闭合。详见
+[存储/格式/API 合同](encryption-storage.md) 与[安全边界](security.md)。
+每次格式变更仍须 ADR、保留快照、显式迁移和往返验证。
 
 ## M2 plaintext writes
 
@@ -10,7 +17,7 @@ Table and index pages use native SQLite leaf/interior formats, payload-locality 
 
 Writes require UTF-8, rollback mode, no reserved bytes, schema format 4 (or new empty format 0), no autovacuum, no unknown schema object/constraint, and a single-link regular file. A whole-file ownership preflight rejects overlapping live/free pages, cross-root reuse, duplicate roots and unowned physical pages before the first mutation. This is structural preflight, not a complete logical integrity checker.
 
-The journal uses SQLite's documented magic, sector-aligned header, big-endian page numbers and nonce-seeded page checksums. Original pages and touched-sector neighbors precede physical database changes. Sector size defaults to an explicit 4096-byte assumption, configurable through SectorSize; hardware-specific atomicity is not certified. Existing journals are refused pending implemented recovery. Default rollback opens reject WAL; the explicit M3 exclusive mode is described below. Commit ordering and error outcomes are specified in ADR0003; interrupted/failed-I/O execution remains NOT_RUN.
+The journal uses SQLite's documented magic, sector-aligned header, big-endian page numbers and nonce-seeded page checksums. Original pages and touched-sector neighbors precede physical database changes. Sector size defaults to an explicit 4096-byte assumption, configurable through SectorSize; hardware-specific atomicity is not certified. 默认公开 rollback 打开路径拒绝已有 journal；内部 replay 源码不等于公开自动恢复已合入。 Default rollback opens reject WAL; the explicit M3 exclusive mode is described below. Commit ordering and error outcomes are specified in ADR0003; interrupted/failed-I/O execution remains NOT_RUN.
 
 
 ## M3 WAL and recovery source
@@ -19,7 +26,9 @@ WAL uses SQLite's32-byte header and24-byte frame header plus a complete page. St
 
 The committed overlay selects the newest page image through the last complete commit marker, with logical extent from that marker and strict bounded scanning. Invalid, incomplete, uncommitted and salt-mismatching tails are classified and refused; this does not implement SQLite's full recovery policy. Checkpoint retains synced WAL images for every extant main-file sector neighbor before overwriting pages. Header mode2 remains after normal checkpoint/close, even when the WAL is removed.
 
-Rollback replay plans support a bounded sequence of published finite-count segments with identical page/sector/original-extent geometry, globally unique original pages and per-segment nonce-seeded sparse checksums. The first header remains authoritative; cumulative limits and exact input consumption are required. Complete missing-original coverage is checked if the current extent is shorter. See [the memory-only supported/unsupported matrix](rollback-replay-memory.md). Physical replay is deliberately isolated and unqualified. See ADR0004 and the source-only manual harness. The separate [experimental authenticated snapshot format](encryption-storage.md) does not implement encrypted WAL.
+Rollback replay plans support a bounded sequence of published finite-count segments with identical page/sector/original-extent geometry, globally unique original pages and per-segment nonce-seeded sparse checksums. The first header remains authoritative; cumulative limits and exact input consumption are required. Complete missing-original coverage is checked if the current extent is shorter. See [the memory-only supported/unsupported matrix](rollback-replay-memory.md). Physical replay is deliberately isolated and unqualified. See ADR0004 and the source-only manual harness. 历史上单独的 layout-1 snapshot 检查点没有加密 WAL；当前已实现独立的
+layout-2 / layout-3 认证 WAL，见下方 M8 小节。它不复用这里的原生 SQLite
+WAL 字节或 SHM 协议。
 
 ## M3 shared WAL-index
 
@@ -122,20 +131,48 @@ The encryption package defines an experimental 512-byte GSQLENC1 bootstrap and
 24-byte authenticated-record header plus AES256GCM ciphertext/tag. The snapshot
 storage layer now uses authenticated root/base objects for database publication,
 rekey, encrypted backup/restore and explicit plaintext import/export. Existing
-plaintext files are not silently transformed. Explicit layout-2 WAL roots select
-an ordered authenticated base/dirty-segment graph; snapshot layout-1 and portable
-archive bytes remain unchanged. A stable format promise and physical crash/security
-qualification remain open. See
-[encryption-storage.md](encryption-storage.md) for root/base/segment formats
-and [encryption-primitives.md](encryption-primitives.md) for record-codec offsets
-and cryptographic scope.
+plaintext files are not silently transformed.
 
-## Extended vector memory codecs
+当前 layout-2 / layout-3 roots
+选择有序认证的 base/dirty-segment 图；layout 3 的 `GSEMNF03` 根另绑定共享
+协调策略。snapshot layout 1 和 portable archive 合同保持独立，不能把活跃
+数据库 root 单文件当作备份。模式必须显式匹配；现有 API
+`UpgradeEncryptedWAL` 和 `UpgradeEncryptedWALShared` 在静止可写连接上显式
+发布新 base/root 并保留旧密文/逻辑身份，不承诺任意向前迁移、降级或历史撤销。
+布局实现分别见 [WAL](../internal/encstore/wal_format.go) 与
+[shared](../internal/encstore/shared_format.go)。稳定格式、物理崩溃和安全验收仍未完成。
+root/base/segment 格式详见 [encryption-storage.md](encryption-storage.md)；
+record-codec 偏移和密码学范围详见 [encryption-primitives.md](encryption-primitives.md)。
+
+## 扩展向量 codec、SQL 与持久 ANN
 
 The distinct version-1 GSH/GSB/GSS codecs represent finite binary16 values,
 canonical MSB-first packed bits, and sorted sparse binary32 entries. Existing
-dense GSVv1 is unchanged. These codecs and nullable Go adapters do not yet enable
-SQL column declarations or extended ANN storage. They are not PostgreSQL binary
-COPY/wire and have no authentication/checksum claim. See
-[extended-values.md](../extension/vector/extended-values.md) for exact byte layout,
-limits and deliberate conversion/precision differences.
+dense GSVv1 is unchanged.
+
+最初检查点只提供内存 codec/nullable Go adapter；
+当前 [HALFVEC](half-vector.md)、[BIT](bit-vector.md)、[SPARSEVEC](sparse-vector.md)
+已有受限 SQL 列合同，且通过[typed ANN](typed-ann.md) 参与真实持久 HNSW 和
+受支持的 IVFFlat。具体维度、非零数、opclass、存储版本及不支持组合必须按
+该矩阵核对；例如 sparse IVFFlat 仍不支持。不得从 codec 存在推断完整 SQL
+或任意 ANN 支持。它们不是 PostgreSQL binary COPY/wire，也没有自身
+checksum/authentication 承诺。具体字节布局、限制和转换/精度差异见
+[extended-values.md](../extension/vector/extended-values.md)。
+
+## 格式证据与迁移限制
+
+核对基点：`1352ae524575e4d6fe8b5434fd930c3b07be4ac8`。本次只核对代码与
+既有资料，没有新运行数据库、升级或恢复测试。
+
+- layout-2 的 [`TestEncryptionWALReviewExplicitUpgradeAndCloseQuota`](../sqlite/encrypted_wal_review_test.go)
+  与 layout-3 的 [`TestEncryptionSharedExplicitUpgradeCopiesAndRestore`](../sqlite/encryption_shared_test.go)
+  是现有普通升级/复制入口；历史实际结果见 [WAL 组件记录](evidence/m8-wal-components.txt)
+  与 [shared 组件记录](evidence/m8-shared-components.txt)、[独立审阅记录](evidence/m8-shared-review.txt)。
+- [`TestTypedANNHNSWAllMetricsPersistentSQLAndNative`](../sqlite/ann_typed_test.go)
+  和 `TestTypedANNIVFPersistentListsAllMetricsAndDML` 覆盖受支持 typed 持久路径；
+  [历史组合记录](evidence/m9-typed-ann-aggregate.txt) 保留其精确树与实际范围。
+- 这些普通路径和内存格式负例不证明物理磁盘篡改、断电、恢复、native OS
+  行为或通用向前迁移安全。未知版本仍须拒绝；完整格式升级/回滚矩阵、
+  公开恢复及 native WAL-tail 等缺口见[验收矩阵](acceptance-status.md)。
+  [未知中断和 ANN harness FAIL/HOLD](interruption-20261010.md) 继续保留，
+  不因本文修正或持久索引已有实现而改为通过。
