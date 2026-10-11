@@ -1,5 +1,18 @@
 # Manual verification and release-blocking gates
 
+## 2026-10-11 中文入口与当前边界
+
+请先阅读[中文手工验收手册](manual-verification-zh.md)、
+[当前验收矩阵](acceptance-status.md)与[中断说明](interruption-20261010.md)。
+下文保留历史命令和当时范围，不能把旧版本状态或旧 PASS 当成最新源码的
+验收结论。2026-10-10 被中止的 ANN V4、新 41 目标 fuzz 及未知触发链路
+继续暂停，不通过改名、变更输入、其他执行环境或 CI 重试。
+
+当前 main 的 Windows/Darwin 两项 raw namespace 测试尚未合入新的人工
+门控；不要直接在这些 OS 上执行默认全套。已有 Linux 普通 CI 与新 OS/
+性能 runner、计费读取是不同授权范围。明确未实现的 harness 或生产能力
+仍列为代码缺口，不伪装成“已有测试只差手工运行”。
+
 Test-scope correction: historical full suites from M2 through 7addc493 included two namespace-mutation tests. Their PASS outputs remain factual, but are not clean ordinary-scope evidence. See [the audit and gating correction](test-scope-audit.md).
 
 This file records checks that require a separately approved native environment or independent reviewer. No command here is evidence that it was executed.

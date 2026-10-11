@@ -1,5 +1,11 @@
 # Current compatibility matrix
 
+2026-10-11 对账：本页描述 main 已合入能力，未发布候选的有限 PASS 不计入。
+当前缺口、平台中断及中文自测步骤分别见
+[验收矩阵](acceptance-status.md)、[中断记录](interruption-20261010.md) 和
+[中文手册](manual-verification-zh.md)。Native Check V2 已在 776b23e 合入；
+下面修正此前“没有 native full checker”的过时摘要，保留原记录于 Git 历史。
+
 Behavior baseline: official SQLite **3.54.0**; Go **1.27.2**. This is a
 conditional development checkpoint, not production or complete milestone
 acceptance. `partial` means implemented and tested only within the stated
@@ -20,7 +26,7 @@ Exact source, command, CI and restored-commit evidence remains in
 | Native Go production build | verified scoped | CGO_ENABLED=0 dependency/build checks; separate enabled race detector does not introduce a production C dependency |
 | SQLite format-3 rowid files | partial | Explicit header/varint/record/table/index/overflow/freelist encodings, schema root1, signed rowids, integer/REAL/NULL/TEXT/BLOB; ordinary CLI interoperability at 512/4096/65536-byte pages |
 | Unsupported file/schema forms | unsupported | UTF-16, WITHOUT ROWID, autovacuum and unlisted schema/format semantics fail closed; support is never inferred from the version number |
-| Table and index mutation | partial | Native page split/merge, table/index creation and maintained nonunique BINARY ASC indices; ordinary integrity_check is performed by the test oracle, not a native full integrity checker |
+| Table and index mutation | partial | Native page split/merge, table/index creation and maintained nonunique BINARY ASC indices; test-oracle integrity_check and the separately bounded native DB/Tx/CLI Check V2 provide distinct checks, neither implies universal SQLite feature support |
 | Rollback journal | partial | Standard DELETE-journal normal commit/rollback and sector assumptions; existing journals cause ErrRecoveryRequired; existing zero-byte databases are rejected |
 | Hot rollback recovery | partial source only | Explicit internal aligned finite-count multi-segment replay with bounded memory parsing and minimal cleanup ownership; automatic Open integration and unsupported modes/tails remain code work. Native RecoverRollback is source-reviewed only; physical replay/crash qualification is NOT_RUN |
 | Exclusive WAL | partial | Explicit writable WALExclusive, lifetime EXCLUSIVE lock, one active lease, ordinary append/read/checkpoint/close/interoperability; not shared concurrency |
@@ -29,7 +35,8 @@ Exact source, command, CI and restored-commit evidence remains in
 | Locking/native platforms | partial | Linux managed OFD locks; Darwin process-fcntl/deferred-close registry; Windows/amd64 LockFileEx, full file identity and managed mapping/metadata handles. Linux/amd64 ordinary runtime only; other target builds are not runtime evidence |
 | Managed cleanup ownership | partial | Bounded shared failed-open/successful-close, encrypted and plaintext Reader/Tx/exclusive minimal-owner registries/retry APIs are implemented, including pre-acquisition public metadata adoption. Native recovery now shares bounded ownership and explicit initial-absence provenance; shared-session initial-absence provenance and rollback Reader post-SHARED metadata timing are corrected with independent source/ordinary/race evidence. Native failure execution remains unqualified |
 | Busy/cancel/uncertain results | partial | Normal BUSY, stale shared promotion, cancellation and snapshot lifetime are exercised. Once physical publication begins it is not interrupted; ErrPoisoned/ErrCommitUncertain requires stopping use and preserving evidence |
-| General backup/integrity/VACUUM | unsupported | No general native integrity_check, plaintext online backup API or native VACUUM; metadata inspect and extension-index consistency checks have narrower meanings |
+| Native full-profile integrity checking | partial | DB.Check/Tx.Check/CLI Check V2 validate one pinned snapshot, whole-page ownership, supported tables/ordinary indices and built-in extension semantics under explicit budgets. This is not unrestricted SQLite PRAGMA integrity_check or physical recovery qualification; see native-check.md |
+| Plaintext backup/native VACUUM | unsupported | Plaintext backup API/CLI and native VACUUM are not implemented on main. Unpublished Linux rollback backup candidates do not change this status; encrypted correct-key backup has a separate supported profile |
 
 Plaintext paths are resolved once per connection. Idle rollback connections do
 not hold a shared snapshot. Query Rows and explicit Tx retain their snapshot;

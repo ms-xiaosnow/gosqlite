@@ -480,5 +480,19 @@
     "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38090596555",
     "remote_ci_status": "COMPLETED SUCCESS for exact SHA, updated2026-10-10T22:30:25Z, observed22:31:10Z. Ordinary job114326050222 and complete pinned-oracle job114326050489.",
     "open_gates": "Generic plaintext backup, real readonly plaintext WAL CLI and supported planner parity remain code gaps. TransactionV4/CheckV2 full aggregate nowPASS but excluded pending separate checkpoint. PerformanceCI/ANN report validation corrective work, actuallongsoak/largerbench, physicalfailure/recovery/targetruntime and independent M10 remain unqualified."
+  },
+  {
+    "stage": "Native Check V2 与普通事务测量 V4；中断前最后源码检查点",
+    "remote_commit": "776b23eb59ce9613bf4498d352a716a193cdc9c3",
+    "local_commit": "776b23eb59ce9613bf4498d352a716a193cdc9c3",
+    "tree": "8f6026330f968314456548a3b8684476fea73afb",
+    "bundle_sha256": "e293948441bdb6953d759636b1e818a0ba1ba2703aa628818ba685d3f9c4015c",
+    "bundle_bytes": 4946692,
+    "library_file_id": "libfile_3e43b3629e148191bb995c979b80e9a2",
+    "library_version": 0,
+    "verified": "2026-10-10T22:34:37Z expected-SHA 非强制远端更新并精确本地镜像；22:36:07Z Library 字节读回/clone/fsck/原 goal 核验 PASS。源组合8b604e3c667152284a29d7ad7dfba5a10f63b053 全普通单元/vet/build21:49:37Z、完整 pinned oracle21:59:34Z、全 race(SQLite583.504s)/五目标构建/modules/hash22:10:33Z PASS。精确 Library 恢复局部普通/race、全 vet/build、五目标/modules/clean tree22:37:31Z exit0。2026-10-11T01:36Z 仅只读确认远端/本地身份仍相同，01:37Z 再取 Library bundle 与本地逐字节及 SHA 相同；没有重跑数据库测试。",
+    "remote_ci": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38091940645",
+    "remote_ci_status": "COMPLETED SUCCESS；2026-10-10T22:52:30Z 自然终态，22:53:47Z 两项 job 读回：oracle114329976910、ordinary114329977006 SUCCESS。无取消、重试。",
+    "open_gates": "中断/恢复边界见 docs/interruption-20261010.md 与中文自测手册。受阻 ANN V4、新41目标fuzz和未知触发链路不恢复。main 仍缺公开恢复、明文备份、真正只读 plaintext-WAL 等代码；未发布候选不计入。物理故障、安全、真实目标OS、长测/大型性能和独立M10未验收。"
   }
 ]

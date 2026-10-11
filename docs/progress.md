@@ -976,3 +976,77 @@ no crash, fault, native recovery, namespace substitution or interrupted-rekey
 execution. Correctness/ordinary source review is not independent security/legal
 release approval. Wider planner, Windows/Darwin/public recovery and repaired
 ANN/performance-CI sources remain separate increments.
+
+
+### 2026-10-11：中文受限验收说明与独立范围恢复
+
+- 状态：IN_PROGRESS；这是文档和只读对账阶段，不是 M10 完成。
+- 用户要求继续未受限工作；平台无法验证项写入项目中文 Markdown，
+  包括详细自测步骤。被中止的 ANN V4、新 41 目标 fuzz 与未知触发链路
+  保持平台阻塞，不重发、不改变输入或换执行器/CI 重试。
+- 01:36 只读确认远端和本地 main 仍为
+  `776b23eb59ce9613bf4498d352a716a193cdc9c3`，tree
+  `8f6026330f968314456548a3b8684476fea73afb`；文档修改前工作树干净。
+  原 goal 为 43,100 字节，SHA-256
+  `9ae7b1d776856669a10eb753408c7754d015d266f8783240165450e96e4bac81`，
+  本轮未更改。
+- 01:37 重新从 Library 取回代码备份
+  `libfile_3e43b3629e148191bb995c979b80e9a2`，与本地 4,946,692 字节
+  bundle 逐字节一致；SHA-256
+  `e293948441bdb6953d759636b1e818a0ba1ba2703aa628818ba685d3f9c4015c`。
+  原中断报告 Library `libfile_0958d62d04dc8191bdb2ea277785b416`
+  再次可读。本轮没有再次 clone 执行或重跑数据库测试。
+- 将中断范围、已有自然终态、未持久源码与环境限制整合到
+  `docs/interruption-20261010.md`；新增中文手册
+  `docs/manual-verification-zh.md`，保留历史英文记录并加入当前入口。
+  `docs/acceptance-status.md` 分开列出必须实现、可自动验证、受限待人工、
+  真实外部环境；`docs/compatibility.md` 修正“没有 native full checker”
+  的过时摘要。Native Check V2、Transaction V4、NFC 组合覆盖和精确距离
+  v2 都已在 main，不能继续列作未实现。
+- 补记中断前源码提交的现有证据：CI `38091940645` 在 10 日 22:52:30
+  自然 SUCCESS，ordinary `114329977006` 和 oracle `114329976910`
+  均成功；Library 恢复门 22:37:31 exit 0。备份候选的既有 64796 会话
+  22:41:14 exit 0，但最终独立报告/事后全清单未闭合。这些是旧结果，
+  不计作 11 日的新测试。
+- 本轮静态核对方式：读取 Git ref/HEAD/tree/status；核对 goal 和报告哈希；
+  Library 文本读取及 bundle 字节比较；阅读现有源码、测试名、标签、
+  环境门与脚本；只修改文档。具体静态文档校验结果在完成后另记。
+- 已发现可独立的窄工作候选：CLI `inspect` 的打开调用仍使用
+  `sqlite.Open`，丢失 caller context；对应 G1、§3.6、§12.2。
+  拟仅改该调用点及其 AST/普通只读回归，不改 pager、WAL、恢复、
+  backup、rekey、ANN、性能作业或任何冻结候选。测试必须明确命名选择，
+  保持完整 fixture 和正常关闭，不做故障/namespace/进程强杀。
+- 后续独立候选：`inspect` 对已有扩展方法/版本、tokenizer 配置和
+  generation 的只读元数据呈现（§3.7、§12.2），先审阅同快照与预算设计；
+  不实现只读 WAL、不改变索引格式或算法。若范围不能保持独立则停止并
+  记录，不将广 SQL 扩展用作绕过受阻的恢复/备份工作。
+- 本段记录的初始文档阶段尚未执行上述候选；先完成范围报告，再进行
+  开始普通实现/验证。固定未发布 a314/planner/WAL/backup/performance/
+  ANN/retained-directory 源码本轮仅核对状态，不整合或恢复其执行链路。
+- 真实代码缺口仍包括公开恢复、WAL 尾部 native publisher、明文备份、
+  只读 plaintext-WAL CLI、既有 SQL 差异、部分故障 harness；详细矩阵不
+  将这些归为“只差手工”。长测没启动；10 日发现的 tmpfs 余量及
+  fsync=volatile 条件在未来测量前必须重新核验，不能推断已消除。
+  新 OS/performance runner 与计费读取仍需单独许可。
+- 下一步最小任务：校验并审阅中文文档的真实测试名/参数/前提，持久保存
+  文档检查点；随后只推进上列经过报告和范围审阅的独立 CLI 小切片。
+
+
+#### 中文手册静态复核发现与修正
+
+- 手册中的 48 个真实测试引用（含 39 个 focused 普通选择）已静态核对；
+  唯一不存在的 TestCrash 是显式禁止冒充入口的反例。新文档链接可解析，
+  fenced blocks 配对，原 goal 与既有 checkpoint JSON 条目语义保持不变。
+  此核对只读取文本，不执行手册命令。
+- 独立文档审阅确认旧源码/main/候选边界、CI/备份身份和四类矩阵；将
+  /tmp 容量判断明确为 10 日针对拟议长测的历史预检，未来必须重新核验。
+- 命令级复核发现并修正文档规程：sparse-exact 的错误可返回 0，要求空
+  stderr 与完整 JSON/结果断言；write 示例只限写入 smoke，其 Close/log.Fatal
+  不证明资源退休；五个现成示例错误时也可能清理私有 fixture，不能保证
+  完整失败现场。未伪称这些示例源码缺口已经修复。
+- 为 maintenance/manual 命令添加独立 capture 名称与失败停止，源清单管道
+  启用 pipefail，所有身份/hash 输出检查错误；说明开发空间交接资料并非
+  仓库依赖。这些是未来用户的命令模板，没有在本轮执行。
+- 获明确范围批准后，inspect context 的一行修正只在独立副本进行普通
+  定名/只读验证。基线 AST 确认原调用丢失 ctx，运行回归原本通过；不把
+  此发现夸大成实测取消时限故障。结果和精确修正树将在独立审阅后单列。
