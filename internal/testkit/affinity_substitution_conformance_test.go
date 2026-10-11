@@ -6,8 +6,8 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/ms-xiaosnow/gosqlite/internal/testoracle"
 	"github.com/ms-xiaosnow/gosqlite/sqlite"
-	"os/exec"
 	"path/filepath"
 	"reflect"
 	"strings"
@@ -37,7 +37,7 @@ func TestAffinityInheritedMatrixOracle(t *testing.T) {
 	compare := func(q string) {
 		t.Helper()
 		cases++
-		cmd := exec.Command(cli, "-batch", "-bail", "-noheader", "-quote", "-readonly", path, q)
+		cmd := testoracle.ForTest(t, cli, "-batch", "-bail", "-noheader", "-quote", "-readonly", path, q)
 		var stderr bytes.Buffer
 		cmd.Stderr = &stderr
 		out, werr := cmd.Output()

@@ -6,11 +6,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
 
+	"github.com/ms-xiaosnow/gosqlite/internal/testoracle"
 	"github.com/ms-xiaosnow/gosqlite/sqlite"
 )
 
@@ -161,7 +161,7 @@ func TestRelationalOracleBindingAndEvaluationErrors(t *testing.T) {
 		t.Run(tc.query, func(t *testing.T) {
 			// The pinned shell reports these SQLITE_ERROR categories as text,
 			// without printing the numeric primary code in this invocation mode.
-			out, err := exec.Command(confOracle(t), "-readonly", "-batch", "-bail", path, tc.query).CombinedOutput()
+			out, err := testoracle.ForTest(t, confOracle(t), "-readonly", "-batch", "-bail", path, tc.query).CombinedOutput()
 			if err == nil || !strings.Contains(string(out), tc.category) {
 				t.Fatalf("oracle should report %q: %v: %s", tc.category, err, out)
 			}

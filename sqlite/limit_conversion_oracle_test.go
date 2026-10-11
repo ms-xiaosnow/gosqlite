@@ -13,13 +13,15 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/ms-xiaosnow/gosqlite/internal/testoracle"
 )
 
 // Fixed ordinary SQL only. The official CLI always completes normally; this
 // helper has no cancellation, timeout, signal, extension, or observer dependency.
 func limitConversionOracle(t *testing.T, executable, query string) ([][]any, bool) {
 	t.Helper()
-	cmd := exec.Command(executable, "-batch", "-bail", "-json", "-cmd", ".log stderr", ":memory:")
+	cmd := testoracle.ForTest(t, executable, "-batch", "-bail", "-json", "-cmd", ".log stderr", ":memory:")
 	cmd.Stdin = strings.NewReader(limitConversionSeed + "\n" + query + ";\n")
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout, cmd.Stderr = &stdout, &stderr
@@ -68,7 +70,7 @@ func TestLimitConversionPinnedOracle(t *testing.T) {
 	if executable == "" {
 		t.Fatal("SQLITE_ORACLE must name the pinned SQLite 3.54.0 CLI")
 	}
-	version, err := exec.Command(executable, "-batch", ":memory:", "SELECT sqlite_version() || '|' || sqlite_source_id();").CombinedOutput()
+	version, err := testoracle.ForTest(t, executable, "-batch", ":memory:", "SELECT sqlite_version() || '|' || sqlite_source_id();").CombinedOutput()
 	const wantVersion = "3.54.0|2026-10-09 15:46:58 be8d059e9a49089ab2dce5ed26dd87aaf598fdc5fbe0b107c0dd758464bcd5e3"
 	if err != nil || strings.TrimSpace(string(version)) != wantVersion {
 		t.Fatalf("oracle identity=%q err=%v", version, err)

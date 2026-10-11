@@ -158,16 +158,28 @@ func main() {
 			}
 			return nil
 		}
-		if !strings.HasSuffix(path, "_test.go") {
+		if !strings.HasSuffix(path, ".go") {
 			return nil
 		}
 		raw, err := os.ReadFile(path)
 		if err != nil {
 			return err
 		}
-		findings, err := inspectSource(path, raw)
-		if err != nil {
-			return err
+		var findings []string
+		// Keep the existing restricted-reference policy and its exact manual
+		// exclusions separate from startup isolation, which ignores build tags.
+		if strings.HasSuffix(path, "_test.go") {
+			findings, err = inspectSource(path, raw)
+			if err != nil {
+				return err
+			}
+		}
+		if oracleCurrentGoPath(path) {
+			startup, err := inspectOracleSource(path, raw)
+			if err != nil {
+				return err
+			}
+			findings = append(findings, startup...)
 		}
 		for _, f := range findings {
 			fmt.Fprintln(os.Stderr, f)
@@ -179,8 +191,17 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		failed = true
 	}
+	contracts, err := inspectOracleContracts(".")
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		failed = true
+	}
+	for _, finding := range contracts {
+		fmt.Fprintln(os.Stderr, finding)
+		failed = true
+	}
 	if failed {
 		os.Exit(1)
 	}
-	fmt.Println("Ordinary test source-reference guard PASS; behavioral review is still required.")
+	fmt.Println("Ordinary test and oracle startup source-reference guards PASS; behavioral review is still required.")
 }

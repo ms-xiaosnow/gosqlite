@@ -15,7 +15,6 @@ import (
 	"math"
 	"math/rand"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"reflect"
 	"strconv"
@@ -25,6 +24,7 @@ import (
 
 	_ "github.com/ms-xiaosnow/gosqlite/driver"
 	"github.com/ms-xiaosnow/gosqlite/internal/buildinfo"
+	"github.com/ms-xiaosnow/gosqlite/internal/testoracle"
 	"github.com/ms-xiaosnow/gosqlite/sqlite"
 )
 
@@ -53,7 +53,7 @@ func confOracle(t *testing.T) string {
 	}
 
 	confVersionOnce.Do(func() {
-		out, err := exec.Command(path, "-batch", "-bail", "-noheader", "-list", ":memory:", "SELECT sqlite_version(),sqlite_source_id();").CombinedOutput()
+		out, err := testoracle.ForTest(t, path, "-batch", "-bail", "-noheader", "-list", ":memory:", "SELECT sqlite_version(),sqlite_source_id();").CombinedOutput()
 		if err != nil {
 			confVersionErr = fmt.Errorf("oracle baseline check: %w: %s", err, out)
 			return
@@ -78,7 +78,7 @@ func confCLI(t *testing.T, path, query string, readonly bool) []byte {
 		args = append(args, "-readonly")
 	}
 	args = append(args, path)
-	cmd := exec.Command(confOracle(t), args...)
+	cmd := testoracle.ForTest(t, confOracle(t), args...)
 	cmd.Stdin = strings.NewReader(query + "\n")
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
@@ -439,7 +439,7 @@ func TestOracleErrorsAndResources(t *testing.T) {
 	defer db.Close()
 	for _, q := range []string{"SELECT missing FROM empty_table", "SELECT id FROM empty_table WHERE missing=0", "SELECT id FROM empty_table ORDER BY missing", "SELECT abs() FROM empty_table", "SELECT missing_function(id) FROM empty_table", "SELECT 1 LIMIT NULL", "SELECT 1 LIMIT 1.5", "SELECT 1 ORDER BY 2", "SELECT abs(-9223372036854775808)", "SELECT -0x8000000000000000"} {
 		t.Run(q, func(t *testing.T) {
-			cmd := exec.Command(confOracle(t), "-readonly", "-batch", "-bail", path, q)
+			cmd := testoracle.ForTest(t, confOracle(t), "-readonly", "-batch", "-bail", path, q)
 			if out, err := cmd.CombinedOutput(); err == nil {
 				t.Fatalf("error reference unexpectedly succeeded: %s", out)
 			}

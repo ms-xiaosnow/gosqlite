@@ -6,12 +6,12 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"os/exec"
 	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
 
+	"github.com/ms-xiaosnow/gosqlite/internal/testoracle"
 	"github.com/ms-xiaosnow/gosqlite/sqlite"
 )
 
@@ -64,7 +64,7 @@ func TestBooleanOracleContexts(t *testing.T) {
 	cases := 0
 	compare := func(q string, arg any, binding string) {
 		t.Helper()
-		cmd := exec.Command(cli, "-batch", "-bail", "-noheader", "-quote", "-readonly", path)
+		cmd := testoracle.ForTest(t, cli, "-batch", "-bail", "-noheader", "-quote", "-readonly", path)
 		cmd.Stdin = strings.NewReader(".parameter init\n.parameter set ?1 " + binding + "\n" + q + ";\n")
 		var stderr bytes.Buffer
 		cmd.Stderr = &stderr

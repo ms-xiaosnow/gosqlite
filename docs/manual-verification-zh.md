@@ -1,5 +1,54 @@
 # gosqlite 中文手工验收操作手册
 
+## 最新状态：startup / WAL / LIMIT / 示例（2026-10-11）
+
+已闭合的发布基点是 `b3492ed822d59834e5159cb7964c9dbd937027f7`，tree
+`ff13ded52883edfbabf747547a11b4e4ed7301ee`。其 Library 精确恢复及历史
+CI `38129577026` 已完成；CI 于 10:05:10 UTC SUCCESS，ordinary
+`114440917650` 与 oracle `114440917334` 均成功。该旧 oracle 启动隔离
+**NOT_PROVEN**，不能把真实历史 SUCCESS 改写为干净启动资格。
+
+**2026-10-11 12:31 UTC 终态：52b 精确本地两 quick 加全 15 门 PASS；两次旧 FAIL 保留。**
+
+- 原组合 `904ca698c3359bfe0674231f6d14ec8a9d704f30`：guard PASS，11:11:04 UTC
+  ordinary FAIL，5,341 PASS / 23 FAIL / 7 预期 oracle 叶项 SKIP；9 个顶层的
+  20 条直接 EXPLAIN 断言是生产规划提示回归，另 3 条为父项传播。
+- 首次修复 `209ba515f4dce18ae57103254b4053d4708b8736`：guard PASS，11:50:37 UTC
+  ordinary FAIL，5,547 PASS / 23 FAIL / 7 预期 oracle 叶项 SKIP。旧 9 根及原
+  23 条失败路径已实际 PASS，但新增测试误要求 ANN ranking 为 bounded_heap；
+  两次失败后各自第 3–15 项仍 NOT_RUN，原始日志和断言不覆盖。
+- 最新 `52b03f1d94f578fb6e3722c7bf28fc0056fad6d4` 只修新测试的 shape 常量，
+  生产源未改。quick 10 根 / 75 路径 PASS；随后全 15 门从 guard 重新执行，
+  12:31:15 UTC 自然终结，17 个顶层命令均 exit 0（含脚本子调用实际 19 次 Go）。
+- ordinary/race 各 5,570 PASS 加 7 个预期 oracle 叶项 SKIP；完整 oracle 为
+  7,202 路径 PASS、零测试 SKIP；末两名 LIMIT oracle race 为 394 路径 PASS。
+  vet、no-CGO build、五目标编译、模块与两种实际依赖闭包均 PASS。
+
+只有这个固定本地 tree 的已执行开发范围取得资格。main 仍为 b349，没有新提交、
+新提交 Library 恢复或新 CI 结果；本手册用户模板仍 NOT_RUN，不自动授予执行权限。
+native WAL-tail publisher 等真实代码缺口、原生/物理/安全和 M10 未验收均保持。
+下表独立切片的历史身份与结果继续保留，不能反向改写为同一源码资格：
+
+| 项目 | 精确源码身份 | 已有结果与当前边界 |
+|---|---|---|
+| SQLite 启动输入收口 | `5fec5ce5e5339f02dc2715d9a2d6bd4691b1c62c` | 46 个 Go 与 5 个 shell 调用点已在候选源码改造；独立源码审阅 PASS，14 Test / 198 路径纯检查与 AST guard PASS；后来的独立资格批次见最新摘要；不继承旧 PASS，也不自动授权 CI |
+| WAL scanner / proof / 普通生命周期 | `dbbb1e4ebca107c9a12695d9ad498a0c2f2057cf` | 13 条普通非 oracle 命令 PASS；normal/race 各 1,208 Test、41 Fuzz 目标的 313 固定种子、5 个可运行 Example；7 个可选 oracle 叶用例 SKIP；原生坏尾安全发布器仍缺代码 |
+| LIMIT 绑定与执行阶段 | `4c5c5fa0b60ee728b2c6f2eb153325106270cc86` | 新鲜基线 4 Test / 123 子项产生 49 条直接阶段断言 FAIL；候选 normal/race 各 16 Test / 1,145 子项 PASS、零 SKIP；没有新 oracle 结果 |
+| Levenshtein 示例发现 | `ec48c505f48aed452b96cd6544c6e3e84187ac3d` | 仅增加一行空行；精确 normal/race 各实际运行 `ExampleEngine_Levenshtein` 一次并通过原 `3 false` 输出断言；不反向改写旧 WAL 只有 5 个 Example 的事实 |
+
+完整身份、原始日志定位及持久归档见[本次证据](evidence/startup-wal-limit-20261011.md)。
+未来用户的启动前置、可复制模板和停止规则见[启动隔离中文规程](oracle-startup-verification-zh.md)。
+这些新规程仍是 NOT_RUN，不是执行许可。旧段落的日期、PASS/FAIL、PENDING、
+候选身份和当时缺口均保留；若与本摘要不同，按各自时点理解，不能混合资格。
+
+真实代码缺口仍包括 native WAL-tail publisher、更广 CAST/IPK/LEFT-ON/WHERE/
+排序阶段、通用明文备份、只读明文 WAL、部分 backend 与完整物理故障设施。
+strict Option A 明文备份在另一个候选中实现，不属于本批；main 的 plaintext
+backup 仍 unsupported，将来的 ext-family-only profile 也尚未资格验收。
+这些不是“只差运行”。四场景 public Open harness 已有源码/编译证据，但实际物理
+四场景仍 BLOCKED / NOT_RUN；长期、原生平台、持久性、安全和独立 M10 验收未完成。
+总体仍处于 **M9 实现推进、M10 未验收**，继续逐批补真实代码，不能宣布全部可编码项完成。
+
 2026-10-11 后续补记：公开 Open 四场景手工测试入口现已补齐并通过独立
 源码/AST/选择/编译/符号检查，全部物理运行仍 **BLOCKED / NOT_RUN**。
 当前身份及步骤索引见[第20节](#20-公开-open-四场景-harness-源码与编译资格2026-10-11)；
@@ -16,7 +65,7 @@
 
 当前不能宣布原始 `goal.md` 全部验收通过，也不能宣布稳定版、生产可用或加密安全已经认证。原因同时包括真实实现缺口、未合入的独立候选、已知失败、未运行的验收以及平台限制，不能统称为“只差人工测试”。
 
-本手册的源码基线为本地只读确认的提交：
+本手册初版的历史源码基线为当时本地只读确认的提交；它不包含后续 startup helper，不能用来运行本次新覆盖：
 
 - 项目：`durable-restart/gosqlite`
 - HEAD：`776b23eb59ce9613bf4498d352a716a193cdc9c3`
@@ -141,10 +190,28 @@
 SOURCE_REPO=/absolute/path/to/reviewed/gosqlite
 BASE=/absolute/path/to/disposable-acceptance
 TOOLCHAINS=/absolute/path/to/verified/toolchains
-SOURCE_COMMIT=776b23eb59ce9613bf4498d352a716a193cdc9c3
-
-test -d "$SOURCE_REPO/.git" || exit 1
-test -d "$BASE" || exit 1
+# 必须先由用户填入已合入 startup helper、经过完整源码审阅的实际提交全 SHA。
+# 当前历史 b349 / 776b 均不含该 helper；不得拿候选 tree 当作 commit。
+: "${SOURCE_COMMIT:?填写本次已审阅新提交的40位完整commit SHA}"
+clean_absolute() {
+  case "$1" in /*) ;; *) return 1 ;; esac
+  case "$1" in *//*|*/./*|*/../*|*/.|*/..|*\\*) return 1 ;; /) ;; */) return 1 ;; esac
+}
+for p in "$SOURCE_REPO" "$BASE" "$TOOLCHAINS"; do
+  clean_absolute "$p" || exit 1
+done
+test "$(/usr/bin/uname -s)" = Linux || exit 1
+test -d "$SOURCE_REPO/.git" && test -d "$BASE" || exit 1
+SOURCE_STATUS=$(git -C "$SOURCE_REPO" status --porcelain) || exit 1
+test -z "$SOURCE_STATUS" || exit 1
+SOURCE_HEAD=$(git -C "$SOURCE_REPO" rev-parse --verify HEAD) || exit 1
+test "$SOURCE_COMMIT" = "$SOURCE_HEAD" || exit 1
+SOURCE_TREE=$(git -C "$SOURCE_REPO" rev-parse "$SOURCE_COMMIT^{tree}") || exit 1
+for p in internal/testoracle/spec.go internal/testoracle/test.go \
+  internal/testoracle/spec_test.go internal/testscope/oracle_startup.go \
+  internal/testscope/oracle_shell.go; do
+  git -C "$SOURCE_REPO" cat-file -e "$SOURCE_COMMIT:$p" || exit 1
+done
 test -x "$TOOLCHAINS/go1.27.2/bin/go" || exit 1
 test -x "$TOOLCHAINS/sqlite-build-3540000/sqlite3" || exit 1
 umask 077
@@ -153,13 +220,19 @@ RUNROOT=$(mktemp -d "$BASE/gosqlite-acceptance-XXXXXXXX") || exit 1
 WORK="$RUNROOT/source"
 EVIDENCE="$RUNROOT/evidence"
 DATA="$RUNROOT/data"
-mkdir "$WORK" "$EVIDENCE" "$DATA" "$RUNROOT/bin" "$RUNROOT/tmp" "$RUNROOT/go-cache" || exit 1
+mkdir "$WORK" "$EVIDENCE" "$DATA" "$RUNROOT/bin" "$RUNROOT/go-cache" || exit 1
+# 私有临时根仅供未来获准的普通工具/Go fixture/SQLite child 使用。
+# 当前文档工作没有创建它，也不改变现有执行环境的缓存/资源策略。
+ORACLE_TMP=$(mktemp -d /tmp/gosqlite-oracle-XXXXXXXX) || exit 1
 git -C "$SOURCE_REPO" archive --format=tar "$SOURCE_COMMIT" > "$RUNROOT/source.tar" || exit 1
 tar -xf "$RUNROOT/source.tar" -C "$WORK" || exit 1
-git -C "$SOURCE_REPO" rev-parse "$SOURCE_COMMIT^{tree}" > "$EVIDENCE/source-tree.txt" || exit 1
+printf '%s\n' "$SOURCE_TREE" > "$EVIDENCE/source-tree.txt" || exit 1
 printf '%s\n' "$SOURCE_COMMIT" > "$EVIDENCE/source-commit.txt" || exit 1
+printf '%s\n' "$ORACLE_TMP" > "$EVIDENCE/oracle-temp-root.txt" || exit 1
 sha256sum "$RUNROOT/source.tar" > "$EVIDENCE/source-archive.sha256" || exit 1
-cd "$WORK" || exit 1
+cd -P "$WORK" || exit 1
+WORK=$(pwd -P) || exit 1
+ORACLE_CWD="$WORK"
 sha256sum goal.md > "$EVIDENCE/goal.sha256" || exit 1
 find . -type f -print0 | LC_ALL=C sort -z | xargs -0 sha256sum > "$EVIDENCE/source-before.sha256" || exit 1
 ```
@@ -173,13 +246,56 @@ find . -type f -print0 | LC_ALL=C sort -z | xargs -0 sha256sum > "$EVIDENCE/sour
 export PATH="$TOOLCHAINS/go1.27.2/bin:$PATH"
 export GOTOOLCHAIN=local CGO_ENABLED=0
 export GOPATH=/absolute/path/to/verified/offline-go-path
+export GOMODCACHE="$GOPATH/pkg/mod"
 export GOPROXY=off GOSUMDB=off
 export GOCACHE="$RUNROOT/go-cache"
+for p in "$GOPATH" "$GOMODCACHE" "$GOCACHE"; do
+  clean_absolute "$p" || exit 1
+  test -d "$p" && test -r "$p" && test -w "$p" && test -x "$p" || exit 1
+done
 export GOFLAGS=-buildvcs=false
-export TMPDIR="$RUNROOT/tmp"
-export SQLITE_ORACLE="$TOOLCHAINS/sqlite-build-3540000/sqlite3"
+export GOENV=off GOWORK=off
+unset SQLITE_ORACLE GOTMPDIR TMP TEMP
+unset GOSQLITE_MANUAL_RECOVERY GOSQLITE_MANUAL_RECOVERY_DIR GOSQLITE_MANUAL_NAMESPACE
+export TMPDIR="$ORACLE_TMP"
+# ORACLE_BIN 仅为本终端的未导出变量，普通测试不会因此打开可选 oracle。
+export -n ORACLE_BIN
+ORACLE_BIN="$TOOLCHAINS/sqlite-build-3540000/sqlite3"
 export GOMAXPROCS=2
+for p in "$ORACLE_BIN" "$ORACLE_TMP" "$ORACLE_CWD"; do
+  clean_absolute "$p" || exit 1
+done
+case "$ORACLE_TMP" in /tmp/*) ;; *) exit 1 ;; esac
+test -d "$ORACLE_TMP" && test ! -L "$ORACLE_TMP" || exit 1
+test -w "$ORACLE_TMP" && test -x "$ORACLE_TMP" || exit 1
+test "$(stat -c %a "$ORACLE_TMP")" = 700 || exit 1
+test "$(stat -c %u "$ORACLE_TMP")" = "$(id -u)" || exit 1
+test -f "$ORACLE_BIN" && test -x "$ORACLE_BIN" || exit 1
+sha256sum "$ORACLE_BIN" > "$EVIDENCE/oracle-binary.sha256" || exit 1
+printf '%s\n' "$ORACLE_BIN" "$ORACLE_CWD" > "$EVIDENCE/oracle-path-and-cwd.txt" || exit 1
+oracle_child() (
+  # 必须保留所审阅的绝对 CWD，不能改到临时根破坏相对 fixture。
+  cd "$ORACLE_CWD" || exit 1
+  exec /usr/bin/env -i LC_ALL=C LANG=C TZ=UTC \
+    "SQLITE_TMPDIR=$ORACLE_TMP" "TMPDIR=$ORACLE_TMP" \
+    "$ORACLE_BIN" -noinit "$@"
+)
+declare -f oracle_child > "$EVIDENCE/oracle-child-wrapper.bash" || exit 1
+printf '%s\n' LC_ALL=C LANG=C TZ=UTC \
+  "SQLITE_TMPDIR=$ORACLE_TMP" "TMPDIR=$ORACLE_TMP" \
+  > "$EVIDENCE/oracle-child-environment.txt" || exit 1
 ```
+
+上面的五次直接 SQLite 调用（身份、原生库 integrity、官方建库、官方复查、
+grams integrity）统一通过 `oracle_child`。SQLite 子进程环境恰为 LC_ALL、LANG、
+TZ、SQLITE_TMPDIR、TMPDIR 五键，`-noinit` 先于全部原参数；不继承 HOME/XDG、
+SQLITE_DEBUG_BREAK（空值也不允许）、PATH 或 loader 覆盖。父 shell、`/usr/bin/env`
+自身启动、编译器及系统 loader 仍为可信前置，不是完整 OS 隔离。
+`ForTest` 的 `os.Getwd` 可能读取 PWD 并 stat 路径，不能称该适配器完全纯净。
+GOTMPDIR 在 Go 1.27.2 的 test TempDir 优先于 TMPDIR，因此本模板明确 unset；
+若用户以后更改它，必须重新核对 fixture、编译临时文件及 SQLite 的共同根。
+以上目录存在/权限检查不能证明后续 namespace 稳定，失效时 SQLite 仍可能 fallback。
+完整启动步骤与进一步限制见[启动隔离专题](oracle-startup-verification-zh.md)。
 
 `GOPROXY=off GOSUMDB=off` 只用于已验证缓存的离线复验，不能说明依赖从未验证或新下载无需校验。`GOMAXPROCS=2` 是复验容量条件，不是 CPU 隔离证明。
 
@@ -215,20 +331,36 @@ capture() {
 
 ### 4.4 版本、磁盘和源身份前置检查
 
+先记录存储、空间、inode 和所选路径权限；这一块尚不调用 Go。
+
 ```bash
 # 文档模板。本轮不得执行。
-capture env-go go version || exit 1
-capture env-go-baseline go env GOVERSION GOOS GOARCH CGO_ENABLED GOTOOLCHAIN || exit 1
 capture env-uname uname -a || exit 1
 capture env-filesystem findmnt -T "$TMPDIR" || exit 1
-capture env-free-bytes df -B1 "$TMPDIR" "$EVIDENCE" || exit 1
-capture env-free-inodes df -i "$TMPDIR" "$EVIDENCE" || exit 1
-capture env-oracle "$SQLITE_ORACLE" -batch -bail -noheader -list :memory: \
-  'SELECT sqlite_version(),sqlite_source_id();' || exit 1
+capture env-workspace-filesystem findmnt -T "$RUNROOT" || exit 1
+capture env-free-bytes df -B1 "$TMPDIR" "$RUNROOT" || exit 1
+capture env-free-inodes df -i "$TMPDIR" "$RUNROOT" || exit 1
+capture env-path-permissions stat -c '%a %u %n' \
+  "$TMPDIR" "$RUNROOT" "$GOPATH" "$GOMODCACHE" "$GOCACHE" || exit 1
+```
+
+用户必须先逐项确认实际临时根所在文件系统至少有 1 GiB = 1073741824 bytes、
+RUNROOT 所在文件系统至少有 2 GiB = 2147483648 bytes，且两者各至少 10000
+可用 inode；所选 TMPDIR/GOPATH/GOMODCACHE/GOCACHE 均已有所需读写/搜索权限，
+离线依赖 cache 确为已经验证的 `GOPATH/pkg/mod`。缺记录、身份不符或不足时就在
+此停止，不进入下面的第一条 Go 命令，也不清理、降阈值或换 cache/temp 求通过。
+每条后续 Go 调用前都须重新完成同样的资源核对，记录名用新的唯一名称；一次
+预检不保证后续持续满足阈值。下面三条也分别以新预检与人工判定为前置。
+
+```bash
+# 文档模板。本轮不得执行。每一条前先完成上述资源准入，不能整块自动串跑。
+capture env-go go version || exit 1
+capture env-go-baseline go env GOVERSION GOOS GOARCH CGO_ENABLED GOTOOLCHAIN GOPATH GOMODCACHE GOCACHE || exit 1
 capture modules go mod verify || exit 1
 ```
 
-应见 `go version go1.27.2 linux/amd64`，oracle 身份必须逐字等于：
+应见 `go version go1.27.2 linux/amd64`。这里没有启动 oracle；其身份命令移到
+第 5.3 节单独的 HOLD 前置之后。未来该步骤获准时，oracle 身份必须逐字等于：
 
 ```text
 3.54.0|2026-10-09 15:46:58 be8d059e9a49089ab2dce5ed26dd87aaf598fdc5fbe0b107c0dd758464bcd5e3
@@ -237,6 +369,9 @@ capture modules go mod verify || exit 1
 不要整份打印 `env`，其中可能有密钥。只记录这里列出的非秘密字段。若 `findmnt` 不存在，先手工取得等价挂载证据，不静默跳过。
 
 已有环境曾出现 `/tmp` 为约 5.24 GB tmpfs，仅约 1.33–1.42 GiB 可用；工作区挂载带 `fsync=volatile`。这是历史观测，不是新环境的容量。必须检查实际 `TMPDIR`，不能拿当前目录的 `df` 代替。`fsync=volatile` 主机上的成功 Sync/正常重开不能证明掉电持久性。
+未来物理持久性资格的合成数据库必须另置于已经独立核验的真实持久文件系统，
+与 `/tmp` 临时根分开；`$DATA` 的位置也必须实际核验，不能只因它不叫 tmp 就认可。
+本普通模板没有启动、授权或代替受限物理验收。
 
 ## 5 普通自动门禁的手工操作
 
@@ -252,7 +387,7 @@ capture ordinary-scope go run ./internal/testscope || exit 1
 预期 stdout：
 
 ```text
-Ordinary test source-reference guard PASS; behavioral review is still required.
+Ordinary test and oracle startup source-reference guards PASS; behavioral review is still required.
 ```
 
 人工还要阅读所选测试及 helper。此 guard 是防错辅助，不能证明行为安全；旧基线的 OS raw namespace selector 缺口已在第 19 节的独立切片补上，但 bare helper、不同名 wrapper、动态调用与 reflection 仍需行为审阅。普通 `GOFLAGS` 不得出现 `manual_`；`manual_namespace` 与 `manual_recovery` 不得混入普通 unit、race、oracle 或 CI。
@@ -279,9 +414,18 @@ sha256sum "$RUNROOT/bin/gosqlite" > "$EVIDENCE/cli-binary.sha256" || exit 1
 
 ### 5.3 固定完整 oracle
 
+当前全部新 oracle 与会触发 oracle 的新 CI 仍 **HOLD / NOT_RUN**。
+本小节仅提供未来用户已完成源码/依赖/启动/输入闭包审阅后的真实脚本形状，
+不能因 pure source guard 或其他候选 PASS 而提前执行，连 version/help 也不能例外。
+
 ```bash
 # 文档模板。本轮不得执行。
-capture full-oracle env SQLITE_ORACLE="$SQLITE_ORACLE" sh ./scripts/test-oracle.sh || exit 1
+# 只有另行批准完整 oracle 后执行；不会向后续普通命令导出 SQLITE_ORACLE。
+capture env-oracle oracle_child -batch -bail -noheader -list :memory: \
+  'SELECT sqlite_version(),sqlite_source_id();' || exit 1
+capture full-oracle /usr/bin/env -u GOTMPDIR \
+  SQLITE_ORACLE="$ORACLE_BIN" TMPDIR="$ORACLE_TMP" \
+  /bin/sh ./scripts/test-oracle.sh || exit 1
 ```
 
 该脚本实际先跑 testscope，再比较 SQLite source ID，然后执行 `go test -count=1 -timeout=30m -tags oracle ./...`。不能把它缩成 `./internal/testkit` 或某一个 `-run` 后仍称“完整 oracle”。脚本中的 30 分钟是已存在的 Go 测试上限，不是 crash 验收；普通协作 CLI 子进程正常 `.quit`/EOF/Wait 收尾，不能擅自加进程终止机制。
@@ -323,7 +467,7 @@ capture sql-select "$CLI" query "$PLAIN" \
   'SELECT id,name,score FROM items ORDER BY id' || exit 1
 capture sql-native-check "$CLI" check "$PLAIN" || exit 1
 capture sql-inspect "$CLI" inspect "$PLAIN" || exit 1
-capture sql-official-integrity "$SQLITE_ORACLE" -batch -bail "$PLAIN" \
+capture sql-official-integrity oracle_child -batch -bail "$PLAIN" \
   'PRAGMA integrity_check; SELECT id,name,score FROM items ORDER BY id;' || exit 1
 ```
 
@@ -340,13 +484,13 @@ capture sql-official-integrity "$SQLITE_ORACLE" -batch -bail "$PLAIN" \
 # 文档模板。本轮不得执行。
 OFFICIAL="$DATA/official-created.db"
 test ! -e "$OFFICIAL" || exit 1
-capture sql-official-create "$SQLITE_ORACLE" -batch -bail "$OFFICIAL" \
+capture sql-official-create oracle_child -batch -bail "$OFFICIAL" \
   "PRAGMA page_size=4096; PRAGMA journal_mode=DELETE; CREATE TABLE items(id INTEGER PRIMARY KEY,name TEXT NOT NULL,score REAL); INSERT INTO items VALUES(7,'原始',3.5);" || exit 1
 capture sql-read-official "$CLI" query "$OFFICIAL" \
   'SELECT id,name,score FROM items ORDER BY id' || exit 1
 capture sql-update-official "$CLI" query "$OFFICIAL" \
   "UPDATE items SET name='已更新',score=4.5 WHERE id=7" || exit 1
-capture sql-recheck-official "$SQLITE_ORACLE" -batch -bail "$OFFICIAL" \
+capture sql-recheck-official oracle_child -batch -bail "$OFFICIAL" \
   'PRAGMA integrity_check; SELECT id,name,score FROM items ORDER BY id;' || exit 1
 ```
 
@@ -380,7 +524,7 @@ capture grams-correctness env CGO_ENABLED=0 go test -count=1 -v ./sqlite \
 capture grams-example env CGO_ENABLED=0 go run ./examples/grams "$DATA/grams.db" || exit 1
 capture grams-full-check "$CLI" check "$DATA/grams.db" || exit 1
 capture grams-named-check "$CLI" check "$DATA/grams.db" docs_grams || exit 1
-capture grams-official-integrity "$SQLITE_ORACLE" -batch -bail "$DATA/grams.db" \
+capture grams-official-integrity oracle_child -batch -bail "$DATA/grams.db" \
   'PRAGMA integrity_check;' || exit 1
 ```
 
@@ -562,7 +706,7 @@ capture migration-transition "$CLI" migrate pgembedding transition \
 
 ### 11.1 先检查实际保存位置与容量
 
-`benchmarks/transactions/main.go` 用 `os.MkdirTemp("", ...)`，因此数据在 `TMPDIR`，不是重定向 JSON 旁边。必须固定为用户独立目录，核对 mount/可用字节/inodes，并复核报告的 `retained_data_directory` 确实是其子目录。
+`benchmarks/transactions/main.go` 用 `os.MkdirTemp("", ...)`，因此数据在 `TMPDIR`，不是重定向 JSON 旁边。本普通 Linux 模板固定为 /tmp 下的用户私有根；若后续长测要采用另一位置，须另审完整路径契约，不能直接套用本 oracle helper。核对 mount/可用字节/inodes，并复核报告的 `retained_data_directory` 确实是其子目录。
 
 既有提案的工程入场门槛为：初始至少 6 GiB = 6442450944 bytes；构建后和每个 profile 启动前至少 4 GiB = 4294967296 bytes；审查建议每次至少 250000 free inodes。这些是入场余量，不是能抵御其他进程占用的硬保证，也不是原规范给定数字。
 
@@ -771,7 +915,7 @@ RUNROOT/
   source/                         精确导出的源码副本
   bin/                            本轮构建及 hash
   data/                           显式合成数据库与导入数据
-  tmp/                            明确指定的临时与 retained fixture 根
+  # 普通临时根在单独的新 /tmp/gosqlite-oracle-*，路径另存 oracle-temp-root.txt
   go-cache/                       本轮编译缓存
   evidence/
     source-commit.txt
@@ -811,7 +955,7 @@ cmp "$EVIDENCE/cli-binary.sha256" "$EVIDENCE/cli-binary-after.sha256" || exit 1
 1. 先确认本次所有子进程和 worker 自然结束、Rows/Tx/DB 正常收尾，无 pending retirement。不能因 shell 返回就推定原生资源状态明确。
 2. 完成 `results.tsv` 与 blockers，保存全部失败/不完整/未知记录。复制或归档已经正常关闭的合成 fixture 与 evidence，校验归档可读和 hash。
 3. 有异常 close、部分输出、源码变化或未知状态时，操作者默认保留整个 `RUNROOT`，不再自动做清理。这无法撤销现成示例内部已经发生的删除：第 9 节所列示例可能在失败时清理私有 fixture，普通 go test 的 t.TempDir 也会自动收尾；这些局限必须记录，不能宣称完整失败现场仍在。不要额外删除失败现场、WAL/journal/加密旧 generation 或 fuzz corpus 来让下一次通过。
-4. 只在操作者再次确认路径、资料保留策略和没有未闭合对象后，手工删除自己明确生成且可丢弃的目录。本文故意不提供宽泛 `rm -rf` 或 namespace sweep。
+4. 对 RUNROOT 和单独的 ORACLE_TMP 分别确认归属与记录。只在操作者再次确认路径、资料保留策略和没有未闭合对象后，手工删除自己明确生成且可丢弃的目录。本文故意不提供宽泛 `rm -rf` 或 namespace sweep。
 5. 第 9 节示例会自行清理私有临时目录，其中包含错误返回时的无条件清理和未报告的清理错误；transaction harness 则保留数据目录。逐例记录，成功退出不证明任意失败路径都已安全退休，不假定所有工具行为相同。
 6. 删除临时凭据/文件不是安全擦除，不能因此声称 GC、SSD、快照或旧 encrypted history 不可恢复。真实秘密根本不应进入本验收。
 
@@ -1059,9 +1203,14 @@ selector 规则保守匹配接收者，可检查调用/方法值/方法表达式
   的既有限制不变。空间不足或平台条件不符即 BLOCKED，不临时改断言/权限/挂载。
 - 只用独立、可丢弃且不含用户数据的新目录。不得使用生产路径、唯一备份或活库家族。
   两测试只写合成 `first`/`after` 字节，不能误称实际加密数据库验收。
-- `SOURCE_COMMIT` 必须由用户先填入实际已合入本批六路径的审阅提交全 SHA，
-  同时填其 `SOURCE_TREE`。上面的 56bb 是组合父基点，**不能用作下面的新入口提交**。
-  不把未提交 worktree、旧候选全树或 `HEAD` 的动态变化当作固定来源。
+- 本节的新模板要求 `SOURCE_COMMIT` 同时包含已审阅的六路径 namespace 门控、
+  `internal/testoracle` startup helper 和新版 `internal/testscope` startup guard，
+  并由用户填入该实际审阅提交的完整 SHA 及 `SOURCE_TREE`。56bb 是原父基点；
+  50b/b349 虽已含 namespace 门控，仍缺新版 startup helper/guard，**都不能用于
+  下面这个新版模板**。旧版本的手工模板仍保存在各自原提交中，不追改其历史。
+  不把未提交 worktree、候选 tree 或动态 `HEAD` 当作固定 commit 来源。
+  后面的文件/guard 文本检查只是版本准入，不能代替对完整源码的审阅；本节也
+  不运行 SQLite child，不授予 Windows/Darwin 原生 oracle 资格。
 
 以下只建立本次独立副本，变量的示例路径须先替换；Windows Bash 路径可用 `/c/...`。
 执行前还须按第 4.3 节在本专用终端定义原有 `capture` 函数，日志名不重复使用。
@@ -1072,12 +1221,25 @@ SOURCE_REPO=/absolute/path/to/reviewed/gosqlite
 BASE=/absolute/path/to/disposable-native-acceptance
 TOOLCHAIN_BIN=/absolute/path/to/native-go1.27.2/bin
 # 用户须先设置 SOURCE_COMMIT、SOURCE_TREE 和 GOPATH；GOPATH 为已核验缓存的原生绝对路径。
-: "${SOURCE_COMMIT:?填写已合入六路径的新审阅提交全SHA}"
+: "${SOURCE_COMMIT:?填写同时含namespace六路径与新版startup helper/guard的审阅提交全SHA}"
 : "${SOURCE_TREE:?填写该提交的实际tree}"
 : "${GOPATH:?填写已验证离线模块缓存的原生路径}"
 test -d "$BASE" && test -d "$SOURCE_REPO/.git" || exit 1
 test "$(git -C "$SOURCE_REPO" rev-parse "$SOURCE_COMMIT^{commit}")" = "$SOURCE_COMMIT" || exit 1
 test "$(git -C "$SOURCE_REPO" rev-parse "$SOURCE_COMMIT^{tree}")" = "$SOURCE_TREE" || exit 1
+# 新模板同时需要 namespace 门控与 startup helper/guard，拒绝旧 50b/b349。
+for p in internal/encstore/namespace_manual_windows_amd64_test.go \
+  internal/encstore/namespace_manual_darwin_test.go \
+  internal/testoracle/spec.go internal/testoracle/test.go \
+  internal/testoracle/spec_test.go internal/testscope/oracle_startup.go \
+  internal/testscope/oracle_shell.go; do
+  git -C "$SOURCE_REPO" cat-file -e "$SOURCE_COMMIT:$p" || exit 1
+done
+git -C "$SOURCE_REPO" grep -F -q \
+  'Ordinary test and oracle startup source-reference guards PASS; behavioral review is still required.' \
+  "$SOURCE_COMMIT" -- internal/testscope/main.go || exit 1
+git -C "$SOURCE_REPO" grep -F -q 'inspectOracleContracts(".")' \
+  "$SOURCE_COMMIT" -- internal/testscope/main.go || exit 1
 umask 077
 set -o pipefail
 RUNROOT=$(mktemp -d "$BASE/gosqlite-namespace-XXXXXXXX") || exit 1
@@ -1088,6 +1250,11 @@ tar -xf "$RUNROOT/source.tar" -C "$WORK" || exit 1
 printf '%s\n' "$SOURCE_COMMIT" > "$EVIDENCE/source-commit.txt" || exit 1
 printf '%s\n' "$SOURCE_TREE" > "$EVIDENCE/source-tree.txt" || exit 1
 export PATH="$TOOLCHAIN_BIN:$PATH" GOPATH
+export GOMODCACHE="$GOPATH/pkg/mod"
+# 保留各平台原生路径写法，显式选择已验证模块缓存，不继承其他 GOMODCACHE。
+for p in "$GOPATH" "$GOMODCACHE"; do
+  test -d "$p" && test -r "$p" && test -w "$p" && test -x "$p" || exit 1
+done
 export GOTOOLCHAIN=local GOENV=off GOWORK=off GOPROXY=off GOSUMDB=off
 export CGO_ENABLED=0 GOMAXPROCS=2 GOFLAGS=-buildvcs=false
 unset GOOS GOARCH GOTMPDIR GOSQLITE_MANUAL_NAMESPACE GOSQLITE_MANUAL_RECOVERY
@@ -1142,7 +1309,7 @@ capture namespace-archive-hash python3 -c 'import hashlib,pathlib,sys; print(has
 
 先人工核对 19.1 两文件的首行、各自完整函数和首句 gate，以及当前 P0 恢复
 检查仍在。下面 guard 只运行源码扫描，成功文本仍是
-`Ordinary test source-reference guard PASS; behavioral review is still required.`
+`Ordinary test and oracle startup source-reference guards PASS; behavioral review is still required.`
 **不要把 manual tag 放进 GOFLAGS**，也不在本规程运行 package 全套。
 
 ```bash
@@ -1278,3 +1445,17 @@ WAL-tail publisher、短写/Sync/ENOSPC、断电/强杀/torn-write、恶意目�
 四个具名子项全部实际运行且通过、零 FAIL/SKIP、身份/日志/退出码齐备，
 才可对该精确提交及实际 Linux/架构/文件系统记四场景 PASS；编译、空匹配或
 部分 PASS 均不符合。当前没有这份物理运行证据，M3/M10/整体仍未验收。
+
+## 21 startup / WAL / LIMIT / 示例的新证据与后续手工入口
+
+本次没有运行本手册任一命令或创建手工 fixture。前面历史章节及日志保留原时点；
+第 4–7 节的五处直接 SQLite 未来模板已经改用统一清洁子进程，普通命令保持
+SQLITE_ORACLE 未导出，不能误把可选 oracle 加入普通范围。新 helper 仅支持 Linux
+启动；Windows/Darwin 的原生 oracle 合同仍未实现，跨编译不能补齐这项资格。
+
+逐项状态与旧 b349 持久闭合见[证据摘要](evidence/startup-wal-limit-20261011.md)。
+启动纯测试、完整脚本、精确 LIMIT 和 Example 未来选择器见
+[中文专题](oracle-startup-verification-zh.md)；只有真实存在的测试/参数才列为命令。
+四场景 public recovery 保持第 20 节的 BLOCKED / NOT_RUN；native WAL-tail
+publisher 和其他缺失 harness 没有可编造的运行命令。限制分类的更新不允许恢复
+ANN V4、受阻 41-target campaign 或未知中断链路。

@@ -44,14 +44,15 @@ func (s *SharedSession) readIndexHeaderLocked(ctx context.Context) (h walindex.H
 	}
 	h = walindex.Header{Version: wal.Version}
 	if st.Size() != 0 {
-		snap, e := wal.Scan(ctx, nativeReaderAt{s.walFile}, st.Size(), wal.Limits{})
+		prefix, e := wal.ScanPrefix(ctx, nativeReaderAt{s.walFile}, st.Size(), wal.Limits{})
 		// Stale-generation bytes after an exact committed prefix are the normal
 		// consequence of SQLite WAL reuse. Fully checksum-valid uncommitted
 		// frames can likewise follow an ordinary cache-spill then ROLLBACK.
 		// Only the last committed prefix enters the shared index.
-		if !sharedWALPrefixAllowed(snap, e) {
+		if !sharedWALPrefixAllowed(prefix, e) {
 			return h, fmt.Errorf("%w: shared WAL reconstruction: %w", ErrUnsupported, e)
 		}
+		snap := prefix.Snapshot()
 		if snap.Header.PageSize != s.header.PageSize {
 			return h, fmt.Errorf("%w: physical database and WAL page sizes differ", ErrCorrupt)
 		}
@@ -89,6 +90,6 @@ func (s *SharedSession) readIndexHeaderLocked(ctx context.Context) (h walindex.H
 // The WAL scanner never exposes pending pages as committed. These two tails
 // represent normal rollback/reuse; all incomplete or same-salt invalid tails
 // remain refused rather than being silently repaired.
-func sharedWALPrefixAllowed(s wal.Snapshot, err error) bool {
-	return err == nil || (errors.Is(err, wal.ErrTail) && (s.Tail == wal.TailUncommitted || s.Tail == wal.TailSaltMismatch))
+func sharedWALPrefixAllowed(prefix wal.CommittedPrefix, err error) bool {
+	return prefix.Allows(err, wal.TailUncommitted, wal.TailSaltMismatch)
 }

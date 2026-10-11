@@ -246,11 +246,11 @@ func Scan(ctx context.Context, r io.ReaderAt, size int64, limits Limits) (Snapsh
 		}
 		offset += frameSize
 	}
-	if s.ValidFrameCount != s.FrameCount {
-		return tail(s, TailUncommitted, s.EndOffset, nil)
-	}
 	if err := ctx.Err(); err != nil {
 		return s, err
+	}
+	if s.ValidFrameCount != s.FrameCount {
+		return tail(s, TailUncommitted, s.EndOffset, nil)
 	}
 	s.Complete = true
 	return s, nil
@@ -258,19 +258,15 @@ func Scan(ctx context.Context, r io.ReaderAt, size int64, limits Limits) (Snapsh
 
 func tail(s Snapshot, status TailStatus, offset int64, cause error) (Snapshot, error) {
 	s.Tail, s.TailOffset, s.TailCause = status, offset, cause
-	if cause == nil {
-		return s, fmt.Errorf("%w: %s at %d", ErrTail, status, offset)
-	}
-	return s, fmt.Errorf("%w: %s at %d: %w", ErrTail, status, offset, cause)
+	return s, &tailError{status: status, offset: offset, cause: cause}
 }
 
 func readAt(r io.ReaderAt, b []byte, offset int64) error {
 	n, err := r.ReadAt(b, offset)
 	if n != len(b) {
-		if err == nil || errors.Is(err, io.EOF) {
-			return io.ErrUnexpectedEOF
-		}
-		return err
+		// EOF may be joined to a real I/O or ownership failure. Preserve the
+		// entire error graph rather than replacing an errors.Is(EOF) match.
+		return errors.Join(io.ErrUnexpectedEOF, err)
 	}
 	// ReaderAt permits a full final read to return EOF. Other errors are
 	// propagated even if the reader supplied all requested bytes.

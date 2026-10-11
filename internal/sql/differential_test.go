@@ -8,11 +8,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/ms-xiaosnow/gosqlite/internal/buildinfo"
+	"github.com/ms-xiaosnow/gosqlite/internal/testoracle"
 	"io"
 	"math"
 	"math/rand"
 	"os"
-	"os/exec"
 	"strconv"
 	"strings"
 	"testing"
@@ -88,7 +88,7 @@ func TestDiffSQLiteAffinity(t *testing.T) {
 }
 func runDiff(t *testing.T, oracle string, exprs []string, prefix string, ctx *EvalContext) {
 	t.Helper()
-	version, err := exec.Command(oracle, "-batch", "-bail", ":memory:", "SELECT sqlite_version() || '|' || sqlite_source_id();").CombinedOutput()
+	version, err := testoracle.ForTest(t, oracle, "-batch", "-bail", ":memory:", "SELECT sqlite_version() || '|' || sqlite_source_id();").CombinedOutput()
 	if err != nil || strings.TrimSpace(string(version)) != buildinfo.SQLiteBaseline+"|"+buildinfo.SQLiteSourceID {
 		t.Fatalf("oracle version/source mismatch: %s (%v)", version, err)
 	}
@@ -101,7 +101,7 @@ func runDiff(t *testing.T, oracle string, exprs []string, prefix string, ctx *Ev
 		}
 		fmt.Fprintf(&script, "SELECT %d AS id, typeof((%s)) AS t, CASE WHEN typeof((%s)) IN ('text','blob') THEN hex((%s)) ELSE quote((%s)) END AS v%s;\n", i, e, e, e, e, from)
 	}
-	cmd := exec.Command(oracle, "-json", ":memory:")
+	cmd := testoracle.ForTest(t, oracle, "-json", ":memory:")
 	cmd.Stdin = strings.NewReader(script.String())
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr

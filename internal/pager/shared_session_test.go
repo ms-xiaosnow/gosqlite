@@ -468,19 +468,20 @@ func TestSharedWALCommittedPrefixTailPolicyInMemory(t *testing.T) {
 		t.Fatal(e)
 	}
 	full := append(append(append([]byte(nil), raw...), committed...), pending...)
-	snap, e := wal.Scan(context.Background(), bytes.NewReader(full), int64(len(full)), wal.Limits{})
-	if !sharedWALPrefixAllowed(snap, e) || snap.FrameCount != 1 || snap.ValidFrameCount != 2 || snap.DBSize != 1 || snap.Checksum != sum || snap.Pages[1].Frame != 1 {
+	prefix, e := wal.ScanPrefix(context.Background(), bytes.NewReader(full), int64(len(full)), wal.Limits{})
+	snap := prefix.Snapshot()
+	if !sharedWALPrefixAllowed(prefix, e) || snap.FrameCount != 1 || snap.ValidFrameCount != 2 || snap.DBSize != 1 || snap.Checksum != sum || snap.Pages[1].Frame != 1 {
 		t.Fatalf("committed prefix: %+v %v", snap, e)
 	}
 	incomplete := full[:len(full)-1]
-	snap, e = wal.Scan(context.Background(), bytes.NewReader(incomplete), int64(len(incomplete)), wal.Limits{})
-	if sharedWALPrefixAllowed(snap, e) {
+	prefix, e = wal.ScanPrefix(context.Background(), bytes.NewReader(incomplete), int64(len(incomplete)), wal.Limits{})
+	if sharedWALPrefixAllowed(prefix, e) {
 		t.Fatal("accepted incomplete same-salt suffix")
 	}
 	damaged := append([]byte(nil), full...)
 	damaged[len(damaged)-1] ^= 1
-	snap, e = wal.Scan(context.Background(), bytes.NewReader(damaged), int64(len(damaged)), wal.Limits{})
-	if sharedWALPrefixAllowed(snap, e) {
+	prefix, e = wal.ScanPrefix(context.Background(), bytes.NewReader(damaged), int64(len(damaged)), wal.Limits{})
+	if sharedWALPrefixAllowed(prefix, e) {
 		t.Fatal("accepted invalid same-salt suffix")
 	}
 	old := h
@@ -490,8 +491,9 @@ func TestSharedWALCommittedPrefixTailPolicyInMemory(t *testing.T) {
 		t.Fatal(e)
 	}
 	reused := append(append([]byte(nil), full...), suffix...)
-	snap, e = wal.Scan(context.Background(), bytes.NewReader(reused), int64(len(reused)), wal.Limits{})
-	if !sharedWALPrefixAllowed(snap, e) || snap.FrameCount != 1 || snap.ValidFrameCount != 2 || snap.Pages[1].Frame != 1 {
+	prefix, e = wal.ScanPrefix(context.Background(), bytes.NewReader(reused), int64(len(reused)), wal.Limits{})
+	snap = prefix.Snapshot()
+	if !sharedWALPrefixAllowed(prefix, e) || snap.FrameCount != 1 || snap.ValidFrameCount != 2 || snap.Pages[1].Frame != 1 {
 		t.Fatalf("ordinary rollback then old-generation suffix: %+v %v", snap, e)
 	}
 }

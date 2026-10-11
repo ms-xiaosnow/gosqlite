@@ -6,12 +6,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os/exec"
 	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
 
+	"github.com/ms-xiaosnow/gosqlite/internal/testoracle"
 	"github.com/ms-xiaosnow/gosqlite/sqlite"
 )
 
@@ -167,11 +167,11 @@ func TestOracleTransactionExclusiveReservations(t *testing.T) {
 			peer := startLiveOracle(t, path)
 			writeExec(t, db, "BEGIN EXCLUSIVE")
 			// Expected BUSY from an ordinary cooperating process, with normal return.
-			out, err := exec.Command(confOracle(t), "-batch", "-bail", path, "BEGIN IMMEDIATE; ROLLBACK;").CombinedOutput()
+			out, err := testoracle.ForTest(t, confOracle(t), "-batch", "-bail", path, "BEGIN IMMEDIATE; ROLLBACK;").CombinedOutput()
 			if err == nil || !strings.Contains(string(out), "locked") {
 				t.Fatalf("official writer bypassed reservation: %v %s", err, out)
 			}
-			out, err = exec.Command(confOracle(t), "-batch", "-bail", path, "SELECT id FROM t;").CombinedOutput()
+			out, err = testoracle.ForTest(t, confOracle(t), "-batch", "-bail", path, "SELECT id FROM t;").CombinedOutput()
 			if shared {
 				if err != nil || strings.TrimSpace(string(out)) != "1" {
 					t.Fatal(err, string(out))

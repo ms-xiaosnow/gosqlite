@@ -8,12 +8,12 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"os/exec"
 	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
 
+	"github.com/ms-xiaosnow/gosqlite/internal/testoracle"
 	"github.com/ms-xiaosnow/gosqlite/sqlite"
 )
 
@@ -125,7 +125,7 @@ func TestCachedPreparationOracleHistories(t *testing.T) {
 			// Ordinary peer SQL changes declarations, never bytes or filesystem names.
 			external := func(q string) {
 				t.Helper()
-				cmd := exec.Command(confOracle(t), "-batch", path)
+				cmd := testoracle.ForTest(t, confOracle(t), "-batch", path)
 				cmd.Stdin = strings.NewReader(q + ";\n")
 				out, e := cmd.CombinedOutput()
 				if e != nil {

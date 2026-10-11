@@ -5,9 +5,10 @@ package testkit_test
 import (
 	"context"
 	"fmt"
-	"os/exec"
 	"strings"
 	"testing"
+
+	"github.com/ms-xiaosnow/gosqlite/internal/testoracle"
 )
 
 // Independent review probes: ordinary intact SQL fixtures and completed read-only
@@ -80,7 +81,7 @@ func TestIndependentAggregateExplainAndBindOrder(t *testing.T) {
 		"EXPLAIN QUERY PLAN SELECT count(*) FROM a LIMIT NULL",
 	} {
 		t.Run(q, func(t *testing.T) {
-			output, err := exec.Command(confOracle(t), "-batch", "-bail", "-readonly", path, q).CombinedOutput()
+			output, err := testoracle.ForTest(t, confOracle(t), "-batch", "-bail", "-readonly", path, q).CombinedOutput()
 			if err != nil || !strings.Contains(string(output), "QUERY PLAN") {
 				t.Fatal(err, string(output))
 			}
@@ -102,7 +103,7 @@ func TestIndependentAggregateExplainAndBindOrder(t *testing.T) {
 		{"SELECT count(*) LIMIT 0 OFFSET abs()", "wrong number of arguments"},
 	} {
 		t.Run(tc.q, func(t *testing.T) {
-			output, err := exec.Command(confOracle(t), "-batch", "-bail", "-readonly", path, tc.q).CombinedOutput()
+			output, err := testoracle.ForTest(t, confOracle(t), "-batch", "-bail", "-readonly", path, tc.q).CombinedOutput()
 			if err == nil || !strings.Contains(string(output), tc.category) {
 				t.Fatal(err, string(output))
 			}
@@ -120,7 +121,7 @@ func TestIndependentAggregateExplainAndBindOrder(t *testing.T) {
 func TestIndependentAggregateNULOverflow(t *testing.T) {
 	db, path := aggregateOracleFixture(t, false)
 	q := "SELECT sum(CASE id WHEN 1 THEN 9223372036854775807 WHEN 2 THEN 1 ELSE CAST(x'300078' AS TEXT) END) FROM a"
-	output, err := exec.Command(confOracle(t), "-batch", "-bail", "-readonly", path, q).CombinedOutput()
+	output, err := testoracle.ForTest(t, confOracle(t), "-batch", "-bail", "-readonly", path, q).CombinedOutput()
 	if err == nil || !strings.Contains(string(output), "integer overflow") {
 		t.Fatal(err, string(output))
 	}

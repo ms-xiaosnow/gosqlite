@@ -7,6 +7,7 @@ import (
 	"math"
 	"strings"
 
+	"github.com/ms-xiaosnow/gosqlite/extension/vector"
 	"github.com/ms-xiaosnow/gosqlite/internal/btree"
 	sqlast "github.com/ms-xiaosnow/gosqlite/internal/sql"
 )
@@ -232,25 +233,32 @@ func (d *DB) plan(ctx context.Context, reader btree.PageReader, sel *sqlast.Sele
 		}
 		r.order = append(r.order, orderExpr{expr: o.Expr, column: -1, desc: o.Desc, nulls: o.Nulls})
 	}
-	if sel.Limit != nil {
-		if err := validate(sel.Limit, nil, nil); err != nil {
-			return nil, err
-		}
-		r.limit, err = limitValue(ctx, sel.Limit, params)
-		if err != nil {
-			return nil, err
-		}
+	// Bind both expressions before execution. EXPLAIN executes neither bound;
+	// LIMIT 0 suppresses OFFSET evaluation, but never its name/function checks.
+	if err := validate(sel.Limit, nil, nil); err != nil {
+		return nil, err
 	}
-	if sel.Offset != nil {
-		if err := validate(sel.Offset, nil, nil); err != nil {
-			return nil, err
+	if err := validate(sel.Offset, nil, nil); err != nil {
+		return nil, err
+	}
+	if sel.Explain {
+		// Hints recognize safe numeric syntax without executing either bound.
+		r.limit, r.offset = explainPlanBounds(sel.Limit, sel.Offset, params)
+	} else {
+		if sel.Limit != nil {
+			r.limit, err = limitValue(ctx, sel.Limit, params)
+			if err != nil {
+				return nil, err
+			}
 		}
-		r.offset, err = limitValue(ctx, sel.Offset, params)
-		if err != nil {
-			return nil, err
-		}
-		if r.offset < 0 {
-			r.offset = 0
+		if r.limit != 0 && sel.Offset != nil {
+			r.offset, err = limitValue(ctx, sel.Offset, params)
+			if err != nil {
+				return nil, err
+			}
+			if r.offset < 0 {
+				r.offset = 0
+			}
 		}
 	}
 	if err = d.prepareGramFunctions(ctx, reader, r); err != nil {
@@ -331,6 +339,81 @@ func integerConstant(e sqlast.Expr) (int64, bool) {
 	}
 	return 0, false
 }
+
+// explainPlanBounds supplies optional bounded-ranking metadata after both
+// bounds have been validated. Unknown or invalid hints keep the conservative
+// unbounded plan, without introducing execution-time bound errors. EXPLAIN can
+// therefore differ from SELECT for numeric text, calls, casts, and arithmetic.
+func explainPlanBounds(limit, offset sqlast.Expr, params []any) (int64, int64) {
+	n, known := explainBoundInteger(limit, params)
+	if !known || n < 0 {
+		return -1, 0
+	}
+	if n == 0 {
+		return 0, 0
+	}
+	var skip int64
+	if offset != nil {
+		var ok bool
+		skip, ok = explainBoundInteger(offset, params)
+		if !ok {
+			return -1, 0
+		}
+		if skip < 0 {
+			skip = 0
+		}
+	}
+	maxResults := int64(vector.DefaultSearchLimits().MaxResults)
+	if n > maxResults || skip > maxResults-n {
+		return -1, 0
+	}
+	return n, skip
+}
+
+// explainBoundInteger reads canonical numeric leaves and safe unary signs.
+// Parameters have already passed the ordinary admission path. No evaluator,
+// conversion callback, context, or execution budget participates in this hint.
+func explainBoundInteger(expr sqlast.Expr, params []any) (int64, bool) {
+	var value any
+	switch x := expr.(type) {
+	case *sqlast.Literal:
+		value = x.Value
+	case *sqlast.Parameter:
+		if x.Index < 1 || x.Index > len(params) {
+			return 0, false
+		}
+		value = params[x.Index-1]
+	case *sqlast.Unary:
+		if x.Op != "+" && x.Op != "-" {
+			return 0, false
+		}
+		n, ok := explainBoundInteger(x.Expr, params)
+		if !ok {
+			return 0, false
+		}
+		if x.Op == "-" {
+			if n == math.MinInt64 {
+				return 0, false
+			}
+			n = -n
+		}
+		return n, true
+	default:
+		return 0, false
+	}
+	switch n := value.(type) {
+	case int64:
+		return n, true
+	case float64:
+		// Match NUMERIC affinity's strict REAL endpoints. Comparisons reject
+		// NaN/infinities before conversion; the round trip requires exactness.
+		if n > float64(math.MinInt64) && n < 9223372036854775808.0 && float64(int64(n)) == n {
+			return int64(n), true
+		}
+	}
+	return 0, false
+}
+
 func limitValue(ctx context.Context, expr sqlast.Expr, params []any) (int64, error) {
 	value, err := sqlast.Eval(expr, &sqlast.EvalContext{Context: ctx, Params: params})
 	if err != nil {

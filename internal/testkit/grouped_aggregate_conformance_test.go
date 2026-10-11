@@ -6,8 +6,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/ms-xiaosnow/gosqlite/internal/testoracle"
 	"github.com/ms-xiaosnow/gosqlite/sqlite"
-	"os/exec"
 	"strings"
 	"testing"
 )
@@ -133,7 +133,7 @@ func TestGroupedAggregateOracleErrorTimingAndBounds(t *testing.T) {
 		{"SELECT x FROM a HAVING count(*)>0", "non-aggregate"},
 	} {
 		t.Run(tc.q, func(t *testing.T) {
-			out, err := exec.Command(confOracle(t), "-readonly", "-batch", "-bail", path, tc.q).CombinedOutput()
+			out, err := testoracle.ForTest(t, confOracle(t), "-readonly", "-batch", "-bail", path, tc.q).CombinedOutput()
 			if err == nil || !strings.Contains(string(out), tc.part) {
 				t.Fatalf("oracle want %s got %v %s", tc.part, err, out)
 			}
@@ -151,7 +151,7 @@ func TestGroupedAggregateOracleErrorTimingAndBounds(t *testing.T) {
 		})
 	}
 	for _, q := range []string{"EXPLAIN QUERY PLAN SELECT x,count(*) FROM a GROUP BY x HAVING abs(-9223372036854775808) LIMIT NULL OFFSET 1.5", "EXPLAIN QUERY PLAN SELECT x,count(*) FROM a GROUP BY x LIMIT abs(-9223372036854775808)"} {
-		out, err := exec.Command(confOracle(t), "-readonly", "-batch", "-bail", path, q).CombinedOutput()
+		out, err := testoracle.ForTest(t, confOracle(t), "-readonly", "-batch", "-bail", path, q).CombinedOutput()
 		if err != nil {
 			t.Fatal(err, string(out))
 		}
@@ -258,7 +258,7 @@ func TestGroupedAggregateOracleRowidStream(t *testing.T) {
 			for _, bad := range []int{1, 2, 3, 4} {
 				q := fmt.Sprintf("SELECT id,count(*) FROM stream_group WHERE CASE WHEN id=%d THEN abs(-9223372036854775808) ELSE 1 END GROUP BY %s%s", bad, keys, tail)
 				t.Run(q, func(t *testing.T) {
-					out, officialErr := exec.Command(confOracle(t), "-readonly", "-batch", "-bail", path, q).CombinedOutput()
+					out, officialErr := testoracle.ForTest(t, confOracle(t), "-readonly", "-batch", "-bail", path, q).CombinedOutput()
 					if officialErr == nil {
 						confCompare(t, confExpected(t, path, q), confNative(t, db, q))
 						return

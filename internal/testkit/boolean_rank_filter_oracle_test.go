@@ -6,12 +6,12 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"os/exec"
 	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
 
+	"github.com/ms-xiaosnow/gosqlite/internal/testoracle"
 	"github.com/ms-xiaosnow/gosqlite/sqlite"
 )
 
@@ -54,7 +54,7 @@ func TestBooleanRankFilterOracle(t *testing.T) {
 				continue
 			}
 			scalar := "SELECT id FROM items NOT INDEXED WHERE " + where + " ORDER BY id LIMIT 2"
-			cmd := exec.Command(cli, "-batch", "-bail", "-noheader", "-quote", "-readonly", dbpath)
+			cmd := testoracle.ForTest(t, cli, "-batch", "-bail", "-noheader", "-quote", "-readonly", dbpath)
 			cmd.Stdin = strings.NewReader(".parameter init\n.parameter set ?1 " + arg.sql + "\n" + scalar + ";\n")
 			var stderr bytes.Buffer
 			cmd.Stderr = &stderr

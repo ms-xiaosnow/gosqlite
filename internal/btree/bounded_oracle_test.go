@@ -11,7 +11,6 @@ import (
 	"math"
 	"math/rand"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"reflect"
 	"strconv"
@@ -19,13 +18,14 @@ import (
 	"testing"
 
 	"github.com/ms-xiaosnow/gosqlite/internal/pager"
+	"github.com/ms-xiaosnow/gosqlite/internal/testoracle"
 )
 
 // The CLI is test-only. It creates intact ordinary databases using legal SQL.
 // No file faults, file-byte mutation, process termination or crash paths run.
 func boundedOracleSQL(t *testing.T, cli, path, sql string) string {
 	t.Helper()
-	cmd := exec.Command(cli, "-batch", "-bail", path)
+	cmd := testoracle.ForTest(t, cli, "-batch", "-bail", path)
 	cmd.Stdin = strings.NewReader(sql)
 	out, err := cmd.CombinedOutput()
 	if err != nil {

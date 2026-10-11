@@ -6,13 +6,13 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
 
 	"github.com/ms-xiaosnow/gosqlite/internal/buildinfo"
 	"github.com/ms-xiaosnow/gosqlite/internal/pager"
+	"github.com/ms-xiaosnow/gosqlite/internal/testoracle"
 )
 
 // Only ordinary successful transactions and the official read/check oracle
@@ -23,7 +23,7 @@ func mutableOracle(t *testing.T, path, sql string) string {
 	if exe == "" {
 		t.Fatal("oracle acceptance requires explicit SQLITE_ORACLE")
 	}
-	cmd := exec.Command(exe, "-batch", "-bail", "-noheader", "-list", path)
+	cmd := testoracle.ForTest(t, exe, "-batch", "-bail", "-noheader", "-list", path)
 	cmd.Stdin = strings.NewReader(sql + "\n")
 	out, e := cmd.CombinedOutput()
 	if e != nil {
@@ -37,7 +37,7 @@ func TestMutableDurableOracle(t *testing.T) {
 	if exe == "" {
 		t.Fatal("oracle acceptance requires explicit SQLITE_ORACLE")
 	}
-	if version, e := exec.Command(exe, "-version").Output(); e != nil || !strings.HasPrefix(string(version), buildinfo.SQLiteBaseline+" ") {
+	if version, e := testoracle.ForTest(t, exe, "-version").Output(); e != nil || !strings.HasPrefix(string(version), buildinfo.SQLiteBaseline+" ") {
 		t.Fatalf("wrong official oracle: %s %v", version, e)
 	}
 	for _, size := range []uint32{512, 4096, 65536} {

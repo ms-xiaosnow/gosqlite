@@ -7,12 +7,12 @@ import (
 	"context"
 	"fmt"
 	"math"
-	"os/exec"
 	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
 
+	"github.com/ms-xiaosnow/gosqlite/internal/testoracle"
 	"github.com/ms-xiaosnow/gosqlite/sqlite"
 )
 
@@ -97,7 +97,7 @@ func TestOracleSecondaryRangeSQL(t *testing.T) {
 				bind string
 			}{{int64(1), "1"}, {1.5, "1.5"}, {"01", "\"'01'\""}, {[]byte("42"), "X'3432'"}, {nil, "NULL"}, {"x\x00y", "\"CAST(X'780079' AS TEXT)\""}} {
 				q := "SELECT id,typeof(k),hex(k) FROM t WHERE k>?1 ORDER BY k,id DESC LIMIT 9"
-				cmd := exec.Command(confOracle(t), "-batch", "-bail", "-quote", "-header", "-readonly", path)
+				cmd := testoracle.ForTest(t, confOracle(t), "-batch", "-bail", "-quote", "-header", "-readonly", path)
 				cmd.Stdin = strings.NewReader(".parameter init\n.parameter set ?1 " + p.bind + "\n" + q + ";\n")
 				out, err := cmd.CombinedOutput()
 				if err != nil {
@@ -118,7 +118,7 @@ func TestOracleSecondaryRangeSQL(t *testing.T) {
 				checks++
 			}
 			for _, q := range []string{"SELECT abs(-9223372036854775808) FROM t WHERE k>0 ORDER BY k,id", "SELECT id FROM t WHERE k>0 AND abs(-9223372036854775808)>0", "SELECT missing FROM t WHERE k>0 LIMIT 0", "SELECT id FROM t WHERE k>0 ORDER BY missing LIMIT 0", "SELECT id FROM t WHERE k >", "SELECT id FROM t WHERE k >< 1"} {
-				cmd := exec.Command(confOracle(t), "-batch", "-bail", "-readonly", path, q)
+				cmd := testoracle.ForTest(t, confOracle(t), "-batch", "-bail", "-readonly", path, q)
 				var stderr bytes.Buffer
 				cmd.Stderr = &stderr
 				_, oracleErr := cmd.Output()

@@ -16,6 +16,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/ms-xiaosnow/gosqlite/internal/testoracle"
 	"github.com/ms-xiaosnow/gosqlite/sqlite"
 )
 
@@ -136,7 +137,7 @@ func TestConnectionCountersOracleHistories(t *testing.T) {
 					script.WriteString(step.query + ";\n")
 					appendQuery(connectionOracleSelect)
 				}
-				cmd := exec.Command(confOracle(t), "-batch", "-quote", "-header", filepath.Join(t.TempDir(), "official.db"))
+				cmd := testoracle.ForTest(t, confOracle(t), "-batch", "-quote", "-header", filepath.Join(t.TempDir(), "official.db"))
 				cmd.Stdin = strings.NewReader(script.String())
 				var stderr bytes.Buffer
 				cmd.Stderr = &stderr
@@ -182,7 +183,7 @@ func TestConnectionCountersOracleFunctionErrors(t *testing.T) {
 				t.Fatal(err)
 			}
 			defer db.Close()
-			out, oracleErr := exec.Command(confOracle(t), "-batch", "-bail", ":memory:", q).CombinedOutput()
+			out, oracleErr := testoracle.ForTest(t, confOracle(t), "-batch", "-bail", ":memory:", q).CombinedOutput()
 			if oracleErr == nil || !strings.Contains(string(out), "wrong number of arguments") {
 				t.Fatal(string(out), oracleErr)
 			}
@@ -211,7 +212,7 @@ type counterLiveOracle struct {
 
 func startCounterLiveOracle(t *testing.T, path string) *counterLiveOracle {
 	t.Helper()
-	p := &counterLiveOracle{t: t, cmd: exec.Command(confOracle(t), "-batch", "-header", "-quote", path)}
+	p := &counterLiveOracle{t: t, cmd: testoracle.ForTest(t, confOracle(t), "-batch", "-header", "-quote", path)}
 	var err error
 	p.in, err = p.cmd.StdinPipe()
 	if err != nil {

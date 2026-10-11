@@ -15,6 +15,7 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/ms-xiaosnow/gosqlite/internal/testoracle"
 	"github.com/ms-xiaosnow/gosqlite/sqlite"
 )
 
@@ -51,7 +52,7 @@ type liveOracle struct {
 func startLiveOracle(t *testing.T, path string) *liveOracle {
 	t.Helper()
 	p := &liveOracle{t: t}
-	p.cmd = exec.Command(confOracle(t), "-batch", "-noheader", "-list", path)
+	p.cmd = testoracle.ForTest(t, confOracle(t), "-batch", "-noheader", "-list", path)
 	var err error
 	p.in, err = p.cmd.StdinPipe()
 	if err != nil {

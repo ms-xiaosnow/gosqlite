@@ -6,12 +6,12 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"os/exec"
 	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
 
+	"github.com/ms-xiaosnow/gosqlite/internal/testoracle"
 	"github.com/ms-xiaosnow/gosqlite/sqlite"
 )
 
@@ -41,7 +41,7 @@ func TestBooleanIdentifierOracleMatrix(t *testing.T) {
 	compare := func(q string) {
 		t.Helper()
 		cases++
-		cmd := exec.Command(cli, "-batch", "-bail", "-quote", "-header", "-readonly", path)
+		cmd := testoracle.ForTest(t, cli, "-batch", "-bail", "-quote", "-header", "-readonly", path)
 		cmd.Stdin = strings.NewReader(q + ";\n")
 		var stderr bytes.Buffer
 		cmd.Stderr = &stderr
@@ -160,7 +160,7 @@ func TestBooleanIdentifierOracleDML(t *testing.T) {
 		writeExec(t, db, q)
 	}
 	query := `SELECT id,true,false,"NULL",typeof(true),typeof(false) FROM true ORDER BY id`
-	cmd := exec.Command(cli, "-batch", "-bail", "-quote", "-header", ":memory:", strings.Join(script, ";")+";"+query+";")
+	cmd := testoracle.ForTest(t, cli, "-batch", "-bail", "-quote", "-header", ":memory:", strings.Join(script, ";")+";"+query+";")
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		t.Fatalf("oracle DML %v: %s", err, out)

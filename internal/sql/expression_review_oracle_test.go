@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
-	"os/exec"
 	"strings"
 	"testing"
 
 	"github.com/ms-xiaosnow/gosqlite/internal/buildinfo"
+	"github.com/ms-xiaosnow/gosqlite/internal/testoracle"
 )
 
 // The audited runDiff helper checks the pinned official version/source, uses
@@ -90,7 +90,7 @@ func TestExpressionReviewOracleCastTextPrefixes(t *testing.T) {
 
 func TestExpressionReviewOracleCastKeywordGrammar(t *testing.T) {
 	oracle := os.Getenv("SQLITE_ORACLE")
-	version, err := exec.Command(oracle, "-batch", "-bail", ":memory:", "SELECT sqlite_version() || '|' || sqlite_source_id();").CombinedOutput()
+	version, err := testoracle.ForTest(t, oracle, "-batch", "-bail", ":memory:", "SELECT sqlite_version() || '|' || sqlite_source_id();").CombinedOutput()
 	if err != nil || strings.TrimSpace(string(version)) != buildinfo.SQLiteBaseline+"|"+buildinfo.SQLiteSourceID {
 		t.Fatalf("oracle identity: %s %v", version, err)
 	}
@@ -100,7 +100,7 @@ func TestExpressionReviewOracleCastKeywordGrammar(t *testing.T) {
 	for _, name := range names {
 		q := "CAST('1.5' AS " + name + ")"
 		// Each subprocess performs just one SELECT in memory and exits normally.
-		out, wantErr := exec.Command(oracle, "-batch", "-bail", ":memory:", "SELECT "+q+";").CombinedOutput()
+		out, wantErr := testoracle.ForTest(t, oracle, "-batch", "-bail", ":memory:", "SELECT "+q+";").CombinedOutput()
 		_, gotErr := ParseExpr(q)
 		if (gotErr == nil) != (wantErr == nil) {
 			t.Errorf("%s: native err=%v; SQLite err=%v output=%s", name, gotErr, wantErr, out)

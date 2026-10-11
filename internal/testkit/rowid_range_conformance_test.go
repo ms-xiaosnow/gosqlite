@@ -6,11 +6,11 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
 
+	"github.com/ms-xiaosnow/gosqlite/internal/testoracle"
 	"github.com/ms-xiaosnow/gosqlite/sqlite"
 )
 
@@ -64,7 +64,7 @@ func TestOracleRowIDRangeSQL(t *testing.T) {
 				bind string
 			}{{int64(1), "1"}, {1.25, "1.25"}, {"00042", "\"'00042'\""}, {[]byte("42"), "X'3432'"}, {nil, "NULL"}} {
 				q := "SELECT id,v,r FROM t WHERE id>?1 ORDER BY id DESC LIMIT 3"
-				cmd := exec.Command(confOracle(t), "-batch", "-bail", "-quote", "-header", "-readonly", path)
+				cmd := testoracle.ForTest(t, confOracle(t), "-batch", "-bail", "-quote", "-header", "-readonly", path)
 				cmd.Stdin = strings.NewReader(".parameter init\n.parameter set ?1 " + p.bind + "\n" + q + ";\n")
 				out, err := cmd.CombinedOutput()
 				if err != nil {
@@ -82,7 +82,7 @@ func TestOracleRowIDRangeSQL(t *testing.T) {
 				cases++
 			}
 			for _, q := range []string{"SELECT abs(id) FROM t WHERE id<=-9223372036854775808 ORDER BY id DESC LIMIT 1", "SELECT id FROM t WHERE id>0 AND abs(-9223372036854775808)>0 ORDER BY id", "SELECT id FROM t WHERE id>0 ORDER BY abs(-9223372036854775808)", "SELECT missing FROM t WHERE id>0 ORDER BY id LIMIT 0"} {
-				cmd := exec.Command(confOracle(t), "-batch", "-bail", "-readonly", path, q)
+				cmd := testoracle.ForTest(t, confOracle(t), "-batch", "-bail", "-readonly", path, q)
 				var stderr bytes.Buffer
 				cmd.Stderr = &stderr
 				_, oracleErr := cmd.Output()

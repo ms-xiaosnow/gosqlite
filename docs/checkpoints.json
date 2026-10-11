@@ -906,5 +906,101 @@
     "evidence_archive_bytes": 15356765,
     "evidence_archive_sha256": "21cd1a73b622123605eb48a5031b0cc38314a04eac8a9b71c72f873ecaa3d701",
     "evidence_archive_readback": "PASS bytecmp,843entries,842manifestfile hashes"
+  },
+  {
+    "remote_commit": "b3492ed822d59834e5159cb7964c9dbd937027f7",
+    "tree": "ff13ded52883edfbabf747547a11b4e4ed7301ee",
+    "parent": "50b627e11e9dbce7f2fde8df35c4634c52a06d52",
+    "main_readback_verified": true,
+    "local_mirror_exact": true,
+    "library_file_id": "libfile_c416989d053081919f257c1f3200564c",
+    "library_version": 0,
+    "bundle_bytes": 5769076,
+    "bundle_sha256": "dfe931d13fce5ec1984b50e69128478a2d025176827306a6585898845b8f4251",
+    "library_readback": "PASS：逐字节读回、完整 bundle 校验、fresh clone/fsck、精确 HEAD/tree/goal。",
+    "source_gate": {
+      "tree": "0af9b064bebfbec9c8270c4bf2f10ec2055fb186",
+      "status": "PASS：六条 AST/list/compile/nm Go 工具命令；没有执行物理测试。",
+      "non_docs": 789
+    },
+    "restore": {
+      "status": "PASS",
+      "start_utc": "2026-10-11T09:51:23.961270+00:00",
+      "finish_utc": "2026-10-11T09:51:37.340563+00:00",
+      "head": "b3492ed822d59834e5159cb7964c9dbd937027f7",
+      "tree": "ff13ded52883edfbabf747547a11b4e4ed7301ee",
+      "files": 3128,
+      "non_docs": 789,
+      "preservation": {
+        "source_files_directories_modes_metadata_unchanged": true,
+        "full_git_metadata_unchanged": true,
+        "head_tree_index_tracked_entries_unchanged": true,
+        "compiler_freeze_unchanged": true
+      },
+      "Go_command_count": 6,
+      "command_exits": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "test_binary_executed": false,
+      "physical_scenarios": {
+        "nil-default-preserves-input": "BLOCKED / NOT_RUN",
+        "opt-in-restores-and-reopens": "BLOCKED / NOT_RUN",
+        "journal-limit-preserves-input": "BLOCKED / NOT_RUN",
+        "no-create-preserves-absence": "BLOCKED / NOT_RUN"
+      },
+      "default_CI": "separate lead-owned run 38129577026; no CI conclusion claimed here",
+      "failure": null,
+      "compiler_lease": "terminal; released to lead"
+    },
+    "ci_run": 38129577026,
+    "ci_status": "COMPLETED SUCCESS 2026-10-11T10:05:10Z",
+    "acceptance": "有限公开 Open 手工 harness 源码/编译检查点；四个物理场景全部 BLOCKED / NOT_RUN；M10 未完成。",
+    "restore_report_sha256": "45a4a34ed7ca2cc7d09420523928a54f4d1069ec44ef31f9a7f1d371d58987eb",
+    "restore_manifest_sha256": "335ab12e11dca09c126f54d60d4c03b879932311bfbafbd9b4f66cfa017f7a7b",
+    "restore_manifest_files": 56,
+    "oracle_initialization_qualification": "历史 CI SUCCESS 保持；旧 helper 缺少 -noinit 与清洁子进程环境，启动隔离 NOT_PROVEN。没有读取实际用户配置或环境值，也没有观察或推断历史额外命令。新 oracle 与新 CI HOLD，等待独立启动审阅及明确后续范围。",
+    "observed_utc": "2026-10-11T10:09:19.002245+00:00",
+    "ci_jobs": [
+      {
+        "id": 114440917334,
+        "name": "oracle",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 114440917650,
+        "name": "ordinary",
+        "status": "completed",
+        "conclusion": "success"
+      }
+    ],
+    "ci_terminal": {
+      "id": 38129577026,
+      "head_sha": "b3492ed822d59834e5159cb7964c9dbd937027f7",
+      "updated_at": "2026-10-11T10:05:10Z",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    "ci_decoded_logs": {
+      "ordinary": {
+        "bytes": 23983,
+        "sha256": "9c2e0f65b2ef932f89df5de2796a8902b8b84641a325eb136207277a58484321"
+      },
+      "oracle": {
+        "bytes": 21229,
+        "sha256": "962175d2215185daa0d4af85324049f3eea3ee010f52135272132330c6170fd0"
+      }
+    },
+    "evidence_archive_library_file_id": "libfile_611e42320f0081919d6ef2a4f490a493",
+    "evidence_archive_bytes": 12197085,
+    "evidence_archive_sha256": "d0e5477c3b8e01daea3af7d23b1cbdd73a084fa9347ace441110e54c0ecade9e",
+    "evidence_archive_readback": "PASS：逐字节读回、266 条目、265 个清单文件哈希。",
+    "checkpoint_scope_note": "仅追加已经闭合的 b349 历史记录；startup/WAL/LIMIT/Example 独立候选没有在本记录中取得组合、提交、恢复或 CI 资格。"
   }
 ]

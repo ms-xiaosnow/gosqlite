@@ -69,6 +69,21 @@ NULL queries and nullable vector columns retain the existing exact/general path.
 The NOT NULL requirement preserves SQL's NULL-first ascending ordering; native
 search supports nullable vector columns and excludes NULL candidates.
 
+2026-10-11 未发布 EXPLAIN 窄修：SQL ANN 的 bound hint 遵循
+[SQL ranking 的保守合同](vector.md#sql-bounded-ranking-and-truthful-plans)，只读
+字面/已准入参数的 int64、严格排除 ±2^63 的有限精确整数 REAL 与安全 unary +/-。
+unknown NULL/TEXT/BLOB/function/CAST/binary/超界 bound 不执行、不新增 bound runtime 错误；
+unknown OFFSET 不猜 0。LIMIT 0 忽略 OFFSET 提示，正 LIMIT 仅在 OFFSET 已知
+或缺省、负 OFFSET 归 0、合计安全且不超过既有 MaxResults 时给有界提示。
+实际 SELECT 的原求值语义不变，因此数字文本 LIMIT 的实际 SELECT 可选 ANN，
+EXPLAIN 却保守不给 ANN 提示。只有 bound hint 无 SQL 求值预算消耗，不能扩展成
+整个 EXPLAIN 零预算/零元数据 I/O；下文的 IVF 训练状态读取边界仍成立。
+209ba 已通过旧规划回归测试，但因新增 shape 测试误要求 bounded_heap 而总体
+ordinary FAIL；52b 仅把 HNSW/IVF 期望修为既有 ann_exact_rescore，exact 仍为
+bounded_heap，生产不动。52b 的本地两 quick / 全 15 门已经自然 PASS，旧回归与
+新 shape 断言在 ordinary/race/完整 oracle 均通过；源码未发布，不提升物理、
+外平台原生或 M10 资格。
+
 ```sql
 CREATE INDEX items_ivf ON items(embedding) USING ivfflat
   WITH(opclass='vector_l2_ops',lists=100,training_samples=10000,

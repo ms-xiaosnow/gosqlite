@@ -50,15 +50,21 @@ func (s *Session) openWALLocked(ctx context.Context) error {
 	if s.walInfo.Size() == 0 {
 		return nil
 	}
-	s.snapshot, err = wal.Scan(ctx, nativeReaderAt{f}, s.walInfo.Size(), wal.Limits{})
+	prefix, err := wal.ScanPrefix(ctx, nativeReaderAt{f}, s.walInfo.Size(), wal.Limits{})
 	if err != nil {
-		// Incomplete, uncommitted, and invalid tails are deliberately left
-		// untouched. Supporting their recovery requires separate acceptance.
+		// Typed scanner evidence is necessary but not sufficient: the existing
+		// path-based intact-WAL normalizer is not a retained-directory tail
+		// publisher. Do not silently treat pre/post pathname checks as that
+		// capability, or truncate/append to the old authoritative WAL.
+		if exclusiveWALPrefixAllowed(prefix, err) {
+			return errors.Join(ErrUnsupported, errWALTailPublicationUnavailable, err)
+		}
 		if errors.Is(err, wal.ErrLimit) {
-			return fmt.Errorf("%w: %v", ErrLimit, err)
+			return fmt.Errorf("%w: %w", ErrLimit, err)
 		}
 		return fmt.Errorf("%w: WAL validation: %w", ErrUnsupported, err)
 	}
+	s.snapshot = prefix.Snapshot()
 	return nil
 }
 

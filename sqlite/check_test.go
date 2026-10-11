@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"reflect"
 	"strings"
@@ -14,6 +13,7 @@ import (
 
 	"github.com/ms-xiaosnow/gosqlite/encryption"
 	"github.com/ms-xiaosnow/gosqlite/internal/testkit/fileview"
+	"github.com/ms-xiaosnow/gosqlite/internal/testoracle"
 	"github.com/ms-xiaosnow/gosqlite/sqlite"
 )
 
@@ -312,7 +312,7 @@ func checkOracle(t *testing.T, path, sql string) string {
 	if oracle == "" {
 		t.Skip("SQLITE_ORACLE is required for official supported-profile fixtures")
 	}
-	cmd := exec.Command(oracle, path, sql)
+	cmd := testoracle.ForTest(t, oracle, path, sql)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		t.Fatal(string(out), err)

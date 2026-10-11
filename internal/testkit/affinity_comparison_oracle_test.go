@@ -6,8 +6,8 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/ms-xiaosnow/gosqlite/internal/testoracle"
 	"github.com/ms-xiaosnow/gosqlite/sqlite"
-	"os/exec"
 	"path/filepath"
 	"reflect"
 	"strconv"
@@ -37,7 +37,7 @@ func affinityBatch(t *testing.T, db *sqlite.DB, path string, cases []affinityQue
 		}
 		script.WriteString(c.sql + ";\n")
 	}
-	cmd := exec.Command(confOracle(t), "-batch", "-bail", "-noheader", "-quote", "-readonly", path)
+	cmd := testoracle.ForTest(t, confOracle(t), "-batch", "-bail", "-noheader", "-quote", "-readonly", path)
 	cmd.Stdin = strings.NewReader(script.String())
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr

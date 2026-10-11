@@ -6,12 +6,12 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"os/exec"
 	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
 
+	"github.com/ms-xiaosnow/gosqlite/internal/testoracle"
 	"github.com/ms-xiaosnow/gosqlite/sqlite"
 )
 
@@ -39,7 +39,7 @@ func TestBooleanAliasOnOracleProvenance(t *testing.T) {
 	compare := func(q string, arg any, binding string) {
 		t.Helper()
 		cases++
-		cmd := exec.Command(cli, "-batch", "-bail", "-quote", "-noheader", "-readonly", path)
+		cmd := testoracle.ForTest(t, cli, "-batch", "-bail", "-quote", "-noheader", "-readonly", path)
 		cmd.Stdin = strings.NewReader(".parameter init\n.parameter set ?1 " + binding + "\n" + q + ";\n")
 		var stderr bytes.Buffer
 		cmd.Stderr = &stderr

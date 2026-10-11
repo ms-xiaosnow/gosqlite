@@ -6,13 +6,13 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"os/exec"
 	"path/filepath"
 	"reflect"
 	"regexp"
 	"strings"
 	"testing"
 
+	"github.com/ms-xiaosnow/gosqlite/internal/testoracle"
 	"github.com/ms-xiaosnow/gosqlite/sqlite"
 )
 
@@ -108,7 +108,7 @@ func TestReviewConnectionCountersTypedOracle(t *testing.T) {
 				script.WriteString(s.q + ";\n")
 				read(counts)
 			}
-			cmd := exec.Command(confOracle(t), "-batch", "-quote", "-header", filepath.Join(t.TempDir(), "official.db"))
+			cmd := testoracle.ForTest(t, confOracle(t), "-batch", "-quote", "-header", filepath.Join(t.TempDir(), "official.db"))
 			cmd.Stdin = strings.NewReader(script.String())
 			var stderr bytes.Buffer
 			cmd.Stderr = &stderr

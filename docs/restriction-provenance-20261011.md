@@ -1,5 +1,54 @@
 # 源码开发与受限执行的证据分类
 
+## 最新状态：startup / WAL / LIMIT / 示例（2026-10-11）
+
+已闭合的发布基点是 `b3492ed822d59834e5159cb7964c9dbd937027f7`，tree
+`ff13ded52883edfbabf747547a11b4e4ed7301ee`。其 Library 精确恢复及历史
+CI `38129577026` 已完成；CI 于 10:05:10 UTC SUCCESS，ordinary
+`114440917650` 与 oracle `114440917334` 均成功。该旧 oracle 启动隔离
+**NOT_PROVEN**，不能把真实历史 SUCCESS 改写为干净启动资格。
+
+**2026-10-11 12:31 UTC 终态：52b 精确本地两 quick 加全 15 门 PASS；两次旧 FAIL 保留。**
+
+- 原组合 `904ca698c3359bfe0674231f6d14ec8a9d704f30`：guard PASS，11:11:04 UTC
+  ordinary FAIL，5,341 PASS / 23 FAIL / 7 预期 oracle 叶项 SKIP；9 个顶层的
+  20 条直接 EXPLAIN 断言是生产规划提示回归，另 3 条为父项传播。
+- 首次修复 `209ba515f4dce18ae57103254b4053d4708b8736`：guard PASS，11:50:37 UTC
+  ordinary FAIL，5,547 PASS / 23 FAIL / 7 预期 oracle 叶项 SKIP。旧 9 根及原
+  23 条失败路径已实际 PASS，但新增测试误要求 ANN ranking 为 bounded_heap；
+  两次失败后各自第 3–15 项仍 NOT_RUN，原始日志和断言不覆盖。
+- 最新 `52b03f1d94f578fb6e3722c7bf28fc0056fad6d4` 只修新测试的 shape 常量，
+  生产源未改。quick 10 根 / 75 路径 PASS；随后全 15 门从 guard 重新执行，
+  12:31:15 UTC 自然终结，17 个顶层命令均 exit 0（含脚本子调用实际 19 次 Go）。
+- ordinary/race 各 5,570 PASS 加 7 个预期 oracle 叶项 SKIP；完整 oracle 为
+  7,202 路径 PASS、零测试 SKIP；末两名 LIMIT oracle race 为 394 路径 PASS。
+  vet、no-CGO build、五目标编译、模块与两种实际依赖闭包均 PASS。
+
+只有这个固定本地 tree 的已执行开发范围取得资格。main 仍为 b349，没有新提交、
+新提交 Library 恢复或新 CI 结果；本手册用户模板仍 NOT_RUN，不自动授予执行权限。
+native WAL-tail publisher 等真实代码缺口、原生/物理/安全和 M10 未验收均保持。
+下表独立切片的历史身份与结果继续保留，不能反向改写为同一源码资格：
+
+| 项目 | 精确源码身份 | 已有结果与当前边界 |
+|---|---|---|
+| SQLite 启动输入收口 | `5fec5ce5e5339f02dc2715d9a2d6bd4691b1c62c` | 46 个 Go 与 5 个 shell 调用点已在候选源码改造；独立源码审阅 PASS，14 Test / 198 路径纯检查与 AST guard PASS；后来的独立资格批次见最新摘要；不继承旧 PASS，也不自动授权 CI |
+| WAL scanner / proof / 普通生命周期 | `dbbb1e4ebca107c9a12695d9ad498a0c2f2057cf` | 13 条普通非 oracle 命令 PASS；normal/race 各 1,208 Test、41 Fuzz 目标的 313 固定种子、5 个可运行 Example；7 个可选 oracle 叶用例 SKIP；原生坏尾安全发布器仍缺代码 |
+| LIMIT 绑定与执行阶段 | `4c5c5fa0b60ee728b2c6f2eb153325106270cc86` | 新鲜基线 4 Test / 123 子项产生 49 条直接阶段断言 FAIL；候选 normal/race 各 16 Test / 1,145 子项 PASS、零 SKIP；没有新 oracle 结果 |
+| Levenshtein 示例发现 | `ec48c505f48aed452b96cd6544c6e3e84187ac3d` | 仅增加一行空行；精确 normal/race 各实际运行 `ExampleEngine_Levenshtein` 一次并通过原 `3 false` 输出断言；不反向改写旧 WAL 只有 5 个 Example 的事实 |
+
+完整身份、原始日志定位及持久归档见[本次证据](evidence/startup-wal-limit-20261011.md)。
+未来用户的启动前置、可复制模板和停止规则见[启动隔离中文规程](oracle-startup-verification-zh.md)。
+这些新规程仍是 NOT_RUN，不是执行许可。旧段落的日期、PASS/FAIL、PENDING、
+候选身份和当时缺口均保留；若与本摘要不同，按各自时点理解，不能混合资格。
+
+真实代码缺口仍包括 native WAL-tail publisher、更广 CAST/IPK/LEFT-ON/WHERE/
+排序阶段、通用明文备份、只读明文 WAL、部分 backend 与完整物理故障设施。
+strict Option A 明文备份在另一个候选中实现，不属于本批；main 的 plaintext
+backup 仍 unsupported，将来的 ext-family-only profile 也尚未资格验收。
+这些不是“只差运行”。四场景 public Open harness 已有源码/编译证据，但实际物理
+四场景仍 BLOCKED / NOT_RUN；长期、原生平台、持久性、安全和独立 M10 验收未完成。
+总体仍处于 **M9 实现推进、M10 未验收**，继续逐批补真实代码，不能宣布全部可编码项完成。
+
 核对日期：2026-10-11 UTC。本文纠正此前将多项剩余编码工作一并列作平台禁止的过宽表述。原始 [goal.md](../goal.md) 不变；初次分类时的开发基点为 `63c2ebb10e3a2c4ff2378ee9f33c46133134c70f`，tree `d735409ebd1c43d90ee1650c8a7c2a084e270674`。07:01:55 UTC 的远端只读记录仍指向该提交。本轮后续新提交、精确恢复和 CI 尚待实际产生及核验，不预写自指 SHA。
 
 **结论：在已搜索的可访问证据中，没有定位到 recovery、backup、WAL、planner、backend 或缺失 harness 的精确源码编辑动作被拒绝的原始记录。** 已定位的事实包括受限测试执行、开发时的谨慎暂停、真实工程缺陷、待审阅/待集成，以及触发动作不明的整轮安全中断。这些事实应分开记载。没有找到记录，不证明从未拒绝，也不自动授予任何操作权限。
@@ -209,3 +258,70 @@ Connector 实际恢复覆盖、更广 journal、其他平台及 native WAL publi
 不是执行授权；任何 test binary、fixture 生成或物理场景均未执行。
 实际 RecoverRollback/public bridge/启用恢复的 Open/Connect 仍 BLOCKED / NOT_RUN。
 ANN V4、41-target fuzz、未知触发链路及其他执行限制均保持。
+
+## 十 2026-10-11 startup 与当前普通证据的资格补充
+
+1. 新 oracle HOLD 的依据是已定位的启动输入缺口与源码独立审阅前置，不是将所有
+   数据库源码编辑再度归为禁令。已发布 b349 的 46 个 Go / 5 个 shell 调用点没有
+   `-noinit`，并继承环境；官方源码明确 SQLITE_DEBUG_BREAK 先于 flags，用户
+   初始化先于 version/help。静态审计没有读取实际用户配置或环境值，不推断过去
+   真的执行过额外命令。历史 PASS/FAIL/SUCCESS 保留，初始化隔离 NOT_PROVEN。
+2. startup 候选统一五键环境、领先 noinit、绝对路径/CWD 和 Linux-only admission；
+   Windows/Darwin 原生 oracle 仍 unsupported。NewSpec 字符串模型与 ForTest
+   适配器不同：后者 Getwd 可查 PWD/stat；Shell 只清洁 SQLite child，父脚本/
+   downloader/configure/compiler 和 trusted env loader 不在完整隔离声明内。
+   installer 新增的绝对 base 检查是实际父脚本行为变化，不能说整个 bootstrap 同字节。
+3. WAL 的 13 条普通命令、LIMIT 的新鲜基线及两条候选选择器、Example 两条选择器
+   有各自精确身份和终态，不能扩大到 startup、完整组合或新 oracle / CI。
+   WAL 的 41 个目标仅跑 313 固定 seed，不是受阻的新 41-target fuzz campaign。
+   旧 sixth Example NOT_RUN 保留，只有独立一行空行修正取得新 named PASS。
+4. 用户未来文档中的新私有 /tmp 根用于普通 Go/SQLite 临时文件；这不是当前执行
+   的环境/缓存/resource policy 变更。现有实际复验保持原有 /tmp、缓存与资源门；
+   无阈值降低、迁移 cache/temp 或清理求 PASS。真正持久性 fixture 必须在另行
+   核验的持久设备，与 /tmp 分开，tmpfs 或 fsync=volatile 不可资格替代。
+5. native WAL-tail publisher、通用明文 backup、只读 WAL、其余 SQL/backend 与
+   完整故障 harness 继续按真实代码缺口记录；strict Option A backup 是别的候选。
+   已有 public Open 四场景仅源码/编译 PASS，实际仍 BLOCKED / NOT_RUN。
+   本次没有改写历史限制、启动受限操作或恢复 ANN V4 / 受阻 campaign / 未知链路。
+
+本页旧表保留当时状态，最新候选和执行结果以页首及[分层证据](evidence/startup-wal-limit-20261011.md)
+为准。文件或归档存在不是资格；只有精确身份、真正执行、完整断言与终态齐备才可
+记对应有限 PASS。源码开发仍继续，M9/M10 和原 goal 的实现/验收义务均保留。
+
+## 十一 2026-10-11 11:11 UTC 组合失败的范围
+
+新四切片组合只执行本次精确许可中的 guard 和无筛选普通测试；guard PASS，
+ordinary 自然 exit 1 后立即停止，第 3–15 项全部 NOT_RUN。20 条直接 EXPLAIN
+断言失败是真实回归，不是资源不足或执行器错误；原日志和失败身份已保存。
+只读因果分析与已批准的 `query.go` bound hint 窄修另列，不能由源码修复推定重跑、
+oracle 或 CI 获准。修复尚无新执行结果，全部受限物理工作及既有 HOLD 保持。
+
+本次普通 argv、固定 tree 和原日志可以核验；可访问旧证据仍不足以重建 ANN V4 /
+未知中断的精确操作。不能仅凭测试名称含 ANN 就认定同链，也不能宣称已证实不同链。
+没有恢复、改名、拆分旧受阻流程；原始 FAIL 归档读回 PASS 只证明保真保存，
+不改变运行 FAIL。准确身份和停止范围见[分层证据](evidence/startup-wal-limit-20261011.md)。
+
+## 十二 12:04 UTC 新批次的许可与结果分界
+
+本节 RUNNING 是 12:04 UTC 的历史观测；后续有限终态见第十三节。
+
+209ba 的新测试 shape 断言失败有独立真实日志；旧 9 根 / 23 路径已通过仍不能
+使总体变成 PASS。52b 的生产代码不变，只修新测试常量，独立审阅后另行启动
+quick 及新的 15 门，目前 RUNNING / 待终态。此前各报告的 source-only、HOLD、
+NOT_RUN 是各自时点，保持原文；新范围许可不来自文档，也不授权恢复旧中断链路。
+
+backup 六条有限模型/AST PASS 不等于六个 native 场景已迁移或执行；Windows
+候选的 Linux 正确密钥成功与模型/AST PASS 不等于 Windows 原生通过。两切片
+未发布、未并入本批。全部物理故障/恢复/namespace 等原限制、ANN V4、受阻
+41-target campaign 及未知中断链路保持；无新 CI 或发布结论。
+
+## 十三 12:31 UTC 有限资格完成，不扩展限制范围
+
+52b 两 quick 与全 15 门已自然 PASS，完整 oracle 及末两名 LIMIT oracle race
+有自己的实际结果。它们属于独立批准的本地固定源码范围，不是文档授权、CI
+默认放行或旧失败重跑；两次原 FAIL 和第 3–15 项 NOT_RUN 原记录保持。
+普通/race 的七项缺省 oracle SKIP 也仍保留，即使后来完整 oracle 实际通过。
+
+该有限资格不补齐 native WAL-tail publisher，不证明物理持久性、外平台原生、
+加密安全或完整 M10；backup 与 Windows 未发布切片没有混入。没有新提交或
+新 CI。原受限操作、ANN V4、受阻 campaign 和未知中断链路仍保持原有边界。

@@ -34,6 +34,7 @@ func ExampleEngine_Levenshtein() {
 	}
 	fmt.Println(distance.Value, distance.Exact)
 	// False means only that the actual distance exceeds 2; 3 is the sentinel.
+
 	// Output: 3 false
 }
 

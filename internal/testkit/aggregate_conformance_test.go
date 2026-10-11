@@ -7,11 +7,11 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
 
+	"github.com/ms-xiaosnow/gosqlite/internal/testoracle"
 	"github.com/ms-xiaosnow/gosqlite/sqlite"
 )
 
@@ -131,7 +131,7 @@ func TestGlobalAggregateOracleErrors(t *testing.T) {
 		{"SELECT count(*) FROM a LIMIT sum(1)", "misuse of aggregate"},
 	} {
 		t.Run(tc.q, func(t *testing.T) {
-			out, err := exec.Command(confOracle(t), "-readonly", "-batch", "-bail", path, tc.q).CombinedOutput()
+			out, err := testoracle.ForTest(t, confOracle(t), "-readonly", "-batch", "-bail", path, tc.q).CombinedOutput()
 			if err == nil || !strings.Contains(string(out), tc.category) {
 				t.Fatalf("oracle want %s, got %v: %s", tc.category, err, out)
 			}
@@ -222,7 +222,7 @@ func TestGlobalAggregateOracleOffsetErrorSuppression(t *testing.T) {
 		"SELECT sum(abs(-9223372036854775808)) FROM a LIMIT 1 OFFSET 1",
 	} {
 		t.Run(q, func(t *testing.T) {
-			out, err := exec.Command(confOracle(t), "-readonly", "-batch", "-bail", path, q).CombinedOutput()
+			out, err := testoracle.ForTest(t, confOracle(t), "-readonly", "-batch", "-bail", path, q).CombinedOutput()
 			if err == nil || !strings.Contains(string(out), "integer overflow") {
 				t.Fatal(err, string(out))
 			}
@@ -253,7 +253,7 @@ func TestGlobalAggregateOracleNULNumericStorageClasses(t *testing.T) {
 	}
 	// Integer-valued NUL-terminated TEXT does not clear prior integer overflow.
 	q := "SELECT sum(CASE WHEN id=1 THEN 9223372036854775807 WHEN id=2 THEN 1 ELSE CAST(x'300031' AS TEXT) END) FROM a"
-	out, err := exec.Command(confOracle(t), "-batch", "-bail", "-readonly", path, q).CombinedOutput()
+	out, err := testoracle.ForTest(t, confOracle(t), "-batch", "-bail", "-readonly", path, q).CombinedOutput()
 	if err == nil || !strings.Contains(string(out), "integer overflow") {
 		t.Fatal(err, string(out))
 	}

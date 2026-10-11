@@ -1,5 +1,54 @@
 # Implementation and acceptance progress
 
+## 最新状态：startup / WAL / LIMIT / 示例（2026-10-11）
+
+已闭合的发布基点是 `b3492ed822d59834e5159cb7964c9dbd937027f7`，tree
+`ff13ded52883edfbabf747547a11b4e4ed7301ee`。其 Library 精确恢复及历史
+CI `38129577026` 已完成；CI 于 10:05:10 UTC SUCCESS，ordinary
+`114440917650` 与 oracle `114440917334` 均成功。该旧 oracle 启动隔离
+**NOT_PROVEN**，不能把真实历史 SUCCESS 改写为干净启动资格。
+
+**2026-10-11 12:31 UTC 终态：52b 精确本地两 quick 加全 15 门 PASS；两次旧 FAIL 保留。**
+
+- 原组合 `904ca698c3359bfe0674231f6d14ec8a9d704f30`：guard PASS，11:11:04 UTC
+  ordinary FAIL，5,341 PASS / 23 FAIL / 7 预期 oracle 叶项 SKIP；9 个顶层的
+  20 条直接 EXPLAIN 断言是生产规划提示回归，另 3 条为父项传播。
+- 首次修复 `209ba515f4dce18ae57103254b4053d4708b8736`：guard PASS，11:50:37 UTC
+  ordinary FAIL，5,547 PASS / 23 FAIL / 7 预期 oracle 叶项 SKIP。旧 9 根及原
+  23 条失败路径已实际 PASS，但新增测试误要求 ANN ranking 为 bounded_heap；
+  两次失败后各自第 3–15 项仍 NOT_RUN，原始日志和断言不覆盖。
+- 最新 `52b03f1d94f578fb6e3722c7bf28fc0056fad6d4` 只修新测试的 shape 常量，
+  生产源未改。quick 10 根 / 75 路径 PASS；随后全 15 门从 guard 重新执行，
+  12:31:15 UTC 自然终结，17 个顶层命令均 exit 0（含脚本子调用实际 19 次 Go）。
+- ordinary/race 各 5,570 PASS 加 7 个预期 oracle 叶项 SKIP；完整 oracle 为
+  7,202 路径 PASS、零测试 SKIP；末两名 LIMIT oracle race 为 394 路径 PASS。
+  vet、no-CGO build、五目标编译、模块与两种实际依赖闭包均 PASS。
+
+只有这个固定本地 tree 的已执行开发范围取得资格。main 仍为 b349，没有新提交、
+新提交 Library 恢复或新 CI 结果；本手册用户模板仍 NOT_RUN，不自动授予执行权限。
+native WAL-tail publisher 等真实代码缺口、原生/物理/安全和 M10 未验收均保持。
+下表独立切片的历史身份与结果继续保留，不能反向改写为同一源码资格：
+
+| 项目 | 精确源码身份 | 已有结果与当前边界 |
+|---|---|---|
+| SQLite 启动输入收口 | `5fec5ce5e5339f02dc2715d9a2d6bd4691b1c62c` | 46 个 Go 与 5 个 shell 调用点已在候选源码改造；独立源码审阅 PASS，14 Test / 198 路径纯检查与 AST guard PASS；后来的独立资格批次见最新摘要；不继承旧 PASS，也不自动授权 CI |
+| WAL scanner / proof / 普通生命周期 | `dbbb1e4ebca107c9a12695d9ad498a0c2f2057cf` | 13 条普通非 oracle 命令 PASS；normal/race 各 1,208 Test、41 Fuzz 目标的 313 固定种子、5 个可运行 Example；7 个可选 oracle 叶用例 SKIP；原生坏尾安全发布器仍缺代码 |
+| LIMIT 绑定与执行阶段 | `4c5c5fa0b60ee728b2c6f2eb153325106270cc86` | 新鲜基线 4 Test / 123 子项产生 49 条直接阶段断言 FAIL；候选 normal/race 各 16 Test / 1,145 子项 PASS、零 SKIP；没有新 oracle 结果 |
+| Levenshtein 示例发现 | `ec48c505f48aed452b96cd6544c6e3e84187ac3d` | 仅增加一行空行；精确 normal/race 各实际运行 `ExampleEngine_Levenshtein` 一次并通过原 `3 false` 输出断言；不反向改写旧 WAL 只有 5 个 Example 的事实 |
+
+完整身份、原始日志定位及持久归档见[本次证据](evidence/startup-wal-limit-20261011.md)。
+未来用户的启动前置、可复制模板和停止规则见[启动隔离中文规程](oracle-startup-verification-zh.md)。
+这些新规程仍是 NOT_RUN，不是执行许可。旧段落的日期、PASS/FAIL、PENDING、
+候选身份和当时缺口均保留；若与本摘要不同，按各自时点理解，不能混合资格。
+
+真实代码缺口仍包括 native WAL-tail publisher、更广 CAST/IPK/LEFT-ON/WHERE/
+排序阶段、通用明文备份、只读明文 WAL、部分 backend 与完整物理故障设施。
+strict Option A 明文备份在另一个候选中实现，不属于本批；main 的 plaintext
+backup 仍 unsupported，将来的 ext-family-only profile 也尚未资格验收。
+这些不是“只差运行”。四场景 public Open harness 已有源码/编译证据，但实际物理
+四场景仍 BLOCKED / NOT_RUN；长期、原生平台、持久性、安全和独立 M10 验收未完成。
+总体仍处于 **M9 实现推进、M10 未验收**，继续逐批补真实代码，不能宣布全部可编码项完成。
+
 Test-scope correction: historical full suites from M2 through 7addc493 included two namespace-mutation tests. Their PASS outputs remain factual, but are not clean ordinary-scope evidence. See [the audit and gating correction](test-scope-audit.md).
 
 Fresh restart, 2026-10-10 UTC. Historical work and test results are not acceptance evidence. Original goal SHA-256: 9ae7b1d776856669a10eb753408c7754d015d266f8783240165450e96e4bac81.
@@ -1373,3 +1422,95 @@ ANN/performance-CI sources remain separate increments.
 ## 2026-10-11 09:35 UTC：public harness 精确组合限定检查完成
 
 独立组合树 `0af9b064bebfbec9c8270c4bf2f10ec2055fb186`，3104文件/789非docs（原788全部保持，加唯一手工测试源码），于09:32:51完成六条AST/list/编译/符号命令 PASS；196相对链接和48shell块仅静态检查PASS。独立报告SHA256 `ba6e3c4458d8d192b9dd2f231936c61706d9f6b2fdb64249f34ea34d1b71d765`，81项证据清单SHA256 `394e491d4564c594cb7f7e1e304495f95c8b620122c7e7408a14bcae30f6279e`。物理四场景全部BLOCKED/NOT_RUN，二进制从未执行。随后仅追加文档和证据；发布前逐路径核对全部789非docs不变，文档另做最终静态读回。精确新提交、Library恢复和CI在实际完成后另记，不继承父namespace的成功。
+
+## 2026-10-11：启动隔离、WAL、LIMIT 与示例的分层进展
+
+以下保留组合运行前的记录，包括当时“尚未运行”和“下一步”表述；后续实际 FAIL
+以页首及下段 11:11 UTC 更新为准，不把原 source-only 记录改写成运行结论。
+
+- 状态：M9 实现继续推进；M10 / 整体未验收。这里只汇总已存在的独立结果，
+  没有运行新测试、Go、shell 检查、oracle 或 CI；没有给未来组合预填 commit/tree。
+- b349 的六条 compiler-only 恢复检查、全部 3,128 文件 / 789 非 docs 身份及
+  CI `38129577026` 两 job 终态已经闭合。源码 bundle 和终态证据归档均读回 PASS；
+  四个 public Open 物理场景仍未运行。详细保存身份见[本次证据](evidence/startup-wal-limit-20261011.md)。
+- 启动候选 `5fec5ce5e5339f02dc2715d9a2d6bd4691b1c62c` 增加 test-only
+  `internal/testoracle` 和 source guard，统一 46 Go / 5 shell 点的 leading
+  `-noinit`、五键 Env、绝对 executable/temp/CWD、Linux admission。独立静态
+  inventory/replay 和源码审阅 PASS；另获准的两条纯命令于 10:38 UTC 终结，
+  14 Test / 198 路径与 AST guard PASS，零 skip/fail；新 oracle / CI HOLD。
+  `ForTest` 的 Getwd/PWD/stat、脚本 bootstrap 未整体清洁、installer 新增绝对
+  base preflight 都明确披露；不主张绝对 OS 隔离。
+- WAL 精确树 `dbbb1e4ebca107c9a12695d9ad498a0c2f2057cf` 的 13 条普通非
+  oracle 命令 PASS。normal/race 各 1,208 Test、41 Fuzz / 313 固定 seed、5 个
+  Runnable Example；7 个可选 oracle 叶项 SKIP。早先“6 个都可运行”的计数错误与
+  原日志保留，不能追改旧执行数。native retained-directory tail publisher 仍缺。
+- LIMIT 候选 `4c5c5fa0b60ee728b2c6f2eb153325106270cc86` 基于
+  `75ec6ac6aaf602c74daa1f7d6449534b52fbd5c8`。新鲜基线 4 Test / 123 子项，
+  49 条实际断言证明绑定/执行阶段差异；候选 normal/race 各 16 Test / 1,145 子项
+  PASS、零 SKIP，无 oracle。更广 CAST/IPK/LEFT-ON/WHERE/排序阶段并未关闭。
+- 示例树 `ec48c505f48aed452b96cd6544c6e3e84187ac3d` 只在
+  `extension/similarity/example_test.go` 的 Output 前增加一行空行；10:30:22–10:30:32
+  UTC 两个精确选择器各运行一次 `ExampleEngine_Levenshtein`，normal/race PASS，
+  输出断言仍 `3 false`。标准 Go harness 捕获成功输出，不存在单独的原始 stdout
+  `3 false` 事件；证据是固定断言与 named run/pass。没有新全包或组合结果。
+- [中文启动专题](oracle-startup-verification-zh.md) 给真实参数、版本/依赖、干净
+  审阅提交隔离副本、日志/断言/停止/保留步骤。主手册五次直接 SQLite 命令统一
+  清洁子进程；未导出 ORACLE_BIN，普通命令先 unset SQLITE_ORACLE/GOTMPDIR。
+  将来的用户私有 /tmp 模板不改变当前实际执行的既有缓存、默认 /tmp 与资源门。
+- 四切片源码现已组成 tree `904ca698c3359bfe0674231f6d14ec8a9d704f30`，
+  55 路径、3,146 文件；Library 静态归档与 clone/fsck 加逐路径覆回核验 PASS，
+  尚未运行组合测试。HEAD 仍为 b349，组合是未发布 dirty 源码，不是远端镜像。
+- 下一步：独立审阅该组合与新 LIMIT 两处 startup 适配，再按明确许可完成精确
+  组合普通门。原 51 点加新 LIMIT 两处不能借旧站点数替代闭包复核。
+  新 oracle、发布导致的 CI、精确恢复与持久记录均须各自产生终态后追加；当前 HOLD
+  不因文档或历史 SUCCESS 解除。继续分批补真实源码缺口，不用“剩余都是人工测试”收尾。
+- strict Option A backup 在另一候选，不属于此组合；main 明文 backup unsupported，
+  更广/平台/物理资格未完成。全部受限物理工作、ANN V4、受阻 41-target campaign
+  与未知中断链路保持原状，不恢复或替换执行。
+
+## 2026-10-11 11:11 UTC：组合普通门失败与窄修待验
+
+tree `904ca698c3359bfe0674231f6d14ec8a9d704f30` 的 guard PASS；第二条完整
+普通命令自然 exit 1 后停止。5,341 PASS / 23 FAIL / 7 预期 oracle 叶项 SKIP；
+9 个顶层失败、20 条直接 EXPLAIN 断言和 3 条父项传播。全部 6 个 Example 及
+313 固定 seed 通过；这些局部成功不能覆盖规划回归，也不证明未到达的测试后续语句。
+余下 3–15 项 NOT_RUN，新 oracle / CI HOLD，main 仍是 b349。
+
+只读源码追踪定位为：新 LIMIT 阶段门使 EXPLAIN 保留 limit=-1，原 vector rank
+准备提前返回，丢失 ANN/有界堆提示；hybrid 仍保留 grams SEARCH，不能笼统说
+所有计划都 SCAN。修复候选只补纯 bound hint，实际 SELECT 原阶段语义保持，
+独立审阅和新执行待验。完整原始失败、原因推断边界及 Library 身份见
+[本次证据](evidence/startup-wal-limit-20261011.md)。继续补真实代码，不重写旧 PASS。
+
+## 2026-10-11 12:04 UTC：第二次失败与 shape 断言修正待终态
+
+以下是 12:04 UTC 的历史观测；新终态见紧接其后的 12:31 UTC 补记。
+
+209ba 的完整普通门真实 FAIL，但原 904ca 的 9 个失败根和 23 条旧失败路径已
+全部实际 PASS。新的唯一失败根 TestLimitExplainHintPlanPreservation 把 HNSW/IVF
+的既有 ann_exact_rescore 错要求为 bounded_heap；20 个直接叶失败加 3 个父项
+传播构成 23 FAIL。不能把这次新测试合同错误与上一轮生产规划回归混写。
+
+52b03f1d94f578fb6e3722c7bf28fc0056fad6d4 只改新测试的精确 shape 常量，
+生产 query.go 及其他 3,146 文件保持。源码审阅无阻断；quick 10 根及其后新的
+全 15 门正在独立运行，**RUNNING / 待终态**，此处尚无新 PASS。原两轮日志、
+断言、STOP 和独立报告保持，未续跑旧失败 runner。
+
+backup 的 34 顶层 / 142 子项有限模型与 AST PASS、Windows 切片的有限 Linux/
+模型 PASS 分别有自己的源码与归档；它们未发布、未并入本批，也不是 native
+持久性或 Windows 原生通过。详见[新证据](evidence/startup-wal-limit-20261011.md)。
+
+## 2026-10-11 12:31 UTC：52b 两 quick 与全 15 门自然 PASS
+
+固定 tree `52b03f1d94f578fb6e3722c7bf28fc0056fad6d4` 的 17 顶层命令全部
+自然 exit 0，控制器于 12:31:15.669004 UTC 完成。两个 quick 的 10 根 / 75 路径
+没有替代全套；ordinary/race 各 5,570 PASS + 7 预期 oracle SKIP，完整 oracle
+7,202 PASS / 零测试 SKIP，末两名 oracle race 394 PASS。旧 9 根 / 23 路径、
+16 个 LIMIT 根 / 1,161 路径和新 4 根 / 206 路径在三个完整 lane 全部通过。
+这次真正到达并通过先前短路的 TopK/Method/Exact 和 IVF ready/lists 断言。
+
+实际 whole-module 闭包 206 包，shipping union 164 包；后者无 testoracle /
+testscope / os/exec / C 输入，不能把 tooling 闭包当 shipping。全部五目标只是
+编译，不是外平台原生资格。完整源码/原始日志已 Library 保存并读回；精确报告、
+归档 ID、哈希及剩余边界见[分层证据](evidence/startup-wal-limit-20261011.md)。
+没有新提交/恢复/CI，904ca 与 209ba 原始 FAIL 保持。M9 继续，M10 未验收。

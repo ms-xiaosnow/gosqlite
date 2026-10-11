@@ -6,12 +6,12 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
 
 	"github.com/ms-xiaosnow/gosqlite/internal/buildinfo"
+	"github.com/ms-xiaosnow/gosqlite/internal/testoracle"
 )
 
 // This oracle is test-only. No crash, fault, forced exit, corrupted fixture,
@@ -22,7 +22,7 @@ func pagerOracle(t *testing.T, path, sql string) string {
 	if exe == "" {
 		t.Fatal("oracle acceptance requires explicit SQLITE_ORACLE")
 	}
-	cmd := exec.Command(exe, "-batch", "-bail", "-noheader", "-list", path)
+	cmd := testoracle.ForTest(t, exe, "-batch", "-bail", "-noheader", "-list", path)
 	cmd.Stdin = strings.NewReader(sql + "\n")
 	b, err := cmd.CombinedOutput()
 	if err != nil {
@@ -139,7 +139,7 @@ func TestTxOraclePOSIXAndNativeOFDLocksConflict(t *testing.T) {
 	tx := openTxTest(t, path, Options{})
 	busy := func(sql string) {
 		t.Helper()
-		cmd := exec.Command(os.Getenv("SQLITE_ORACLE"), "-batch", "-bail", path, sql)
+		cmd := testoracle.ForTest(t, os.Getenv("SQLITE_ORACLE"), "-batch", "-bail", path, sql)
 		out, err := cmd.CombinedOutput()
 		if err == nil || !strings.Contains(string(out), "database is locked") {
 			t.Fatalf("expected official BUSY for %s: %v %s", sql, err, out)
@@ -185,7 +185,7 @@ func TestTxOracleManagedProbeRetainsReservation(t *testing.T) {
 	if err = probe.Close(); err != nil {
 		t.Fatal(err)
 	}
-	cmd := exec.Command(os.Getenv("SQLITE_ORACLE"), "-batch", "-bail", path, "BEGIN IMMEDIATE; COMMIT;")
+	cmd := testoracle.ForTest(t, os.Getenv("SQLITE_ORACLE"), "-batch", "-bail", path, "BEGIN IMMEDIATE; COMMIT;")
 	out, err := cmd.CombinedOutput()
 	if err == nil || !strings.Contains(string(out), "database is locked") {
 		t.Fatalf("probe released native reservation: %v %s", err, out)

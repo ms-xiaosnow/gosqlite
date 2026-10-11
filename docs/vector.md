@@ -69,6 +69,28 @@ A narrow optimization recognizes one ASC distance key over a declared vector col
 
 Business WHERE executes first. Source access can be SCAN or an independently sound grams13 SEARCH; a ranking heap is never called an index. SQL keeps ordinary NULL-first ascending order, unlike native NULL exclusion. EXPLAIN describes ranking but does not score vectors. Query parsing remains lazy about bad query-vector values until a qualifying non-NULL row needs a score; a zero LIMIT never scores.
 
+2026-10-11 未发布窄修合同：EXPLAIN 的 LIMIT/OFFSET bound hint 只读取字面量或
+已通过普通绑定准入的参数中的 int64，以及有限、可精确表示为整数且严格位于
+(-2^63, +2^63) 的 REAL；REAL 两端均排除。允许安全 unary `+`/`-`，但对
+MinInt64 取负为 unknown。解析器已表示为 int64 的 TRUE/FALSE 也遵循这条规则。
+NULL、TEXT（包括数字文本）、BLOB、function、CAST、binary expression、其他形态
+或超界值均为 unknown；hint 不执行它们，也不新增 bound runtime 错误。普通参数
+准入和名字/函数绑定校验仍先发生，并可按原合同报错。
+
+已知 LIMIT 0 不读取 OFFSET 提示；正 LIMIT 要求 OFFSET 缺省或已知（缺省为 0，
+已知负数按 0），不把 unknown OFFSET 猜成 0。LIMIT 与规范化 OFFSET 的安全
+合计必须不超过现有 `vector.DefaultSearchLimits().MaxResults`（10,000）；否则
+保守放弃有界排名提示。未知、负数/无限 LIMIT 同样保守处理。实际 SELECT 仍用原有
+求值/转换和错误阶段；例如数字文本 LIMIT 的 SELECT 可以使用 ANN，EXPLAIN 却
+保守显示不采用该 ANN/有界堆提示，不能把 EXPLAIN 当成该 SELECT 的已执行计划。
+
+只有这项 bound hint 不消耗 SQL 求值预算，也不调用求值器或转换回调；这不是整个
+EXPLAIN 零预算或零元数据 I/O 的承诺。已有 vector operand 规划和 IVF 状态元数据
+读取仍有原边界。该生产窄修在 209ba 的旧规划回归测试已 PASS，但该树因新增
+shape 断言错误总体 ordinary FAIL。只修测试常量的 52b 已取得本地两 quick / 全
+15 门 PASS，含实际 oracle；未发布，也不证明 native/物理或 M10 资格。
+两轮原始 FAIL 与源码身份见[分层证据](evidence/startup-wal-limit-20261011.md)。
+
 Secondary ORDER BY keys, DESC, computed query-vector operands and unbounded LIMIT keep the existing general MaxSortBytes-bounded SQL sorter, preserving explicit ordering semantics. The recognized heap uses default vector candidate/result/component quotas; LIMIT+OFFSET must fit10,000 retained rows. None of these limits may silently truncate an exact answer.
 
 Rows.Plan adds VectorMetric, VectorColumn, VectorDimensions, VectorTopK, VectorExact and VectorRanking="bounded_heap". Rows.Stats adds VectorRankedRows, VectorFilteredRows, VectorNullRows and VectorRankComponents. These count the recognized ranking stage only, not all repeated scalar projections/filters. Existing source posting/base-row counters remain distinct. Rows.Close releases the ranking cache while retaining value-only plan/stats diagnostics.

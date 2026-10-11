@@ -5,8 +5,8 @@ package testkit_test
 import (
 	"context"
 	"errors"
+	"github.com/ms-xiaosnow/gosqlite/internal/testoracle"
 	"github.com/ms-xiaosnow/gosqlite/sqlite"
-	"os/exec"
 	"path/filepath"
 	"reflect"
 	"strings"
@@ -98,7 +98,7 @@ func TestReviewPreparationUnsupportedCatalogCannotWrite(t *testing.T) {
 		}
 	}
 	// Ordinary official SQL introduces a well-formed unsupported view; no raw writes.
-	cmd := exec.Command(confOracle(t), "-batch", path)
+	cmd := testoracle.ForTest(t, confOracle(t), "-batch", path)
 	cmd.Stdin = strings.NewReader("CREATE VIEW view_t AS SELECT * FROM t;\n")
 	if out, e := cmd.CombinedOutput(); e != nil {
 		t.Fatal(string(out), e)

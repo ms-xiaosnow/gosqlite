@@ -368,27 +368,6 @@ func (d *DB) planRelational(ctx context.Context, reader btree.PageReader, origin
 		}
 		r.order = append(r.order, orderExpr{expr: bound, column: -1, desc: o.Desc, nulls: o.Nulls})
 	}
-	if !aggregate {
-		if sel.Limit != nil {
-			if err = relationalValidate(sel.Limit, nil, budget); err != nil {
-				return nil, err
-			}
-			r.limit, err = limitValue(ctx, sel.Limit, params)
-			if err != nil {
-				return nil, err
-			}
-		}
-		if sel.Offset != nil {
-			if err = relationalValidate(sel.Offset, nil, budget); err != nil {
-				return nil, err
-			}
-			r.offset, err = limitValue(ctx, sel.Offset, params)
-			if err != nil {
-				return nil, err
-			}
-			r.offset = max(r.offset, 0)
-		}
-	}
 	// Bind all ON expressions before any row is fetched. Forward references in
 	// ON are explicitly excluded for now, including through result aliases.
 	n := 0
@@ -582,7 +561,7 @@ func (d *DB) planRelational(ctx context.Context, reader btree.PageReader, origin
 			}
 		}
 	}
-	if aggregate {
+	{
 		// Binding is unconditional and complete before any bound expression is
 		// evaluated. EXPLAIN executes neither bound; LIMIT 0 bypasses OFFSET.
 		if err = relationalValidate(sel.Limit, nil, budget); err != nil {
