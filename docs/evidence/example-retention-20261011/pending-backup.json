@@ -1,0 +1,11 @@
+{
+  "baseline": "1352ae524575e4d6fe8b5434fd930c3b07be4ac8",
+  "library_file_id": "libfile_d512bea615188191b50b8c2fbc6d8b79",
+  "archive_sha256": "063176fc950e8fd2426e4e16abceaa65f3bdc3890190b7716900754db4e7bdb1",
+  "bytes": 831642,
+  "entries": 142,
+  "source_files": 2907,
+  "changed_paths": 10,
+  "verification": "PASS readback bytes + all manifest hashes + static base/delta reconstruction of file inventory, contents and Git modes; no extraction/execution of code",
+  "status": "UNPUBLISHED/NOT ACCEPTED at archive creation; full aggregate then running"
+}

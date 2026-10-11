@@ -1,0 +1,528 @@
+FINAL CLOSEOUT EXISTING ORDINARY AGGREGATE START 2026-10-11T04:07:57Z
+Frozen tree d7393c254a6fca4452ae194d64d9045659f9781d; source is never edited. No Git commands or remote actions.
+No manual tags, tests added by this verifier, new fuzz/soak, benchmark campaigns, native other-OS execution, or blocked-candidate composition. Stop at first failure; no retries.
+
+STAGE resource-precheck START 2026-10-11T04:07:57Z
+COMMAND python3 /workspace/scratch/5e06a74e5f65/durable-restart/final-closeout-combined-checks.precheck.py 
+{
+  "/tmp": {
+    "available_bytes": 1422282752,
+    "available_inodes": 1243543,
+    "writable_by_current_user": true
+  },
+  "/workspace/scratch/5e06a74e5f65/durable-restart": {
+    "available_bytes": 4636368896,
+    "available_inodes": 1214115,
+    "writable_by_current_user": true
+  },
+  "/workspace/scratch/5e06a74e5f65/durable-restart/go-cache": {
+    "available_bytes": 4636368896,
+    "available_inodes": 1214115,
+    "writable_by_current_user": true
+  },
+  "/workspace/scratch/5e06a74e5f65/durable-restart/go-path": {
+    "available_bytes": 4636368896,
+    "available_inodes": 1214115,
+    "writable_by_current_user": true
+  }
+}
+Read-only resource precheck PASS. Default /tmp retained; no cleanup, relocation, or retry.
+STAGE resource-precheck EXIT 0 AT 2026-10-11T04:07:57Z
+
+STAGE resource-snapshot START 2026-10-11T04:07:57Z
+COMMAND bash -c df\ -B1\ /tmp\ \"\$1\"\;\ df\ -i\ /tmp\ \"\$1\"\;\ free\ -b\;\ printf\ \"TMPDIR=%s\\nGOTMPDIR=%s\\n\"\ \"\$\{TMPDIR:-/tmp\ \(default\)\}\"\ \"\$\{GOTMPDIR:-unset\}\" _ /workspace/scratch/5e06a74e5f65/durable-restart 
+Filesystem       1B-blocks        Used  Available Use% Mounted on
+tmpfs           5237919744  3815636992 1422282752  73% /tmp
+overlay        33770192896 27399086080 4636344320  86% /workspace/scratch/5e06a74e5f65
+Filesystem      Inodes  IUsed   IFree IUse% Mounted on
+tmpfs          1278789  35246 1243543    3% /tmp
+overlay        2097152 883044 1214108   43% /workspace/scratch/5e06a74e5f65
+               total        used        free      shared  buff/cache   available
+Mem:     10475843584  6347988992  1976205312  3839324160  6561648640  4127854592
+Swap:              0           0           0
+TMPDIR=/tmp
+GOTMPDIR=unset
+STAGE resource-snapshot EXIT 0 AT 2026-10-11T04:07:57Z
+
+STAGE source-identity-before START 2026-10-11T04:07:57Z
+COMMAND python3 /workspace/scratch/5e06a74e5f65/durable-restart/final-closeout-combined-checks.identity.py before 
+{
+  "phase": "before",
+  "baseline_commit": "1352ae524575e4d6fe8b5434fd930c3b07be4ac8",
+  "baseline_tree": "2b91b20abec4b2d651de1dd860fe86e79b62bac9",
+  "exact_tree": "d7393c254a6fca4452ae194d64d9045659f9781d",
+  "source_files": 2935,
+  "source_directories": 141,
+  "changed_paths": [
+    "README.md",
+    "cmd/gosqlite/main.go",
+    "cmd/gosqlite/query_close_test.go",
+    "docs/acceptance-status.md",
+    "docs/checkpoints.json",
+    "docs/cli-resource-verification-zh.md",
+    "docs/closeout-scope-20261011.md",
+    "docs/evidence/cli-resources-20261011.md",
+    "docs/evidence/cli-resources-20261011/identity-after.json",
+    "docs/evidence/cli-resources-20261011/identity-before.json",
+    "docs/evidence/cli-resources-20261011/independent-review.md",
+    "docs/evidence/cli-resources-20261011/independent-summary.json",
+    "docs/evidence/cli-resources-20261011/ordinary-aggregate-command.txt",
+    "docs/evidence/cli-resources-20261011/ordinary-aggregate.txt",
+    "docs/evidence/cli-resources-20261011/owner-scoped-evidence.json",
+    "docs/evidence/cli-resources-20261011/pending-backup.json",
+    "docs/evidence/cli-resources-20261011/source-manifest.json",
+    "docs/evidence/cli-resources-20261011/stages.tsv",
+    "docs/evidence/contract-docs-20261011/SHA256SUMS",
+    "docs/evidence/contract-docs-20261011/contract-docs.patch",
+    "docs/evidence/contract-docs-20261011/manifest.json",
+    "docs/evidence/contract-docs-20261011/progress-fragment-zh.md",
+    "docs/evidence/contract-docs-20261011/static-review.json",
+    "docs/evidence/inspect-metadata-20261011/ci-ordinary.txt.gz",
+    "docs/evidence/inspect-metadata-20261011/library-restore.txt.gz",
+    "docs/evidence/inspect-metadata-20261011/persistence.json",
+    "docs/evidence/query-close-20261011.md",
+    "docs/file-formats.md",
+    "docs/manual-verification-zh.md",
+    "docs/migration-pgembedding.md",
+    "docs/progress.md",
+    "docs/security.md",
+    "examples/encrypted-cli/main.go",
+    "examples/encrypted-shared/main.go",
+    "examples/encrypted-wal/main.go",
+    "examples/encrypted/main.go",
+    "examples/internal/fixturecleanup/cleanup.go",
+    "examples/internal/fixturecleanup/cleanup_test.go",
+    "examples/internal/fixturecleanup/source_test.go",
+    "examples/native-check/main.go",
+    "examples/readonly/legacy_source_test.go",
+    "examples/readonly/main.go",
+    "examples/readonly/main_test.go",
+    "examples/sparse-exact/README.md",
+    "examples/sparse-exact/main.go",
+    "examples/sparse-exact/main_status_test.go",
+    "examples/write/README.md",
+    "examples/write/main.go",
+    "examples/write/main_test.go"
+  ],
+  "prior_cli_tree": "4c2af13646c973c53340450f8f1310492aae5628",
+  "changed_from_prior_cli": [
+    "README.md",
+    "docs/acceptance-status.md",
+    "docs/checkpoints.json",
+    "docs/cli-resource-verification-zh.md",
+    "docs/closeout-scope-20261011.md",
+    "docs/evidence/cli-resources-20261011.md",
+    "docs/evidence/cli-resources-20261011/identity-after.json",
+    "docs/evidence/cli-resources-20261011/identity-before.json",
+    "docs/evidence/cli-resources-20261011/independent-review.md",
+    "docs/evidence/cli-resources-20261011/independent-summary.json",
+    "docs/evidence/cli-resources-20261011/ordinary-aggregate-command.txt",
+    "docs/evidence/cli-resources-20261011/ordinary-aggregate.txt",
+    "docs/evidence/cli-resources-20261011/owner-scoped-evidence.json",
+    "docs/evidence/cli-resources-20261011/pending-backup.json",
+    "docs/evidence/cli-resources-20261011/source-manifest.json",
+    "docs/evidence/cli-resources-20261011/stages.tsv",
+    "docs/evidence/contract-docs-20261011/SHA256SUMS",
+    "docs/evidence/contract-docs-20261011/contract-docs.patch",
+    "docs/evidence/contract-docs-20261011/manifest.json",
+    "docs/evidence/contract-docs-20261011/progress-fragment-zh.md",
+    "docs/evidence/contract-docs-20261011/static-review.json",
+    "docs/evidence/inspect-metadata-20261011/ci-ordinary.txt.gz",
+    "docs/evidence/inspect-metadata-20261011/library-restore.txt.gz",
+    "docs/evidence/inspect-metadata-20261011/persistence.json",
+    "docs/file-formats.md",
+    "docs/manual-verification-zh.md",
+    "docs/migration-pgembedding.md",
+    "docs/progress.md",
+    "docs/security.md",
+    "examples/encrypted-cli/main.go",
+    "examples/encrypted-shared/main.go",
+    "examples/encrypted-wal/main.go",
+    "examples/encrypted/main.go",
+    "examples/internal/fixturecleanup/cleanup.go",
+    "examples/internal/fixturecleanup/cleanup_test.go",
+    "examples/internal/fixturecleanup/source_test.go",
+    "examples/native-check/main.go"
+  ],
+  "retention_source_paths_exact_match": [
+    "examples/encrypted/main.go",
+    "examples/encrypted-wal/main.go",
+    "examples/encrypted-shared/main.go",
+    "examples/encrypted-cli/main.go",
+    "examples/native-check/main.go",
+    "examples/internal/fixturecleanup/cleanup.go",
+    "examples/internal/fixturecleanup/cleanup_test.go",
+    "examples/internal/fixturecleanup/source_test.go"
+  ],
+  "new_test_files_over_prior_cli": [
+    "examples/internal/fixturecleanup/cleanup_test.go",
+    "examples/internal/fixturecleanup/source_test.go"
+  ],
+  "old_test_files_byte_mode_unchanged": 353,
+  "prior_cli_all_test_files_unchanged": 358,
+  "module_and_scripts_unchanged": true,
+  "owner_inventory_matches": true,
+  "freeze_copy_bytes_git_modes_actual_modes_directory_inventory_match": true,
+  "copy_has_git": false,
+  "git_commands_run": 0,
+  "manifest_sha256": "42e86ecc5dacd170693e3d798d0e9512a35cc168b9a35484d0228b1403a8b5f1",
+  "baseline_inventory_sha256": "952eca0c0b3732d16171a6b7e8da94345eee517312eadab9abbf5ff1c9ffda6f",
+  "frozen_inventory_sha256": "b3f85ee50b04ef37d0adb45f8482673cdec1853340ac7f2045cca0b7a8dace7e"
+}
+STAGE source-identity-before EXIT 0 AT 2026-10-11T04:08:00Z
+
+STAGE environment START 2026-10-11T04:08:00Z
+COMMAND bash -c set\ -e\;\ go\ version\;\ test\ \"\$\(go\ env\ GOVERSION\)\"\ =\ go1.27.2\;\ test\ \"\$\(go\ env\ GOOS\)/\$\(go\ env\ GOARCH\)\"\ =\ linux/amd64\;\ go\ env\ GOVERSION\ GOOS\ GOARCH\ GOTOOLCHAIN\ GOPROXY\ GOSUMDB\ GOPATH\ GOCACHE\ CGO_ENABLED\ GOFLAGS\;\ printf\ \"GOMAXPROCS=%s\\nSQLITE_ORACLE=%s\\n\"\ \"\$GOMAXPROCS\"\ \"\$SQLITE_ORACLE\"\;\ sha256sum\ \"\$1/toolchains/go1.27.2/bin/go\"\ \"\$SQLITE_ORACLE\"\ \"\$REVIEW_REPORT\"\ \"\$1/final-closeout-combined-evidence-v1/manifest.json\"\ \"\$1/final-closeout-combined-checks.sh\"\ \"\$1/final-closeout-combined-checks.identity.py\"\ \"\$1/final-closeout-combined-checks.precheck.py\"\ \"\$1/example-retention-review-evidence-v1/report.md\"\ \"\$1/cli-resources-combined-checks.REPORT.md\" _ /workspace/scratch/5e06a74e5f65/durable-restart 
+go version go1.27.2 linux/amd64
+go1.27.2
+linux
+amd64
+local
+off
+off
+/workspace/scratch/5e06a74e5f65/durable-restart/go-path
+/workspace/scratch/5e06a74e5f65/durable-restart/go-cache
+0
+-buildvcs=false
+GOMAXPROCS=2
+SQLITE_ORACLE=/workspace/scratch/5e06a74e5f65/durable-restart/toolchains/sqlite-build-3540000/sqlite3
+548d3c32f83fa81152f543eb1526be7884cfe0526eb5e9ce29d3eca14786e7e0  /workspace/scratch/5e06a74e5f65/durable-restart/toolchains/go1.27.2/bin/go
+470775f6ada29ccfb2d3046ac2b4c975df95a9c20b782332d4e8ba6b6233e6c6  /workspace/scratch/5e06a74e5f65/durable-restart/toolchains/sqlite-build-3540000/sqlite3
+f5f61796b3ca3468b29f6e4cf7bf0ae22649e03f2215ad86f8cbacc7d323231d  /workspace/scratch/5e06a74e5f65/durable-restart/final-closeout-combined-checks.SOURCE_REVIEW.md
+42e86ecc5dacd170693e3d798d0e9512a35cc168b9a35484d0228b1403a8b5f1  /workspace/scratch/5e06a74e5f65/durable-restart/final-closeout-combined-evidence-v1/manifest.json
+89312e3aa40746bf9958549e8342f92f453e21b8189ac0a64ebc4b030e296276  /workspace/scratch/5e06a74e5f65/durable-restart/final-closeout-combined-checks.sh
+f4229ed3bca454662d35b980f2ad603d61a4dfc4a5dcb75c4d003da2036b0cfb  /workspace/scratch/5e06a74e5f65/durable-restart/final-closeout-combined-checks.identity.py
+d3ff05082394e049ded67a45c1dbd708474b67d1f9f96f6b1ae3088e66741f91  /workspace/scratch/5e06a74e5f65/durable-restart/final-closeout-combined-checks.precheck.py
+7cee0bd0589b03b0edbcaac7c38a1651def88f29d4471513b40c7a17c8bc277a  /workspace/scratch/5e06a74e5f65/durable-restart/example-retention-review-evidence-v1/report.md
+d9b56dbb8e6650065a84c7dd24182fcf225417da622859e51aad48859e98b78e  /workspace/scratch/5e06a74e5f65/durable-restart/cli-resources-combined-checks.REPORT.md
+STAGE environment EXIT 0 AT 2026-10-11T04:08:00Z
+
+STAGE sourceguard-before START 2026-10-11T04:08:00Z
+COMMAND go run ./internal/testscope 
+Ordinary test source-reference guard PASS; behavioral review is still required.
+STAGE sourceguard-before EXIT 0 AT 2026-10-11T04:08:01Z
+
+STAGE cgo0-unit START 2026-10-11T04:08:01Z
+COMMAND go test ./... -count=1 -timeout=0 
+?   	github.com/ms-xiaosnow/gosqlite/benchmarks/ann	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/benchmarks/grams	13.908s
+ok  	github.com/ms-xiaosnow/gosqlite/benchmarks/transactions	0.097s
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.687s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	2.053s
+ok  	github.com/ms-xiaosnow/gosqlite/encryption	1.046s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ann	0.265s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/bit-rerank	0.005s
+?   	github.com/ms-xiaosnow/gosqlite/examples/encrypted	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/encrypted-cli	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-shared	0.013s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-wal	0.009s
+?   	github.com/ms-xiaosnow/gosqlite/examples/grams	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/half-rerank	0.005s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/internal/fixturecleanup	0.008s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ivfflat	0.167s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/migrate-pgembedding	0.011s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/migration-full-table	0.024s
+?   	github.com/ms-xiaosnow/gosqlite/examples/migration-transition	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/native-check	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/pgembedding-import	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/readonly	0.043s
+?   	github.com/ms-xiaosnow/gosqlite/examples/similarity	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/sparse-exact	0.004s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/typed-ann-rerank	0.208s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/vector	0.060s
+?   	github.com/ms-xiaosnow/gosqlite/examples/wal	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/write	0.009s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/grams13	0.376s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/registry	0.020s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/similarity	1.266s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	0.310s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector/ann	5.970s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	11.044s
+?   	github.com/ms-xiaosnow/gosqlite/internal/buildinfo	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/darwinfile	0.027s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	0.087s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/journal	0.060s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.403s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/record	0.004s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.059s
+?   	github.com/ms-xiaosnow/gosqlite/internal/testkit/fileview	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testscope	0.002s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.093s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/wal	0.270s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	0.091s
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	7.267s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	75.152s
+STAGE cgo0-unit EXIT 0 AT 2026-10-11T04:09:55Z
+
+STAGE cgo0-vet START 2026-10-11T04:09:55Z
+COMMAND go vet ./... 
+STAGE cgo0-vet EXIT 0 AT 2026-10-11T04:09:57Z
+
+STAGE cgo0-build START 2026-10-11T04:09:57Z
+COMMAND go build -trimpath ./... 
+STAGE cgo0-build EXIT 0 AT 2026-10-11T04:10:02Z
+
+STAGE full-ordinary-oracle START 2026-10-11T04:10:02Z
+COMMAND ./scripts/test-oracle.sh 
+Ordinary test source-reference guard PASS; behavioral review is still required.
+?   	github.com/ms-xiaosnow/gosqlite/benchmarks/ann	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/benchmarks/grams	13.005s
+ok  	github.com/ms-xiaosnow/gosqlite/benchmarks/transactions	0.102s
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	0.776s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	2.034s
+ok  	github.com/ms-xiaosnow/gosqlite/encryption	0.869s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ann	0.271s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/bit-rerank	0.004s
+?   	github.com/ms-xiaosnow/gosqlite/examples/encrypted	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/encrypted-cli	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-shared	0.018s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-wal	0.007s
+?   	github.com/ms-xiaosnow/gosqlite/examples/grams	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/half-rerank	0.004s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/internal/fixturecleanup	0.007s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ivfflat	0.343s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/migrate-pgembedding	0.014s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/migration-full-table	0.016s
+?   	github.com/ms-xiaosnow/gosqlite/examples/migration-transition	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/native-check	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/pgembedding-import	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/readonly	0.033s
+?   	github.com/ms-xiaosnow/gosqlite/examples/similarity	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/sparse-exact	0.004s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/typed-ann-rerank	0.202s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/vector	0.050s
+?   	github.com/ms-xiaosnow/gosqlite/examples/wal	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/write	0.012s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/grams13	0.345s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/registry	0.015s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/similarity	1.197s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	0.265s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector/ann	5.711s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	15.078s
+?   	github.com/ms-xiaosnow/gosqlite/internal/buildinfo	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/darwinfile	0.031s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	0.089s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/journal	0.075s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	0.433s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/record	0.003s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	0.872s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testkit	217.903s
+?   	github.com/ms-xiaosnow/gosqlite/internal/testkit/fileview	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testscope	0.002s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	0.079s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/wal	0.259s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	0.103s
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	6.801s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	77.558s
+STAGE full-ordinary-oracle EXIT 0 AT 2026-10-11T04:14:05Z
+
+STAGE sourceguard-before-race START 2026-10-11T04:14:05Z
+COMMAND go run ./internal/testscope 
+Ordinary test source-reference guard PASS; behavioral review is still required.
+STAGE sourceguard-before-race EXIT 0 AT 2026-10-11T04:14:05Z
+
+STAGE cgo1-race START 2026-10-11T04:14:05Z
+COMMAND env CGO_ENABLED=1 go test -race ./... -count=1 -timeout=0 
+?   	github.com/ms-xiaosnow/gosqlite/benchmarks/ann	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/benchmarks/grams	60.271s
+ok  	github.com/ms-xiaosnow/gosqlite/benchmarks/transactions	1.229s
+ok  	github.com/ms-xiaosnow/gosqlite/cmd/gosqlite	3.903s
+ok  	github.com/ms-xiaosnow/gosqlite/driver	10.005s
+ok  	github.com/ms-xiaosnow/gosqlite/encryption	4.648s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ann	2.831s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/bit-rerank	1.046s
+?   	github.com/ms-xiaosnow/gosqlite/examples/encrypted	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/encrypted-cli	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-shared	1.041s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/encrypted-wal	1.037s
+?   	github.com/ms-xiaosnow/gosqlite/examples/grams	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/half-rerank	1.039s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/internal/fixturecleanup	1.049s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/ivfflat	1.807s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/migrate-pgembedding	1.048s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/migration-full-table	1.199s
+?   	github.com/ms-xiaosnow/gosqlite/examples/migration-transition	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/native-check	[no test files]
+?   	github.com/ms-xiaosnow/gosqlite/examples/pgembedding-import	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/readonly	1.163s
+?   	github.com/ms-xiaosnow/gosqlite/examples/similarity	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/sparse-exact	1.026s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/typed-ann-rerank	2.052s
+ok  	github.com/ms-xiaosnow/gosqlite/examples/vector	1.195s
+?   	github.com/ms-xiaosnow/gosqlite/examples/wal	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/examples/write	1.052s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/grams13	2.982s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/registry	1.094s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/similarity	7.231s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector	5.064s
+ok  	github.com/ms-xiaosnow/gosqlite/extension/vector/ann	41.700s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/btree	47.031s
+?   	github.com/ms-xiaosnow/gosqlite/internal/buildinfo	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/darwinfile	1.109s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/encstore	1.486s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/journal	1.694s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/pager	2.381s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/record	1.018s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/sql	1.253s
+?   	github.com/ms-xiaosnow/gosqlite/internal/testkit/fileview	[no test files]
+ok  	github.com/ms-xiaosnow/gosqlite/internal/testscope	1.012s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/vfs	1.584s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/wal	5.065s
+ok  	github.com/ms-xiaosnow/gosqlite/internal/walindex	2.371s
+ok  	github.com/ms-xiaosnow/gosqlite/migration/postgres	45.968s
+ok  	github.com/ms-xiaosnow/gosqlite/sqlite	383.297s
+STAGE cgo1-race EXIT 0 AT 2026-10-11T04:22:48Z
+
+STAGE cross-build-linux-arm64 START 2026-10-11T04:22:48Z
+COMMAND env CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build ./... 
+STAGE cross-build-linux-arm64 EXIT 0 AT 2026-10-11T04:22:56Z
+
+STAGE cross-build-darwin-arm64 START 2026-10-11T04:22:56Z
+COMMAND env CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build ./... 
+STAGE cross-build-darwin-arm64 EXIT 0 AT 2026-10-11T04:23:05Z
+
+STAGE cross-build-darwin-amd64 START 2026-10-11T04:23:05Z
+COMMAND env CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build ./... 
+STAGE cross-build-darwin-amd64 EXIT 0 AT 2026-10-11T04:23:14Z
+
+STAGE cross-build-windows-amd64 START 2026-10-11T04:23:14Z
+COMMAND env CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build ./... 
+STAGE cross-build-windows-amd64 EXIT 0 AT 2026-10-11T04:23:23Z
+
+STAGE cross-build-windows-arm64 START 2026-10-11T04:23:23Z
+COMMAND env CGO_ENABLED=0 GOOS=windows GOARCH=arm64 go build ./... 
+STAGE cross-build-windows-arm64 EXIT 0 AT 2026-10-11T04:23:31Z
+
+STAGE module-integrity START 2026-10-11T04:23:31Z
+COMMAND go mod verify 
+all modules verified
+STAGE module-integrity EXIT 0 AT 2026-10-11T04:23:32Z
+
+STAGE source-identity-after START 2026-10-11T04:23:32Z
+COMMAND python3 /workspace/scratch/5e06a74e5f65/durable-restart/final-closeout-combined-checks.identity.py after 
+{
+  "phase": "after",
+  "baseline_commit": "1352ae524575e4d6fe8b5434fd930c3b07be4ac8",
+  "baseline_tree": "2b91b20abec4b2d651de1dd860fe86e79b62bac9",
+  "exact_tree": "d7393c254a6fca4452ae194d64d9045659f9781d",
+  "source_files": 2935,
+  "source_directories": 141,
+  "changed_paths": [
+    "README.md",
+    "cmd/gosqlite/main.go",
+    "cmd/gosqlite/query_close_test.go",
+    "docs/acceptance-status.md",
+    "docs/checkpoints.json",
+    "docs/cli-resource-verification-zh.md",
+    "docs/closeout-scope-20261011.md",
+    "docs/evidence/cli-resources-20261011.md",
+    "docs/evidence/cli-resources-20261011/identity-after.json",
+    "docs/evidence/cli-resources-20261011/identity-before.json",
+    "docs/evidence/cli-resources-20261011/independent-review.md",
+    "docs/evidence/cli-resources-20261011/independent-summary.json",
+    "docs/evidence/cli-resources-20261011/ordinary-aggregate-command.txt",
+    "docs/evidence/cli-resources-20261011/ordinary-aggregate.txt",
+    "docs/evidence/cli-resources-20261011/owner-scoped-evidence.json",
+    "docs/evidence/cli-resources-20261011/pending-backup.json",
+    "docs/evidence/cli-resources-20261011/source-manifest.json",
+    "docs/evidence/cli-resources-20261011/stages.tsv",
+    "docs/evidence/contract-docs-20261011/SHA256SUMS",
+    "docs/evidence/contract-docs-20261011/contract-docs.patch",
+    "docs/evidence/contract-docs-20261011/manifest.json",
+    "docs/evidence/contract-docs-20261011/progress-fragment-zh.md",
+    "docs/evidence/contract-docs-20261011/static-review.json",
+    "docs/evidence/inspect-metadata-20261011/ci-ordinary.txt.gz",
+    "docs/evidence/inspect-metadata-20261011/library-restore.txt.gz",
+    "docs/evidence/inspect-metadata-20261011/persistence.json",
+    "docs/evidence/query-close-20261011.md",
+    "docs/file-formats.md",
+    "docs/manual-verification-zh.md",
+    "docs/migration-pgembedding.md",
+    "docs/progress.md",
+    "docs/security.md",
+    "examples/encrypted-cli/main.go",
+    "examples/encrypted-shared/main.go",
+    "examples/encrypted-wal/main.go",
+    "examples/encrypted/main.go",
+    "examples/internal/fixturecleanup/cleanup.go",
+    "examples/internal/fixturecleanup/cleanup_test.go",
+    "examples/internal/fixturecleanup/source_test.go",
+    "examples/native-check/main.go",
+    "examples/readonly/legacy_source_test.go",
+    "examples/readonly/main.go",
+    "examples/readonly/main_test.go",
+    "examples/sparse-exact/README.md",
+    "examples/sparse-exact/main.go",
+    "examples/sparse-exact/main_status_test.go",
+    "examples/write/README.md",
+    "examples/write/main.go",
+    "examples/write/main_test.go"
+  ],
+  "prior_cli_tree": "4c2af13646c973c53340450f8f1310492aae5628",
+  "changed_from_prior_cli": [
+    "README.md",
+    "docs/acceptance-status.md",
+    "docs/checkpoints.json",
+    "docs/cli-resource-verification-zh.md",
+    "docs/closeout-scope-20261011.md",
+    "docs/evidence/cli-resources-20261011.md",
+    "docs/evidence/cli-resources-20261011/identity-after.json",
+    "docs/evidence/cli-resources-20261011/identity-before.json",
+    "docs/evidence/cli-resources-20261011/independent-review.md",
+    "docs/evidence/cli-resources-20261011/independent-summary.json",
+    "docs/evidence/cli-resources-20261011/ordinary-aggregate-command.txt",
+    "docs/evidence/cli-resources-20261011/ordinary-aggregate.txt",
+    "docs/evidence/cli-resources-20261011/owner-scoped-evidence.json",
+    "docs/evidence/cli-resources-20261011/pending-backup.json",
+    "docs/evidence/cli-resources-20261011/source-manifest.json",
+    "docs/evidence/cli-resources-20261011/stages.tsv",
+    "docs/evidence/contract-docs-20261011/SHA256SUMS",
+    "docs/evidence/contract-docs-20261011/contract-docs.patch",
+    "docs/evidence/contract-docs-20261011/manifest.json",
+    "docs/evidence/contract-docs-20261011/progress-fragment-zh.md",
+    "docs/evidence/contract-docs-20261011/static-review.json",
+    "docs/evidence/inspect-metadata-20261011/ci-ordinary.txt.gz",
+    "docs/evidence/inspect-metadata-20261011/library-restore.txt.gz",
+    "docs/evidence/inspect-metadata-20261011/persistence.json",
+    "docs/file-formats.md",
+    "docs/manual-verification-zh.md",
+    "docs/migration-pgembedding.md",
+    "docs/progress.md",
+    "docs/security.md",
+    "examples/encrypted-cli/main.go",
+    "examples/encrypted-shared/main.go",
+    "examples/encrypted-wal/main.go",
+    "examples/encrypted/main.go",
+    "examples/internal/fixturecleanup/cleanup.go",
+    "examples/internal/fixturecleanup/cleanup_test.go",
+    "examples/internal/fixturecleanup/source_test.go",
+    "examples/native-check/main.go"
+  ],
+  "retention_source_paths_exact_match": [
+    "examples/encrypted/main.go",
+    "examples/encrypted-wal/main.go",
+    "examples/encrypted-shared/main.go",
+    "examples/encrypted-cli/main.go",
+    "examples/native-check/main.go",
+    "examples/internal/fixturecleanup/cleanup.go",
+    "examples/internal/fixturecleanup/cleanup_test.go",
+    "examples/internal/fixturecleanup/source_test.go"
+  ],
+  "new_test_files_over_prior_cli": [
+    "examples/internal/fixturecleanup/cleanup_test.go",
+    "examples/internal/fixturecleanup/source_test.go"
+  ],
+  "old_test_files_byte_mode_unchanged": 353,
+  "prior_cli_all_test_files_unchanged": 358,
+  "module_and_scripts_unchanged": true,
+  "owner_inventory_matches": true,
+  "freeze_copy_bytes_git_modes_actual_modes_directory_inventory_match": true,
+  "copy_has_git": false,
+  "git_commands_run": 0,
+  "manifest_sha256": "42e86ecc5dacd170693e3d798d0e9512a35cc168b9a35484d0228b1403a8b5f1",
+  "baseline_inventory_sha256": "952eca0c0b3732d16171a6b7e8da94345eee517312eadab9abbf5ff1c9ffda6f",
+  "frozen_inventory_sha256": "b3f85ee50b04ef37d0adb45f8482673cdec1853340ac7f2045cca0b7a8dace7e"
+}
+STAGE source-identity-after EXIT 0 AT 2026-10-11T04:23:35Z
+FINAL CLOSEOUT FULL FROZEN ORDINARY AGGREGATE PASS 2026-10-11T04:23:35Z
+AGGREGATE EXIT 0 AT 2026-10-11T04:23:35Z LAST_STAGE complete

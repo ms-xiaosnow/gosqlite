@@ -552,5 +552,36 @@
     ],
     "authorization_event": "Standing stage main/ordinary CI authorization. Guarded fast-forward update succeeded first call with expected prior SHA; no force or alternate route.",
     "restore_log_sha256": "d38229f4f1b290b00f3aa5e0ebc8f52fb89469d233b579dc5e0dc56c8fc40ada"
+  },
+  {
+    "observed_utc": "2026-10-11T04:30:11Z",
+    "remote_commit": "7a9972547f49531df04cf1b624dfa662b483907b",
+    "tree": "f10585e19a6fbb23af0d0d7402698f9b0b35e0f0",
+    "parent": "1352ae524575e4d6fe8b5434fd930c3b07be4ac8",
+    "library_file_id": "libfile_f28c9a0df2108191981d41eb76fafc58",
+    "library_version": 0,
+    "bundle_bytes": 5183463,
+    "bundle_sha256": "bd4d728d9667579ec03820f5166cef766ef871ee5accdfb113a1aac2f12f8b9c",
+    "main_readback_verified": true,
+    "local_mirror_exact": true,
+    "restore": "PASS exit0 2026-10-11T04:13:29Z: Library byte comparison/clone --branch main/fsck/exact SHA/tree/original goal; exactly18 top-level tests each CGO0/race plus29 subtests per mode, no skip/fail/zero-match; 8sourceguards/fullvet/trimpathbuild/five crossbuilds/before-after modules and all2933files139directories unchanged. No full test/oracle rerun.",
+    "source_gate": "Frozen tree4c2af13646c973c53340450f8f1310492aae5628 full ordinary unit/vet/build/oracle/race/five builds/modules/identity PASS exit0 2026-10-11T03:53:38Z; final non-doc files exact same bytes/modes/inventory, docs only differences.",
+    "ci_run": 38110617335,
+    "ci_status": "COMPLETED SUCCESS updated2026-10-11T04:30:02Z readback2026-10-11T04:30:11Z",
+    "ci_jobs": [
+      {
+        "id": 114385219665,
+        "name": "oracle",
+        "conclusion": "success"
+      },
+      {
+        "id": 114385219823,
+        "name": "ordinary",
+        "conclusion": "success"
+      }
+    ],
+    "authorization_event": "Standing stage main/ordinary CI authorization. Guarded fast-forward expected prior SHA succeeded first call, no force or alternate route.",
+    "restore_log_sha256": "1413f3b01db875259c7f1925ae1a6aceb2a006525e6e00d5137adaa8247e31ae",
+    "ci_ordinary_log_sha256": "fbdaf4e76ba12c875689272b0f6dad91829b0620068997b3f85a5951b834d335"
   }
 ]

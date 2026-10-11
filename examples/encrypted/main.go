@@ -14,6 +14,7 @@ import (
 	"sync"
 
 	"github.com/ms-xiaosnow/gosqlite/encryption"
+	"github.com/ms-xiaosnow/gosqlite/examples/internal/fixturecleanup"
 	"github.com/ms-xiaosnow/gosqlite/sqlite"
 )
 
@@ -74,8 +75,10 @@ func run() (err error) {
 	if err != nil {
 		return err
 	}
-	// This removes only our disposable demo directory. Removal is not secure erase.
-	defer func() { err = errors.Join(err, os.RemoveAll(dir)) }()
+	// Only ordinary completed success may remove the private demo directory.
+	completed := false
+	// Evaluate the final result after every later resource defer has run.
+	defer func() { err = fixturecleanup.Finalize(dir, completed, err, os.RemoveAll) }()
 	for _, name := range []string{"source", "archive", "restored"} {
 		if err = os.Mkdir(filepath.Join(dir, name), 0700); err != nil {
 			return err
@@ -115,7 +118,9 @@ func run() (err error) {
 	if err != nil {
 		return err
 	}
-	fmt.Println("Created, wrote, queried, and authenticated an encrypted snapshot.")
+	if _, err = fmt.Println("Created, wrote, queried, and authenticated an encrypted snapshot."); err != nil {
+		return err
+	}
 
 	if err = db.Rekey(ctx, rotated); err != nil {
 		return err
@@ -142,7 +147,9 @@ func run() (err error) {
 	if err = checkNote(ctx, reopened); err != nil {
 		return err
 	}
-	fmt.Println("Rekeyed and reopened with the new key; old ciphertext is retained.")
+	if _, err = fmt.Println("Rekeyed and reopened with the new key; old ciphertext is retained."); err != nil {
+		return err
+	}
 
 	archive := filepath.Join(dir, "archive", "demo.backup.gse")
 	backupInfo, err := reopened.BackupEncrypted(ctx, archive, archiveKey)
@@ -173,8 +180,13 @@ func run() (err error) {
 	if _, err = restored.VerifyEncrypted(ctx); err != nil {
 		return err
 	}
-	fmt.Println("Created a portable encrypted backup and verified a fresh restored family.")
-	fmt.Println("Keys stayed in memory; disposable files will now be removed (not securely erased).")
+	if _, err = fmt.Println("Created a portable encrypted backup and verified a fresh restored family."); err != nil {
+		return err
+	}
+	if _, err = fmt.Println("Keys stayed in memory; disposable files will now be removed (not securely erased)."); err != nil {
+		return err
+	}
+	completed = true
 	return nil
 }
 

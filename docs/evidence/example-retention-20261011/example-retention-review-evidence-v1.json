@@ -1,0 +1,302 @@
+{
+  "identity-after.command": {
+    "sha256": "f946a3cd25adc799baa3ccae07d526185690d528b40aeb2dfd80d1ff6c187899",
+    "bytes": 10,
+    "text": "identity \n"
+  },
+  "identity-after.exit": {
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "bytes": 2,
+    "text": "0\n"
+  },
+  "identity-after.finished": {
+    "sha256": "805701a18c26c24b9b6e7c9260728479d982cb8f6fb4a37144ae31adcbb82a30",
+    "bytes": 21,
+    "text": "2026-10-11T03:59:57Z\n"
+  },
+  "identity-after.started": {
+    "sha256": "805701a18c26c24b9b6e7c9260728479d982cb8f6fb4a37144ae31adcbb82a30",
+    "bytes": 21,
+    "text": "2026-10-11T03:59:57Z\n"
+  },
+  "identity-after.stderr": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0,
+    "text": ""
+  },
+  "identity-after.stdout": {
+    "sha256": "4de7861d90067415f3ff0a9b3ede83d6f2a4e7247788bea971118c09538e53fe",
+    "bytes": 96,
+    "text": "source files: 2907 directories: 139 file identity changes: 0 directory identity unchanged: True\n"
+  },
+  "identity-before-ordinary.command": {
+    "sha256": "f946a3cd25adc799baa3ccae07d526185690d528b40aeb2dfd80d1ff6c187899",
+    "bytes": 10,
+    "text": "identity \n"
+  },
+  "identity-before-ordinary.exit": {
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "bytes": 2,
+    "text": "0\n"
+  },
+  "identity-before-ordinary.finished": {
+    "sha256": "891ed6063b45b2ac968327bacb5f0898e5ef6cd18d376f5f0e01b50e9f3c9c97",
+    "bytes": 21,
+    "text": "2026-10-11T03:59:41Z\n"
+  },
+  "identity-before-ordinary.started": {
+    "sha256": "891ed6063b45b2ac968327bacb5f0898e5ef6cd18d376f5f0e01b50e9f3c9c97",
+    "bytes": 21,
+    "text": "2026-10-11T03:59:41Z\n"
+  },
+  "identity-before-ordinary.stderr": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0,
+    "text": ""
+  },
+  "identity-before-ordinary.stdout": {
+    "sha256": "4de7861d90067415f3ff0a9b3ede83d6f2a4e7247788bea971118c09538e53fe",
+    "bytes": 96,
+    "text": "source files: 2907 directories: 139 file identity changes: 0 directory identity unchanged: True\n"
+  },
+  "identity-before-race.command": {
+    "sha256": "f946a3cd25adc799baa3ccae07d526185690d528b40aeb2dfd80d1ff6c187899",
+    "bytes": 10,
+    "text": "identity \n"
+  },
+  "identity-before-race.exit": {
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "bytes": 2,
+    "text": "0\n"
+  },
+  "identity-before-race.finished": {
+    "sha256": "df46a38f1c1776f9c8799f35d499ca721f3a7371a096b4ebdcd502aeba2303d8",
+    "bytes": 21,
+    "text": "2026-10-11T03:59:46Z\n"
+  },
+  "identity-before-race.started": {
+    "sha256": "28d78b339b1e27942b3fda4b5386ac5a903a1d4754aa9df1a2b0c7a167fd68ca",
+    "bytes": 21,
+    "text": "2026-10-11T03:59:45Z\n"
+  },
+  "identity-before-race.stderr": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0,
+    "text": ""
+  },
+  "identity-before-race.stdout": {
+    "sha256": "4de7861d90067415f3ff0a9b3ede83d6f2a4e7247788bea971118c09538e53fe",
+    "bytes": 96,
+    "text": "source files: 2907 directories: 139 file identity changes: 0 directory identity unchanged: True\n"
+  },
+  "scoped-build-cgo0.command": {
+    "sha256": "cf729fbfe110e7bbcd7086b02974dc631b9a16b600be39df6a15affd883b1a34",
+    "bytes": 186,
+    "text": "env CGO_ENABLED=0 go build ./examples/internal/fixturecleanup ./examples/encrypted ./examples/encrypted-wal ./examples/encrypted-shared ./examples/encrypted-cli ./examples/native-check \n"
+  },
+  "scoped-build-cgo0.exit": {
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "bytes": 2,
+    "text": "0\n"
+  },
+  "scoped-build-cgo0.finished": {
+    "sha256": "805701a18c26c24b9b6e7c9260728479d982cb8f6fb4a37144ae31adcbb82a30",
+    "bytes": 21,
+    "text": "2026-10-11T03:59:57Z\n"
+  },
+  "scoped-build-cgo0.started": {
+    "sha256": "d3f347d0a45b549583e8ce6ed49760e3ee4d30d83dc868d41def5fe735382706",
+    "bytes": 21,
+    "text": "2026-10-11T03:59:55Z\n"
+  },
+  "scoped-build-cgo0.stderr": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0,
+    "text": ""
+  },
+  "scoped-build-cgo0.stdout": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0,
+    "text": ""
+  },
+  "scoped-vet-cgo0.command": {
+    "sha256": "bb9c4ec979d2c4aedf8251fec8471c0fc25e1fffcc422f72a3d6bc98046667c1",
+    "bytes": 184,
+    "text": "env CGO_ENABLED=0 go vet ./examples/internal/fixturecleanup ./examples/encrypted ./examples/encrypted-wal ./examples/encrypted-shared ./examples/encrypted-cli ./examples/native-check \n"
+  },
+  "scoped-vet-cgo0.exit": {
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "bytes": 2,
+    "text": "0\n"
+  },
+  "scoped-vet-cgo0.finished": {
+    "sha256": "d3f347d0a45b549583e8ce6ed49760e3ee4d30d83dc868d41def5fe735382706",
+    "bytes": 21,
+    "text": "2026-10-11T03:59:55Z\n"
+  },
+  "scoped-vet-cgo0.started": {
+    "sha256": "d3f347d0a45b549583e8ce6ed49760e3ee4d30d83dc868d41def5fe735382706",
+    "bytes": 21,
+    "text": "2026-10-11T03:59:55Z\n"
+  },
+  "scoped-vet-cgo0.stderr": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0,
+    "text": ""
+  },
+  "scoped-vet-cgo0.stdout": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0,
+    "text": ""
+  },
+  "selected-cgo0.command": {
+    "sha256": "732b8eaee4f9401858156ce728ba28504ebf3a030fae6826ac7eca251ddd6238",
+    "bytes": 291,
+    "text": "env CGO_ENABLED=0 go test -count=1 -v ./examples/internal/fixturecleanup ./examples/encrypted-wal ./examples/encrypted-shared -run \\^\\(TestFinalizeCallbackPolicy\\|TestFinalizeDelayedResult\\|TestExampleFixtureFinalizersSource\\|TestEncryptedWALExample\\|TestEncryptedSharedExampleOrdinary\\)\\$ \n"
+  },
+  "selected-cgo0.exit": {
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "bytes": 2,
+    "text": "0\n"
+  },
+  "selected-cgo0.finished": {
+    "sha256": "28d78b339b1e27942b3fda4b5386ac5a903a1d4754aa9df1a2b0c7a167fd68ca",
+    "bytes": 21,
+    "text": "2026-10-11T03:59:45Z\n"
+  },
+  "selected-cgo0.started": {
+    "sha256": "b0f6c4b8ad665e6cc058c413c0b47df3fa5392277e21fcf0d75aa1024f4c7bda",
+    "bytes": 21,
+    "text": "2026-10-11T03:59:42Z\n"
+  },
+  "selected-cgo0.stderr": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0,
+    "text": ""
+  },
+  "selected-cgo0.stdout": {
+    "sha256": "93c40db87aaea28cab68c7f5651f51914aaa28cba03ac3c32148738733bfdfea",
+    "bytes": 2043,
+    "text": "=== RUN   TestFinalizeCallbackPolicy\n=== RUN   TestFinalizeCallbackPolicy/completed_success\n=== RUN   TestFinalizeCallbackPolicy/operation_error\n=== RUN   TestFinalizeCallbackPolicy/joined_result\n=== RUN   TestFinalizeCallbackPolicy/incomplete_without_error\n=== RUN   TestFinalizeCallbackPolicy/incomplete_with_error\n=== RUN   TestFinalizeCallbackPolicy/removal_error\n--- PASS: TestFinalizeCallbackPolicy (0.00s)\n    --- PASS: TestFinalizeCallbackPolicy/completed_success (0.00s)\n    --- PASS: TestFinalizeCallbackPolicy/operation_error (0.00s)\n    --- PASS: TestFinalizeCallbackPolicy/joined_result (0.00s)\n    --- PASS: TestFinalizeCallbackPolicy/incomplete_without_error (0.00s)\n    --- PASS: TestFinalizeCallbackPolicy/incomplete_with_error (0.00s)\n    --- PASS: TestFinalizeCallbackPolicy/removal_error (0.00s)\n=== RUN   TestFinalizeDelayedResult\n--- PASS: TestFinalizeDelayedResult (0.00s)\n=== RUN   TestExampleFixtureFinalizersSource\n=== RUN   TestExampleFixtureFinalizersSource/encrypted\n=== RUN   TestExampleFixtureFinalizersSource/encrypted-wal\n=== RUN   TestExampleFixtureFinalizersSource/encrypted-shared\n=== RUN   TestExampleFixtureFinalizersSource/encrypted-cli\n=== RUN   TestExampleFixtureFinalizersSource/native-check\n--- PASS: TestExampleFixtureFinalizersSource (0.01s)\n    --- PASS: TestExampleFixtureFinalizersSource/encrypted (0.00s)\n    --- PASS: TestExampleFixtureFinalizersSource/encrypted-wal (0.00s)\n    --- PASS: TestExampleFixtureFinalizersSource/encrypted-shared (0.00s)\n    --- PASS: TestExampleFixtureFinalizersSource/encrypted-cli (0.00s)\n    --- PASS: TestExampleFixtureFinalizersSource/native-check (0.00s)\nPASS\nok  \tgithub.com/ms-xiaosnow/gosqlite/examples/internal/fixturecleanup\t0.011s\n=== RUN   TestEncryptedWALExample\n--- PASS: TestEncryptedWALExample (0.00s)\nPASS\nok  \tgithub.com/ms-xiaosnow/gosqlite/examples/encrypted-wal\t0.007s\n=== RUN   TestEncryptedSharedExampleOrdinary\n--- PASS: TestEncryptedSharedExampleOrdinary (0.01s)\nPASS\nok  \tgithub.com/ms-xiaosnow/gosqlite/examples/encrypted-shared\t0.009s\n"
+  },
+  "selected-cgo1-race.command": {
+    "sha256": "2812d378d52b942e2eb4ee6565cbcddaeefdddc758a867296bcaa2cf78b653f6",
+    "bytes": 297,
+    "text": "env CGO_ENABLED=1 go test -race -count=1 -v ./examples/internal/fixturecleanup ./examples/encrypted-wal ./examples/encrypted-shared -run \\^\\(TestFinalizeCallbackPolicy\\|TestFinalizeDelayedResult\\|TestExampleFixtureFinalizersSource\\|TestEncryptedWALExample\\|TestEncryptedSharedExampleOrdinary\\)\\$ \n"
+  },
+  "selected-cgo1-race.exit": {
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "bytes": 2,
+    "text": "0\n"
+  },
+  "selected-cgo1-race.finished": {
+    "sha256": "d3f347d0a45b549583e8ce6ed49760e3ee4d30d83dc868d41def5fe735382706",
+    "bytes": 21,
+    "text": "2026-10-11T03:59:55Z\n"
+  },
+  "selected-cgo1-race.started": {
+    "sha256": "027d16a043b8f2df4309b20ef1ee3835db529e9fbf194d4946b46913e819a46e",
+    "bytes": 21,
+    "text": "2026-10-11T03:59:47Z\n"
+  },
+  "selected-cgo1-race.stderr": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0,
+    "text": ""
+  },
+  "selected-cgo1-race.stdout": {
+    "sha256": "4459ca921821af14edffc71583b16cd8ffcf8901105c9f1dcf8ccf12a081ffb7",
+    "bytes": 2043,
+    "text": "=== RUN   TestFinalizeCallbackPolicy\n=== RUN   TestFinalizeCallbackPolicy/completed_success\n=== RUN   TestFinalizeCallbackPolicy/operation_error\n=== RUN   TestFinalizeCallbackPolicy/joined_result\n=== RUN   TestFinalizeCallbackPolicy/incomplete_without_error\n=== RUN   TestFinalizeCallbackPolicy/incomplete_with_error\n=== RUN   TestFinalizeCallbackPolicy/removal_error\n--- PASS: TestFinalizeCallbackPolicy (0.00s)\n    --- PASS: TestFinalizeCallbackPolicy/completed_success (0.00s)\n    --- PASS: TestFinalizeCallbackPolicy/operation_error (0.00s)\n    --- PASS: TestFinalizeCallbackPolicy/joined_result (0.00s)\n    --- PASS: TestFinalizeCallbackPolicy/incomplete_without_error (0.00s)\n    --- PASS: TestFinalizeCallbackPolicy/incomplete_with_error (0.00s)\n    --- PASS: TestFinalizeCallbackPolicy/removal_error (0.00s)\n=== RUN   TestFinalizeDelayedResult\n--- PASS: TestFinalizeDelayedResult (0.00s)\n=== RUN   TestExampleFixtureFinalizersSource\n=== RUN   TestExampleFixtureFinalizersSource/encrypted\n=== RUN   TestExampleFixtureFinalizersSource/encrypted-wal\n=== RUN   TestExampleFixtureFinalizersSource/encrypted-shared\n=== RUN   TestExampleFixtureFinalizersSource/encrypted-cli\n=== RUN   TestExampleFixtureFinalizersSource/native-check\n--- PASS: TestExampleFixtureFinalizersSource (0.03s)\n    --- PASS: TestExampleFixtureFinalizersSource/encrypted (0.01s)\n    --- PASS: TestExampleFixtureFinalizersSource/encrypted-wal (0.01s)\n    --- PASS: TestExampleFixtureFinalizersSource/encrypted-shared (0.00s)\n    --- PASS: TestExampleFixtureFinalizersSource/encrypted-cli (0.01s)\n    --- PASS: TestExampleFixtureFinalizersSource/native-check (0.00s)\nPASS\nok  \tgithub.com/ms-xiaosnow/gosqlite/examples/internal/fixturecleanup\t1.045s\n=== RUN   TestEncryptedWALExample\n--- PASS: TestEncryptedWALExample (0.02s)\nPASS\nok  \tgithub.com/ms-xiaosnow/gosqlite/examples/encrypted-wal\t1.034s\n=== RUN   TestEncryptedSharedExampleOrdinary\n--- PASS: TestEncryptedSharedExampleOrdinary (0.02s)\nPASS\nok  \tgithub.com/ms-xiaosnow/gosqlite/examples/encrypted-shared\t1.036s\n"
+  },
+  "sourceguard-cgo0.command": {
+    "sha256": "71f486d6837fe64a43bee8efc0c94f6315db2b095ae787487a1e0533e381f5e9",
+    "bytes": 118,
+    "text": "env CGO_ENABLED=0 go test -count=1 -v ./examples/internal/fixturecleanup -run \\^TestExampleFixtureFinalizersSource\\$ \n"
+  },
+  "sourceguard-cgo0.exit": {
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "bytes": 2,
+    "text": "0\n"
+  },
+  "sourceguard-cgo0.finished": {
+    "sha256": "b0f6c4b8ad665e6cc058c413c0b47df3fa5392277e21fcf0d75aa1024f4c7bda",
+    "bytes": 21,
+    "text": "2026-10-11T03:59:42Z\n"
+  },
+  "sourceguard-cgo0.started": {
+    "sha256": "891ed6063b45b2ac968327bacb5f0898e5ef6cd18d376f5f0e01b50e9f3c9c97",
+    "bytes": 21,
+    "text": "2026-10-11T03:59:41Z\n"
+  },
+  "sourceguard-cgo0.stderr": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0,
+    "text": ""
+  },
+  "sourceguard-cgo0.stdout": {
+    "sha256": "d7dbe7f0c149efe94bd8a6ec7f1bad2c9e0239d0025e720717945ac578be37b6",
+    "bytes": 826,
+    "text": "=== RUN   TestExampleFixtureFinalizersSource\n=== RUN   TestExampleFixtureFinalizersSource/encrypted\n=== RUN   TestExampleFixtureFinalizersSource/encrypted-wal\n=== RUN   TestExampleFixtureFinalizersSource/encrypted-shared\n=== RUN   TestExampleFixtureFinalizersSource/encrypted-cli\n=== RUN   TestExampleFixtureFinalizersSource/native-check\n--- PASS: TestExampleFixtureFinalizersSource (0.01s)\n    --- PASS: TestExampleFixtureFinalizersSource/encrypted (0.00s)\n    --- PASS: TestExampleFixtureFinalizersSource/encrypted-wal (0.00s)\n    --- PASS: TestExampleFixtureFinalizersSource/encrypted-shared (0.00s)\n    --- PASS: TestExampleFixtureFinalizersSource/encrypted-cli (0.00s)\n    --- PASS: TestExampleFixtureFinalizersSource/native-check (0.00s)\nPASS\nok  \tgithub.com/ms-xiaosnow/gosqlite/examples/internal/fixturecleanup\t0.013s\n"
+  },
+  "sourceguard-cgo1-race.command": {
+    "sha256": "23b4ee72ea02047aab85ca3563e8aaaf17ccbf4d9fb00d4e5f16d538c0688de6",
+    "bytes": 124,
+    "text": "env CGO_ENABLED=1 go test -race -count=1 -v ./examples/internal/fixturecleanup -run \\^TestExampleFixtureFinalizersSource\\$ \n"
+  },
+  "sourceguard-cgo1-race.exit": {
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "bytes": 2,
+    "text": "0\n"
+  },
+  "sourceguard-cgo1-race.finished": {
+    "sha256": "027d16a043b8f2df4309b20ef1ee3835db529e9fbf194d4946b46913e819a46e",
+    "bytes": 21,
+    "text": "2026-10-11T03:59:47Z\n"
+  },
+  "sourceguard-cgo1-race.started": {
+    "sha256": "df46a38f1c1776f9c8799f35d499ca721f3a7371a096b4ebdcd502aeba2303d8",
+    "bytes": 21,
+    "text": "2026-10-11T03:59:46Z\n"
+  },
+  "sourceguard-cgo1-race.stderr": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0,
+    "text": ""
+  },
+  "sourceguard-cgo1-race.stdout": {
+    "sha256": "39cdb97d8b19ecf49247db1d5c36c155bfeca9d29ce3dd4a89825885de56648f",
+    "bytes": 826,
+    "text": "=== RUN   TestExampleFixtureFinalizersSource\n=== RUN   TestExampleFixtureFinalizersSource/encrypted\n=== RUN   TestExampleFixtureFinalizersSource/encrypted-wal\n=== RUN   TestExampleFixtureFinalizersSource/encrypted-shared\n=== RUN   TestExampleFixtureFinalizersSource/encrypted-cli\n=== RUN   TestExampleFixtureFinalizersSource/native-check\n--- PASS: TestExampleFixtureFinalizersSource (0.02s)\n    --- PASS: TestExampleFixtureFinalizersSource/encrypted (0.00s)\n    --- PASS: TestExampleFixtureFinalizersSource/encrypted-wal (0.00s)\n    --- PASS: TestExampleFixtureFinalizersSource/encrypted-shared (0.00s)\n    --- PASS: TestExampleFixtureFinalizersSource/encrypted-cli (0.00s)\n    --- PASS: TestExampleFixtureFinalizersSource/native-check (0.00s)\nPASS\nok  \tgithub.com/ms-xiaosnow/gosqlite/examples/internal/fixturecleanup\t1.040s\n"
+  },
+  "toolchain.command": {
+    "sha256": "3bef7c7a9110c993cf1260b930c6477ba35731eca35ea9e11b4d1d4ea37802e9",
+    "bytes": 12,
+    "text": "go version \n"
+  },
+  "toolchain.exit": {
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "bytes": 2,
+    "text": "0\n"
+  },
+  "toolchain.finished": {
+    "sha256": "93b5aa717a5e70c55cfd4146a7fa26996e3d0c28153a2ef680293e4676b0b6e2",
+    "bytes": 21,
+    "text": "2026-10-11T03:59:40Z\n"
+  },
+  "toolchain.started": {
+    "sha256": "93b5aa717a5e70c55cfd4146a7fa26996e3d0c28153a2ef680293e4676b0b6e2",
+    "bytes": 21,
+    "text": "2026-10-11T03:59:40Z\n"
+  },
+  "toolchain.stderr": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0,
+    "text": ""
+  },
+  "toolchain.stdout": {
+    "sha256": "ed4307d760c597256afdc696a61d47d13e832615d7741ead11c64966a440b376",
+    "bytes": 32,
+    "text": "go version go1.27.2 linux/amd64\n"
+  }
+}

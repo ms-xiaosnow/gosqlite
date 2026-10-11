@@ -4,6 +4,18 @@ Historical test-scope statements are corrected in [the namespace-test audit](doc
 
 A native Go database kernel targeting tested subsets of SQLite 3.54.0 files and SQL. Current development: persistent HNSW/IVFFlat, exact typed-vector KNN and same-snapshot hybrid ranking, plus experimental authenticated snapshot, dirty-page WAL and concurrent encrypted sessions, ordinary B-tree equality, leading inequalities and bounded rowid-range planning, nested savepoints, scoped INNER/CROSS/LEFT JOINs and bounded global aggregates, CASE/CAST/BETWEEN/IN, context-sensitive predicate evaluation, affinity-correct comparisons and explicit NULL ordering, BIT/HALFVEC/SPARSEVEC exact search, extended vector primitives, and bounded pg_embedding catalog inspection, typed offline SQL conversion and resumable CSV/NDJSON import. It is not production-ready. No CGO, SQLite subprocess, C ABI, or remote SQL engine is used in production.
 
+## 示例临时目录的有限保留约定
+
+`encrypted`、`encrypted-wal`、`encrypted-shared`、`encrypted-cli` 和
+`native-check` 只在普通流程完成、输出成功且全部已有资源收尾未返回错误后，
+才尝试删除自己的私有临时目录。失败或未完成时不调用删除，并在返回错误中
+报告保留目录；删除本身失败会保留错误，不重试，但可能已部分删除，不能承诺
+完整现场。加密 provider/密钥清理语义保持不变；保留密文不代表保留密钥或仍可
+解密，也不构成安全擦除、崩溃恢复或任意故障场景的证明。此独立切片仅通过
+纯 helper/源码检查及既有 WAL/shared 普通成功路径的定名普通/race 门和 scoped
+vet/build；没有执行真实失败保留或 snapshot/CLI/native-check 示例。手册中的
+历史限制不能用候选源码改写为已经运行的证据。
+
 ## Try the implemented SQL path
 
 Use Go 1.27.2. Plain-file native backends are implemented for Linux, Darwin and Windows/amd64. Only Linux/amd64 ordinary runtime is verified here; Darwin/Windows evidence is source review and cross-compilation, with platform limits documented in ADR0015. Encrypted native backends are implemented for Linux, Darwin and Windows/amd64; only Linux ordinary runtime is verified.

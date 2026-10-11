@@ -1,0 +1,243 @@
+{
+  "result": "PASS",
+  "aggregate_exit": 0,
+  "tool_session_exit": 0,
+  "started": "2026-10-11T04:07:57Z",
+  "finished": "2026-10-11T04:23:35Z",
+  "tree": "d7393c254a6fca4452ae194d64d9045659f9781d",
+  "baseline_commit": "1352ae524575e4d6fe8b5434fd930c3b07be4ac8",
+  "source_files": 2935,
+  "source_directories": 141,
+  "source_identity_before_after_equal": true,
+  "old_test_files_unchanged": 353,
+  "prior_cli_test_files_unchanged": 358,
+  "stages": [
+    {
+      "stage": "resource-precheck",
+      "started": "2026-10-11T04:07:57Z",
+      "finished": "2026-10-11T04:07:57Z",
+      "exit": 0,
+      "seconds": 0,
+      "command": "python3 /workspace/scratch/5e06a74e5f65/durable-restart/final-closeout-combined-checks.precheck.py",
+      "stdout_bytes": 728,
+      "stderr_bytes": 0
+    },
+    {
+      "stage": "resource-snapshot",
+      "started": "2026-10-11T04:07:57Z",
+      "finished": "2026-10-11T04:07:57Z",
+      "exit": 0,
+      "seconds": 0,
+      "command": "bash -c df\\ -B1\\ /tmp\\ \\\"\\$1\\\"\\;\\ df\\ -i\\ /tmp\\ \\\"\\$1\\\"\\;\\ free\\ -b\\;\\ printf\\ \\\"TMPDIR=%s\\\\nGOTMPDIR=%s\\\\n\\\"\\ \\\"\\$\\{TMPDIR:-/tmp\\ \\(default\\)\\}\\\"\\ \\\"\\$\\{GOTMPDIR:-unset\\}\\\" _ /workspace/scratch/5e06a74e5f65/durable-restart",
+      "stdout_bytes": 627,
+      "stderr_bytes": 0
+    },
+    {
+      "stage": "source-identity-before",
+      "started": "2026-10-11T04:07:57Z",
+      "finished": "2026-10-11T04:08:00Z",
+      "exit": 0,
+      "seconds": 3,
+      "command": "python3 /workspace/scratch/5e06a74e5f65/durable-restart/final-closeout-combined-checks.identity.py before",
+      "stdout_bytes": 5725,
+      "stderr_bytes": 0
+    },
+    {
+      "stage": "environment",
+      "started": "2026-10-11T04:08:00Z",
+      "finished": "2026-10-11T04:08:00Z",
+      "exit": 0,
+      "seconds": 0,
+      "command": "bash -c set\\ -e\\;\\ go\\ version\\;\\ test\\ \\\"\\$\\(go\\ env\\ GOVERSION\\)\\\"\\ =\\ go1.27.2\\;\\ test\\ \\\"\\$\\(go\\ env\\ GOOS\\)/\\$\\(go\\ env\\ GOARCH\\)\\\"\\ =\\ linux/amd64\\;\\ go\\ env\\ GOVERSION\\ GOOS\\ GOARCH\\ GOTOOLCHAIN\\ GOPROXY\\ GOSUMDB\\ GOPATH\\ GOCACHE\\ CGO_ENABLED\\ GOFLAGS\\;\\ printf\\ \\\"GOMAXPROCS=%s\\\\nSQLITE_ORACLE=%s\\\\n\\\"\\ \\\"\\$GOMAXPROCS\\\"\\ \\\"\\$SQLITE_ORACLE\\\"\\;\\ sha256sum\\ \\\"\\$1/toolchains/go1.27.2/bin/go\\\"\\ \\\"\\$SQLITE_ORACLE\\\"\\ \\\"\\$REVIEW_REPORT\\\"\\ \\\"\\$1/final-closeout-combined-evidence-v1/manifest.json\\\"\\ \\\"\\$1/final-closeout-combined-checks.sh\\\"\\ \\\"\\$1/final-closeout-combined-checks.identity.py\\\"\\ \\\"\\$1/final-closeout-combined-checks.precheck.py\\\"\\ \\\"\\$1/example-retention-review-evidence-v1/report.md\\\"\\ \\\"\\$1/cli-resources-combined-checks.REPORT.md\\\" _ /workspace/scratch/5e06a74e5f65/durable-restart",
+      "stdout_bytes": 1711,
+      "stderr_bytes": 0
+    },
+    {
+      "stage": "sourceguard-before",
+      "started": "2026-10-11T04:08:00Z",
+      "finished": "2026-10-11T04:08:01Z",
+      "exit": 0,
+      "seconds": 1,
+      "command": "go run ./internal/testscope",
+      "stdout_bytes": 80,
+      "stderr_bytes": 0
+    },
+    {
+      "stage": "cgo0-unit",
+      "started": "2026-10-11T04:08:01Z",
+      "finished": "2026-10-11T04:09:55Z",
+      "exit": 0,
+      "seconds": 114,
+      "command": "go test ./... -count=1 -timeout=0",
+      "stdout_bytes": 3124,
+      "stderr_bytes": 0
+    },
+    {
+      "stage": "cgo0-vet",
+      "started": "2026-10-11T04:09:55Z",
+      "finished": "2026-10-11T04:09:57Z",
+      "exit": 0,
+      "seconds": 2,
+      "command": "go vet ./...",
+      "stdout_bytes": 0,
+      "stderr_bytes": 0
+    },
+    {
+      "stage": "cgo0-build",
+      "started": "2026-10-11T04:09:57Z",
+      "finished": "2026-10-11T04:10:02Z",
+      "exit": 0,
+      "seconds": 5,
+      "command": "go build -trimpath ./...",
+      "stdout_bytes": 0,
+      "stderr_bytes": 0
+    },
+    {
+      "stage": "full-ordinary-oracle",
+      "started": "2026-10-11T04:10:02Z",
+      "finished": "2026-10-11T04:14:05Z",
+      "exit": 0,
+      "seconds": 243,
+      "command": "./scripts/test-oracle.sh",
+      "stdout_bytes": 3267,
+      "stderr_bytes": 0
+    },
+    {
+      "stage": "sourceguard-before-race",
+      "started": "2026-10-11T04:14:05Z",
+      "finished": "2026-10-11T04:14:05Z",
+      "exit": 0,
+      "seconds": 0,
+      "command": "go run ./internal/testscope",
+      "stdout_bytes": 80,
+      "stderr_bytes": 0
+    },
+    {
+      "stage": "cgo1-race",
+      "started": "2026-10-11T04:14:05Z",
+      "finished": "2026-10-11T04:22:48Z",
+      "exit": 0,
+      "seconds": 523,
+      "command": "env CGO_ENABLED=1 go test -race ./... -count=1 -timeout=0",
+      "stdout_bytes": 3128,
+      "stderr_bytes": 0
+    },
+    {
+      "stage": "cross-build-linux-arm64",
+      "started": "2026-10-11T04:22:48Z",
+      "finished": "2026-10-11T04:22:56Z",
+      "exit": 0,
+      "seconds": 8,
+      "command": "env CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build ./...",
+      "stdout_bytes": 0,
+      "stderr_bytes": 0
+    },
+    {
+      "stage": "cross-build-darwin-arm64",
+      "started": "2026-10-11T04:22:56Z",
+      "finished": "2026-10-11T04:23:05Z",
+      "exit": 0,
+      "seconds": 9,
+      "command": "env CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build ./...",
+      "stdout_bytes": 0,
+      "stderr_bytes": 0
+    },
+    {
+      "stage": "cross-build-darwin-amd64",
+      "started": "2026-10-11T04:23:05Z",
+      "finished": "2026-10-11T04:23:14Z",
+      "exit": 0,
+      "seconds": 9,
+      "command": "env CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build ./...",
+      "stdout_bytes": 0,
+      "stderr_bytes": 0
+    },
+    {
+      "stage": "cross-build-windows-amd64",
+      "started": "2026-10-11T04:23:14Z",
+      "finished": "2026-10-11T04:23:23Z",
+      "exit": 0,
+      "seconds": 9,
+      "command": "env CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build ./...",
+      "stdout_bytes": 0,
+      "stderr_bytes": 0
+    },
+    {
+      "stage": "cross-build-windows-arm64",
+      "started": "2026-10-11T04:23:23Z",
+      "finished": "2026-10-11T04:23:31Z",
+      "exit": 0,
+      "seconds": 8,
+      "command": "env CGO_ENABLED=0 GOOS=windows GOARCH=arm64 go build ./...",
+      "stdout_bytes": 0,
+      "stderr_bytes": 0
+    },
+    {
+      "stage": "module-integrity",
+      "started": "2026-10-11T04:23:31Z",
+      "finished": "2026-10-11T04:23:32Z",
+      "exit": 0,
+      "seconds": 1,
+      "command": "go mod verify",
+      "stdout_bytes": 21,
+      "stderr_bytes": 0
+    },
+    {
+      "stage": "source-identity-after",
+      "started": "2026-10-11T04:23:32Z",
+      "finished": "2026-10-11T04:23:35Z",
+      "exit": 0,
+      "seconds": 3,
+      "command": "python3 /workspace/scratch/5e06a74e5f65/durable-restart/final-closeout-combined-checks.identity.py after",
+      "stdout_bytes": 5724,
+      "stderr_bytes": 0
+    }
+  ],
+  "stage_stderr_all_empty": true,
+  "package_output_counts": {
+    "cgo0-unit": {
+      "ok_package_lines": 37,
+      "no_test_files_lines": 11,
+      "not_test_level_verbose": true
+    },
+    "full-ordinary-oracle": {
+      "ok_package_lines": 38,
+      "no_test_files_lines": 11,
+      "not_test_level_verbose": true
+    },
+    "cgo1-race": {
+      "ok_package_lines": 37,
+      "no_test_files_lines": 11,
+      "not_test_level_verbose": true
+    }
+  },
+  "gate_failures": 0,
+  "tool_denials": 0,
+  "gate_retries": 0,
+  "source_edits": 0,
+  "git_commands": 0,
+  "remote_actions": 0,
+  "cleanup_or_resource_relocation": false,
+  "copy": "final-closeout-combined-verify",
+  "command": "set -o pipefail; set -o noclobber; bash /workspace/scratch/5e06a74e5f65/durable-restart/final-closeout-combined-checks.sh /workspace/scratch/5e06a74e5f65/durable-restart/final-closeout-combined-checks.SOURCE_REVIEW.md 2>&1 | tee /workspace/scratch/5e06a74e5f65/durable-restart/final-closeout-combined-checks.txt",
+  "inputs_sha256": {
+    "final-closeout-combined-evidence-v1/manifest.json": "42e86ecc5dacd170693e3d798d0e9512a35cc168b9a35484d0228b1403a8b5f1",
+    "final-closeout-combined-evidence-v1/baseline-inventory.json": "952eca0c0b3732d16171a6b7e8da94345eee517312eadab9abbf5ff1c9ffda6f",
+    "final-closeout-combined-evidence-v1/frozen-inventory.json": "b3f85ee50b04ef37d0adb45f8482673cdec1853340ac7f2045cca0b7a8dace7e",
+    "cli-resources-combined-checks.sh": "edd6242b0b49c15c16368953d207a9ad8257d6d17f81b1f13118d3d0ac4c8566",
+    "cli-resources-combined-checks.REPORT.md": "d9b56dbb8e6650065a84c7dd24182fcf225417da622859e51aad48859e98b78e",
+    "cli-resources-independent-evidence-v1/REVIEW.md": "49b719d3b3ac4b40b1083b0c476897839613f834c7fbd3f421a6f2fd5cb9f2d7",
+    "example-retention-review-evidence-v1/report.md": "7cee0bd0589b03b0edbcaac7c38a1651def88f29d4471513b40c7a17c8bc277a",
+    "example-retention-freeze-v1.json": "7c3906728139107b7ea58729d2f2f868e641a170e249b8c7435323194c856478",
+    "toolchains/go1.27.2/bin/go": "548d3c32f83fa81152f543eb1526be7884cfe0526eb5e9ce29d3eca14786e7e0",
+    "toolchains/sqlite-build-3540000/sqlite3": "470775f6ada29ccfb2d3046ac2b4c975df95a9c20b782332d4e8ba6b6233e6c6"
+  },
+  "limits": [
+    "ordinary gate only",
+    "cross-compilation is not native target execution",
+    "no runtime real-failure fixture retention proof",
+    "no physical-fault/crash/recovery qualification",
+    "no production or milestone acceptance",
+    "all existing HOLD/BLOCKED states remain"
+  ]
+}

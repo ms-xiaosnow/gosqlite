@@ -1,0 +1,61 @@
+#!/bin/bash
+set -eu
+ROOT=/workspace/scratch/5e06a74e5f65/durable-restart
+WORK="$ROOT/example-retention-review-work-v1"
+EVIDENCE="$ROOT/example-retention-review-evidence-v1"
+cd "$WORK"
+export PATH="$ROOT/toolchains/go1.27.2/bin:$PATH"
+export GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off GOFLAGS=-buildvcs=false
+export GOPATH="$ROOT/go-path" GOCACHE="$ROOT/go-cache" GOMAXPROCS=2
+unset TMPDIR TMP TEMP
+selector='^(TestFinalizeCallbackPolicy|TestFinalizeDelayedResult|TestExampleFixtureFinalizersSource|TestEncryptedWALExample|TestEncryptedSharedExampleOrdinary)$'
+packages=(./examples/internal/fixturecleanup ./examples/encrypted-wal ./examples/encrypted-shared)
+build_packages=(./examples/internal/fixturecleanup ./examples/encrypted ./examples/encrypted-wal ./examples/encrypted-shared ./examples/encrypted-cli ./examples/native-check)
+capture() {
+  local name="$1"
+  shift
+  printf '%q ' "$@" > "$EVIDENCE/$name.command"
+  printf '\n' >> "$EVIDENCE/$name.command"
+  date -u +%FT%TZ > "$EVIDENCE/$name.started"
+  set +e
+  "$@" > "$EVIDENCE/$name.stdout" 2> "$EVIDENCE/$name.stderr"
+  local rc=$?
+  set -e
+  printf '%s\n' "$rc" > "$EVIDENCE/$name.exit"
+  date -u +%FT%TZ > "$EVIDENCE/$name.finished"
+  printf '%s exit=%s\n' "$name" "$rc"
+  if [ "$rc" -ne 0 ]; then
+    printf 'STOPPED at %s; initial failure preserved; no retry\n' "$name" | tee "$EVIDENCE/result.txt"
+    exit "$rc"
+  fi
+}
+identity() {
+  python3 - "$EVIDENCE/source-before.json" "$WORK" <<'PY'
+import hashlib,json,sys
+from pathlib import Path
+expected=json.loads(Path(sys.argv[1]).read_text()); root=Path(sys.argv[2]); files={}; directories=[]
+for p in sorted(root.rglob('*')):
+    rel=str(p.relative_to(root))
+    if p.is_symlink(): raise AssertionError('unexpected symlink: '+rel)
+    if p.is_file(): files[rel]={'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'mode':oct(p.stat().st_mode&0o777)}
+    elif p.is_dir(): directories.append(rel)
+    else: raise AssertionError('unexpected entry: '+rel)
+actual={'files':files,'directories':directories}
+changed=[p for p in sorted(expected['files'].keys()|files.keys()) if expected['files'].get(p)!=files.get(p)]
+print('source files:',len(files),'directories:',len(directories),'file identity changes:',len(changed),'directory identity unchanged:',expected['directories']==directories)
+if actual!=expected:
+    print('\n'.join(changed)); sys.exit(1)
+PY
+}
+capture toolchain go version
+printf 'GOTOOLCHAIN=%s\nGOPROXY=%s\nGOSUMDB=%s\nGOFLAGS=%s\nGOPATH=%s\nGOCACHE=%s\nGOMAXPROCS=%s\nTMPDIR=unset (/tmp default)\nWORK=%s\n' "$GOTOOLCHAIN" "$GOPROXY" "$GOSUMDB" "$GOFLAGS" "$GOPATH" "$GOCACHE" "$GOMAXPROCS" "$WORK" > "$EVIDENCE/environment.txt"
+capture identity-before-ordinary identity
+capture sourceguard-cgo0 env CGO_ENABLED=0 go test -count=1 -v ./examples/internal/fixturecleanup -run '^TestExampleFixtureFinalizersSource$'
+capture selected-cgo0 env CGO_ENABLED=0 go test -count=1 -v "${packages[@]}" -run "$selector"
+capture identity-before-race identity
+capture sourceguard-cgo1-race env CGO_ENABLED=1 go test -race -count=1 -v ./examples/internal/fixturecleanup -run '^TestExampleFixtureFinalizersSource$'
+capture selected-cgo1-race env CGO_ENABLED=1 go test -race -count=1 -v "${packages[@]}" -run "$selector"
+capture scoped-vet-cgo0 env CGO_ENABLED=0 go vet "${build_packages[@]}"
+capture scoped-build-cgo0 env CGO_ENABLED=0 go build "${build_packages[@]}"
+capture identity-after identity
+printf 'ALL_AUTHORIZED_INDEPENDENT_SCOPED_CHECKS_PASSED\n' > "$EVIDENCE/result.txt"

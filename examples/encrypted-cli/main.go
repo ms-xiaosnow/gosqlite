@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 
 	"github.com/ms-xiaosnow/gosqlite/encryption"
+	"github.com/ms-xiaosnow/gosqlite/examples/internal/fixturecleanup"
 	"github.com/ms-xiaosnow/gosqlite/sqlite"
 )
 
@@ -54,7 +55,9 @@ func run() (resultErr error) {
 	if err != nil {
 		return err
 	}
-	defer func() { resultErr = errors.Join(resultErr, os.RemoveAll(dir)) }()
+	completed := false
+	// Evaluate the final result after every later resource defer has run.
+	defer func() { resultErr = fixturecleanup.Finalize(dir, completed, resultErr, os.RemoveAll) }()
 	// Removal of our disposable directory and clearing owned bytes are not
 	// secure erase. The Go runtime/environment may retain credential copies.
 	var cfg [3]sqlite.EncryptionOptions
@@ -96,7 +99,9 @@ func run() (resultErr error) {
 	if err := backup.Run(); err != nil {
 		return errors.New("disposable CLI backup failed")
 	}
-	fmt.Print(output.String())
+	if _, err = fmt.Print(output.String()); err != nil {
+		return err
+	}
 
 	rekey := exec.Command(binary, "rekey", path, "--current-key-provider", "env-hex:GOSQLITE_DEMO_OLD", "--key-provider", "env-hex:GOSQLITE_DEMO_NEW")
 	rekey.Env = []string{"GOSQLITE_DEMO_OLD=" + hex.EncodeToString(providers[0].key), "GOSQLITE_DEMO_NEW=" + hex.EncodeToString(providers[1].key)}
@@ -105,7 +110,9 @@ func run() (resultErr error) {
 	if err := rekey.Run(); err != nil {
 		return errors.New("disposable CLI rekey failed")
 	}
-	fmt.Print(output.String())
+	if _, err = fmt.Print(output.String()); err != nil {
+		return err
+	}
 	if err := verify(ctx, path, cfg[1]); err != nil {
 		return err
 	}
@@ -117,7 +124,10 @@ func run() (resultErr error) {
 	if err := verify(ctx, restored, cfg[1]); err != nil {
 		return err
 	}
-	fmt.Println("Correct-key CLI backup/rekey, native restore, and both data readbacks passed; disposable files will be removed.")
+	if _, err = fmt.Println("Correct-key CLI backup/rekey, native restore, and both data readbacks passed; disposable files will be removed."); err != nil {
+		return err
+	}
+	completed = true
 	return nil
 }
 

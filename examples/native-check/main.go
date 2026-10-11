@@ -17,6 +17,7 @@ import (
 	"reflect"
 
 	"github.com/ms-xiaosnow/gosqlite/encryption"
+	"github.com/ms-xiaosnow/gosqlite/examples/internal/fixturecleanup"
 	"github.com/ms-xiaosnow/gosqlite/sqlite"
 )
 
@@ -61,12 +62,14 @@ func create(path string, opts sqlite.Options) (result sqlite.CheckResult, retErr
 	}
 	return db.Check(ctx)
 }
-func run(binary string) error {
+func run(binary string) (err error) {
 	dir, err := os.MkdirTemp("", "gosqlite-check-proof-")
 	if err != nil {
 		return err
 	}
-	defer os.RemoveAll(dir) // only normally completed disposable fixture directory
+	completed := false
+	// Evaluate the final result after every later resource defer has run.
+	defer func() { err = fixturecleanup.Finalize(dir, completed, err, os.RemoveAll) }()
 	key := make([]byte, 32)
 	if _, err = rand.Read(key); err != nil {
 		return err
@@ -130,6 +133,7 @@ func run(binary string) error {
 			return err
 		}
 	}
+	completed = true
 	return nil
 }
 func main() {

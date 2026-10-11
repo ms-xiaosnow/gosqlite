@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/ms-xiaosnow/gosqlite/encryption"
+	"github.com/ms-xiaosnow/gosqlite/examples/internal/fixturecleanup"
 	"github.com/ms-xiaosnow/gosqlite/sqlite"
 	"io"
 	"log"
@@ -72,7 +73,9 @@ func run(out io.Writer) (err error) {
 	if err != nil {
 		return err
 	}
-	defer func() { err = errors.Join(err, os.RemoveAll(dir)) }()
+	completed := false
+	// Evaluate the final result after every later resource defer has run.
+	defer func() { err = fixturecleanup.Finalize(dir, completed, err, os.RemoveAll) }()
 	provider, err := newProvider()
 	if err != nil {
 		return err
@@ -122,7 +125,9 @@ func run(out io.Writer) (err error) {
 	if err = c.Close(); err != nil {
 		return err
 	}
-	fmt.Fprintln(out, "A new reader sees the committed head while another connection owns unpublished writes.")
+	if _, err = fmt.Fprintln(out, "A new reader sees the committed head while another connection owns unpublished writes."); err != nil {
+		return err
+	}
 	if err = exec(b, "COMMIT"); err != nil {
 		return err
 	}
@@ -138,7 +143,9 @@ func run(out io.Writer) (err error) {
 	if err = checkValue(ctx, a, "new"); err != nil {
 		return err
 	}
-	fmt.Fprintln(out, "The old reader stays pinned; stale promotion fails, and a fresh transaction sees the new value.")
+	if _, err = fmt.Fprintln(out, "The old reader stays pinned; stale promotion fails, and a fresh transaction sees the new value."); err != nil {
+		return err
+	}
 	if err = exec(a, "BEGIN"); err != nil {
 		return err
 	}
@@ -161,9 +168,14 @@ func run(out io.Writer) (err error) {
 	if info.StorageLayout != 3 || info.WALSegments != 0 {
 		return errors.New("unexpected shared checkpoint metadata")
 	}
-	fmt.Fprintln(out, "Checkpoint retains old snapshots and selects a fresh base; all historical ciphertext remains.")
-	_, err = fmt.Fprintln(out, "Credentials stayed in memory. Disposable files are removed after normal close, without secure-erasure claims.")
-	return err
+	if _, err = fmt.Fprintln(out, "Checkpoint retains old snapshots and selects a fresh base; all historical ciphertext remains."); err != nil {
+		return err
+	}
+	if _, err = fmt.Fprintln(out, "Credentials stayed in memory. Disposable files are removed after normal close, without secure-erasure claims."); err != nil {
+		return err
+	}
+	completed = true
+	return nil
 }
 func checkValue(ctx context.Context, db *sqlite.DB, want string) (err error) {
 	rows, err := db.Query(ctx, "SELECT body FROM notes")

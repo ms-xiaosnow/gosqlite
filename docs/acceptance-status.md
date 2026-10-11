@@ -1,8 +1,9 @@
 # 当前实现与验收矩阵
 
-核对时间：2026-10-11；最新已保存源码基点为 `1352ae524575e4d6fe8b5434fd930c3b07be4ac8`。
-本检查点叠加已独立审阅并通过完整普通门的四项 CLI/示例资源修正；见[组合证据](evidence/cli-resources-20261011.md)。已有 inspect 精确源码和边界见
-[元数据证据](evidence/inspect-metadata-20261011.md) 和 [上下文证据](evidence/inspect-context-20261011.md)。
+核对时间：2026-10-11；本次修改的已保存父基点为 `7a9972547f49531df04cf1b624dfa662b483907b`。
+本次最终保存提交与 current CI 发布时仍待按精确 commit 确认；这里不预写尚未生成的自指提交。旧 `1352ae524575e4d6fe8b5434fd930c3b07be4ac8` 保留为历史基点。
+本检查点叠加三项有限收尾：四项 CLI/示例资源修正、三份必需入口文档对账、五例目录终结与输出错误修正。四项 CLI 固定树完整普通门、三份文档独立静态审阅、五例独立源码和限定普通/race 审阅分别 PASS；最终组合与新提交持久门见文末，不能沿用基点结果。四项 CLI 的精确结果见[组合证据](evidence/cli-resources-20261011.md)，五例的操作边界见[留存限定复验](example-retention-verification-zh.md)。
+已有 inspect 精确源码和边界见[元数据证据](evidence/inspect-metadata-20261011.md)和[上下文证据](evidence/inspect-context-20261011.md)。
 这是开发检查点清单，不是最终交付。原始 [goal.md](../goal.md) 不变。
 平台受限项目可以暂停执行并记录用户自测步骤，不能取消真实实现义务。
 
@@ -27,7 +28,7 @@
 | G1、§4.2、§11.1/11.3 | 索引范围、有限 JOIN/GROUP BY/HAVING、连接计数和 cached preparation 的限定普通门通过 | `已知差异`：支持查询的 planner 错误/排序/阶段一致性仍待修正。V4c 树 `552286a…` 有独立有限 PASS，但没有和 main 新 grouped/counter 组合；不能替代 main 结果 |
 | §4.2、§8.1、§12.2 | correct-key 加密 backup/rekey CLI、native DB/Tx/CLI Check V2 已合入 | `未实现/未合入`：main 明文 backup 命令仍明确 unsupported；Linux rollback V2 候选终审未完成，WAL/非 Linux backup 和真正只读 plaintext-WAL CLI 缺代码。native VACUUM 未实现 |
 | G1、§3.6、§12.2 | query/check/inspect CLI 均使用 OpenContext；DB.Inspect 和 inspect --extensions 在单快照呈现持久 method/version/config/generation，默认 JSON 保持 | `PARTIAL`：本次实测只涵盖 Linux plaintext rollback、grams/custom metadata；加密 inspect、真正只读 WAL、完整 CLI 目标仍缺实现。持久 metadata 不证明索引可用或正确，中途 I/O 取消未动态验证 |
-| §12.1、§14 | 可运行示例存在，普通功能样本有历史证据 | `本次限定修正`：sparse 状态、readonly 显式只读、write/query 关闭错误已修；实际失败进程/原生关闭失败未执行，仅 AST/纯 helper 和普通路径。五个加密/native-check 示例目录保留候选另行进行，尚未合入；仍不作为完整故障现场证明 |
+| §12.1、§14 | 四项 CLI/示例资源修正与五例目录终结/输出错误修正已完成，各自取得限定独立审阅与普通证据 | `限定修正 PASS，完整验收未完成`：sparse 状态、readonly 显式只读、write/query 关闭错误及五例目录终结已有证据。实际失败进程/原生关闭失败/真实失败目录保留未执行；WAL 原 t.TempDir 清理和清除进程密钥不允许推断失败现场完整或可解密 |
 | §9.2(2/5) | caller-dataset 范数、完整精确距离与 Top-K v2 已合入；高维 v1 失败保留，v2 有有理数参考验证 | `PARTIAL`：ANN caller-dataset recall 及真实 PG/Neon 验证单列；精确距离不能替代 ANN |
 | §5.2、§7.2、§11.3 | NFC 组合语料、真实 grams build/空间/P50/P95 工具和普通事务 V4 已合入 | `FAIL/HOLD（候选工具）`：ANN 报告 V3 三类实质准入缺陷未修，V4 链路受阻。性能报告 V3 有限审阅通过但未合入/部署；没有可采信测量不得宣称完整基准通过 |
 | §8、§11.3、§12.3 | Linux/Darwin/Windows 有受支持 backend 源码，只有 Linux 普通运行证据 | `PARTIAL`：main Windows shared rekey 及 Darwin 名称配置受限；修正版在未发布 `a314028…` 组合。更广 Unicode root 支持未实现，但不能虚构为规范要求任意无限名字。保留目录 VFS 未冻结/整合 |
@@ -103,4 +104,14 @@
 
 ## 有限收尾
 
-[有限清单](closeout-scope-20261011.md)区分本轮独立修正、旧HOLD真实代码缺口、缺失harness与代码已有的人工/外部门。四项资源组合完整普通门于03:53:38 UTC PASS；1352基点CI38108065647于03:42:12 UTC SUCCESS。本环境独立项可按清单收口，整体未验收，不称只剩手工测试。
+[有限清单](closeout-scope-20261011.md)的三项独立改动及各自 scoped/static 审阅已完成。四项资源 tree `4c2af13646c973c53340450f8f1310492aae5628` 的完整普通门于 03:53:38 UTC PASS；三份合同文档静态 PASS；五例目录终结取得源码、精选五项普通/race 与限定 vet/build 独立 PASS，真实失败目录保留仍未动态验证。
+
+最终组合 tree `d7393c254a6fca4452ae194d64d9045659f9781d` 完整普通门 PASS（2026-10-11 04:23:35 UTC，18阶段全部自然 exit 0）；最终新提交的精确持久恢复和 current CI PENDING。基点 `1352ae524575e4d6fe8b5434fd930c3b07be4ac8` 的 CI `38108065647` 于 03:42:12 UTC SUCCESS，以及该基点的恢复 PASS，各自只证明原身份。
+
+在现有限制下完成了独立可推进项，整体未验收。
+
+其余真实代码缺口、原始 FAIL/HOLD、已有但受限的人工门、IMPLEMENTATION_MISSING 和真实外部资格分别保留。ANN V4、41 目标 fuzz 与未知中断的操作/目标没有新增证据，不重发、不换路，不作通过推断。
+
+本次组合普通门原始记录见[五例组合证据](evidence/example-retention-20261011.md)。后续仅文档/证据变更；777个非 docs 文件的字节、权限、Git模式与清单已独立核对相同，仍按实际新提交另行核验恢复和CI。
+
+父基点 `7a9972547f49531df04cf1b624dfa662b483907b` 的 Library `libfile_f28c9a0df2108191981d41eb76fafc58` 已读回并精确恢复；30阶段、18项每模式具名测试/29子项、8 sourceguard、vet/build/五目标/模块/全部身份于04:13:29 UTC PASS。该提交 CI `38110617335` ordinary/oracle 均 SUCCESS（04:30:02 UTC）；[闭合证据](evidence/cli-resources-20261011/persistence.json)只属于父基点，不替代本次新提交。

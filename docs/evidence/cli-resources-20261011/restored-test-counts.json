@@ -1,0 +1,101 @@
+{
+  "unit": {
+    "sparse": {
+      "top_level_run": 4,
+      "top_level_pass": 4,
+      "subtests_run": 4,
+      "names": [
+        "TestSparseExactRun",
+        "TestSparseExactMainStatusWiring",
+        "TestSparseExactMainStatusWiringRejectsLegacy",
+        "TestSparseExactExample"
+      ]
+    },
+    "query": {
+      "top_level_run": 5,
+      "top_level_pass": 5,
+      "subtests_run": 2,
+      "names": [
+        "TestSQLWriteAndQuery",
+        "TestQuerySourceJoinsRowsCloseError",
+        "TestQuerySourceRejectsLegacyRowsClose",
+        "TestQueryOutputWriterError",
+        "TestQueryReadonlyFixture"
+      ]
+    },
+    "readonly": {
+      "top_level_run": 6,
+      "top_level_pass": 6,
+      "subtests_run": 15,
+      "names": [
+        "TestReadonlyLegacySourceContract",
+        "TestReadonlyExampleIntactFixtures",
+        "TestReadonlyRunArguments",
+        "TestReadonlyWriteRow",
+        "TestReadonlyReportResult",
+        "TestReadonlySourceContract"
+      ]
+    },
+    "write": {
+      "top_level_run": 3,
+      "top_level_pass": 3,
+      "subtests_run": 8,
+      "names": [
+        "TestWriteExampleLifecycleAST",
+        "TestWriteExampleArgumentStatus",
+        "TestWriteExampleOrdinarySuccessReopen"
+      ]
+    }
+  },
+  "race": {
+    "sparse": {
+      "top_level_run": 4,
+      "top_level_pass": 4,
+      "subtests_run": 4,
+      "names": [
+        "TestSparseExactRun",
+        "TestSparseExactMainStatusWiring",
+        "TestSparseExactMainStatusWiringRejectsLegacy",
+        "TestSparseExactExample"
+      ]
+    },
+    "query": {
+      "top_level_run": 5,
+      "top_level_pass": 5,
+      "subtests_run": 2,
+      "names": [
+        "TestSQLWriteAndQuery",
+        "TestQuerySourceJoinsRowsCloseError",
+        "TestQuerySourceRejectsLegacyRowsClose",
+        "TestQueryOutputWriterError",
+        "TestQueryReadonlyFixture"
+      ]
+    },
+    "readonly": {
+      "top_level_run": 6,
+      "top_level_pass": 6,
+      "subtests_run": 15,
+      "names": [
+        "TestReadonlyLegacySourceContract",
+        "TestReadonlyExampleIntactFixtures",
+        "TestReadonlyRunArguments",
+        "TestReadonlyWriteRow",
+        "TestReadonlyReportResult",
+        "TestReadonlySourceContract"
+      ]
+    },
+    "write": {
+      "top_level_run": 3,
+      "top_level_pass": 3,
+      "subtests_run": 8,
+      "names": [
+        "TestWriteExampleLifecycleAST",
+        "TestWriteExampleArgumentStatus",
+        "TestWriteExampleOrdinarySuccessReopen"
+      ]
+    }
+  },
+  "sourceguard_passes": 8,
+  "each_mode_top_level_total": 18,
+  "no_skip_fail_or_zero_test": true
+}

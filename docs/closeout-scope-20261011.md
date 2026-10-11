@@ -6,10 +6,12 @@
 
 | 项目 | 原规范依据 | 明确结束条件 |
 |---|---|---|
-| query 关闭错误合并；readonly 显式只读与资源归还；write 资源归还后输出；sparse-exact 状态传递 | G1 的上下文/资源/错误行为；§12.1 可编译示例；§12.2 CLI；§0/§14 如实记录 | 已固定四项组合，独立 18 项普通/race 检查通过；完整普通门、精确保存/恢复及 CI 终态据实闭合。不得重复作为新功能无限扩展 |
-| 必需入口文档对账 | §12.3 迁移指南、格式说明、安全文档 | 修正 migration-pgembedding.md 的过时 checkpoint A 入口；区分 file-formats.md 的 layout 1/2/3；security.md 区分已修复的 Reader/shared 来源问题和仍存在的风险。保留历史失败和原阶段契约 |
-| 已知五个示例的失败现场与错误报告 | G1/§12.1 的资源和错误行为；现有手册披露的规程缺口 | 限 encrypted、encrypted-wal、encrypted-shared、encrypted-cli、native-check 的目录终结/输出错误；仅纯 helper、AST 和原有正常成功路径验证。不得扩展成整仓示例改造，不把源码断言当真实故障现场保留证明 |
+| query 关闭错误合并；readonly 显式只读与资源归还；write 资源归还后输出；sparse-exact 状态传递 | G1 的上下文/资源/错误行为；§12.1 可编译示例；§12.2 CLI；§0/§14 如实记录 | 有限修正与独立 18 项普通/race 已完成；固定 tree 4c2af13646c973c53340450f8f1310492aae5628 的完整普通门 PASS。最终组合及新提交持久门另列，不扩大修正范围 |
+| 必需入口文档对账 | §12.3 迁移指南、格式说明、安全文档 | migration-pgembedding.md、file-formats.md、security.md 已按实际入口、layout 1/2/3 和已修复/仍存风险对账，独立静态审阅 PASS；历史失败、原阶段契约和外部验收限制保留 |
+| 已知五个示例的失败现场与错误报告 | G1/§12.1 的资源和错误行为；现有手册披露的规程缺口 | encrypted、encrypted-wal、encrypted-shared、encrypted-cli、native-check 的有限目录终结/输出错误修正已完成；源码、纯 helper/AST、原有两项正常流程的五个精确测试普通/race 与限定 vet/build 独立 PASS。未动态证明真实失败现场保留，不扩展成整仓示例改造 |
 | 状态、步骤与证据一致 | §0、§12.3、§14 | 全部 PASS 指向精确源码/命令/结果；HOLD、FAIL、未实现设施、NOT_RUN、外部资格分开；中文命令均有实际实现，未执行的命令不记为成功 |
+
+最终组合 tree `d7393c254a6fca4452ae194d64d9045659f9781d` 的完整普通门：PASS（2026-10-11 04:23:35 UTC，18阶段全部自然 exit 0）；最终新提交的精确持久恢复和 current CI：PENDING。以上不是失败或跳过，也不能借旧基点结果改记成功。每项只有在对应原始结果与精确源码身份齐全后，才单独更新。五例留存的操作步骤见[限定复验补充](example-retention-verification-zh.md)。
 
 第三项是已明确选择的有限规程修正，不是原 goal 逐字要求新增的数据库内核功能。现有完整能力（Native Check V2、Inspect、正确密钥维护 CLI、迁移数据精确距离复核、grams/事务测量等）不重复列作待开发来拉长清单。
 
@@ -47,8 +49,38 @@
 
 ## 五、达到有限边界之后
 
-本轮前三项有限改动的精确门禁、必要文档和持久证据闭合后，不再为延长任务自行添加新功能。若收尾发现旧 HOLD 的依赖，暂停该依赖并报告，不另起同义链路。
+本轮三项有限改动及各自独立 scoped/static 审阅已经完成；最终组合普通门及新提交持久证据按第一节逐项闭合。完成后不再为延长任务自行添加新功能；若发现旧 HOLD 的依赖，暂停该依赖并报告，不另起同义链路。
 
-允许的结论是：“本环境已确认的独立收尾项已完成；现有声明范围取得列明的普通验证证据，剩余实现缺口和受限/外部验收逐项保留。”
+在现有限制下完成了独立可推进项，整体未验收。
 
-不能写“所有当前可实现功能已完成”“只剩人工测试”“M0–M10 全部 VERIFIED”或“生产安全验收通过”。完整原始目标仍需上表的实际代码、安全与资格门共同闭合；在此之前不作最终交付声明。
+该结论不表示所有当前可实现功能已完成，也不表示只剩人工测试。公开恢复、WAL-tail publisher、支持域 SQL 正确性、明文备份、真正只读 WAL、部分 backend 和完整故障设施仍有实现或集成缺口；ANN V3 原始 FAIL、ANN V4、41 目标 fuzz 与未知中断/HOLD 不变。当前 M10 未完成，不能宣布生产安全、原始 goal 或 M0–M10 全部 VERIFIED。
+
+## 六、维护者的实际下一步
+
+以下是边界清单，不是本轮继续执行或开发的授权；应保留在收尾说明中，避免笼统说“之后人工验收”。
+
+### 已有可执行入口但当前受限或未运行
+
+- Linux 有限 rollback recovery：`internal/pager/recovery_manual_test.go` 的 `TestManualRollbackRecovery`，独立 manual_recovery gate；具体已实现断言与限制见中文主手册 12.1。当前 BLOCKED / NOT_RUN。
+- 两个 plaintext namespace 回归：`sqlite/write_namespace_manual_test.go` 中两个真实具名测试，见主手册 12.2；当前 BLOCKED / NOT_RUN，历史曾运行事实单独保留。
+- 现有普通 SQL/互操作、grams/精确向量、正确密钥维护和离线迁移入口见主手册 5–10；未来只对所选提交和授权范围逐项复验，不把这份清单当作立即重跑整套的指令。
+- 事务 V4、grams 测量等现有工具可用于将来的有资源预算长测，见主手册 11；完整 soak 与大规模合格结果仍 NOT_RUN。小样本不是长期资格。
+
+### 首先需要实际代码或 harness 并重新审阅
+
+- public Open rollback 集成、native exclusive WAL-tail publisher、支持 SQL 域内已知 planner/阶段/排序错误，旧候选均按现状 HOLD，不在本轮另建修复链。
+- main 明文 backup、WAL/非 Linux backup、真正只读 plaintext-WAL 入口、尚未整合的 backend/目录所有权候选及完整格式升级/回退覆盖。
+- 完整 crash/power-loss/process-exit、短写/Sync/ENOSPC/torn-write、checkpoint/rekey 中断与磁盘认证负面矩阵：IMPLEMENTATION_MISSING 加受限执行；先补具体协议、实现、断言与独立审阅，不能编造命令。
+- ANN V3 的三个源码/报告准入 FAIL 保留；V4 未完成，41 目标 fuzz 和未知中断链路没有明确操作/目标。当前为 HOLD/UNKNOWN/BLOCKED，不是只差一台外部测试机。
+
+### 需要真实外部环境或有资格的独立审查
+
+- 精确源码在真实目标 OS/架构、文件系统和具持久性语义硬件上的原生锁、mapping、目录同步与恢复边界。新 OS 全量运行前还需先解决 raw namespace 门控集成。
+- 已声明数据与负载的长期 soak、大规模固定硬件性能测量、实际冷暖缓存及资源预算；不得用交叉编译或 cloud tmpfs 的正常成功代替。
+- 授权可丢弃 PG/Neon 的实际版本、依赖、权限、模板与回滚快照；离线 SQL/NDJSON 转换不能代替服务器执行。
+- 独立数据安全、密码学、威胁模型、依赖许可/法律和稳定 API 审查。一般工程审阅不能替代相应资格与结论。
+- 新 runner、计费/额度读取、新费用或权限先单独取得授权；本次既有普通 CI 权限不扩展到这些动作。
+
+本次组合普通门原始记录见[五例组合证据](evidence/example-retention-20261011.md)。后续仅文档/证据变更；777个非 docs 文件的字节、权限、Git模式与清单已独立核对相同，仍按实际新提交另行核验恢复和CI。
+
+父基点 `7a9972547f49531df04cf1b624dfa662b483907b` 的 Library `libfile_f28c9a0df2108191981d41eb76fafc58` 已读回并精确恢复；30阶段、18项每模式具名测试/29子项、8 sourceguard、vet/build/五目标/模块/全部身份于04:13:29 UTC PASS。该提交 CI `38110617335` ordinary/oracle 均 SUCCESS（04:30:02 UTC）；[闭合证据](evidence/cli-resources-20261011/persistence.json)只属于父基点，不替代本次新提交。

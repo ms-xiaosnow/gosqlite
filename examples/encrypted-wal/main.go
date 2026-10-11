@@ -15,6 +15,7 @@ import (
 	"sync"
 
 	"github.com/ms-xiaosnow/gosqlite/encryption"
+	"github.com/ms-xiaosnow/gosqlite/examples/internal/fixturecleanup"
 	"github.com/ms-xiaosnow/gosqlite/sqlite"
 )
 
@@ -74,9 +75,10 @@ func run(out io.Writer) (err error) {
 	if err != nil {
 		return err
 	}
-	// MkdirTemp creates a private directory. Remove only this disposable family,
-	// after every owned handle has closed. Removal is not secure erasure.
-	defer func() { err = errors.Join(err, os.RemoveAll(dir)) }()
+	// MkdirTemp creates a private directory; failures retain its remaining files.
+	completed := false
+	// Evaluate the final result after every later resource defer has run.
+	defer func() { err = fixturecleanup.Finalize(dir, completed, err, os.RemoveAll) }()
 	provider, err := newProvider()
 	if err != nil {
 		return err
@@ -185,8 +187,11 @@ func run(out io.Writer) (err error) {
 	if _, err = fmt.Fprintln(out, "Checkpointed and reopened read-only: zero selected segments, same data, retained ciphertext history."); err != nil {
 		return err
 	}
-	_, err = fmt.Fprintln(out, "The key stayed in memory; disposable files will now be removed (not securely erased).")
-	return err
+	if _, err = fmt.Fprintln(out, "The key stayed in memory; disposable files will now be removed (not securely erased)."); err != nil {
+		return err
+	}
+	completed = true
+	return nil
 }
 
 // Rows must close before VerifyEncrypted, Checkpoint or other maintenance.

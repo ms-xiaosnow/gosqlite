@@ -1,0 +1,635 @@
+--- a/README.md
++++ b/README.md
+@@ -3,6 +3,18 @@
+ Historical test-scope statements are corrected in [the namespace-test audit](docs/test-scope-audit.md); the affected tests are now excluded from ordinary workflows.
+ 
+ A native Go database kernel targeting tested subsets of SQLite 3.54.0 files and SQL. Current development: persistent HNSW/IVFFlat, exact typed-vector KNN and same-snapshot hybrid ranking, plus experimental authenticated snapshot, dirty-page WAL and concurrent encrypted sessions, ordinary B-tree equality, leading inequalities and bounded rowid-range planning, nested savepoints, scoped INNER/CROSS/LEFT JOINs and bounded global aggregates, CASE/CAST/BETWEEN/IN, context-sensitive predicate evaluation, affinity-correct comparisons and explicit NULL ordering, BIT/HALFVEC/SPARSEVEC exact search, extended vector primitives, and bounded pg_embedding catalog inspection, typed offline SQL conversion and resumable CSV/NDJSON import. It is not production-ready. No CGO, SQLite subprocess, C ABI, or remote SQL engine is used in production.
++
++## 示例临时目录的有限保留约定
++
++`encrypted`、`encrypted-wal`、`encrypted-shared`、`encrypted-cli` 和
++`native-check` 只在普通流程完成、输出成功且全部已有资源收尾未返回错误后，
++才尝试删除自己的私有临时目录。失败或未完成时不调用删除，并在返回错误中
++报告保留目录；删除本身失败会保留错误，不重试，但可能已部分删除，不能承诺
++完整现场。加密 provider/密钥清理语义保持不变；保留密文不代表保留密钥或仍可
++解密，也不构成安全擦除、崩溃恢复或任意故障场景的证明。此独立切片仅通过
++纯 helper/源码检查及既有 WAL/shared 普通成功路径的定名普通/race 门和 scoped
++vet/build；没有执行真实失败保留或 snapshot/CLI/native-check 示例。手册中的
++历史限制不能用候选源码改写为已经运行的证据。
+ 
+ ## Try the implemented SQL path
+ 
+--- a/docs/progress.md
++++ b/docs/progress.md
+@@ -1117,3 +1117,34 @@
+   源码或测试，不解除 HOLD/BLOCKED，不算运行验收或 main 已有能力。
+ - 此源码检查点的远端 main、完整 git bundle、恢复和 CI 结果仍须逐项确认；
+   未提前声明它们已通过，未声明完成整体 §12.2、生产可用或 M10。
++
++### 2026-10-11：五个示例的临时目录保留切片（定名普通验证通过）
++
++- 从不可变 `1352ae524575e4d6fe8b5434fd930c3b07be4ac8` 副本准备，
++  对应 G1/§12.1 的示例错误与资源收尾；仅修改上述五个 `examples/*/main.go`，
++  增加 `examples/internal/fixturecleanup`，未改数据库/加密/VFS/backend。
++- finalizer 在 MkdirTemp 成功后、资源 defer 前注册；延迟读取完成标志和
++  命名返回错误。仅普通完成且最终错误为空时删除；错误/未完成保留目录，
++  `errors.Is` 保留原错误。删除失败不重试，可能部分删除，不保证完整现场。
++- 检查原先遗漏的普通输出错误；已有 Close 错误合并、provider/密钥清理及
++  子进程失败诊断策略保持。保留密文不保证持有或能恢复密钥。
++- 新增纯回调/计数/sentinel 单元测试和五文件 AST 检查，无数据库/文件失败
++  注入；353 个既有测试文件字节/模式原样保持。执行前已逐行审阅 helper、
++  新测试、五文件差异及既有两项普通测试的完整调用路径。
++- 已批准并实际通过的精确普通选择：`TestFinalizeCallbackPolicy`、
++  `TestFinalizeDelayedResult`、`TestExampleFixtureFinalizersSource`，以及
++  原有 `TestEncryptedWALExample` / `TestEncryptedSharedExampleOrdinary`。
++  后两项仅普通成功路径；WAL 测试内部 TMPDIR/t.TempDir 自动收尾，不能据此
++  证明失败 fixture 保留。同选择 CGO1 race 通过；两次执行前均通过源码 AST
++  guard。helper 与五示例的 scoped CGO0 vet/build 通过，仅构建而不运行
++  snapshot/CLI/native-check 二进制。测试树前/后 2,907 文件身份一致；
++  所有门自然 exit 0，无失败、拒绝或重跑，不据此宣布全仓门通过。
++- 固定 Go 1.27.2，GOTOOLCHAIN=local、GOPROXY=off、GOSUMDB=off、
++  GOFLAGS=-buildvcs=false、GOMAXPROCS=2，专用 GOPATH/GOCACHE，默认 /tmp；
++  CGO0 普通与 CGO1 race 均使用 `-count=1 -v`，只选择上述五个测试名及
++  `./examples/internal/fixturecleanup ./examples/encrypted-wal ./examples/encrypted-shared`。
++- 不执行 snapshot/CLI/native-check 示例、子进程新增场景、错误密钥、篡改、
++  原生 I/O 故障、进程退出/崩溃/恢复、namespace、中断 rekey、ANN V4、
++  41 目标 fuzz、旧 held 链路、新 OS、performance 或长测。验证后仅更新本
++  README/progress 结果文字，受测 Go 源字节不变。下一步是独立复审及由
++  主任务决定整合/完整固定树门；此切片没有修改主树、Git、远端或 CI。
+--- a/examples/encrypted-cli/main.go
++++ b/examples/encrypted-cli/main.go
+@@ -14,6 +14,7 @@
+ 	"path/filepath"
+ 
+ 	"github.com/ms-xiaosnow/gosqlite/encryption"
++	"github.com/ms-xiaosnow/gosqlite/examples/internal/fixturecleanup"
+ 	"github.com/ms-xiaosnow/gosqlite/sqlite"
+ )
+ 
+@@ -54,7 +55,9 @@
+ 	if err != nil {
+ 		return err
+ 	}
+-	defer func() { resultErr = errors.Join(resultErr, os.RemoveAll(dir)) }()
++	completed := false
++	// Evaluate the final result after every later resource defer has run.
++	defer func() { resultErr = fixturecleanup.Finalize(dir, completed, resultErr, os.RemoveAll) }()
+ 	// Removal of our disposable directory and clearing owned bytes are not
+ 	// secure erase. The Go runtime/environment may retain credential copies.
+ 	var cfg [3]sqlite.EncryptionOptions
+@@ -96,7 +99,9 @@
+ 	if err := backup.Run(); err != nil {
+ 		return errors.New("disposable CLI backup failed")
+ 	}
+-	fmt.Print(output.String())
++	if _, err = fmt.Print(output.String()); err != nil {
++		return err
++	}
+ 
+ 	rekey := exec.Command(binary, "rekey", path, "--current-key-provider", "env-hex:GOSQLITE_DEMO_OLD", "--key-provider", "env-hex:GOSQLITE_DEMO_NEW")
+ 	rekey.Env = []string{"GOSQLITE_DEMO_OLD=" + hex.EncodeToString(providers[0].key), "GOSQLITE_DEMO_NEW=" + hex.EncodeToString(providers[1].key)}
+@@ -105,7 +110,9 @@
+ 	if err := rekey.Run(); err != nil {
+ 		return errors.New("disposable CLI rekey failed")
+ 	}
+-	fmt.Print(output.String())
++	if _, err = fmt.Print(output.String()); err != nil {
++		return err
++	}
+ 	if err := verify(ctx, path, cfg[1]); err != nil {
+ 		return err
+ 	}
+@@ -117,7 +124,10 @@
+ 	if err := verify(ctx, restored, cfg[1]); err != nil {
+ 		return err
+ 	}
+-	fmt.Println("Correct-key CLI backup/rekey, native restore, and both data readbacks passed; disposable files will be removed.")
++	if _, err = fmt.Println("Correct-key CLI backup/rekey, native restore, and both data readbacks passed; disposable files will be removed."); err != nil {
++		return err
++	}
++	completed = true
+ 	return nil
+ }
+ 
+--- a/examples/encrypted-shared/main.go
++++ b/examples/encrypted-shared/main.go
+@@ -8,6 +8,7 @@
+ 	"errors"
+ 	"fmt"
+ 	"github.com/ms-xiaosnow/gosqlite/encryption"
++	"github.com/ms-xiaosnow/gosqlite/examples/internal/fixturecleanup"
+ 	"github.com/ms-xiaosnow/gosqlite/sqlite"
+ 	"io"
+ 	"log"
+@@ -72,7 +73,9 @@
+ 	if err != nil {
+ 		return err
+ 	}
+-	defer func() { err = errors.Join(err, os.RemoveAll(dir)) }()
++	completed := false
++	// Evaluate the final result after every later resource defer has run.
++	defer func() { err = fixturecleanup.Finalize(dir, completed, err, os.RemoveAll) }()
+ 	provider, err := newProvider()
+ 	if err != nil {
+ 		return err
+@@ -122,7 +125,9 @@
+ 	if err = c.Close(); err != nil {
+ 		return err
+ 	}
+-	fmt.Fprintln(out, "A new reader sees the committed head while another connection owns unpublished writes.")
++	if _, err = fmt.Fprintln(out, "A new reader sees the committed head while another connection owns unpublished writes."); err != nil {
++		return err
++	}
+ 	if err = exec(b, "COMMIT"); err != nil {
+ 		return err
+ 	}
+@@ -138,7 +143,9 @@
+ 	if err = checkValue(ctx, a, "new"); err != nil {
+ 		return err
+ 	}
+-	fmt.Fprintln(out, "The old reader stays pinned; stale promotion fails, and a fresh transaction sees the new value.")
++	if _, err = fmt.Fprintln(out, "The old reader stays pinned; stale promotion fails, and a fresh transaction sees the new value."); err != nil {
++		return err
++	}
+ 	if err = exec(a, "BEGIN"); err != nil {
+ 		return err
+ 	}
+@@ -161,9 +168,14 @@
+ 	if info.StorageLayout != 3 || info.WALSegments != 0 {
+ 		return errors.New("unexpected shared checkpoint metadata")
+ 	}
+-	fmt.Fprintln(out, "Checkpoint retains old snapshots and selects a fresh base; all historical ciphertext remains.")
+-	_, err = fmt.Fprintln(out, "Credentials stayed in memory. Disposable files are removed after normal close, without secure-erasure claims.")
+-	return err
++	if _, err = fmt.Fprintln(out, "Checkpoint retains old snapshots and selects a fresh base; all historical ciphertext remains."); err != nil {
++		return err
++	}
++	if _, err = fmt.Fprintln(out, "Credentials stayed in memory. Disposable files are removed after normal close, without secure-erasure claims."); err != nil {
++		return err
++	}
++	completed = true
++	return nil
+ }
+ func checkValue(ctx context.Context, db *sqlite.DB, want string) (err error) {
+ 	rows, err := db.Query(ctx, "SELECT body FROM notes")
+--- a/examples/encrypted-wal/main.go
++++ b/examples/encrypted-wal/main.go
+@@ -15,6 +15,7 @@
+ 	"sync"
+ 
+ 	"github.com/ms-xiaosnow/gosqlite/encryption"
++	"github.com/ms-xiaosnow/gosqlite/examples/internal/fixturecleanup"
+ 	"github.com/ms-xiaosnow/gosqlite/sqlite"
+ )
+ 
+@@ -74,9 +75,10 @@
+ 	if err != nil {
+ 		return err
+ 	}
+-	// MkdirTemp creates a private directory. Remove only this disposable family,
+-	// after every owned handle has closed. Removal is not secure erasure.
+-	defer func() { err = errors.Join(err, os.RemoveAll(dir)) }()
++	// MkdirTemp creates a private directory; failures retain its remaining files.
++	completed := false
++	// Evaluate the final result after every later resource defer has run.
++	defer func() { err = fixturecleanup.Finalize(dir, completed, err, os.RemoveAll) }()
+ 	provider, err := newProvider()
+ 	if err != nil {
+ 		return err
+@@ -185,8 +187,11 @@
+ 	if _, err = fmt.Fprintln(out, "Checkpointed and reopened read-only: zero selected segments, same data, retained ciphertext history."); err != nil {
+ 		return err
+ 	}
+-	_, err = fmt.Fprintln(out, "The key stayed in memory; disposable files will now be removed (not securely erased).")
+-	return err
++	if _, err = fmt.Fprintln(out, "The key stayed in memory; disposable files will now be removed (not securely erased)."); err != nil {
++		return err
++	}
++	completed = true
++	return nil
+ }
+ 
+ // Rows must close before VerifyEncrypted, Checkpoint or other maintenance.
+--- a/examples/encrypted/main.go
++++ b/examples/encrypted/main.go
+@@ -14,6 +14,7 @@
+ 	"sync"
+ 
+ 	"github.com/ms-xiaosnow/gosqlite/encryption"
++	"github.com/ms-xiaosnow/gosqlite/examples/internal/fixturecleanup"
+ 	"github.com/ms-xiaosnow/gosqlite/sqlite"
+ )
+ 
+@@ -74,8 +75,10 @@
+ 	if err != nil {
+ 		return err
+ 	}
+-	// This removes only our disposable demo directory. Removal is not secure erase.
+-	defer func() { err = errors.Join(err, os.RemoveAll(dir)) }()
++	// Only ordinary completed success may remove the private demo directory.
++	completed := false
++	// Evaluate the final result after every later resource defer has run.
++	defer func() { err = fixturecleanup.Finalize(dir, completed, err, os.RemoveAll) }()
+ 	for _, name := range []string{"source", "archive", "restored"} {
+ 		if err = os.Mkdir(filepath.Join(dir, name), 0700); err != nil {
+ 			return err
+@@ -115,7 +118,9 @@
+ 	if err != nil {
+ 		return err
+ 	}
+-	fmt.Println("Created, wrote, queried, and authenticated an encrypted snapshot.")
++	if _, err = fmt.Println("Created, wrote, queried, and authenticated an encrypted snapshot."); err != nil {
++		return err
++	}
+ 
+ 	if err = db.Rekey(ctx, rotated); err != nil {
+ 		return err
+@@ -142,7 +147,9 @@
+ 	if err = checkNote(ctx, reopened); err != nil {
+ 		return err
+ 	}
+-	fmt.Println("Rekeyed and reopened with the new key; old ciphertext is retained.")
++	if _, err = fmt.Println("Rekeyed and reopened with the new key; old ciphertext is retained."); err != nil {
++		return err
++	}
+ 
+ 	archive := filepath.Join(dir, "archive", "demo.backup.gse")
+ 	backupInfo, err := reopened.BackupEncrypted(ctx, archive, archiveKey)
+@@ -173,8 +180,13 @@
+ 	if _, err = restored.VerifyEncrypted(ctx); err != nil {
+ 		return err
+ 	}
+-	fmt.Println("Created a portable encrypted backup and verified a fresh restored family.")
+-	fmt.Println("Keys stayed in memory; disposable files will now be removed (not securely erased).")
++	if _, err = fmt.Println("Created a portable encrypted backup and verified a fresh restored family."); err != nil {
++		return err
++	}
++	if _, err = fmt.Println("Keys stayed in memory; disposable files will now be removed (not securely erased)."); err != nil {
++		return err
++	}
++	completed = true
+ 	return nil
+ }
+ 
+--- a/examples/internal/fixturecleanup/cleanup.go
++++ b/examples/internal/fixturecleanup/cleanup.go
+@@ -0,0 +1,25 @@
++// Package fixturecleanup limits cleanup to completed, successful examples.
++// It does not own database handles or credentials.
++package fixturecleanup
++
++import (
++	"errors"
++	"fmt"
++)
++
++// Finalize is called inside a deferred closure, registered just after MkdirTemp
++// succeeds and before resource defers. completed and result must be evaluated
++// inside that closure, so a later close error or incomplete run prevents removal.
++// remove is called at most once, only after ordinary completed success. Removing
++// files is not secure erasure. A failed removal may already have deleted some
++// files, so neither this helper nor its error promises an intact failure fixture.
++// Retaining encrypted files does not retain their process-local credentials.
++func Finalize(dir string, completed bool, result error, remove func(string) error) error {
++	if !completed || result != nil {
++		return errors.Join(result, fmt.Errorf("example did not complete successfully; private fixture directory retained at %q", dir))
++	}
++	if err := remove(dir); err != nil {
++		return fmt.Errorf("cleanup failed for private fixture directory %q; any remaining files are retained without retry (removal may be partial): %w", dir, err)
++	}
++	return nil
++}
+--- a/examples/internal/fixturecleanup/cleanup_test.go
++++ b/examples/internal/fixturecleanup/cleanup_test.go
+@@ -0,0 +1,90 @@
++package fixturecleanup
++
++import (
++	"errors"
++	"strings"
++	"testing"
++)
++
++// Callbacks only: these tests create no files, handles, or credentials.
++func TestFinalizeCallbackPolicy(t *testing.T) {
++	operationErr := errors.New("operation sentinel")
++	closeErr := errors.New("close sentinel")
++	removeErr := errors.New("remove sentinel")
++	for _, tc := range []struct {
++		name      string
++		completed bool
++		result    error
++		removeErr error
++		calls     int
++		want      []error
++		text      string
++	}{
++		{name: "completed success", completed: true, calls: 1},
++		{name: "operation error", completed: true, result: operationErr, want: []error{operationErr}, text: "retained"},
++		{name: "joined result", completed: true, result: errors.Join(operationErr, closeErr), want: []error{operationErr, closeErr}, text: "retained"},
++		{name: "incomplete without error", text: "did not complete successfully"},
++		{name: "incomplete with error", result: operationErr, want: []error{operationErr}, text: "retained"},
++		{name: "removal error", completed: true, removeErr: removeErr, calls: 1, want: []error{removeErr}, text: "without retry (removal may be partial)"},
++	} {
++		t.Run(tc.name, func(t *testing.T) {
++			const dir = "private-example-directory"
++			calls := 0
++			err := Finalize(dir, tc.completed, tc.result, func(got string) error {
++				calls++
++				if got != dir {
++					t.Fatalf("remove path = %q, want %q", got, dir)
++				}
++				return tc.removeErr
++			})
++			if calls != tc.calls {
++				t.Fatalf("remove calls = %d, want %d", calls, tc.calls)
++			}
++			if tc.text == "" {
++				if err != nil {
++					t.Fatal(err)
++				}
++				return
++			}
++			if err == nil || !strings.Contains(err.Error(), tc.text) || !strings.Contains(err.Error(), dir) {
++				t.Fatalf("error = %v, want message %q and directory %q", err, tc.text, dir)
++			}
++			for _, want := range tc.want {
++				if !errors.Is(err, want) {
++					t.Fatalf("error %v lost sentinel %v", err, want)
++				}
++			}
++		})
++	}
++}
++
++func TestFinalizeDelayedResult(t *testing.T) {
++	lateErr := errors.New("deferred callback sentinel")
++	for _, failLate := range []bool{false, true} {
++		calls := 0
++		run := func() (err error) {
++			completed := false
++			defer func() {
++				err = Finalize("private-example-directory", completed, err, func(string) error {
++					calls++
++					return nil
++				})
++			}()
++			defer func() {
++				if failLate {
++					err = errors.Join(err, lateErr)
++				}
++			}()
++			completed = true
++			return nil
++		}
++		err := run()
++		if failLate {
++			if calls != 0 || !errors.Is(err, lateErr) {
++				t.Fatalf("late error = %v, remove calls = %d", err, calls)
++			}
++		} else if err != nil || calls != 1 {
++			t.Fatalf("completed success error = %v, remove calls = %d", err, calls)
++		}
++	}
++}
+--- a/examples/internal/fixturecleanup/source_test.go
++++ b/examples/internal/fixturecleanup/source_test.go
+@@ -0,0 +1,203 @@
++package fixturecleanup
++
++import (
++	"bytes"
++	"fmt"
++	"go/ast"
++	"go/format"
++	"go/parser"
++	"go/token"
++	"path/filepath"
++	"reflect"
++	"strings"
++	"testing"
++)
++
++// This reads source only. It never imports or runs the example packages.
++func TestExampleFixtureFinalizersSource(t *testing.T) {
++	for _, tc := range []struct {
++		name        string
++		result      string
++		outputCalls int
++		closes      []string
++	}{
++		{"encrypted", "err", 4, []string{
++			"run: defer func() { err = errors.Join(err, db.Close()) }()",
++			"run: defer func() { err = errors.Join(err, reopened.Close()) }()",
++			"run: defer func() { err = errors.Join(err, restored.Close()) }()",
++			"checkNote: defer func() { err = errors.Join(err, rows.Close()) }()",
++		}},
++		{"encrypted-wal", "err", 4, []string{
++			"run: defer func() { err = errors.Join(err, db.Close()) }()",
++			"run: defer func() { err = errors.Join(err, reopened.Close()) }()",
++			"run: defer func() { err = errors.Join(err, reader.Close()) }()",
++			"checkNote: defer func() { err = errors.Join(err, rows.Close()) }()",
++		}},
++		{"encrypted-shared", "err", 4, []string{
++			"run: defer func() { err = errors.Join(err, a.Close()) }()",
++			"run: defer func() { err = errors.Join(err, b.Close()) }()",
++			"run: defer func() { err = errors.Join(err, c.Close()) }()",
++			"checkValue: defer func() { err = errors.Join(err, rows.Close()) }()",
++		}},
++		{"encrypted-cli", "resultErr", 3, []string{
++			"run: defer func() { resultErr = errors.Join(resultErr, db.Close()) }()",
++			"verify: defer func() { resultErr = errors.Join(resultErr, db.Close()) }()",
++			"verify: defer func() { resultErr = errors.Join(resultErr, rows.Close()) }()",
++		}},
++		{"native-check", "err", 1, []string{
++			"create: defer func() { retErr = errors.Join(retErr, db.Close()) }()",
++		}},
++	} {
++		t.Run(tc.name, func(t *testing.T) {
++			fset := token.NewFileSet()
++			file, err := parser.ParseFile(fset, filepath.Join("..", "..", tc.name, "main.go"), nil, 0)
++			if err != nil {
++				t.Fatal(err)
++			}
++			var run *ast.FuncDecl
++			var closes []string
++			for _, decl := range file.Decls {
++				fn, ok := decl.(*ast.FuncDecl)
++				if !ok {
++					continue
++				}
++				if fn.Name.Name == "run" {
++					run = fn
++				}
++				ast.Inspect(fn.Body, func(n ast.Node) bool {
++					if d, ok := n.(*ast.DeferStmt); ok && hasSelectorCall(d.Call, "Close") {
++						closes = append(closes, fn.Name.Name+": "+sourceText(t, fset, d))
++					}
++					return true
++				})
++			}
++			if !reflect.DeepEqual(closes, tc.closes) {
++				t.Fatalf("Close aggregation changed:\ngot %q\nwant %q", closes, tc.closes)
++			}
++			if run == nil || run.Type.Results == nil || len(run.Type.Results.List) != 1 {
++				t.Fatal("run must have one named error result")
++			}
++			result := run.Type.Results.List[0]
++			if len(result.Names) != 1 || result.Names[0].Name != tc.result || sourceText(t, fset, result.Type) != "error" {
++				t.Fatal("run result must keep the expected error name")
++			}
++			stmts := run.Body.List
++			mkdir := -1
++			for i, stmt := range stmts {
++				if a, ok := stmt.(*ast.AssignStmt); ok && len(a.Rhs) == 1 {
++					if call, ok := a.Rhs[0].(*ast.CallExpr); ok && sourceText(t, fset, call.Fun) == "os.MkdirTemp" {
++						if mkdir != -1 {
++							t.Fatal("multiple temporary directories")
++						}
++						mkdir = i
++					}
++				}
++			}
++			if mkdir < 0 || mkdir+3 >= len(stmts) {
++				t.Fatal("missing temporary-directory finalizer")
++			}
++			if sourceText(t, fset, stmts[mkdir+1]) != "if err != nil { return err }" || sourceText(t, fset, stmts[mkdir+2]) != "completed := false" {
++				t.Fatal("completion flag must follow the successful MkdirTemp guard")
++			}
++			want := fmt.Sprintf("defer func() { %s = fixturecleanup.Finalize(dir, completed, %s, os.RemoveAll) }()", tc.result, tc.result)
++			finalizer, ok := stmts[mkdir+3].(*ast.DeferStmt)
++			if !ok || sourceText(t, fset, finalizer) != want {
++				t.Fatalf("finalizer must delay evaluation of completion and final error; want %s", want)
++			}
++			if len(finalizer.Call.Args) != 0 {
++				t.Fatal("deferred closure must not capture early argument values")
++			}
++			ast.Inspect(run.Body, func(n ast.Node) bool {
++				if d, ok := n.(*ast.DeferStmt); ok && d != finalizer && d.Pos() < finalizer.Pos() {
++					t.Error("resource defer precedes the directory finalizer")
++				}
++				return true
++			})
++			if len(stmts) < 2 || sourceText(t, fset, stmts[len(stmts)-2]) != "completed = true" || sourceText(t, fset, stmts[len(stmts)-1]) != "return nil" {
++				t.Fatal("ordinary completion must be marked only at the final successful return")
++			}
++			completionWrites, removals := 0, 0
++			ast.Inspect(run.Body, func(n ast.Node) bool {
++				if a, ok := n.(*ast.AssignStmt); ok {
++					for _, lhs := range a.Lhs {
++						if ident, ok := lhs.(*ast.Ident); ok && ident.Name == "completed" {
++							completionWrites++
++						}
++					}
++				}
++				if s, ok := n.(*ast.SelectorExpr); ok && sourceText(t, fset, s) == "os.RemoveAll" {
++					removals++
++				}
++				return true
++			})
++			if completionWrites != 2 || removals != 1 {
++				t.Fatalf("completion assignments = %d; removal references = %d", completionWrites, removals)
++			}
++			checkRunOutputs(t, fset, run, tc.outputCalls)
++		})
++	}
++}
++
++func checkRunOutputs(t *testing.T, fset *token.FileSet, run *ast.FuncDecl, want int) {
++	t.Helper()
++	parents := make(map[ast.Node]ast.Node)
++	var stack []ast.Node
++	ast.Inspect(run.Body, func(n ast.Node) bool {
++		if n == nil {
++			stack = stack[:len(stack)-1]
++			return true
++		}
++		if len(stack) != 0 {
++			parents[n] = stack[len(stack)-1]
++		}
++		stack = append(stack, n)
++		return true
++	})
++	calls := 0
++	ast.Inspect(run.Body, func(n ast.Node) bool {
++		call, ok := n.(*ast.CallExpr)
++		if !ok {
++			return true
++		}
++		fun := sourceText(t, fset, call.Fun)
++		if !strings.HasPrefix(fun, "fmt.Print") && !strings.HasPrefix(fun, "fmt.Fprint") && fun != "json.NewEncoder(os.Stdout).Encode" {
++			return true
++		}
++		calls++
++		assign, ok := parents[call].(*ast.AssignStmt)
++		if !ok || len(assign.Lhs) == 0 || sourceText(t, fset, assign.Lhs[len(assign.Lhs)-1]) != "err" {
++			t.Errorf("unchecked ordinary output: %s", fun)
++			return true
++		}
++		guard, ok := parents[assign].(*ast.IfStmt)
++		if !ok || guard.Init != assign || sourceText(t, fset, guard.Cond) != "err != nil" || sourceText(t, fset, guard.Body) != "{ return err }" {
++			t.Errorf("output error must return before completion: %s", fun)
++		}
++		return true
++	})
++	if calls != want {
++		t.Fatalf("ordinary output calls = %d, want %d", calls, want)
++	}
++}
++
++func hasSelectorCall(n ast.Node, name string) bool {
++	found := false
++	ast.Inspect(n, func(n ast.Node) bool {
++		if c, ok := n.(*ast.CallExpr); ok {
++			if s, ok := c.Fun.(*ast.SelectorExpr); ok && s.Sel.Name == name {
++				found = true
++			}
++		}
++		return true
++	})
++	return found
++}
++
++func sourceText(t *testing.T, fset *token.FileSet, n ast.Node) string {
++	t.Helper()
++	var out bytes.Buffer
++	if err := format.Node(&out, fset, n); err != nil {
++		t.Fatal(err)
++	}
++	return strings.Join(strings.Fields(out.String()), " ")
++}
+--- a/examples/native-check/main.go
++++ b/examples/native-check/main.go
+@@ -17,6 +17,7 @@
+ 	"reflect"
+ 
+ 	"github.com/ms-xiaosnow/gosqlite/encryption"
++	"github.com/ms-xiaosnow/gosqlite/examples/internal/fixturecleanup"
+ 	"github.com/ms-xiaosnow/gosqlite/sqlite"
+ )
+ 
+@@ -61,12 +62,14 @@
+ 	}
+ 	return db.Check(ctx)
+ }
+-func run(binary string) error {
++func run(binary string) (err error) {
+ 	dir, err := os.MkdirTemp("", "gosqlite-check-proof-")
+ 	if err != nil {
+ 		return err
+ 	}
+-	defer os.RemoveAll(dir) // only normally completed disposable fixture directory
++	completed := false
++	// Evaluate the final result after every later resource defer has run.
++	defer func() { err = fixturecleanup.Finalize(dir, completed, err, os.RemoveAll) }()
+ 	key := make([]byte, 32)
+ 	if _, err = rand.Read(key); err != nil {
+ 		return err
+@@ -130,6 +133,7 @@
+ 			return err
+ 		}
+ 	}
++	completed = true
+ 	return nil
+ }
+ func main() {

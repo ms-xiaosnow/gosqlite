@@ -1,0 +1,63 @@
+#!/bin/bash
+set -euo pipefail
+ROOT=/workspace/scratch/5e06a74e5f65/durable-restart
+PREFIX="$ROOT/final-closeout-combined-checks"
+REVIEW_REPORT=${1:?Pass the independently completed review report path after explicit approval}
+test -f "$REVIEW_REPORT"
+test ! -e "$PREFIX.exit"
+test ! -e "$PREFIX.stages.tsv"
+export REVIEW_REPORT
+set -o noclobber
+export PATH="$ROOT/toolchains/go1.27.2/bin:$PATH"
+export GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off
+export GOCACHE="$ROOT/go-cache" GOPATH="$ROOT/go-path"
+export CGO_ENABLED=0 GOFLAGS=-buildvcs=false GOMAXPROCS=2
+export SQLITE_ORACLE="$ROOT/toolchains/sqlite-build-3540000/sqlite3"
+stage=initialization
+trap 'rc=$?; printf "AGGREGATE EXIT %s AT %s LAST_STAGE %s\n" "$rc" "$(date -u +%FT%TZ)" "$stage"; printf "%s\n" "$rc" > "$PREFIX.exit"' EXIT
+run_stage() {
+    stage=$1
+    shift
+    local start end rc
+    start=$(date -u +%FT%TZ)
+    printf '%s\n' "$start" > "$PREFIX.$stage.started"
+    { printf '%q ' "$@"; printf '\n'; } > "$PREFIX.$stage.command"
+    printf '\nSTAGE %s START %s\nCOMMAND ' "$stage" "$start"
+    printf '%q ' "$@"
+    printf '\n'
+    set +e
+    "$@" > >(tee "$PREFIX.$stage.stdout") 2> >(tee "$PREFIX.$stage.stderr" >&2)
+    rc=$?
+    wait
+    set -e
+    end=$(date -u +%FT%TZ)
+    printf '%s\n' "$end" > "$PREFIX.$stage.finished"
+    printf '%s\n' "$rc" > "$PREFIX.$stage.exit"
+    printf 'STAGE %s EXIT %s AT %s\n' "$stage" "$rc" "$end"
+    printf '%s\t%s\t%s\t%s\n' "$stage" "$start" "$end" "$rc" >> "$PREFIX.stages.tsv"
+    if [ "$rc" -ne 0 ]; then
+        exit "$rc"
+    fi
+}
+printf 'FINAL CLOSEOUT EXISTING ORDINARY AGGREGATE START %s\n' "$(date -u +%FT%TZ)"
+printf 'Frozen tree d7393c254a6fca4452ae194d64d9045659f9781d; source is never edited. No Git commands or remote actions.\n'
+printf 'No manual tags, tests added by this verifier, new fuzz/soak, benchmark campaigns, native other-OS execution, or blocked-candidate composition. Stop at first failure; no retries.\n'
+run_stage resource-precheck python3 "$PREFIX.precheck.py"
+run_stage resource-snapshot bash -c 'df -B1 /tmp "$1"; df -i /tmp "$1"; free -b; printf "TMPDIR=%s\nGOTMPDIR=%s\n" "${TMPDIR:-/tmp (default)}" "${GOTMPDIR:-unset}"' _ "$ROOT"
+run_stage source-identity-before python3 "$PREFIX.identity.py" before
+cd "$ROOT/final-closeout-combined-verify"
+run_stage environment bash -c 'set -e; go version; test "$(go env GOVERSION)" = go1.27.2; test "$(go env GOOS)/$(go env GOARCH)" = linux/amd64; go env GOVERSION GOOS GOARCH GOTOOLCHAIN GOPROXY GOSUMDB GOPATH GOCACHE CGO_ENABLED GOFLAGS; printf "GOMAXPROCS=%s\nSQLITE_ORACLE=%s\n" "$GOMAXPROCS" "$SQLITE_ORACLE"; sha256sum "$1/toolchains/go1.27.2/bin/go" "$SQLITE_ORACLE" "$REVIEW_REPORT" "$1/final-closeout-combined-evidence-v1/manifest.json" "$1/final-closeout-combined-checks.sh" "$1/final-closeout-combined-checks.identity.py" "$1/final-closeout-combined-checks.precheck.py" "$1/example-retention-review-evidence-v1/report.md" "$1/cli-resources-combined-checks.REPORT.md"' _ "$ROOT"
+run_stage sourceguard-before go run ./internal/testscope
+run_stage cgo0-unit go test ./... -count=1 -timeout=0
+run_stage cgo0-vet go vet ./...
+run_stage cgo0-build go build -trimpath ./...
+run_stage full-ordinary-oracle ./scripts/test-oracle.sh
+run_stage sourceguard-before-race go run ./internal/testscope
+run_stage cgo1-race env CGO_ENABLED=1 go test -race ./... -count=1 -timeout=0
+for target in linux/arm64 darwin/arm64 darwin/amd64 windows/amd64 windows/arm64; do
+    run_stage "cross-build-${target//\//-}" env CGO_ENABLED=0 GOOS="${target%/*}" GOARCH="${target#*/}" go build ./...
+done
+run_stage module-integrity go mod verify
+run_stage source-identity-after python3 "$PREFIX.identity.py" after
+stage=complete
+printf 'FINAL CLOSEOUT FULL FROZEN ORDINARY AGGREGATE PASS %s\n' "$(date -u +%FT%TZ)"

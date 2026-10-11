@@ -1223,3 +1223,47 @@ ANN/performance-CI sources remain separate increments.
   [验收矩阵](acceptance-status.md) 和[中断记录](interruption-20261010.md)。
 - 下一步最小任务：审阅本次文档补丁及 before/after 哈希后按已授权流程保存；
   不以文档收尾为理由恢复受阻候选、运行受限工作或宣称全目标已完成。
+
+### 2026-10-11：五个示例的临时目录保留切片（定名普通验证通过）
+
+- 从不可变 `1352ae524575e4d6fe8b5434fd930c3b07be4ac8` 副本准备，
+  对应 G1/§12.1 的示例错误与资源收尾；仅修改上述五个 `examples/*/main.go`，
+  增加 `examples/internal/fixturecleanup`，未改数据库/加密/VFS/backend。
+- finalizer 在 MkdirTemp 成功后、资源 defer 前注册；延迟读取完成标志和
+  命名返回错误。仅普通完成且最终错误为空时删除；错误/未完成保留目录，
+  `errors.Is` 保留原错误。删除失败不重试，可能部分删除，不保证完整现场。
+- 检查原先遗漏的普通输出错误；已有 Close 错误合并、provider/密钥清理及
+  子进程失败诊断策略保持。保留密文不保证持有或能恢复密钥。
+- 新增纯回调/计数/sentinel 单元测试和五文件 AST 检查，无数据库/文件失败
+  注入；353 个既有测试文件字节/模式原样保持。执行前已逐行审阅 helper、
+  新测试、五文件差异及既有两项普通测试的完整调用路径。
+- 已批准并实际通过的精确普通选择：`TestFinalizeCallbackPolicy`、
+  `TestFinalizeDelayedResult`、`TestExampleFixtureFinalizersSource`，以及
+  原有 `TestEncryptedWALExample` / `TestEncryptedSharedExampleOrdinary`。
+  后两项仅普通成功路径；WAL 测试内部 TMPDIR/t.TempDir 自动收尾，不能据此
+  证明失败 fixture 保留。同选择 CGO1 race 通过；两次执行前均通过源码 AST
+  guard。helper 与五示例的 scoped CGO0 vet/build 通过，仅构建而不运行
+  snapshot/CLI/native-check 二进制。测试树前/后 2,907 文件身份一致；
+  所有门自然 exit 0，无失败、拒绝或重跑，不据此宣布全仓门通过。
+- 固定 Go 1.27.2，GOTOOLCHAIN=local、GOPROXY=off、GOSUMDB=off、
+  GOFLAGS=-buildvcs=false、GOMAXPROCS=2，专用 GOPATH/GOCACHE，默认 /tmp；
+  CGO0 普通与 CGO1 race 均使用 `-count=1 -v`，只选择上述五个测试名及
+  `./examples/internal/fixturecleanup ./examples/encrypted-wal ./examples/encrypted-shared`。
+- 不执行 snapshot/CLI/native-check 示例、子进程新增场景、错误密钥、篡改、
+  原生 I/O 故障、进程退出/崩溃/恢复、namespace、中断 rekey、ANN V4、
+  41 目标 fuzz、旧 held 链路、新 OS、performance 或长测。验证后仅更新本
+  README/progress 结果文字，受测 Go 源字节不变。下一步是独立复审及由
+  主任务决定整合/完整固定树门；此切片没有修改主树、Git、远端或 CI。
+
+### 2026-10-11 三项有限收尾与最终身份
+
+- 四项 CLI/示例资源修正完成：固定 tree `4c2af13646c973c53340450f8f1310492aae5628` 的独立 18 项普通/race 和完整既有普通门于 03:53:38 UTC PASS。原始证据与源码身份不变。
+- migration-pgembedding、file-formats、security 三份必需入口合同对账完成并整合；独立静态审阅 PASS。只是入口、支持范围和证据叙述修正，没有新增运行行为，未把文档命令记为本次执行。
+- 五例目录终结与输出错误修正完成：八个源码/测试文件保持已审阅候选字节；独立源码审阅、精选五项普通/race、对应 AST guard 与限定 vet/build PASS。仅完整且最终无错误时才调用删除，错误保留原链与目录诊断；删除可能部分完成，密钥仍清除，不承诺完整或可解密现场。未运行真实失败保留、snapshot/CLI/native-check main，也未解除任何受限门。
+- 最终组合 tree `d7393c254a6fca4452ae194d64d9045659f9781d` 完整普通门 PASS（2026-10-11 04:23:35 UTC，18阶段全部自然 exit 0）；最终新提交、精确持久恢复与 current CI PENDING。不得使用旧基点的恢复或 CI 替代，也不得把部分阶段 PASS 当作 aggregate PASS。
+- 中文[五例限定复验](example-retention-verification-zh.md)已列明实际五个测试、固定环境/依赖、所选提交隔离副本、独占日志、源码前后身份、断言、停止和清理边界。规程编写是静态工作，命令未因编写而运行。
+- 在现有限制下完成了独立可推进项，整体未验收。三项有限范围之外不新增功能；公开恢复、备份/WAL、支持域 SQL、backend 和完整物理故障设施仍有实现/整合缺口，原始 FAIL 和旧 HOLD 保留。ANN V4、41 目标 fuzz 与未知中断不作恢复或通过推断。
+
+本次组合普通门原始记录见[五例组合证据](evidence/example-retention-20261011.md)。后续仅文档/证据变更；777个非 docs 文件的字节、权限、Git模式与清单已独立核对相同，仍按实际新提交另行核验恢复和CI。
+
+父基点 `7a9972547f49531df04cf1b624dfa662b483907b` 的 Library `libfile_f28c9a0df2108191981d41eb76fafc58` 已读回并精确恢复；30阶段、18项每模式具名测试/29子项、8 sourceguard、vet/build/五目标/模块/全部身份于04:13:29 UTC PASS。该提交 CI `38110617335` ordinary/oracle 均 SUCCESS（04:30:02 UTC）；[闭合证据](evidence/cli-resources-20261011/persistence.json)只属于父基点，不替代本次新提交。

@@ -1,0 +1,143 @@
+{
+  "started_utc": "2026-10-11T04:17:48.211151+00:00",
+  "finished_utc": "2026-10-11T04:17:50.210186+00:00",
+  "scope": "read-only filesystem inventory, excluding root .git metadata; no project code execution",
+  "main": "gosqlite",
+  "freeze": "final-closeout-combined-freeze-v1",
+  "main_files": 2944,
+  "freeze_files": 2935,
+  "main_directories": 142,
+  "freeze_directories": 141,
+  "main_non_doc_files": 777,
+  "freeze_non_doc_files": 777,
+  "differences": [
+    {
+      "path": "docs/evidence/contract-docs-20261011/independent-review.md",
+      "main": {
+        "kind": "file",
+        "mode": 420,
+        "git_mode": "100644",
+        "size": 3995,
+        "sha256": "4ab1c9e5f8fddda647ba8a69665f6f6a8cc42200de29a80c56dc81b6a4c067df"
+      },
+      "freeze": null
+    },
+    {
+      "path": "docs/evidence/example-retention-20261011",
+      "main": {
+        "kind": "directory",
+        "mode": 493
+      },
+      "freeze": null
+    },
+    {
+      "path": "docs/evidence/example-retention-20261011/example-retention-evidence-v1.json",
+      "main": {
+        "kind": "file",
+        "mode": 420,
+        "git_mode": "100644",
+        "size": 15857,
+        "sha256": "579f2fc5cea88c49d14039208540e38838718bb822a36b7a86b2b7de8d2e7a90"
+      },
+      "freeze": null
+    },
+    {
+      "path": "docs/evidence/example-retention-20261011/example-retention-review-evidence-v1.json",
+      "main": {
+        "kind": "file",
+        "mode": 420,
+        "git_mode": "100644",
+        "size": 16979,
+        "sha256": "ceca72a97d23f9e190ff95beaaebace3b8bca740586eab35bf9315f4a9f56c93"
+      },
+      "freeze": null
+    },
+    {
+      "path": "docs/evidence/example-retention-20261011/independent-checks.txt",
+      "main": {
+        "kind": "file",
+        "mode": 420,
+        "git_mode": "100644",
+        "size": 3494,
+        "sha256": "0c0da4fc80eaa030ad512419c3b31fa365a830bf166f3baa64dd4d41e6972788"
+      },
+      "freeze": null
+    },
+    {
+      "path": "docs/evidence/example-retention-20261011/independent-review.md",
+      "main": {
+        "kind": "file",
+        "mode": 420,
+        "git_mode": "100644",
+        "size": 6454,
+        "sha256": "7cee0bd0589b03b0edbcaac7c38a1651def88f29d4471513b40c7a17c8bc277a"
+      },
+      "freeze": null
+    },
+    {
+      "path": "docs/evidence/example-retention-20261011/owned-files.sha256",
+      "main": {
+        "kind": "file",
+        "mode": 420,
+        "git_mode": "100644",
+        "size": 981,
+        "sha256": "fcc86fe01c4b7cace7513fd8bde49accffe2256ff2cbd41a261e230840d1ed82"
+      },
+      "freeze": null
+    },
+    {
+      "path": "docs/evidence/example-retention-20261011/pending-backup.json",
+      "main": {
+        "kind": "file",
+        "mode": 420,
+        "git_mode": "100644",
+        "size": 298,
+        "sha256": "2b951c4864e7fded7dc7ebef353ecf1c18f8a45d067ec803ebe1d51cab9bf14d"
+      },
+      "freeze": null
+    },
+    {
+      "path": "docs/evidence/example-retention-20261011/source-review-identity.json",
+      "main": {
+        "kind": "file",
+        "mode": 420,
+        "git_mode": "100644",
+        "size": 4562,
+        "sha256": "8d5b37f4f09ba2cea295537498f21f8854281e809b69e60b4f3023abb3206cbc"
+      },
+      "freeze": null
+    },
+    {
+      "path": "docs/evidence/example-retention-20261011/source.patch",
+      "main": {
+        "kind": "file",
+        "mode": 420,
+        "git_mode": "100644",
+        "size": 25507,
+        "sha256": "07069a393c06be6d40295f882cc6a1aab9ab902d153922cb8e99d046a04c38e4"
+      },
+      "freeze": null
+    },
+    {
+      "path": "docs/progress.md",
+      "main": {
+        "kind": "file",
+        "mode": 420,
+        "git_mode": "100644",
+        "size": 124743,
+        "sha256": "138e2d8810e0f24bbd43b029220d38aaa42a0c8fd74c39ba25579777beaa5062"
+      },
+      "freeze": {
+        "kind": "file",
+        "mode": 420,
+        "git_mode": "100644",
+        "size": 124465,
+        "sha256": "be4ebe2e6dfef1720ce05cf5b856726debae3902fce1bded42b4b6d9693a9f70"
+      }
+    }
+  ],
+  "non_docs_differences": [],
+  "main_non_docs_drift_during_scan": [],
+  "goal_sha256_main": "9ae7b1d776856669a10eb753408c7754d015d266f8783240165450e96e4bac81",
+  "goal_sha256_freeze": "9ae7b1d776856669a10eb753408c7754d015d266f8783240165450e96e4bac81"
+}
