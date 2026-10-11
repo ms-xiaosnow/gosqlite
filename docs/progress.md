@@ -1,5 +1,27 @@
 # Implementation and acceptance progress
 
+## 2026-10-11 17:02 UTC 开发资格补记
+
+本次 Darwin 有界清单/诊断源码组合 `8a324a8cedeccc8ba46234924c8074890aefa1da`
+的 21 项限定普通验证已全部闭合。ordinary/race 各 5,614 PASS、7 个固定预期
+SKIP；完整 SQLite 3.54.0 oracle 为 7,246 PASS、零 SKIP；LIMIT oracle/race
+394 PASS。Darwin 两架构及 Windows 测试二进制仅编译并核对符号，未运行。
+完整身份、原始记录器失败和修正、支持域及缺口见
+[Darwin 清单专题的本次补记](darwin-unicode-inventory.md)。
+
+本文形成时的已发布父基点为 `3ea6d3ab15f678fe48bee312921da60828845869`，
+其精确 Library 恢复 17 门和 CI [38149634238](https://github.com/ms-xiaosnow/gosqlite/actions/runs/38149634238)
+已通过；只属于该父基点。本批仅同步文档，所有 813 个非 docs 且非 README
+文件与上述已验证组合逐字节/模式一致。新提交、精确恢复和 CI 要分别读取
+其实际终态，不预写自指 SHA 或未来 PASS。历史段落的“未发布”、旧 main、
+NOT_RUN、PASS/FAIL 保留各自写作时点，不能混作当前资格。
+
+原生 Darwin/Windows、实际持久性/故障/恢复、安全审查和 M10 均未验收。
+本次没有合入另行开发的原生 Unicode 手工入口、strict plaintext backup、
+WAL-tail publisher、只读明文 WAL 或 IPK 修正；相关未实现/未合入项仍分别跟踪。
+
+下一动作是按既有授权保存此开发检查点、精确 Library 恢复同 21 门并跟进两项现有 Ubuntu CI。状态以实际 commit/作业终态记录；不创建 Release，不宣称最终交付。独立源码批次继续消除真实代码缺口。
+
 当前发布基点为 `67318ded6416547f26d685719d3e01e208454a87`。本次 Windows
 九路径代码树 b0e 的完整 17 门已于 14:42 UTC 自然 PASS；文档组合尚未发布，
 原生 Windows 仍 NOT_RUN。本页末尾保留本次记录，详见 [Windows 专题](windows-shared-rekey.md)。以下 12:31 / b349 摘要和旧 FAIL
@@ -1575,3 +1597,66 @@ testscope / os/exec / C 输入，不能把 tooling 闭包当 shipping。全部�
   需各自授权和验证，不能用本批源码或文档成功代替。若验收依赖保留失败数据库，
   现有 t.TempDir 测试不能承担，须先单独实现并审阅 failure-preserving harness，
   该要求当前 BLOCKED / IMPLEMENTATION_MISSING，不增加虚构执行入口。
+
+
+## 2026-10-11 Darwin 当前十路径源码与九文档补记
+
+- 状态：**IN_PROGRESS / 当前未发布候选**。独立源码审阅已满足限定要求；本次
+  只作当前文档窄差异，不改变任何代码，不据此宣布 M3/M8/M10 或生产资格完成。
+- 已发布 Windows 基点为 `3ea6d3ab15f678fe48bee312921da60828845869`，tree
+  `f6edabfba3e004a0e7874441b8c0a3e38cf099c6`。本次收到的 15:34 UTC 状态为
+  [CI 38149634238](https://github.com/ms-xiaosnow/gosqlite/actions/runs/38149634238)
+  SUCCESS；ordinary `114500198677` 于 15:22:03 UTC 成功结束，oracle
+  `114500198765` 于 15:11:14 UTC 成功结束。该基点的精确恢复 17 门当时仍
+  RUNNING，未有终态结论。终态补记：精确发布基点恢复 17 门现已全部自然 PASS，
+  租约于 15:41:11.876041 UTC 释放；封存报告 windows-rekey-restore-verification-v1/REPORT.md
+  SHA-256 为 `daa562281808a2d572b118ff713a4dc6b9b564201116bf3261c72f40d8d4c938`。
+  它与先前 b0e 本地 17 门 PASS、上述 CI SUCCESS 分属各自身份；本次 Darwin
+  候选不继承其完整测试或恢复资格。
+- 固定源码候选 `darwin-current-composed-work-v1`：tree
+  `88c400a4caeb40d8d96fae7700e7048d69db4ff5`，3,156 文件/148 目录记录。
+  十路径均在 internal/encstore：directory_names.go、inventory.go、
+  platform_darwin.go、file_default.go、platform_windows.go、directory_names_test.go、
+  directory_unicode_test.go、inventory_batch_test.go、native_darwin_test.go、
+  native_windows_test.go。Windows 九路径实现/十四文档事实、当前 guards、manual
+  gates、模块及其余新 main 内容保持，不复制旧整树。
+- 独立源码报告 `darwin-current-composed-independent-review-v1/REPORT.md`，
+  SHA-256 `ec90e774280c6669a44911ed5bebcf646f757dbc7c54d4c0d675f1fa6e96e134`；
+  owner source.patch SHA-256
+  `6d53dab564021a86ff13e362d40a0d9a370cea1693a95b0dea7c7d3728e19b56`。
+  当前源码审阅满足要求，不是模型、编译、runtime 或原生资格 PASS。
+- 实现范围：根名仍为最长 177 字节的可打印 ASCII，预留 78 字节生成后缀，
+  Unicode 父路径原已允许。有效 UTF-8 同级名称只在根名内、Unicode/控制字节前
+  已有折叠 ASCII 差异，且实际枚举 owner 的一次 Fstatfs 确认本地 APFS 或
+  hfs subtype 0–3 后才能略过。扫描配额先于分类；选中成员保持 checked/owned
+  Close/字节计费；六类批内失败 readErr-first join、字面 EOF 与取消/清理
+  边界详见[清单证明](darwin-unicode-inventory.md)。
+- 本次文档仅九路径：新增上述清单专题，窄改 compatibility、encryption-storage、
+  native-encrypted-darwin、manual-verification、manual-verification-zh、
+  acceptance-status、restriction-provenance-20261011 和本页。未改 README；
+  原有命令及门保持，没有新原生执行命令。文档组合 tree 与逐路径身份由本次
+  独立证据记录，不能把输入源码 tree 当作含文档的最终身份；独立文档审阅待办。
+- V1 文档冻结时，18 个内存函数加 2 个源码/AST 函数共 20 项仍记 normal/race
+  **NOT_RUN**，旧树及证据保持。终态补记：固定源码的两条 Linux/amd64 精确
+  20 项 normal/race 已各运行一次并自然 exit 0，各 20 顶层 RUN/PASS、零子项/
+  SKIP/FAIL、一个 package PASS、stderr 为空；耗时分别 2.383 秒、4.384 秒，
+  权威租约释放时刻 **15:45:02.994806 UTC**。报告
+  `darwin-current-composed-finite-verification-v2/REPORT.md` SHA-256 为
+  `16b011b671638906b47392052779537d539c72d069848efca9f01875de945711`，MANIFEST
+  SHA-256 为 `1ecf3217d22932ccbb75088c215147007c69f854f1a145b517d6832783ed3fb3`；
+  全部 79 项已静态核对。结果仅属于不变源码，不是含文档组合的完整套件/编译/CI。
+  额外 guard、独立/跨目标编译、source-selection/symbol 与原生 Darwin 仍 NOT_RUN。
+  AST 仅结构回归辅助，不是控制流/owner/锁范围证明。初始未经核实的 system Go/
+  新 cache 提案历史 HOLD 且未执行；修正版 V2 经主任务批准后仅两条命令串行各
+  执行一次，无重试或额外探测，未扩大原生等其他执行许可。
+- 真实 managed-directory 加 Unicode-sibling 资格 harness 为
+  **IMPLEMENTATION_MISSING**；现有 Darwin 两个 nil-directory 分类调用只用
+  ASCII，不能到达新 Fstatfs 分支。一般 Unicode 根名亦未实现。两者不能合并
+  成只等原生机器运行。没有发明测试入口或将历史编译结果转为当前通过。
+- baseline 对 unrelated-Ω.txt 的原始 FAIL/exit 1、V1 全本地卷 HOLD、V2 丢
+  ReadDir 诊断 HOLD、V3 旧树有限 PASS 均保持各自身份。ANN V4、受阻 41-target
+  campaign、未知中断链路和物理 namespace/故障/恢复/中断 rekey 限制不改变。
+- 下一步：完成含此终态补记的精确九文档独立审阅。本文档 V2 编辑只作静态读取/
+  哈希/文本/元数据检查，未另行运行 Go、gofmt、Go parser/compiler、项目脚本、
+  测试、native/oracle 或 Git；未发布/上传/切换环境。上列两条有限结果与文档
+  编辑分开记账，源码、模型执行、文档集成与原生资格仍分别记录。

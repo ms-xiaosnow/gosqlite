@@ -1,5 +1,27 @@
 # Native encrypted storage on Darwin: bounded implementation
 
+## 2026-10-11 17:02 UTC 开发资格补记
+
+本次 Darwin 有界清单/诊断源码组合 `8a324a8cedeccc8ba46234924c8074890aefa1da`
+的 21 项限定普通验证已全部闭合。ordinary/race 各 5,614 PASS、7 个固定预期
+SKIP；完整 SQLite 3.54.0 oracle 为 7,246 PASS、零 SKIP；LIMIT oracle/race
+394 PASS。Darwin 两架构及 Windows 测试二进制仅编译并核对符号，未运行。
+完整身份、原始记录器失败和修正、支持域及缺口见
+[Darwin 清单专题的本次补记](darwin-unicode-inventory.md)。
+
+本文形成时的已发布父基点为 `3ea6d3ab15f678fe48bee312921da60828845869`，
+其精确 Library 恢复 17 门和 CI [38149634238](https://github.com/ms-xiaosnow/gosqlite/actions/runs/38149634238)
+已通过；只属于该父基点。本批仅同步文档，所有 813 个非 docs 且非 README
+文件与上述已验证组合逐字节/模式一致。新提交、精确恢复和 CI 要分别读取
+其实际终态，不预写自指 SHA 或未来 PASS。历史段落的“未发布”、旧 main、
+NOT_RUN、PASS/FAIL 保留各自写作时点，不能混作当前资格。
+
+原生 Darwin/Windows、实际持久性/故障/恢复、安全审查和 M10 均未验收。
+本次没有合入另行开发的原生 Unicode 手工入口、strict plaintext backup、
+WAL-tail publisher、只读明文 WAL 或 IPK 修正；相关未实现/未合入项仍分别跟踪。
+
+当前两目标编译为 Darwin/amd64 和 Darwin/arm64，各精确 99 Test + 1 Fuzz 符号；没有在 macOS 上执行 initializer 或测试。实际枚举目录/Fstatfs/Unicode sibling 手工入口不在本源码树内。
+
 Date: 2026-10-10. Targets: Darwin/arm64 and Darwin/amd64, CGO disabled.
 **Native runtime execution is NOT_RUN.** This source/compile checkpoint does
 not qualify M3, M8, M10, security, interoperability or physical durability.
@@ -17,9 +39,9 @@ original scope; no Darwin backend or native execution is added by this update.
 | Plain/encrypted managed same-inode probes | One cross-package physical-close gate and inode registry | Portable synthetic-resource laws; target test compiled only |
 | Relative namespace and publication | openat/fstatat, nofollow, renameatx_np(RENAME_EXCL), renameat replacement | Target source/test compilation only |
 | Local filesystem and regular-file policy | fstat/fstatfs, MNT_LOCAL, single-link regular members | No native filesystem qualification |
-| User target basename | Printable ASCII, maximum 177 bytes | Explicit temporary capability restriction |
-| Directory contents for inventory | Every enumerated name must be ASCII, including unrelated siblings | Explicit additional temporary capability restriction |
-| Unicode target basenames | **Required implementation gap** | Apple filesystem Unicode equivalence/accounting not implemented; Unicode parent paths are allowed |
+| User target basename | 可打印 ASCII，最长 177 字节，预留 78 字节生成后缀 | 现有组件策略不变，Unicode 父路径原已允许 |
+| Directory contents for inventory | 当前未发布候选只放行可证明无关的有效 UTF-8 同级名称，并核验实际枚举 owner 的本地 APFS 或 hfs subtype 0–3 | 限定源码审阅满足要求；固定源码的 Linux/amd64 精确 20 项模型/AST normal/race PASS；额外编译门及原生验证仍 NOT_RUN，见[清单证明](darwin-unicode-inventory.md) |
+| Unicode target basenames | **未实现的一般能力** | 本次不实现一般 Apple Unicode 等价/根名支持；真实目录 Unicode 同级资格 harness 另为 IMPLEMENTATION_MISSING |
 | Sync | fsync for regular files and directories | No F_FULLFSYNC/device-cache or power-loss qualification |
 | Windows shared-mode rekey comparison | Guarded conversion source now exists in the separate Windows composition | It is not atomic POSIX conversion; post-conversion same-source-key authority check is required; native Windows remains NOT_RUN |
 
@@ -143,22 +165,33 @@ until every child physically retires. A retained child can still make relative
 identity checks through that pin; public directory operations cannot reopen the
 closed lease. Known or unknown child close uncertainty retains the parent pin.
 
-ASCII case-insensitive family-prefix accounting conservatively handles ordinary
-case-alias opens on case-insensitive APFS/HFS and may count extra names on a
-case-sensitive volume. Inventory first refuses every non-ASCII directory entry,
-including unrelated sibling names. An ASCII requested root is insufficient:
-APFS preserves Unicode spelling while looking up normalized equivalents, so
-an intact imported Kelvin-sign-prefixed family can alias an ASCII K name.
-The blanket refusal prevents undercount without claiming Apple Unicode
-normalization compatibility. Use a dedicated directory containing only ASCII
-entry names; its parent path may still contain Unicode. IDs and generated
-suffix grammar remain strict. The
-177-byte ASCII root-name cap reserves the longest 78-byte generated suffix
-within a 255-byte basename. Correct Apple Unicode normalization/case equivalence
-is an unimplemented capability, not an unrun acceptance test. Requested target basenames outside this
-profile are refused before provider acquisition or stable-lock creation.
-The additional directory-content restriction is enforced during inventory
-scans; it does not promise to precede every credential or stable-lock step.
+2026-10-11 当前未发布候选补记：ASCII 大小写折叠家族计费仍保守处理 APFS/HFS
+普通大小写别名，也可能在大小写敏感卷多计名称。原先所有非 ASCII 同级名称均
+拒绝的限制，现只对“有效 UTF-8 且在完整 ASCII 根名内部、遇到 Unicode/控制
+字节前已经出现折叠后差异”的名称给出暂定非成员结论。Kelvin sign、long-s、
+组合符/忽略字符先于差异、完整根名后才有 Unicode、非法 UTF-8 均不满足证明。
+未知 ID/生成后缀继续拒绝；这不是完整 Apple Unicode normalization/case 算法。
+
+生产分类还须使用实际 ReadDir 枚举 owner：持有 lease mutex，经 rawLocked 和
+目录标志检查，在同一 descriptor 上一次 Fstatfs，要求 MNT_LOCAL 加精确 NUL
+终止类型 apfs，或 hfs subtype 0–3；APFS 不受 HFS subtype 上限限制。未知/非
+本地类型不能因 ASCII 前缀差异被跳过，没有第二次 open 或查询失败后的降级。
+配额检查仍先于分类；无关名称计扫描项但不打开/计字节，选中成员保留 checked
+namespace、owned Close 和物理字节计费。六种批内失败以 readErr 为首保留诊断，
+只有字面 io.EOF 清洁终结，原取消与有界清理约束不变。
+
+根名上限仍为 177 字节可打印 ASCII，最长 78 字节生成后缀预留不变，父路径可
+含 Unicode。根名 profile 外的既有提前拒绝时机不变；目录内容限制仍在 inventory
+执行，不承诺先于每次 provider/credential 或 stable-lock 操作。一般 Unicode
+根名能力仍未实现，不能把该缺口与“已有测试但未运行”混为一谈。
+
+限定源码审阅已满足要求。V1 文档的 normal/race NOT_RUN 保留历史身份；固定
+源码的 Linux/amd64 精确 20 项模型/源码 normal/race 现已各一次 PASS，额外
+编译门和原生 Darwin 执行仍 NOT_RUN。AST 只是结构回归辅助，不证明控制流、锁范围或
+绑定。现有两个 nil-directory 分类调用只有 ASCII 名称；真实 managed-directory
+加 Unicode-sibling 的资格 harness 为 IMPLEMENTATION_MISSING，另与原生执行
+NOT_RUN 分列。上文历史编译证据不转给新候选。完整证明、六项诊断、历史 FAIL/HOLD
+和精确身份见[清单专题](darwin-unicode-inventory.md)。
 
 The source and destination of publication remain in the same pinned directory.
 The candidate is opened managed/nofollow and its handle/name identity is checked.

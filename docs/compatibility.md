@@ -1,5 +1,27 @@
 # Current compatibility matrix
 
+## 2026-10-11 17:02 UTC 开发资格补记
+
+本次 Darwin 有界清单/诊断源码组合 `8a324a8cedeccc8ba46234924c8074890aefa1da`
+的 21 项限定普通验证已全部闭合。ordinary/race 各 5,614 PASS、7 个固定预期
+SKIP；完整 SQLite 3.54.0 oracle 为 7,246 PASS、零 SKIP；LIMIT oracle/race
+394 PASS。Darwin 两架构及 Windows 测试二进制仅编译并核对符号，未运行。
+完整身份、原始记录器失败和修正、支持域及缺口见
+[Darwin 清单专题的本次补记](darwin-unicode-inventory.md)。
+
+本文形成时的已发布父基点为 `3ea6d3ab15f678fe48bee312921da60828845869`，
+其精确 Library 恢复 17 门和 CI [38149634238](https://github.com/ms-xiaosnow/gosqlite/actions/runs/38149634238)
+已通过；只属于该父基点。本批仅同步文档，所有 813 个非 docs 且非 README
+文件与上述已验证组合逐字节/模式一致。新提交、精确恢复和 CI 要分别读取
+其实际终态，不预写自指 SHA 或未来 PASS。历史段落的“未发布”、旧 main、
+NOT_RUN、PASS/FAIL 保留各自写作时点，不能混作当前资格。
+
+原生 Darwin/Windows、实际持久性/故障/恢复、安全审查和 M10 均未验收。
+本次没有合入另行开发的原生 Unicode 手工入口、strict plaintext backup、
+WAL-tail publisher、只读明文 WAL 或 IPK 修正；相关未实现/未合入项仍分别跟踪。
+
+本批仍为 PARTIAL：仅可证无关的 UTF-8 sibling、实际枚举 owner 的限定 local APFS/HFS 门，以及批内读取诊断保留。ASCII 根/177 字节上限不变；更广文件名/文件系统和原生资格不从本次普通 PASS 推出。
+
 2026-10-11 对账：除下面明确标注的 Windows 九路径未发布源码增量外，本页保留 main 的能力分层；候选有限 PASS 不计为 main 或原生资格。当前身份见 [Windows shared-rekey 专题](windows-shared-rekey.md)。
 当前缺口、平台中断及中文自测步骤分别见
 [验收矩阵](acceptance-status.md)、[中断记录](interruption-20261010.md) 和
@@ -101,7 +123,7 @@ ignoring constraints. Full SQLite compatibility is not claimed.
 | ANN | partial | Genuine persistent HNSW and IVFFlat selected graph/list reads, snapshot rescoring, transactional maintenance/rebuild, budgets and truthful fallback. Typed HNSW half/bit/sparse and IVF half/bit; sparse IVF, IVF L1 and bit Jaccard remain unsupported. Dense v1 cross-version bytes/configuration preserved |
 | ANN performance | partial | Fixed-fixture recall and logical-work evidence; no universal recall or latency guarantee. Small-data latency may be worse than exact scan; no scan is called an ANN hit |
 | Independent encryption | partial experimental | Independent GSQLENC1 authenticated snapshot/dirty-WAL/shared layouts, KeyProvider/KDF, correct-key ordinary rekey/copy/backup/restore and plaintext import/export; not SEE format compatibility |
-| Encrypted platforms | partial | Linux, Darwin and Windows/amd64 native backends; only Linux ordinary runtime. Windows shared-mode rekey has guarded admission/conversion and post-conversion same-source-key authority checks in this unpublished composition; native Windows is NOT_RUN. Darwin ASCII basename/directory inventory limits still require Unicode work |
+| Encrypted platforms | partial | Linux, Darwin and Windows/amd64 native backends; only Linux ordinary runtime. Windows shared-mode rekey has guarded admission/conversion and post-conversion same-source-key authority checks in this unpublished composition; native Windows is NOT_RUN. Darwin 当前未发布候选保持可打印 ASCII 根名上限 177 字节及 78 字节后缀预留；有效 UTF-8 同级名称仅在根名内、Unicode/控制字节之前已有折叠 ASCII 差异，且实际枚举 owner 的 Fstatfs 确认本地 APFS 或 hfs subtype 0–3 后可略过。Unicode 父路径原已允许；一般 Unicode 根名与真实目录资格 harness 仍缺，固定源码的 Linux/amd64 精确 20 项模型/AST normal/race 已 PASS；额外编译门及原生验证仍 NOT_RUN，见[受限清单证明](darwin-unicode-inventory.md) |
 | Encryption security/recovery | unsupported qualification | Correct-key ordinary tests and descriptor-free parser/crypto/ownership laws do not prove physical tamper/wrong-key/crash/interrupted-rekey safety. Retained history, namespace/freshness and secure-deletion limits remain explicit |
 | pg_embedding migration | partial | Bounded identity-aware catalog inspector, typed offline SQL conversion, resumable mapped CSV/NDJSON import and deterministic verification reports; old Manhattan mapping is explicit |
 | PG/Neon transition | partial | Review-only retained-array, shadow-column and bounded PG16 full-table copy/swap text with mutations commented; unsupported FK/views/functions/triggers/RLS/partitions/custom-expression/collation/ACL dependencies, online/batched cutover and live execution remain open |

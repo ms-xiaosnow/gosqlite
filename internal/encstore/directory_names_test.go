@@ -88,12 +88,15 @@ func TestDarwinDirectoryMemoryASCIIInventoryPolicy(t *testing.T) {
 			t.Fatal(name, member, e)
 		}
 	}
-	for _, name := range []string{"K.gse", "K.gse.gse-" + strings.Repeat("a", 64) + ".retained", "unrelated-Ω.txt"} {
+	for _, name := range []string{"K.gse", "K.gse.gse-" + strings.Repeat("a", 64) + ".retained"} {
 		if member, e := darwinFamilyEntry(name, "k.gse"); !errors.Is(e, ErrUnsupported) || member {
 			t.Fatal("Unicode accounting alias", name, member, e)
 		}
 	}
 	if member, e := darwinFamilyEntry("unrelated.txt", "k.gse"); e != nil || member {
+		t.Fatal(member, e)
+	}
+	if member, e := darwinFamilyEntry("unrelated-Ω.txt", "k.gse"); e != nil || member {
 		t.Fatal(member, e)
 	}
 }

@@ -675,6 +675,6 @@ func encryptedWinFoldPrefix(name, prefix string) (string, bool, error) {
 	} // CSTR_EQUAL
 	return windows.UTF16ToString(n[count : len(n)-1]), true, nil
 }
-func platformFamilyEntry(name, base string) (bool, error) {
+func platformFamilyEntry(name, base string, _ *managedFile) (bool, error) {
 	return foldedFamilyEntry(name, base, encryptedWinFoldPrefix)
 }

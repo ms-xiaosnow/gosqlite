@@ -77,8 +77,41 @@ func canonicalPath(path string) (string, error) {
 	}
 	return p, nil
 }
-func platformPathInfo(path string) (os.FileInfo, error)   { return os.Lstat(path) }
-func platformFamilyEntry(name, base string) (bool, error) { return darwinFamilyEntry(name, base) }
+func platformPathInfo(path string) (os.FileInfo, error) { return os.Lstat(path) }
+func platformFamilyEntry(name, base string, dir *managedFile) (bool, error) {
+	member, err := darwinFamilyEntry(name, base)
+	if err != nil || member {
+		return member, err
+	}
+	for i := range len(name) {
+		if name[i] >= 128 {
+			// Only this newly allowed Unicode nonmember needs a filesystem proof.
+			// Inspect the actual managed enumeration descriptor, never a path or
+			// an independently opened probe. ASCII local-filesystem policy is unchanged.
+			if dir == nil {
+				return false, ErrUnsupported
+			}
+			dir.mu.Lock()
+			defer dir.mu.Unlock()
+			raw, e := dir.rawLocked()
+			if e != nil {
+				return false, e
+			}
+			if !dir.descriptor.directory {
+				return false, ErrUnsupported
+			}
+			var fs unix.Statfs_t
+			if e = unix.Fstatfs(int(raw.Fd()), &fs); e != nil {
+				return false, e
+			}
+			if !darwinUnicodeInventoryFilesystem(fs.Fstypename, fs.Fssubtype, fs.Flags&unix.MNT_LOCAL != 0) {
+				return false, ErrUnsupported
+			}
+			return false, nil
+		}
+	}
+	return false, nil
+}
 
 func validateFile(i os.FileInfo) error {
 	if !i.Mode().IsRegular() {

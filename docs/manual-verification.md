@@ -1,5 +1,27 @@
 # Manual verification and release-blocking gates
 
+## 2026-10-11 17:02 UTC 开发资格补记
+
+本次 Darwin 有界清单/诊断源码组合 `8a324a8cedeccc8ba46234924c8074890aefa1da`
+的 21 项限定普通验证已全部闭合。ordinary/race 各 5,614 PASS、7 个固定预期
+SKIP；完整 SQLite 3.54.0 oracle 为 7,246 PASS、零 SKIP；LIMIT oracle/race
+394 PASS。Darwin 两架构及 Windows 测试二进制仅编译并核对符号，未运行。
+完整身份、原始记录器失败和修正、支持域及缺口见
+[Darwin 清单专题的本次补记](darwin-unicode-inventory.md)。
+
+本文形成时的已发布父基点为 `3ea6d3ab15f678fe48bee312921da60828845869`，
+其精确 Library 恢复 17 门和 CI [38149634238](https://github.com/ms-xiaosnow/gosqlite/actions/runs/38149634238)
+已通过；只属于该父基点。本批仅同步文档，所有 813 个非 docs 且非 README
+文件与上述已验证组合逐字节/模式一致。新提交、精确恢复和 CI 要分别读取
+其实际终态，不预写自指 SHA 或未来 PASS。历史段落的“未发布”、旧 main、
+NOT_RUN、PASS/FAIL 保留各自写作时点，不能混作当前资格。
+
+原生 Darwin/Windows、实际持久性/故障/恢复、安全审查和 M10 均未验收。
+本次没有合入另行开发的原生 Unicode 手工入口、strict plaintext backup、
+WAL-tail publisher、只读明文 WAL 或 IPK 修正；相关未实现/未合入项仍分别跟踪。
+
+此补记没有执行下方任何手工命令，也不变更 tag/env 双门。现有命令块原样保留；没有现成 harness 的条目仍应先实现设施，不能借普通编译视为自测已完成。
+
 Windows shared-rekey follow-on (2026-10-11): the unpublished b0e21b81 source
 composition implements guarded Windows lifecycle admission/conversion and the
 post-conversion same-source-key authority check. Historical unsupported/code-gap
@@ -460,6 +482,17 @@ Native Darwin/Windows runtime remains NOT_RUN. Restricted failure cases remain
 BLOCKED and must not be run here or relocated. Successful-session Close, public
 DB.Close retry, driver disposal, Windows shared rekey and Darwin Unicode
 inventory are still actual required code work, separate from these manual gates.
+
+2026-10-11 当前 Darwin 补记：上段把 Unicode inventory 全部列为待写代码的
+表述属于旧检查点。当前未发布十路径候选已实现受限 Unicode 同级名称/实际枚举
+owner 的 APFS/HFS 门及六类 readErr-first 诊断，独立源码审阅满足限定要求。
+可打印 ASCII 根名 177 字节及 78 字节预留不变，Unicode 父路径原已允许；
+一般 Unicode 根名、真实 managed-directory/Unicode-sibling 资格 harness 仍为
+IMPLEMENTATION_MISSING。现有 Darwin nil-directory 测试只有 ASCII，不能覆盖
+新 Fstatfs 分支。V1 文档的未运行状态保留历史身份；固定源码的 Linux/amd64
+精确 20 项模型/源码函数 normal/race 现已各一次 PASS，额外编译门与原生
+Darwin 仍 NOT_RUN；AST 仅为结构回归辅助，详见[清单证明](darwin-unicode-inventory.md)。
+本补记不改变上面其他历史事项、任何现有命令、manual tag/env 门或物理执行限制。
 
 ## Typed ANN ordinary verification boundary
 

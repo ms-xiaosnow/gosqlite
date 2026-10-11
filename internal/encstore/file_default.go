@@ -176,7 +176,7 @@ func canonicalPath(path string) (string, error) {
 	return p, nil
 }
 func platformPathInfo(path string) (os.FileInfo, error)   { return os.Lstat(path) }
-func platformFamilyEntry(name, base string) (bool, error) { return familyEntry(name, base) }
+func platformFamilyEntry(name, base string, _ *managedFile) (bool, error) { return familyEntry(name, base) }
 func platformOperation(encryption.Operation, Mode) error  { return supported() }
 func platformPreflight(string) error                      { return supported() }
 func platformFileCheck(f *managedFile, path string, info os.FileInfo) error {

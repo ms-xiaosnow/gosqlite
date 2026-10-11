@@ -1,5 +1,27 @@
 # gosqlite 中文手工验收操作手册
 
+## 2026-10-11 17:02 UTC 开发资格补记
+
+本次 Darwin 有界清单/诊断源码组合 `8a324a8cedeccc8ba46234924c8074890aefa1da`
+的 21 项限定普通验证已全部闭合。ordinary/race 各 5,614 PASS、7 个固定预期
+SKIP；完整 SQLite 3.54.0 oracle 为 7,246 PASS、零 SKIP；LIMIT oracle/race
+394 PASS。Darwin 两架构及 Windows 测试二进制仅编译并核对符号，未运行。
+完整身份、原始记录器失败和修正、支持域及缺口见
+[Darwin 清单专题的本次补记](darwin-unicode-inventory.md)。
+
+本文形成时的已发布父基点为 `3ea6d3ab15f678fe48bee312921da60828845869`，
+其精确 Library 恢复 17 门和 CI [38149634238](https://github.com/ms-xiaosnow/gosqlite/actions/runs/38149634238)
+已通过；只属于该父基点。本批仅同步文档，所有 813 个非 docs 且非 README
+文件与上述已验证组合逐字节/模式一致。新提交、精确恢复和 CI 要分别读取
+其实际终态，不预写自指 SHA 或未来 PASS。历史段落的“未发布”、旧 main、
+NOT_RUN、PASS/FAIL 保留各自写作时点，不能混作当前资格。
+
+原生 Darwin/Windows、实际持久性/故障/恢复、安全审查和 M10 均未验收。
+本次没有合入另行开发的原生 Unicode 手工入口、strict plaintext backup、
+WAL-tail publisher、只读明文 WAL 或 IPK 修正；相关未实现/未合入项仍分别跟踪。
+
+本轮仅添加开发证据说明，原有手工命令、依赖版本、隔离副本与清理/留证步骤未改，也均未在此轮执行。请仍逐项区别 IMPLEMENTATION_MISSING、FAIL、NOT_RUN、平台阻塞及真实外部环境要求。
+
 ## 当前补记：Windows shared rekey 源码与资格分层（2026-10-11）
 
 已发布基点现为 `67318ded6416547f26d685719d3e01e208454a87`，tree
@@ -1707,3 +1729,28 @@ argv/start/end/exit/stdout/stderr、JSON 逐名核对及前后清单，计算 SH
 擦除或完整 M3/M8/M10 PASS。当前这些普通原生结果仍 **NOT_RUN**；Windows
 namespace barrier 缺失、旧 ciphertext 可解密、native WAL-tail publisher 代码缺口、
 独立 backup R1 未发布、ANN V4/受阻 41-target campaign/未知中断限制全部保留。
+
+
+## 23 Darwin 受限 Unicode 同级清单的当前源码边界
+
+2026-10-11：第 3.2 节的 776b 表及旧 V3 结果保留历史身份。当前已发布基点为
+`3ea6d3ab15f678fe48bee312921da60828845869`；新十路径源码候选 tree
+`88c400a4caeb40d8d96fae7700e7048d69db4ff5` 尚未发布。独立源码审阅已满足
+限定要求，详见[受限清单证明与身份](darwin-unicode-inventory.md)。
+
+根名仍须是最长 177 字节的可打印 ASCII，预留 78 字节生成后缀；Unicode 父路径
+原已允许。只有有效 UTF-8 同级名称在根名内部、Unicode/控制字节前已有折叠
+ASCII 差异，且实际 managed 枚举 owner 的 Fstatfs 确认本地 APFS 或 hfs subtype
+0–3，才可不作为成员。扫描配额在分类前扣计，选中成员所有权及六类读取诊断
+在前的 join 保持；只有字面 EOF 清洁终结，取消/清理约束不变。
+
+V1 文档的 18 个内存函数加 2 个源码/AST 函数 normal/race NOT_RUN 保留历史
+身份；固定源码的两条 Linux/amd64 精确 20 项现已各一次 PASS，零子项/SKIP/FAIL，
+各一个 package PASS，stderr 为空。额外编译/源码门仍 NOT_RUN，AST 只是结构
+回归辅助。初始未经核实的 system Go/新 cache 提案历史 HOLD 且未执行；固定
+工具修正版 V2 经主任务批准后只执行这两条命令一次，不扩展执行许可。原生 Darwin
+另为 NOT_RUN；现有传 nil 目录的分类测试只覆盖 ASCII，真实 managed-directory
+加 Unicode-sibling 资格 harness 为 IMPLEMENTATION_MISSING，而非只缺原生机器。
+没有为此发明选择器或新增运行命令。一般 Unicode 根名、M3/M8/M10、既有物理
+限制和所有手工 tag/env 门保持，历史 baseline FAIL、V1/V2 HOLD 与 V3 旧树结果
+不转为当前 PASS。

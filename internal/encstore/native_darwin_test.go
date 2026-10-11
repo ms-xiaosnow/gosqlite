@@ -169,12 +169,12 @@ func TestDarwinEncryptedPathPolicyMemory(t *testing.T) {
 		}
 	}
 	for _, name := range []string{"FAMILY.GSE", "FAMILY.GSE.gse-lock", "FAMILY.GSE.gse-" + strings.Repeat("a", 64) + ".retained"} {
-		ok, e := platformFamilyEntry(name, "family.gse")
+		ok, e := platformFamilyEntry(name, "family.gse", nil)
 		if e != nil || !ok {
 			t.Fatal(name, ok, e)
 		}
 	}
-	if _, e := platformFamilyEntry("FAMILY.GSE.gse-"+strings.Repeat("A", 64)+".retained", "family.gse"); !errors.Is(e, ErrUnsupported) {
+	if _, e := platformFamilyEntry("FAMILY.GSE.gse-"+strings.Repeat("A", 64)+".retained", "family.gse", nil); !errors.Is(e, ErrUnsupported) {
 		t.Fatal("noncanonical ID suffix", e)
 	}
 }

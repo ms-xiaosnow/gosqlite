@@ -1,5 +1,27 @@
 # Experimental encrypted snapshot and WAL storage
 
+## 2026-10-11 17:02 UTC 开发资格补记
+
+本次 Darwin 有界清单/诊断源码组合 `8a324a8cedeccc8ba46234924c8074890aefa1da`
+的 21 项限定普通验证已全部闭合。ordinary/race 各 5,614 PASS、7 个固定预期
+SKIP；完整 SQLite 3.54.0 oracle 为 7,246 PASS、零 SKIP；LIMIT oracle/race
+394 PASS。Darwin 两架构及 Windows 测试二进制仅编译并核对符号，未运行。
+完整身份、原始记录器失败和修正、支持域及缺口见
+[Darwin 清单专题的本次补记](darwin-unicode-inventory.md)。
+
+本文形成时的已发布父基点为 `3ea6d3ab15f678fe48bee312921da60828845869`，
+其精确 Library 恢复 17 门和 CI [38149634238](https://github.com/ms-xiaosnow/gosqlite/actions/runs/38149634238)
+已通过；只属于该父基点。本批仅同步文档，所有 813 个非 docs 且非 README
+文件与上述已验证组合逐字节/模式一致。新提交、精确恢复和 CI 要分别读取
+其实际终态，不预写自指 SHA 或未来 PASS。历史段落的“未发布”、旧 main、
+NOT_RUN、PASS/FAIL 保留各自写作时点，不能混作当前资格。
+
+原生 Darwin/Windows、实际持久性/故障/恢复、安全审查和 M10 均未验收。
+本次没有合入另行开发的原生 Unicode 手工入口、strict plaintext backup、
+WAL-tail publisher、只读明文 WAL 或 IPK 修正；相关未实现/未合入项仍分别跟踪。
+
+加密格式、密钥代际、发布/恢复协议和威胁边界未因这批清单修正扩大。源码/普通执行与原生密码学、掉电安全、法律审查须保持分层。
+
 The **M8c slice** adds explicit shared-reader/single-writer coordination to
 immutable authenticated dirty-page WAL segments and existing snapshot storage.
 Explicitly setting `sqlite.Options.Encryption`
@@ -12,8 +34,14 @@ supported; `EncryptionWAL` explicitly selects lifetime-exclusive layout 2.
 
 The implementation is experimental. Linux has ordinary-path runtime evidence;
 Windows/amd64 now has a bounded native implementation with compile-only evidence,
-and Darwin now has a shared plain/encrypted inode coordinator with compile-only
-evidence and strict ASCII inventory limits. Windows shared-mode rekey now has
+且 Darwin 共享明文/加密 inode coordinator 的编译证据保留原历史范围。
+当前未发布候选仍限制根名为最长 177 字节的可打印 ASCII，预留 78 字节后缀；
+Unicode 父路径原已允许。仅对根名内先于 Unicode/控制字节的折叠 ASCII 差异，
+加实际枚举 owner 的本地 APFS 或 hfs subtype 0–3 检查，缩小无关同级名称限制；
+当前源码审阅已满足限定要求；固定源码的 Linux/amd64 精确 20 项模型/AST
+normal/race 已 PASS，额外编译门/原生验证仍 NOT_RUN。
+
+Windows shared-mode rekey now has
 guarded admission/conversion source with a post-conversion same-source-key authority
 check in this unpublished composition; native Windows execution remains NOT_RUN. See [native encrypted Windows support](native-encrypted-windows.md)
 for the precise matrix and no-directory-barrier policy. It is an independent
@@ -480,6 +508,11 @@ entries are also reserved, including the new family's stable-lock entry.
 Owned filename classes, regular-file/single-link conditions and context are
 checked; unknown family names are refused.
 
+当前 Darwin 候选仍在分类前计数并检查扫描配额；可证明无关的 Unicode 同级名称
+不打开、不计对象字节，选中成员保持 checked namespace、owned Close 和大小计费。
+部分 ReadDir 批次的六类失败保留读取诊断在前，只有字面 io.EOF 正常终结；
+取消时机与有界 owner 清理限制不变，详见[清单证明](darwin-unicode-inventory.md)。
+
 `MaxDirectoryEntries` is a **scan-work guard, not an inode quota**. Unrelated
 directory names count toward it, and concurrent additions can cause refusal.
 Known publication additions are reserved, but this does not enforce an OS inode
@@ -525,8 +558,13 @@ publication/rekey workflows have **not** been executed or accepted for this
 checkpoint. They must not be run here or relocated to CI/another executor.
 Memory-only malformed-input tests do not qualify these disk/recovery behaviors.
 The shared slice adds simultaneous intact-file readers/writer, operation-pinned
-copies, stale promotion, quiescent rekey and combined-resource tests. Darwin/Windows encrypted coordination has source/compile evidence only; Darwin
-Unicode inventory remains an implementation gap. Windows shared-mode rekey has
+copies, stale promotion, quiescent rekey and combined-resource tests. Darwin/Windows encrypted coordination has source/compile evidence only; Darwin 的受限 Unicode 同级名称
+清单/诊断修正在当前未发布候选中已有源码；一般 Unicode 根名与真实 managed-directory/
+Unicode-sibling 资格 harness 仍为 IMPLEMENTATION_MISSING，原生执行另记 NOT_RUN，
+固定源码的精确 20 项模型/源码 normal/race 已各一次 PASS，不是完整套件、
+原生或含文档组合的编译/CI 资格；V1 文档的未运行记录保持历史身份。
+
+Windows shared-mode rekey has
 bounded source implementation, but native admission/conversion, mixed-old-client
 behavior and failure/durability qualification remain open. Independent
 security review and full release qualification remain outstanding.

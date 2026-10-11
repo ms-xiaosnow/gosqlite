@@ -142,12 +142,12 @@ func TestWindowsEncryptedPathPolicyMemory(t *testing.T) {
 	}
 	id := strings.Repeat("a", 64)
 	for _, name := range []string{"ORDINARY Ω.GSE", "ORDINARY Ω.GSE.GSE-LOCK", "ORDINARY Ω.GSE.GSE-" + id + ".base"} {
-		member, err := platformFamilyEntry(name, "ordinary ω.gse")
+		member, err := platformFamilyEntry(name, "ordinary ω.gse", nil)
 		if err != nil || !member {
 			t.Fatal("native ordinal family prefix", name, err)
 		}
 	}
-	if _, err := platformFamilyEntry("ORDINARY Ω.GSE.GSE-"+id+".BASE", "ordinary ω.gse"); !errors.Is(err, ErrUnsupported) {
+	if _, err := platformFamilyEntry("ORDINARY Ω.GSE.GSE-"+id+".BASE", "ordinary ω.gse", nil); !errors.Is(err, ErrUnsupported) {
 		t.Fatal("noncanonical family suffix", err)
 	}
 

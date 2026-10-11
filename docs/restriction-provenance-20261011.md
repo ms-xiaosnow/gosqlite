@@ -1,5 +1,27 @@
 # 源码开发与受限执行的证据分类
 
+## 2026-10-11 17:02 UTC 开发资格补记
+
+本次 Darwin 有界清单/诊断源码组合 `8a324a8cedeccc8ba46234924c8074890aefa1da`
+的 21 项限定普通验证已全部闭合。ordinary/race 各 5,614 PASS、7 个固定预期
+SKIP；完整 SQLite 3.54.0 oracle 为 7,246 PASS、零 SKIP；LIMIT oracle/race
+394 PASS。Darwin 两架构及 Windows 测试二进制仅编译并核对符号，未运行。
+完整身份、原始记录器失败和修正、支持域及缺口见
+[Darwin 清单专题的本次补记](darwin-unicode-inventory.md)。
+
+本文形成时的已发布父基点为 `3ea6d3ab15f678fe48bee312921da60828845869`，
+其精确 Library 恢复 17 门和 CI [38149634238](https://github.com/ms-xiaosnow/gosqlite/actions/runs/38149634238)
+已通过；只属于该父基点。本批仅同步文档，所有 813 个非 docs 且非 README
+文件与上述已验证组合逐字节/模式一致。新提交、精确恢复和 CI 要分别读取
+其实际终态，不预写自指 SHA 或未来 PASS。历史段落的“未发布”、旧 main、
+NOT_RUN、PASS/FAIL 保留各自写作时点，不能混作当前资格。
+
+原生 Darwin/Windows、实际持久性/故障/恢复、安全审查和 M10 均未验收。
+本次没有合入另行开发的原生 Unicode 手工入口、strict plaintext backup、
+WAL-tail publisher、只读明文 WAL 或 IPK 修正；相关未实现/未合入项仍分别跟踪。
+
+本次 gate17 是记录器把含空格 Go 泛型符号误当畸形行的工程 FAIL，nm 本身 exit0；原记录不改，纯解析重核后只续未执行18–21，无 Go 重跑。另一个 continuation 草稿漏 helper 在启动前发现，0 Go。它们不是平台安全拒绝，也不解除其他已确认受阻链路。
+
 ## 当前补记：Windows shared rekey 源码与资格分层（2026-10-11）
 
 已发布基点现为 `67318ded6416547f26d685719d3e01e208454a87`，tree
@@ -134,7 +156,7 @@ manual harness 源码/编译资格更新；OS namespace 行保留六路径门控
 |---|---|---|---|
 | 已支持 SQL 的 planner/阶段/排序正确性 | V4c 与 main 新 grouped/counter/preparation 尚需精确 hunk 组合；涉及 CAST/IPK、LEFT-ON/WHERE、排序、绑定/执行阶段，不能写成只缺测试机 | 没有找到 planner 专属测试拒绝；本次只选择下节 LIMIT 转换，不恢复整棵旧候选 | `planner-parity-independent-review-v4c/REVIEW.md:3–7,47–56,77–79`；`planner-parity-close-v4c-evidence/HANDOFF.md:12–29,109–115`。旧 full patch 37路径；tree `552286a4985b1d9f339d8f59756b4eb2cad7071a` |
 | Windows shared encrypted rekey | main `internal/encstore/platform_windows.go:81–87` 仍拒绝；候选 guarded lifecycle/authority 检查待按 hunk 集成，不复制整个 a314 | native Windows、namespace、错误密钥/篡改、I/O 故障、中断 rekey 均未资格验收 | `windows-shared-rekey-independent-review-v1/review.md:5–7,28–56,74–94`；候选 tree `7ede866de6a99f5390bc2f912e2e54f7d8c586d0` |
-| Darwin V3 名称与诊断 | 受限 Unicode sibling admission、managed apfs/hfs gate、inventory 诊断保存未合入；不等于任意 Unicode root 支持 | 原生 OS、namespace 和故障场景 NOT_RUN | `darwin-unicode-independent-review-v3/REVIEW.md:5–20,30–54,88–90`；tree `62051a4f338d2e3de249694079b742ebab70c19a`。V1/V2 工程 HOLD 保留 |
+| Darwin V3 名称与诊断 | 旧 V3 尚未合入的历史记录保留；当前十路径候选 tree `88c400a4caeb40d8d96fae7700e7048d69db4ff5` 的受限 sibling/managed APFS/HFS 门及诊断修正已满足独立源码审阅，尚未发布；一般 Unicode 根名未实现，真实目录 Unicode-sibling harness 为 IMPLEMENTATION_MISSING | V1 文档 NOT_RUN 保留历史身份；固定源码的 Linux/amd64 精确 20 项模型/源码 normal/race 各一次 PASS，额外编译门、原生 OS、namespace、故障验证仍 NOT_RUN；文档不授予新增执行许可 | 历史 `darwin-unicode-independent-review-v3/REVIEW.md:5–20,30–54,88–90` 与 tree `62051a4f338d2e3de249694079b742ebab70c19a` 保持；baseline FAIL、V1 全本地卷 HOLD、V2 丢诊断 HOLD 不覆盖，当前身份与限制见[清单证明](darwin-unicode-inventory.md) |
 | OS raw namespace 测试隔离 | 本批六路径已把两个完整函数移入 exact manual_namespace/env gate，并只追加 Rename/rename selectors；当前 public-recovery guard 保持 | 两项原生物理执行仍 BLOCKED / NOT_RUN；不直接启用 Windows/macOS 全套或新 runner | 新候选 tree `01918609a55cc149c5155451da40f7389854db06` 的 owner/独立 source/model/race、188 选择及六项编译/符号 PASS；旧 native-scope 报告仅作来源，见第八节与[中文第 19 节](manual-verification-zh.md#19-os-raw-namespace-门控与独立原生验收2026-10-11)。源码门控不是运行许可 |
 | 更广 Darwin Unicode root | 已有设计提案未实现/未接受；应按必要支持范围单独决策，不能虚构任意无限文件名为强制门槛 | 涉及的原生名称资格另行界定 | `darwin-unicode-sibling-evidence-v2/UNICODE-ROOT-DESIGN-NOT-IMPLEMENTED.md:1–4,60–65` |
 | 分期 SQL/文件格式 | UNIQUE/CHECK/FK、CTE/UPSERT/view/trigger/window/JSON/FTS5/ATTACH 等按实际矩阵 PARTIAL/未实现；UTF-16/WITHOUT ROWID/autovacuum 按支持范围 fail closed | 没有找到这些编辑的原始拒绝；不能凭普通测试许可启动任意新功能 | goal §4.2；[兼容矩阵](compatibility.md)。分期状态不能豁免已声明支持域的正确性，也不能用新增语法替代基础恢复义务 |

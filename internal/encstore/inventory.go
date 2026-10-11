@@ -67,6 +67,21 @@ func charge(total, amount, maximum uint64) (uint64, error) {
 	return total + amount, nil
 }
 
+// inventoryBatchError preserves a ReadDir diagnostic that accompanied entries
+// when processing one of those entries also fails. Only the literal io.EOF
+// sentinel is clean completion; wrapped/joined EOF can carry other diagnostics.
+// Keep the original error nodes in read-then-entry order, without matching,
+// flattening, formatting or deduplicating an arbitrary error graph.
+func inventoryBatchError(readErr, entryErr error) error {
+	if readErr == nil || readErr == io.EOF {
+		return entryErr
+	}
+	if entryErr == nil {
+		return readErr
+	}
+	return errors.Join(readErr, entryErr)
+}
+
 // inventory uses a bounded batched directory scan and charges every physical
 // family object, including unreferenced candidates from previous attempts.
 // Unknown family names, links, symlinks and nonregular entries fail closed.
@@ -110,40 +125,40 @@ func inventory(ctx context.Context, path string, maxBytes uint64, maxEntries uin
 		if remain := uint64(maxEntries) - uint64(scanned) + 1; remain < 64 {
 			n = int(remain)
 		}
-		batch, e := f.ReadDir(n)
+		batch, readErr := f.ReadDir(n)
 		for _, entry := range batch {
 			scanned++
 			if scanned > maxEntries {
-				return 0, encryption.ErrLimit
+				return 0, inventoryBatchError(readErr, encryption.ErrLimit)
 			}
-			member, e := platformFamilyEntry(entry.Name(), base)
+			member, e := platformFamilyEntry(entry.Name(), base, f)
 			if e != nil {
-				return 0, e
+				return 0, inventoryBatchError(readErr, e)
 			}
 			if !member {
 				continue
 			}
 			obj, info, e := ns.checked(filepath.Join(dir, entry.Name()), os.O_RDONLY)
 			if e != nil {
-				return 0, e
+				return 0, inventoryBatchError(readErr, e)
 			}
 			e = obj.Close()
 			if e != nil {
-				return 0, e
+				return 0, inventoryBatchError(readErr, e)
 			}
 			if info.Size() < 0 {
-				return 0, encryption.ErrFormat
+				return 0, inventoryBatchError(readErr, encryption.ErrFormat)
 			}
 			total, e = charge(total, uint64(info.Size()), maxBytes)
 			if e != nil {
-				return 0, e
+				return 0, inventoryBatchError(readErr, e)
 			}
 		}
-		if e == io.EOF {
+		if readErr == io.EOF {
 			break
 		}
-		if e != nil {
-			return 0, e
+		if readErr != nil {
+			return 0, readErr
 		}
 	}
 	// Revalidate the scanned directory with the platform's managed identity

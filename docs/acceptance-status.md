@@ -1,5 +1,27 @@
 # 当前实现与验收矩阵
 
+## 2026-10-11 17:02 UTC 开发资格补记
+
+本次 Darwin 有界清单/诊断源码组合 `8a324a8cedeccc8ba46234924c8074890aefa1da`
+的 21 项限定普通验证已全部闭合。ordinary/race 各 5,614 PASS、7 个固定预期
+SKIP；完整 SQLite 3.54.0 oracle 为 7,246 PASS、零 SKIP；LIMIT oracle/race
+394 PASS。Darwin 两架构及 Windows 测试二进制仅编译并核对符号，未运行。
+完整身份、原始记录器失败和修正、支持域及缺口见
+[Darwin 清单专题的本次补记](darwin-unicode-inventory.md)。
+
+本文形成时的已发布父基点为 `3ea6d3ab15f678fe48bee312921da60828845869`，
+其精确 Library 恢复 17 门和 CI [38149634238](https://github.com/ms-xiaosnow/gosqlite/actions/runs/38149634238)
+已通过；只属于该父基点。本批仅同步文档，所有 813 个非 docs 且非 README
+文件与上述已验证组合逐字节/模式一致。新提交、精确恢复和 CI 要分别读取
+其实际终态，不预写自指 SHA 或未来 PASS。历史段落的“未发布”、旧 main、
+NOT_RUN、PASS/FAIL 保留各自写作时点，不能混作当前资格。
+
+原生 Darwin/Windows、实际持久性/故障/恢复、安全审查和 M10 均未验收。
+本次没有合入另行开发的原生 Unicode 手工入口、strict plaintext backup、
+WAL-tail publisher、只读明文 WAL 或 IPK 修正；相关未实现/未合入项仍分别跟踪。
+
+分类更新：Darwin 有界名称/ReadDir 诊断代码取得上述限定普通与编译资格；原生平台仍 NOT_RUN。真实只读 WAL、通用备份/更多 journal、完整物理 harness、支持域 SQL 差异以及受阻 ANN V4 等代码义务仍开放。整体继续 M9 范围实现，M3/M8/M10 未完整验收。
+
 ## 当前补记：Windows shared rekey 源码与资格分层（2026-10-11）
 
 已发布基点现为 `67318ded6416547f26d685719d3e01e208454a87`，tree
@@ -132,7 +154,7 @@ API、预算、诊断兼容边界与精确 source/model 命令见
 | §12.1、§14 | 四项 CLI/示例资源修正与五例目录终结/输出错误修正已完成，各自取得限定独立审阅与普通证据 | `限定修正 PASS，完整验收未完成`：sparse 状态、readonly 显式只读、write/query 关闭错误及五例目录终结已有证据。实际失败进程/原生关闭失败/真实失败目录保留未执行；WAL 原 t.TempDir 清理和清除进程密钥不允许推断失败现场完整或可解密 |
 | §9.2(2/5) | caller-dataset 范数、完整精确距离与 Top-K v2 已合入；高维 v1 失败保留，v2 有有理数参考验证 | `PARTIAL`：ANN caller-dataset recall 及真实 PG/Neon 验证单列；精确距离不能替代 ANN |
 | §5.2、§7.2、§11.3 | NFC 组合语料、真实 grams build/空间/P50/P95 工具和普通事务 V4 已合入 | `FAIL/待集成/部署HOLD分列`：ANN 报告 V3 三类实质准入缺陷未修，V4 链路禁重试。性能报告 V3 限定源码审阅通过但未合入；自动性能 CI 部署另受操作许可限制。没有可采信测量不得宣称完整基准通过 |
-| §8、§11.3、§12.3 | Linux/Darwin/Windows 有受支持 backend 源码，只有 Linux 普通运行证据 | `PARTIAL`：main Windows shared rekey 及 Darwin 名称配置受限；修正版在未发布 `a314028…` 组合。更广 Unicode root 支持未实现，但不能虚构为规范要求任意无限名字。保留目录 VFS 未冻结/整合 |
+| §8、§11.3、§12.3 | Linux/Darwin/Windows 有受支持 backend 源码，只有 Linux 普通运行证据 | `PARTIAL`：main Windows shared rekey 及 Darwin 名称配置受限；修正版在未发布 `a314028…` 组合。Darwin 部分由下述当前补记接续：受限 Unicode sibling/诊断修正已获限定源码审阅，尚未发布；固定源码的 Linux/amd64 精确 20 项模型/AST normal/race PASS；额外编译门/原生验证仍 NOT_RUN，真实目录 Unicode-sibling harness 为 IMPLEMENTATION_MISSING。更广 Unicode root 支持未实现，但不能虚构为规范要求任意无限名字。保留目录 VFS 未冻结/整合 |
 | G1、§4.2 | 明确的 phased SQL/格式矩阵 | UNIQUE/CHECK/FK、CTE/UPSERT/view/trigger/window/JSON/FTS5/ATTACH 等和 UTF-16/WITHOUT ROWID/autovacuum 未实现；保留分期状态，优先现有支持域正确性 |
 | §11.1、M3/M8/M10 | 有限手工 replay/namespace 测试源已存在 | 完整故障点、断电、短写/Sync、ENOSPC、错位/torn write、checkpoint/rekey 中断的 harness 仍有源码缺口；不能全部称为已有命令只待运行 |
 | §11.3、§12.3、M10 | 来源、许可、威胁模型、格式说明和示例已有 | 稳定 API、完整格式升级/回滚矩阵、独立数据安全/密码学/法律审查与稳定版判断均未闭合 |
@@ -334,3 +356,22 @@ Windows 候选 `5d1e457eed1e01b3705c0650c7aa9e42efa96559` 的限定模型/AST
 normal/race 及单项 Linux 正确密钥 shared-rekey normal/race 有独立 PASS，仍未
 发布、不属于本批组合，也不提升 Windows 原生资格。原始报告和归档见
 [分层证据](evidence/startup-wal-limit-20261011.md)。
+
+
+## 2026-10-11 Darwin 当前源码与九文档补记
+
+已发布基点 `3ea6d3ab15f678fe48bee312921da60828845869` 的 tree 为
+`f6edabfba3e004a0e7874441b8c0a3e38cf099c6`。当前十路径源码候选 tree
+`88c400a4caeb40d8d96fae7700e7048d69db4ff5` 获限定独立源码审阅，报告
+`darwin-current-composed-independent-review-v1/REPORT.md` 的 SHA-256 为
+`ec90e774280c6669a44911ed5bebcf646f757dbc7c54d4c0d675f1fa6e96e134`。
+该结论不等于 main 已含此修正，含本补记的九文档组合还需独立文档审阅。
+
+[清单证明](darwin-unicode-inventory.md) 只覆盖可打印 ASCII 根名内的前导差异
+及实际枚举 owner 的本地 APFS/hfs subtype 0–3 门，177 字节根名与 78 字节后缀
+预留不变。V1 文档的 NOT_RUN 记录保持历史身份；固定源码的 Linux/amd64 精确
+20 项模型/源码 normal/race 已各一次 PASS，额外编译门和原生验证仍 NOT_RUN；
+一般 Unicode 根名与真实 managed-directory/Unicode-sibling 资格 harness 仍为
+IMPLEMENTATION_MISSING。AST 不构成控制流证明，现有 ASCII/nil-directory 原生
+测试不能覆盖新门。历史 V3、Windows b0e 本地 17 门及新基点 CI 各属其精确身份，
+不授予当前 Darwin PASS。M3/M8/M10、安全/恢复/生产验收和既有物理限制保持开放。
