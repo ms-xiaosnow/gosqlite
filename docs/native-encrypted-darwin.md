@@ -4,6 +4,10 @@ Date: 2026-10-10. Targets: Darwin/arm64 and Darwin/amd64, CGO disabled.
 **Native runtime execution is NOT_RUN.** This source/compile checkpoint does
 not qualify M3, M8, M10, security, interoperability or physical durability.
 
+Windows comparison updated 2026-10-11: only the Windows rekey comparison below
+is superseded. Other source/compile statements retain this Darwin checkpoint's
+original scope; no Darwin backend or native execution is added by this update.
+
 ## Capability and remaining work
 
 | Capability | Implementation | Evidence boundary |
@@ -17,7 +21,7 @@ not qualify M3, M8, M10, security, interoperability or physical durability.
 | Directory contents for inventory | Every enumerated name must be ASCII, including unrelated siblings | Explicit additional temporary capability restriction |
 | Unicode target basenames | **Required implementation gap** | Apple filesystem Unicode equivalence/accounting not implemented; Unicode parent paths are allowed |
 | Sync | fsync for regular files and directories | No F_FULLFSYNC/device-cache or power-loss qualification |
-| Windows shared-mode rekey | **Required implementation gap, unchanged** | Darwin implementation supplies no Windows atomic conversion |
+| Windows shared-mode rekey comparison | Guarded conversion source now exists in the separate Windows composition | It is not atomic POSIX conversion; post-conversion same-source-key authority check is required; native Windows remains NOT_RUN |
 
 Modes `Snapshot=0`, `WAL=1`, `WALShared=2`, authenticated layouts 1/2/3,
 coordination protocol 1, KDF/record framing, content commitments and archives
@@ -103,8 +107,10 @@ without an unlock gap. A contended upgrade preserves the old shared hold.
 Unexpected acquisition/release errors poison the inode rather than being
 reported as safely retryable BUSY. Cleanup releases capture, writer, then
 lifecycle; partially successful cleanup retains every remaining exact hold.
-Windows still refuses shared-mode rekey because its separate LockFileEx backend
-does not provide the same atomic conversion.
+Windows uses a separate guarded admission/conversion protocol with a real gap,
+not this atomic POSIX conversion. Its post-conversion same-source-key authority
+check is documented in [the Windows protocol](windows-shared-rekey.md); native
+Windows remains NOT_RUN. This comparison does not change Darwin backend code.
 
 ## Namespace, identity and lifetime
 

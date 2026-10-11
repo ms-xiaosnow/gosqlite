@@ -1,5 +1,26 @@
 # 源码开发与受限执行的证据分类
 
+## 当前补记：Windows shared rekey 源码与资格分层（2026-10-11）
+
+已发布基点现为 `67318ded6416547f26d685719d3e01e208454a87`，tree
+`1452ea832a41bdb8214bffd98fdb1b4d4fc37757`；其精确 Library 恢复两 quick +
+全 15 门 PASS，原有 CI [38141275294](https://github.com/ms-xiaosnow/gosqlite/actions/runs/38141275294)
+及 ordinary `114475481426` / oracle `114475481239` 均 SUCCESS。这些结果只属于
+67318ded，不能移给新候选。下文 startup / WAL / LIMIT 的 12:31 摘要、旧失败、
+旧 `main 仍为 b349` 和各历史表保留原时点，不代表这里的新发布状态。
+
+本工作副本基于 Windows 九路径源码 tree
+`b0e21b81b6eee598124171ec2fb7f4c6df77751a`，实现 guarded admission/conversion
+及转换后同一源密钥的精确 authority 检查；尚未发布。该源码的四条限定 normal
+为 30/1/1/1 路径 PASS；另一次 CLI normal 为 root/snapshot/wal/shared 四路径 PASS。
+该 b0e 代码树的完整 17 门已于 14:42 UTC 自然 PASS：ordinary/race 各 5,602
+PASS + 七个固定 oracle SKIP，完整 oracle 7,234 PASS/零测试 SKIP，LIMIT oracle
+race 394 PASS；五目标 build 与 Windows test-compile/nm 均通过，PE 未运行。
+这些新执行只资格到 b0e 代码树；含本文档的新组合、新提交恢复和候选 CI 尚未发生。
+本次文档同步不运行项目代码。协议、来源、当前资格和剩余门见
+[Windows shared-rekey 专题](windows-shared-rekey.md)；原生 Windows 仍 **NOT_RUN**。
+
+
 ## 最新状态：startup / WAL / LIMIT / 示例（2026-10-11）
 
 已闭合的发布基点是 `b3492ed822d59834e5159cb7964c9dbd937027f7`，tree
@@ -325,3 +346,29 @@ backup 六条有限模型/AST PASS 不等于六个 native 场景已迁移或执�
 该有限资格不补齐 native WAL-tail publisher，不证明物理持久性、外平台原生、
 加密安全或完整 M10；backup 与 Windows 未发布切片没有混入。没有新提交或
 新 CI。原受限操作、ANN V4、受阻 campaign 和未知中断链路仍保持原有边界。
+
+## 十四 Windows 九路径的有限新范围，不恢复旧受阻链路
+
+全仓只读审计以 67318ded 发布基点和 b0e21b81 九路径候选为准，明确成功 shared
+rekey 的两条既有入口是 SQLite quiescent test 与 CLI correct-key shared 子项，
+另加新的 latest-head 根。Windows 的新 admission 则影响所有初始 encrypted
+lifecycle 获取。原两包报告的“唯一既有 Linux caller”只适用于其两包范围，不能
+扩大成全仓断言。所有 public/CLI/helpers/driver/examples、manual gates、startup
+初始化与 CI 选择已做静态范围审查，新的有限 Linux 完整资格不再凭“自动 CI 有
+未知新增 held closure”笼统阻断；范围审查不是运行或发布许可。
+
+随后四条 normal 和单独 CLI normal 已有各自 b0e 真实 PASS；另按精确批准范围
+运行的 17 门于 14:42 UTC 自然全部 PASS，脚本展开共 19 次显式 Go 调用，Windows
+PE 只编译和读取符号。主机 nm 的官方按需 bootstrap 与记录器中间占位字段见
+[终态边界](windows-shared-rekey.md#terminal-seventeen-gate-code-qualification)。
+源码未扩选/重试，本文档未运行项目。这里的源码/文档许可与限定普通资格，不是对原生
+Windows/Darwin、mixed-old-binary、物理错误/恢复/namespace/中断 rekey 的解限。
+原四类别溯源、找不到精确拒绝不等于从未拒绝、原未知中断的不能归因均保持。
+ANN V4、受阻 41-target campaign 和未知链路没有被重发、换名、拆小或迁移 CI。
+
+当前源实现和原生未验收须分开：[Windows 专题](windows-shared-rekey.md)列准确
+源码及结果；[中文第 22 节](manual-verification-zh.md#22-windows-shared-rekey-原生普通路径独立规程)
+只给现有三个普通 native 入口的未来独立用户规程，全部 NOT_RUN。没有完整
+mixed-version/fault/中断 rekey harness 的项仍是实现缺口，Windows directory Sync
+也没有新增 namespace barrier。native WAL-tail publisher 与未发布 backup R1
+不属于 Windows 切片，不能改称只差机器或已经完成。

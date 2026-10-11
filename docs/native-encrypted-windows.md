@@ -1,9 +1,12 @@
 # Native encrypted storage on Windows: bounded implementation
 
-Date: 2026-10-10. Target: Windows/amd64, Windows 10 1709 or later, local fixed
+Source update: 2026-10-11. Target: Windows/amd64, Windows 10 1709 or later, local fixed
 NTFS, CGO disabled. **Native execution is NOT_RUN.** This implementation is
 experimental and does not qualify M8, M3, M10, security or physical durability.
-Darwin encrypted storage is still a missing implementation, not an unrun test.
+Darwin has a separate bounded implementation with native runtime NOT_RUN; its
+ASCII inventory/Unicode work is not changed by this Windows composition. This
+page describes unpublished source based on b0e21b81; exact identities and separate
+results are in [the shared-rekey record](windows-shared-rekey.md).
 
 ## Capability and missing implementation matrix
 
@@ -13,9 +16,9 @@ Darwin encrypted storage is still a missing implementation, not an unrun test.
 | Windows/amd64 modes 0 and 1 | Native handles, stable lifecycle locks, handle-relative publication | Cross-build/compile-only tests; native runtime NOT_RUN |
 | Windows/amd64 mode 2 reads, writer, refresh, checkpoint | Native exact byte-0/1/2 locking and immutable-selection publication | Cross-build/compile-only tests; native runtime NOT_RUN |
 | Windows legacy-to-shared explicit upgrade | Exclusive lifecycle retained through publication, then shared-over-exclusive downgrade | Source and memory-model evidence; native runtime NOT_RUN |
-| Windows mode-2 rekey | **Unsupported implementation gap** | Refused before target provider acquisition and before writer reservation; no unlock/relock substitute |
+| Windows mode-2 rekey | Guarded admission/conversion plus post-conversion exact source-authority check | Implemented source; portable laws/source-AST and separate Linux ordinary checks; native Windows NOT_RUN |
 | Windows encrypted archive, restore, explicit plaintext copy helpers | Managed handle and retained-directory lifetime paths | Compiled only on Windows; inherited ordinary Linux API regressions pass |
-| Darwin encrypted storage | **Unsupported implementation gap** | Needs a coordinated inode owner covering every encrypted descriptor and plain-VFS alias, deferred close, namespace and publication primitives |
+| Darwin encrypted storage | Separate bounded shared plain/encrypted inode owner and namespace implementation | Native runtime NOT_RUN; existing ASCII inventory and Unicode gap remain |
 | Other OSes and Windows architectures | Explicit unsupported backend | Cross-building a stub is not native storage support |
 | Windows directory namespace barrier | **Not supplied** | Directory Sync performs no flush; successful publication does not establish Unix-style namespace persistence |
 
@@ -92,13 +95,37 @@ is unresolved, both successful records remain represented and the owner is
 poisoned. Cleanup drains capture, writer, then lifecycle; it preserves every
 unreleased record and the actual handle on partial failure.
 
-The reverse conversion is not available: exclusive cannot overlap shared.
-Dropping shared and reacquiring exclusive would violate the existing protocol
-and permit a legacy lifecycle owner to enter. Shared-mode rekey is therefore
-explicitly unsupported on Windows. `Prepare` rejects it before filesystem
-preflight or provider acquisition, and `BeginMaintenance` rejects it before
-writer reservation. No new protocol byte, hidden exclusive-session fallback,
-process mutex or weakened rekey claim is introduced.
+Exclusive cannot overlap shared on the same handle. A direct ledger upgrade is
+still refused without dropping protection, but shared rekey now uses the separate
+bounded protocol in [lifecycle_windows_protocol.go](../internal/encstore/lifecycle_windows_protocol.go):
+
+1. Every updated initial lifecycle opener, including read-only/shared and legacy
+   modes, takes exclusive capture byte 2, acquires byte 0, then releases capture.
+2. Upgrade requires shared byte 0, exclusive writer byte 1 and no capture hold.
+   It takes capture, releases shared byte 0, tries exclusive byte 0 once, and
+   releases capture on success. This is a real gap, not atomic LockFileEx upgrade.
+3. An ordinary exclusive-acquisition BUSY restores shared byte 0 before releasing
+   capture and returning ordinary BUSY. Failed restoration (including BUSY),
+   unexpected native result or failed release poisons the owner and retains the
+   remaining exact protectors. A joined BUSY/poison is not a retryable BUSY.
+4. Older binaries can ignore admission. After conversion, `BeginMaintenance`
+   therefore takes capture again and checks the pinned directory/lock identity,
+   authenticates the current named root using the retained source master/options,
+   compares its exact bytes with the pre-gap refreshed selection, and checks
+   handle/name identity. Refusal joins gate release and `EndMaintenance(false)`.
+   No source-provider reacquisition or different post-gap graph adoption occurs.
+
+The writer reservation and latest-head refresh precede conversion. The authority
+check precedes copy budgeting, full-source verification, logical validation and
+publication. Existing publisher checks and rename-attempt uncertainty remain.
+The common authority check also applies to successful shared rekey on Linux and
+Darwin; their platform backend source is unchanged. Target credential preparation
+is the existing earlier step, not a source credential refresh after the gap.
+
+No new protocol byte, persistent format, hidden exclusive-session fallback,
+process mutex or retry loop is introduced. This source implementation does not
+establish actual mixed-old-binary or native Windows safety. See the
+[protocol and evidence boundary](windows-shared-rekey.md).
 
 ## Real resource lifetime
 
@@ -147,8 +174,9 @@ physical durability, hostile filesystem behavior and recovery remain unaccepted.
 
 ## Verification and sources
 
-`docs/evidence/native-encrypted-windows-components.txt` records exact commands,
-results and the source freeze. Five target-only tests compile:
+[The original component evidence](evidence/native-encrypted-windows-components.txt)
+records its historical commands/results and source freeze. At that old checkpoint,
+the five target-only names were:
 
 - `TestWindowsEncryptedExactLocksAndProbeLifetime`
 - `TestWindowsEncryptedRelativePublicationAndRetainedRoot`
@@ -156,7 +184,32 @@ results and the source freeze. Five target-only tests compile:
 - `TestWindowsEncryptedPathPolicyMemory`
 - `TestWindowsEncryptedSharedRekeyPreflightMemory`
 
-Fourteen portable ownership memory tests exercise exact lock acquisition/release,
+That list is historical. The namespace function now lives in
+[namespace_manual_windows_amd64_test.go](../internal/encstore/namespace_manual_windows_amd64_test.go)
+under `manual_namespace` plus `GOSQLITE_MANUAL_NAMESPACE=independently_authorized`;
+this composition leaves its source/gate unchanged. The old preflight-refusal
+name is removed and replaced by `TestWindowsEncryptedSharedRekeyCapability` in
+[native_windows_test.go](../internal/encstore/native_windows_test.go). Despite the
+old PathPolicyMemory name, that existing target test invokes native ordinal path
+classification; it must not be counted as Linux inert-memory execution. The new
+capability test calls the native version API, but opens no database. Neither was
+run on Windows. Current compile/static-symbol qualification is separately listed
+in [the new record](windows-shared-rekey.md), never inferred from the old binary.
+
+The new ten `TestWindowsLifecycleMemory*` laws are portable inert callback/ledger
+models with 20 named children (30 paths). `TestWindowsLifecycleSourceIntegration`
+reads/parses two source files; it is not native or full control-flow proof. On b0e,
+these two separate normal commands passed, followed by two separate correct-key
+Linux shared-rekey tests (one path each); another CLI normal passed four paths.
+The exact b0e code tree's 17 gates now PASS (14:42 UTC): ordinary/race each
+5,602 PASS + seven expected oracle skips, complete oracle 7,234 PASS, and the
+specific LIMIT oracle-race pair 394 PASS. Five target builds and Windows encstore
+test compilation plus host nm succeeded; the PE was never run. This is not native
+Windows acceptance or a test run of the later documentation composition. The
+[full record](windows-shared-rekey.md) explains the host nm bootstrap and exact
+command/evidence boundary. Old candidate/main passes are not transferred.
+
+Fourteen earlier portable ownership memory tests exercise exact lock acquisition/release,
 all 64 held-state combinations, 192 partial-close positions, stacked downgrade,
 parent-child retention, cleanup retry and terminal-unknown-close containment.
 Two further memory tests cover strict family-tail classification and the UTF-16
@@ -169,7 +222,8 @@ checkpoint, savepoints, rekey and copy regressions are separately scoped.
 No Windows/Darwin runtime, native cross-process acceptance, failed native
 I/O/lock/close/Sync, disk tamper/wrong-key/missing-selected-file test, crash,
 process exit, interrupted publication/rekey, hot recovery or hostile namespace
-mutation was executed here or elsewhere. Independent source/security/legal and
+mutation is established by this Windows evidence. Historical broader-scope
+namespace runs are separately corrected in [the scope audit](test-scope-audit.md). Independent source/security/legal and
 full release review remain separate gates. No tests were relocated to CI.
 
 Official Microsoft APIs were checked on 2026-10-10:

@@ -1,5 +1,26 @@
 # 当前实现与验收矩阵
 
+## 当前补记：Windows shared rekey 源码与资格分层（2026-10-11）
+
+已发布基点现为 `67318ded6416547f26d685719d3e01e208454a87`，tree
+`1452ea832a41bdb8214bffd98fdb1b4d4fc37757`；其精确 Library 恢复两 quick +
+全 15 门 PASS，原有 CI [38141275294](https://github.com/ms-xiaosnow/gosqlite/actions/runs/38141275294)
+及 ordinary `114475481426` / oracle `114475481239` 均 SUCCESS。这些结果只属于
+67318ded，不能移给新候选。下文 startup / WAL / LIMIT 的 12:31 摘要、旧失败、
+旧 `main 仍为 b349` 和各历史表保留原时点，不代表这里的新发布状态。
+
+本工作副本基于 Windows 九路径源码 tree
+`b0e21b81b6eee598124171ec2fb7f4c6df77751a`，实现 guarded admission/conversion
+及转换后同一源密钥的精确 authority 检查；尚未发布。该源码的四条限定 normal
+为 30/1/1/1 路径 PASS；另一次 CLI normal 为 root/snapshot/wal/shared 四路径 PASS。
+该 b0e 代码树的完整 17 门已于 14:42 UTC 自然 PASS：ordinary/race 各 5,602
+PASS + 七个固定 oracle SKIP，完整 oracle 7,234 PASS/零测试 SKIP，LIMIT oracle
+race 394 PASS；五目标 build 与 Windows test-compile/nm 均通过，PE 未运行。
+这些新执行只资格到 b0e 代码树；含本文档的新组合、新提交恢复和候选 CI 尚未发生。
+本次文档同步不运行项目代码。协议、来源、当前资格和剩余门见
+[Windows shared-rekey 专题](windows-shared-rekey.md)；原生 Windows 仍 **NOT_RUN**。
+
+
 ## 最新状态：startup / WAL / LIMIT / 示例（2026-10-11）
 
 已闭合的发布基点是 `b3492ed822d59834e5159cb7964c9dbd937027f7`，tree

@@ -15,8 +15,10 @@ remain code work; unsupported is a safe interim behavior, not removal from goal.
   disclosed unsafe-pointer mapping warning. No physical durability claim follows.
 - Linux encrypted immutable shared selections and one writer now exist, with
   pinned copy/checkpoint and quiescent rekey. Native encrypted Windows/Darwin
-  ownership/coordination now exists; Windows shared rekey and Darwin Unicode
-  inventory remain explicit code gaps, with native runtime qualification open.
+  ownership/coordination now exists. Windows shared rekey now has guarded
+  conversion and same-source-key authority checks in the unpublished composition;
+  [native and failure qualification](../windows-shared-rekey.md) remains open.
+  Darwin Unicode inventory remains a separate code gap.
 - Retained encrypted history has no garbage collection or external freshness
   guarantee. Keep these limitations distinct from independent security review.
 
@@ -115,6 +117,7 @@ No data-loss or ordinary-lock-failure claim has been established.
 
 Windows encrypted modes0/1/shared2 now have native managed coordination code.
 Darwin encrypted coordination now shares plain/encrypted inode ownership. Keep
-Windows shared rekey, Darwin Unicode inventory and platform runtime/durability
-acceptance as separate open requirements. A cross-build does not
+Windows shared-rekey native/mixed-version/failure qualification, Darwin Unicode
+inventory implementation and platform runtime/durability acceptance as separate
+open requirements. A cross-build does not
 close those gates. Preserve current encrypted bytes and exact lifecycle rules.

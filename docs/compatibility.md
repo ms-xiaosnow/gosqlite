@@ -1,6 +1,6 @@
 # Current compatibility matrix
 
-2026-10-11 对账：本页描述 main 已合入能力，未发布候选的有限 PASS 不计入。
+2026-10-11 对账：除下面明确标注的 Windows 九路径未发布源码增量外，本页保留 main 的能力分层；候选有限 PASS 不计为 main 或原生资格。当前身份见 [Windows shared-rekey 专题](windows-shared-rekey.md)。
 当前缺口、平台中断及中文自测步骤分别见
 [验收矩阵](acceptance-status.md)、[中断记录](interruption-20261010.md) 和
 [中文手册](manual-verification-zh.md)。Native Check V2 已在 776b23e 合入；
@@ -101,7 +101,7 @@ ignoring constraints. Full SQLite compatibility is not claimed.
 | ANN | partial | Genuine persistent HNSW and IVFFlat selected graph/list reads, snapshot rescoring, transactional maintenance/rebuild, budgets and truthful fallback. Typed HNSW half/bit/sparse and IVF half/bit; sparse IVF, IVF L1 and bit Jaccard remain unsupported. Dense v1 cross-version bytes/configuration preserved |
 | ANN performance | partial | Fixed-fixture recall and logical-work evidence; no universal recall or latency guarantee. Small-data latency may be worse than exact scan; no scan is called an ANN hit |
 | Independent encryption | partial experimental | Independent GSQLENC1 authenticated snapshot/dirty-WAL/shared layouts, KeyProvider/KDF, correct-key ordinary rekey/copy/backup/restore and plaintext import/export; not SEE format compatibility |
-| Encrypted platforms | partial | Linux, Darwin and Windows/amd64 native backends; only Linux ordinary runtime. Windows shared-mode rekey is unsupported code; Darwin ASCII basename/directory inventory limits still require Unicode work |
+| Encrypted platforms | partial | Linux, Darwin and Windows/amd64 native backends; only Linux ordinary runtime. Windows shared-mode rekey has guarded admission/conversion and post-conversion same-source-key authority checks in this unpublished composition; native Windows is NOT_RUN. Darwin ASCII basename/directory inventory limits still require Unicode work |
 | Encryption security/recovery | unsupported qualification | Correct-key ordinary tests and descriptor-free parser/crypto/ownership laws do not prove physical tamper/wrong-key/crash/interrupted-rekey safety. Retained history, namespace/freshness and secure-deletion limits remain explicit |
 | pg_embedding migration | partial | Bounded identity-aware catalog inspector, typed offline SQL conversion, resumable mapped CSV/NDJSON import and deterministic verification reports; old Manhattan mapping is explicit |
 | PG/Neon transition | partial | Review-only retained-array, shadow-column and bounded PG16 full-table copy/swap text with mutations commented; unsupported FK/views/functions/triggers/RLS/partitions/custom-expression/collation/ACL dependencies, online/batched cutover and live execution remain open |

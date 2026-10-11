@@ -1,5 +1,26 @@
 # gosqlite 中文手工验收操作手册
 
+## 当前补记：Windows shared rekey 源码与资格分层（2026-10-11）
+
+已发布基点现为 `67318ded6416547f26d685719d3e01e208454a87`，tree
+`1452ea832a41bdb8214bffd98fdb1b4d4fc37757`；其精确 Library 恢复两 quick +
+全 15 门 PASS，原有 CI [38141275294](https://github.com/ms-xiaosnow/gosqlite/actions/runs/38141275294)
+及 ordinary `114475481426` / oracle `114475481239` 均 SUCCESS。这些结果只属于
+67318ded，不能移给新候选。下文 startup / WAL / LIMIT 的 12:31 摘要、旧失败、
+旧 `main 仍为 b349` 和各历史表保留原时点，不代表这里的新发布状态。
+
+本工作副本基于 Windows 九路径源码 tree
+`b0e21b81b6eee598124171ec2fb7f4c6df77751a`，实现 guarded admission/conversion
+及转换后同一源密钥的精确 authority 检查；尚未发布。该源码的四条限定 normal
+为 30/1/1/1 路径 PASS；另一次 CLI normal 为 root/snapshot/wal/shared 四路径 PASS。
+该 b0e 代码树的完整 17 门已于 14:42 UTC 自然 PASS：ordinary/race 各 5,602
+PASS + 七个固定 oracle SKIP，完整 oracle 7,234 PASS/零测试 SKIP，LIMIT oracle
+race 394 PASS；五目标 build 与 Windows test-compile/nm 均通过，PE 未运行。
+这些新执行只资格到 b0e 代码树；含本文档的新组合、新提交恢复和候选 CI 尚未发生。
+本次文档同步不运行项目代码。协议、来源、当前资格和剩余门见
+[Windows shared-rekey 专题](windows-shared-rekey.md)；原生 Windows 仍 **NOT_RUN**。
+
+
 ## 最新状态：startup / WAL / LIMIT / 示例（2026-10-11）
 
 已闭合的发布基点是 `b3492ed822d59834e5159cb7964c9dbd937027f7`，tree
@@ -1161,6 +1182,10 @@ tree `c31e7dcbeed9732688681741ee38ec60ff0bfb49`。已审阅六路径候选以 P0
 覆盖保持不变。manual 文件各只含一个原测试，没有新的 initializer 或 helper。
 Windows 原文件保留当前 shared-rekey preflight 所需 `context` import。
 
+此句仅记录 namespace 门控的历史源码。新 Windows 九路径组合已把旧 preflight
+拒绝测试替换为 `TestWindowsEncryptedSharedRekeyCapability`，并移除该无用
+`context` import；manual namespace 文件及其 gate 原样保持。见第 22 节。
+
 通用 selector switch 只增加 `Rename` / `rename`，原 P0 恢复引用、同文件
 alias/type、dot-import、unkeyed Options 检查保持。新增纯源码测试为
 `TestNativeNamespaceMethodReferenceGuard`，只解析字符串，不执行字符串里的操作。
@@ -1459,3 +1484,226 @@ SQLITE_ORACLE 未导出，不能误把可选 oracle 加入普通范围。新 hel
 四场景 public recovery 保持第 20 节的 BLOCKED / NOT_RUN；native WAL-tail
 publisher 和其他缺失 harness 没有可编造的运行命令。限制分类的更新不允许恢复
 ANN V4、受阻 41-target campaign 或未知中断链路。
+
+## 22 Windows shared-rekey 原生普通路径独立规程
+
+### 22.1 当前源码和执行边界
+
+**本节全部命令 NOT_RUN。** 仅供用户以后在独立批准的原生 Windows 环境逐项
+采用；不是当前代理、其他执行器或 CI 的执行许可，也不能作为受阻链路的替代。
+先读 [Windows 协议与精确源码](windows-shared-rekey.md)。旧第 3.2 节固定 776b
+表与第 9.2 节的“不支持”保留历史意义；b0e 九路径源码现已实现 guarded
+admission/conversion，尚未发布，不能凭旧 main 或旧编译二进制执行本规程。
+
+当前实际存在的三个测试入口：
+
+| 命令代号 | 实际入口 | 可证明的有限内容 |
+|---|---|---|
+| capability | [TestWindowsEncryptedSharedRekeyCapability](../internal/encstore/native_windows_test.go) | 原生版本检查允许 shared-rekey target；不打开 DB，不证明 NTFS/锁/发布 |
+| latest | [TestEncryptionSharedRekeyLatestHeadOrdinary](../sqlite/encryption_shared_rekey_test.go) | intact/correct-key、其他 owner 正常退出后，rekey 采用另一连接最新 head 并用新正确 key 重开 |
+| quiescent | [TestEncryptionSharedQuiescentRekeyAndLeaseRetention](../sqlite/encryption_shared_test.go) | idle/read-only owner 阻塞 rekey；正常退出后原 owner 的 lease 保留、rekey 成功、新正确 key 重开 |
+
+三个测试均没有 manual tag/env gate；必须精确选择，不能因此启动整个 Windows
+包或默认全仓。`native_windows_test.go` 的 `windows && amd64` 才是 capability
+的平台选择。旧 `TestWindowsEncryptedSharedRekeyPreflightMemory` 已被替换，
+不能使用旧名字得到零匹配 exit 0 后报通过。namespace 测试另在 manual 文件，
+保留第 19 节双门，本节绝不加 `manual_namespace`、`manual_recovery` 或 oracle。
+
+这些现有普通测试没有原生旧/新二进制调度、强制切换点、真实 lock/Close/Sync
+失败或中断 rekey harness。故此规程即使全部 PASS，也只取得三个普通路径的
+目标机结果，不能称整个 Windows rekey 通过、mixed-version 安全或故障设施已实现。
+
+### 22.2 工具、隔离副本和可核查的前置
+
+- 原生 Windows/amd64，Windows 10 1709（build 16299）或更高；记录准确 OS
+  edition/build、CPU、是否虚拟化、固定本地 NTFS 卷、剩余空间、权限和实际路径。
+  WSL 的 Linux 结果、Wine/模拟执行、UNC、网络盘、reparse/cloud/offline 目录
+  不能替代。NTFS 本身不证明电源故障安全；Windows Directory Sync 没有承诺的
+  namespace 持久性 barrier。
+- 已验证原生 Go **1.27.2**、Git Bash、Git、tar、Python 3。不开安装/下载流程。
+  模块使用已验证离线缓存：x/crypto v0.58.0、x/sys v0.49.0、x/text v0.43.0。
+  项目行为基线仍是官方 SQLite **3.54.0**，但本节没有 SQLite child 或 oracle
+  对照；不要求运行 Windows SQLite，不能把 Linux-only startup helper 强行改目标。
+- 单独的已审阅干净提交，须包含专题所列九文件精确 SHA-256。操作者填其完整
+  commit 和 tree，不能用动态 HEAD、b0e tree 当 commit 或旧 67318ded 代替。
+  以后若任一源码不同，先重新审阅/定界，不能直接改下面哈希求 PASS。
+- 只用新的可丢弃目录、合成数据及测试自生临时 key，不用真实秘密、原库或唯一
+  备份。不打印整份环境，不开 `set -x`。本节私有 temp/cache 是未来用户新环境
+  的模板，不变更当前已有复验的 /tmp、缓存和资源门。
+- 下列脚本逐块人工审核，空间不足、路径/版本/哈希错误即停。用户先核准本次
+  空间上限和资源条件，至少为 source/cache/output 与独立 temp 各预留 2 GiB；
+  该下限只是启动条件，不是内存或磁盘最大消耗保证。不因不足自动清理/搬迁。
+
+```bash
+# 未来独立用户模板。当前 NOT_RUN；路径先由操作者填入并核验。
+SOURCE_REPO=/c/reviewed/gosqlite
+BASE=/c/disposable-native-acceptance
+TOOLCHAIN_BIN=/c/tools/go1.27.2/bin
+GO_BIN="$TOOLCHAIN_BIN/go.exe"
+SYSTEMROOT_NATIVE=C:/Windows
+SYSTEM32_BASH=/c/Windows/System32
+GOPATH_NATIVE=C:/verified-go-cache
+GOMODCACHE_NATIVE=C:/verified-go-cache/pkg/mod
+: "${SOURCE_COMMIT:?填写包含九文件修正的已审阅完整提交SHA}"
+: "${SOURCE_TREE:?填写该提交准确tree}"
+test -d "$BASE" && test -d "$SOURCE_REPO/.git" && test -x "$GO_BIN" || exit 1
+test -d "$SYSTEM32_BASH" || exit 1
+test -d "$(cygpath -u "$GOPATH_NATIVE")" || exit 1
+test -d "$(cygpath -u "$GOMODCACHE_NATIVE")" || exit 1
+test -z "$(git -C "$SOURCE_REPO" status --porcelain)" || exit 1
+test "$(git -C "$SOURCE_REPO" rev-parse "$SOURCE_COMMIT^{commit}")" = "$SOURCE_COMMIT" || exit 1
+test "$(git -C "$SOURCE_REPO" rev-parse "$SOURCE_COMMIT^{tree}")" = "$SOURCE_TREE" || exit 1
+umask 077
+RUNROOT=$(mktemp -d "$BASE/gosqlite-windows-rekey-XXXXXXXX") || exit 1
+WORK="$RUNROOT/source"; EVIDENCE="$RUNROOT/evidence"
+mkdir "$WORK" "$EVIDENCE" "$RUNROOT/tmp" "$RUNROOT/go-cache" || exit 1
+git -C "$SOURCE_REPO" archive "$SOURCE_COMMIT" > "$RUNROOT/source.tar" || exit 1
+tar -xf "$RUNROOT/source.tar" -C "$WORK" || exit 1
+printf '%s\n' "$SOURCE_COMMIT" > "$EVIDENCE/source-commit.txt" || exit 1
+printf '%s\n' "$SOURCE_TREE" > "$EVIDENCE/source-tree.txt" || exit 1
+NATIVE_TMP=$(cygpath -m "$RUNROOT/tmp") || exit 1
+NATIVE_CACHE=$(cygpath -m "$RUNROOT/go-cache") || exit 1
+cd "$WORK" || exit 1
+```
+
+只读 source archive 哈希及完整路径/大小/内容/实际 mode 清单采用第 19.2 节的
+`source_inventory.py` 原文，存入本次 EVIDENCE，先人工审阅再调用。Git archive
+和 Windows 权限不承诺保留原 POSIX 0600/0700；本机实际 mode/ACL 单独记录，
+不得称 Git tree 已证明它们。之后所有前后清单必须在同一隔离副本上相等。
+
+下面为独立日志函数及严格限定的 Go 子进程环境。`env -i` 不传入 HOME、用户
+GOFLAGS、SQLITE_ORACLE、SQLITE_DEBUG_BREAK 或 manual gates。SystemRoot/WINDIR、
+工具和系统 PATH 是操作者已核验的明确值，仍不是 OS 沙箱/不可信 loader 防御。
+Git Bash/cygpath 路径转换须先验证；失败时停止，不转 WSL 或改变 target 绕过。
+
+```bash
+# 未来独立用户模板。本次 NOT_RUN。不覆盖已有日志。
+capture_rekey() {
+  local name=$1 rc
+  shift
+  test ! -e "$EVIDENCE/$name.stdout" || return 1
+  printf '%q ' "$@" > "$EVIDENCE/$name.command" || return 1
+  printf '\n' >> "$EVIDENCE/$name.command" || return 1
+  date -u +%Y-%m-%dT%H:%M:%SZ > "$EVIDENCE/$name.start-utc" || return 1
+  "$@" > "$EVIDENCE/$name.stdout" 2> "$EVIDENCE/$name.stderr"
+  rc=$?
+  printf '%s\n' "$rc" > "$EVIDENCE/$name.exit" || return 1
+  date -u +%Y-%m-%dT%H:%M:%SZ > "$EVIDENCE/$name.end-utc" || return 1
+  return "$rc"
+}
+native_go() {
+  env -i SystemRoot="$SYSTEMROOT_NATIVE" WINDIR="$SYSTEMROOT_NATIVE" \
+    PATH="$TOOLCHAIN_BIN:/usr/bin:/bin:$SYSTEM32_BASH" \
+    GOPATH="$GOPATH_NATIVE" GOMODCACHE="$GOMODCACHE_NATIVE" GOCACHE="$NATIVE_CACHE" \
+    TMPDIR="$NATIVE_TMP" TMP="$NATIVE_TMP" TEMP="$NATIVE_TMP" \
+    GOENV=off GOWORK=off GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off GO111MODULE=on \
+    CGO_ENABLED=0 GOOS=windows GOARCH=amd64 GOAMD64=v1 GOMAXPROCS=2 \
+    GOFLAGS= GOEXPERIMENT= GODEBUG= GORACE= GOCACHEPROG= GOCOVERDIR= GOFIPS140=off \
+    LC_ALL=C LANG=C TZ=UTC "$GO_BIN" "$@"
+}
+capture_rekey version native_go version || exit 1
+capture_rekey host native_go env GOVERSION GOHOSTOS GOHOSTARCH GOOS GOARCH CGO_ENABLED || exit 1
+# 人工核对依次为 go1.27.2、windows、amd64、windows、amd64、0。
+# 核对完成才继续；只看到 GOOS=windows 不证明实际主机为 Windows。
+capture_rekey modules native_go mod verify || exit 1
+capture_rekey source-before python3 "$EVIDENCE/source_inventory.py" "$WORK" || exit 1
+capture_rekey archive-sha256 python3 -c 'import hashlib,pathlib,sys; print(hashlib.sha256(pathlib.Path(sys.argv[1]).read_bytes()).hexdigest())' "$RUNROOT/source.tar" || exit 1
+capture_rekey go-sha256 python3 -c 'import hashlib,pathlib,sys; print(hashlib.sha256(pathlib.Path(sys.argv[1]).read_bytes()).hexdigest())' "$GO_BIN" || exit 1
+```
+
+保存以上函数原文、明确环境白名单和路径到 `procedure.txt`，与日志同行保存，
+因为 command 文件中的 `native_go` 函数名本身不等于完整进程环境。人工把 source
+清单中九文件哈希逐项对照专题表，同时核对完整审阅提交的其他源码；九文件相等
+不是全仓源码审核替代。保存 `host-and-storage.md`、工具哈希、依赖核验、空间
+观测、source archive 和前清单。任何项目不满足就记 BLOCKED，不启动测试。
+
+### 22.3 三个精确命令及断言
+
+以下只在以上独立授权、完整身份、真实主机与资源前置全部满足后逐项执行。
+`-vet=off` 明确只限定这三个测试命令，不算 Windows clean-vet 资格；既有
+VFS unsafe-pointer cross-vet 历史诊断不被抹去。不是 race 或完整包验收。
+使用 Go 的内部 timeout，进程自然退出；不得另加外部 kill、重试或宽 selector。
+
+```bash
+# 本次 NOT_RUN。每步非零即停；不得换名跳过失败。
+capture_rekey capability native_go test -mod=readonly -buildvcs=false -p=1 \
+  -count=1 -json -vet=off -timeout=2m \
+  -run '^TestWindowsEncryptedSharedRekeyCapability$' ./internal/encstore || exit 1
+capture_rekey latest native_go test -mod=readonly -buildvcs=false -p=1 \
+  -count=1 -json -vet=off -timeout=5m \
+  -run '^TestEncryptionSharedRekeyLatestHeadOrdinary$' ./sqlite || exit 1
+capture_rekey quiescent native_go test -mod=readonly -buildvcs=false -p=1 \
+  -count=1 -json -vet=off -timeout=5m \
+  -run '^TestEncryptionSharedQuiescentRekeyAndLeaseRetention$' ./sqlite || exit 1
+capture_rekey source-after python3 "$EVIDENCE/source_inventory.py" "$WORK" || exit 1
+cmp "$EVIDENCE/source-before.stdout" "$EVIDENCE/source-after.stdout" || exit 1
+```
+
+执行每条后先审阅完整 JSON，再启动下一条；每条必须恰有表中对应唯一顶层 RUN
+和终态 PASS、零子项、一个正确包 PASS、exit 0、空 stderr，无 FAIL/SKIP、额外
+名称、重复/缺失/截断事件或 `(cached)`。零匹配即使 exit 0 也 FAIL。capability
+只能证明原生版本检查；不能用它跳过 latest/quiescent 或推断卷与锁已验收。
+
+- latest：A 先持旧 head，B 正常写入 `latest` 和 `also copied` 后关闭；A 自己
+  rekey 必须采用最新值。DatabaseID 保持，layout=3、mode=shared、segments=0，
+  sequence 增加、head 改变；新正确 key 只读重开后值和完整 VerifyEncrypted 成功。
+- quiescent：idle/read-only first B 使 A rekey 得 BUSY；B 正常关闭后，同一正确
+  key 的 legacy WAL 打开仍 BUSY，证明 A lease 未丢；A 保留 `retained`，随后
+  rekey/Close 成功，新正确 key 只读重开保留该值且 mode=shared、segments=0。
+- 两个 SQLite 测试的各 DB Close attempt 都先置标志、检查结果，不在 cleanup
+  中自动重试失败的同一 DB Close；这不证明 native Close 计数、所有资源终结或
+  物理 Close 失败。公共 query helper 的 deferred Rows.Close 未查返回仍是
+  已知继承限制，不能扩大为完整清理验收。
+
+### 22.4 失败排查、证据和清理
+
+任何非零、未知 retirement、缺名/多名、SKIP、身份改变或前置不满足，停止后续
+命令。记录具体包/测试/错误链和最后成功步骤，不自动重复 Open/Rekey/Close，
+不删除候选、切 mode/文件系统、换环境或改 assertion 求 PASS。
+
+- `ErrUnsupported`：检查真实 OS/build/架构、卷是否固定 NTFS、路径政策、九源码
+  哈希及 selector。capability 通过而实际 Open 拒绝仍算后者失败，不能放宽路径。
+- `ErrBusy`：可来自普通 owner 争用；若还带 poison/uncertain，则不可视为安全
+  BUSY。停止并保留错误；不要自动循环到成功或假定写入未发生。
+- 认证/authority/`ErrChanged`：保留 source 身份、日志和可取得的目录现场，停止。
+  不主动加入旧 key、tamper、namespace 替换或恢复操作来“确认原因”。
+- 编译/依赖/资源错误：保留日志，先处理真实前置；不下载替代工具链、不换缓存
+  或关闭更多 checker。新的修复/重跑属于新审阅和新证据。
+
+测试使用 `t.TempDir`，Go cleanup 可能自动移除 fixture，包括测试失败后的目录。
+因此保留 RUNROOT/log/source archive **不保证保留测试失败数据库**；测试自生密钥
+也没有恢复承诺。专门的失败现场保留、混合版本调度和物理故障 harness 仍缺独立
+实现/审阅，不在文档中虚构开关。
+
+若验收要求保留失败数据库或事后排查未知 retirement，现有三个普通测试不能
+承担该验收：明确记 **BLOCKED / IMPLEMENTATION_MISSING**，停止本节原生命令。
+下一步是单独实现并独立审阅 failure-preserving harness，最低合同包括：
+
+- 调用方拥有的唯一可丢弃 fixture root，失败或 pending/unknown retirement 时
+  不自动删除，不能借成功返回假定所有 owner 已终结；
+- 数据库家族前后 manifest、操作/错误及 owner-state 证据，出错后只收集无需
+  重启项目代码即可安全取得的资料；
+- 临时合成 key 的明确保管/销毁政策与后续重开限制，不承诺仅凭文件可恢复；
+- consuming Close 只做 checked-once attempt，未知结果立即停止，不重试可能已
+  被消耗/复用的 numeric native handle；
+- harness 源码与任何新增 fault、mixed-old-binary、interruption 或其他已排除
+  场景分别审阅、分别明确授权，不能由本节普通路径或文档取得许可。
+
+这是缺失设施的工程下一步，不是一个现有 test/flag/env；本次未实现它。
+若独立批准范围仅需要三个有限普通路径，且不依赖失败 DB 留存，可按前述边界
+单独规划；不得借这个较窄结果满足留存依赖型验收。
+
+成功或失败后均先保留整个 RUNROOT，补后清单
+和故障诊断；某步失败时只做不启动项目代码的证据采集，不接着执行下一测试。
+
+最终归档包含完整 source archive/身份、工具/环境白名单、主机和卷证据、每条
+argv/start/end/exit/stdout/stderr、JSON 逐名核对及前后清单，计算 SHA-256 并读回
+比对。用户确认副本和证据可用、无遗留 owner 待处理后，才人工决定清理自己新建
+的目录；本规程不给自动 `rm`、强制终止或未知 handle 重试命令。
+
+只有上述三个名称全部实际运行并通过、身份/环境/原始证据完整且前后 source
+相同，才可写“某精确提交在某原生 Windows/build/NTFS 上的三个普通路径 PASS”。
+不得写 mixed-old-binary、native lock/close failure、power loss、中断 rekey、安全
+擦除或完整 M3/M8/M10 PASS。当前这些普通原生结果仍 **NOT_RUN**；Windows
+namespace barrier 缺失、旧 ciphertext 可解密、native WAL-tail publisher 代码缺口、
+独立 backup R1 未发布、ANN V4/受阻 41-target campaign/未知中断限制全部保留。

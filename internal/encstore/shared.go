@@ -296,7 +296,10 @@ func (s *Store) checkAuthority() (err error) {
 }
 
 // BeginMaintenance acquires the latest authority before any copy validation.
-// Rekey additionally converts byte 0 atomically; BUSY retains the SHARED lease.
+// Rekey additionally requires exclusive byte 0. POSIX converts atomically;
+// Windows uses guarded conversion and restores SHARED before ordinary BUSY.
+// Recheck exact authority after conversion: an older Windows lifecycle opener
+// can ignore the admission gate and enter the non-atomic conversion interval.
 func (s *Store) BeginMaintenance(ctx context.Context, rekey bool) (err error) {
 	if s.opts.Mode != WALShared {
 		return s.Check()
@@ -314,6 +317,12 @@ func (s *Store) BeginMaintenance(ctx context.Context, rekey bool) (err error) {
 			return errors.Join(err, s.ReleaseWriter(false))
 		}
 		s.lifecycleExclusive = true
+		if err = s.enterGate(false); err == nil {
+			err = errors.Join(s.checkAuthority(), s.leaveGate(false))
+		}
+		if err != nil {
+			return errors.Join(err, s.EndMaintenance(false))
+		}
 	}
 	return nil
 }

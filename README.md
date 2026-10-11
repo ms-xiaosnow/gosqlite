@@ -1,5 +1,12 @@
 # gosqlite
 
+Current source update (2026-10-11): this unpublished Windows shared-rekey
+composition adds guarded lifecycle admission/conversion and a post-conversion
+same-source-key authority check. Native Windows execution remains **NOT_RUN**.
+The exact source identity, separate Linux results, completed seventeen-gate code qualification,
+and published-main boundary are in [the protocol record](docs/windows-shared-rekey.md).
+
+
 Historical test-scope statements are corrected in [the namespace-test audit](docs/test-scope-audit.md); the affected tests are now excluded from ordinary workflows.
 
 A native Go database kernel targeting tested subsets of SQLite 3.54.0 files and SQL. Current development: persistent HNSW/IVFFlat, exact typed-vector KNN and same-snapshot hybrid ranking, plus experimental authenticated snapshot, dirty-page WAL and concurrent encrypted sessions, ordinary B-tree equality, leading inequalities and bounded rowid-range planning, nested savepoints, scoped INNER/CROSS/LEFT JOINs and bounded global aggregates, CASE/CAST/BETWEEN/IN, context-sensitive predicate evaluation, affinity-correct comparisons and explicit NULL ordering, BIT/HALFVEC/SPARSEVEC exact search, extended vector primitives, and bounded pg_embedding catalog inspection, typed offline SQL conversion and resumable CSV/NDJSON import. It is not production-ready. No CGO, SQLite subprocess, C ABI, or remote SQL engine is used in production.
@@ -73,7 +80,7 @@ SQLITE_ORACLE=/absolute/path/to/verified/sqlite3 ./scripts/test-oracle.sh
 
 See [progress](docs/progress.md), [compatibility](docs/compatibility.md), [architecture](docs/architecture.md), [sources](docs/upstream.md), and [manual verification](docs/manual-verification.md). The unchanged [original goal](goal.md) remains the contract. [Restart protocol](docs/restart.md) and checkpoint records preserve durable development history.
 
-Qualified crash recovery, Windows shared rekey and Darwin Unicode inventory, broader SQL and online/dependency-complete pg_embedding transition work remain unfinished implementation work. Full SQLite/PostgreSQL semantics, SEE file compatibility and production security are not claimed.
+Qualified crash recovery, Darwin Unicode inventory, broader SQL and online/dependency-complete pg_embedding transition work remain unfinished implementation work. Windows shared rekey is implemented in this unpublished source composition; native Windows and failure/durability qualification remain open. Full SQLite/PostgreSQL semantics, SEE file compatibility and production security are not claimed.
 
 
 ## Explicit exclusive WAL
@@ -220,8 +227,9 @@ legacy layouts are never silently upgraded. Run examples/encrypted-shared only
 with disposable data. A Windows/amd64 encrypted backend now implements legacy
 and shared-session paths under its strict local-NTFS policy, with native runtime
 unverified. Darwin encrypted modes0/1/2 now use a shared plain/encrypted inode
-coordinator, with strict ASCII inventory limits. Windows shared rekey and Darwin
-Unicode inventory remain required implementation work. Retained-history collection,
+coordinator, with strict ASCII inventory limits. Windows shared rekey now uses
+guarded conversion with a post-conversion source-authority check; native execution
+remains NOT_RUN. Darwin Unicode inventory remains required implementation work. Retained-history collection,
 external freshness guarantees and independent security acceptance remain open.
 
 ## Sparse exact vectors
@@ -276,7 +284,8 @@ Windows/amd64 now has handle-relative encrypted publication and exact lifecycle/
 writer/capture locks. Public plain and encrypted Open paths use managed bounded
 metadata observations; full native IDs and uncertain-close tombstones are retained.
 These are source/model and cross-build results, not Windows runtime acceptance.
-Shared encrypted rekey remains unsupported, directory namespace barriers are not
+Shared encrypted rekey has bounded guarded-conversion source in this composition;
+native Windows behavior remains unqualified. Directory namespace barriers are not
 supplied, and default Windows VFS vet retains a disclosed mapping diagnostic. See
 [encrypted policy](docs/native-encrypted-windows.md) and
 [metadata correction](docs/native-windows-metadata.md).

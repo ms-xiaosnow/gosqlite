@@ -13,8 +13,9 @@ supported; `EncryptionWAL` explicitly selects lifetime-exclusive layout 2.
 The implementation is experimental. Linux has ordinary-path runtime evidence;
 Windows/amd64 now has a bounded native implementation with compile-only evidence,
 and Darwin now has a shared plain/encrypted inode coordinator with compile-only
-evidence and strict ASCII inventory limits. Windows shared-mode rekey is a separate missing
-implementation. See [native encrypted Windows support](native-encrypted-windows.md)
+evidence and strict ASCII inventory limits. Windows shared-mode rekey now has
+guarded admission/conversion source with a post-conversion same-source-key authority
+check in this unpublished composition; native Windows execution remains NOT_RUN. See [native encrypted Windows support](native-encrypted-windows.md)
 for the precise matrix and no-directory-barrier policy. It is an independent
 container, not a SQLite/SEE ciphertext format. Full M8 remains
 partial: simultaneous encrypted writer/readers now have an ordinary-path Linux
@@ -167,8 +168,14 @@ Reopen explicitly with `EncryptionWALShared`. `UpgradeEncryptedWAL` still only
 means snapshot-to-layout-2 conversion.
 
 Shared rekey requires every other connection to close, including idle/read-only
-ones. A failed atomic lifecycle conversion leaves the original shared lease
-intact. Checkpoint and full-head copies can proceed while other connections keep
+ones. Linux/Darwin use atomic lifecycle conversion. Windows uses a guarded gap
+under writer/capture protection and returns ordinary BUSY only after restoring the
+shared lease; failed restoration or gate release retains poison/protectors. After
+exclusive conversion, shared rekey reauthenticates the named root with the retained
+source master and compares exact bytes/identity before validation or publication.
+It never reacquires source credentials or adopts another graph after the gap.
+See the [Windows protocol and evidence boundary](windows-shared-rekey.md).
+Checkpoint and full-head copies can proceed while other connections keep
 old readers. Every copy pins one head through validation and output. There is no
 GC, retained-key revocation or protection against replay of a whole valid family.
 See [ADR 0016](decisions/0016-shared-encrypted-coordination.md).
@@ -519,7 +526,9 @@ checkpoint. They must not be run here or relocated to CI/another executor.
 Memory-only malformed-input tests do not qualify these disk/recovery behaviors.
 The shared slice adds simultaneous intact-file readers/writer, operation-pinned
 copies, stale promotion, quiescent rekey and combined-resource tests. Darwin/Windows encrypted coordination has source/compile evidence only; Darwin
-Unicode inventory and Windows shared-mode rekey remain implementation gaps. Independent
+Unicode inventory remains an implementation gap. Windows shared-mode rekey has
+bounded source implementation, but native admission/conversion, mixed-old-client
+behavior and failure/durability qualification remain open. Independent
 security review and full release qualification remain outstanding.
 
 ## Layout-3 coordination and combined admission

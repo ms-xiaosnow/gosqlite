@@ -78,15 +78,7 @@ func supported() error {
 	}
 	return nil
 }
-func platformOperation(op encryption.Operation, mode Mode) error {
-	if err := supported(); err != nil {
-		return err
-	}
-	if op == encryption.OperationRekeyTarget && mode == WALShared {
-		return fmt.Errorf("%w: shared encrypted rekey has no atomic Windows lifecycle upgrade", ErrUnsupported)
-	}
-	return nil
-}
+func platformOperation(encryption.Operation, Mode) error { return supported() }
 func platformPreflight(path string) error {
 	if err := supported(); err != nil {
 		return err
@@ -486,6 +478,14 @@ func rangeLock(f *managedFile, offset int64, shared, unlock bool) error {
 	}
 	if f.directory || !strings.HasSuffix(f.path, ".gse-lock") {
 		return ErrUnsupported
+	}
+	if offset == lifecycleByte && !unlock {
+		if f.locks.held[lifecycleByte] == 0 {
+			return f.locks.admitLifecycle(shared, f.nativeLock)
+		}
+		if !shared && f.locks.held[lifecycleByte] == 1 {
+			return f.locks.upgradeLifecycle(f.nativeLock)
+		}
 	}
 	return f.locks.change(offset, shared, unlock, f.nativeLock)
 }

@@ -1,5 +1,10 @@
 # Implementation and acceptance progress
 
+当前发布基点为 `67318ded6416547f26d685719d3e01e208454a87`。本次 Windows
+九路径代码树 b0e 的完整 17 门已于 14:42 UTC 自然 PASS；文档组合尚未发布，
+原生 Windows 仍 NOT_RUN。本页末尾保留本次记录，详见 [Windows 专题](windows-shared-rekey.md)。以下 12:31 / b349 摘要和旧 FAIL
+保留原历史时点，不能作为当前 main 或新候选的资格结论。
+
 ## 最新状态：startup / WAL / LIMIT / 示例（2026-10-11）
 
 已闭合的发布基点是 `b3492ed822d59834e5159cb7964c9dbd937027f7`，tree
@@ -1514,3 +1519,59 @@ testscope / os/exec / C 输入，不能把 tooling 闭包当 shipping。全部�
 编译，不是外平台原生资格。完整源码/原始日志已 Library 保存并读回；精确报告、
 归档 ID、哈希及剩余边界见[分层证据](evidence/startup-wal-limit-20261011.md)。
 没有新提交/恢复/CI，904ca 与 209ba 原始 FAIL 保持。M9 继续，M10 未验收。
+
+## 2026-10-11 14:42 UTC：Windows shared-rekey 九路径与独立文档同步
+
+- 状态：**IN_PROGRESS / 未发布源码；原生 Windows NOT_RUN**。原目标 M3/M8/M10
+  没有完成；本批不恢复 ANN V4、受阻 41-target campaign 或未知中断链路。
+- 已发布基点为 `67318ded6416547f26d685719d3e01e208454a87`，tree
+  `1452ea832a41bdb8214bffd98fdb1b4d4fc37757`。其精确 Library 恢复两 quick +
+  全 15 门 PASS，13:27 UTC 终结；既有 [CI 38141275294](https://github.com/ms-xiaosnow/gosqlite/actions/runs/38141275294)
+  SUCCESS，ordinary `114475481426` / oracle `114475481239` SUCCESS。
+  旧 904ca/209ba FAIL、52b 本地 PASS 和此前 PENDING 均保留各自历史身份。
+- 新 Windows 源码 tree `b0e21b81b6eee598124171ec2fb7f4c6df77751a`，3,153 文件/
+  148 目录记录，九路径：八项原审阅结果完整保留，另只强化既有 quiescent test
+  的 DB owner checked-once cleanup。全部当前 startup/WAL/LIMIT/guard/source
+  contracts、模块、CI、manual gates 保持。没有复制旧组合覆盖新 main。
+- 实现：每个 Windows 初始 lifecycle admission 由 capture gate 保护；shared
+  rekey 在 writer+capture 下进行有真实间隙的 conversion，普通 BUSY 前恢复
+  shared lease。转换后用保留 source master 认证当前 root、逐字节及 owner/name
+  identity 对比，先于 copy validation/output；没有 source provider reacquire 或
+  post-gap graph adoption。原生混合旧 binary 行为尚未执行。关键源、ADR、错误/
+  ownership 与安全边界见 [协议专题](windows-shared-rekey.md)。
+- 九路径独立源码审阅无阻断；全仓只读范围审计补齐 CLI shared caller，闭合
+  Linux ordinary/race/oracle 选择的源码范围，不凭两包审阅猜整个仓库。现有
+  1,421 个跨平台 Test/Fuzz/Example 声明逐项分类，新增十二个 portable 根/32 路径。
+- b0e 四条限定 normal 分别 PASS 30/1/1/1 路径，13:39 UTC 自然完成；另一次 CLI
+  correct-key normal 为 root/snapshot/wal/shared 四路径 PASS，13:52 UTC 完成。
+  四条与 CLI 结果分别保留；旧 5d1 normal/race 与 673 主线结果不能移给 b0e。
+- b0e 新完整 17 门于 14:42 UTC 自然全部 PASS，租约 14:42:11.115207 UTC
+  释放。ordinary/race 各 5,602 PASS + 七个固定 oracle SKIP，完整 oracle 7,234
+  PASS/零测试 SKIP，末两名 LIMIT oracle race 394 PASS；guard/vet/CGO0 build、
+  五目标 build、mod verify 及两种实际闭包通过。whole-module 206 包/1,317 输入；
+  shipping 164 包/1,228 输入且无 testoracle/testscope/os/exec/C-family 输入。
+- Windows encstore PE 仅 `go test -c` 编译，再由主机 `go tool nm` 读取 8,054
+  符号；新 capability 存在、旧 refusal/manual namespace 不在。PE 从未执行。
+  此固定 Go 没有预装 nm，实际命令按需构建/复用官方 cmd/nm；26 个来源输入
+  已与固定官方 archive 核对。17 外层命令串行，脚本展开共 19 次显式 Go 调用；
+  nm 内建 bootstrap 的 BuildP 为 GOMAXPROCS=2，不能称全部内部编译 -p=1。
+- actual test 事件零 FAIL；记录器 natural-exit 中的初始化 status:FAIL 占位仍
+  原样保留，各实际 exit0/natural-return 和后验 final PASS 已逐项对账。详见
+  [结果与记录器边界](windows-shared-rekey.md#terminal-seventeen-gate-code-qualification)。
+  本文档组合未重新运行项目；新提交、Library 精确恢复、候选 CI 尚未发生。
+- 本批另做最多十四路径的文档同步，以完整 metadata-preserving b0e 副本为底，
+  只修 Windows 当前源码/资格表述及相关当前状态；不改 `checkpoints.json`，
+  不执行 Go、项目脚本、compiler、native/oracle 或测试。文档/链接/命令源码核对
+  与最终独立审阅另记，b0e 是代码输入身份而非含本文档的最终 tree。
+- [中文第 22 节](manual-verification-zh.md#22-windows-shared-rekey-原生普通路径独立规程)
+  给出原生环境/精确提交隔离副本、实际三个测试入口、参数、预期断言、失败诊断、
+  原始证据和人工清理规则；全是未来用户模板 NOT_RUN。`t.TempDir` 可能删除失败
+  fixture，不能承诺现场留存或发明 mixed-version/fault harness。
+- 剩余：Windows 无承诺 namespace persistence barrier；原生版本/NTFS/locks/
+  close/mixed-binary/fault/中断 rekey 未资格；保留旧 ciphertext 不是 secure erase
+  或旧 key revocation。native WAL-tail publisher 仍缺代码，backup R1 属另一个
+  未发布候选，Darwin Unicode/更广 SQL/物理设施与独立 M10 验收没有一并完成。
+- 下一步：完成终态文档的独立窄差异审阅；之后的精确组合、提交/保存/恢复/CI
+  需各自授权和验证，不能用本批源码或文档成功代替。若验收依赖保留失败数据库，
+  现有 t.TempDir 测试不能承担，须先单独实现并审阅 failure-preserving harness，
+  该要求当前 BLOCKED / IMPLEMENTATION_MISSING，不增加虚构执行入口。

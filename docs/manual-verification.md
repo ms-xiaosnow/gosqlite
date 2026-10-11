@@ -1,5 +1,15 @@
 # Manual verification and release-blocking gates
 
+Windows shared-rekey follow-on (2026-10-11): the unpublished b0e21b81 source
+composition implements guarded Windows lifecycle admission/conversion and the
+post-conversion same-source-key authority check. Historical unsupported/code-gap
+statements below retain their old checkpoint meaning. Native Windows is still
+**NOT_RUN**, including version, locks, NTFS, mixed-old-binary and failure behavior.
+See the [protocol/evidence record](windows-shared-rekey.md) and
+[Chinese native procedure](manual-verification-zh.md#22-windows-shared-rekey-原生普通路径独立规程).
+No command in that procedure was executed while preparing these documents.
+
+
 Current follow-on (2026-10-11): the limited public Open four-case manual harness
 has been implemented and independently source-reviewed/compiler-qualified.
 Every physical scenario remains BLOCKED / NOT_RUN. Earlier public-harness

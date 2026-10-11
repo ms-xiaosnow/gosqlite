@@ -4,7 +4,7 @@ Test-scope correction: historical full suites from M2 through 7addc493 included 
 
 This is a development project, not production-ready. M2 can modify a supported SQLite subset. It validates supported catalog grammar and whole-file page ownership, holds native Linux locks, bounds dirty pages and refuses layouts it cannot preserve. No crash/recovery durability qualification exists. Never use irreplaceable data with this development build. No security or legal review has been completed.
 
-The encryption package implements experimental memory-only AES-256-GCM authenticated-record primitives with unique writer nonces, bound file/page/frame identity, explicit raw-key versus passphrase modes and bounded Argon2id parameters. The M8 snapshot and dirty-page WAL storage slices connect these primitives to SQL and code-configured driver connections, immutable authenticated roots/bases, rekey, encrypted backup/restore, and explicit plaintext export/import. Set `sqlite.Options.Encryption` to select it; nil keeps the ordinary plaintext engine. Immutable authenticated WAL segments, bounded overlay replay and checkpoint are implemented; Linux EncryptionWALShared implements concurrent readers and one writer; Windows/amd64 native coordination is implemented but unexecuted; Darwin encrypted coordination is implemented but unexecuted, while Darwin Unicode inventory, Windows shared rekey and full M8 acceptance remain open. The independent container is not SQLite/SEE ciphertext compatibility; no SEE private source is accessed. Keys must enter only through code-configured providers, never argv, DSNs, SQL, logs, repository files, or examples with usable static secrets.
+The encryption package implements experimental memory-only AES-256-GCM authenticated-record primitives with unique writer nonces, bound file/page/frame identity, explicit raw-key versus passphrase modes and bounded Argon2id parameters. The M8 snapshot and dirty-page WAL storage slices connect these primitives to SQL and code-configured driver connections, immutable authenticated roots/bases, rekey, encrypted backup/restore, and explicit plaintext export/import. Set `sqlite.Options.Encryption` to select it; nil keeps the ordinary plaintext engine. Immutable authenticated WAL segments, bounded overlay replay and checkpoint are implemented; Linux EncryptionWALShared implements concurrent readers and one writer; Windows/amd64 native coordination is implemented but unexecuted; Darwin encrypted coordination is implemented but unexecuted, while Darwin Unicode inventory and full M8 acceptance remain open. This unpublished Windows composition implements guarded shared rekey and a post-conversion same-source-key authority check, with native runtime still NOT_RUN. The independent container is not SQLite/SEE ciphertext compatibility; no SEE private source is accessed. Keys must enter only through code-configured providers, never argv, DSNs, SQL, logs, repository files, or examples with usable static secrets.
 
 AEAD cannot prevent whole-family historical rollback without externally protected freshness state. Under a reused credential, an unrelated complete valid encrypted family can be substituted unless the application also checks an externally protected expected identity. Internal parent hashes, commit sequences and authenticated roots are not that external expectation; the public storage APIs do not accept an expected-root identity/freshness token. Metadata sizes/IDs/KDF costs, access patterns, process memory and Go GC copies remain risks. The library's best-effort clearing does not erase all copies or expanded keys. Publishing a production-security claim requires independent review and the full negative/recovery gate.
 
@@ -58,7 +58,14 @@ behavior is unchanged by this source finding.
 
 Windows encrypted namespace operations use managed native relative handles and
 strict local fixed-NTFS/filename policy. No Windows runtime, directory persistence
-barrier, shared-rekey support or physical failure qualification is implied. The
+barrier or physical failure qualification is implied. Guarded shared rekey is
+implemented in this source composition; see [its protocol and evidence limits](windows-shared-rekey.md).
+Updated Windows initial lifecycle admission in every encrypted mode takes capture
+byte 2, and shared-to-exclusive conversion has a real protected gap. Older binaries
+may ignore that admission gate. After conversion, the retained source master must
+authenticate the currently named root and match exact bytes plus owner identity
+before source validation/output. A failed restore/release is poison, even when
+the error also matches BUSY; it is not permission to retry. The
 public Open prelude was included in the metadata audit rather than assuming the
 internal backend alone covered every handle. Source/model reviews are not an
 independent security/cryptographic/legal review. Uncertain-close tombstones may
@@ -124,8 +131,8 @@ are reconciled below; complete public-lifecycle safety is not established.
 ## 仍未关闭的实现与验收门
 
 - 公开 Open 恢复、明文 backup、native WAL-tail 发布和 planner 修正仍有未
-  合入/未实现部分；Windows shared rekey、Darwin 名称处理等候选也不能当作
-  当前 main 能力。有关源码与状态以[验收矩阵](acceptance-status.md)及
+  合入/未实现部分；Windows shared rekey 已进入本未发布源码组合，原生执行
+  仍 NOT_RUN，不能记为已发布 main 能力；Darwin 名称处理候选仍另列。有关源码与状态以[验收矩阵](acceptance-status.md)及
   [未发布候选记录](interruption-20261010.md)为准。
 - 未知触发中断、ANN 报告 V3 的 FAIL/HOLD 和被中断 V4/新 fuzz 链路继续
   保留，不因普通测试历史或本文修正解除暂停，也不推断为 ANN 算法已损坏。

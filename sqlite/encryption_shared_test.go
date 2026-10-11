@@ -141,29 +141,62 @@ func TestEncryptionSharedQuiescentRekeyAndLeaseRetention(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	defer a.Close()
+	aCloseAttempted := false
+	t.Cleanup(func() {
+		if !aCloseAttempted {
+			aCloseAttempted = true
+			if closeErr := a.Close(); closeErr != nil {
+				t.Error("cleanup a:", closeErr)
+			}
+		}
+	})
 	encryptedExec(t, a, "CREATE TABLE t(id INTEGER PRIMARY KEY,v TEXT)")
 	encryptedExec(t, a, "INSERT INTO t VALUES(1,'retained')")
 	ro := opts
 	ro.ReadOnly = true
-	b, e := sqlite.Open(path, ro)
+	firstB, e := sqlite.Open(path, ro)
 	if e != nil {
 		t.Fatal(e)
 	}
+	firstBCloseAttempted := false
+	t.Cleanup(func() {
+		if !firstBCloseAttempted {
+			firstBCloseAttempted = true
+			if closeErr := firstB.Close(); closeErr != nil {
+				t.Error("cleanup first b:", closeErr)
+			}
+		}
+	})
 	if e = a.Rekey(ctx, next); !errors.Is(e, sqlite.ErrBusy) {
 		t.Fatal("idle readonly must block rekey", e)
 	}
-	if e = b.Close(); e != nil {
+	firstBCloseAttempted = true
+	if e = firstB.Close(); e != nil {
 		t.Fatal(e)
 	}
-	// A failed atomic conversion must retain A's shared lifecycle lease.
+	// A failed lifecycle conversion must retain A's shared lifecycle lease.
 	legacy := cfg
 	legacy.Mode = sqlite.EncryptionWAL
-	if x, e := sqlite.Open(path, sqlite.Options{Encryption: &legacy}); !errors.Is(e, sqlite.ErrBusy) {
+	x, legacyErr := sqlite.Open(path, sqlite.Options{Encryption: &legacy})
+	xCloseAttempted := false
+	if x != nil {
+		t.Cleanup(func() {
+			if !xCloseAttempted {
+				xCloseAttempted = true
+				if closeErr := x.Close(); closeErr != nil {
+					t.Error("cleanup unexpected legacy owner:", closeErr)
+				}
+			}
+		})
+	}
+	if !errors.Is(legacyErr, sqlite.ErrBusy) {
 		if x != nil {
-			x.Close()
+			xCloseAttempted = true
+			if closeErr := x.Close(); closeErr != nil {
+				t.Error("close unexpected legacy owner:", closeErr)
+			}
 		}
-		t.Fatal("failed rekey dropped lifecycle", e)
+		t.Fatal("failed rekey dropped lifecycle", legacyErr)
 	}
 	if got := query(t, a, "SELECT v FROM t"); !reflect.DeepEqual(got, [][]any{{"retained"}}) {
 		t.Fatal(got)
@@ -171,21 +204,34 @@ func TestEncryptionSharedQuiescentRekeyAndLeaseRetention(t *testing.T) {
 	if e = a.Rekey(ctx, next); e != nil {
 		t.Fatal(e)
 	}
+	aCloseAttempted = true
 	if e = a.Close(); e != nil {
 		t.Fatal(e)
 	}
 	// Only the new correct provider is used for the ordinary reopen.
-	b, e = sqlite.Open(path, sqlite.Options{Encryption: &next, ReadOnly: true})
+	reopenedB, e := sqlite.Open(path, sqlite.Options{Encryption: &next, ReadOnly: true})
 	if e != nil {
 		t.Fatal(e)
 	}
-	defer b.Close()
-	if got := query(t, b, "SELECT v FROM t"); !reflect.DeepEqual(got, [][]any{{"retained"}}) {
+	reopenedBCloseAttempted := false
+	t.Cleanup(func() {
+		if !reopenedBCloseAttempted {
+			reopenedBCloseAttempted = true
+			if closeErr := reopenedB.Close(); closeErr != nil {
+				t.Error("cleanup reopened b:", closeErr)
+			}
+		}
+	})
+	if got := query(t, reopenedB, "SELECT v FROM t"); !reflect.DeepEqual(got, [][]any{{"retained"}}) {
 		t.Fatal(got)
 	}
-	i, e := b.VerifyEncrypted(ctx)
+	i, e := reopenedB.VerifyEncrypted(ctx)
 	if e != nil || i.Mode != sqlite.EncryptionWALShared || i.WALSegments != 0 {
 		t.Fatal(i, e)
+	}
+	reopenedBCloseAttempted = true
+	if e = reopenedB.Close(); e != nil {
+		t.Fatal(e)
 	}
 }
 

@@ -41,9 +41,10 @@ func (l *exactByteLocks) change(offset int64, shared, unlock bool, call byteLock
 		return nil
 	}
 	// LockFileEx cannot acquire exclusive over a shared lock, even its own.
-	// Never emulate atomic upgrade by temporarily dropping lifecycle protection.
+	// Direct requests never drop shared protection. Windows lifecycle conversion
+	// has a separate guarded protocol and requires a Store authority recheck.
 	if old == 1 {
-		return fmt.Errorf("%w: Windows shared lifecycle rekey requires atomic lock conversion", ErrUnsupported)
+		return fmt.Errorf("%w: direct Windows shared-to-exclusive lock conversion", ErrUnsupported)
 	}
 	if old == 3 {
 		return l.poison(ErrUnsupported)

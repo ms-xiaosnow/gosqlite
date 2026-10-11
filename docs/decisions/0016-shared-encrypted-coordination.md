@@ -28,7 +28,7 @@ Linux uses three nonblocking one-byte OFD ranges:
 | --- | --- |
 | 0 | Lifetime SHARED for every shared-mode connection, including idle read-only handles; EXCLUSIVE for creation, legacy sessions, upgrade and globally quiescent rekey |
 | 1 | EXCLUSIVE writer reservation through admission, transaction completion and validated release |
-| 2 | SHARED only while capturing the current named root; EXCLUSIVE only during publication authority check, cutover and postpublication verification |
+| 2 | SHARED while capturing the current named root; EXCLUSIVE during authority checks, cutover and postpublication verification, and on Windows during initial lifecycle admission/guarded conversion |
 
 Legacy read-only handles retain their preexisting SHARED byte-0 behavior, but
 mode authentication prevents them from joining a layout-3 family. No POSIX
@@ -85,10 +85,18 @@ reserves byte 1 and refreshes before checking for segments, so a stale idle head
 cannot skip another connection's commits. It selects a new full base and retains
 all objects needed by older readers.
 
-Rekey obtains byte 1 and atomically converts byte 0 to EXCLUSIVE. Any other
-connection, including an idle read-only one, causes BUSY. Failed conversion keeps
-the original SHARED lifecycle lease. Successful rekey validates/copies the same
-selected head, adopts the new epoch, downgrades byte 0 and releases byte 1.
+Rekey obtains byte 1 and refreshes/authenticates the latest selected head before
+converting byte 0 to EXCLUSIVE. Linux/Darwin convert atomically. Windows now gates
+all initial lifecycle admission with byte 2 and converts under writer/capture
+protection, with a real shared-unlock/exclusive-acquire interval. Ordinary BUSY
+requires successful SHARED restoration; restoration/release uncertainty poisons
+and retains protectors. Old binaries may ignore admission, so successful shared
+rekey on every backend additionally takes capture and authenticates the named
+root with the retained source master, compares exact selected bytes and verifies
+owner/name identity after conversion and before validation/copy/publication. It
+does not reacquire source credentials or adopt a different post-gap graph.
+Successful rekey validates/copies that selected head, adopts the new epoch,
+downgrades byte 0 and releases byte 1.
 Prior ciphertext is retained and remains decryptable with prior credentials.
 
 Default writable Close attempts a nonblocking latest-head checkpoint. A BUSY or
@@ -127,10 +135,13 @@ checks. The disposable `examples/encrypted-shared` exercises the ordinary path.
 
 No disk tamper, wrong-key disk open, missing selected object, hostile namespace
 race, failed native I/O, short write, disk-full/permission fault, forced process
-exit, crash/hot recovery or interrupted publication/rekey was executed. Darwin encrypted coordination remains unsupported. Windows/amd64 now has a
-[bounded native implementation](../native-encrypted-windows.md), verified only
-by compilation and portable memory laws. Windows shared-mode rekey remains an
-explicit implementation gap; no directory namespace persistence barrier is
+exit, crash/hot recovery or interrupted publication/rekey was executed by the
+scoped evidence described here. Darwin now has [bounded native coordination](../native-encrypted-darwin.md),
+with native runtime NOT_RUN. Windows/amd64 has a
+[bounded native implementation](../native-encrypted-windows.md), including guarded
+shared rekey in this unpublished composition. Its [protocol record](../windows-shared-rekey.md)
+separates portable laws, source-AST checks, Linux ordinary results and the
+completed bounded seventeen-gate code qualification. No Windows directory namespace persistence barrier is
 provided. Native Windows runtime acceptance is NOT_RUN. Cryptographic/legal
 review, hostile-namespace security, externally protected freshness, secure erase
 and physical durability remain separate gates. Full M8 and production readiness

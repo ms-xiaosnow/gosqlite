@@ -3,7 +3,6 @@
 package encstore
 
 import (
-	"context"
 	"errors"
 	"os"
 	"path/filepath"
@@ -158,21 +157,10 @@ func TestWindowsEncryptedPathPolicyMemory(t *testing.T) {
 
 }
 
-type windowsForbiddenProvider struct{ calls int }
-
-func (p *windowsForbiddenProvider) Acquire(context.Context, encryption.KeyRequest) (encryption.KeyMaterial, error) {
-	p.calls++
-	return nil, errors.New("provider must not be called")
-}
-func TestWindowsEncryptedSharedRekeyPreflightMemory(t *testing.T) {
-	p := &windowsForbiddenProvider{}
-	cfg := Options{Mode: WALShared, CredentialKind: encryption.RawKey256, KeyProvider: p}
-	prepared, err := Prepare(context.Background(), `C:\path-never-opened\db.gse`, cfg, encryption.OperationRekeyTarget, [16]byte{1})
-	if prepared != nil || !errors.Is(err, ErrUnsupported) || p.calls != 0 {
-		t.Fatal("unsupported operation touched provider", err, p.calls)
-	}
-	s := Store{opts: cfg}
-	if err = s.BeginMaintenance(context.Background(), true); !errors.Is(err, ErrUnsupported) || s.writerOwned {
-		t.Fatal("unsupported operation reserved writer", err)
+func TestWindowsEncryptedSharedRekeyCapability(t *testing.T) {
+	// This target-only capability check reads the native version. It does not
+	// open a database or replace the portable guarded-conversion law tests.
+	if err := platformOperation(encryption.OperationRekeyTarget, WALShared); err != nil {
+		t.Fatal("supported Windows target rejected shared rekey", err)
 	}
 }
