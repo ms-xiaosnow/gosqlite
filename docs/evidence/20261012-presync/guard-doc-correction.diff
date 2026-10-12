@@ -1,0 +1,16 @@
+--- a/internal/testscope/rollback_fault_sql.go
++++ b/internal/testscope/rollback_fault_sql.go
+@@ -706,6 +706,13 @@
+ 	require("FinishManualRollbackSQLFault", "pre-DB cause bound to actual frozen target and Tx poison", `scope.scope.mu.Lock()`, `target,point := scope.scope.targetError,scope.scope.plan.Spec().Target.Point`, `scope.scope.mu.Unlock()`, `preDBOnlyTargetCause := false`, `if point == rollbackfault.JournalBodySync || point == rollbackfault.JournalHeaderSync || point == rollbackfault.PublishDirectorySync { scope.scope.tx.mu.Lock(); poison := scope.scope.tx.poisoned; scope.scope.tx.mu.Unlock(); preDBOnlyTargetCause = manualRollbackSQLOnlyTargetCause(commitErr,poison,target) }`)
+ 	require("manualRollbackSQLOnlyTargetCause", "closed bounded pre-DB cause traversal", `if commitErr == nil || poison == nil || target != errRollbackFaultInjected { return false }`, `if _,custom := commitErr.(interface{ Is(error) bool }); custom { return false }`, `if _,custom := commitErr.(interface{ As(any) bool }); custom { return false }`, `public,ok := commitErr.(interface{ Unwrap() error })`, `if !ok || public.Unwrap() != poison { return false }`, `joinType := reflect.TypeOf(errors.Join(ErrPoisoned,target))`, `var pending [rollbackfault.MaxEvents]error`, `pending[0] = poison`, `count,visited := 1,0`, `sawTarget,sawPoisoned := false,false`, `for count != 0 { if visited == len(pending) { return false }; visited++; count--; current := pending[count]; pending[count] = nil; if _,custom := current.(interface{ Is(error) bool }); custom { return false }; if _,custom := current.(interface{ As(any) bool }); custom { return false }; if current == target { sawTarget = true; continue }; if current == ErrPoisoned { sawPoisoned = true; continue }; if reflect.TypeOf(current) != joinType { return false }; children := current.(interface{ Unwrap() []error }).Unwrap(); if len(children) == 0 || len(children) > len(pending)-count { return false }; for _,child := range children { if child == nil { return false }; pending[count] = child; count++ } }`, `return sawTarget && sawPoisoned`)
+ 	cause := functions["manualRollbackSQLOnlyTargetCause"]
++	if cause != nil {
++		// Doc is commentary, not part of the closed signature/body contract.
++		// Keep the parsed source AST intact for all other guard checks.
++		shape := *cause
++		shape.Doc = nil
++		cause = &shape
++	}
+ 	if cause == nil || readOnlyWALManualCompact(cause) != readOnlyWALManualCompactText(`func manualRollbackSQLOnlyTargetCause(commitErr, poison, target error) bool {
+ 	if commitErr == nil || poison == nil || target != errRollbackFaultInjected {
+ 		return false

@@ -23,3 +23,7 @@
 - 基线 CI：run 38291398196，head 50b85ed，两作业 SUCCESS；原日志已独立持久化。该旧 CI 不冒充本次新增源码的 CI。
 
 后续三个 pre-DB fail-before caller 只有未完成且未持久化的中间修改，未包含在本检查点。实际故障注入、恢复、退出重启和物理持久性仍 NOT_RUN，整体 M10 尚未验收。[四格手工入口与步骤](../../testing/rollback-fault-sql-manual-zh.md)保留环境、隔离副本、断言和原件留存要求。
+
+## 20:44发布后的精确终态
+
+提交 a49d9bf2cb98101569fc15f6cbebf7ffc43069a1 已远端读回。Library bundle libfile_515c7cf3946c81919afdf7e39cb561f6 已读回，3351文件字节/Git mode、提交/树与fsck恢复PASS。CI 38306158084 于21:03:18 UTC SUCCESS：ordinary115000599728于21:03:17、oracle115000599807于20:55:40均成功。两份完整decoded job log及压缩证据的哈希/Library ID见本目录a49索引。这是新增CI事实，不补造旧13980丢失日志；恢复只核完整性，没有机械重跑旧本地PASS。

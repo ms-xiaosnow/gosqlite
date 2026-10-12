@@ -701,3 +701,7 @@ IMPLEMENTATION_MISSING，也不提升任何恢复/持久性/安全/M3/M8/M10 资
 ## 2026-10-12：第四格与同码恢复
 
 新增 index-prefix-64-error，受测源树 bf7fcb34 的六项影响范围已实际 PASS；整体未验收，物理手工仍 NOT_RUN。额度暂停后原目录不可见，已从持久基包和七文件 delta 恢复相同全部文件。13980 原始日志未上传、当前不可恢复，不能假装已有原始日志；不重复已通过测试。详见 [第四格记录](evidence/20261012-prefix-error/README.zh.md) 与 [恢复和缺失说明](evidence/20261012-prefix-error/recovery-interruption.zh.md)。
+
+## 2026-10-12 21:06 UTC 更新
+
+pre-DB三格已实现并完成受影响普通验证；仍不构成物理恢复资格。见[增量结果/复用/原失败](evidence/20261012-presync/README.zh.md)。a49检查点GitHub、Library精确恢复和CI均闭合。两格post-DB及其余有限设施代码待补，整体未验收。

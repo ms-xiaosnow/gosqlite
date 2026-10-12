@@ -2290,3 +2290,7 @@ separately recorded at the top of this document.
 ## 2026-10-12：第四格与同码恢复
 
 新增 index-prefix-64-error，受测源树 bf7fcb34 的六项影响范围已实际 PASS；整体未验收，物理手工仍 NOT_RUN。额度暂停后原目录不可见，已从持久基包和七文件 delta 恢复相同全部文件。13980 原始日志未上传、当前不可恢复，不能假装已有原始日志；不重复已通过测试。详见 [第四格记录](evidence/20261012-prefix-error/README.zh.md) 与 [恢复和缺失说明](evidence/20261012-prefix-error/recovery-interruption.zh.md)。
+
+## 2026-10-12：三个 pre-DB caller 增量闭合
+
+七格SQL手工设施源码已实现；新三格仍物理NOT_RUN。受影响normal/race、sourceguard和manual编译/nm已通过，保留原guard注释表示FAIL与最小修正，未变模型normal/无关包证据复用。[准确结果和原始事件](evidence/20261012-presync/README.zh.md)。a49 Git/Library恢复/CI双SUCCESS已闭合；下一两个post-DB caller仍在实现，不提前标完成。

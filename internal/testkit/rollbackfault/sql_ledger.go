@@ -22,6 +22,9 @@ const (
 	SQLIndexPrefix64
 	SQLDBSyncBefore
 	SQLIndexPrefix64Error
+	SQLJournalBodySyncBefore
+	SQLJournalHeaderSyncBefore
+	SQLPublishDirectorySyncBefore
 )
 
 type SQLState uint8
@@ -193,8 +196,11 @@ type SQLArtifactEvidence struct {
 }
 
 // Counts are observations, not instructions to close or retry anything. A
-// failed Commit must be followed by retired writer owners, explicit recovery,
-// and a fresh read-only open, without a second Commit or Rollback attempt.
+// failed Commit must be followed by retired writer owners and a fresh read-only
+// open. Only the three post-write failures call recovery; the three pre-DB
+// failures require an untouched OLD copy and zero recovery calls. No second
+// Commit or Rollback attempt is permitted. The two recovery-boundary flags also
+// bind the no-recovery path: retirement and the zero-call decision precede open.
 type SQLLifecycleEvidence struct {
 	ArmCalls                     uint8
 	CommitCalls                  uint8
@@ -210,6 +216,10 @@ type SQLLifecycleEvidence struct {
 	PublicCodeIOErr              bool
 	PublicRecoveryRequired       bool
 	PublicShortWrite             bool
+	PublicPoisoned               bool
+	PublicCommitUncertain        bool
+	PublicCleanupPending         bool
+	PreDBOnlyTargetCause         bool
 }
 
 type SQLLedgerEvidence struct {
@@ -338,8 +348,23 @@ func SQLPlan(identity Identity, which SQLCase) (Plan, Problem) {
 	case SQLIndexPrefix64Error:
 		spec.Action, spec.Prefix, spec.PrefixError = PrefixShortWrite, 64, true
 		spec.ExpectedCommit, spec.CallCount = CommitRecoveryRequired, 15
+	case SQLJournalBodySyncBefore:
+		spec.Target, spec.Action = spec.Calls[8], FailBefore
+		spec.ExpectedCommit, spec.CallCount = CommitFailed, 11
+	case SQLJournalHeaderSyncBefore:
+		spec.Target, spec.Action = spec.Calls[10], FailBefore
+		spec.ExpectedCommit, spec.CallCount = CommitFailed, 13
+	case SQLPublishDirectorySyncBefore:
+		spec.Target, spec.Action = spec.Calls[11], FailBefore
+		spec.ExpectedCommit, spec.CallCount = CommitFailed, 14
 	default:
 		return Plan{}, ProblemTarget
+	}
+	if isSQLPreDBFailure(which) {
+		// The selected Sync/helper is not called. Only the normal two cleanup
+		// operations follow; no database write or recovery is in this trace.
+		spec.Calls[spec.CallCount-2] = Call{Point: CleanupUnlink, Occurrence: 1, Role: Journal, Owner: 12}
+		spec.Calls[spec.CallCount-1] = Call{Point: CleanupDirectorySync, Occurrence: 1, Role: Directory, Owner: 13}
 	}
 	for i := int(spec.CallCount); i < MaxCalls; i++ {
 		spec.Calls[i] = Call{}
@@ -376,8 +401,10 @@ func ObserveSQLLedger(plan Plan, receipt Receipt, evidence SQLLedgerEvidence) SQ
 	}
 	lifecycle := SQLLifecycleEvidence{ArmCalls: 1, CommitCalls: 1, FinishCalls: 1, DisarmCalls: 1, WriterOpens: 1, ReopenCalls: 1, ReopenReadOnly: true, WriterRetiredBeforeRecovery: true, RecoveryFinishedBeforeReopen: true, CommitCapturedUnchanged: true}
 	if evidence.Case != SQLControl {
-		lifecycle.PublicCodeIOErr, lifecycle.PublicRecoveryRequired = true, true
+		lifecycle.PublicCodeIOErr, lifecycle.PublicPoisoned = true, true
+		lifecycle.PublicRecoveryRequired = needsSQLRecovery(evidence.Case)
 		lifecycle.PublicShortWrite = evidence.Case == SQLIndexPrefix64
+		lifecycle.PreDBOnlyTargetCause = isSQLPreDBFailure(evidence.Case)
 	}
 	if evidence.Lifecycle != lifecycle {
 		result.Problem = SQLProblemLifecycle
@@ -549,13 +576,21 @@ func validSQLQueryWork(query SQLQuery, work SQLQueryWork, count uint8) bool {
 	return work.IndexKeysRead == 0 && work.IndexPageReads == 0 && work.RowIDSeeks == 0 && work.Candidates == 0 && work.BaseRowFetches == 3
 }
 
+func isSQLPreDBFailure(which SQLCase) bool {
+	return which == SQLJournalBodySyncBefore || which == SQLJournalHeaderSyncBefore || which == SQLPublishDirectorySyncBefore
+}
+
+func needsSQLRecovery(which SQLCase) bool {
+	return which == SQLIndexPrefix64 || which == SQLDBSyncBefore || which == SQLIndexPrefix64Error
+}
+
 func validSQLRecovery(which SQLCase, recovery SQLRecoveryEvidence) bool {
-	if which == SQLControl {
-		// A control must not call recovery, even as a purported no-op. Its
-		// retained post-commit copy is opened read-only without journal replay.
+	if which == SQLControl || isSQLPreDBFailure(which) {
+		// Control and pre-DB failures must not call recovery, even as a no-op.
+		// The copied input is opened read-only, NEW for control and OLD pre-DB.
 		return recovery == (SQLRecoveryEvidence{Identity: recovery.Identity, OwnersRetired: true})
 	}
-	if recovery.Calls != 1 || recovery.Error != None || recovery.ErrorToken != 0 || !recovery.OwnersRetired || recovery.JournalPresentAfter || recovery.Limits != (SQLRecoveryLimits{MaxJournalBytes: SQLJournalBytes, MaxRecords: SQLPageCount, MaxDatabaseBytes: SQLDatabaseBytes}) {
+	if !needsSQLRecovery(which) || recovery.Calls != 1 || recovery.Error != None || recovery.ErrorToken != 0 || !recovery.OwnersRetired || recovery.JournalPresentAfter || recovery.Limits != (SQLRecoveryLimits{MaxJournalBytes: SQLJournalBytes, MaxRecords: SQLPageCount, MaxDatabaseBytes: SQLDatabaseBytes}) {
 		return false
 	}
 	return recovery.JournalPresentBefore && recovery.Replayed && recovery.ReplayedPages == SQLPageCount && recovery.OriginalPages == SQLPageCount
@@ -567,7 +602,7 @@ func validSQLArtifacts(which SQLCase, artifacts [SQLArtifactCount]SQLArtifactEvi
 			return false
 		}
 		journal := artifact.Role == SQLOriginalJournalArtifact || artifact.Role == SQLJournalCopyArtifact || artifact.Role == SQLReplayJournalArtifact
-		if journal && which == SQLControl {
+		if journal && (which == SQLControl || isSQLPreDBFailure(which)) {
 			if artifact.Before != (SQLArtifactStamp{}) || artifact.After != (SQLArtifactStamp{}) {
 				return false
 			}
@@ -605,11 +640,20 @@ func validSQLArtifacts(which SQLCase, artifacts [SQLArtifactCount]SQLArtifactEvi
 	post := artifacts[SQLPostCopyArtifact].Before.SHA256
 	replayBefore := artifacts[SQLReplayArtifact].Before.SHA256
 	replayAfter := artifacts[SQLReplayArtifact].After.SHA256
-	if baseline == trial || trial != post || trial != replayBefore {
+	if trial != post || trial != replayBefore {
+		return false
+	}
+	if isSQLPreDBFailure(which) {
+		return baseline == trial && replayAfter == baseline
+	}
+	if baseline == trial {
 		return false
 	}
 	if which == SQLControl {
 		return replayAfter == trial
+	}
+	if !needsSQLRecovery(which) {
+		return false
 	}
 	journal := artifacts[SQLOriginalJournalArtifact].Before.SHA256
 	return replayAfter == baseline && journal == artifacts[SQLJournalCopyArtifact].Before.SHA256 && journal == artifacts[SQLReplayJournalArtifact].Before.SHA256

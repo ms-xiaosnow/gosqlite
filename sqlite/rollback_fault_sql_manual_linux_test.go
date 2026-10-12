@@ -317,8 +317,14 @@ func manualRollbackSQLAdmit(c *manualRollbackSQLConfig) error {
 		c.caseID = rollbackfault.SQLDBSyncBefore
 	case "index-prefix-64-error":
 		c.caseID = rollbackfault.SQLIndexPrefix64Error
+	case "jbody-sync-before":
+		c.caseID = rollbackfault.SQLJournalBodySyncBefore
+	case "jheader-sync-before":
+		c.caseID = rollbackfault.SQLJournalHeaderSyncBefore
+	case "publish-dirsync-before":
+		c.caseID = rollbackfault.SQLPublishDirectorySyncBefore
 	default:
-		return fmt.Errorf("exactly one of four fixed cases required")
+		return fmt.Errorf("exactly one of seven fixed cases required")
 	}
 	manifest, _, err := manualRollbackSQLRead(&c.ledger, c.binding.SourceManifestPath, 4<<20)
 	if err != nil {
@@ -594,6 +600,7 @@ func manualRollbackSQLAbandon(tx *Tx, cause error) error {
 
 func manualRollbackSQLCommit(c *manualRollbackSQLConfig, ctx context.Context, path string, plan rollbackfault.Plan) (pager.ManualRollbackSQLReport, error) {
 	spec := plan.Spec()
+	preDB := c.caseID == rollbackfault.SQLJournalBodySyncBefore || c.caseID == rollbackfault.SQLJournalHeaderSyncBefore || c.caseID == rollbackfault.SQLPublishDirectorySyncBefore
 	frozen, problem := rollbackfault.SQLPlan(spec.Identity, c.caseID)
 	if problem != rollbackfault.NoProblem || frozen.Spec() != spec {
 		return pager.ManualRollbackSQLReport{}, fmt.Errorf("public Commit case/plan mismatch")
@@ -640,8 +647,17 @@ func manualRollbackSQLCommit(c *manualRollbackSQLConfig, ctx context.Context, pa
 		}
 	} else {
 		var publicError *Error
-		if !errors.As(commitErr, &publicError) || publicError.Code != CodeIOErr || !errors.Is(commitErr, ErrRecoveryRequired) || errors.Is(commitErr, pager.ErrPlaintextCleanupPending) || errors.Is(commitErr, pager.ErrCommitUncertain) {
+		if !errors.As(commitErr, &publicError) || publicError.Code != CodeIOErr || !errors.Is(commitErr, pager.ErrPoisoned) || errors.Is(commitErr, pager.ErrPlaintextCleanupPending) || errors.Is(commitErr, pager.ErrCommitUncertain) {
 			return report, fmt.Errorf("unqualified public Commit error: %v", commitErr)
+		}
+		if preDB {
+			// Exact public wrapper identity plus the bridge's actual Tx poison
+			// binding excludes extra consumed close errors and unknown chains.
+			if commitErr != publicError || !report.PreDBOnlyTargetCause || errors.Is(commitErr, ErrRecoveryRequired) || errors.Is(commitErr, io.ErrShortWrite) {
+				return report, fmt.Errorf("INCOMPLETE: pre-DB public cause or cleanup differs: %v", commitErr)
+			}
+		} else if !errors.Is(commitErr, ErrRecoveryRequired) {
+			return report, fmt.Errorf("unqualified public recovery cause: %v", commitErr)
 		}
 		if c.caseID == rollbackfault.SQLIndexPrefix64 && !errors.Is(commitErr, io.ErrShortWrite) {
 			return report, fmt.Errorf("original short-write cause lost")
@@ -894,6 +910,8 @@ func TestManualRollbackFaultSQLLedger(t *testing.T) {
 	if problem != rollbackfault.NoProblem {
 		t.Fatalf("BLOCKED before fixture: invalid fixed plan %v", problem)
 	}
+	preDB := c.caseID == rollbackfault.SQLJournalBodySyncBefore || c.caseID == rollbackfault.SQLJournalHeaderSyncBefore || c.caseID == rollbackfault.SQLPublishDirectorySyncBefore
+	needsRecovery := c.caseID == rollbackfault.SQLIndexPrefix64 || c.caseID == rollbackfault.SQLDBSyncBefore || c.caseID == rollbackfault.SQLIndexPrefix64Error
 	baseline, err := manualRollbackSQLBaseline()
 	if err != nil {
 		t.Fatal(err)
@@ -938,14 +956,15 @@ func TestManualRollbackFaultSQLLedger(t *testing.T) {
 		commitText = report.CommitError.Error()
 	}
 	commitRecord, marshalErr := json.MarshalIndent(struct {
-		Identity    rollbackfault.Identity
-		Plan        rollbackfault.PlanSpec
-		Observation rollbackfault.Observation
-		Events      [rollbackfault.MaxEvents]rollbackfault.Event
-		EventCount  uint8
-		CommitError string
-		Diagnostics [rollbackfault.MaxEvents]string
-	}{identity, plan.Spec(), report.Observation, report.Events, report.EventCount, commitText, diagnosticTexts}, "", "  ")
+		Identity             rollbackfault.Identity
+		Plan                 rollbackfault.PlanSpec
+		Observation          rollbackfault.Observation
+		Events               [rollbackfault.MaxEvents]rollbackfault.Event
+		EventCount           uint8
+		CommitError          string
+		Diagnostics          [rollbackfault.MaxEvents]string
+		PreDBOnlyTargetCause bool
+	}{identity, plan.Spec(), report.Observation, report.Events, report.EventCount, commitText, diagnosticTexts, report.PreDBOnlyTargetCause}, "", "  ")
 	if marshalErr != nil {
 		t.Fatal(marshalErr)
 	}
@@ -973,9 +992,16 @@ func TestManualRollbackFaultSQLLedger(t *testing.T) {
 	evidence.Lifecycle.PublicCodeIOErr = errors.As(report.CommitError, &publicError) && publicError.Code == CodeIOErr
 	evidence.Lifecycle.PublicRecoveryRequired = errors.Is(report.CommitError, ErrRecoveryRequired)
 	evidence.Lifecycle.PublicShortWrite = errors.Is(report.CommitError, io.ErrShortWrite)
+	evidence.Lifecycle.PublicPoisoned = errors.Is(report.CommitError, pager.ErrPoisoned)
+	evidence.Lifecycle.PublicCommitUncertain = errors.Is(report.CommitError, pager.ErrCommitUncertain)
+	evidence.Lifecycle.PublicCleanupPending = errors.Is(report.CommitError, pager.ErrPlaintextCleanupPending)
+	evidence.Lifecycle.PreDBOnlyTargetCause = report.PreDBOnlyTargetCause
 	post, postInfo, err := manualRollbackSQLRead(&c.ledger, filepath.Join(c.root, "trial.db"), 12288)
 	if err != nil || len(post) != 12288 || !os.SameFile(trialInfo, postInfo) {
 		t.Fatalf("post-Commit extent/identity: %v", err)
+	}
+	if preDB && !bytes.Equal(post, baseline[:]) {
+		t.Fatal("INCOMPLETE: pre-DB failure changed original database bytes")
 	}
 	if (c.caseID == rollbackfault.SQLIndexPrefix64 || c.caseID == rollbackfault.SQLIndexPrefix64Error) && !bytes.Equal(post[8192+64:], baseline[8192+64:]) {
 		t.Fatal("index short write changed bytes beyond the frozen 64-byte prefix")
@@ -987,9 +1013,9 @@ func TestManualRollbackFaultSQLLedger(t *testing.T) {
 		t.Fatal(err)
 	}
 	var journalBytes []byte
-	if c.caseID == rollbackfault.SQLControl {
+	if !needsRecovery {
 		if _, err := os.Lstat(filepath.Join(c.root, "trial.db-journal")); !os.IsNotExist(err) {
-			t.Fatalf("control journal must be absent: %v", err)
+			t.Fatalf("control/pre-DB journal must be absent after normal cleanup: %v", err)
 		}
 	} else {
 		journalBytes, _, err = manualRollbackSQLRead(&c.ledger, filepath.Join(c.root, "trial.db-journal"), 16408)
@@ -1007,7 +1033,7 @@ func TestManualRollbackFaultSQLLedger(t *testing.T) {
 	if err != nil || os.SameFile(trialInfo, replayInfo) {
 		t.Fatalf("exclusive fresh replay: %v", err)
 	}
-	if c.caseID != rollbackfault.SQLControl {
+	if needsRecovery {
 		if _, err := c.create("replay.db-journal", journalBytes, false); err != nil {
 			t.Fatal(err)
 		}
@@ -1040,7 +1066,7 @@ func TestManualRollbackFaultSQLLedger(t *testing.T) {
 	}
 	evidence.Originals.BeforeBytes = int64(len(oldBefore))
 	evidence.Recovery = rollbackfault.SQLRecoveryEvidence{Identity: identity, OwnersRetired: manualRollbackSQLRegistryEmpty()}
-	if c.caseID != rollbackfault.SQLControl {
+	if needsRecovery {
 		result, recoveryErr := manualRollbackSQLRecoverCopy(ctx, filepath.Join(c.root, "replay.db"))
 		evidence.Recovery.Calls++
 		if recoveryErr != nil {
@@ -1052,7 +1078,7 @@ func TestManualRollbackFaultSQLLedger(t *testing.T) {
 		evidence.Recovery.OwnersRetired = manualRollbackSQLRegistryEmpty()
 	}
 	if _, err := os.Lstat(filepath.Join(c.root, "replay.db-journal")); !os.IsNotExist(err) {
-		t.Fatalf("replay journal not absent after control/recovery: %v", err)
+		t.Fatalf("replay journal not absent after control/pre-DB/recovery: %v", err)
 	}
 	if err := c.retainedUnchanged(); err != nil {
 		t.Fatal(err)

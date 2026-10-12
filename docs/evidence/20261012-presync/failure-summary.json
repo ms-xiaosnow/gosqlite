@@ -1,0 +1,26 @@
+{
+  "source_tree": "db1f6099d8da8421048cfbcd6f15f45e98cb8231",
+  "result": "FAIL",
+  "session": 48278,
+  "format": "PASS",
+  "normal": {
+    "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault": {
+      "roots_pass": 47,
+      "children_pass": 1290,
+      "fail": [],
+      "skip": []
+    },
+    "github.com/ms-xiaosnow/gosqlite/internal/testscope": {
+      "roots_pass": 71,
+      "children_pass": 971,
+      "fail": [
+        "TestRollbackFaultSQLSourceContracts"
+      ],
+      "skip": []
+    }
+  },
+  "remaining_four": "NOT_RUN",
+  "raw_normal_sha256": "3465b13f1e45051358541858bc414b6bd52832e4d11d218959f749adf469c068",
+  "cause": "one sourceguard positive contract failed; root cause investigation pending",
+  "physical": "NOT_RUN"
+}

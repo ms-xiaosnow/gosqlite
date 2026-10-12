@@ -1,0 +1,46 @@
+{
+  "published_parent": {
+    "commit": "a49d9bf2cb98101569fc15f6cbebf7ffc43069a1",
+    "tree": "d997f7ff3bd5b19f7b0cbb63a0975cf608f1bf30",
+    "url": "https://github.com/ms-xiaosnow/gosqlite/commit/a49d9bf2cb98101569fc15f6cbebf7ffc43069a1",
+    "bundle_library_file_id": "libfile_515c7cf3946c81919afdf7e39cb561f6",
+    "bundle_bytes": 7076007,
+    "bundle_sha256": "ae9e8361a68019f1fba373f006a08b19bba0865380002ebe1203452ad8fa99e2",
+    "restore": "PASS: exact commit/tree, 3351 blob bytes/Git modes, fsck; no repeat Go tests"
+  },
+  "candidate_v1_source": {
+    "tree": "db1f6099d8da8421048cfbcd6f15f45e98cb8231",
+    "library_file_id": "libfile_5bb5242fd2348191a76f195bff8e5599",
+    "bytes": 246527,
+    "sha256": "d2f2c33e9104ca571c64a3df84bafca02e6a33760baba3c425b6fa96ae436ab9",
+    "readback": "PASS 20members",
+    "status_at_archive": "SOURCE_ONLY; before test execution"
+  },
+  "candidate_v1_execution": {
+    "session": 48278,
+    "library_file_id": "libfile_a14eb8c99d3481919b4de3a1e7fbf8d7",
+    "bytes": 304916,
+    "sha256": "4f196e1cef2dd3e98bcb7e80eb57bfe70572d4006ea67b47597fc85b44ba991f",
+    "readback": "PASS 19members",
+    "status": "FAIL: one sourceguard positive contract; normal model1337PASS; remaining4 NOT_RUN"
+  },
+  "candidate_v2": {
+    "tree": "d023d4a01d48011c60e67b96a83230d806ab5660",
+    "session": 83450,
+    "correction": "one guard shallow FuncDecl copy ignores Doc comments only; exact signature/body/order retained",
+    "normal_model": "reuse48278 unchanged rollbackfault source/import/init closure; not rerun",
+    "status": "PASS completed 2026-10-12T21:06:47Z; actual6commands and unchanged-model normal reuse",
+    "historical_status_snapshot": "format and affected testscope normal PASS; race in progress; sourceguard/compile/nm pending",
+    "archive": {
+      "library_file_id": "libfile_959e767892588191b39f718c6e655b00",
+      "file_name": "gosqlite-presync-affected-validation-v2-20261012.zip",
+      "version": 0,
+      "bytes": 9505748,
+      "sha256": "52cf8f7d872110a13985b5a770165b13ceceb8712d42cca38685f78d43aafe84",
+      "members": 65,
+      "readback": "PASS exact set/bytes/SHA/ZIP CRC",
+      "physical": "NOT_RUN",
+      "compiled_image_executed": false
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "library_file_id": "libfile_e1e324753b0c819197712fae4e7d78f3",
+  "file_id": "file_00000000c56881fabd53ff466fea7e70",
+  "file_name": "gosqlite-a49d9bf-ci-38306158084.zip",
+  "current_version_number": 0,
+  "local_path": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/a49-ci-evidence/gosqlite-a49d9bf-ci-38306158084.zip",
+  "readback_path": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/a49-ci-evidence/library-readback/gosqlite-a49d9bf-ci-38306158084.zip",
+  "byte_length": 18636,
+  "sha256": "0a051b20834c54cb8cd955368e2a19b248ae7303967ea3fc178ea5ebe9aa451f",
+  "library_readback_exact_bytes": "PASS",
+  "library_readback_crc_and_payload_hashes": "PASS"
+}

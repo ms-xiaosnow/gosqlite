@@ -1,0 +1,20 @@
+{
+  "library_file_id": "libfile_515c7cf3946c81919afdf7e39cb561f6",
+  "commit": "a49d9bf2cb98101569fc15f6cbebf7ffc43069a1",
+  "tree": "d997f7ff3bd5b19f7b0cbb63a0975cf608f1bf30",
+  "bundle_sha256": "ae9e8361a68019f1fba373f006a08b19bba0865380002ebe1203452ad8fa99e2",
+  "bytes": 7076007,
+  "result": "PASS",
+  "restored_git_blob_bytes_and_git_modes": 3351,
+  "restore_kind": "bare Git repository; no second working tree",
+  "fsck_stdout": "",
+  "fsck_stderr": "notice: HEAD points to an unborn branch (master)\n",
+  "runtime_tests": "NOT_RERUN: unchanged tested source; integrity only",
+  "posix_metadata": "not claimed identical to prior execution directories",
+  "fsck_after_setting_bare_HEAD_to_main": {
+    "stdout": "",
+    "stderr": "",
+    "exit_code": 0
+  },
+  "restore_command": "git clone --branch main gosqlite-prefix-error-a49d9bf.bundle gosqlite"
+}
