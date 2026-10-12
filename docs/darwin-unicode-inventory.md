@@ -1,6 +1,12 @@
 # Darwin Unicode 同级名称清单的受限证明
 
-## 2026-10-11 17:02 UTC：完整 21 门限定资格
+## 当前五切片组合状态（2026-10-12）
+
+当前冻结运行树为 `59ce26879c4301babc7648fbddc5cc66c4097263`（3,267 文件、783 个 Go 文件），包含 LEFT/Rows、encrypted inspect、Darwin inventory manual、Connector rollback manual 和 automatic UNIQUE（含 c382 空结果表头 helper 修复）；**不包含 CHECK**。该树于 **2026-10-12 05:21:06 UTC 自然完成完整 26 门 / 28 次 Go 调用 PASS**，lease 已 RELEASED。ordinary/race 各 **8,569 named PASS / 7 个固定预期 SKIP**，完整 pinned oracle **10,301 PASS / 0 SKIP**，LIMIT oracle/race **394 PASS**。新检查点提交、Git bundle、精确恢复及对应 CI 均 **PENDING**；已验证的未发布源包不代替这些步骤。
+
+已发布 main 仍为 `8bc189474bdb2b0a683c6c059992f9acbc426250`，其 bundle、恢复 26 门和两项 CI 已闭合，只资格该精确基点。当前范围、具名输入收据和真实代码/原生余缺以[当前状态](current-status-20261012.md)及[组合证据](evidence/combined-checkpoint-20261012.md)为准。下文带旧日期的 SOURCE_ONLY、NOT_RUN、PENDING、FAIL/HOLD/UNKNOWN 均保留原时点含义；历史失败不回写，手工、物理及 M3/M8/M10 门不因此开放。
+
+## 历史记录：2026-10-11 17:02 UTC 完整 21 门限定资格
 
 当前固定资格组合为 `8a324a8cedeccc8ba46234924c8074890aefa1da`，
 3,157 文件 / 148 目录；其中十路径源码来自
@@ -78,7 +84,7 @@ V1 文档冻结时仍记录 20 项 normal/race **NOT_RUN**，原身份及证据�
 额外编译门、源码门执行及原生 Darwin 验证仍为 **NOT_RUN**。本次含文档组合
 没有完整套件、独立编译或 CI 结果。
 
-## 当前身份与能力边界
+## 历史身份与能力边界（当时固定树）
 
 - 已发布基点：提交 `3ea6d3ab15f678fe48bee312921da60828845869`，tree
   `f6edabfba3e004a0e7874441b8c0a3e38cf099c6`。
@@ -241,3 +247,66 @@ M3/M8/M10、独立数据安全/密码学/法律审查及生产资格保持开放
 [限制溯源](restriction-provenance-20261011.md)、[中文手册](manual-verification-zh.md)
 与[验收状态](acceptance-status.md)。本页不改变任何现有手工命令、tag/env 门或
 物理执行权限。
+
+## 后续独立候选：有限原生 inventory harness（source-only）
+
+2026-10-11：在冻结文档 tree `8a324a8cedeccc8ba46234924c8074890aefa1da`
+之外另建 `darwin-inventory-manual-work-v1`。仅新增受
+`darwin && manual_darwin_inventory` 双门保护的唯一入口
+`TestManualDarwinUnicodeInventory`、独立 source-pinned AST guard/纯字符串负变体
+和窄 main 接线；不修改生产逻辑或旧 manual exemption。上述旧时点的
+IMPLEMENTATION_MISSING 记录保留；本新候选已补的是有限目录分类/计费 harness
+源码，尚未编译、运行 guard 或原生执行，不能写成完整加密资格已补齐。
+
+新入口要求第一动作 env=1、用户明确绝对隔离 root、真实 uid/0700/无 symlink
+和保留 descriptor 上的本地 APFS 或 HFS subtype 0–3，任何失败 Fatal、不 Skip。
+只创建一个私有独占子目录及四个 ordinary metadata payload；三个家族名称合计
+12 字节，`notes-Ω.txt` 为 7 字节。实际 retained enumerator 分类与 nil-owner
+拒绝均有断言，provided namespace/self-open 两 route 都验证精确计费、字节上限
+和四项扫描计数；前后样本 size/digest 保持。它们不是加密数据库格式 fixture，
+没有创建密钥或执行加密/恢复/发布操作。
+
+fixture 成功失败均保留，ledger 先登记 owner 再做后续动作，Close checked-once、
+已知 child 先于 parent，未知资源/Close/依赖 barrier 保留而不重试。日志在计数目录
+之外，记录 native/build/fs 身份、11 个有限断言及 retirement diagnostics。
+具体真实入口、固定工具与依赖、未来命令、证据、失败排查和用户确认后清理见
+[独立中文原生规程](testing/darwin-inventory-manual-zh.md)。文档命令均未执行。
+
+旧 `88c400...` 的 20 项 normal/race PASS 不资格这个新 candidate；当前新增源码
+的 parser/gofmt/guard/selection/compile/native 均 NOT_RUN。一般 Unicode 根名、
+完整加密/native 验收、M3/M8/M10、历史 FAIL/HOLD 与所有既有受限门保持。
+
+
+## 历史 Storage 后继层：源码集成状态（2026-10-11）
+
+以上 V1/旧树状态为原始历史记录，原文完整保留。当前另建
+`darwin-manual-storage-source-v1`，在冻结 Storage tree
+`2602cc60e8c82e3c7f900eb44439e4217cb0b8c3` 之上只集成历史七路径 hunk，
+并在独立审阅完整组合 `internal/testscope/main.go` 后单独更新 WAL 守卫的
+该文件 pin，合计五个源码、三个文档路径。原生文件和两个专用 guard 文件
+保持已封存 V2 的完整字节；V2 tree `578c30fbf9f6e360943265a3208b25c8158dfcef`
+的历史独立结论为 `SOURCE_REVIEW_ACCEPTED_R1_CLOSED`，不能移作新树执行结果。
+V1 HOLD、旧“待复审”及所有旧执行结论均保持其原时点含义。
+
+本层是未发布的未来源码候选，不替换仍由独立执行流程拥有的 Storage 基线，
+也不改变已发布 `f189746671aaf4962a699292a84110e2d43387e8` 的身份。
+最终全树、逐文件 SHA-256/字节/Git 与 POSIX mode、完整 main 审阅及 pin 决策
+见同批封存的 `darwin-manual-storage-integration-evidence-v1`；树身份不嵌入
+自身文件而形成循环。本次 Go/parser/gofmt/list/编译/test/nm/guard/native
+均 NOT_RUN。未来只有 9 次 go-list、5 次 compile-only 和 5 次 nm 的 19 项
+有限静态提案，仍须新树独立审阅、明确审批及队列准入；没有执行许可。
+
+所有当前 Backup/WAL 接线、ordinary/manual exclusions、namespace/recovery
+政策、Windows rekey/key-session/provider/native 行为与文档均保留，不做生产
+依赖回移。原始 native 手册命令属于历史模板；后续提案已由独立 addendum
+纠正：保留既有 go-cache、实际 go-path/pkg/mod 与默认 /tmp，TMPDIR/TMP/TEMP/
+GOTMPDIR 不设值；只新建证据输出，不增加 timeout 或 go version -m 探测，
+资源门限不降低。不得直接执行旧模板或据此启动 recorder/OS runner。
+
+双 tag/env 门、用户明确私有隔离 root、euid/0700/无 symlink、真实本地 APFS
+或 HFS subtype 0–3、初始零 group/lease、固定 ASCII 家族 basename `k.gse`、
+checked-once child-before-parent owner 退休以及成功失败 fixture 保留不变。
+root 校验并不禁止 UTF-8 父目录；任何未来执行授权可另要求 ASCII 私有目录
+拼写，不能把它写成已有源码检查。无 rename/tamper/fault/recovery、权限扩张、
+新 OS runner 或自动清理。有限目录分类/计费不是加密格式、durability、完整
+Darwin/native、安全、M3/M8/M10 或其他受阻 campaign 的通过。

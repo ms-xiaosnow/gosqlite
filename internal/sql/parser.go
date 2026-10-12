@@ -13,6 +13,8 @@ const MaxParameters = 32766
 const MaxSQLBytes = 1 << 20
 const MaxTokens = 32768
 const MaxColumns = 2000
+const MaxUniqueConstraints = 2000
+const MaxUniqueTerms = 8192
 const MaxFunctionArgs = 1000
 const maxExpressionDepth = 128
 
@@ -374,7 +376,29 @@ func (p *parser) createTable() (*CreateTable, error) {
 	}
 	seen := map[string]bool{}
 	pk := false
+	tableConstraints := false
+	uniqueTerms := 0
 	for {
+		if p.is("UNIQUE") || p.is("CONSTRAINT") {
+			if len(s.Columns) == 0 {
+				return nil, p.unsupported("table constraint requires columns")
+			}
+			tableConstraints = true
+			u, err := p.tableUniqueConstraint()
+			if err != nil {
+				return nil, err
+			}
+			if err = p.appendUniqueConstraint(s, u, &uniqueTerms); err != nil {
+				return nil, err
+			}
+			if !p.take(",") {
+				break
+			}
+			continue
+		}
+		if tableConstraints {
+			return nil, p.unsupported("columns after table constraints")
+		}
 		c := ColumnDef{}
 		c.Name, err = p.name()
 		if err != nil {
@@ -414,11 +438,29 @@ func (p *parser) createTable() (*CreateTable, error) {
 				c.Type = typeName + "(" + strconv.Itoa(n) + ")"
 			}
 		}
-		if p.peek().Kind == Identifier && !p.is("PRIMARY") && !p.is("NOT") && !p.is("DEFAULT") {
+		if p.peek().Kind == Identifier && !p.is("PRIMARY") && !p.is("NOT") && !p.is("DEFAULT") && !p.is("UNIQUE") && !p.is("CONSTRAINT") && !p.is("COLLATE") {
 			return nil, p.unsupported("column type or constraint " + p.peek().Text)
 		}
 		for !p.is(",") && !p.is(")") && p.peek().Kind != EOF {
 			switch {
+			case p.is("UNIQUE") || p.is("CONSTRAINT"):
+				u := UniqueConstraint{Columns: []string{c.Name}}
+				if p.take("CONSTRAINT") {
+					u.Name, err = p.name()
+					if err != nil {
+						return nil, err
+					}
+				}
+				if !p.take("UNIQUE") {
+					return nil, p.unsupported("only named UNIQUE constraints")
+				}
+				if err = p.appendUniqueConstraint(s, u, &uniqueTerms); err != nil {
+					return nil, err
+				}
+			case p.take("COLLATE"):
+				if err = p.binaryConstraintCollation(); err != nil {
+					return nil, err
+				}
 			case p.take("PRIMARY"):
 				if err = p.need("KEY"); err != nil {
 					return nil, err
@@ -464,6 +506,66 @@ func (p *parser) createTable() (*CreateTable, error) {
 		return nil, err
 	}
 	return s, nil
+}
+
+// Constraint lists deliberately do not reuse CREATE INDEX's DESC representation:
+// unsupported clauses must fail before equivalent constraints are coalesced.
+func (p *parser) binaryConstraintCollation() error {
+	name, err := p.name()
+	if err != nil {
+		return err
+	}
+	if FoldName(name) != "binary" {
+		return p.unsupported("constraint collation " + name)
+	}
+	return nil
+}
+func (p *parser) tableUniqueConstraint() (UniqueConstraint, error) {
+	u := UniqueConstraint{}
+	var err error
+	if p.take("CONSTRAINT") {
+		u.Name, err = p.name()
+		if err != nil {
+			return u, err
+		}
+	}
+	if !p.take("UNIQUE") {
+		return u, p.unsupported("only table UNIQUE constraints")
+	}
+	if err = p.need("("); err != nil {
+		return u, err
+	}
+	for {
+		name, err := p.name()
+		if err != nil {
+			return u, err
+		}
+		if len(u.Columns) >= MaxColumns {
+			return u, p.unsupported("UNIQUE key exceeds 2000 columns")
+		}
+		u.Columns = append(u.Columns, name)
+		if p.take("COLLATE") {
+			if err = p.binaryConstraintCollation(); err != nil {
+				return u, err
+			}
+		}
+		if p.is("DESC") {
+			return u, p.unsupported("descending UNIQUE constraints")
+		}
+		p.take("ASC")
+		if !p.take(",") {
+			break
+		}
+	}
+	return u, p.need(")")
+}
+func (p *parser) appendUniqueConstraint(s *CreateTable, u UniqueConstraint, terms *int) error {
+	if len(s.UniqueConstraints) >= MaxUniqueConstraints || len(u.Columns) > MaxUniqueTerms-*terms {
+		return p.unsupported("UNIQUE constraint count or total key-term budget")
+	}
+	*terms += len(u.Columns)
+	s.UniqueConstraints = append(s.UniqueConstraints, u)
+	return nil
 }
 func (p *parser) defaultExpr() (Expr, error) {
 	var e Expr

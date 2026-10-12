@@ -22,41 +22,18 @@ import (
 	"github.com/ms-xiaosnow/gosqlite/sqlite"
 )
 
-// Pre-canceled runtime calls return at runContext's entry guard. Inspect the
-// actual opener as well, so dropping the caller context cannot pass unnoticed.
-// Negative controls mutate only parsed source strings, never native state.
-func inspectSourceErrors(source []byte) []string {
+// Pre-canceled runtime calls return before opening. These AST checks also pin
+// the actual dispatch, public opener, options and single-snapshot ownership path.
+// Negative controls mutate parsed source strings only, never native state.
+func inspectSourceErrors(mainSource, inspectSource []byte) []string {
 	set := token.NewFileSet()
-	file, err := parser.ParseFile(set, "main.go", source, 0)
+	mainFile, err := parser.ParseFile(set, "main.go", mainSource, 0)
 	if err != nil {
 		return []string{err.Error()}
 	}
-	var inspect *ast.CaseClause
-	for _, decl := range file.Decls {
-		fn, ok := decl.(*ast.FuncDecl)
-		if !ok || fn.Name.Name != "runContext" {
-			continue
-		}
-		for _, stmt := range fn.Body.List {
-			sw, ok := stmt.(*ast.SwitchStmt)
-			if !ok {
-				continue
-			}
-			for _, stmt := range sw.Body.List {
-				clause := stmt.(*ast.CaseClause)
-				for _, value := range clause.List {
-					if lit, ok := value.(*ast.BasicLit); ok && lit.Kind == token.STRING && lit.Value == `"inspect"` {
-						if inspect != nil {
-							return []string{"duplicate inspect branch"}
-						}
-						inspect = clause
-					}
-				}
-			}
-		}
-	}
-	if inspect == nil {
-		return []string{"runContext inspect branch missing"}
+	helperFile, err := parser.ParseFile(set, "inspect.go", inspectSource, 0)
+	if err != nil {
+		return []string{err.Error()}
 	}
 	var failures []string
 	text := func(node ast.Node) string {
@@ -66,78 +43,180 @@ func inspectSourceErrors(source []byte) []string {
 		}
 		return out.String()
 	}
-	if len(inspect.Body) < 2 || text(inspect.Body[0]) != "flags, tail, err := parseReadOnlyWALFlags(args[1:], true)" {
-		failures = append(failures, "inspect must parse its own flags before opening")
-	}
-	if len(inspect.Body) >= 2 {
-		guard, ok := inspect.Body[1].(*ast.IfStmt)
-		if !ok || text(guard.Cond) != "err != nil || len(tail) != 1 || flags.walExclusive || flags.walShared" || len(guard.Body.List) != 1 {
-			failures = append(failures, "inspect must reject invalid paths and writable WAL flags before opening")
-		} else if _, ok := guard.Body.List[0].(*ast.ReturnStmt); !ok {
-			failures = append(failures, "inspect invalid-flag guard must return")
+	functions := map[string]*ast.FuncDecl{}
+	for _, file := range []*ast.File{mainFile, helperFile} {
+		for _, decl := range file.Decls {
+			if fn, ok := decl.(*ast.FuncDecl); ok {
+				if functions[fn.Name.Name] != nil {
+					failures = append(failures, "duplicate function "+fn.Name.Name)
+				}
+				functions[fn.Name.Name] = fn
+			}
 		}
 	}
-	openers := 0
-	ast.Inspect(inspect, func(node ast.Node) bool {
+	var inspect *ast.CaseClause
+	if run := functions["runContext"]; run != nil {
+		for _, stmt := range run.Body.List {
+			sw, ok := stmt.(*ast.SwitchStmt)
+			if !ok || text(sw.Tag) != "args[0]" {
+				continue
+			}
+			for _, stmt := range sw.Body.List {
+				clause := stmt.(*ast.CaseClause)
+				for _, value := range clause.List {
+					if text(value) == `"inspect"` {
+						if inspect != nil {
+							failures = append(failures, "duplicate inspect branch")
+						}
+						inspect = clause
+					}
+				}
+			}
+		}
+	}
+	if inspect == nil || len(inspect.Body) != 1 || text(inspect.Body[0]) != "return runInspect(ctx, args[1:], out)" {
+		failures = append(failures, "inspect must forward caller context, arguments and output once")
+	}
+	// Compare parsed statement structure, not textual presence. Full bodies pin
+	// parse-before-open, provider scope, options, checked close and emission order.
+	expectBody := func(name, body string) {
+		fn := functions[name]
+		expected, err := parser.ParseFile(set, "expected.go", "package main; func expected() {"+body+"}", 0)
+		if err != nil {
+			failures = append(failures, "invalid source contract: "+err.Error())
+			return
+		}
+		if fn == nil || strings.Join(strings.Fields(text(fn.Body)), " ") != strings.Join(strings.Fields(text(expected.Decls[0].(*ast.FuncDecl).Body)), " ") {
+			failures = append(failures, name+" forwarding/ownership body changed")
+		}
+	}
+	expectBody("openInspectDB", `return sqlite.OpenContext(ctx, path, opts)`)
+	expectBody("runInspectWithInput", `return runInspectWithOpener(ctx, args, out, input, openInspectDB)`)
+	expectBody("runInspectWithOpener", `
+		if err := ctx.Err(); err != nil { return err }
+		o, err := parseInspect(args)
+		if err != nil { return err }
+		var provider *cliKeyProvider
+		if o.provider != "" {
+			provider, err = newCLIKeyProvider(o.provider, input)
+			if err != nil { return err }
+			defer provider.close()
+		}
+		result, err := executeInspect(ctx, o, provider, open)
+		if err == nil { err = json.NewEncoder(out).Encode(result) }
+		if err != nil && provider != nil { return inspectError(err) }
+		return err
+	`)
+	expectBody("executeInspect", `
+		opts := sqlite.Options{ReadOnly: true, NoCreate: true, WALShared: o.walReadOnly}
+		if provider != nil {
+			opts.Encryption = &sqlite.EncryptionOptions{KeyProvider: provider, CredentialKind: provider.kind, Mode: o.mode}
+			opts.KeepWALOnClose = o.mode != sqlite.EncryptionSnapshot
+		}
+		db, err := open(ctx, o.path, opts)
+		if err != nil { return nil, err }
+		inspection, inspectErr := db.Inspect(ctx, sqlite.InspectOptions{IncludeExtensions: o.extensions})
+		if err := errors.Join(inspectErr, db.Close()); err != nil { return nil, err }
+		return inspectOutput(o, provider != nil, inspection), nil
+	`)
+	parse := functions["parseInspect"]
+	if parse == nil || len(parse.Body.List) != 7 || text(parse.Body.List[0]) != "flags, tail, err := parseReadOnlyWALFlags(args, true)" {
+		failures = append(failures, "inspect must parse legacy leading flags before routing")
+	} else {
+		guard, ok := parse.Body.List[1].(*ast.IfStmt)
+		if !ok || text(guard.Cond) != `err != nil || len(tail) == 0 || tail[0] == "" || flags.walExclusive || flags.walShared` || len(guard.Body.List) != 1 || text(guard.Body.List[0]) != "return inspectCommandOptions{}, errors.New(inspectUsage)" {
+			failures = append(failures, "inspect must reject invalid paths and writable WAL modes")
+		}
+		if text(parse.Body.List[2]) != "o := inspectCommandOptions{path: tail[0], walReadOnly: flags.walReadOnly, extensions: flags.extensions}" {
+			failures = append(failures, "inspect parsed path/flags were not preserved")
+		}
+		guard, ok = parse.Body.List[5].(*ast.IfStmt)
+		if !ok || text(guard.Cond) != `seen["--mode"] && o.provider == "" || o.provider != "" && o.walReadOnly` || len(guard.Body.List) != 1 || text(guard.Body.List[0]) != "return inspectCommandOptions{}, errors.New(inspectUsage)" {
+			failures = append(failures, "inspect must reject mode without provider and plaintext WAL/encryption conflicts")
+		}
+	}
+	// Check the user-facing wrapper structurally without binding whitespace or
+	// the noninteractive stdin closure's formatting to the source test.
+	run := functions["runInspect"]
+	if run == nil || len(run.Body.List) != 1 {
+		failures = append(failures, "runInspect forwarding missing")
+	} else if ret, ok := run.Body.List[0].(*ast.ReturnStmt); !ok || len(ret.Results) != 1 {
+		failures = append(failures, "runInspect must return its input runner")
+	} else if call, ok := ret.Results[0].(*ast.CallExpr); !ok || text(call.Fun) != "runInspectWithInput" || len(call.Args) != 4 || text(call.Args[0]) != "ctx" || text(call.Args[1]) != "args" || text(call.Args[2]) != "out" {
+		failures = append(failures, "runInspect lost caller context/arguments/output")
+	}
+	openers, inspections, closes := 0, 0, 0
+	ast.Inspect(helperFile, func(node ast.Node) bool {
 		call, ok := node.(*ast.CallExpr)
-		if !ok {
-			return true
-		}
+		if !ok { return true }
 		sel, ok := call.Fun.(*ast.SelectorExpr)
-		if !ok || (sel.Sel.Name != "Open" && sel.Sel.Name != "OpenContext") {
-			return true
-		}
-		pkg, ok := sel.X.(*ast.Ident)
-		if !ok || pkg.Name != "sqlite" {
-			return true
-		}
-		openers++
-		const want = "sqlite.OpenContext(ctx, tail[0], sqlite.Options{ReadOnly: true, NoCreate: true, WALShared: flags.walReadOnly})"
-		if got := text(call); got != want {
-			failures = append(failures, fmt.Sprintf("inspect must forward caller context and readonly capabilities: got %s; want %s", got, want))
-		}
+		if !ok { return true }
+		if text(sel.X) == "sqlite" && (sel.Sel.Name == "Open" || sel.Sel.Name == "OpenContext") { openers++ }
+		if sel.Sel.Name == "Inspect" { inspections++ }
+		if sel.Sel.Name == "Close" { closes++ }
+		if sel.Sel.Name == "VerifyEncrypted" { failures = append(failures, "inspect must not add verification/debug reads") }
 		return true
 	})
-	if openers != 1 {
-		failures = append(failures, fmt.Sprintf("inspect has %d SQLite open calls, want exactly one", openers))
+	if openers != 1 || inspections != 1 || closes != 1 {
+		failures = append(failures, fmt.Sprintf("inspect has %d openers, %d inspections, %d closes; want one each", openers, inspections, closes))
+	}
+	// Parser object identity catches a same-spelled context shadow as well.
+	for _, name := range []string{"openInspectDB", "runInspect", "runInspectWithInput", "runInspectWithOpener", "executeInspect"} {
+		fn := functions[name]
+		if fn == nil || len(fn.Type.Params.List) == 0 || len(fn.Type.Params.List[0].Names) != 1 { continue }
+		ctx := fn.Type.Params.List[0].Names[0]
+		ast.Inspect(fn.Body, func(node ast.Node) bool {
+			id, ok := node.(*ast.Ident)
+			if ok && id.Name == "ctx" && (id.Obj == nil || id.Obj != ctx.Obj) {
+				failures = append(failures, name+" lost caller context identity")
+			}
+			return true
+		})
 	}
 	return failures
 }
 
 func TestInspectSourceForwardsCallerContext(t *testing.T) {
-	source, err := os.ReadFile("main.go")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if failures := inspectSourceErrors(source); len(failures) != 0 {
-		t.Fatal(failures)
-	}
-	const opener = "sqlite.OpenContext(ctx, tail[0], sqlite.Options{ReadOnly: true, NoCreate: true, WALShared: flags.walReadOnly})"
-	for _, tc := range []struct{ name, old, replacement string }{
-		{"caller_context", opener, strings.Replace(opener, "(ctx,", "(context.Background(),", 1)},
-		{"legacy_open", opener, strings.Replace(opener, "OpenContext(ctx, ", "Open(", 1)},
-		{"wrong_path", opener, strings.Replace(opener, "tail[0]", "args[1]", 1)},
-		{"writable_option", opener, strings.Replace(opener, "ReadOnly: true", "ReadOnly: false", 1)},
-		{"create_option", opener, strings.Replace(opener, "NoCreate: true", "NoCreate: false", 1)},
-		{"missing_readonly", opener, strings.Replace(opener, "ReadOnly: true, ", "", 1)},
-		{"missing_nocreate", opener, strings.Replace(opener, "NoCreate: true, ", "", 1)},
-		{"wrong_wal_flag", opener, strings.Replace(opener, "flags.walReadOnly", "flags.walShared", 1)},
-		{"duplicate_open", opener, opener + "; _, _ = " + opener},
-		{"parser_bypass", "parseReadOnlyWALFlags(args[1:], true)", "parseReadOnlyWALFlags(args[1:], false)"},
-		{"writable_modes_accepted", "err != nil || len(tail) != 1 || flags.walExclusive || flags.walShared", "err != nil || len(tail) != 1"},
-		{"duplicate_inspect", "case \"inspect\":", "case \"inspect\":\ncase \"inspect\":"},
+	mainSource, err := os.ReadFile("main.go")
+	if err != nil { t.Fatal(err) }
+	helperSource, err := os.ReadFile("inspect.go")
+	if err != nil { t.Fatal(err) }
+	if failures := inspectSourceErrors(mainSource, helperSource); len(failures) != 0 { t.Fatal(failures) }
+	for _, tc := range []struct{ name, file, old, replacement string }{
+		{"dispatch_context", "main", "return runInspect(ctx, args[1:], out)", "return runInspect(context.Background(), args[1:], out)"},
+		{"dispatch_path", "main", "return runInspect(ctx, args[1:], out)", "return runInspect(ctx, args[2:], out)"},
+		{"duplicate_inspect", "main", "case \"inspect\":", "case \"inspect\":\ncase \"inspect\":"},
+		{"caller_context", "helper", "sqlite.OpenContext(ctx, path, opts)", "sqlite.OpenContext(context.Background(), path, opts)"},
+		{"legacy_open", "helper", "sqlite.OpenContext(ctx, path, opts)", "sqlite.Open(path, opts)"},
+		{"wrong_path", "helper", "open(ctx, o.path, opts)", "open(ctx, o.provider, opts)"},
+		{"writable_option", "helper", "ReadOnly: true", "ReadOnly: false"},
+		{"create_option", "helper", "NoCreate: true", "NoCreate: false"},
+		{"missing_readonly", "helper", "ReadOnly: true, ", ""},
+		{"missing_nocreate", "helper", "NoCreate: true, ", ""},
+		{"wrong_wal_flag", "helper", "WALShared: o.walReadOnly", "WALShared: true"},
+		{"duplicate_open", "helper", "db, err := open(ctx, o.path, opts)", "db, err := open(ctx, o.path, opts); _, _ = open(ctx, o.path, opts)"},
+		{"parser_bypass", "helper", "parseReadOnlyWALFlags(args, true)", "parseReadOnlyWALFlags(args, false)"},
+		{"writable_modes_accepted", "helper", ` || flags.walExclusive || flags.walShared`, ""},
+		{"mixed_modes_accepted", "helper", ` || o.provider != "" && o.walReadOnly`, ""},
+		{"profile_lost", "helper", "Mode: o.mode", "Mode: sqlite.EncryptionSnapshot"},
+		{"provider_lost", "helper", "KeyProvider: provider", "KeyProvider: nil"},
+		{"wal_retention_lost", "helper", "opts.KeepWALOnClose = o.mode != sqlite.EncryptionSnapshot", "opts.KeepWALOnClose = false"},
+		{"inspection_context", "helper", "db.Inspect(ctx,", "db.Inspect(context.Background(),"},
+		{"extensions_lost", "helper", "IncludeExtensions: o.extensions", "IncludeExtensions: true"},
+		{"discard_close_error", "helper", "errors.Join(inspectErr, db.Close())", "inspectErr"},
+		{"discard_inspect_error", "helper", "errors.Join(inspectErr, db.Close())", "db.Close()"},
+		{"early_provider_close", "helper", "defer provider.close()", "provider.close()"},
+		{"output_on_error", "helper", "if err == nil {", "if true {"},
+		{"input_opener_bypass", "helper", "input, openInspectDB)", "input, nil)"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			if strings.Count(string(source), tc.old) != 1 {
-				t.Fatal("negative control must replace exactly one source fragment", tc.old)
-			}
-			mutated := strings.Replace(string(source), tc.old, tc.replacement, 1)
-			if _, err := parser.ParseFile(token.NewFileSet(), "main.go", mutated, 0); err != nil {
-				t.Fatal("malformed negative control", err)
-			}
-			if failures := inspectSourceErrors([]byte(mutated)); len(failures) == 0 {
-				t.Fatal("source guard accepted negative control", tc.name)
-			}
+			mainCopy, helperCopy := string(mainSource), string(helperSource)
+			source := &helperCopy
+			if tc.file == "main" { source = &mainCopy }
+			if strings.Count(*source, tc.old) != 1 { t.Fatal("negative control must replace exactly one source fragment", tc.old) }
+			*source = strings.Replace(*source, tc.old, tc.replacement, 1)
+			if _, err := parser.ParseFile(token.NewFileSet(), tc.file+".go", *source, 0); err != nil { t.Fatal("malformed negative control", err) }
+			if failures := inspectSourceErrors([]byte(mainCopy), []byte(helperCopy)); len(failures) == 0 { t.Fatal("source guard accepted negative control", tc.name) }
 		})
 	}
 }

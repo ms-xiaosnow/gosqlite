@@ -1,5 +1,9 @@
 # 历史有限收尾与当前继续编码边界
 
+## 当前状态入口（2026-10-12）
+
+本文件旧段落保留各自写作时点的源码、FAIL/HOLD/UNKNOWN 与 NOT_RUN；其中“当前”“缺失”“待合入”或 PENDING 不能覆盖[当前源码/证据矩阵](current-status-20261012.md)。已保存 main8bc 的发布、精确恢复与 CI 已闭合；本次 LEFT/inspect/Darwin/Connector/automatic UNIQUE 组合仅 SOURCE_ONLY；前序 Rows pin 已修正，新增 sqlite.go 的 WAL-tail 完整源 pin 经独立完整 ownership 复审在本后继窄修，automatic UNIQUE 原 oracle FAIL 及 d79 HOLD 保留，已接入独立审阅的空结果表头修复，组合运行仍全部 NOT_RUN。输入切片的有限成功不转授本组合，原生手工/物理门不变。
+
 核对日期：2026-10-11。原始 `goal.md` 不变。三项有限收尾已在63c2检查点保存；它不是缩减原目标，也不是完整验收证书。06:53 UTC用户要求跳过并记录受限测试、其余继续分批编码。此前把多项源码统一暂停的依据现已[逐项纠正](restriction-provenance-20261011.md)：没有定位到相关精确源码编辑的原始拒绝，不能将谨慎暂停当作已证明的编码禁令。也不能从未定位记录推导一揽子许可。进展与精确身份以[验收矩阵](acceptance-status.md)、[checkpoints.json](checkpoints.json)及具名证据为准。
 
 ## 一、已完成的历史有限收尾清单

@@ -1,5 +1,20 @@
 # Native supported-profile integrity checking
 
+## 当前自动 UNIQUE 组合入口（2026-10-12）
+
+本文件下方自动 UNIQUE V1/V2 与 Storage 基点段落保留各自身份的历史；最新组合见[当前源码与证据](current-status-20261012.md)。本次在已审阅 LEFT/inspect/Darwin/Connector v4 上并入 automatic UNIQUE 原基线增量，并接入独立复审通过的 c382 空结果表头观察器窄修；未加入 CHECK。前序 d79 组合及旧 sqlite.go pin HOLD 原样冻结，本后继仅按独立完整 ownership 复审更新该一个 pin。组合 **SOURCE_ONLY / NOT_RUN**；原 automatic UNIQUE 六门 oracle FAIL 保留，修后原 gate11 运行资格仍待其独立终态，输入成功不转授组合。
+
+> 2026-10-12 V2 精确 schema 预算修正：前驱 `c065143baa0e61d0c4aae942ae2b5051b26b28f2`
+> 因 AU-1（owner/table/已有目录和行数预算遗漏）保留 **SOURCE_HOLD**。本 V2 仅做
+> 共享 ReadSchema 真实计费、完整当前目录与新增行的写入前准入，以及纯模型/小型 quota
+> 原子失败测试源码；仍 **SOURCE_ONLY / NOT_RUN**，待独立复审，不能继承前驱或基线结果。
+
+> 2026-10-12 自动 UNIQUE 新切片：**SOURCE_ONLY / NOT_RUN**。本树在冻结
+> `4008bd9442ffd21e1e993d4f1c72dbeed3c910f3` 上新增普通 rowid 列/表 UNIQUE、
+> 精确 autoindex 所有权/NULL 元数据和原子 CREATE；基线的完整 26 门 PASS 不传递。
+> 本切片尚未格式化、编译、测试或 oracle；下方旧“当前”段落是各自身份的历史。
+> [准确范围、API/JSON 兼容决策、来源与有限提案](automatic-unique.md)。
+
 ## 2026-10-12 Storage + UNIQUE：冻结组合完整 26 门 PASS
 
 冻结运行树 `4008bd9442ffd21e1e993d4f1c72dbeed3c910f3`（3,238 文件）于 **00:49:41 UTC**
@@ -251,3 +266,12 @@ from that rejection list. Table/column UNIQUE and implicit autoindexes, typed
 vector or extension UNIQUE, DESC, partial, expression and non-BINARY indexes
 remain rejected. Descriptor-free logical fixtures are confined to PageReader
 memory; no malformed fixture is written to native storage or routed to VFS.
+
+## 自动 UNIQUE 目录/Check 增量（2026-10-12，未运行）
+
+[自动 UNIQUE 新候选](automatic-unique.md)在完整目录期望集合匹配后，将每个约束根
+加入既有 Check 所有权、source/index 双向核对及相邻非 NULL 前缀唯一性检查。
+不会从 sqlite_ 前缀推断已支持，也不合成缺失索引。NULL 仍有真实索引项；任意字段
+NULL 的重复键合法。空 TEXT 自动索引 SQL 是明确不支持的非规范形式，不是损坏断言。
+原来的全面拒绝 autoindex 段落是历史范围；这个新范围尚未运行验证，CheckScope 名称
+不变且不宣称完整 SQLite integrity_check 等价。生产 Check 实现本身未修改。

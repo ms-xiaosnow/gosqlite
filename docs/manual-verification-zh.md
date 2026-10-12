@@ -1,5 +1,9 @@
 # gosqlite 中文手工验收操作手册
 
+## 当前状态入口（2026-10-12）
+
+本文件旧段落保留各自写作时点的源码、FAIL/HOLD/UNKNOWN 与 NOT_RUN；其中“当前”“缺失”“待合入”或 PENDING 不能覆盖[当前源码/证据矩阵](current-status-20261012.md)。已保存 main8bc 的发布、精确恢复与 CI 已闭合；本次 LEFT/inspect/Darwin/Connector/automatic UNIQUE 组合仅 SOURCE_ONLY；前序 Rows pin 已修正，新增 sqlite.go 的 WAL-tail 完整源 pin 经独立完整 ownership 复审在本后继窄修，automatic UNIQUE 原 oracle FAIL 及 d79 HOLD 保留，已接入独立审阅的空结果表头修复，组合运行仍全部 NOT_RUN。输入切片的有限成功不转授本组合，原生手工/物理门不变。
+
 > 2026-10-12 当前组合状态：Storage metadata 修正树 `7389e7b7` 的三条回归
 > 已实际 PASS（14 根 / 92 named PASS），UNIQUE 树 `fd4e3471` 的十二条有限门
 > 已实际 PASS（31 根 / 223 named PASS / 零 SKIP）；两者均自然退出并释放 lease。
@@ -1784,3 +1788,68 @@ V1 文档的 18 个内存函数加 2 个源码/AST 函数 normal/race NOT_RUN �
 没有为此发明选择器或新增运行命令。一般 Unicode 根名、M3/M8/M10、既有物理
 限制和所有手工 tag/env 门保持，历史 baseline FAIL、V1/V2 HOLD 与 V3 旧树结果
 不转为当前 PASS。
+
+
+## 24 新独立 Darwin inventory 手工 harness：仅源码，全部执行 NOT_RUN
+
+2026-10-11：第 23 节“真实 managed-directory 加 Unicode sibling harness 缺失”
+是旧固定生产/文档树的历史状态，原文保留。新隔离候选
+`darwin-inventory-manual-work-v1` 仅补有限 directory classification/charging
+的源码入口 `TestManualDarwinUnicodeInventory`，没有生产逻辑修改。
+完整范围、source pin、root/FS 前置、真实命令与逐名结果见
+[Darwin inventory 独立规程](testing/darwin-inventory-manual-zh.md)。
+
+它只在 `darwin && manual_darwin_inventory` 和第一动作
+`GOSQLITE_MANUAL_DARWIN_INVENTORY=1` 双门下可运行，用户必须提供已存在、
+自己拥有、0700、绝对且无 symlink 的隔离 root，并由真实 retained descriptor
+确认本地 APFS 或 HFS subtype 0–3；没有默认 root、Skip、放宽或换卷回退。
+一次 private exclusive child 中只有三个家族名字的 ordinary payload 与
+`notes-Ω.txt`，不是加密数据库格式样本。两条 inventory route 验证精确 12 字节
+family charge、11 字节上限拒绝、3 项扫描上限拒绝及样本 size/digest 不变。
+
+新的 source guard 只解析固定文件/惰性变体，不启动 native；没有扩大旧 manual
+exemption。所有 owned resource 先注册，checked-once child-before-parent
+retirement，未知资源/Close 立即保留；成功失败都不自动删 fixture。
+日志置于 counted fixture 外，必须核对 11 个具名断言、native/source/build/fs
+身份与终态所有权。用户确认完整封存、没有未处理 owner 后才决定清理新目录。
+
+本次没有运行 Go/parser/gofmt/编译/测试/原生/项目脚本，所有执行层均 NOT_RUN；
+旧源码 `88c400...` 的 20 项 normal/race PASS 不能转给本新树。当前缺少原生机器，
+手册只是未来单独审批的用户模板，不能据此启动当前或被阻断链路。完整加密/
+Darwin 接受性、一般 Unicode 根名、M3/M8/M10、历史 FAIL/HOLD、Windows 变更及
+ANN V4/受阻 41-target campaign/未知中断和既有 manual tag/env 门全部保持。
+
+
+## 当前 Storage 后继层：源码集成状态（2026-10-11）
+
+以上 V1/旧树状态为原始历史记录，原文完整保留。当前另建
+`darwin-manual-storage-source-v1`，在冻结 Storage tree
+`2602cc60e8c82e3c7f900eb44439e4217cb0b8c3` 之上只集成历史七路径 hunk，
+并在独立审阅完整组合 `internal/testscope/main.go` 后单独更新 WAL 守卫的
+该文件 pin，合计五个源码、三个文档路径。原生文件和两个专用 guard 文件
+保持已封存 V2 的完整字节；V2 tree `578c30fbf9f6e360943265a3208b25c8158dfcef`
+的历史独立结论为 `SOURCE_REVIEW_ACCEPTED_R1_CLOSED`，不能移作新树执行结果。
+V1 HOLD、旧“待复审”及所有旧执行结论均保持其原时点含义。
+
+本层是未发布的未来源码候选，不替换仍由独立执行流程拥有的 Storage 基线，
+也不改变已发布 `f189746671aaf4962a699292a84110e2d43387e8` 的身份。
+最终全树、逐文件 SHA-256/字节/Git 与 POSIX mode、完整 main 审阅及 pin 决策
+见同批封存的 `darwin-manual-storage-integration-evidence-v1`；树身份不嵌入
+自身文件而形成循环。本次 Go/parser/gofmt/list/编译/test/nm/guard/native
+均 NOT_RUN。未来只有 9 次 go-list、5 次 compile-only 和 5 次 nm 的 19 项
+有限静态提案，仍须新树独立审阅、明确审批及队列准入；没有执行许可。
+
+所有当前 Backup/WAL 接线、ordinary/manual exclusions、namespace/recovery
+政策、Windows rekey/key-session/provider/native 行为与文档均保留，不做生产
+依赖回移。原始 native 手册命令属于历史模板；后续提案已由独立 addendum
+纠正：保留既有 go-cache、实际 go-path/pkg/mod 与默认 /tmp，TMPDIR/TMP/TEMP/
+GOTMPDIR 不设值；只新建证据输出，不增加 timeout 或 go version -m 探测，
+资源门限不降低。不得直接执行旧模板或据此启动 recorder/OS runner。
+
+双 tag/env 门、用户明确私有隔离 root、euid/0700/无 symlink、真实本地 APFS
+或 HFS subtype 0–3、初始零 group/lease、固定 ASCII 家族 basename `k.gse`、
+checked-once child-before-parent owner 退休以及成功失败 fixture 保留不变。
+root 校验并不禁止 UTF-8 父目录；任何未来执行授权可另要求 ASCII 私有目录
+拼写，不能把它写成已有源码检查。无 rename/tamper/fault/recovery、权限扩张、
+新 OS runner 或自动清理。有限目录分类/计费不是加密格式、durability、完整
+Darwin/native、安全、M3/M8/M10 或其他受阻 campaign 的通过。

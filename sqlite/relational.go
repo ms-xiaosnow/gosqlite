@@ -153,6 +153,7 @@ type relationalJoin struct {
 	leftWidth, rightWidth int
 	kind                  string
 	on                    *predicateProgram
+	leftWhere             *predicateProgram
 	rows                  *Rows
 	budget                *relationalBudget
 	outer                 []any
@@ -178,6 +179,19 @@ func (s *relationalJoin) Next() (int64, []any, error) {
 			}
 			s.outer = row
 			s.matched = false
+			if s.leftWhere != nil {
+				// aggregateInput retargets rows to the original input scope.
+				// Use that pointer, not a captured root evaluator or padded tuple.
+				keep, e := s.rows.relationalPredicate(s.leftWhere, row)
+				if e != nil {
+					return 0, nil, e
+				}
+				if !keep {
+					// The leaf owns this borrowed row until its next Next/Close.
+					s.outer = nil
+					continue
+				}
+			}
 			s.right, err = s.rightFactory()
 			if err != nil {
 				return 0, nil, err

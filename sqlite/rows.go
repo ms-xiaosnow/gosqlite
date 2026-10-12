@@ -109,6 +109,9 @@ func (r *Rows) close() error {
 		r.release = nil
 	}
 	if r.relational != nil {
+		// Terminal bookkeeping follows source/snapshot retirement, including
+		// paths that never entered the runtime scratch cleanup scopes.
+		r.relational.scalarBytes, r.relational.resultBytes = 0, 0
 		r.relational.stats.CurrentBytes = 0
 		r.exprs, r.order, r.table, r.sel, r.aliases = nil, nil, nil, nil, nil
 	}

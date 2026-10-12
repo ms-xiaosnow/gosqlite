@@ -1,9 +1,13 @@
-# CLI encrypted backup and rekey
+# CLI encrypted backup, rekey and inspect
+
+## 当前状态入口（2026-10-12）
+
+本文件旧段落保留各自写作时点的源码、FAIL/HOLD/UNKNOWN 与 NOT_RUN；其中“当前”“缺失”“待合入”或 PENDING 不能覆盖[当前源码/证据矩阵](current-status-20261012.md)。已保存 main8bc 的发布、精确恢复与 CI 已闭合；本次 LEFT/inspect/Darwin/Connector/automatic UNIQUE 组合仅 SOURCE_ONLY；前序 Rows pin 已修正，新增 sqlite.go 的 WAL-tail 完整源 pin 经独立完整 ownership 复审在本后继窄修，automatic UNIQUE 原 oracle FAIL 及 d79 HOLD 保留，已接入独立审阅的空结果表头修复，组合运行仍全部 NOT_RUN。输入切片的有限成功不转授本组合，原生手工/物理门不变。
 
 This is a narrow implementation of goal §12.2 using the existing experimental
 native encrypted storage APIs. It does not change the encrypted format, public
 `sqlite.Options`/`sqlite.Result` layouts, KDF policy, platform restrictions or the
-existing query/inspect/check/migrate syntax. Do not use irreplaceable data.
+existing plaintext inspect JSON and leading flags, or query/check/migrate syntax. Do not use irreplaceable data.
 [Storage and acceptance boundaries](encryption-storage.md) still apply.
 
 ## Commands
@@ -11,14 +15,15 @@ existing query/inspect/check/migrate syntax. Do not use irreplaceable data.
 ```text
 gosqlite backup <db> --out <new-archive> --key-provider <provider> [--out-key-provider <provider>] [--mode snapshot|wal|shared]
 gosqlite rekey <db> --key-provider <new-provider> --current-key-provider <provider> [--mode snapshot|wal|shared]
+gosqlite inspect [--extensions] <db> --key-provider <provider> [--mode snapshot|wal|shared]
 ```
 
-Put the database path first, then separate flag/value pairs. Each flag may appear
+For backup/rekey, put the database path first, then separate flag/value pairs. Each flag may appear
 once. `--flag=value`, positional extras and automatic mode detection are not
-supported. With a path beginning `--`, use an unambiguous absolute path. Both
-commands open an existing database with `NoCreate`; they never create a missing
+supported. With a path beginning `--`, use an unambiguous absolute path. Backup and rekey
+open an existing database with `NoCreate`; they never create a missing
 source. Options and provider descriptors are validated without printing their
-contents. `gosqlite help` lists both commands.
+contents. `gosqlite help` lists these commands.
 
 `--mode snapshot` is the default and selects layout 1. `wal` explicitly selects
 layout 2; `shared` selects layout 3. The existing family must match. These are
@@ -97,6 +102,68 @@ ciphertext, plaintext copies, backups or snapshots. It does not convert plaintex
 in place, change encrypted mode or recover an interrupted operation. Keep the
 current and replacement credentials available until successful verification.
 
+### Inspect: source implementation, runtime NOT_RUN
+
+The new encrypted inspect route implements the goal §12.2 key/profile plumbing
+using the existing public `OpenContext` and `DB.Inspect` APIs. This candidate's
+parser/compiler/tests/native/race/build/full gates have **NOT_RUN**; earlier
+backup/rekey or base-tree results do not qualify this new route.
+
+`gosqlite inspect [--extensions] <db> --key-provider <provider>` explicitly
+selects encrypted snapshot mode. Append `--mode wal` or `--mode shared` only for
+an existing family in that profile. Provider/mode pairs follow the path; each
+may appear once, in either order. No automatic profile detection, conversion,
+recovery, credential-file input, secret-value argument or KDF override is added.
+All four local descriptors below are supported by the unchanged provider.
+
+Plaintext `inspect [--wal-readonly] [--extensions] <db>` retains its leading-flag
+ordering flexibility and exact default/extension JSON field order and labels.
+`--extensions` must still lead the path and remains opt-in. Writable native WAL
+flags are rejected; native `--wal-readonly` cannot be mixed with encryption.
+`--mode` without `--key-provider`, extra positionals, duplicates and malformed
+providers are rejected without printing submitted values.
+
+The encrypted route opens read-only/no-create, retains encrypted WAL on close
+for wal/shared, and calls `DB.Inspect` once. The caller context reaches both
+public OpenContext and Inspect. Recovery/publication options remain unset.
+Its allowlisted JSON fields are `format: "gosqlite-encrypted-family"`, selected
+`mode`, `metadata_scope: "logical SQLite metadata inspection only"`, `header`
+and `schema`; `--extensions` additionally emits `extension_indexes` (including
+`[]` when empty). Header/schema describe decrypted logical SQLite metadata, not
+an ordinary physical SQLite 3 file. No provider, credential, descriptor, env
+name, path, physical encryption header, identity or debugging state is emitted.
+No `VerifyEncrypted`, extra verification snapshot or index scan is added.
+
+Schema SQL is deliberate inspect output. `--extensions` also exposes persisted
+application-chosen method/configuration text. Such metadata can itself contain
+sensitive application content; the credential-plumbing non-disclosure promise
+does not make arbitrary stored metadata secret-free. This is not an integrity,
+index-usability, anti-rollback or production-security verdict.
+
+Inspect joins its operation error with one checked DB Close attempt and emits
+JSON only if both succeed. A writer failure remains failure and can leave a
+partial JSON prefix. Encrypted errors, including writer errors, are reduced to
+fixed categories with uncertainty/poison/recovery preceding retryable causes;
+no arbitrary error chain is retained. A failed Close does **not** prove all
+native owners retired. The CLI does not retry Close, perform recovery, or remove
+uncertain artifacts. Native cleanup tracking remains the existing core's work.
+
+The input runner owns and clears its provider only after the synchronous DB
+operation/Close attempt and output handling; the executor merely borrows it.
+The existing credential contract copies/releases borrowed material during key
+derivation. Logical storage close clears crypto state/options before separately
+managed native cleanup; that cleanup never reacquires credentials. Clearing the
+CLI provider therefore does not assume native retirement, and makes no absolute
+Go-memory erasure claim. Caller-owned providers passed to the executor are not
+closed by it.
+
+New test source separates descriptor-free argument/lifecycle/error models from
+healthy correct-key native snapshot/wal/shared and default-password fixtures.
+Each acquired fixture DB gets one checked Close attempt; successful and failed
+directories remain, but disposable credentials are cleared and retained ciphertext is not
+promised decryptable. No native failure/tamper/wrong-key/recovery/namespace or
+other-platform qualification is included. All new validation remains NOT_RUN.
+
 ## Local provider descriptors
 
 | Descriptor | Input |
@@ -148,7 +215,7 @@ access. For application-specific key management use the native `KeyProvider`.
 
 ## Success, errors and operational scope
 
-Both commands emit one JSON result only after the operation and connection
+Backup and rekey emit one JSON result only after the operation and connection
 cleanup succeed. It contains fixed status/operation/format/mode fields, page
 geometry and `retains_history`; no keys, descriptors, paths, IDs, SQL or data
 rows are logged. Backup reports `gosqlite-encrypted-archive` with snapshot mode;

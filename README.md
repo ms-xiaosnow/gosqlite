@@ -1,6 +1,20 @@
 # gosqlite
 
-## 2026-10-12 Storage + UNIQUE development checkpoint
+## 2026-10-12 五切片组合检查点完整正常门通过
+
+冻结树 `59ce26879c4301babc7648fbddc5cc66c4097263`（3,267 文件、783 个 Go 文件）
+包含 LEFT/Rows、加密 inspect、Darwin inventory 手工入口、Connector rollback 手工入口和
+automatic UNIQUE（含 c382 oracle 表头修复）；**CHECK 未纳入**。
+完整 **26 门 / 28 次 Go 调用于 05:21:06 UTC 自然 PASS**，lease 已 RELEASED。
+ordinary/race 各 **8,569 named PASS / 7 个固定 SKIP**，完整 pinned oracle **10,301 PASS / 0 SKIP**；
+LIMIT oracle/race **394 PASS**。跨编译/符号检查未执行外国映像。
+本次只叠加状态文档；新提交、Git bundle、精确恢复及对应 CI 均 **PENDING**。
+未发布 tree59ce 源包已保存并读回；它不代替新检查点的发布与恢复运行。
+已发布 main 仍为 `8bc189474bdb2b0a683c6c059992f9acbc426250`，其 bundle、恢复 26 门和两项 CI 已闭合。
+原生手工/物理资格及真实实现缺口仍在，不构成生产或 M3/M8/M10 验收。
+见[当前状态与余缺](docs/current-status-20261012.md)和[本组合证据](docs/evidence/combined-checkpoint-20261012.md)。
+
+## 历史记录：2026-10-12 Storage + UNIQUE development checkpoint
 
 The frozen source tree `4008bd9442ffd21e1e993d4f1c72dbeed3c910f3` (3,238 files) naturally
 completed **all 26 gates / 28 Go invocations at 00:49:41 UTC**, with its lease

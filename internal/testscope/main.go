@@ -223,6 +223,17 @@ func main() {
 		fmt.Fprintln(os.Stderr, finding)
 		failed = true
 	}
+	// A separate exact-path, source-pinned manual contract. This does not add
+	// an exemption to inspectSource or broaden any existing manual gate.
+	darwinManual, err := inspectDarwinInventoryManualContract(".")
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		failed = true
+	}
+	for _, finding := range darwinManual {
+		fmt.Fprintln(os.Stderr, finding)
+		failed = true
+	}
 	if failed {
 		os.Exit(1)
 	}

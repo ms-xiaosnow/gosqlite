@@ -103,7 +103,7 @@ func (d *DB) inspectSnapshot(ctx context.Context, reader btree.PageReader, optio
 	}
 	result := InspectResult{Header: fileInfo(reader.Header()), Schema: make([]SchemaEntry, len(entries))}
 	for i, e := range entries {
-		result.Schema[i] = SchemaEntry{e.Type, e.Name, e.TableName, e.SQL, e.RootPage}
+		result.Schema[i] = SchemaEntry{Type: e.Type, Name: e.Name, TableName: e.TableName, SQL: e.SQL, RootPage: e.RootPage, SQLNull: e.SQLNull}
 	}
 	if options.IncludeExtensions {
 		result.ExtensionIndexes, err = d.inspectExtensionCatalog(ctx, reader, entries)

@@ -59,10 +59,10 @@ func TestUniqueIndexParsePreservesOrdinary(t *testing.T) {
 
 func TestUniqueIndexParseRejectsUnsupported(t *testing.T) {
 	for _, query := range []string{
-		"CREATE TABLE t(a UNIQUE)",
-		"CREATE TABLE t(a TEXT UNIQUE)",
-		"CREATE TABLE t(a,b,UNIQUE(a,b))",
-		"CREATE TABLE t(a,CONSTRAINT uq UNIQUE(a))",
+		"CREATE TABLE t(a UNIQUE ON CONFLICT IGNORE)",
+		"CREATE TABLE t(a TEXT UNIQUE ON CONFLICT ABORT)",
+		"CREATE TABLE t(a,b,UNIQUE(a DESC,b))",
+		"CREATE TABLE t(a,CONSTRAINT uq UNIQUE(a COLLATE NOCASE))",
 		"CREATE UNIQUE TABLE t(a)",
 		"CREATE UNIQUE idx ON t(a)",
 		"CREATE UNIQUE UNIQUE INDEX idx ON t(a)",

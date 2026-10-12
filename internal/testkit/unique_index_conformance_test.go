@@ -46,7 +46,9 @@ func uniqueOracleHistory(t *testing.T, size uint32, shared bool, steps []uniqueO
 	appendQuery := func(q string) {
 		t.Helper()
 		r := confNative(t, db, q)
-		if len(r.rows) > 0 {
+		// The pinned shell's -header uses QRF_Always, including empty results.
+		// Preserve those labels so the next statement cannot shift the history.
+		if len(r.columns) > 0 {
 			labels := make([]any, len(r.columns))
 			for i, label := range r.columns {
 				labels[i] = label

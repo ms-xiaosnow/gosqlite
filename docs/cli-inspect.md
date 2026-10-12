@@ -1,5 +1,11 @@
 # 持久化元数据检查
 
+## 当前五切片组合状态（2026-10-12）
+
+当前冻结运行树为 `59ce26879c4301babc7648fbddc5cc66c4097263`（3,267 文件、783 个 Go 文件），包含 LEFT/Rows、encrypted inspect、Darwin inventory manual、Connector rollback manual 和 automatic UNIQUE（含 c382 空结果表头 helper 修复）；**不包含 CHECK**。该树于 **2026-10-12 05:21:06 UTC 自然完成完整 26 门 / 28 次 Go 调用 PASS**，lease 已 RELEASED。ordinary/race 各 **8,569 named PASS / 7 个固定预期 SKIP**，完整 pinned oracle **10,301 PASS / 0 SKIP**，LIMIT oracle/race **394 PASS**。新检查点提交、Git bundle、精确恢复及对应 CI 均 **PENDING**；已验证的未发布源包不代替这些步骤。
+
+已发布 main 仍为 `8bc189474bdb2b0a683c6c059992f9acbc426250`，其 bundle、恢复 26 门和两项 CI 已闭合，只资格该精确基点。当前范围、具名输入收据和真实代码/原生余缺以[当前状态](current-status-20261012.md)及[组合证据](evidence/combined-checkpoint-20261012.md)为准。下文带旧日期的 SOURCE_ONLY、NOT_RUN、PENDING、FAIL/HOLD/UNKNOWN 均保留原时点含义；历史失败不回写，手工、物理及 M3/M8/M10 门不因此开放。
+
 `gosqlite inspect <db>` 保持已有 JSON 对象：`format`、`header`、`schema`。
 字段名、顺序和格式说明不变；嵌套的 FileInfo、SchemaEntry 字段仍以大写
 开头。打开和检查使用调用者 context，CLI 以 ReadOnly 模式连接。
@@ -25,8 +31,9 @@ result, err := db.Inspect(ctx, sqlite.InspectOptions{IncludeExtensions: true})
 InspectResult 的 Header、Schema 和 ExtensionIndexes 来自同一个 reader
 快照。连接已有事务时借用该事务 reader，能看到未提交 DDL，检查后事务
 继续可用；否则只打开一个 reader，成功返回前关闭。取消、读/解码/配额
-错误及 owned-reader 关闭错误都不返回部分结果。CLI 完整取得元数据后才
-编码；输出 writer 自身出错仍可能留下半段 JSON，与既有 CLI 行为相同。
+错误及 owned-reader 关闭错误都不返回部分结果。CLI 完整取得元数据并完成一次 checked DB.Close、二者均成功后才
+编码；关闭错误阻止成功输出，但不能推断所有 native owner 已退休，也不自动重试。
+输出 writer 自身出错仍可能留下半段 JSON，与既有 CLI 行为相同。
 
 ## 适用范围和限制
 
@@ -49,7 +56,28 @@ ANN 配置、source SQL 或索引数据，不核验配置哈希/代际正确性�
 分配的硬上限。默认不带参数的检查不读扩展 catalog，也不应用该可选计费。
 
 没有改动存储格式、pager、注册表、planner、写入路径或恢复逻辑。此选项
-没有增加真正只读的 plaintext WAL 或加密 CLI inspect。
+原始切片没有增加真正只读的 plaintext WAL 或加密 CLI inspect。后续
+Linux 活动 SHM 的 plaintext 只读 WAL 路由保持独立范围；本候选新增
+加密 inspect 的显式 provider/profile 路由，源码与所有运行资格分开记录。
+
+## 历史源码准备记录：2026-10-12 加密命令路由候选 SOURCE_ONLY / NOT_RUN
+
+`gosqlite inspect [--extensions] <db> --key-provider <provider> [--mode snapshot|wal|shared]`
+复用四种既有本地 provider；path 后只接独立 flag/value 对，默认 snapshot，
+不作自动识别或转换。`--mode` 必须配 provider；与 native `--wal-readonly`
+冲突，writable native WAL flags 仍拒绝。默认明文 JSON 和 leading flag 顺序
+保持。详见 [加密 CLI](cli-encryption.md#inspect-source-implementation-runtime-not_run)。
+
+加密 JSON 以 `gosqlite-encrypted-family`、所选 mode 与
+`logical SQLite metadata inspection only` 明示逻辑层；header/schema 来自一次
+DB.Inspect。扩展配置仍只在 `--extensions` 下输出。schema SQL 和应用自己保存
+的配置可能含敏感内容，不能据此保证任意 metadata 无秘密；provider/密钥路径
+不会被序列化。没有添加 VerifyEncrypted/debug dump，不代表完整性或防回滚判断。
+
+新源码模型、正确密钥健康 native fixtures 和 AST 负对照均已写入，但未运行
+Go、parser、gofmt、compiler、test、race 或 native 检查；下节历史命令不是本次
+执行许可或 PASS。新有限提案须独立源码/选择审阅后才能执行。基础树、后续
+Darwin manual 和 LEFT JOIN 切片的资格不向本候选转移。
 
 ## 普通复核方法
 

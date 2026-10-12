@@ -1,6 +1,83 @@
 # Implementation and acceptance progress
 
-## 2026-10-12 Storage + UNIQUE：冻结组合完整 26 门 PASS
+## 当前五切片组合状态（2026-10-12）
+
+当前冻结运行树为 `59ce26879c4301babc7648fbddc5cc66c4097263`（3,267 文件、783 个 Go 文件），包含 LEFT/Rows、encrypted inspect、Darwin inventory manual、Connector rollback manual 和 automatic UNIQUE（含 c382 空结果表头 helper 修复）；**不包含 CHECK**。该树于 **2026-10-12 05:21:06 UTC 自然完成完整 26 门 / 28 次 Go 调用 PASS**，lease 已 RELEASED。ordinary/race 各 **8,569 named PASS / 7 个固定预期 SKIP**，完整 pinned oracle **10,301 PASS / 0 SKIP**，LIMIT oracle/race **394 PASS**。新检查点提交、Git bundle、精确恢复及对应 CI 均 **PENDING**；已验证的未发布源包不代替这些步骤。
+
+已发布 main 仍为 `8bc189474bdb2b0a683c6c059992f9acbc426250`，其 bundle、恢复 26 门和两项 CI 已闭合，只资格该精确基点。当前范围、具名输入收据和真实代码/原生余缺以[当前状态](current-status-20261012.md)及[组合证据](evidence/combined-checkpoint-20261012.md)为准。下文带旧日期的 SOURCE_ONLY、NOT_RUN、PENDING、FAIL/HOLD/UNKNOWN 均保留原时点含义；历史失败不回写，手工、物理及 M3/M8/M10 门不因此开放。
+
+### 历史源码准备记录（V1/V2；下列 NOT_RUN 属于当时）
+
+> 2026-10-12 V2 精确 schema 预算修正：前驱 `c065143baa0e61d0c4aae942ae2b5051b26b28f2`
+> 因 AU-1（owner/table/已有目录和行数预算遗漏）保留 **SOURCE_HOLD**。本 V2 仅做
+> 共享 ReadSchema 真实计费、完整当前目录与新增行的写入前准入，以及纯模型/小型 quota
+> 原子失败测试源码；仍 **SOURCE_ONLY / NOT_RUN**，待独立复审，不能继承前驱或基线结果。
+
+> 2026-10-12 自动 UNIQUE 新切片：**SOURCE_ONLY / NOT_RUN**。本树在冻结
+> `4008bd9442ffd21e1e993d4f1c72dbeed3c910f3` 上新增普通 rowid 列/表 UNIQUE、
+> 精确 autoindex 所有权/NULL 元数据和原子 CREATE；基线的完整 26 门 PASS 不传递。
+> 本切片尚未格式化、编译、测试或 oracle；下方旧“当前”段落是各自身份的历史。
+> [准确范围、API/JSON 兼容决策、来源与有限提案](automatic-unique.md)。
+
+## 自动 UNIQUE V2：AU-1 预算 blocker 的源码修正
+
+- 状态：IN_PROGRESS / SOURCE_ONLY / NOT_RUN；前驱 c065 保持 SOURCE_HOLD。
+- blocker：旧 descriptor cap 不包含重复 owner、table SQL/名字、完整已有目录及行数；
+  可能提交后无法再按 ReadSchema 上限读取。独立审阅和纯算例保留，不改写成 PASS。
+- 修正：ReadSchema/写入共享逐行 exact SchemaUsage，减法防溢出、固定旧上限；
+  compound/explicit CREATE 在分配前从当前 reader 全量准入，common addSchema 在
+  schema append 前再次精确检查。owned trigger 计费，无跨 rollback 的缓存计数器。
+- 新源码：两个纯内存预算文件与一个小型普通 quota/statement-undo 测试文件；
+  没有大名字物理重现，也没有 fault/recovery/publisher/ANN 扩展。
+- 实际执行：Go、gofmt、compiler、tests、race、oracle 均 NOT_RUN；先独立复审 V2，
+  再另批确切新树的有限门。详见 [V2 合同](automatic-unique.md)。
+
+## 自动 UNIQUE 约束纵向源码增量（2026-10-12）
+
+- 状态：IN_PROGRESS / SOURCE_ONLY / NOT_RUN。
+- 交付：有序列/表约束、合并后编号、真实 NULL/schema roots、精确 owner 绑定、
+  原子 CREATE；复用已存在 UNIQUE DML 与 Check，而不复制另一条执行路径。
+- API：SQL 保留 string，SQLNull 使用 omitempty；普通 plaintext inspect JSON 不变。
+- 架构：只接纳从表定义证明的 autoindex，空 TEXT 隐式 SQL 明确 Unsupported，
+  不把它说成 SQLite 损坏；DROP/ALTER 与所有更广约束仍拒绝。
+- 路径：internal/sql、internal/btree/schema.go、sqlite/automatic_unique.go、
+  sqlite/write_schema.go、sqlite/sqlite.go、sqlite/inspect.go；测试另见功能文档。
+- 测试命令和实际结果：本阶段没有运行 Go/gofmt/编译/测试/oracle；全部 NOT_RUN。
+  源码哈希、差异和闭包的 Python 静态整理不产生执行 PASS。
+- 风险和边界：新写入/目录语义仍待独立审阅与确切新树验证；VFS/pager/recovery、
+  ANN、Backup/WAL publisher、LEFT/Darwin/encrypted inspect 独立切片均未改动。
+- 下一步：独立审阅，再另批冻结新树的有限普通/内存/native/driver/CLI/oracle；
+  [完整源契约与有限提案](automatic-unique.md)。M10 与物理资格未验收。
+
+## 历史组合准备入口（2026-10-12，运行前）
+
+本文件旧段落保留各自写作时点的源码、FAIL/HOLD/UNKNOWN 与 NOT_RUN；其中“当前”“缺失”“待合入”或 PENDING 不能覆盖[当前源码/证据矩阵](current-status-20261012.md)。已保存 main8bc 的发布、精确恢复与 CI 已闭合；本次 LEFT/inspect/Darwin/Connector/automatic UNIQUE 组合仅 SOURCE_ONLY；前序 Rows pin 已修正，新增 sqlite.go 的 WAL-tail 完整源 pin 经独立完整 ownership 复审在本后继窄修，automatic UNIQUE 原 oracle FAIL 及 d79 HOLD 保留，已接入独立审阅的空结果表头修复，组合运行仍全部 NOT_RUN。输入切片的有限成功不转授本组合，原生手工/物理门不变。
+
+## 2026-10-12 encrypted inspect 独立源码候选
+
+本候选从 Storage + UNIQUE 冻结树 `4008bd9442ffd21e1e993d4f1c72dbeed3c910f3`
+另建副本，仅补 inspect CLI provider/profile 路由、checked-close-before-output、
+固定加密诊断、对应 AST/纯模型与健康正确密钥测试源及这组文档。复用既有
+raw/password provider 和 snapshot/wal/shared 契约；默认明文 JSON、leading flags、
+单 snapshot metadata 与 extension opt-in 不变。engine/storage、所有 source guards、
+StorageBackup/WAL policy/native gate/factory、恢复 opt-in 和 CI 原字节保留。
+
+本切片是 **SOURCE_ONLY / NOT_RUN / UNPUBLISHED**，不是新的 PASS：Go、gofmt、
+parser、compiler、测试、native、race、oracle、静态构建、完整 26 门、新提交、
+Library 恢复和 CI 均未在此切片执行。基点原完整 26 门的在途/后续状态由父任务
+另记，不能转授本树。独立审阅及新的有限运行提案仍待批准。
+
+Close 错误会阻止成功 JSON，不表示未知 native owner 已退休；不自动重试、恢复
+或删除不确定产物。CLI provider 借用复制和 native cleanup 无需重新取钥的既有
+合同不变。测试用具一次 checked Close attempt，成功/失败目录均保留、临时凭据清除，
+不承诺留存密文仍可解密。错误 Close 只在 descriptor-free 模型中表示。
+
+加密输出明示 encrypted family 与逻辑 SQLite metadata，schema SQL/opt-in config
+仍是应用文本，不是索引完整性/可用性或 anti-rollback 证明。wrong-key、tamper、
+物理/namespace/native fault、恢复、Darwin 原生手工资格和 LEFT JOIN 均不纳入。
+详见 [CLI 范围](cli-encryption.md)。以下旧段落继续保留其原时间与源码身份。
+
+## 历史记录：2026-10-12 Storage + UNIQUE 冻结组合完整 26 门 PASS
 
 冻结运行树 `4008bd9442ffd21e1e993d4f1c72dbeed3c910f3`（3,238 文件）于 **00:49:41 UTC**
 自然完成 **26/26 门、28 次 Go 调用 PASS**，lease 已 RELEASED。ordinary/race
@@ -1987,3 +2064,57 @@ separately recorded at the top of this document.
   历史失败与 held physical/ANN V4/41-target fuzz/未知中断链路保持。
 - 下一步：冻结精确源码与选择器，独立源审；之后另行审批有限正常/model/
   driver/race/pinned-official SQL 门。没有把 source-only 完成记作通过。
+
+
+## 2026-10-11：独立 LEFT JOIN 左行等值预过滤源码切片
+
+- 状态：**SOURCE_ONLY / 全部新执行 NOT_RUN**。以父任务给定 `f189746671aaf4962a699292a84110e2d43387e8` / tree `0f29261ca50576373069dd8ad23a2bd3377a743c` 为基点，新工作副本独立实现；未改原 goal、历史十四语句 fixture/FAIL、既有 CAST/IPK/LIMIT/alias 断言或其他候选。
+- 生产改动只含 `sqlite/relational_bind.go`、`sqlite/relational.go` 和新增 `sqlite/relational_left_where.go`。仅一个根 LEFT JOIN、两个普通表、整个原 WHERE 为已绑定左槽与普通 SQL 字面量的等值 AND；完整 WHERE 复核及 ON/空扩展路径保留。
+- 准入只结构检查，不求值默认值。独立程序禁用 FixedColumns，通过 join.rows 在左行读取后、右源创建前求值，兼容 aggregateInput 的输入重定位；仍用原 reader/budget，统计实际工作，不宣称索引或广泛谓词重排。
+- 已写有限 helper/native/aggregate/driver 测试源与固定 16 比较加 1 身份的隔离 official oracle 源。命令/结果：本阶段未运行 Go、gofmt、Go parser/compiler、fixture、项目脚本、测试、oracle、原生工具、Git、网络或 Library。静态文本/哈希检查不构成编译或运行 PASS。
+- 合同、作用及余缺见 [专题说明](left-where-prefilter.md)。下一步是精确文件身份与测试/helper/selector 的独立源码审阅，再单独申请有限普通/race/oracle 运行；不能继承基点、Storage/UNIQUE 或历史 oracle 的资格。
+- 参数/混合 WHERE、CAST 扩展、多重连接、普通 OFFSET/投影顺序与广义排序等仍未闭合；受限物理恢复/故障/namespace、ANN V4、fuzz campaign 与未知链路不恢复，项目仍为部分资格。
+
+### LEFT JOIN V2：仅测试加强，继续 SOURCE_ONLY / NOT_RUN
+
+- 独立 V1 静态审阅无阻断生产发现，指出 terminal helper 只证明显式 Close 后清理、MaxWork/MaxBytes=1 只到 preparation 的两项覆盖边界。新 V2 副本仅改两份新测试与有限文档；三个生产文件、四百份原测试及历史十四语句不变。
+- 已终止 EOF/ON-error 路径增加显式 Close 前的 closed/source/lease/scalar 状态断言；原早关控制保持。新增两个纯内存逻辑配额模型通过真实 Rows/join/predicate/budget 强制 comparison 运行期 work/memory 失败，并在模型行关闭入口先检查 scalar 清理与原行所有权，保证未进入 rightFactory。
+- 普通/race 提案更新为 26 根、312 后代、338 具名节点；oracle 仍为 16 比较加 1 身份。此处均是源码预期，不是执行结果。
+- 另发现准备阶段 scalarBytes 计数可能在 LIMIT 0、EXPLAIN、首读前取消/关闭路径保留；Rows.close 只重置 CurrentBytes。V1 原新增零 scalarBytes 断言保留，不据此声称真实内存泄漏；未获准修改生产，待独立判断。所有 Go/gofmt/parser/compiler/fixture/native/oracle/Git/network/Library 仍 NOT_RUN。
+
+
+### LEFT JOIN V3：终态 scratch 记账窄修，SOURCE_ONLY / NOT_RUN
+
+- 独立 V2 复审确认准备阶段 scalarBytes 可经未 Next 即 Close、LIMIT 0、EXPLAIN EOF、首读前取消路径保留。这是终态计数残留，不是已证实堆内存或快照泄漏。V1/V2 原副本保持。
+- 本次唯一生产增量在 Rows.close：保持原有 source Close、owner release 和错误组合顺序，在原 CurrentBytes 归零前直接归零 scalarBytes/resultBytes，不调用 clear 扣减；Work、PeakBytes、failed、收费及所有配额不变。
+- 共享 budget 的 aggregate/grouped 子 Rows 只作内部 fetch/evaluateSourceRow，关闭的是 child.source；未登记 DB/Tx，也不调用 Rows.close。根来源树与结果退休后才重置，不提前抹去仍有 owner 的计数。resultBytes 在已输出行的早关或 LIMIT 终止可绕过下一次 fetch 清理，故与总数配对归零。
+- 已有两个新清理 helper 仅增加 resultBytes 零断言，既有具名测试正文、四百份原测试、三个预过滤生产路径及 driver/oracle 保持。原未开始关闭、LIMIT 0、EXPLAIN、取消、正常耗尽、ON/配额错误覆盖继续使用，不新增案例。
+- 精确有限提案仍为 26 根、312 后代、338 节点及 17 official 进程。全部 Go/gofmt/parser/compiler/fixture/model/native/race/oracle/Git/network/Library 执行 NOT_RUN；下一步仅独立源码复审，后续运行另审。Storage/UNIQUE 及其他候选不混入。
+
+
+## 2026-10-12：独立 Connector rollback 四场景手工源码
+
+- 状态：**SOURCE_ONLY / NOT_RUN**。只读基点提交
+  `8bc189474bdb2b0a683c6c059992f9acbc426250`、tree
+  `c0959fb87e8aaedd946e6bb7abbaddb67cf5ced0`；历史状态及证据完整保留。
+- 新增 `sqlite/connector_rollback_recovery_manual_linux_test.go`，外部 sqlite_test
+  包、`manual_recovery && linux` 与独立环境/空目录门；精确入口
+  `TestManualConnectorRollbackRecovery`。复用既有 public fixture 辅助函数，
+  原文件、生产源码、模块、CI、testscope/main.go 全部不变。
+- 四项仅覆盖 nil-default 拒绝/输入不变、显式 opt-in 恢复/健康逻辑读/只读
+  reconnect/字节身份、journal 配额拒绝/输入不变、NoCreate 全 sidecar 缺失。
+  NewConnector 后修改调用方 policy 验证独立快照；构造前后不变断言与源码
+  no-I/O 检查分开。Adapter rows/statement/connection 单次受检退休，隐式
+  EOF 退休及未知 Close 保留，未触碰全局 pending owner 的清理操作。
+- 新增 `internal/testscope/connector_rollback_manual_test.go` 的纯 AST/pin
+  合同和惰性文本反例；只读五个固定源文件，不构造或执行 native 对象。
+  全部新 Go parser/gofmt/guard/list/compiler/nm/test/oracle/native 检查
+  **NOT_RUN**；本阶段仅静态文本编辑、Python 标准库哈希/差异/清单。
+- [中文规程](connector-rollback-manual-zh.md)给出实际 tag/env、隔离副本、
+  精确 selector、依赖、断言、失败保留及 owner 退休后的人工清理条件。
+  有限 Connector harness 源码不再缺失；四项实际恢复仍 BLOCKED / NOT_RUN，
+  完整故障/崩溃/恢复及其他平台矩阵仍有独立实现和执行缺口。
+- 下一步：独立审核固定完整 tree、差异、测试/helper/import/init 闭包，之后
+  另行决定有限源码检查资格。无 Git/远端/Library/CI 变更；不得执行或转移
+  受阻 recovery、ANN V4、41-target campaign、未知中断链。无 M3/M8/M10
+  或整体目标/生产可用声明。

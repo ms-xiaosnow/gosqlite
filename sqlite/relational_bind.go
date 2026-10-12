@@ -301,6 +301,12 @@ func (d *DB) planRelational(ctx context.Context, reader btree.PageReader, origin
 	if err != nil {
 		return nil, err
 	}
+	// Keep the original bound tree, before ON/HAVING promotion, cloning and
+	// fixed-column substitutions. The optional left program must prove this
+	// whole clause and never inherit a transformed full-WHERE program.
+	originalWhere := sel.Where
+	outerAliasPromoted := false
+	var leftWhere *predicateProgram
 	// GROUP BY uses source-name precedence, with result aliases and integer
 	// ordinals as fallbacks. Aggregates in a resolved key are rejected below.
 	sel.GroupBy = nil
@@ -422,6 +428,7 @@ func (d *DB) planRelational(ctx context.Context, reader btree.PageReader, origin
 			if e != nil {
 				return nil, 0, e
 			}
+			outerAliasPromoted = outerAliasPromoted || len(ordinary) != 0
 			for _, term := range ordinary {
 				if sel.Where == nil {
 					sel.Where = term
@@ -441,7 +448,11 @@ func (d *DB) planRelational(ctx context.Context, reader btree.PageReader, origin
 			if e != nil {
 				return nil, e
 			}
-			return &relationalJoin{left: l, rightFactory: right, leftWidth: lw, rightWidth: rw, kind: j.Kind, on: onProgram, rows: r, budget: budget}, nil
+			join := &relationalJoin{left: l, rightFactory: right, leftWidth: lw, rightWidth: rw, kind: j.Kind, on: onProgram, rows: r, budget: budget}
+			if relation == original.Relation {
+				join.leftWhere = leftWhere
+			}
+			return join, nil
 		}, lw + rw, nil
 	}
 	factory, _, err := build(original.Relation)
@@ -533,6 +544,21 @@ func (d *DB) planRelational(ctx context.Context, reader btree.PageReader, origin
 		*onPrograms[i] = *p
 		r.startupPredicates = append(r.startupPredicates, p.constant...)
 	}
+	admitted, err := scope.leftWherePrefilter(original, originalWhere, outerAliasPromoted)
+	if err != nil {
+		return nil, err
+	}
+	if admitted {
+		if err = budget.reserve(64); err != nil {
+			return nil, err
+		}
+		ec := r.predicateContext()
+		ec.FixedColumns = nil
+		leftWhere, err = compilePredicate(originalWhere, ec, false, budget)
+		if err != nil {
+			return nil, err
+		}
+	}
 	var tables []string
 	for _, b := range scope.leaves {
 		label := b.table.name
@@ -560,6 +586,9 @@ func (d *DB) planRelational(ctx context.Context, reader btree.PageReader, origin
 				r.queryPlan.Reason = "native bounded unique physical-rowid grouping stream with next-qualified-row lookahead; one table snapshot; no secondary-index or ANN pushdown"
 			}
 		}
+	}
+	if leftWhere != nil {
+		r.queryPlan.Reason += "; left-row equality prefilter; full WHERE recheck after join"
 	}
 	{
 		// Binding is unconditional and complete before any bound expression is

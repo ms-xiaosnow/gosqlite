@@ -11,10 +11,11 @@ import (
 )
 
 type writeIndex struct {
-	name    string
-	root    uint32
-	unique  bool
-	columns []int
+	name            string
+	root            uint32
+	unique          bool
+	constraintOwned bool // A table constraint owns this root; never independently droppable.
+	columns         []int
 }
 type writeTable struct {
 	*table
@@ -28,7 +29,7 @@ type writeCatalog struct {
 }
 
 // Every stored definition is parsed before mutation. Unknown constraints,
-// triggers, virtual tables, generated columns, collations, autoindexes and
+// triggers, virtual tables, generated columns, unsupported collations and
 // other unsupported objects fail closed rather than silently losing data.
 func (t *Tx) validateCatalog(ctx context.Context) (*writeCatalog, error) {
 	entries, err := btree.ReadSchema(ctx, t.reader)
@@ -50,6 +51,9 @@ func buildWriteCatalog(ctx context.Context, entries []btree.SchemaEntry, extensi
 		if err := ctx.Err(); err != nil {
 			return nil, err
 		}
+		if e.SQLNull && e.SQL != "" {
+			return nil, fmt.Errorf("%w: inconsistent nullable schema SQL", ErrCorrupt)
+		}
 		if e.Type == "trigger" {
 			if _, owned := extensions.guards[fold(e.Name)]; owned {
 				continue
@@ -65,7 +69,7 @@ func buildWriteCatalog(ctx context.Context, entries []btree.SchemaEntry, extensi
 		if e.Type != "table" && e.Type != "index" {
 			return nil, fmt.Errorf("%w: writing a database containing %s %q", ErrUnsupported, e.Type, e.Name)
 		}
-		if strings.HasPrefix(fold(e.Name), "sqlite_") {
+		if e.Type == "table" && strings.HasPrefix(fold(e.Name), "sqlite_") {
 			return nil, fmt.Errorf("%w: internal schema object %q", ErrUnsupported, e.Name)
 		}
 		if _, exists := c.names[fold(e.Name)]; exists {
@@ -78,6 +82,9 @@ func buildWriteCatalog(ctx context.Context, entries []btree.SchemaEntry, extensi
 		roots[e.RootPage] = true
 		if e.Type != "table" {
 			continue
+		}
+		if e.SQLNull {
+			return nil, fmt.Errorf("%w: table SQL is NULL", ErrCorrupt)
 		}
 		parsed, err := sqlast.Parse(e.SQL)
 		if err != nil {
@@ -93,12 +100,31 @@ func buildWriteCatalog(ctx context.Context, entries []btree.SchemaEntry, extensi
 		}
 		c.tables[fold(e.Name)] = tab
 	}
+	expected := map[string]implicitIndexBinding{}
+	for _, tab := range c.tables {
+		for i, idx := range tab.indexes {
+			expected[fold(idx.name)] = implicitIndexBinding{table: tab, ordinal: i}
+		}
+	}
 	for _, e := range entries {
 		if err := ctx.Err(); err != nil {
 			return nil, err
 		}
 		if e.Type != "index" {
 			continue
+		}
+		if binding, ok := expected[fold(e.Name)]; ok {
+			if err := bindAutomaticUnique(e, binding); err != nil {
+				return nil, err
+			}
+			delete(expected, fold(e.Name))
+			continue
+		}
+		if strings.HasPrefix(fold(e.Name), "sqlite_") {
+			return nil, fmt.Errorf("%w: unrecognized internal schema object %q", ErrUnsupported, e.Name)
+		}
+		if e.SQLNull {
+			return nil, fmt.Errorf("%w: orphan implicit index", ErrCorrupt)
 		}
 		parsed, err := sqlast.Parse(e.SQL)
 		if err != nil {
@@ -117,6 +143,9 @@ func buildWriteCatalog(ctx context.Context, entries []btree.SchemaEntry, extensi
 			return nil, err
 		}
 		tab.indexes = append(tab.indexes, index)
+	}
+	if len(expected) != 0 {
+		return nil, fmt.Errorf("%w: missing implicit UNIQUE index", ErrCorrupt)
 	}
 	for _, x := range extensions.indexes {
 		c.names[fold(x.name)] = "extension index"
@@ -167,7 +196,13 @@ func writableTable(def *sqlast.CreateTable, root uint32) (*writeTable, error) {
 			}
 		}
 	}
-	return &writeTable{table: tab}, nil
+	writable := &writeTable{table: tab}
+	indexes, err := automaticUniqueIndexes(def, writable)
+	if err != nil {
+		return nil, err
+	}
+	writable.indexes = indexes
+	return writable, nil
 }
 func writableIndex(def *sqlast.CreateIndex, tab *writeTable, root uint32) (writeIndex, error) {
 	idx := writeIndex{name: def.Name, root: root, unique: def.Unique}
@@ -215,16 +250,43 @@ func (t *Tx) createTable(ctx context.Context, c *writeCatalog, def *sqlast.Creat
 	if err != nil {
 		return err
 	}
+	// All declarations and generated names are admitted before allocation.
+	for _, idx := range tab.indexes {
+		if _, exists := c.names[fold(idx.name)]; exists {
+			return fmt.Errorf("%w: implicit index name collision", ErrCorrupt)
+		}
+	}
+	if err = t.admitSchemaRows(ctx, automaticTableSchemaRows(def, tab)); err != nil {
+		return err
+	}
 	root, err := btree.CreateTree(ctx, t.storage, btree.TableTree)
 	if err != nil {
 		return err
 	}
-	if err = t.addSchema(ctx, "table", def.Name, def.Name, root, def.SQL); err != nil {
+	if err = t.addSchemaRecord(ctx, "table", def.Name, def.Name, root, &def.SQL); err != nil {
 		return err
 	}
 	tab.root = root
+	for i := range tab.indexes {
+		idx := &tab.indexes[i]
+		idx.root, err = btree.CreateTree(ctx, t.storage, btree.IndexTree)
+		if err != nil {
+			return err
+		}
+		if err = t.addSchemaRecord(ctx, "index", idx.name, def.Name, idx.root, nil); err != nil {
+			return err
+		}
+	}
+	// One compound CREATE, one cookie bump. The enclosing storage.Statement
+	// rolls back all roots and schema rows before exposing any failed result.
+	if err = t.storage.BumpSchemaCookie(ctx); err != nil {
+		return err
+	}
 	c.tables[fold(def.Name)] = tab
 	c.names[fold(def.Name)] = "table"
+	for _, idx := range tab.indexes {
+		c.names[fold(idx.name)] = "index"
+	}
 	return nil
 }
 func (t *Tx) createIndex(ctx context.Context, c *writeCatalog, def *sqlast.CreateIndex) error {
@@ -246,6 +308,9 @@ func (t *Tx) createIndex(ctx context.Context, c *writeCatalog, def *sqlast.Creat
 	}
 	idx, err := writableIndex(def, tab, 0)
 	if err != nil {
+		return err
+	}
+	if err = t.admitSchemaRows(ctx, []btree.SchemaEntry{{Type: "index", Name: def.Name, TableName: tab.name, SQL: def.SQL}}); err != nil {
 		return err
 	}
 	root, err := btree.CreateTree(ctx, t.storage, btree.IndexTree)
@@ -280,15 +345,34 @@ func (t *Tx) createIndex(ctx context.Context, c *writeCatalog, def *sqlast.Creat
 	}
 	return t.addSchema(ctx, "index", def.Name, tab.name, root, def.SQL)
 }
+
+// addSchema preserves the string API and cookie behavior of existing explicit
+// and extension callers. Compound table creation uses addSchemaRecord directly.
 func (t *Tx) addSchema(ctx context.Context, typ, name, table string, root uint32, sql string) error {
+	// Existing explicit/extension callers share the same global invariant.
+	// Re-read this transaction's current records, including any earlier append
+	// in this statement; no cached counter can survive savepoint/statement undo.
+	if err := t.admitSchemaRows(ctx, []btree.SchemaEntry{{Type: typ, Name: name, TableName: table, SQL: sql}}); err != nil {
+		return err
+	}
+	if err := t.addSchemaRecord(ctx, typ, name, table, root, &sql); err != nil {
+		return err
+	}
+	return t.storage.BumpSchemaCookie(ctx)
+}
+
+// addSchemaRecord is the unchecked primitive. Its only callers are the compound
+// CREATE after admitting its complete delta, and addSchema after fresh admission.
+func (t *Tx) addSchemaRecord(ctx context.Context, typ, name, table string, root uint32, sql *string) error {
 	id, err := t.nextRowID(ctx, 1)
 	if err != nil {
 		return err
 	}
-	if err = btree.InsertTable(ctx, t.storage, 1, id, []any{typ, name, table, int64(root), sql}); err != nil {
-		return err
+	var value any
+	if sql != nil {
+		value = *sql
 	}
-	return t.storage.BumpSchemaCookie(ctx)
+	return btree.InsertTable(ctx, t.storage, 1, id, []any{typ, name, table, int64(root), value})
 }
 func (idx writeIndex) key(rowid int64, values []any) []any {
 	key := make([]any, len(idx.columns)+1)

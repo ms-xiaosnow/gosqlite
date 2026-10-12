@@ -193,10 +193,12 @@ type FileInfo struct {
 	ReadVersion, WriteVersion                                                 byte
 }
 
-// SchemaEntry is an entry from sqlite_schema. SQL is empty for internal indexes.
+// SchemaEntry is an entry from sqlite_schema. SQL remains a string; SQLNull
+// distinguishes SQL NULL from empty TEXT and is omitted from ordinary JSON.
 type SchemaEntry struct {
 	Type, Name, TableName, SQL string
 	RootPage                   uint32
+	SQLNull                    bool `json:"SQLNull,omitempty"`
 }
 
 // DB is a connection. Idle rollback-mode connections hold no shared lock.
@@ -416,7 +418,7 @@ func (d *DB) Schema(ctx context.Context) (_ []SchemaEntry, retErr error) {
 	d.info = fileInfo(reader.Header())
 	result := make([]SchemaEntry, len(entries))
 	for i, e := range entries {
-		result[i] = SchemaEntry{e.Type, e.Name, e.TableName, e.SQL, e.RootPage}
+		result[i] = SchemaEntry{Type: e.Type, Name: e.Name, TableName: e.TableName, SQL: e.SQL, RootPage: e.RootPage, SQLNull: e.SQLNull}
 	}
 	return result, nil
 }

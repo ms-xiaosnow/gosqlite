@@ -67,9 +67,18 @@ type CreateTable struct {
 	Name        string
 	IfNotExists bool
 	Columns     []ColumnDef
+	// UniqueConstraints retains declaration order, including duplicate clauses.
+	UniqueConstraints []UniqueConstraint
 }
 
 func (*CreateTable) statement() {}
+
+// UniqueConstraint is a named or anonymous BINARY ASC ordinary constraint.
+// Names label constraints only; implicit index names are derived separately.
+type UniqueConstraint struct {
+	Name    string
+	Columns []string
+}
 
 type ColumnDef struct {
 	Name, Type          string

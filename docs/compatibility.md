@@ -1,6 +1,36 @@
 # Current compatibility matrix
 
-## 2026-10-12 Storage + UNIQUE：冻结组合完整 26 门 PASS
+## 当前五切片组合状态（2026-10-12）
+
+当前冻结运行树为 `59ce26879c4301babc7648fbddc5cc66c4097263`（3,267 文件、783 个 Go 文件），包含 LEFT/Rows、encrypted inspect、Darwin inventory manual、Connector rollback manual 和 automatic UNIQUE（含 c382 空结果表头 helper 修复）；**不包含 CHECK**。该树于 **2026-10-12 05:21:06 UTC 自然完成完整 26 门 / 28 次 Go 调用 PASS**，lease 已 RELEASED。ordinary/race 各 **8,569 named PASS / 7 个固定预期 SKIP**，完整 pinned oracle **10,301 PASS / 0 SKIP**，LIMIT oracle/race **394 PASS**。新检查点提交、Git bundle、精确恢复及对应 CI 均 **PENDING**；已验证的未发布源包不代替这些步骤。
+
+已发布 main 仍为 `8bc189474bdb2b0a683c6c059992f9acbc426250`，其 bundle、恢复 26 门和两项 CI 已闭合，只资格该精确基点。当前范围、具名输入收据和真实代码/原生余缺以[当前状态](current-status-20261012.md)及[组合证据](evidence/combined-checkpoint-20261012.md)为准。下文带旧日期的 SOURCE_ONLY、NOT_RUN、PENDING、FAIL/HOLD/UNKNOWN 均保留原时点含义；历史失败不回写，手工、物理及 M3/M8/M10 门不因此开放。
+
+## 本轮源码兼容范围
+
+- ordinary rowid 列/末尾表级 BINARY ASC automatic UNIQUE 已在 tree59ce；真实根、NULL SQL、owner 绑定与原子 CREATE 均有源码，c382 独立有限 oracle 已 PASS。组合 tree59ce 的完整正常 26 门现已 PASS。
+- LEFT WHERE 仅新增单个根 LEFT JOIN、两个普通表、左槽/普通字面量等值 AND 的受限预过滤；不是一般表达式 pushdown 或完整 planner parity。
+- encrypted inspect 的显式 provider 与 snapshot/wal/shared 路由已纳入；metadata 呈现不证明索引正确或加密安全。
+- Darwin inventory 与 Connector rollback 的双门手工 harness 已有源码及各自有限静态资格；真实原生/恢复入口未运行。
+- Windows shared rekey、Darwin 受限 inventory 生产修正和严格 Linux plaintext Backup 源码已在 main8bc；原生、文件系统、物理失败与更广模式仍 PARTIAL/NOT_RUN。
+- CHECK9c3b 是单独、未发布、未纳入的候选；三普通门已 PASS；截至 05:22:24 UTC，oracle 已批准未运行。其余 SQL/格式缺口不因此消失。
+
+下列旧能力矩阵保留原阶段断言，不作为本轮“未合入/未实现/NOT_RUN”的依据；本轮状态以上述范围及[中央矩阵](current-status-20261012.md)为准。
+
+### 历史源码准备记录（V1/V2；下列 NOT_RUN 属于当时）
+
+> 2026-10-12 V2 精确 schema 预算修正：前驱 `c065143baa0e61d0c4aae942ae2b5051b26b28f2`
+> 因 AU-1（owner/table/已有目录和行数预算遗漏）保留 **SOURCE_HOLD**。本 V2 仅做
+> 共享 ReadSchema 真实计费、完整当前目录与新增行的写入前准入，以及纯模型/小型 quota
+> 原子失败测试源码；仍 **SOURCE_ONLY / NOT_RUN**，待独立复审，不能继承前驱或基线结果。
+
+> 2026-10-12 自动 UNIQUE 新切片：**SOURCE_ONLY / NOT_RUN**。本树在冻结
+> `4008bd9442ffd21e1e993d4f1c72dbeed3c910f3` 上新增普通 rowid 列/表 UNIQUE、
+> 精确 autoindex 所有权/NULL 元数据和原子 CREATE；基线的完整 26 门 PASS 不传递。
+> 本切片尚未格式化、编译、测试或 oracle；下方旧“当前”段落是各自身份的历史。
+> [准确范围、API/JSON 兼容决策、来源与有限提案](automatic-unique.md)。
+
+## 历史记录：2026-10-12 Storage + UNIQUE 冻结组合完整 26 门 PASS
 
 冻结运行树 `4008bd9442ffd21e1e993d4f1c72dbeed3c910f3`（3,238 文件）于 **00:49:41 UTC**
 自然完成 **26/26 门、28 次 Go 调用 PASS**，lease 已 RELEASED。ordinary/race
@@ -182,7 +212,7 @@ in [the historical compatibility log](history/compatibility-before-sql-ranges.md
 Exact source, command, CI and restored-commit evidence remains in
 [progress](progress.md), [checkpoint records](checkpoints.json) and `evidence/`.
 
-## SQLite files, storage and lifecycle
+## 历史能力矩阵：SQLite files, storage and lifecycle
 
 | Capability | Status | Implemented profile and open boundary |
 |---|---|---|
@@ -221,12 +251,12 @@ unsafe-pointer diagnostic remains unqualified. See [native platform
 ADR0015](decisions/0015-native-darwin-windows-backends.md) and
 [manual verification](manual-verification.md) for exact existing commands.
 
-## SQL and planner
+## 历史能力矩阵：SQL and planner
 
 | Capability | Status | Implemented profile and open boundary |
 |---|---|---|
 | Basic DDL/DML | partial | Simple rowid CREATE TABLE, nonunique BINARY ASC CREATE INDEX, plus bounded explicit ordinary named-column BINARY ASC CREATE UNIQUE INDEX (finite-input and exact combined 26-gate qualification PASS), multirow INSERT, UPDATE/DELETE, transactional DDL, REINDEX for supported extension indices |
-| Constraints/schema | partial | INTEGER PRIMARY KEY rowid alias, NOT NULL and supported literal DEFAULT; noninteger PK metadata can be read but does not imply enforcement. Explicit named-column BINARY ASC CREATE UNIQUE INDEX supports repeated NULL, immediate writes and Check; the independent 12-gate input has 223 named PASS, and the exact frozen combination has 26-gate PASS: ordinary/race each 8,231 named PASS / 7 expected SKIP and complete pinned oracle 9,925 PASS / zero SKIP. Table/column UNIQUE and autoindexes, typed-vector/extension UNIQUE, CHECK/FK/compound PK/generated columns/STRICT/general schema alterations remain unsupported; see unique-index.md |
+| Constraints/schema | partial | INTEGER PRIMARY KEY rowid alias, NOT NULL and supported literal DEFAULT; noninteger PK metadata can be read but does not imply enforcement. Explicit named-column BINARY ASC CREATE UNIQUE INDEX supports repeated NULL, immediate writes and Check; the independent 12-gate input has 223 named PASS, and the exact frozen combination has 26-gate PASS: ordinary/race each 8,231 named PASS / 7 expected SKIP and complete pinned oracle 9,925 PASS / zero SKIP. Ordinary rowid column/table UNIQUE and their canonical NULL-SQL autoindexes are included in the further source-only HOLD composition; its runtime remains NOT_RUN. Typed-vector/extension UNIQUE, CHECK/FK/compound PK/generated columns/STRICT/general schema alterations remain unsupported; see automatic-unique.md and current-status-20261012.md |
 | Transaction control | partial | Native/driver and retained-connection BEGIN, COMMIT/END, ROLLBACK, SAVEPOINT, RELEASE, ROLLBACK TO; bounded statement/savepoint undo and read-own-writes. Connection changes()/total_changes()/last_insert_rowid() now have bounded native/driver state. General cursor relaxation remains code work |
 | SELECT and JOIN | partial | No FROM/single table and bounded named-table comma/INNER/CROSS/LEFT nested loops, aliases/qualified columns/stars, WHERE/ON, binds, ordering/NULL placement/LIMIT/OFFSET; one root snapshot/Tx lease. USING/NATURAL/RIGHT/FULL/derived/subquery relations remain unsupported |
 | Boolean and affinity semantics | partial | Context-sensitive scalar versus predicate/CASE branching, three-valued logic, bounded constant startup/substitution and declared-versus-absent comparison affinity; unquoted TRUE/FALSE identifier precedence and scoped SQLite direct LEFT-ON result-alias provenance are implemented. The current unpublished composition adds a bounded direct IPK equality/LIKE admission correction, including under NOT INDEXED; the exact combined tree now has normal and fixed original-SQL oracle evidence, separately recorded above. CAST/general-expression planning and LEFT-only WHERE pushdown ahead of an error-producing ON remain gaps, not full oracle parity |
@@ -252,7 +282,7 @@ See [relational SQL](relational-sql.md), [Boolean expressions](boolean-expressio
 All unsupported writable catalog semantics reject mutation rather than silently
 ignoring constraints. Full SQLite compatibility is not claimed.
 
-## Text, vectors, encryption and migration
+## 历史能力矩阵：Text, vectors, encryption and migration
 
 | Capability | Status | Implemented profile and open boundary |
 |---|---|---|
