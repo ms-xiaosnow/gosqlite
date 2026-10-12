@@ -35,6 +35,7 @@ func TestEncryptionWALPasswordOrdinaryReopenAndCancellation(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
+	noncesBefore := captureEncryptedNonces(t, path)
 	tx, e := db.Begin(ctx)
 	if e != nil {
 		t.Fatal(e)
@@ -57,6 +58,9 @@ func TestEncryptionWALPasswordOrdinaryReopenAndCancellation(t *testing.T) {
 	next, e := os.ReadDir(dir)
 	if e != nil || len(names) != len(next) {
 		t.Fatal("cancelled commit created files", e)
+	}
+	if !reflect.DeepEqual(noncesBefore, captureEncryptedNonces(t, path)) {
+		t.Fatal("cancelled commit/rollback changed nonce-bearing inventory")
 	}
 	if e = db.Close(); e != nil {
 		t.Fatal(e)
@@ -96,7 +100,19 @@ func TestEncryptionWALPasswordOrdinaryReopenAndCancellation(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
+	defer db.Close()
+	if !reflect.DeepEqual(noncesBefore, captureEncryptedNonces(t, path)) {
+		t.Fatal("ordinary reopen changed nonce-bearing inventory before a write")
+	}
 	encryptedExec(t, db, "INSERT INTO records VALUES(2,?)", sentinel)
+	noncesAfterWrite := captureEncryptedNonces(t, path)
+	assertEncryptedNonceAdvance(t, noncesBefore, noncesAfterWrite, encryption.FileWAL)
+	if noncesAfterWrite.root.Epoch != noncesBefore.root.Epoch {
+		t.Fatal("ordinary reopen/write unexpectedly changed key epoch")
+	}
+	if got := query(t, db, "SELECT id,body FROM records ORDER BY id"); !reflect.DeepEqual(got, [][]any{{int64(1), sentinel}, {int64(2), sentinel}}) {
+		t.Fatal("ordinary reopen/write changed committed rows")
+	}
 	if e = db.Close(); e != nil {
 		t.Fatal(e)
 	}
@@ -108,6 +124,11 @@ func TestEncryptionWALPasswordOrdinaryReopenAndCancellation(t *testing.T) {
 	i, e := db.VerifyEncrypted(ctx)
 	if e != nil || i.Mode != sqlite.EncryptionWAL || i.StorageLayout != 2 || i.WALSegments != 0 {
 		t.Fatal(i, e)
+	}
+	noncesAfterClose := captureEncryptedNonces(t, path)
+	assertEncryptedNonceAdvance(t, noncesAfterWrite, noncesAfterClose, encryption.FileBase)
+	if noncesAfterClose.root.Epoch != noncesAfterWrite.root.Epoch {
+		t.Fatal("ordinary close checkpoint unexpectedly changed key epoch")
 	}
 	names, e = os.ReadDir(dir)
 	if e != nil {

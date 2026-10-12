@@ -1,0 +1,17 @@
+{
+  "session": 68178,
+  "logs": [
+    {
+      "path": "02_normal.events.jsonl.gz",
+      "raw_bytes": 3183,
+      "raw_sha256": "3363aeeeffa9a11dd545afb46e5e782c920c6ab091ed30774a2d722cf13ed8e0",
+      "gzip_sha256": "bf44bb35c1cc703a2c30b7516ddf7df6baf13792b9d94f569344ac1b51316c21"
+    },
+    {
+      "path": "03_race.events.jsonl.gz",
+      "raw_bytes": 3187,
+      "raw_sha256": "1be31975a5fd3fd232b21380601d9362b7efe93a6db6f02078021072206e1588",
+      "gzip_sha256": "c60d6c48e02d631f07fcb05950a8369d2b285c9ab5e2a5cf6436f3630c1a9880"
+    }
+  ]
+}

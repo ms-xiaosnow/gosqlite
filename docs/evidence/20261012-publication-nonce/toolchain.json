@@ -1,0 +1,92 @@
+{
+  "root": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033",
+  "go": {
+    "version": "go1.27.2",
+    "archive_library_file_id": "libfile_bbc6e7ce605c8191a3ab33b913a86ef9",
+    "official_url": "https://go.dev/dl/go1.27.2.linux-amd64.tar.gz",
+    "archive_sha256": "ecbadb99091a3f46e31f5f934b068b1864eafa7995211b39eaddf76996045fe5",
+    "go_binary_sha256": "548d3c32f83fa81152f543eb1526be7884cfe0526eb5e9ce29d3eca14786e7e0",
+    "gofmt_binary_sha256": "5583dbb3339147fee7cdb067eb3cd4a50015b48c27084377f49d93833aa4ad77",
+    "binary_path": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/toolchains/go1.27.2/bin/go",
+    "preinstalled_nm": false
+  },
+  "dependency_source_bundle": {
+    "library_file_id": "libfile_2daeff6610308191b6cedee4b404e60a",
+    "filename": "official-sqlite-go-dependency-sources-20261011.tar.gz",
+    "sha256": "2a7bedf1b85cc4cec4dc4a53cd0ac13f7a8cbceab20fd6fee42616736f4b4bda"
+  },
+  "modules": [
+    {
+      "path": "golang.org/x/crypto",
+      "version": "v0.58.0",
+      "sum": "h1:COkYLr4k7nDI4r6QtMML2AfzeIswWHAJthLS6K/M/54=",
+      "go_mod_sum": "h1:Xh+kl5A+M0gMiWDytH2Hhr5Z7WbNCpv/eB/EFgfSk+w=",
+      "dir": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/toolchains/gopath/pkg/mod/golang.org/x/crypto@v0.58.0"
+    },
+    {
+      "path": "golang.org/x/sys",
+      "version": "v0.49.0",
+      "sum": "h1:XbzkgYJHdqh/8m2Uu0W/dQv8nktxx4BFHp1M0gROTXA=",
+      "go_mod_sum": "h1:hNLxWAXmnKAxqDtdwIYC4bM9oQPEecfsnNMuSxOs3og=",
+      "dir": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/toolchains/gopath/pkg/mod/golang.org/x/sys@v0.49.0"
+    },
+    {
+      "path": "golang.org/x/text",
+      "version": "v0.43.0",
+      "sum": "h1:1QivrlhwAsnMOcqgOdl9my7s9OyZl8O5/UGUTJVXoWc=",
+      "go_mod_sum": "h1:hbSIYA/amXcRXTFSZqh8tWHEoqRvvbKPJ2uz/KU+a+s=",
+      "dir": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/toolchains/gopath/pkg/mod/golang.org/x/text@v0.43.0"
+    }
+  ],
+  "module_verification": "go mod verify: all modules verified; go.mod and go.sum unchanged",
+  "system_c_compiler": {
+    "cc": "/usr/bin/cc",
+    "gcc": "/usr/bin/gcc",
+    "version": "14.2.0 (Debian 14.2.0-19)"
+  },
+  "project_tests": "NOT_RUN",
+  "recommended_go_environment": {
+    "GOROOT": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/toolchains/go1.27.2",
+    "GOPATH": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/toolchains/gopath",
+    "GOMODCACHE": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/toolchains/gopath/pkg/mod",
+    "GOCACHE": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/go-cache",
+    "GOTMPDIR": "",
+    "TMPDIR": "/tmp",
+    "GOTOOLCHAIN": "local",
+    "GOPROXY": "off",
+    "GOSUMDB": "off",
+    "GOWORK": "off",
+    "GOENV": "off",
+    "CC": "/usr/bin/gcc"
+  },
+  "bootstrap_environment_used": {
+    "GOCACHE": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/toolchains/cache",
+    "GOTMPDIR": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/toolchains/tmp",
+    "TMPDIR": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/toolchains/tmp"
+  },
+  "bootstrap_scope": "Go archive verification, version smoke, exact pinned module materialization and module verification only; no project build/test or temporary SQLite database.",
+  "recommended_environment_note": "Preserves parent resource contract for future authorized project execution. Caller selects explicit GOFLAGS and CGO_ENABLED for each gate. No project command executed by toolchain restorer.",
+  "sqlite": {
+    "source_path": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/toolchains/sqlite-src-3540000",
+    "source_archive_path": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/toolchains/official-sources/sources/sqlite/sqlite-src-3540000.zip",
+    "source_archive_sha256": "8847659821e0c5116bd14a94644c82ba932b2d9a05ac81af2e34af814aad7c58",
+    "source_archive_sha3_256": "a5c29342ca185abcda332448fbb27c536661245be27e20199b46c49099b0e15e",
+    "generated_sqlite3_c_sha3_256": "8efd453d08a7cfc4c79de5923153036cdc4dcaa254d4f1e617be6a2a98828f9e",
+    "binary_path": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/toolchains/sqlite-build-3540000/sqlite3",
+    "binary_sha256": "30b11d828843b374c4e1162c43f579c50317dbe7ce66bafcfb3014acdd430729",
+    "version_smoke": "3.54.0 2026-10-09 15:46:58 be8d059e9a49089ab2dce5ed26dd87aaf598fdc5fbe0b107c0dd758464bcd5e3 (64-bit)",
+    "configure_arguments": [
+      "--all",
+      "--disable-readline",
+      "--disable-tcl",
+      "--disable-shared"
+    ],
+    "build_command": "make -j2 sqlite3",
+    "configure_exit": 0,
+    "make_exit": 0,
+    "source_content_modified": false,
+    "sqlite_sql_or_project_tests": "NOT_RUN",
+    "temp_location_used": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/toolchains/tmp",
+    "smoke_note": "Only env -i LC_ALL=C LANG=C TZ=UTC SQLITE_TMPDIR/TMPDIR set to the toolchain temporary directory; CLI -noinit --version. No SQL executed. This bootstrap is not project-oracle qualification."
+  }
+}

@@ -1,0 +1,158 @@
+{
+  "utc": "2026-10-12T22:05:30.475269+00:00",
+  "status": "PASS",
+  "commands": [
+    {
+      "name": "01_format",
+      "start_utc": "2026-10-12T22:04:58.955677+00:00",
+      "end_utc": "2026-10-12T22:05:00.959536+00:00",
+      "exit_code": 0,
+      "resource_breach_latched": false,
+      "observer_error": null,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "PASS"
+    },
+    {
+      "name": "02_normal",
+      "start_utc": "2026-10-12T22:05:01.378955+00:00",
+      "end_utc": "2026-10-12T22:05:07.384177+00:00",
+      "exit_code": 0,
+      "resource_breach_latched": false,
+      "observer_error": null,
+      "stdout_sha256": "91427df45385e51e5a419bdf8d670bdf9411e807c8177a5d54a5f29eed13261e",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tests": {
+        "github.com/ms-xiaosnow/gosqlite/internal/vfs": {
+          "roots": [
+            "TestBackupDestinationModelAdmissionBlocksMutation",
+            "TestBackupPublicationModelOwnedAcquisitionFailure",
+            "TestBackupPublicationModelPublicationErrno",
+            "TestBackupPublicationModelSameFinalRace",
+            "TestBackupPublicationModelSealAndRetirement",
+            "TestBackupPublicationModelStateAndFailures",
+            "TestBackupPublicationSourceCapabilityFlow",
+            "TestBackupPublicationSourceMutationCounterexamples",
+            "TestWALPublicationMemoryBoundsAndTransfer",
+            "TestWALPublicationMemoryCloseOutcomeMatrix",
+            "TestWALPublicationMemoryDiagnosticOwnership",
+            "TestWALPublicationMemoryNamespaceFacts",
+            "TestWALPublicationMemoryNilWrapperFailsClosed",
+            "TestWALPublicationMemoryOneShotFailures",
+            "TestWALPublicationMemoryPublicationErrno",
+            "TestWALPublicationMemorySuccessOrdering",
+            "TestWALPublicationMemoryUnknownHooksBeforeUnwrap",
+            "TestWALPublicationMemoryUnsafeBranchPreservesErrno",
+            "TestWALPublicationSourceDependencies",
+            "TestWALPublicationSourceNegativeVariants"
+          ],
+          "root_count": 20,
+          "named_pass": 116,
+          "child_pass": 96,
+          "fail": 0,
+          "skip": 0
+        },
+        "github.com/ms-xiaosnow/gosqlite/internal/testscope": {
+          "roots": [
+            "TestWALPublicationGuardElapsedRejectsTimingAndQualificationDrift",
+            "TestWALPublicationGuardElapsedSourceIsInertAndPinned",
+            "TestWALPublicationGuardExactCallBoundaries",
+            "TestWALPublicationGuardFakeFactoryIsExactSource",
+            "TestWALPublicationGuardFixedSourceAndWiring",
+            "TestWALPublicationGuardManualSourceIsExactAndDoubleGated",
+            "TestWALPublicationGuardProductionBoundariesAreRequired",
+            "TestWALPublicationGuardPureFilesRejectNativeAliasesAndVariables",
+            "TestWALPublicationGuardRejectsActivationReferences",
+            "TestWALPublicationGuardRejectsControlFlowAndFactoryDrift",
+            "TestWALPublicationGuardSafeControls"
+          ],
+          "root_count": 11,
+          "named_pass": 11,
+          "child_pass": 0,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "status": "PASS"
+    },
+    {
+      "name": "03_race",
+      "start_utc": "2026-10-12T22:05:07.896169+00:00",
+      "end_utc": "2026-10-12T22:05:21.903612+00:00",
+      "exit_code": 0,
+      "resource_breach_latched": false,
+      "observer_error": null,
+      "stdout_sha256": "bdfc1b8891a879464c0a5f1ef6efc581b15436ce4f0428c76c808ae2db1dda9e",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tests": {
+        "github.com/ms-xiaosnow/gosqlite/internal/vfs": {
+          "roots": [
+            "TestBackupDestinationModelAdmissionBlocksMutation",
+            "TestBackupPublicationModelOwnedAcquisitionFailure",
+            "TestBackupPublicationModelPublicationErrno",
+            "TestBackupPublicationModelSameFinalRace",
+            "TestBackupPublicationModelSealAndRetirement",
+            "TestBackupPublicationModelStateAndFailures",
+            "TestBackupPublicationSourceCapabilityFlow",
+            "TestBackupPublicationSourceMutationCounterexamples",
+            "TestWALPublicationMemoryBoundsAndTransfer",
+            "TestWALPublicationMemoryCloseOutcomeMatrix",
+            "TestWALPublicationMemoryDiagnosticOwnership",
+            "TestWALPublicationMemoryNamespaceFacts",
+            "TestWALPublicationMemoryNilWrapperFailsClosed",
+            "TestWALPublicationMemoryOneShotFailures",
+            "TestWALPublicationMemoryPublicationErrno",
+            "TestWALPublicationMemorySuccessOrdering",
+            "TestWALPublicationMemoryUnknownHooksBeforeUnwrap",
+            "TestWALPublicationMemoryUnsafeBranchPreservesErrno",
+            "TestWALPublicationSourceDependencies",
+            "TestWALPublicationSourceNegativeVariants"
+          ],
+          "root_count": 20,
+          "named_pass": 116,
+          "child_pass": 96,
+          "fail": 0,
+          "skip": 0
+        },
+        "github.com/ms-xiaosnow/gosqlite/internal/testscope": {
+          "roots": [
+            "TestWALPublicationGuardElapsedRejectsTimingAndQualificationDrift",
+            "TestWALPublicationGuardElapsedSourceIsInertAndPinned",
+            "TestWALPublicationGuardExactCallBoundaries",
+            "TestWALPublicationGuardFakeFactoryIsExactSource",
+            "TestWALPublicationGuardFixedSourceAndWiring",
+            "TestWALPublicationGuardManualSourceIsExactAndDoubleGated",
+            "TestWALPublicationGuardProductionBoundariesAreRequired",
+            "TestWALPublicationGuardPureFilesRejectNativeAliasesAndVariables",
+            "TestWALPublicationGuardRejectsActivationReferences",
+            "TestWALPublicationGuardRejectsControlFlowAndFactoryDrift",
+            "TestWALPublicationGuardSafeControls"
+          ],
+          "root_count": 11,
+          "named_pass": 11,
+          "child_pass": 0,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "status": "PASS"
+    },
+    {
+      "name": "04_sourceguard",
+      "start_utc": "2026-10-12T22:05:22.305926+00:00",
+      "end_utc": "2026-10-12T22:05:30.308562+00:00",
+      "exit_code": 0,
+      "resource_breach_latched": false,
+      "observer_error": null,
+      "stdout_sha256": "ba0cb4aff7a9c991c087485ff3499bf86b9b57f990c78b979c1f08ffc42a3505",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "PASS"
+    }
+  ],
+  "source_unchanged": true,
+  "manual_image_executed": false,
+  "unrelated_tests": "REUSED, not rerun",
+  "prior_tests": "Unchanged unrelated source closures reuse their recorded applicable evidence",
+  "rerun_reason": "Two new errno roots; existing fake event/retirement helper consumers; reviewed model source pin. Corrected20vfs+11guard dependency selection; no unrelated all-suite run",
+  "lease": "RELEASED_ON_RETURN"
+}

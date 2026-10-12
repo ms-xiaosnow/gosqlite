@@ -1,0 +1,13 @@
+{
+  "base_commit": "edcc8be3e4c0d0dc46066020dc900a5effcaee30",
+  "candidate_tree": "598b243e946431c90ed0b5da307f89b288cc19e2",
+  "independent_source_review": "CLEAR_SOURCE_ONLY",
+  "files": {
+    "internal/vfs/wal_publication_model_test.go": "465813a5c6c4b1324ad6b4ed4850585c24d145e5e3a7a4f7e22ca1d178cd0902",
+    "internal/vfs/backup_publication_model_test.go": "9c17d9c4cbc4ed7076c5b665d119fc892d23acffb20a77606bb7d7282f2c73cd",
+    "internal/testscope/wal_tail_publication.go": "bf572575fd3440b46d7ec13d3f094bdb9cac09c9acde16f7d93273b5b647d1c5"
+  },
+  "source_review_sha256": "b94ed944aa363a5e31780608c7feea57e64fab11a3ece760b9d73d3d4f85d7ae",
+  "corrected_selector_reason": "Shared backupModel.event helper consumer TestBackupDestinationModelAdmissionBlocksMutation included by independentreview",
+  "physical": "NOT_RUN"
+}

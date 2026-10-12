@@ -14,93 +14,163 @@ import (
 // These are inert integer/byte/event models of the actual production facade.
 // File values are identity markers only; no File method or native factory runs.
 type walPublicationModelInfo struct{ size int64 }
-func (i walPublicationModelInfo) Name() string { return "memory" }
-func (i walPublicationModelInfo) Size() int64 { return i.size }
-func (walPublicationModelInfo) Mode() os.FileMode { return 0600 }
+
+func (i walPublicationModelInfo) Name() string     { return "memory" }
+func (i walPublicationModelInfo) Size() int64      { return i.size }
+func (walPublicationModelInfo) Mode() os.FileMode  { return 0600 }
 func (walPublicationModelInfo) ModTime() time.Time { return time.Time{} }
-func (walPublicationModelInfo) IsDir() bool { return false }
-func (walPublicationModelInfo) Sys() any { return nil }
+func (walPublicationModelInfo) IsDir() bool        { return false }
+func (walPublicationModelInfo) Sys() any           { return nil }
 
 type walPublicationModel struct {
-	events []string
-	fail map[string]error
-	source, candidate []byte
+	events                     []string
+	fail                       map[string]error
+	source, candidate          []byte
 	main, old, next, directory *File
-	known, transferred bool
-	childDone, directoryDone bool
-	shortWrite bool
+	known, transferred         bool
+	childDone, directoryDone   bool
+	shortWrite                 bool
+	retired                    []*File // inert identities only, in actual retirement order
 }
+
 func newWALPublicationModel() (*WALPublication, *walPublicationModel) {
 	m := &walPublicationModel{fail: make(map[string]error), source: bytes.Repeat([]byte{7}, 64),
 		main: &File{}, old: &File{}, next: &File{}, directory: &File{}, known: true, childDone: true, directoryDone: true}
 	return newWALPublicationWithOps(m), m
 }
-func (m *walPublicationModel) event(name string) error { m.events = append(m.events, name); return m.fail[name] }
-func (m *walPublicationModel) allowedFiles() []*File { return []*File{m.main, m.old, m.next, m.directory} }
+func (m *walPublicationModel) event(name string) error {
+	m.events = append(m.events, name)
+	return m.fail[name]
+}
+func (m *walPublicationModel) allowedFiles() []*File {
+	return []*File{m.main, m.old, m.next, m.directory}
+}
 func (m *walPublicationModel) acquire() error { return m.event("acquire") }
-func (m *walPublicationModel) create() error { return m.event("create") }
+func (m *walPublicationModel) create() error  { return m.event("create") }
 func (m *walPublicationModel) readSource(b []byte, off int64) (int, error) {
-	if err := m.event("read"); err != nil { return 0, err }
+	if err := m.event("read"); err != nil {
+		return 0, err
+	}
 	return bytes.NewReader(m.source).ReadAt(b, off)
 }
 func (m *walPublicationModel) writeCandidate(b []byte, off int64) (int, error) {
 	err := m.event("write")
 	n := len(b)
-	if m.shortWrite { n /= 2 }
-	if end := int(off)+n; end > len(m.candidate) { m.candidate = append(m.candidate, make([]byte, end-len(m.candidate))...) }
+	if m.shortWrite {
+		n /= 2
+	}
+	if end := int(off) + n; end > len(m.candidate) {
+		m.candidate = append(m.candidate, make([]byte, end-len(m.candidate))...)
+	}
 	copy(m.candidate[int(off):], b[:n])
 	return n, err
 }
 func (m *walPublicationModel) candidateInfo() (os.FileInfo, error) {
-	if err := m.event("info"); err != nil { return nil, err }
+	if err := m.event("info"); err != nil {
+		return nil, err
+	}
 	return walPublicationModelInfo{int64(len(m.candidate))}, nil
 }
-func (m *walPublicationModel) recheck() error { return m.event("recheck") }
-func (m *walPublicationModel) syncCandidate() error { return m.event("candidate-sync") }
+func (m *walPublicationModel) recheck() error         { return m.event("recheck") }
+func (m *walPublicationModel) syncCandidate() error   { return m.event("candidate-sync") }
 func (m *walPublicationModel) replace() (bool, error) { return m.known, m.event("replace") }
 func (m *walPublicationModel) transfer(main, old *File) (*File, error) {
-	if main != m.main || old != m.old || m.transferred { return nil, ErrIdentity }
-	if err := m.event("transfer"); err != nil { return nil, err }
+	if main != m.main || old != m.old || m.transferred {
+		return nil, ErrIdentity
+	}
+	if err := m.event("transfer"); err != nil {
+		return nil, err
+	}
 	m.transferred = true
 	return m.next, nil
 }
 func (m *walPublicationModel) postPublication() (os.FileInfo, error) {
-	if err := m.event("post-shm"); err != nil { return nil, err }
+	if err := m.event("post-shm"); err != nil {
+		return nil, err
+	}
 	return walPublicationModelInfo{int64(len(m.candidate))}, nil
 }
 func (m *walPublicationModel) syncDirectory() error { return m.event("directory-sync") }
-func (m *walPublicationModel) seal() { _ = m.event("seal") }
-func (m *walPublicationModel) closeChild() (bool, error) { return m.childDone, m.event("child-close") }
-func (m *walPublicationModel) closeDirectory() (bool, error) { return m.directoryDone, m.event("directory-close") }
+func (m *walPublicationModel) seal()                { _ = m.event("seal") }
+func (m *walPublicationModel) closeChild() (bool, error) {
+	err := m.event("child-close")
+	if m.childDone {
+		child := m.next
+		if m.transferred {
+			child = m.old
+		}
+		m.retired = append(m.retired, child)
+	}
+	return m.childDone, err
+}
+func (m *walPublicationModel) closeDirectory() (bool, error) {
+	err := m.event("directory-close")
+	if m.directoryDone {
+		m.retired = append(m.retired, m.directory)
+	}
+	return m.directoryDone, err
+}
 func walPublicationModelPrepared(t *testing.T, p *WALPublication) {
 	t.Helper()
-	if err := p.Acquire(); err != nil { t.Fatal(err) }
-	if err := p.CreateCandidate(32); err != nil { t.Fatal(err) }
+	if err := p.Acquire(); err != nil {
+		t.Fatal(err)
+	}
+	if err := p.CreateCandidate(32); err != nil {
+		t.Fatal(err)
+	}
 	b := make([]byte, 32)
-	if _, err := p.Source().ReadAt(b, 0); err != nil { t.Fatal(err) }
-	if _, err := p.WriteAt(b, 0); err != nil { t.Fatal(err) }
-	if err := p.Prepare(32); err != nil { t.Fatal(err) }
+	if _, err := p.Source().ReadAt(b, 0); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := p.WriteAt(b, 0); err != nil {
+		t.Fatal(err)
+	}
+	if err := p.Prepare(32); err != nil {
+		t.Fatal(err)
+	}
 }
 func walPublicationModelCount(events []string, name string) int {
 	n := 0
-	for _, e := range events { if e == name { n++ } }
+	for _, e := range events {
+		if e == name {
+			n++
+		}
+	}
 	return n
 }
 func TestWALPublicationMemorySuccessOrdering(t *testing.T) {
 	p, m := newWALPublicationModel()
 	original := append([]byte(nil), m.source...)
 	walPublicationModelPrepared(t, p)
-	if p.Durable() { t.Fatal("premature durable state") }
-	if known, err := p.Replace(); !known || err != nil { t.Fatal(known, err) }
-	if p.Durable() { t.Fatal("rename exposed clean state") }
+	if p.Durable() {
+		t.Fatal("premature durable state")
+	}
+	if known, err := p.Replace(); !known || err != nil {
+		t.Fatal(known, err)
+	}
+	if p.Durable() {
+		t.Fatal("rename exposed clean state")
+	}
 	next, err := p.TransferWAL(m.main, m.old)
-	if err != nil || next != m.next || !m.transferred { t.Fatal("lost owner", err) }
-	if _, err = p.FinishPublication(); err != nil || !p.Durable() { t.Fatal(err) }
-	if err = p.Close(); err != nil || !p.RetirementComplete() { t.Fatal(err) }
-	if err = p.Close(); err != nil { t.Fatal(err) }
+	if err != nil || next != m.next || !m.transferred {
+		t.Fatal("lost owner", err)
+	}
+	if _, err = p.FinishPublication(); err != nil || !p.Durable() {
+		t.Fatal(err)
+	}
+	if err = p.Close(); err != nil || !p.RetirementComplete() {
+		t.Fatal(err)
+	}
+	if err = p.Close(); err != nil {
+		t.Fatal(err)
+	}
 	want := []string{"acquire", "create", "info", "read", "write", "info", "recheck", "candidate-sync", "recheck", "replace", "transfer", "post-shm", "directory-sync", "seal", "child-close", "directory-close"}
-	if !reflect.DeepEqual(m.events, want) || !bytes.Equal(m.source, original) || !bytes.Equal(m.candidate, original[:32]) { t.Fatal(m.events) }
-	if _, err := p.WriteAt([]byte{1}, 0); !errors.Is(err, ErrPoisoned) { t.Fatal(err) }
+	if !reflect.DeepEqual(m.events, want) || !bytes.Equal(m.source, original) || !bytes.Equal(m.candidate, original[:32]) {
+		t.Fatal(m.events)
+	}
+	if _, err := p.WriteAt([]byte{1}, 0); !errors.Is(err, ErrPoisoned) {
+		t.Fatal(err)
+	}
 }
 func TestWALPublicationMemoryOneShotFailures(t *testing.T) {
 	cause := errors.New("inert publication diagnostic")
@@ -109,27 +179,48 @@ func TestWALPublicationMemoryOneShotFailures(t *testing.T) {
 			p, m := newWALPublicationModel()
 			m.fail[phase] = cause
 			var err error
-			if err = p.Acquire(); err == nil { err = p.CreateCandidate(32) }
-			if err == nil { _, err = p.Source().ReadAt(make([]byte, 32), 0) }
-			if err == nil { _, err = p.WriteAt(make([]byte, 32), 0) }
-			if err == nil { err = p.Prepare(32) }
+			if err = p.Acquire(); err == nil {
+				err = p.CreateCandidate(32)
+			}
+			if err == nil {
+				_, err = p.Source().ReadAt(make([]byte, 32), 0)
+			}
+			if err == nil {
+				_, err = p.WriteAt(make([]byte, 32), 0)
+			}
+			if err == nil {
+				err = p.Prepare(32)
+			}
 			attempted := false
 			if err == nil {
 				attempted = true
-				if phase == "replace" { m.known = false }
+				if phase == "replace" {
+					m.known = false
+				}
 				known, replacement := p.Replace()
 				err = replacement
-				if known { _, transfer := p.TransferWAL(m.main, m.old); err = errors.Join(err, transfer) }
+				if known {
+					_, transfer := p.TransferWAL(m.main, m.old)
+					err = errors.Join(err, transfer)
+				}
 				_, barrier := p.FinishPublication()
 				err = errors.Join(err, barrier)
 			}
-			if !errors.Is(err, cause) || p.Durable() { t.Fatal("failure erased or published", err) }
-			if attempted && walPublicationModelCount(m.events, "directory-sync") != 1 { t.Fatal("missing protective barrier", m.events) }
+			if !errors.Is(err, cause) || p.Durable() {
+				t.Fatal("failure erased or published", err)
+			}
+			if attempted && walPublicationModelCount(m.events, "directory-sync") != 1 {
+				t.Fatal("missing protective barrier", m.events)
+			}
 			_, _ = p.Replace()
 			_, _ = p.FinishPublication()
-			if walPublicationModelCount(m.events, "replace") > 1 || walPublicationModelCount(m.events, "directory-sync") > 1 { t.Fatal("native phase retried") }
+			if walPublicationModelCount(m.events, "replace") > 1 || walPublicationModelCount(m.events, "directory-sync") > 1 {
+				t.Fatal("native phase retried")
+			}
 			_ = p.Close()
-			if walPublicationModelCount(m.events, "child-close") != 1 || walPublicationModelCount(m.events, "directory-close") != 1 { t.Fatal(m.events) }
+			if walPublicationModelCount(m.events, "child-close") != 1 || walPublicationModelCount(m.events, "directory-close") != 1 {
+				t.Fatal(m.events)
+			}
 		})
 	}
 }
@@ -139,47 +230,88 @@ func TestWALPublicationMemoryCloseOutcomeMatrix(t *testing.T) {
 		for directory := 0; directory < 4; directory++ {
 			p, m := newWALPublicationModel()
 			m.childDone, m.directoryDone = child < 2, directory < 2
-			if child&1 != 0 { m.fail["child-close"] = cause }
-			if directory&1 != 0 { m.fail["directory-close"] = cause }
+			if child&1 != 0 {
+				m.fail["child-close"] = cause
+			}
+			if directory&1 != 0 {
+				m.fail["directory-close"] = cause
+			}
 			err := p.Close()
-			if p.RetirementComplete() != (child < 2 && directory < 2) { t.Fatal(child, directory, err) }
+			if p.RetirementComplete() != (child < 2 && directory < 2) {
+				t.Fatal(child, directory, err)
+			}
 			if child&1 != 0 || child < 2 && directory&1 != 0 {
-				if !errors.Is(err, cause) { t.Fatal("consumed diagnostic lost", err) }
+				if !errors.Is(err, cause) {
+					t.Fatal("consumed diagnostic lost", err)
+				}
 			}
 			_ = p.Close()
 			_ = p.Close()
-			if walPublicationModelCount(m.events, "child-close") != 1 { t.Fatal("unknown child close retried") }
+			if walPublicationModelCount(m.events, "child-close") != 1 {
+				t.Fatal("unknown child close retried")
+			}
 			wantDir := 0
-			if child < 2 { wantDir = 1 }
-			if walPublicationModelCount(m.events, "directory-close") != wantDir { t.Fatal("directory passed incomplete child", m.events) }
+			if child < 2 {
+				wantDir = 1
+			}
+			if walPublicationModelCount(m.events, "directory-close") != wantDir {
+				t.Fatal("directory passed incomplete child", m.events)
+			}
 		}
 	}
 }
 func TestWALPublicationMemoryBoundsAndTransfer(t *testing.T) {
 	p, m := newWALPublicationModel()
-	if _, ok := p.Source().(io.WriterAt); ok { t.Fatal("source writable") }
-	if err := p.Acquire(); err != nil { t.Fatal(err) }
-	if err := p.CreateCandidate(32); err != nil { t.Fatal(err) }
-	if _, err := p.WriteAt(make([]byte, 33), 0); !errors.Is(err, ErrPoisoned) { t.Fatal(err) }
-	if err := p.Prepare(32); !errors.Is(err, ErrIdentity) { t.Fatal("short candidate admitted", err) }
-	if walPublicationModelCount(m.events, "candidate-sync") != 0 { t.Fatal("short candidate synced") }
+	if _, ok := p.Source().(io.WriterAt); ok {
+		t.Fatal("source writable")
+	}
+	if err := p.Acquire(); err != nil {
+		t.Fatal(err)
+	}
+	if err := p.CreateCandidate(32); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := p.WriteAt(make([]byte, 33), 0); !errors.Is(err, ErrPoisoned) {
+		t.Fatal(err)
+	}
+	if err := p.Prepare(32); !errors.Is(err, ErrIdentity) {
+		t.Fatal("short candidate admitted", err)
+	}
+	if walPublicationModelCount(m.events, "candidate-sync") != 0 {
+		t.Fatal("short candidate synced")
+	}
 	p, m = newWALPublicationModel()
-	if err := p.Acquire(); err != nil { t.Fatal(err) }
-	if err := p.CreateCandidate(32); err != nil { t.Fatal(err) }
+	if err := p.Acquire(); err != nil {
+		t.Fatal(err)
+	}
+	if err := p.CreateCandidate(32); err != nil {
+		t.Fatal(err)
+	}
 	m.shortWrite = true
-	if _, err := p.WriteAt(make([]byte, 32), 0); !errors.Is(err, io.ErrShortWrite) { t.Fatal("short nil write lost", err) }
-	if err := p.Prepare(32); !errors.Is(err, ErrPoisoned) || walPublicationModelCount(m.events, "candidate-sync") != 0 { t.Fatal("failed write remained usable", err) }
+	if _, err := p.WriteAt(make([]byte, 32), 0); !errors.Is(err, io.ErrShortWrite) {
+		t.Fatal("short nil write lost", err)
+	}
+	if err := p.Prepare(32); !errors.Is(err, ErrPoisoned) || walPublicationModelCount(m.events, "candidate-sync") != 0 {
+		t.Fatal("failed write remained usable", err)
+	}
 	p, m = newWALPublicationModel()
 	walPublicationModelPrepared(t, p)
-	if _, err := p.TransferWAL(m.main, m.old); !errors.Is(err, ErrPoisoned) { t.Fatal("transfer before rename") }
+	if _, err := p.TransferWAL(m.main, m.old); !errors.Is(err, ErrPoisoned) {
+		t.Fatal("transfer before rename")
+	}
 	_, _ = p.Replace()
-	if _, err := p.TransferWAL(m.old, m.main); !errors.Is(err, ErrIdentity) { t.Fatal(err) }
+	if _, err := p.TransferWAL(m.old, m.main); !errors.Is(err, ErrIdentity) {
+		t.Fatal(err)
+	}
 	_, _ = p.FinishPublication()
-	if p.Durable() || walPublicationModelCount(m.events, "directory-sync") != 1 { t.Fatal(m.events) }
+	if p.Durable() || walPublicationModelCount(m.events, "directory-sync") != 1 {
+		t.Fatal(m.events)
+	}
 }
 
 type walPublicationCycle struct{}
-func (*walPublicationCycle) Error() string { return "inert cycle" }
+
+func (*walPublicationCycle) Error() string   { return "inert cycle" }
 func (e *walPublicationCycle) Unwrap() error { return e }
 func TestWALPublicationMemoryDiagnosticOwnership(t *testing.T) {
 	cause := errors.New("inert owner diagnostic")
@@ -187,34 +319,55 @@ func TestWALPublicationMemoryDiagnosticOwnership(t *testing.T) {
 		p, m := newWALPublicationModel()
 		var input error
 		switch kind {
-		case "known": input = &os.PathError{Op: "memory", Path: "inert", Err: retainedFileCleanup(m.next, cause)}
-		case "borrowed": input = retainedFileCleanup(m.old, cause)
-		case "foreign": input = retainedFileCleanup(&File{}, cause)
-		case "cycle": input = &walPublicationCycle{}
+		case "known":
+			input = &os.PathError{Op: "memory", Path: "inert", Err: retainedFileCleanup(m.next, cause)}
+		case "borrowed":
+			input = retainedFileCleanup(m.old, cause)
+		case "foreign":
+			input = retainedFileCleanup(&File{}, cause)
+		case "cycle":
+			input = &walPublicationCycle{}
 		case "over-budget":
 			errs := make([]error, 129)
-			for i := range errs { errs[i] = cause }
+			for i := range errs {
+				errs[i] = cause
+			}
 			input = errors.Join(errs...)
 		}
 		m.fail["acquire"] = input
 		err := p.Acquire()
 		owners, discovery := CleanupOwnersBounded(err, 256)
-		if discovery != nil || len(owners) != 0 { t.Fatal("interior owner escaped", kind, discovery) }
+		if discovery != nil || len(owners) != 0 {
+			t.Fatal("interior owner escaped", kind, discovery)
+		}
 		if kind == "known" || kind == "borrowed" {
-			if !errors.Is(err, cause) { t.Fatal("safe cause lost") }
-			if kind == "known" { var path *os.PathError; if !errors.As(err, &path) || path.Path != "inert" { t.Fatal("safe As lost") } }
+			if !errors.Is(err, cause) {
+				t.Fatal("safe cause lost")
+			}
+			if kind == "known" {
+				var path *os.PathError
+				if !errors.As(err, &path) || path.Path != "inert" {
+					t.Fatal("safe As lost")
+				}
+			}
 			_ = p.Close()
-			if !p.RetirementComplete() { t.Fatal(kind) }
+			if !p.RetirementComplete() {
+				t.Fatal(kind)
+			}
 		} else {
 			_ = p.Close()
-			if p.RetirementComplete() || walPublicationModelCount(m.events, "child-close") != 0 { t.Fatal("foreign/cyclic graph released protector", kind) }
+			if p.RetirementComplete() || walPublicationModelCount(m.events, "child-close") != 0 {
+				t.Fatal("foreign/cyclic graph released protector", kind)
+			}
 		}
 	}
 }
 func TestWALPublicationMemoryNamespaceFacts(t *testing.T) {
 	parent := walPublicationFact{mask: walPublicationRequiredMask, mode: walPublicationDirectory, inode: 1, mount: 10, devMajor: 8, devMinor: 1}
 	child := walPublicationFact{mask: walPublicationRequiredMask, mode: walPublicationRegular, links: 1, inode: 2, mount: 10, devMajor: 8, devMinor: 1}
-	if err := walPublicationDirectChild(parent, child, child); err != nil { t.Fatal(err) }
+	if err := walPublicationDirectChild(parent, child, child); err != nil {
+		t.Fatal(err)
+	}
 	for _, mutate := range []func(*walPublicationFact){
 		func(f *walPublicationFact) { f.mask &^= 0x4000 }, func(f *walPublicationFact) { f.mount = 0 },
 		func(f *walPublicationFact) { f.mount++ }, func(f *walPublicationFact) { f.links = 2 },
@@ -222,56 +375,96 @@ func TestWALPublicationMemoryNamespaceFacts(t *testing.T) {
 	} {
 		bad := child
 		mutate(&bad)
-		if err := walPublicationDirectChild(parent, bad, bad); err == nil { t.Fatal("unsafe fact admitted", bad) }
+		if err := walPublicationDirectChild(parent, bad, bad); err == nil {
+			t.Fatal("unsafe fact admitted", bad)
+		}
 	}
-	if !child.samePhysical(walPublicationFact{devMajor: 8, devMinor: 1, inode: 2, mount: 99}) { t.Fatal("mount hid physical alias") }
+	if !child.samePhysical(walPublicationFact{devMajor: 8, devMinor: 1, inode: 2, mount: 99}) {
+		t.Fatal("mount hid physical alias")
+	}
 	for _, name := range []string{"", ".", "..", "db-wal", "DB-SHM", "db-journal", "a/b", "a\\b", "数据库", string(bytes.Repeat([]byte{'x'}, 201))} {
-		if walPublicationBasename(name) { t.Fatal("unsafe basename", name) }
+		if walPublicationBasename(name) {
+			t.Fatal("unsafe basename", name)
+		}
 	}
-	if !walPublicationBasename("ordinary.db") { t.Fatal("bounded name refused") }
+	if !walPublicationBasename("ordinary.db") {
+		t.Fatal("bounded name refused")
+	}
 	main, original, candidate, shm := child, child, child, child
 	main.inode, original.inode, candidate.inode, shm.inode = 2, 3, 4, 5
-	if err := walPublicationDistinct(main, original, candidate, shm, true); err != nil { t.Fatal(err) }
+	if err := walPublicationDistinct(main, original, candidate, shm, true); err != nil {
+		t.Fatal(err)
+	}
 	for _, alias := range []walPublicationFact{main, original, shm} {
 		alias.mount++ // a different mount never excuses a physical alias
-		if err := walPublicationDistinct(main, original, alias, shm, true); !errors.Is(err, ErrIdentity) { t.Fatal("candidate physical alias admitted", err) }
+		if err := walPublicationDistinct(main, original, alias, shm, true); !errors.Is(err, ErrIdentity) {
+			t.Fatal("candidate physical alias admitted", err)
+		}
 	}
-	if err := walPublicationDistinct(main, main, candidate, shm, false); !errors.Is(err, ErrIdentity) { t.Fatal("main/WAL physical alias") }
+	if err := walPublicationDistinct(main, main, candidate, shm, false); !errors.Is(err, ErrIdentity) {
+		t.Fatal("main/WAL physical alias")
+	}
 	p, model := newWALPublicationModel()
-	if err := p.Acquire(); err != nil { t.Fatal(err) }
+	if err := p.Acquire(); err != nil {
+		t.Fatal(err)
+	}
 	model.fail["create"] = os.ErrExist
-	if err := p.CreateCandidate(32); !errors.Is(err, os.ErrExist) { t.Fatal(err) }
-	if err := p.CreateCandidate(32); !errors.Is(err, ErrPoisoned) || walPublicationModelCount(model.events, "create") != 1 { t.Fatal("collision retried", err) }
+	if err := p.CreateCandidate(32); !errors.Is(err, os.ErrExist) {
+		t.Fatal(err)
+	}
+	if err := p.CreateCandidate(32); !errors.Is(err, ErrPoisoned) || walPublicationModelCount(model.events, "create") != 1 {
+		t.Fatal("collision retried", err)
+	}
 }
 
 // The hook and nil-wrapper graphs are inert; counters prove that diagnostics do
 // not format or dispatch unknown hooks. Only the production facade owns them.
-type walPublicationHookModel struct { errorCalls, unwrapCalls, hookCalls int }
+type walPublicationHookModel struct{ errorCalls, unwrapCalls, hookCalls int }
+
 func (e *walPublicationHookModel) Error() string { e.errorCalls++; return "inert unknown hook" }
 func (e *walPublicationHookModel) Unwrap() error { e.unwrapCalls++; return syscall.EIO }
-type walPublicationIsModel struct { *walPublicationHookModel }
+
+type walPublicationIsModel struct{ *walPublicationHookModel }
+
 func (e *walPublicationIsModel) Is(error) bool { e.hookCalls++; return false }
-type walPublicationAsModel struct { *walPublicationHookModel }
+
+type walPublicationAsModel struct{ *walPublicationHookModel }
+
 func (e *walPublicationAsModel) As(any) bool { e.hookCalls++; return false }
 
-type walPublicationNilWrapperModel struct { errorCalls, unwrapCalls int }
+type walPublicationNilWrapperModel struct{ errorCalls, unwrapCalls int }
+
 func (e *walPublicationNilWrapperModel) Error() string { e.errorCalls++; return "inert nil wrapper" }
 func (e *walPublicationNilWrapperModel) Unwrap() error { e.unwrapCalls++; return nil }
-type walPublicationNilChildrenModel struct { children []error }
-func (*walPublicationNilChildrenModel) Error() string { panic("nil-child graph must remain opaque") }
+
+type walPublicationNilChildrenModel struct{ children []error }
+
+func (*walPublicationNilChildrenModel) Error() string     { panic("nil-child graph must remain opaque") }
 func (e *walPublicationNilChildrenModel) Unwrap() []error { return e.children }
 
 func walPublicationModelTerminalGraph(t *testing.T, p *WALPublication, m *walPublicationModel, input, diagnostic error) {
 	t.Helper()
-	if !p.terminal || !p.failed || p.unsafe != input { t.Fatal("original terminal graph not retained opaquely") }
-	if diagnostic == nil || diagnostic.Error() == "" || !errors.Is(diagnostic, ErrPoisoned) { t.Fatal("missing safe terminal diagnostic") }
-	owners, discovery := CleanupOwnersBounded(diagnostic, 256)
-	if discovery != nil || len(owners) != 0 { t.Fatal("interior cleanup owner escaped") }
-	for i := 0; i < 2; i++ {
-		if err := p.Close(); !errors.Is(err, ErrPoisoned) { t.Fatal("terminal close lost barrier") }
-		if p.RetirementComplete() || p.complete || p.childComplete || p.directoryComplete || p.unsafe != input { t.Fatal("terminal graph released protector") }
+	if !p.terminal || !p.failed || p.unsafe != input {
+		t.Fatal("original terminal graph not retained opaquely")
 	}
-	if walPublicationModelCount(m.events, "seal") != 1 || walPublicationModelCount(m.events, "child-close") != 0 || walPublicationModelCount(m.events, "directory-close") != 0 { t.Fatal("terminal child or directory retired", m.events) }
+	if diagnostic == nil || diagnostic.Error() == "" || !errors.Is(diagnostic, ErrPoisoned) {
+		t.Fatal("missing safe terminal diagnostic")
+	}
+	owners, discovery := CleanupOwnersBounded(diagnostic, 256)
+	if discovery != nil || len(owners) != 0 {
+		t.Fatal("interior cleanup owner escaped")
+	}
+	for i := 0; i < 2; i++ {
+		if err := p.Close(); !errors.Is(err, ErrPoisoned) {
+			t.Fatal("terminal close lost barrier")
+		}
+		if p.RetirementComplete() || p.complete || p.childComplete || p.directoryComplete || p.unsafe != input {
+			t.Fatal("terminal graph released protector")
+		}
+	}
+	if walPublicationModelCount(m.events, "seal") != 1 || walPublicationModelCount(m.events, "child-close") != 0 || walPublicationModelCount(m.events, "directory-close") != 0 {
+		t.Fatal("terminal child or directory retired", m.events)
+	}
 }
 
 func TestWALPublicationMemoryUnknownHooksBeforeUnwrap(t *testing.T) {
@@ -280,15 +473,25 @@ func TestWALPublicationMemoryUnknownHooksBeforeUnwrap(t *testing.T) {
 			p, m := newWALPublicationModel()
 			hooks := &walPublicationHookModel{}
 			var input error = &walPublicationIsModel{hooks}
-			if kind == "As" { input = &walPublicationAsModel{hooks} }
-			if sibling { input = errors.Join(syscall.EIO, input) }
+			if kind == "As" {
+				input = &walPublicationAsModel{hooks}
+			}
+			if sibling {
+				input = errors.Join(syscall.EIO, input)
+			}
 			m.fail["acquire"] = input
 			diagnostic := p.Acquire()
 			walPublicationModelTerminalGraph(t, p, m, input, diagnostic)
-			if errors.Is(diagnostic, syscall.EIO) != sibling { t.Fatal("unknown child traversed or safe errno sibling lost") }
+			if errors.Is(diagnostic, syscall.EIO) != sibling {
+				t.Fatal("unknown child traversed or safe errno sibling lost")
+			}
 			var path *os.PathError
-			if errors.As(diagnostic, &path) { t.Fatal("unknown As supplied an OS error") }
-			if hooks.errorCalls != 0 || hooks.unwrapCalls != 0 || hooks.hookCalls != 0 { t.Fatal("unknown error hook invoked", kind) }
+			if errors.As(diagnostic, &path) {
+				t.Fatal("unknown As supplied an OS error")
+			}
+			if hooks.errorCalls != 0 || hooks.unwrapCalls != 0 || hooks.hookCalls != 0 {
+				t.Fatal("unknown error hook invoked", kind)
+			}
 		}
 	}
 }
@@ -299,13 +502,19 @@ func TestWALPublicationMemoryUnsafeBranchPreservesErrno(t *testing.T) {
 		foreign := retainedFileCleanup(&File{}, errors.New("inert foreign owner"))
 		safe := &os.PathError{Op: "memory", Path: "inert", Err: syscall.ENOSPC}
 		input := errors.Join(syscall.EIO, foreign, safe)
-		if foreignFirst { input = errors.Join(foreign, syscall.EIO, safe) }
+		if foreignFirst {
+			input = errors.Join(foreign, syscall.EIO, safe)
+		}
 		m.fail["acquire"] = input
 		diagnostic := p.Acquire()
 		walPublicationModelTerminalGraph(t, p, m, input, diagnostic)
-		if !errors.Is(diagnostic, syscall.EIO) || !errors.Is(diagnostic, syscall.ENOSPC) { t.Fatal("safe errno sibling lost") }
+		if !errors.Is(diagnostic, syscall.EIO) || !errors.Is(diagnostic, syscall.ENOSPC) {
+			t.Fatal("safe errno sibling lost")
+		}
 		var path *os.PathError
-		if !errors.As(diagnostic, &path) || path.Path != "inert" || path.Err != syscall.ENOSPC { t.Fatal("safe OS diagnostic lost") }
+		if !errors.As(diagnostic, &path) || path.Path != "inert" || path.Err != syscall.ENOSPC {
+			t.Fatal("safe OS diagnostic lost")
+		}
 	}
 }
 
@@ -315,16 +524,149 @@ func TestWALPublicationMemoryNilWrapperFailsClosed(t *testing.T) {
 		wrapper := &walPublicationNilWrapperModel{}
 		var input error = wrapper
 		switch kind {
-		case "empty": input = &walPublicationNilChildrenModel{}
-		case "nil-child": input = &walPublicationNilChildrenModel{[]error{nil}}
-		case "path": input = &os.PathError{Op: "memory", Path: "inert"}
-		case "nested-empty": input = &os.PathError{Op: "memory", Path: "inert", Err: &walPublicationNilChildrenModel{}}
-		case "typed-nil-path": input = (*os.PathError)(nil)
+		case "empty":
+			input = &walPublicationNilChildrenModel{}
+		case "nil-child":
+			input = &walPublicationNilChildrenModel{[]error{nil}}
+		case "path":
+			input = &os.PathError{Op: "memory", Path: "inert"}
+		case "nested-empty":
+			input = &os.PathError{Op: "memory", Path: "inert", Err: &walPublicationNilChildrenModel{}}
+		case "typed-nil-path":
+			input = (*os.PathError)(nil)
 		}
 		m.fail["acquire"] = input
 		diagnostic := p.Acquire()
 		walPublicationModelTerminalGraph(t, p, m, input, diagnostic)
-		if errors.Is(diagnostic, syscall.EIO) { t.Fatal("empty graph invented errno") }
-		if wrapper.errorCalls != 0 || kind == "single" && wrapper.unwrapCalls != 1 { t.Fatal("nil wrapper was formatted or retraversed") }
+		if errors.Is(diagnostic, syscall.EIO) {
+			t.Fatal("empty graph invented errno")
+		}
+		if wrapper.errorCalls != 0 || kind == "single" && wrapper.unwrapCalls != 1 {
+			t.Fatal("nil wrapper was formatted or retraversed")
+		}
+	}
+}
+
+// These finite errno cases enter the production facade after successful fake
+// acquisition. They do not create descriptors, fill a disk, change permissions,
+// or establish native filesystem qualification. A failed Replace is uncertain;
+// a known replacement with a failed directory barrier is visible but not durable.
+func TestWALPublicationMemoryPublicationErrno(t *testing.T) {
+	for _, tc := range []struct {
+		name, phase string
+		errno       syscall.Errno
+	}{
+		{"disk-full-partial-write", "write", syscall.ENOSPC},
+		{"disk-full-candidate-sync", "candidate-sync", syscall.ENOSPC},
+		{"permission-change-replace", "replace", syscall.EACCES},
+		{"disk-full-directory-sync", "directory-sync", syscall.ENOSPC},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			p, m := newWALPublicationModel()
+			original := append([]byte(nil), m.source...)
+			if err := p.Acquire(); err != nil {
+				t.Fatal(err)
+			}
+			if err := p.CreateCandidate(32); err != nil {
+				t.Fatal(err)
+			}
+			page := make([]byte, 32)
+			if _, err := p.Source().ReadAt(page, 0); err != nil {
+				t.Fatal(err)
+			}
+			// Arm only after acquisition succeeds. The rename permission case
+			// still completes the write and candidate Sync before it fails.
+			m.fail[tc.phase] = &os.SyscallError{Syscall: tc.phase, Err: tc.errno}
+			m.shortWrite = tc.phase == "write"
+			m.known = tc.phase != "replace"
+			n, err := p.WriteAt(page, 0)
+			wantBytes := len(page)
+			if m.shortWrite {
+				wantBytes /= 2
+			}
+			if n != wantBytes {
+				t.Fatal("incorrect write result", n)
+			}
+			if m.shortWrite && !errors.Is(err, io.ErrShortWrite) {
+				t.Fatal("partial disk-full write lost short-write cause", err)
+			}
+			if err == nil {
+				err = p.Prepare(32)
+			}
+			if err == nil {
+				known, replacement := p.Replace()
+				err = replacement
+				if known {
+					next, transfer := p.TransferWAL(m.main, m.old)
+					if transfer != nil || next != m.next {
+						t.Fatal("known replacement lost owner", transfer)
+					}
+				}
+				_, barrier := p.FinishPublication()
+				err = errors.Join(err, barrier)
+			}
+			var cause *os.SyscallError
+			if !errors.Is(err, tc.errno) || !errors.As(err, &cause) || cause.Syscall != tc.phase || cause.Err != tc.errno {
+				t.Fatal("publication errno erased", err)
+			}
+			attempted := tc.phase == "replace" || tc.phase == "directory-sync"
+			visible := tc.phase == "directory-sync"
+			if !p.failed || p.terminal || p.unsafe != nil || p.Durable() || p.prepareAttempted != (tc.phase != "write") || p.prepared != attempted || p.replaceAttempted != attempted || p.replaced != visible || p.transferred != visible || m.transferred != visible || p.finishAttempted != attempted {
+				t.Fatal("wrong failed/uncertain publication state")
+			}
+			if !bytes.Equal(m.source, original) || !bytes.Equal(m.candidate, page[:wantBytes]) {
+				t.Fatal("wrong source/candidate bytes")
+			}
+			want := []string{"acquire", "create", "info", "read", "write"}
+			if tc.phase != "write" {
+				want = append(want, "info", "recheck", "candidate-sync")
+			}
+			if attempted {
+				want = append(want, "recheck", "replace")
+			}
+			if visible {
+				want = append(want, "transfer", "post-shm")
+			}
+			if attempted {
+				want = append(want, "directory-sync")
+			}
+			if !reflect.DeepEqual(m.events, want) || len(m.retired) != 0 {
+				t.Fatal("wrong failure boundary or premature retirement", m.events)
+			}
+			// Removing the injected error never grants a retry or a clean ack.
+			delete(m.fail, tc.phase)
+			if _, retry := p.WriteAt(page, 0); !errors.Is(retry, ErrPoisoned) {
+				t.Fatal(retry)
+			}
+			if retry := p.Prepare(32); !errors.Is(retry, ErrPoisoned) {
+				t.Fatal(retry)
+			}
+			if known, retry := p.Replace(); known || !errors.Is(retry, ErrPoisoned) {
+				t.Fatal(known, retry)
+			}
+			if next, retry := p.TransferWAL(m.main, m.old); next != nil || !errors.Is(retry, ErrPoisoned) {
+				t.Fatal(next, retry)
+			}
+			if info, retry := p.FinishPublication(); info != nil || !errors.Is(retry, ErrPoisoned) {
+				t.Fatal(info, retry)
+			}
+			if !reflect.DeepEqual(m.events, want) {
+				t.Fatal("failed operation replayed", m.events)
+			}
+			if closeErr := p.Close(); closeErr != nil || !p.RetirementComplete() || p.Durable() {
+				t.Fatal("failure retired incorrectly or became durable", closeErr)
+			}
+			child := m.next
+			if visible {
+				child = m.old
+			}
+			if len(m.retired) != 2 || m.retired[0] != child || m.retired[1] != m.directory {
+				t.Fatal("wrong owned identities retired")
+			}
+			want = append(want, "seal", "child-close", "directory-close")
+			if closeErr := p.Close(); closeErr != nil || !reflect.DeepEqual(m.events, want) || len(m.retired) != 2 || p.Durable() {
+				t.Fatal("retirement replayed or erased publication failure", closeErr, m.events)
+			}
+		})
 	}
 }

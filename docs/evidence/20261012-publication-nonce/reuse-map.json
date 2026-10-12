@@ -1,0 +1,11 @@
+{
+  "base_commit": "edcc8be3e4c0d0dc46066020dc900a5effcaee30",
+  "r1_tested_tree": "598b243e946431c90ed0b5da307f89b288cc19e2",
+  "r6_tested_combination_tree": "8c1eaf0ae116a3c0803ae6b115326a83887a027e",
+  "r1_on_combination": "R1 threepaths byte-identical; R6 only adds sqlite_test helper/calls/docs, not imported by VFS/testscope model selectors. Reuse127normal/race each, not rerun.",
+  "r6_new": "3exact sqlite_test roots normal/race, sourceguard on combinedtree, no FAIL/SKIP",
+  "production_source": "byte-identical to edcc; no production behavior change",
+  "unrelated_tests": "applicable existing evidence reused, no new local full-suite/oracle/foreign compilation",
+  "current_ci": "existing workflow triggers with containing commit; pending exactterminal",
+  "physical_scope": "R1 descriptor-free fake ops; R6 ordinary healthy Linux files. No disk-full/permission change/crash/wrong-key/tamper/recovery execution."
+}

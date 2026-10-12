@@ -1,0 +1,16 @@
+{
+  "archive": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/errno-model-validation-archive/gosqlite-R1-publication-errno-598b243e-PASS.zip",
+  "bytes": 259200,
+  "sha256": "2cbe3483bc49635d3147ff9cf2f890d2bce05bdf2a822adfd742a44359fb6bde",
+  "members": 40,
+  "tree": "598b243e946431c90ed0b5da307f89b288cc19e2",
+  "session": 89015,
+  "status": "4_BOUNDED_GATES_PASS",
+  "physical": "NOT_RUN",
+  "source_recheck": "PASS",
+  "zip_members": "PASS",
+  "library_file_id": "libfile_7a5443490e708191a2735c47826d21ce",
+  "file_id": "file_00000000c7e881f4ab4632c340a079f1",
+  "readback": "exactbytes+allmembersPASS",
+  "no_tests_repeated": true
+}

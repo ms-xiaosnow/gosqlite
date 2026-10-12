@@ -1,0 +1,420 @@
+diff --git a/docs/testing/encryption-nonce-lifecycle-zh.md b/docs/testing/encryption-nonce-lifecycle-zh.md
+new file mode 100644
+index 0000000..53fdda6
+--- /dev/null
++++ b/docs/testing/encryption-nonce-lifecycle-zh.md
+@@ -0,0 +1,87 @@
++# R6：普通加密生命周期的 nonce 关联断言
++
++本片只补原目标 §8.2:307 的有限关联断言。复用两个已有健康生命周期，
++不新增格式/profile 矩阵，不改变生产 nonce/KDF/writer 实现。
++
++## 精确源码与入口
++
++- `sqlite/encryption_nonce_review_test.go`：只读 inventory helper 与纯值域控制。
++- `sqlite/encryption_wal_test.go`：`TestEncryptionWALPasswordOrdinaryReopenAndCancellation`。
++- `sqlite/encryption_review_test.go`：`TestEncryptionReviewFreshIdentityAndRetainedBytes`。
++- 新增纯值入口：`TestEncryptionPublicNonceDomainIdentity`。
++
++三个入口的有限 selector：
++
++```text
++^(TestEncryptionWALPasswordOrdinaryReopenAndCancellation|TestEncryptionReviewFreshIdentityAndRetainedBytes|TestEncryptionPublicNonceDomainIdentity)$
++```
++
++以上是待验证源码的选择范围，不是执行记录或运行授权。
++
++## 断言的实际含义
++
++同一个测试始终使用同一 application credential。helper 不取得 credential
++或实际 master/file key，只记录公开的符号域：
++
++```text
++(Epoch{DatabaseID, EpochID, Kind, KDF, KDFSalt, RootSalt}, FileID, file role, record role)
+++ nonce = NoncePrefix[4] || big-endian(record sequence)[8]
++```
++
++这个域对应 `encryption/key.go` 的 master 与 file 派生输入；nonce 对应
++`encryption/record.go` 的 `recordNonce`。不把 geometry、commit/transaction/
++parent identity、page/frame routing、plaintext size 或 ciphertext 当成 key
++域，以免不同 AAD 掩盖同 key/nonce 的复用。WAL 页号不是公开 record header
++字段，本 helper 不伪造它，也不替代生产认证器。原有数据与
++`VerifyEncrypted` 断言完整保留。
++
++公开 header/record 来自测试自身正常生成的 intact 文件，通过既有
++`fileview.ReadFile` 只读观察；不绕开 Darwin 的 descriptor-close registry。
++扫描只接受当前 root、`.base`、`.wal`、`.retained`，跳过准确名称的
++`.gse-lock`。固定上限为 64 个目录成员、每文件 4 MiB、每文件 256 条
++record、每条 plaintext 最多 64 KiB、全 inventory 4096 个 pair。
++每文件按声明顺序读完所有记录，检查 role/sequence、完整 extent 和 EOF。
++
++每次快照中 pair 必须唯一。后续 publication 必须保留此前所有对象的
++header 与 SHA-256，保留所有历史 pair，且正好增加一个新 root 和一个
++新 base/WAL 对象。旧 root 改名为 retained 后的再次观察不是新的 Seal，
++因此通过对象身份和相同完整 bytes digest 识别历史记录，不误报重读。
++新 root 必须 FileID 新鲜、commit sequence 增一；新对象必须使用发布后
++的相同 epoch，且除 role/record count 外的完整 descriptor 与 root 一致。
++WAL 的公开 ParentCommitID 是逻辑 object-head ID，不能误当旧 root 的
++bytes digest；本片不额外解密 manifest 来取 PreviousRootHash。snapshot
++测试原有的紧邻 parent-root digest 断言保留，不能推广到 WAL。
++
++1. 既有 password/WAL fixture 在取消 commit 后 rollback，inventory 必须
++   完全不变；普通关闭并重新打开后、再次 INSERT 前也必须完全不变。
++2. reopen 后 INSERT 在相同 epoch 下增加新 WAL/root pair，与全部 retained
++   旧对象的符号 pair 一起检查；两行完整 SQL 数据保持正确。
++3. 既有正常 Close checkpoint 增加新 base/root pair，并保持同 epoch。
++   最后正确 credential 的只读 reopen 与 `VerifyEncrypted` 保持原断言。
++4. 既有 snapshot fixture 的普通 rollback 不增加或改变 nonce-bearing
++   对象；同 credential 成功 rekey 使用新 epoch/root salt/root FileID，
++   新 base/root 与旧 epoch 的 retained 对象一起检查。后续只读 reopen
++   不改变该 inventory。原 retained byte 和 SQL 数据断言均保留。
++5. 纯值控制核对 nonce 字节编码、各公开派生域/record role 分离，以及
++   改 AAD/长度仍得到同一 pair。该入口无 key 派生、数据库或文件写入。
++
++正常成功路径沿用原有 `Close`、只读 reopen 和最后的延迟 Close；新增
++reopen 后断言之前给该 writer 添加延迟 Close，以便断言失败也释放句柄。
++helper 只使用会关闭所开句柄的既有 `fileview.ReadFile`，不持有文件句柄。
++
++## 有限闭合与未运行边界
++
++本片交付状态为 **SOURCE_ONLY / NOT_RUN**。编写期间未运行 Go、gofmt、
++compiler、测试、数据库、native 流程或 CI；未修改生产源码或现有工作树。
++集成后先独立源码审查，再按现有授权对精确源码取得这三个入口的有限
++ordinary/race 终态及 sourceguard 结果，保存其源码绑定与原始结果即可
++闭合 R6 的新增代码片。不需要新 manual tag/controller 或新增 profile。
++
++inventory 不变证明这里的 rollback 没有发布或改写 nonce-bearing 文件，
++不单独声称它观察了所有尚未落盘的 writer 状态；既有
++`TestWriterErrorsPoisonCopies` 和 `TestWriterFreshIdentityAndNoResume`
++继续承担 writer 失败后不可复用、重复写入的纯内存断言。
++
++本片没有 fault、crash、wrong-key、磁盘损坏/负面认证、恢复、ANN 或
++campaign 调用。进程中断 rekey 属于 R5；物理/平台/掉电和密码学外部资格
++仍为各自 NOT_RUN/未完成，不能从本片推出生产已完整 VERIFIED。
+diff --git a/sqlite/encryption_nonce_review_test.go b/sqlite/encryption_nonce_review_test.go
+new file mode 100644
+index 0000000..07540b9
+--- /dev/null
++++ b/sqlite/encryption_nonce_review_test.go
+@@ -0,0 +1,228 @@
++package sqlite_test
++
++import (
++	"bytes"
++	"crypto/sha256"
++	"encoding/binary"
++	"os"
++	"path/filepath"
++	"strings"
++	"testing"
++
++	"github.com/ms-xiaosnow/gosqlite/encryption"
++	"github.com/ms-xiaosnow/gosqlite/internal/testkit/fileview"
++)
++
++// This is a symbolic key domain for the same-credential healthy fixtures below.
++// Epoch contains the public master-KDF inputs; FileID and both roles are the
++// file-KDF inputs. Geometry, commit identity, page/frame routing and ciphertext
++// are AAD or payload, not key domains, so they must not mask nonce reuse here.
++// No credential, master key or derived key is obtained or logged by this probe.
++type encryptedNoncePair struct {
++	epoch      encryption.Epoch
++	fileID     [32]byte
++	fileRole   encryption.FileRole
++	recordRole encryption.RecordRole
++	nonce      [encryption.NonceSize]byte
++}
++
++func encryptedPublicNoncePair(h encryption.Header, r encryption.RecordHeader) encryptedNoncePair {
++	p := encryptedNoncePair{epoch: h.Epoch, fileID: h.FileID, fileRole: h.Descriptor.Role, recordRole: r.Role}
++	copy(p.nonce[:4], h.NoncePrefix[:])
++	binary.BigEndian.PutUint64(p.nonce[4:], r.Sequence)
++	return p
++}
++
++type encryptedNonceObject struct {
++	header encryption.Header
++	digest [32]byte
++}
++
++type encryptedNonceSnapshot struct {
++	root    encryption.Header
++	objects map[encryption.FileIdentity]encryptedNonceObject
++	pairs   map[encryptedNoncePair]struct{}
++}
++
++// Read only intact files produced by these small ordinary tests. Public record
++// roles/sequences suffice for nonce accounting; WAL page routing is encrypted
++// metadata and is deliberately not invented here. This is not authentication,
++// recovery, a parser-fuzz entry, or a replacement for VerifyEncrypted.
++func captureEncryptedNonces(t *testing.T, path string) encryptedNonceSnapshot {
++	t.Helper()
++	s := encryptedNonceSnapshot{objects: make(map[encryption.FileIdentity]encryptedNonceObject), pairs: make(map[encryptedNoncePair]struct{})}
++	dir, root := filepath.Dir(path), filepath.Base(path)
++	entries, err := os.ReadDir(dir)
++	if err != nil {
++		t.Fatal(err)
++	}
++	if len(entries) == 0 || len(entries) > 64 {
++		t.Fatal("nonce fixture inventory outside fixed file bound")
++	}
++	for _, entry := range entries {
++		name := entry.Name()
++		if name == root+".gse-lock" {
++			continue
++		}
++		role := encryption.FileRoot
++		if name != root {
++			if !strings.HasPrefix(name, root+".gse-") {
++				t.Fatal("unexpected nonce fixture member")
++			}
++			switch {
++			case strings.HasSuffix(name, ".base"):
++				role = encryption.FileBase
++			case strings.HasSuffix(name, ".wal"):
++				role = encryption.FileWAL
++			case strings.HasSuffix(name, ".retained"):
++			default:
++				t.Fatal("unexpected nonce fixture object kind")
++			}
++		}
++		info, err := entry.Info()
++		if err != nil || !info.Mode().IsRegular() || info.Size() < encryption.HeaderSize || info.Size() > 4<<20 {
++			t.Fatal("nonce fixture object outside fixed byte bound", err)
++		}
++		raw, err := fileview.ReadFile(filepath.Join(dir, name))
++		if err != nil || int64(len(raw)) != info.Size() {
++			t.Fatal("nonce fixture read incomplete", err)
++		}
++		in := bytes.NewReader(raw)
++		h, err := encryption.ReadHeader(in, encryption.Limits{MaxRecords: 256, MaxRecordBytes: 1 << 16})
++		if err != nil || h.Descriptor.Role != role {
++			t.Fatal("nonce fixture public header invalid", err)
++		}
++		if _, exists := s.objects[h.Identity()]; exists {
++			t.Fatal("duplicate object identity in nonce fixture")
++		}
++		s.objects[h.Identity()] = encryptedNonceObject{header: h, digest: sha256.Sum256(raw)}
++		if name == root {
++			s.root = h
++		}
++		for sequence := uint64(0); sequence < h.Descriptor.RecordCount; sequence++ {
++			record, err := encryption.ReadRecord(in, encryption.Limits{MaxRecords: 256, MaxRecordBytes: 1 << 16})
++			if err != nil {
++				t.Fatal("nonce fixture record incomplete", err)
++			}
++			r, err := encryption.DecodeRecordHeader(record[:encryption.RecordHeaderSize], encryption.Limits{MaxRecords: 256, MaxRecordBytes: 1 << 16})
++			wantRole := encryption.RecordData
++			if sequence == 0 {
++				wantRole = encryption.RecordMetadata
++			} else if sequence == h.Descriptor.RecordCount-1 {
++				wantRole = encryption.RecordFooter
++			}
++			if err != nil || r.Sequence != sequence || r.Role != wantRole {
++				t.Fatal("nonce fixture record identity invalid", err)
++			}
++			pair := encryptedPublicNoncePair(h, r)
++			if _, exists := s.pairs[pair]; exists {
++				t.Fatal("duplicate symbolic key-domain/nonce in retained fixture")
++			}
++			s.pairs[pair] = struct{}{}
++			if len(s.pairs) > 4096 {
++				t.Fatal("nonce fixture inventory outside fixed record bound")
++			}
++		}
++		if in.Len() != 0 {
++			t.Fatal("nonce fixture has trailing bytes")
++		}
++	}
++	if s.root.FileID == ([32]byte{}) || len(s.pairs) == 0 {
++		t.Fatal("nonce fixture root or records missing")
++	}
++	return s
++}
++
++// A successful bounded publication creates one object and one root, retaining
++// every previously observed object byte-for-byte. Rescanning retained ciphertext
++// is not a new Seal: count it once, then check new pairs against that same set.
++func assertEncryptedNonceAdvance(t *testing.T, before, after encryptedNonceSnapshot, objectRole encryption.FileRole) {
++	t.Helper()
++	if len(after.objects) != len(before.objects)+2 || len(after.pairs) <= len(before.pairs) || after.root.FileID == before.root.FileID {
++		t.Fatal("publication did not add exactly two fresh encrypted objects")
++	}
++	if after.root.Descriptor.CommitSequence != before.root.Descriptor.CommitSequence+1 {
++		t.Fatal("nonce publication is not the immediate successor")
++	}
++	for id, old := range before.objects {
++		if current, exists := after.objects[id]; !exists || current != old {
++			t.Fatal("previous nonce-bearing object was not retained unchanged")
++		}
++	}
++	for pair := range before.pairs {
++		if _, exists := after.pairs[pair]; !exists {
++			t.Fatal("previous symbolic key-domain/nonce missing after publication")
++		}
++	}
++	newRoots, newObjects := 0, 0
++	for id, object := range after.objects {
++		if _, exists := before.objects[id]; exists {
++			continue
++		}
++		if object.header.Epoch != after.root.Epoch {
++			t.Fatal("new object does not use the published epoch")
++		}
++		switch object.header.Descriptor.Role {
++		case encryption.FileRoot:
++			newRoots++
++		case objectRole:
++			newObjects++
++			// Root repeats its selected object's descriptor except for role
++			// and record count. WAL ParentCommitID is a logical object-head
++			// ID, not the preceding root's byte digest.
++			descriptor := object.header.Descriptor
++			descriptor.Role, descriptor.RecordCount = encryption.FileRoot, 1
++			if descriptor != after.root.Descriptor {
++				t.Fatal("new nonce-bearing object does not match the published root")
++			}
++		default:
++			t.Fatal("unexpected new object in nonce publication")
++		}
++	}
++	if newRoots != 1 || newObjects != 1 {
++		t.Fatal("nonce publication lacks its new root/object pair")
++	}
++}
++
++func TestEncryptionPublicNonceDomainIdentity(t *testing.T) {
++	h := encryption.Header{Epoch: encryption.Epoch{DatabaseID: [16]byte{1}, EpochID: [32]byte{2}, RootSalt: [32]byte{3}}, FileID: [32]byte{4}, NoncePrefix: [4]byte{1, 2, 3, 4}, Descriptor: encryption.FileDescriptor{Role: encryption.FileBase}}
++	r := encryption.RecordHeader{Role: encryption.RecordData, Sequence: 0x05060708090a0b0c}
++	pair := encryptedPublicNoncePair(h, r)
++	if pair.nonce != ([12]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}) {
++		t.Fatal("public nonce is not prefix plus big-endian sequence")
++	}
++	// Equal nonces in distinct derivation domains are permitted. No keys are
++	// derived and no files are written by these pure-value controls.
++	for _, change := range []func(*encryption.Header){
++		func(h *encryption.Header) { h.Epoch.DatabaseID[0]++ },
++		func(h *encryption.Header) { h.Epoch.EpochID[0]++ },
++		func(h *encryption.Header) { h.Epoch.RootSalt[0]++ },
++		func(h *encryption.Header) { h.Epoch.KDFSalt[0]++ },
++		func(h *encryption.Header) { h.Epoch.KDF.Passes++ },
++		func(h *encryption.Header) { h.Epoch.Kind++ },
++		func(h *encryption.Header) { h.FileID[0]++ },
++		func(h *encryption.Header) { h.Descriptor.Role = encryption.FileWAL },
++	} {
++		next := h
++		change(&next)
++		if encryptedPublicNoncePair(next, r) == pair {
++			t.Fatal("distinct public derivation domains collapsed")
++		}
++	}
++	nextRecord := r
++	nextRecord.Role = encryption.RecordFooter
++	if encryptedPublicNoncePair(h, nextRecord) == pair {
++		t.Fatal("record-role key domain collapsed")
++	}
++	// AAD/payload changes cannot disguise reuse of a key-domain/nonce pair.
++	next := h
++	next.Descriptor.PageSize, next.Descriptor.PageCount, next.Descriptor.RecordCount = 512, 3, 5
++	next.Descriptor.CommitSequence++
++	next.Descriptor.TransactionID[0]++
++	next.Descriptor.ParentCommitID[0]++
++	nextRecord = r
++	nextRecord.PlaintextSize = 512
++	if encryptedPublicNoncePair(next, nextRecord) != pair {
++		t.Fatal("AAD or payload length masked a repeated key-domain/nonce")
++	}
++}
+diff --git a/sqlite/encryption_review_test.go b/sqlite/encryption_review_test.go
+index adaeece..b5e10d1 100644
+--- a/sqlite/encryption_review_test.go
++++ b/sqlite/encryption_review_test.go
+@@ -59,6 +59,7 @@ func TestEncryptionReviewFreshIdentityAndRetainedBytes(t *testing.T) {
+ 		}
+ 		old[f.Name()] = sha256.Sum256(b)
+ 	}
++	noncesBefore := captureEncryptedNonces(t, path)
+ 	tx, err := db.Begin(ctx)
+ 	if err != nil {
+ 		t.Fatal(err)
+@@ -73,6 +74,9 @@ func TestEncryptionReviewFreshIdentityAndRetainedBytes(t *testing.T) {
+ 	if err != nil || !bytes.Equal(before, afterRollback) {
+ 		t.Fatalf("ordinary rollback changed committed root: %v", err)
+ 	}
++	if !reflect.DeepEqual(noncesBefore, captureEncryptedNonces(t, path)) {
++		t.Fatal("ordinary rollback changed nonce-bearing inventory")
++	}
+ 	// Rekeying with the same application credential still needs fresh epoch,
+ 	// salt and file identities. We never open with a wrong credential.
+ 	if err = db.Rekey(ctx, cfg); err != nil {
+@@ -92,6 +96,8 @@ func TestEncryptionReviewFreshIdentityAndRetainedBytes(t *testing.T) {
+ 	if next.Descriptor.ParentCommitID != sha256.Sum256(before) || next.Descriptor.CommitSequence != head.Descriptor.CommitSequence+1 {
+ 		t.Fatal("new root does not identify its immediate predecessor")
+ 	}
++	noncesAfterRekey := captureEncryptedNonces(t, path)
++	assertEncryptedNonceAdvance(t, noncesBefore, noncesAfterRekey, encryption.FileBase)
+ 	for name, hash := range old {
+ 		b, e := fileview.ReadFile(filepath.Join(dir, name))
+ 		if e != nil || sha256.Sum256(b) != hash {
+@@ -111,4 +117,7 @@ func TestEncryptionReviewFreshIdentityAndRetainedBytes(t *testing.T) {
+ 	if got := query(t, db, "SELECT id,payload FROM retained"); !reflect.DeepEqual(got, [][]any{{int64(2), payload}}) {
+ 		t.Fatal("freelist reuse/rekey/reopen changed ordinary data")
+ 	}
++	if !reflect.DeepEqual(noncesAfterRekey, captureEncryptedNonces(t, path)) {
++		t.Fatal("ordinary post-rekey reopen changed nonce-bearing inventory")
++	}
+ }
+diff --git a/sqlite/encryption_wal_test.go b/sqlite/encryption_wal_test.go
+index b236136..bb3c250 100644
+--- a/sqlite/encryption_wal_test.go
++++ b/sqlite/encryption_wal_test.go
+@@ -35,6 +35,7 @@ func TestEncryptionWALPasswordOrdinaryReopenAndCancellation(t *testing.T) {
+ 	if e != nil {
+ 		t.Fatal(e)
+ 	}
++	noncesBefore := captureEncryptedNonces(t, path)
+ 	tx, e := db.Begin(ctx)
+ 	if e != nil {
+ 		t.Fatal(e)
+@@ -58,6 +59,9 @@ func TestEncryptionWALPasswordOrdinaryReopenAndCancellation(t *testing.T) {
+ 	if e != nil || len(names) != len(next) {
+ 		t.Fatal("cancelled commit created files", e)
+ 	}
++	if !reflect.DeepEqual(noncesBefore, captureEncryptedNonces(t, path)) {
++		t.Fatal("cancelled commit/rollback changed nonce-bearing inventory")
++	}
+ 	if e = db.Close(); e != nil {
+ 		t.Fatal(e)
+ 	}
+@@ -96,7 +100,19 @@ func TestEncryptionWALPasswordOrdinaryReopenAndCancellation(t *testing.T) {
+ 	if e != nil {
+ 		t.Fatal(e)
+ 	}
++	defer db.Close()
++	if !reflect.DeepEqual(noncesBefore, captureEncryptedNonces(t, path)) {
++		t.Fatal("ordinary reopen changed nonce-bearing inventory before a write")
++	}
+ 	encryptedExec(t, db, "INSERT INTO records VALUES(2,?)", sentinel)
++	noncesAfterWrite := captureEncryptedNonces(t, path)
++	assertEncryptedNonceAdvance(t, noncesBefore, noncesAfterWrite, encryption.FileWAL)
++	if noncesAfterWrite.root.Epoch != noncesBefore.root.Epoch {
++		t.Fatal("ordinary reopen/write unexpectedly changed key epoch")
++	}
++	if got := query(t, db, "SELECT id,body FROM records ORDER BY id"); !reflect.DeepEqual(got, [][]any{{int64(1), sentinel}, {int64(2), sentinel}}) {
++		t.Fatal("ordinary reopen/write changed committed rows")
++	}
+ 	if e = db.Close(); e != nil {
+ 		t.Fatal(e)
+ 	}
+@@ -109,6 +125,11 @@ func TestEncryptionWALPasswordOrdinaryReopenAndCancellation(t *testing.T) {
+ 	if e != nil || i.Mode != sqlite.EncryptionWAL || i.StorageLayout != 2 || i.WALSegments != 0 {
+ 		t.Fatal(i, e)
+ 	}
++	noncesAfterClose := captureEncryptedNonces(t, path)
++	assertEncryptedNonceAdvance(t, noncesAfterWrite, noncesAfterClose, encryption.FileBase)
++	if noncesAfterClose.root.Epoch != noncesAfterWrite.root.Epoch {
++		t.Fatal("ordinary close checkpoint unexpectedly changed key epoch")
++	}
+ 	names, e = os.ReadDir(dir)
+ 	if e != nil {
+ 		t.Fatal(e)

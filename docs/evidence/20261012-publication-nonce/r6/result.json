@@ -1,0 +1,84 @@
+{
+  "utc": "2026-10-12T22:08:23.324688+00:00",
+  "status": "PASS",
+  "commands": [
+    {
+      "name": "01_format",
+      "start_utc": "2026-10-12T22:07:44.065472+00:00",
+      "end_utc": "2026-10-12T22:07:46.067486+00:00",
+      "exit_code": 0,
+      "resource_breach_latched": false,
+      "observer_error": null,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "PASS"
+    },
+    {
+      "name": "02_normal",
+      "start_utc": "2026-10-12T22:07:46.432638+00:00",
+      "end_utc": "2026-10-12T22:07:50.434366+00:00",
+      "exit_code": 0,
+      "resource_breach_latched": false,
+      "observer_error": null,
+      "stdout_sha256": "3363aeeeffa9a11dd545afb46e5e782c920c6ab091ed30774a2d722cf13ed8e0",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tests": {
+        "github.com/ms-xiaosnow/gosqlite/sqlite": {
+          "roots": [
+            "TestEncryptionPublicNonceDomainIdentity",
+            "TestEncryptionReviewFreshIdentityAndRetainedBytes",
+            "TestEncryptionWALPasswordOrdinaryReopenAndCancellation"
+          ],
+          "root_count": 3,
+          "named_pass": 3,
+          "child_pass": 0,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "status": "PASS"
+    },
+    {
+      "name": "03_race",
+      "start_utc": "2026-10-12T22:07:50.782698+00:00",
+      "end_utc": "2026-10-12T22:08:14.790982+00:00",
+      "exit_code": 0,
+      "resource_breach_latched": false,
+      "observer_error": null,
+      "stdout_sha256": "1be31975a5fd3fd232b21380601d9362b7efe93a6db6f02078021072206e1588",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tests": {
+        "github.com/ms-xiaosnow/gosqlite/sqlite": {
+          "roots": [
+            "TestEncryptionPublicNonceDomainIdentity",
+            "TestEncryptionReviewFreshIdentityAndRetainedBytes",
+            "TestEncryptionWALPasswordOrdinaryReopenAndCancellation"
+          ],
+          "root_count": 3,
+          "named_pass": 3,
+          "child_pass": 0,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "status": "PASS"
+    },
+    {
+      "name": "04_sourceguard",
+      "start_utc": "2026-10-12T22:08:15.148172+00:00",
+      "end_utc": "2026-10-12T22:08:23.151341+00:00",
+      "exit_code": 0,
+      "resource_breach_latched": false,
+      "observer_error": null,
+      "stdout_sha256": "ba0cb4aff7a9c991c087485ff3499bf86b9b57f990c78b979c1f08ffc42a3505",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "PASS"
+    }
+  ],
+  "source_unchanged": true,
+  "manual_image_executed": false,
+  "unrelated_tests": "REUSED, not rerun",
+  "prior_tests": "Unchanged unrelated source closures reuse their recorded applicable evidence",
+  "rerun_reason": "Added public-key-domain/nonce inventory assertions to two existing healthy lifecycle roots and one purevalue root. R1 exactsource unchanged and127normal/race reused; no unrelatedsuite",
+  "lease": "RELEASED_ON_RETURN"
+}

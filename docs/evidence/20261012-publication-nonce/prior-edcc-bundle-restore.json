@@ -1,0 +1,22 @@
+{
+  "commit": "edcc8be3e4c0d0dc46066020dc900a5effcaee30",
+  "tree": "1149df0b8d733e93597acca07d373d029d4df913",
+  "parent": "6d668f80d199b2c49647a3cbc949442d125988ae",
+  "bundle_library_file_id": "libfile_3e0aa6cabf2c819191a12760cfb302d1",
+  "bundle_file_id": "file_00000000d514820db8659a45c1a5af97",
+  "bundle_bytes": 7965820,
+  "bundle_sha256": "b727892ea7ba6e64e61cb2327d23149364002e0951e3553d6ca034bdc7f1f193",
+  "verified_tracked_files": 3436,
+  "verified_tracked_bytes": 53748202,
+  "all_git_modes_and_blob_sha256_match": true,
+  "comparison_basis": "Committed tree at edcc8be3e4c0d0dc46066020dc900a5effcaee30 in original Git object database versus Library-readback bare restore; working tree not used",
+  "fsck_exit": 0,
+  "fsck_output": "",
+  "bundle_verify_exit": 0,
+  "bundle_verify_output": "The bundle contains this ref:\nedcc8be3e4c0d0dc46066020dc900a5effcaee30 refs/heads/main\nThe bundle records a complete history.\nThe bundle uses this hash algorithm: sha1\n/workspace/scratch/5e06a74e5f65/restart-20261012T2033/edcc-library-readback/gosqlite-root-auth-edcc8be.bundle is okay\n",
+  "restore_kind": "bare, no second worktree",
+  "restore_branch": "main",
+  "verified_at": "2026-10-12T22:03:29.659467+00:00",
+  "native_cases": "NOT RUN",
+  "executed_go_or_test_commands": false
+}

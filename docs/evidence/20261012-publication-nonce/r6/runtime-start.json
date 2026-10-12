@@ -1,0 +1,10 @@
+{
+  "utc": "2026-10-12T22:07:43.834633+00:00",
+  "pid": 2,
+  "base_commit": "edcc8be3e4c0d0dc46066020dc900a5effcaee30",
+  "scope": "threeexacthealthy/pure nonce lifecycle roots normal/race; sourceguard; no manual/fault/wrongkey/recovery/foreign/oracle",
+  "source_manifest_sha256": "7a6525cf3e8faac142297c8854d983c849a99a84bb5c8440c17f7cab8287e2a2",
+  "tool_go_sha256": "548d3c32f83fa81152f543eb1526be7884cfe0526eb5e9ce29d3eca14786e7e0",
+  "tool_gofmt_sha256": "5583dbb3339147fee7cdb067eb3cd4a50015b48c27084377f49d93833aa4ad77",
+  "process_scope": "single coordinated Go queue; no claim of global cross-namespace visibility"
+}

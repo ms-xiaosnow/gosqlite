@@ -59,6 +59,7 @@ func TestEncryptionReviewFreshIdentityAndRetainedBytes(t *testing.T) {
 		}
 		old[f.Name()] = sha256.Sum256(b)
 	}
+	noncesBefore := captureEncryptedNonces(t, path)
 	tx, err := db.Begin(ctx)
 	if err != nil {
 		t.Fatal(err)
@@ -72,6 +73,9 @@ func TestEncryptionReviewFreshIdentityAndRetainedBytes(t *testing.T) {
 	afterRollback, err := fileview.ReadFile(path)
 	if err != nil || !bytes.Equal(before, afterRollback) {
 		t.Fatalf("ordinary rollback changed committed root: %v", err)
+	}
+	if !reflect.DeepEqual(noncesBefore, captureEncryptedNonces(t, path)) {
+		t.Fatal("ordinary rollback changed nonce-bearing inventory")
 	}
 	// Rekeying with the same application credential still needs fresh epoch,
 	// salt and file identities. We never open with a wrong credential.
@@ -92,6 +96,8 @@ func TestEncryptionReviewFreshIdentityAndRetainedBytes(t *testing.T) {
 	if next.Descriptor.ParentCommitID != sha256.Sum256(before) || next.Descriptor.CommitSequence != head.Descriptor.CommitSequence+1 {
 		t.Fatal("new root does not identify its immediate predecessor")
 	}
+	noncesAfterRekey := captureEncryptedNonces(t, path)
+	assertEncryptedNonceAdvance(t, noncesBefore, noncesAfterRekey, encryption.FileBase)
 	for name, hash := range old {
 		b, e := fileview.ReadFile(filepath.Join(dir, name))
 		if e != nil || sha256.Sum256(b) != hash {
@@ -110,5 +116,8 @@ func TestEncryptionReviewFreshIdentityAndRetainedBytes(t *testing.T) {
 	}
 	if got := query(t, db, "SELECT id,payload FROM retained"); !reflect.DeepEqual(got, [][]any{{int64(2), payload}}) {
 		t.Fatal("freelist reuse/rekey/reopen changed ordinary data")
+	}
+	if !reflect.DeepEqual(noncesAfterRekey, captureEncryptedNonces(t, path)) {
+		t.Fatal("ordinary post-rekey reopen changed nonce-bearing inventory")
 	}
 }

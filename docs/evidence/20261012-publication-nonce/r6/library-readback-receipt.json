@@ -1,0 +1,16 @@
+{
+  "archive": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/nonce-reopen-validation-archive/gosqlite-R6-nonce-reopen-8c1eaf0a-PASS.zip",
+  "bytes": 204590,
+  "sha256": "70200ac7a2d1fc9ffd90b6693555c57b58d840cf778977092da39090eca3aeea",
+  "members": 38,
+  "tree": "8c1eaf0ae116a3c0803ae6b115326a83887a027e",
+  "session": 68178,
+  "status": "4_FOCUSED_GATES_PASS",
+  "ordinary_healthy_linux_files": "RUN_PASS",
+  "fault_crash_wrongkey_physical": "NOT_RUN",
+  "source_recheck": "PASS",
+  "library_file_id": "libfile_77188d2f926c81919334fbe5e8bf0112",
+  "file_id": "file_000000003d8081f5ae97d2bbf8b866d3",
+  "readback": "exactbytes+allmembersPASS",
+  "no_tests_repeated": true
+}

@@ -1,3 +1,13 @@
+# 当前阶段：有限清单 R1 与 R6 的代码和普通验证闭合
+
+2026-10-12 22:08:23 UTC，R1生产fake-ops errno断言normal/race各127PASS，R6三个普通健康/纯值nonce生命周期根normal/race各3PASS，两批format/sourceguard均PASS。只跑受影响范围，组合复用已过R1；没有重跑无关全套。详见[源码/命令/原始测试记录](evidence/20261012-publication-nonce/README.zh.md)。
+
+生产协议/加密算法未改。R1不执行真实磁盘满/权限变化，R6确实验证正常Linux数据库生命周期；物理故障/错误密钥/恢复继续NOT_RUN。[有限清单](testing/goal-finite-closure-checklist-20261012-zh.md)现已勾选R1/R6，剩R2–R5及受阻ANN修正，整体未验收、M10未通过。
+
+此前edcc8be检查点已保存GitHub且Library裸恢复3436文件/Git模式/字节PASS；CI38314186578在本次记录时仍运行，不能预填终态。后续只读观察精确提交。
+
+## 以下为较早时点历史记录
+
 # 当前阶段：A8 六格手工设施的有限验证闭合
 
 2026-10-12 21:47:51 UTC，受测树 `a6ca3b307531c7479a08add7325de8d996cd7246` 八项影响检查PASS：AST normal10、race46、sourceguard、两种选择、Linux手工compile/nm451/22。模型normal36和未变普通闭包复用；首轮guard1FAIL及两文件修复保留。[源码与测试记录](evidence/20261012-root-auth/README.zh.md)。真实六格磁盘入口全部NOT_RUN，生产路径未改。
