@@ -1,0 +1,19 @@
+{
+  "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault": {
+    "roots": {
+      "pass": 50
+    },
+    "children": {
+      "pass": 1515
+    }
+  },
+  "github.com/ms-xiaosnow/gosqlite/internal/testscope": {
+    "roots": {
+      "pass": 71,
+      "fail": 1
+    },
+    "children": {
+      "pass": 1038
+    }
+  }
+}

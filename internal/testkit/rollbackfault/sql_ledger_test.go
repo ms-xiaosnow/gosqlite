@@ -87,7 +87,7 @@ func sqlEvidenceFixture(t *testing.T, which SQLCase) (Plan, Receipt, SQLLedgerEv
 		t.Fatalf("synthetic SQL plan refused: %v", problem)
 	}
 	state := SQLOld
-	if which == SQLControl {
+	if which == SQLControl || which == SQLFinalDirectorySyncBefore {
 		state = SQLNew
 	}
 	var hashes [3][32]byte
@@ -100,7 +100,7 @@ func sqlEvidenceFixture(t *testing.T, which SQLCase) (Plan, Receipt, SQLLedgerEv
 		Recovery:  SQLRecoveryEvidence{Identity: identity, OwnersRetired: true},
 		Lifecycle: SQLLifecycleEvidence{ArmCalls: 1, CommitCalls: 1, FinishCalls: 1, DisarmCalls: 1, WriterOpens: 1, ReopenCalls: 1, ReopenReadOnly: true, WriterRetiredBeforeRecovery: true, RecoveryFinishedBeforeReopen: true, CommitCapturedUnchanged: true},
 	}
-	if which == SQLIndexPrefix64 || which == SQLDBSyncBefore || which == SQLIndexPrefix64Error {
+	if which == SQLIndexPrefix64 || which == SQLDBSyncBefore || which == SQLIndexPrefix64Error || which == SQLJournalUnlinkBefore {
 		evidence.Recovery.Calls = 1
 		evidence.Recovery.Limits = SQLRecoveryLimits{MaxJournalBytes: 16408, MaxRecords: 3, MaxDatabaseBytes: 12288}
 		evidence.Recovery.JournalPresentBefore = true
@@ -108,18 +108,25 @@ func sqlEvidenceFixture(t *testing.T, which SQLCase) (Plan, Receipt, SQLLedgerEv
 		evidence.Recovery.OriginalPages = 3
 		evidence.Lifecycle.PublicRecoveryRequired = true
 	}
+	postDB := which == SQLJournalUnlinkBefore || which == SQLFinalDirectorySyncBefore
+	if postDB {
+		evidence.PostCommit = sqlSnapshot(identity, 103, 15, SQLNew)
+		evidence.Lifecycle.ReopenCalls = 2
+	}
 	preDB := which == SQLJournalBodySyncBefore || which == SQLJournalHeaderSyncBefore || which == SQLPublishDirectorySyncBefore
 	if which != SQLControl {
 		evidence.Lifecycle.PublicCodeIOErr, evidence.Lifecycle.PublicPoisoned = true, true
 		evidence.Lifecycle.PublicShortWrite = which == SQLIndexPrefix64
 		evidence.Lifecycle.PreDBOnlyTargetCause = preDB
+		evidence.Lifecycle.PostDBOnlyTargetCause = postDB
+		evidence.Lifecycle.PublicCommitUncertain = which == SQLFinalDirectorySyncBefore
 	}
 	labels := [SQLArtifactCount]string{"baseline.input.db", "trial.db", "trial.db-journal", "post-commit.input.db", "post-commit-journal.input.bin", "replay.db", "replay.db-journal"}
 	for i := range evidence.Artifacts {
 		role := SQLArtifactRole(i)
 		evidence.Artifacts[i].Role = role
 		journal := role == SQLOriginalJournalArtifact || role == SQLJournalCopyArtifact || role == SQLReplayJournalArtifact
-		if journal && (which == SQLControl || preDB) {
+		if journal && (which == SQLControl || preDB || which == SQLFinalDirectorySyncBefore) {
 			continue
 		}
 		stamp := SQLArtifactStamp{Identity: labels[i], Device: 1, Inode: uint64(i + 1), Exists: true, Bytes: 12288}
@@ -131,7 +138,7 @@ func sqlEvidenceFixture(t *testing.T, which SQLCase) (Plan, Receipt, SQLLedgerEv
 			stamp.Bytes, stamp.SHA256[0] = 16408, 33
 		}
 		evidence.Artifacts[i].Before, evidence.Artifacts[i].After = stamp, stamp
-		if (which == SQLIndexPrefix64 || which == SQLDBSyncBefore || which == SQLIndexPrefix64Error) && role == SQLReplayArtifact {
+		if (which == SQLIndexPrefix64 || which == SQLDBSyncBefore || which == SQLIndexPrefix64Error || which == SQLJournalUnlinkBefore) && role == SQLReplayArtifact {
 			evidence.Artifacts[i].After.SHA256[0] = 11
 		}
 		if role == SQLReplayJournalArtifact {
@@ -149,7 +156,7 @@ func sqlMustReject(t *testing.T, observation SQLObservation) {
 }
 
 func TestSQLLedgerThreeFrozenScenariosRemainObservationOnly(t *testing.T) {
-	for _, which := range []SQLCase{SQLControl, SQLIndexPrefix64, SQLDBSyncBefore, SQLIndexPrefix64Error, SQLJournalBodySyncBefore, SQLJournalHeaderSyncBefore, SQLPublishDirectorySyncBefore} {
+	for _, which := range []SQLCase{SQLControl, SQLIndexPrefix64, SQLDBSyncBefore, SQLIndexPrefix64Error, SQLJournalBodySyncBefore, SQLJournalHeaderSyncBefore, SQLPublishDirectorySyncBefore, SQLJournalUnlinkBefore, SQLFinalDirectorySyncBefore} {
 		plan, receipt, evidence := sqlEvidenceFixture(t, which)
 		observation := ObserveSQLLedger(plan, receipt, evidence)
 		if !observation.EvidenceConsistent || !observation.ScenarioObserved || observation.Problem != SQLProblemNone || observation.Adapter.Outcome != AdapterObserved {
@@ -191,10 +198,10 @@ func TestSQLLedgerLiteralExpectationsAndQueriesAreDetached(t *testing.T) {
 }
 
 func TestSQLLedgerPlansFreezeThreePageSelectorsAndLimits(t *testing.T) {
-	if SQLCaseUnknown != 0 || SQLControl != 1 || SQLIndexPrefix64 != 2 || SQLDBSyncBefore != 3 || SQLIndexPrefix64Error != 4 || SQLJournalBodySyncBefore != 5 || SQLJournalHeaderSyncBefore != 6 || SQLPublishDirectorySyncBefore != 7 {
+	if SQLCaseUnknown != 0 || SQLControl != 1 || SQLIndexPrefix64 != 2 || SQLDBSyncBefore != 3 || SQLIndexPrefix64Error != 4 || SQLJournalBodySyncBefore != 5 || SQLJournalHeaderSyncBefore != 6 || SQLPublishDirectorySyncBefore != 7 || SQLJournalUnlinkBefore != 8 || SQLFinalDirectorySyncBefore != 9 {
 		t.Fatal("existing SQL case values changed")
 	}
-	for _, which := range []SQLCase{SQLControl, SQLIndexPrefix64, SQLDBSyncBefore, SQLIndexPrefix64Error, SQLJournalBodySyncBefore, SQLJournalHeaderSyncBefore, SQLPublishDirectorySyncBefore} {
+	for _, which := range []SQLCase{SQLControl, SQLIndexPrefix64, SQLDBSyncBefore, SQLIndexPrefix64Error, SQLJournalBodySyncBefore, SQLJournalHeaderSyncBefore, SQLPublishDirectorySyncBefore, SQLJournalUnlinkBefore, SQLFinalDirectorySyncBefore} {
 		plan, _, _ := sqlEvidenceFixture(t, which)
 		spec := plan.Spec()
 		if spec.OriginalPages != 3 || spec.DirtyPages != 3 || spec.PageSize != 4096 || spec.SectorSize != 4096 || spec.MainOwner != 11 || spec.JournalOwner != 12 || spec.DirectoryOwner != 13 || spec.CleanupOwner != 14 {
@@ -206,7 +213,7 @@ func TestSQLLedgerPlansFreezeThreePageSelectorsAndLimits(t *testing.T) {
 			if read.Point != DBOriginalRead || read.Occurrence != uint8(i+1) || read.Offset != int64(i*4096) || record.Point != JournalRecord || record.Occurrence != uint8(i+1) || record.Offset != int64(4096+i*4104) {
 				t.Fatalf("original page role %v was not independently selected", i)
 			}
-			if which == SQLControl || which == SQLIndexPrefix64 || which == SQLDBSyncBefore || which == SQLIndexPrefix64Error {
+			if which == SQLControl || which == SQLIndexPrefix64 || which == SQLDBSyncBefore || which == SQLIndexPrefix64Error || which == SQLJournalUnlinkBefore || which == SQLFinalDirectorySyncBefore {
 				write := spec.Calls[12+i]
 				if write.Point != DBPage || write.Occurrence != uint8(i+1) || write.Offset != int64(i*4096) {
 					t.Fatalf("dirty page role %v was not independently selected", i)
@@ -241,6 +248,14 @@ func TestSQLLedgerPlansFreezeThreePageSelectorsAndLimits(t *testing.T) {
 		case SQLPublishDirectorySyncBefore:
 			if spec.CallCount != 14 || spec.Action != FailBefore || spec.ExpectedCommit != CommitFailed || spec.Target != spec.Calls[11] {
 				t.Fatal("publish directory sync-before selector differs")
+			}
+		case SQLJournalUnlinkBefore:
+			if spec.CallCount != 17 || spec.Action != FailBefore || spec.ExpectedCommit != CommitRecoveryRequired || spec.Target != spec.Calls[16] {
+				t.Fatal("journal unlink-before selector differs")
+			}
+		case SQLFinalDirectorySyncBefore:
+			if spec.CallCount != 18 || spec.Action != FailBefore || spec.ExpectedCommit != CommitUncertain || spec.Target != spec.Calls[17] {
+				t.Fatal("final directory sync-before selector differs")
 			}
 		}
 		for i := int(spec.CallCount); i < MaxCalls; i++ {
@@ -299,14 +314,14 @@ func TestSQLLedgerRejectsOtherwiseAdmittedNonFrozenFaultPlans(t *testing.T) {
 }
 
 func TestSQLLedgerRejectsLogicalMixturesAndEqualCountWrongMembers(t *testing.T) {
-	for _, which := range []SQLCase{SQLControl, SQLIndexPrefix64, SQLDBSyncBefore, SQLIndexPrefix64Error, SQLJournalBodySyncBefore, SQLJournalHeaderSyncBefore, SQLPublishDirectorySyncBefore} {
+	for _, which := range []SQLCase{SQLControl, SQLIndexPrefix64, SQLDBSyncBefore, SQLIndexPrefix64Error, SQLJournalBodySyncBefore, SQLJournalHeaderSyncBefore, SQLPublishDirectorySyncBefore, SQLJournalUnlinkBefore, SQLFinalDirectorySyncBefore} {
 		for _, name := range []string{"wrong-ledger", "oldrows-newindex", "newrows-oldindex", "equal-count-wrong-member", "equal-count-wrong-value", "index-scan-both-wrong", "wrong-id-type", "wrong-key-type", "wrong-value-type", "same-count-duplicate-id", "unreported-tail", "row-reordered", "empty-green-hidden-member", "before-not-old"} {
 			plan, receipt, evidence := sqlEvidenceFixture(t, which)
 			old := sqlSnapshot(evidence.Identity, 102, 8, SQLOld)
 			newState := sqlSnapshot(evidence.Identity, 102, 8, SQLNew)
 			switch name {
 			case "wrong-ledger":
-				if which == SQLControl {
+				if which == SQLControl || which == SQLFinalDirectorySyncBefore {
 					evidence.After = old
 				} else {
 					evidence.After = newState
@@ -351,7 +366,7 @@ func TestSQLLedgerRejectsLogicalMixturesAndEqualCountWrongMembers(t *testing.T) 
 }
 
 func TestSQLLedgerRejectsPlanClaimsWithoutActualIndexWorkAndIndependentScans(t *testing.T) {
-	for _, which := range []SQLCase{SQLControl, SQLIndexPrefix64, SQLDBSyncBefore, SQLIndexPrefix64Error, SQLJournalBodySyncBefore, SQLJournalHeaderSyncBefore, SQLPublishDirectorySyncBefore} {
+	for _, which := range []SQLCase{SQLControl, SQLIndexPrefix64, SQLDBSyncBefore, SQLIndexPrefix64Error, SQLJournalBodySyncBefore, SQLJournalHeaderSyncBefore, SQLPublishDirectorySyncBefore, SQLJournalUnlinkBefore, SQLFinalDirectorySyncBefore} {
 		for _, name := range []string{"scan-disguised-as-search", "wrong-method", "wrong-table", "wrong-index", "extra-index", "wrong-field", "extra-field", "no-recheck", "no-index-pages", "no-index-keys", "no-rowid-seek", "no-base-fetch", "no-candidates", "wrong-return-count", "negative-work", "unbounded-work", "empty-green-no-probe", "scan-uses-index", "scan-fewer-rows", "scan-has-candidates", "scan-fake-reason", "scan-has-method", "copied-index-query", "changed-sql", "reordered-query", "duplicate-iterator"} {
 			plan, receipt, evidence := sqlEvidenceFixture(t, which)
 			query := &evidence.After.Queries[SQLBlueIndex]
@@ -689,7 +704,7 @@ func TestSQLLedgerSnapshotAdmissionRejectsBeforeCommitMismatches(t *testing.T) {
 }
 
 func TestSQLLedgerBindsSourceToolBinaryManifestTrialAndScopeEverywhere(t *testing.T) {
-	for _, which := range []SQLCase{SQLControl, SQLIndexPrefix64, SQLDBSyncBefore, SQLIndexPrefix64Error, SQLJournalBodySyncBefore, SQLJournalHeaderSyncBefore, SQLPublishDirectorySyncBefore} {
+	for _, which := range []SQLCase{SQLControl, SQLIndexPrefix64, SQLDBSyncBefore, SQLIndexPrefix64Error, SQLJournalBodySyncBefore, SQLJournalHeaderSyncBefore, SQLPublishDirectorySyncBefore, SQLJournalUnlinkBefore, SQLFinalDirectorySyncBefore} {
 		for _, where := range []string{"top", "before", "after", "query", "check", "recovery"} {
 			for _, field := range []string{"suite", "source", "tool", "binary", "manifest", "trial", "scope", "profile"} {
 				plan, receipt, evidence := sqlEvidenceFixture(t, which)
@@ -731,7 +746,7 @@ func TestSQLLedgerBindsSourceToolBinaryManifestTrialAndScopeEverywhere(t *testin
 }
 
 func TestSQLLedgerRevalidatesReceiptRatherThanTrustingAnObservation(t *testing.T) {
-	for _, which := range []SQLCase{SQLControl, SQLIndexPrefix64, SQLDBSyncBefore, SQLIndexPrefix64Error, SQLJournalBodySyncBefore, SQLJournalHeaderSyncBefore, SQLPublishDirectorySyncBefore} {
+	for _, which := range []SQLCase{SQLControl, SQLIndexPrefix64, SQLDBSyncBefore, SQLIndexPrefix64Error, SQLJournalBodySyncBefore, SQLJournalHeaderSyncBefore, SQLPublishDirectorySyncBefore, SQLJournalUnlinkBefore, SQLFinalDirectorySyncBefore} {
 		plan, _, evidence := sqlEvidenceFixture(t, which)
 		events := fixtureEvents(plan.Spec())
 		for end := 0; end < len(events); end++ {
@@ -758,6 +773,9 @@ func TestSQLLedgerRevalidatesReceiptRatherThanTrustingAnObservation(t *testing.T
 				case "wrong-commit":
 					if changed[i].Kind == CommitReturned {
 						changed[i].Commit.Class = CommitUncertain
+						if which == SQLFinalDirectorySyncBefore {
+							changed[i].Commit.Class = CommitRecoveryRequired
+						}
 					}
 				case "missing-target-error":
 					if changed[i].Kind == CommitReturned {
@@ -968,8 +986,9 @@ func TestSQLLedgerCasePartitionsUseOnlyExactIDs(t *testing.T) {
 	for value := 0; value <= 255; value++ {
 		which := SQLCase(value)
 		wantPreDB := value == 5 || value == 6 || value == 7
-		wantRecovery := value == 2 || value == 3 || value == 4
-		if isSQLPreDBFailure(which) != wantPreDB || needsSQLRecovery(which) != wantRecovery {
+		wantRecovery := value == 2 || value == 3 || value == 4 || value == 8
+		wantPostDB := value == 8 || value == 9
+		if isSQLPreDBFailure(which) != wantPreDB || needsSQLRecovery(which) != wantRecovery || isSQLPostDBFailure(which) != wantPostDB {
 			t.Fatalf("case %d entered the wrong exact-ID partition", value)
 		}
 	}
@@ -1229,8 +1248,8 @@ func TestSQLLedgerPreDBFailuresRequireBaselineCopiesAndZeroRecovery(t *testing.T
 }
 
 func TestSQLLedgerAllSevenCasesRequireExactPublicFailureFlags(t *testing.T) {
-	for _, which := range []SQLCase{SQLControl, SQLIndexPrefix64, SQLDBSyncBefore, SQLIndexPrefix64Error, SQLJournalBodySyncBefore, SQLJournalHeaderSyncBefore, SQLPublishDirectorySyncBefore} {
-		for _, name := range []string{"code", "poisoned", "recovery", "shortwrite", "uncertain", "cleanup-pending", "target-only-cause", "retired-boundary", "recovery-decision-boundary", "captured-error", "writable-reopen"} {
+	for _, which := range []SQLCase{SQLControl, SQLIndexPrefix64, SQLDBSyncBefore, SQLIndexPrefix64Error, SQLJournalBodySyncBefore, SQLJournalHeaderSyncBefore, SQLPublishDirectorySyncBefore, SQLJournalUnlinkBefore, SQLFinalDirectorySyncBefore} {
+		for _, name := range []string{"code", "poisoned", "recovery", "shortwrite", "uncertain", "cleanup-pending", "target-only-cause", "post-target-only-cause", "retired-boundary", "recovery-decision-boundary", "captured-error", "writable-reopen"} {
 			plan, receipt, evidence := sqlEvidenceFixture(t, which)
 			lifecycle := &evidence.Lifecycle
 			switch name {
@@ -1243,11 +1262,13 @@ func TestSQLLedgerAllSevenCasesRequireExactPublicFailureFlags(t *testing.T) {
 			case "shortwrite":
 				lifecycle.PublicShortWrite = !lifecycle.PublicShortWrite
 			case "uncertain":
-				lifecycle.PublicCommitUncertain = true
+				lifecycle.PublicCommitUncertain = !lifecycle.PublicCommitUncertain
 			case "cleanup-pending":
 				lifecycle.PublicCleanupPending = true
 			case "target-only-cause":
 				lifecycle.PreDBOnlyTargetCause = !lifecycle.PreDBOnlyTargetCause
+			case "post-target-only-cause":
+				lifecycle.PostDBOnlyTargetCause = !lifecycle.PostDBOnlyTargetCause
 			case "retired-boundary":
 				lifecycle.WriterRetiredBeforeRecovery = false
 			case "recovery-decision-boundary":
@@ -1263,7 +1284,7 @@ func TestSQLLedgerAllSevenCasesRequireExactPublicFailureFlags(t *testing.T) {
 }
 
 func TestSQLLedgerAllSevenQueriesRequireEOFCheckAndRetiredOwners(t *testing.T) {
-	for _, which := range []SQLCase{SQLControl, SQLIndexPrefix64, SQLDBSyncBefore, SQLIndexPrefix64Error, SQLJournalBodySyncBefore, SQLJournalHeaderSyncBefore, SQLPublishDirectorySyncBefore} {
+	for _, which := range []SQLCase{SQLControl, SQLIndexPrefix64, SQLDBSyncBefore, SQLIndexPrefix64Error, SQLJournalBodySyncBefore, SQLJournalHeaderSyncBefore, SQLPublishDirectorySyncBefore, SQLJournalUnlinkBefore, SQLFinalDirectorySyncBefore} {
 		for _, before := range []bool{false, true} {
 			for q := 0; q < SQLQueryCount; q++ {
 				for _, name := range []string{"eof", "err-called", "row-error", "close", "owner", "iterator", "text", "work", "row-value"} {
@@ -1324,6 +1345,345 @@ func TestSQLLedgerAllSevenQueriesRequireEOFCheckAndRetiredOwners(t *testing.T) {
 				}
 				sqlMustReject(t, ObserveSQLLedger(plan, receipt, evidence))
 			}
+		}
+	}
+}
+
+func sqlLiteralPostDBCases() [2]struct {
+	which       SQLCase
+	target      Call
+	targetIndex int
+	callCount   uint8
+	eventCount  int
+	commitClass CommitClass
+	finalState  SQLState
+} {
+	return [2]struct {
+		which       SQLCase
+		target      Call
+		targetIndex int
+		callCount   uint8
+		eventCount  int
+		commitClass CommitClass
+		finalState  SQLState
+	}{
+		{SQLJournalUnlinkBefore, Call{Point: JournalUnlink, Occurrence: 1, Role: Journal, Owner: 12}, 16, 17, 39, CommitRecoveryRequired, SQLOld},
+		{SQLFinalDirectorySyncBefore, Call{Point: FinalDirectorySync, Occurrence: 1, Role: Directory, Owner: 13}, 17, 18, 41, CommitUncertain, SQLNew},
+	}
+}
+
+func TestSQLLedgerPostDBFailuresFreezeSkippedTargetAndPublicationPrefix(t *testing.T) {
+	prefix := [18]Call{
+		{Point: JournalCreate, Occurrence: 1, Role: Journal, Owner: 12},
+		{Point: JournalInvalid, Occurrence: 1, Role: Journal, Owner: 12, Length: 4096},
+		{Point: DBOriginalRead, Occurrence: 1, Role: Database, Owner: 11, Offset: 0, Length: 4096},
+		{Point: JournalRecord, Occurrence: 1, Role: Journal, Owner: 12, Offset: 4096, Length: 4104},
+		{Point: DBOriginalRead, Occurrence: 2, Role: Database, Owner: 11, Offset: 4096, Length: 4096},
+		{Point: JournalRecord, Occurrence: 2, Role: Journal, Owner: 12, Offset: 8200, Length: 4104},
+		{Point: DBOriginalRead, Occurrence: 3, Role: Database, Owner: 11, Offset: 8192, Length: 4096},
+		{Point: JournalRecord, Occurrence: 3, Role: Journal, Owner: 12, Offset: 12304, Length: 4104},
+		{Point: JournalBodySync, Occurrence: 1, Role: Journal, Owner: 12},
+		{Point: JournalValidHeader, Occurrence: 1, Role: Journal, Owner: 12, Length: 12},
+		{Point: JournalHeaderSync, Occurrence: 1, Role: Journal, Owner: 12},
+		{Point: PublishDirectorySync, Occurrence: 1, Role: Directory, Owner: 13},
+		{Point: DBPage, Occurrence: 1, Role: Database, Owner: 11, Offset: 0, Length: 4096},
+		{Point: DBPage, Occurrence: 2, Role: Database, Owner: 11, Offset: 4096, Length: 4096},
+		{Point: DBPage, Occurrence: 3, Role: Database, Owner: 11, Offset: 8192, Length: 4096},
+		{Point: DBSync, Occurrence: 1, Role: Database, Owner: 11},
+		{Point: JournalUnlink, Occurrence: 1, Role: Journal, Owner: 12},
+		{Point: FinalDirectorySync, Occurrence: 1, Role: Directory, Owner: 13},
+	}
+	for _, fixed := range sqlLiteralPostDBCases() {
+		plan, receipt, evidence := sqlEvidenceFixture(t, fixed.which)
+		spec := plan.Spec()
+		if spec.Target != fixed.target || spec.Action != FailBefore || spec.Prefix != 0 || spec.PrefixError || spec.ExpectedCommit != fixed.commitClass || spec.CallCount != fixed.callCount {
+			t.Fatalf("post-DB selector %v changed: %+v", fixed.which, spec)
+		}
+		events, count := receipt.Events()
+		if int(count) != fixed.eventCount || events[0].Kind != RunStarted {
+			t.Fatal("post-DB trace has the wrong exact event extent")
+		}
+		for i, call := range prefix[:fixed.callCount] {
+			if spec.Calls[i] != call {
+				t.Fatalf("post-DB publication prefix call %d changed", i)
+			}
+			action := Pass
+			want := Result{Executed: true, NativeN: call.Length, ReturnedN: call.Length, Effect: EffectUnknown}
+			switch call.Point {
+			case DBOriginalRead:
+				want.Effect = EffectNone
+			case JournalInvalid, JournalRecord, JournalValidHeader, DBPage:
+				want.Effect = EffectPossible
+			}
+			if i == fixed.targetIndex {
+				action = FailBefore
+				want = Result{ReturnedError: Injected, NormalizedError: Injected, Effect: EffectNone}
+			}
+			intent, returned := events[1+2*i], events[2+2*i]
+			if intent.Kind != Intent || intent.Call != call || intent.Action != action || returned.Kind != Returned || returned.Call != call || returned.Action != action || returned.Result != want {
+				t.Fatalf("call %d lost actual prefix completion or skipped-target evidence", i)
+			}
+		}
+		commitAt := 1 + 2*int(fixed.callCount)
+		commit := events[commitAt].Commit
+		if events[commitAt].Kind != CommitReturned || commit.Class != fixed.commitClass || commit.Error != Underlying || commit.ErrorToken == 0 || commit.TargetError != Injected || commit.TargetErrorToken != 0 || commit.Logical != LogicalClosed {
+			t.Fatal("post-DB error lost its case-specific class or target cause")
+		}
+		if events[commitAt+1].Kind != OwnersObserved || events[commitAt+1].Owners != (OwnersResult{MainOwner: 11, JournalOwner: 12, CleanupOwner: 14, Main: OwnerRetired, Journal: OwnerRetired, Cleanup: OwnerRetired}) || events[commitAt+2].Kind != ValidationObserved || events[commitAt+2].Validation != 0 || events[commitAt+3].Kind != Terminal {
+			t.Fatal("post-DB trace claimed qualification or skipped retirement")
+		}
+		if evidence.PostCommit.Queries[SQLAllRows].Rows != sqlLiteralRows(SQLNew) || evidence.After.Queries[SQLAllRows].Rows != sqlLiteralRows(fixed.finalState) || evidence.Lifecycle.ReopenCalls != 2 || !evidence.Lifecycle.PostDBOnlyTargetCause || evidence.Lifecycle.PreDBOnlyTargetCause {
+			t.Fatal("post-DB complete NEW copy and case-specific final readback missing")
+		}
+		if fixed.which == SQLJournalUnlinkBefore {
+			if evidence.Recovery.Calls != 1 || !evidence.Recovery.JournalPresentBefore || !evidence.Recovery.Replayed || evidence.Recovery.ReplayedPages != 3 || evidence.Recovery.OriginalPages != 3 || evidence.Recovery.Limits != (SQLRecoveryLimits{MaxJournalBytes: 16408, MaxRecords: 3, MaxDatabaseBytes: 12288}) || !evidence.Lifecycle.PublicRecoveryRequired || evidence.Lifecycle.PublicCommitUncertain {
+				t.Fatal("unlink-before did not require one bounded OLD replay")
+			}
+		} else {
+			if evidence.Recovery != (SQLRecoveryEvidence{Identity: evidence.Identity, OwnersRetired: true}) || evidence.Lifecycle.PublicRecoveryRequired || !evidence.Lifecycle.PublicCommitUncertain {
+				t.Fatal("final-directory uncertainty was promoted to recovery or success")
+			}
+			for _, role := range []SQLArtifactRole{SQLOriginalJournalArtifact, SQLJournalCopyArtifact, SQLReplayJournalArtifact} {
+				if evidence.Artifacts[role] != (SQLArtifactEvidence{Role: role}) {
+					t.Fatal("journal artifact exists after the completed unlink")
+				}
+			}
+		}
+		observation := ObserveSQLLedger(plan, receipt, evidence)
+		if !observation.EvidenceConsistent || !observation.ScenarioObserved || observation.Problem != SQLProblemNone || observation.PhysicalValidated() || observation.Pass() {
+			t.Fatalf("post-DB observation refused or upgraded to durability: %+v", observation)
+		}
+	}
+}
+
+func TestSQLLedgerPostDBFailuresRejectTraceAndClassificationConfusion(t *testing.T) {
+	for _, fixed := range sqlLiteralPostDBCases() {
+		for _, name := range []string{"wrong-case", "unknown-case", "wrong-target", "wrong-owner", "wrong-action", "native-executed", "native-error", "masked-injection", "target-token", "missing-target", "duplicate-target", "DB-sync-skipped", "DB-sync-error", "DB-sync-error-masked", "prior-write-short", "public-nil", "swapped-class", "false-ack", "cleanup-pending", "logical-open", "wrong-commit-target", "commit-target-token", "duplicate-commit", "pending-owner", "unknown-owner", "physical-validation"} {
+			plan, _, evidence := sqlEvidenceFixture(t, fixed.which)
+			events := fixtureEvents(plan.Spec())
+			targetIntent, targetReturn := 1+2*fixed.targetIndex, 2+2*fixed.targetIndex
+			commitAt := 1 + 2*int(fixed.callCount)
+			switch name {
+			case "wrong-case":
+				evidence.Case = SQLJournalUnlinkBefore
+				if fixed.which == SQLJournalUnlinkBefore {
+					evidence.Case = SQLFinalDirectorySyncBefore
+				}
+			case "unknown-case":
+				evidence.Case = SQLCase(10)
+			case "wrong-target":
+				plan.spec.Target.Point = DBSync
+			case "wrong-owner":
+				plan.spec.Target.Owner = 14
+			case "wrong-action":
+				plan.spec.Action = Pass
+			case "native-executed":
+				events[targetReturn].Result.Executed = true
+			case "native-error":
+				events[targetReturn].Result.NativeError, events[targetReturn].Result.NativeErrorToken = Underlying, 71
+			case "masked-injection":
+				events[targetReturn].Result.NormalizedError = None
+			case "target-token":
+				events[targetReturn].Result.ReturnedErrorToken = 71
+			case "missing-target":
+				events = append(events[:targetIntent], events[targetReturn+1:]...)
+			case "duplicate-target":
+				duplicate := []Event{events[targetIntent], events[targetReturn]}
+				events = append(events[:targetReturn+1], append(duplicate, events[targetReturn+1:]...)...)
+			case "DB-sync-skipped":
+				events[32].Result.Executed = false
+			case "DB-sync-error":
+				events[32].Result.NativeError, events[32].Result.NativeErrorToken = Underlying, 71
+				events[32].Result.ReturnedError, events[32].Result.ReturnedErrorToken = Underlying, 71
+				events[32].Result.NormalizedError, events[32].Result.NormalizedErrorToken = Underlying, 71
+			case "DB-sync-error-masked":
+				events[32].Result.NativeError, events[32].Result.NativeErrorToken = Underlying, 71
+			case "prior-write-short":
+				events[30].Result.NativeN = 64
+			case "public-nil":
+				events[commitAt].Commit.Error, events[commitAt].Commit.ErrorToken = None, 0
+			case "swapped-class":
+				events[commitAt].Commit.Class = CommitRecoveryRequired
+				if fixed.which == SQLJournalUnlinkBefore {
+					events[commitAt].Commit.Class = CommitUncertain
+				}
+			case "false-ack":
+				events[commitAt].Commit.Class = CommitSucceeded
+			case "cleanup-pending":
+				events[commitAt].Commit.Class = CommitCleanupPending
+			case "logical-open":
+				events[commitAt].Commit.Logical = LogicalOpen
+			case "wrong-commit-target":
+				events[commitAt].Commit.TargetError = ShortWrite
+			case "commit-target-token":
+				events[commitAt].Commit.TargetErrorToken = 71
+			case "duplicate-commit":
+				events = append(events[:commitAt+1], append([]Event{events[commitAt]}, events[commitAt+1:]...)...)
+			case "pending-owner":
+				events[commitAt+1].Owners.Cleanup = OwnerPending
+			case "unknown-owner":
+				events[commitAt+1].Owners.Journal = OwnerUnknown
+			case "physical-validation":
+				events[commitAt+2].Validation = Validation(1)
+			}
+			renumber(events, plan.Spec().Identity)
+			sqlMustReject(t, ObserveSQLLedger(plan, sqlReceipt(t, plan, events), evidence))
+		}
+	}
+	plan, _, evidence := sqlEvidenceFixture(t, SQLFinalDirectorySyncBefore)
+	for _, name := range []string{"unlink-skipped", "unlink-error", "unlink-error-masked", "unlink-missing"} {
+		events := fixtureEvents(plan.Spec())
+		switch name {
+		case "unlink-skipped":
+			events[34].Result.Executed = false
+		case "unlink-error":
+			events[34].Result.NativeError, events[34].Result.NativeErrorToken = Underlying, 71
+			events[34].Result.ReturnedError, events[34].Result.ReturnedErrorToken = Underlying, 71
+			events[34].Result.NormalizedError, events[34].Result.NormalizedErrorToken = Underlying, 71
+		case "unlink-error-masked":
+			events[34].Result.NativeError, events[34].Result.NativeErrorToken = Underlying, 71
+		case "unlink-missing":
+			events = append(events[:33], events[35:]...)
+		}
+		renumber(events, plan.Spec().Identity)
+		sqlMustReject(t, ObserveSQLLedger(plan, sqlReceipt(t, plan, events), evidence))
+	}
+}
+
+func TestSQLLedgerPostDBFailuresRequireNewCopyAndExactRecoveryDecision(t *testing.T) {
+	for _, fixed := range sqlLiteralPostDBCases() {
+		for _, name := range []string{"missing-new-copy", "old-copy", "mixed-index", "same-count-wrong-member", "copy-identity", "copy-owner-before", "copy-owner-after", "copy-iterator-before", "copy-iterator-after", "copy-owner-live", "copy-close-error", "copy-check", "copy-query-plan", "wrong-reopen-count", "extra-cause", "second-commit", "rollback", "wrong-final-ledger", "wrong-recovery-count", "wrong-recovery-class", "recovery-owner-live", "changed-original", "changed-trial", "changed-post-copy", "coherent-old-copies", "replay-alias", "changed-replay", "physical-claim"} {
+			plan, receipt, evidence := sqlEvidenceFixture(t, fixed.which)
+			switch name {
+			case "missing-new-copy":
+				evidence.PostCommit = SQLSnapshotEvidence{}
+			case "old-copy":
+				evidence.PostCommit = sqlSnapshot(evidence.Identity, 103, 15, SQLOld)
+			case "mixed-index":
+				evidence.PostCommit.Queries[SQLBlueIndex] = sqlSnapshot(evidence.Identity, 103, 15, SQLOld).Queries[SQLBlueIndex]
+			case "same-count-wrong-member":
+				evidence.PostCommit.Queries[SQLBlueIndex].Rows[0].ID = 77
+			case "copy-identity":
+				evidence.PostCommit.Identity.Trial = "wrong-trial"
+			case "copy-owner-before":
+				evidence.PostCommit = sqlSnapshot(evidence.Identity, evidence.Before.Owner, 15, SQLNew)
+			case "copy-owner-after":
+				evidence.PostCommit = sqlSnapshot(evidence.Identity, evidence.After.Owner, 15, SQLNew)
+			case "copy-iterator-before":
+				evidence.PostCommit.Queries[0].Iterator = evidence.Before.Queries[0].Iterator
+			case "copy-iterator-after":
+				evidence.PostCommit.Queries[0].Iterator = evidence.After.Queries[0].Iterator
+			case "copy-owner-live":
+				evidence.PostCommit.OwnerState = OwnerLive
+			case "copy-close-error":
+				evidence.PostCommit.CloseError, evidence.PostCommit.CloseErrorToken = Underlying, 71
+			case "copy-check":
+				evidence.PostCommit.Check.Calls = 0
+			case "copy-query-plan":
+				evidence.PostCommit.Queries[SQLBlueIndex].Plan.Method = "scan"
+			case "wrong-reopen-count":
+				evidence.Lifecycle.ReopenCalls = 1
+			case "extra-cause":
+				evidence.Lifecycle.PostDBOnlyTargetCause = false
+			case "second-commit":
+				evidence.Lifecycle.CommitCalls = 2
+			case "rollback":
+				evidence.Lifecycle.RollbackCalls = 1
+			case "wrong-final-ledger":
+				state := SQLNew
+				if fixed.which == SQLFinalDirectorySyncBefore {
+					state = SQLOld
+				}
+				evidence.After = sqlSnapshot(evidence.Identity, 102, 8, state)
+			case "wrong-recovery-count":
+				evidence.Recovery.Calls++
+			case "wrong-recovery-class":
+				evidence.Lifecycle.PublicRecoveryRequired, evidence.Lifecycle.PublicCommitUncertain = evidence.Lifecycle.PublicCommitUncertain, evidence.Lifecycle.PublicRecoveryRequired
+			case "recovery-owner-live":
+				evidence.Recovery.OwnersRetired = false
+			case "changed-original":
+				evidence.Originals.After[0][0]++
+			case "changed-trial":
+				evidence.Artifacts[SQLTrialArtifact].After.SHA256[0]++
+			case "changed-post-copy":
+				evidence.Artifacts[SQLPostCopyArtifact].After.SHA256[0]++
+			case "coherent-old-copies":
+				for _, role := range []SQLArtifactRole{SQLTrialArtifact, SQLPostCopyArtifact, SQLReplayArtifact} {
+					evidence.Artifacts[role].Before.SHA256 = evidence.Artifacts[SQLBaselineArtifact].Before.SHA256
+					evidence.Artifacts[role].After.SHA256 = evidence.Artifacts[SQLBaselineArtifact].Before.SHA256
+				}
+			case "replay-alias":
+				evidence.Artifacts[SQLReplayArtifact].Before.Inode = evidence.Artifacts[SQLTrialArtifact].Before.Inode
+			case "changed-replay":
+				evidence.Artifacts[SQLReplayArtifact].After.SHA256[0]++
+			case "physical-claim":
+				evidence.PhysicalClaim = true
+			}
+			sqlMustReject(t, ObserveSQLLedger(plan, receipt, evidence))
+		}
+		for q := 0; q < SQLQueryCount; q++ {
+			for _, name := range []string{"eof", "err", "close", "work", "value"} {
+				plan, receipt, evidence := sqlEvidenceFixture(t, fixed.which)
+				query := &evidence.PostCommit.Queries[q]
+				switch name {
+				case "eof":
+					query.EOF = false
+				case "err":
+					query.ErrCalled = false
+				case "close":
+					query.CloseCalls = 0
+				case "work":
+					query.Work.BaseRowFetches++
+				case "value":
+					query.Rows[0].Value = "wrong"
+				}
+				sqlMustReject(t, ObserveSQLLedger(plan, receipt, evidence))
+			}
+		}
+		for _, role := range []SQLArtifactRole{SQLOriginalJournalArtifact, SQLJournalCopyArtifact, SQLReplayJournalArtifact} {
+			plan, receipt, evidence := sqlEvidenceFixture(t, fixed.which)
+			if fixed.which == SQLJournalUnlinkBefore {
+				evidence.Artifacts[role] = SQLArtifactEvidence{Role: role}
+			} else {
+				evidence.Artifacts[role].Before = SQLArtifactStamp{Identity: SQLArtifactName(role), Device: 1, Inode: uint64(role + 1), Exists: true, Bytes: 16408, SHA256: [32]byte{33}}
+			}
+			sqlMustReject(t, ObserveSQLLedger(plan, receipt, evidence))
+		}
+	}
+	for _, which := range []SQLCase{SQLControl, SQLIndexPrefix64, SQLDBSyncBefore, SQLIndexPrefix64Error, SQLJournalBodySyncBefore, SQLJournalHeaderSyncBefore, SQLPublishDirectorySyncBefore} {
+		plan, receipt, evidence := sqlEvidenceFixture(t, which)
+		if evidence.PostCommit != (SQLSnapshotEvidence{}) || evidence.Lifecycle.PostDBOnlyTargetCause {
+			t.Fatal("old case gained post-DB observations")
+		}
+		evidence.PostCommit = sqlSnapshot(evidence.Identity, 103, 15, SQLNew)
+		sqlMustReject(t, ObserveSQLLedger(plan, receipt, evidence))
+	}
+	for _, name := range []string{"missing-recovery", "wrong-limits", "missing-journal-before", "wrong-pages", "journal-after"} {
+		plan, receipt, evidence := sqlEvidenceFixture(t, SQLJournalUnlinkBefore)
+		switch name {
+		case "missing-recovery":
+			evidence.Recovery.Calls = 0
+		case "wrong-limits":
+			evidence.Recovery.Limits.MaxJournalBytes++
+		case "missing-journal-before":
+			evidence.Recovery.JournalPresentBefore = false
+		case "wrong-pages":
+			evidence.Recovery.ReplayedPages--
+		case "journal-after":
+			evidence.Recovery.JournalPresentAfter = true
+		}
+		sqlMustReject(t, ObserveSQLLedger(plan, receipt, evidence))
+	}
+	for _, role := range []SQLArtifactRole{SQLOriginalJournalArtifact, SQLJournalCopyArtifact, SQLReplayJournalArtifact} {
+		plan, receipt, evidence := sqlEvidenceFixture(t, SQLFinalDirectorySyncBefore)
+		evidence.Artifacts[role].After.Exists = true
+		sqlMustReject(t, ObserveSQLLedger(plan, receipt, evidence))
+	}
+	plan, _, evidence := sqlEvidenceFixture(t, SQLFinalDirectorySyncBefore)
+	for value := 10; value <= 255; value++ {
+		which := SQLCase(value)
+		if _, problem := SQLPlan(plan.Spec().Identity, which); problem == NoProblem || validSQLRecovery(which, evidence.Recovery) || validSQLArtifacts(which, evidence.Artifacts) {
+			t.Fatalf("future SQL case %d received a classification", value)
 		}
 	}
 }

@@ -1,0 +1,32 @@
+{
+  "tested_tree": "449d420ca57e9ab7a454dcfdd33bc2d9aec8871a",
+  "final_validation_archive": {
+    "library_file_id": "libfile_27616e2a994881918c2280159b0f5451",
+    "file_id": "file_00000000868082309332ded9c792a709",
+    "file_name": "gosqlite-postdb-affected-validation-v2-20261012.zip",
+    "bytes": 9868531,
+    "sha256": "5163d74b92b593e50795a9678d1fa4cc557e8e622098e6bb793022160f59c802",
+    "member_count": 84,
+    "readback_verified_utc": "2026-10-12T21:35:07.398993+00:00",
+    "original_and_readback_bytes_identical": true,
+    "readback_all_member_sha256_bytes_crc": true,
+    "readback_exact_seven_payload_identity_verified": true
+  },
+  "original_fail_archive": {
+    "library_file_id": "libfile_2c13c3943cf88191a7e7fd32e911c4d5",
+    "bytes": 820890,
+    "sha256": "a6a5c5b95920007a870c54291a7b7ca22f762437c316e6f9cad32a1721dfa32e",
+    "members": 41,
+    "readback": "PASS"
+  },
+  "parent_source_bundle": {
+    "commit": "4dc3979aa8d503913b75e3c0c432c234d7bc0a40",
+    "library_file_id": "libfile_61f98d644b8c819189c89c27ad158961",
+    "sha256": "867144b25c8a2e61c6815f7dba95123b80c35efe89784a567ced3ab99f971789",
+    "bytes": 7459815,
+    "exact_restore_files": 3368,
+    "exact_restore": "PASS; no Go repeated"
+  },
+  "current_commit_source_bundle": "Created after remote commit; final receipt accompanies publication and next checkpoint to avoid self-referential commit",
+  "physical_manual": "NOT_RUN"
+}

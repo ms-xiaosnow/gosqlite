@@ -15,13 +15,14 @@ import (
 type manualRollbackSQLScope struct{ scope *rollbackFaultScope }
 
 type ManualRollbackSQLReport struct {
-	Observation          rollbackfault.Observation
-	Events               [rollbackfault.MaxEvents]rollbackfault.Event
-	EventCount           uint8
-	Diagnostics          [rollbackfault.MaxEvents]error
-	CommitError          error
-	Problem              error
-	PreDBOnlyTargetCause bool
+	Observation           rollbackfault.Observation
+	Events                [rollbackfault.MaxEvents]rollbackfault.Event
+	EventCount            uint8
+	Diagnostics           [rollbackfault.MaxEvents]error
+	CommitError           error
+	Problem               error
+	PreDBOnlyTargetCause  bool
+	PostDBOnlyTargetCause bool
 }
 
 // Snapshots are separately locked scalar observations, not an atomic proof of
@@ -88,6 +89,10 @@ func ArmManualRollbackSQLFault(tx *Tx, plan rollbackfault.Plan) (*manualRollback
 			caseID = rollbackfault.SQLJournalHeaderSyncBefore
 		case rollbackfault.PublishDirectorySync:
 			caseID = rollbackfault.SQLPublishDirectorySyncBefore
+		case rollbackfault.JournalUnlink:
+			caseID = rollbackfault.SQLJournalUnlinkBefore
+		case rollbackfault.FinalDirectorySync:
+			caseID = rollbackfault.SQLFinalDirectorySyncBefore
 		default:
 			return nil, errRollbackFaultScope
 		}
@@ -133,19 +138,34 @@ func FinishManualRollbackSQLFault(scope *manualRollbackSQLScope, commitErr error
 		scope.scope.tx.mu.Lock()
 		poison := scope.scope.tx.poisoned
 		scope.scope.tx.mu.Unlock()
-		preDBOnlyTargetCause = manualRollbackSQLOnlyTargetCause(commitErr, poison, target)
+		preDBOnlyTargetCause = manualRollbackSQLOnlyTargetCause(commitErr, poison, target, nil)
 	}
-	return ManualRollbackSQLReport{Observation: report.Observation, Events: report.Events, EventCount: report.EventCount, Diagnostics: report.Diagnostics, CommitError: report.CommitError, Problem: report.Problem, PreDBOnlyTargetCause: preDBOnlyTargetCause}
+	postDBOnlyTargetCause := false
+	if point == rollbackfault.JournalUnlink || point == rollbackfault.FinalDirectorySync {
+		scope.scope.tx.mu.Lock()
+		poison := scope.scope.tx.poisoned
+		scope.scope.tx.mu.Unlock()
+		permitted := ErrRecoveryRequired
+		if point == rollbackfault.FinalDirectorySync {
+			permitted = ErrCommitUncertain
+		}
+		postDBOnlyTargetCause = manualRollbackSQLOnlyTargetCause(commitErr, poison, target, permitted)
+	}
+	return ManualRollbackSQLReport{Observation: report.Observation, Events: report.Events, EventCount: report.EventCount, Diagnostics: report.Diagnostics, CommitError: report.CommitError, Problem: report.Problem, PreDBOnlyTargetCause: preDBOnlyTargetCause, PostDBOnlyTargetCause: postDBOnlyTargetCause}
 }
 
 // This observation is limited to the original public wrapper and the actual
 // retired Tx poison. The caller also requires the top object to be *sqlite.Error.
-// Below that wrapper only errors.Join nodes and the two exact private/sentinel
-// leaves are accepted. Unknown shapes and custom Is/As are refused BEFORE any
+// Below that wrapper only errors.Join nodes, exact injected/ErrPoisoned leaves,
+// and the one explicitly permitted post-DB classification sentinel are accepted.
+// Unknown shapes and custom Is/As are refused BEFORE any
 // Unwrap, so a consumed cleanup diagnostic cannot disappear behind traversal.
 // No native operation, reset, callback, or retry is introduced here.
-func manualRollbackSQLOnlyTargetCause(commitErr, poison, target error) bool {
+func manualRollbackSQLOnlyTargetCause(commitErr, poison, target, permitted error) bool {
 	if commitErr == nil || poison == nil || target != errRollbackFaultInjected {
+		return false
+	}
+	if permitted != nil && permitted != ErrRecoveryRequired && permitted != ErrCommitUncertain {
 		return false
 	}
 	if _, custom := commitErr.(interface{ Is(error) bool }); custom {
@@ -163,6 +183,7 @@ func manualRollbackSQLOnlyTargetCause(commitErr, poison, target error) bool {
 	pending[0] = poison
 	count, visited := 1, 0
 	sawTarget, sawPoisoned := false, false
+	sawPermitted := permitted == nil
 	for count != 0 {
 		if visited == len(pending) {
 			return false
@@ -185,6 +206,10 @@ func manualRollbackSQLOnlyTargetCause(commitErr, poison, target error) bool {
 			sawPoisoned = true
 			continue
 		}
+		if permitted != nil && current == permitted {
+			sawPermitted = true
+			continue
+		}
 		if reflect.TypeOf(current) != joinType {
 			return false
 		}
@@ -200,7 +225,7 @@ func manualRollbackSQLOnlyTargetCause(commitErr, poison, target error) bool {
 			count++
 		}
 	}
-	return sawTarget && sawPoisoned
+	return sawTarget && sawPoisoned && sawPermitted
 }
 
 func DisarmManualRollbackSQLFault(scope *manualRollbackSQLScope) error {

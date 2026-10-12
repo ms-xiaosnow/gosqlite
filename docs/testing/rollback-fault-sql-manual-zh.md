@@ -1,4 +1,8 @@
-> 最新验证状态：本七格源码经独立审查和受影响normal/race、sourceguard、双tag编译/nm通过；原Doc比较FAIL及最小修正保留。完整命令、原始事件与复用范围见[2026-10-12记录](../evidence/20261012-presync/README.zh.md)。下方SOURCE_ONLY是各次源稿历史状态，不能覆盖此普通验证结果；所有实际manual/物理仍NOT_RUN。
+> 最新九格影响验证：两新增 post-DB caller 已通过独立审查、受影响包normal/race、sourceguard及双tag编译/nm；嵌套说明注释导致的原FAIL和四行修正完整保留。[准确命令与新执行/复用证据](../evidence/20261012-postdb/README.zh.md)。下方SOURCE_ONLY为历史源稿状态；实际manual/物理仍NOT_RUN。
+
+> 上一个4dc3979检查点的验证状态：当时七格源码经独立审查和受影响normal/race、sourceguard、双tag编译/nm通过；原Doc比较FAIL及最小修正保留。完整命令、原始事件与复用范围见[2026-10-12记录](../evidence/20261012-presync/README.zh.md)。下方SOURCE_ONLY是各次源稿历史状态，不能覆盖此普通验证结果；所有实际manual/物理仍NOT_RUN。
+
+> 2026-10-12 两个 post-DB caller 后继：基于 main a49d9bf 与已冻结七格源树 d023d4a01d48011c60e67b96a83230d806ab5660，只复制并编辑本 SQL slice 的七个文件，不复制全仓，不改正在核验的工作树。本次仅追加 junlink-before／final-dirsync-before，状态为 **SOURCE_ONLY / REVIEW_PENDING / EXECUTION_NOT_RUN**。仅另获准运行固定官方 Go 1.27.2 gofmt（SHA-256 5583dbb3339147fee7cdb067eb3cd4a50015b48c27084377f49d93833aa4ad77）：六个 overlay Go 文件一次，四源快照/pins同步后仅 guard 再一次，均退出0且无输出；四源字节及完整快照未改变。尚未运行 Go 测试、AST/parser/scanner runner、编译、manual/native、fixture、Commit、recovery 或 controller。下方较早阶段的 gofmt／源审／有限验证只属于其原字节，不转授本后继。实际物理执行、OS Sync-error-return、断电和硬件资格全部 **NOT_RUN**。本次不改生产 Commit/default/VFS/adapter/A5，不修改公开入口名称。
 
 > 2026-10-12 三个 pre-DB caller 小型 overlay：从冻结的已发布第四格 main `a49d9bf` 重新生成，仅改受影响的 SQL caller／模型／守卫／测试／文档，当前运行树保持不变。重启前的 pre-DB overlay 未保全，也没有可供逐字节比对的旧 overlay hash；这里是新生成的源码，不能称为恢复旧 overlay 或继承其验证结果。本次状态为 **SOURCE_ONLY / REVIEW_PENDING / EXECUTION_NOT_RUN**。只做源码文本编辑、字节检查，以及另行获准的固定官方 gofmt（Go 1.27.2，SHA-256 5583dbb3339147fee7cdb067eb3cd4a50015b48c27084377f49d93833aa4ad77）六个 overlay Go 文件格式化；没有运行 Go 测试、AST/parser/scanner runner、编译、manual/native、fixture、Commit、恢复或 controller。实际物理注入仍全部 **NOT_RUN**。最终完整文件／函数 pins 及其对应的源审另行核验；旧 pin 或旧通过记录不能转授新字节。下方历史状态仅说明其各自原范围，不覆盖本次状态。
 
@@ -10,13 +14,13 @@
 
 ## 状态与边界
 
-本候选为 SOURCE_ONLY／独立源审 HOLD。本文和源码都不是执行许可。本次只执行了另行获准的固定 gofmt 格式化，未运行 Go 测试、parser runner、编译、fixture 构造、Commit、恢复、目标二进制、oracle、fuzz、Git 或网络上传。纯模型只输出 evidence-consistent／ScenarioObserved；PhysicalValidated() 与 Pass() 永远为 false。
+本候选为 SOURCE_ONLY／独立源审 HOLD。本文和源码都不是执行许可。本次做源码文本编辑、字节核对及另行获准的固定 gofmt-only；尚未运行 Go 测试、parser runner、编译、fixture 构造、Commit、恢复、目标二进制、oracle、fuzz、Git 或网络上传。纯模型只输出 evidence-consistent／ScenarioObserved；PhysicalValidated() 与 Pass() 永远为 false。
 
 早期 SQL 供体曾从 readonly-acceptance-integration-source-v2 独立全量复制，保留既有只读媒体、升级、WAL、备份、恢复和 source guard，并经批准逐路径合入 v3 两份只读 guard 修正及 SQL hook 严格结果／错误／append 绑定负例。这是供体历史，不是本次复制动作。v3 的既有源审和7根AST／sourceguard执行结果只属于其原树，不转授本候选。整个 main.go 与 inspectSource body pin 释放须另行审阅；保留旧 pin 的明确 HOLD，不通过剥去新例外再重构旧 body 来绕过复审。供体当时未修改 armer；本次仅对 gated SQL armer／caller 做本节列明的有限追加，不修改生产 Commit 或默认 shipping 路径。
 
 本片只填补现有 A1/A2 plain rollback adapter 到公开 SQL Tx 与普通 B-tree 索引的一条有限绑定。它不是 A5 退出／重启／durable-ack controller，不是 A6 replay 再中断，不涵盖 WAL、加密、其它五种 profile、grams13、ANN 或向量。grams13 的 shadow tables/indexes 加 schema/source 至少九页，超出既有四页 armer；本片没有增大页数、事件容量或放宽 keepFile/session/borrowedCleanup 拒绝条件。
 
-## 冻结输入与七个独立 case
+## 冻结输入与九个独立 case
 
 4096 字节 page／sector，恰三页：page1 sqlite_schema、page2 表 t、page3 普通索引 by_k。无 page split、overflow、freelist、额外 schema 对象。源码直接编码健康三页基线；第一次公开 Open 使用 NoCreate，不以初始化 Commit 偷增事务次数。
 
@@ -42,11 +46,14 @@
 6. jheader-sync-before：JournalHeaderSync、Journal owner=12、occurrence=1，目标为 Calls[10]。body Sync 和 valid-header 写入在此前已完成，所选 header Sync **未被调用**；随后同样要求正常 unlink／cleanup directory Sync，不能写 DB 页。
 7. publish-dirsync-before：PublishDirectorySync、Directory owner=13、occurrence=1，目标为 Calls[11]。journal header Sync 在此前已完成，所选 publish directory helper **未被调用**；随后要求正常 cleanup，不能写 DB 页。Directory owner 标识复合 helper scope，不是一个可对外操作的 descriptor。
 
-后三格的公开 Commit 必须为失败、CodeIOErr、ErrPoisoned，并保留唯一所选注入原因；不接受 ErrRecoveryRequired、io.ErrShortWrite、CommitUncertain、cleanup pending 或额外错误原因。trial 全字节必须等于 OLD baseline，正常 cleanup 后不得剩余 journal。对保留的独立新副本作全新只读重开并验证 OLD，Recovery 调用数必须为零，不能为证明“无需恢复”再调用一次 recovery。
+上述第5至7格的公开 Commit 必须为失败、CodeIOErr、ErrPoisoned，并保留唯一所选注入原因；不接受 ErrRecoveryRequired、io.ErrShortWrite、CommitUncertain、cleanup pending 或额外错误原因。trial 全字节必须等于 OLD baseline，正常 cleanup 后不得剩余 journal。对保留的独立新副本作全新只读重开并验证 OLD，Recovery 调用数必须为零，不能为证明“无需恢复”再调用一次 recovery。
 
-控制 trace 恰18个原始调用／41 events，两种前缀故障均15个／35 events，DB Sync故障16个／37 events。三个 pre-DB trace 分别恰11／27、13／31、14／33；这些调用数包括所选未执行调用的 intent/return 和随后两个正常 cleanup 调用，CommitReturned 的类别均为 CommitFailed。原 armer 仍为最多4页、32调用、128事件、一次终身 scope。所有 three-page plan 的 original 页序固定为0／4096／8192；只有前四格路径进入对应 dirty-page 写入。
+8. junlink-before：JournalUnlink#1、Journal owner=12、Calls[16]，第17个调用 FailBefore。三页 DB 写入及 DB Sync 已实际返回 nil，所选 unlink 没有执行；原 trial 保留完整 NEW 字节和恰16408字节三条 original-page record 的 journal。公开 Commit 为 CodeIOErr／ErrPoisoned／ErrRecoveryRequired，并保留唯一 actual injected cause；不允许 ErrCommitUncertain、io.ErrShortWrite 或 cleanup/Close 额外原因。先读 journal-free 的独立 post-commit.input.db 副本，完整七查询及 Check 必须 NEW 且全部 reader/iterator 已退休，然后只对另一 fresh-copy replay.db／replay.db-journal 恰恢复一次，完整结果必须 OLD。原 trial、journal 和保留副本均不变。
+9. final-dirsync-before：FinalDirectorySync#1、Directory owner=13、Calls[17]，第18个调用 FailBefore。三页写入、DB Sync 和 JournalUnlink 必须均实际执行且返回 nil，最终目录 Sync 复合 helper 尚未调用；journal 已不存在。公开 Commit 必须为 CodeIOErr／ErrPoisoned／ErrCommitUncertain，并保留注入 cause；不得含 ErrRecoveryRequired、io.ErrShortWrite 或 cleanup/Close 额外原因。两个独立只读副本均须完整 NEW，Recovery 调用数严格为零，三种 journal artifact 的 before/after 全零。看到 NEW 只是 readback 观察，不能生成 durable ack、CommitSucceeded、physical PASS 或断电承诺。
 
-FailBefore 只表示 adapter 在所选 native Sync／复合 helper 调用之前返回私有注入错误，不表示那个实际 Sync 返回了失败。它也不是断电、OS fsync failure、lost write、硬件 torn-sector 或持久性证明。随后 cleanup 的正常执行／返回必须有独立 transcript 证据；不能因为命中 fail-before 就假定 cleanup 成功，也不能把 synthetic 模型行当成真实 I/O 观察。
+控制 trace 恰18个原始调用／41 events，两种前缀故障均15个／35 events，DB Sync故障16个／37 events。三个 pre-DB trace 分别恰11／27、13／31、14／33；这些调用数包括所选未执行调用的 intent/return 和随后两个正常 cleanup 调用，CommitReturned 的类别均为 CommitFailed。原 armer 仍为最多4页、32调用、128事件、一次终身 scope。所有 three-page plan 的 original 页序固定为0／4096／8192；前四格及第8／9格进入对应 dirty-page 写入。junlink-before 为17 calls／39 events，final-dirsync-before 为18／41，目标均 Executed=false、EffectNone、NativeN=ReturnedN=0、NativeError=None/0、ReturnedError=NormalizedError=Injected/0；目标后无 cleanup/unlink 重试，分别以 CommitRecoveryRequired／CommitUncertain、LogicalClosed、正常退休 owner 收尾。
+
+FailBefore 只表示 adapter 在所选 native Sync／unlink／复合 helper 调用之前返回私有注入错误，不表示那个实际 Sync 返回了失败。它也不是断电、OS fsync failure、lost write、硬件 torn-sector 或持久性证明。随后 cleanup 的正常执行／返回必须有独立 transcript 证据；不能因为命中 fail-before 就假定 cleanup 成功，也不能把 synthetic 模型行当成真实 I/O 观察。
 
 ## 生命周期与保留要求
 
@@ -60,17 +67,21 @@ FailBefore 只表示 adapter 在所选 native Sync／复合 helper 调用之前�
 
 正常准备失败时，仅对 bridge 判定健康、未 arm、独立拥有的 Tx 调用一次公开 Rollback。文件、Rows、DB 的每个非 nil 返回，包括同时返回 error 的 owner，都先登记后检查 error；关闭失败保持未知，既不再次 Close 也不隐藏。成功终态要求登记的 owner 全部恰一次退休。延迟处理只报告剩余责任，不重试关闭。
 
-baseline、binding、trial、post-commit 副本以及所有实际产生的失败输出均保留。只有三个既有 recovery case（index-prefix-64、db-sync-before、index-prefix-64-error）保留原 journal 和独立 journal 副本，并恰调用一次恢复；恢复只针对 O_EXCL 新建、与所有原件 device/inode 均不同的 replay.db／replay.db-journal。原 trial 和 journal 的 identity、长度、全字节 hash 在恢复前后不变；不向原 trial 调 RecoverRollback。这三格的固定限额为 MaxJournalBytes=16408、MaxRecords=3、MaxDatabaseBytes=12288，实际 Recovered=true、RestoredPages=OriginalPages=3，否则不接受。
+baseline、binding、trial、post-commit 副本以及所有实际产生的失败输出均保留。只有四个 recovery case（index-prefix-64、db-sync-before、index-prefix-64-error、junlink-before）保留原 journal 和独立 journal 副本，并恰调用一次恢复；恢复只针对 O_EXCL 新建、与所有原件 device/inode 均不同的 replay.db／replay.db-journal。原 trial 和 journal 的 identity、长度、全字节 hash 在恢复前后不变；不向原 trial 调 RecoverRollback。这四格的固定限额为 MaxJournalBytes=16408、MaxRecords=3、MaxDatabaseBytes=12288，实际 Recovered=true、RestoredPages=OriginalPages=3，否则不接受。
 
-control 和三个 pre-DB case 都不调用恢复，也不创建／保留三种 journal artifact；其 journal 的 Before／After evidence 必须全零。pre-DB 的 baseline、trial、post-commit input copy、独立 replay.db 的完整字节 hash 必须全部等于 OLD baseline，replay.db 名称只沿用固定 artifact 名，不表示做过 replay。各实体依旧要求独立 device/inode、固定长度和正常退休；先保留证据再全新只读 NoCreate Open，不能复用原 writer 或把新副本当修复目标。
+control、三个 pre-DB case 和 final-dirsync-before 都不调用恢复，也不创建／保留三种 journal artifact；其 journal 的 Before／After evidence 必须全零。pre-DB 的 baseline、trial、post-commit input copy、独立 replay.db 的完整字节 hash 必须全部等于 OLD baseline，replay.db 名称只沿用固定 artifact 名，不表示做过 replay。各实体依旧要求独立 device/inode、固定长度和正常退休；先保留证据再全新只读 NoCreate Open，不能复用原 writer 或把新副本当修复目标。
 
-PublicPoisoned 在全部六个失败 case 为 true，control 为 false；PublicRecoveryRequired 只在三个旧 recovery case 为 true，PublicShortWrite 只在 nil-prefix 格为 true。PublicCommitUncertain 和 PublicCleanupPending 在全部七格均须为 false。PreDBOnlyTargetCause 仅在三个 pre-DB case 为 true，由 Finish 捕获实际 private target 与 Tx.poisoned，再检查实际固定 public wrapper／raw poison／target cause chain 得出。caller 另要求 commitErr 就是原来的 *sqlite.Error public 对象。链检查在 Unwrap 之前拒绝 top／node 自定义 Is／As；top 的唯一 unwrap 必须等于实际 poison，后续只接受相同具体 errors.Join 类型的节点和精确 injected／ErrPoisoned 叶子，最多访问128个节点且 pending 数量有界。额外／未知／nil 原因、循环溢出都返回 false，不能从 plan 或仅凭 errors.Is 命中一个 cause 就填 true；替换 public error 或真实 cleanup error 不能冒充选定场景。
+PublicPoisoned 在全部八个失败 case 为 true，control 为 false；PublicRecoveryRequired 只在上述四个 recovery case 为 true，PublicShortWrite 只在 nil-prefix 格为 true。PublicCommitUncertain 仅 final-dirsync-before 为 true；PublicCleanupPending 在九格全部为 false。PreDBOnlyTargetCause 仅第5至7格为 true，PostDBOnlyTargetCause 仅第8／9格为 true，旧七格的新 flag 与 PostCommit snapshot 必须 canonical zero，不得从 plan 自动填出实际证据。
 
-WriterRetiredBeforeRecovery 和 RecoveryFinishedBeforeReopen 是生命周期边界证据，全部七格都必须为 true。对零 recovery 格，它们表示 writer 已退休、已明确决定跳过 recovery，然后才独立只读重开，不表示调用过恢复。若 cleanup 返回实际错误、出现 pending／unknown owner 或多余原因，停止并保留现场，不重试 cleanup、Sync、Commit、Close 或 recovery，不借 DB.Close／Rollback 修复。
+Finish 捕获实际 private target 与 Tx.poisoned，并将原 public wrapper 的唯一 unwrap 精确绑定到该 poison；caller 另要求 commitErr 就是原始 *sqlite.Error 对象。helper 的第四个参数只允许 nil、ErrRecoveryRequired 或 ErrCommitUncertain：pre-DB 明确传 nil，JournalUnlink 只传 ErrRecoveryRequired，FinalDirectorySync 只传 ErrCommitUncertain。链内仅接受精确 injected／ErrPoisoned 叶子及本格唯一允许且必须出现的 sentinel，其余分类、cleanup/Close error、未知原因均拒绝。top／node 的自定义 Is／As 必须在任何 unwrap 之前被拒绝；非叶节点必须是相同具体 errors.Join 类型，最多访问128个节点并限制 pending 容量。额外／nil 原因、循环溢出都返回 false，即便 owner 已退休也不能忽略消费过的 cleanup 诊断。不能只凭 errors.Is 命中一个原因就填 true，也不为任意自定义 error 程序提供证明。
+
+只有新增两格在恢复决策之前，对已保留的 post-commit.input.db 做额外只读 NoCreate Open，并记录 PostCommit 的真实完整 NEW snapshot；此副本没有 journal，且不等于原 trial inode。成功返回的实际调用才使 ReopenCalls 递增为2；其它七格保持1。Before、PostCommit、After 的 reader owner 与全部 iterator ID 两两独立，完整 EOF／Err／一次 Close／Check 和 owner 退休不可省略。随后 junlink-before 使用另一新副本回放 OLD；final-dirsync-before 仍不执行回放。第二次 NEW 读回也不增加任何持久性资格。
+
+WriterRetiredBeforeRecovery 和 RecoveryFinishedBeforeReopen 是生命周期边界证据，全部九格都必须为 true。对零 recovery 格，它们表示 writer 已退休、已明确决定跳过 recovery，然后才独立只读重开，不表示调用过恢复。若 cleanup 返回实际错误、出现 pending／unknown owner 或多余原因，停止并保留现场，不重试 cleanup、Sync、Commit、Close 或 recovery，不借 DB.Close／Rollback 修复。
 
 ## SQL 与索引证据
 
-在健康基线与处理后独立新副本的全新只读 NoCreate Open 上（仅三个旧 fault case 实际恢复），各执行同样七个固定查询：全表按 id 排序；blue／red／green 各一个索引查询和一个 NOT INDEXED 独立扫描。要求完整行值、类型、行身份与独立 old/new 账本一致，并且索引／scan结果相同。
+在健康基线与处理后独立新副本的全新只读 NoCreate Open 上（只有四个指定 fault case 实际恢复），各执行同样七个固定查询：全表按 id 排序；blue／red／green 各一个索引查询和一个 NOT INDEXED 独立扫描。要求完整行值、类型、行身份与独立 old/new 账本一致，并且索引／scan结果相同。
 
 索引查询必须 Rows.Plan 为 SEARCH／btree／by_k／字段 k／Recheck；Rows.Stats 必须有真实 index-page work，返回的键、候选、rowid seek和base row fetch必须守恒。不存在 green 的旧账本也必须实际探测索引页，不能用未执行或 fallback 冒充。scan计划必须显式 NOT INDEXED，三条基础行均被读取。每个 Rows恰一次EOF循环、Err检查、公共Close。
 
@@ -81,9 +92,9 @@ DB.Check 固定 MaxPages=3、MaxPageReads=512；要求 Scope正确、Pages=3、T
 1. 冻结全部源码与文件清单，独立 review bridge锁顺序、公开 Commit邻接、owner责任、旧 guard增量例外和全 main pin。HOLD不得因更新hash自行解除。
 2. 另获许可后，只运行精确 descriptor-free模型及纯AST/source guard入口，包含重钉hash后的语义负例；审核 default／manual selection inventory。
 3. 另获许可后，只 compile-only 生成 linux manual sqlite 测试二进制并记录 source／tool／binary／manifest关系；只读 symbol inventory，不执行该二进制。
-4. 任何实际七个 case均需新的逐项执行授权、固定环境与保留目录。每次单独进程、独立空目录、唯一绑定case、精确测试参数。严禁执行 Go test ./...、宽selector、count>1、parallel/subtest、timeout-kill、进程controller或更换环境绕过限制。
+4. 任何实际九个 case均需新的逐项执行授权、固定环境与保留目录。每次单独进程、独立空目录、唯一绑定case、精确测试参数。严禁执行 Go test ./...、宽selector、count>1、parallel/subtest、timeout-kill、进程controller或更换环境绕过限制。
 
-未来入口的参数合同为：-test.run=^TestManualRollbackFaultSQLLedger$、-test.count=1、-test.shuffle=off、-test.parallel=1、-test.timeout=0、-test.cpu=1、-test.v=true，均须显式 equals形式且无额外参数。环境使用 GOSQLITE_ROLLBACK_SQL_ROOT、GOSQLITE_ROLLBACK_SQL_BINDING、GOSQLITE_ROLLBACK_SQL_BINDING_SHA256 与 GOSQLITE_ROLLBACK_SQL_PRIVATE_ROOT_CONFIRMED=private_stable_namespace_retained。绑定的 Case 为上述七个名称之一；compile receipt Schema 为 rollback-fault-sql-compile-v1、Package为 ./sqlite、Tags为 manual_fault_rollback、CompileOnly=true。这里只描述合同，不给出已获授权的启动命令或自动 runner。
+未来入口的参数合同为：-test.run=^TestManualRollbackFaultSQLLedger$、-test.count=1、-test.shuffle=off、-test.parallel=1、-test.timeout=0、-test.cpu=1、-test.v=true，均须显式 equals形式且无额外参数。环境使用 GOSQLITE_ROLLBACK_SQL_ROOT、GOSQLITE_ROLLBACK_SQL_BINDING、GOSQLITE_ROLLBACK_SQL_BINDING_SHA256 与 GOSQLITE_ROLLBACK_SQL_PRIVATE_ROOT_CONFIRMED=private_stable_namespace_retained。绑定的 Case 为上述九个名称之一；compile receipt Schema 为 rollback-fault-sql-compile-v1、Package为 ./sqlite、Tags为 manual_fault_rollback、CompileOnly=true。这里只描述合同，不给出已获授权的启动命令或自动 runner。
 
 成功场景的唯一终态仍名为 ROLLBACK_SQL_SCENARIO_OBSERVED，不能翻译为物理 PASS。保留 receipt、全部 transcript、原始公开 error及诊断、退出状态、source/tool/binary身份。未命中、缺失/重复/截断/旧 receipt、pending owner、unknown、wrong source或trial、old rows/new index混搭、缺EOF、错误索引计划、恢复原件、控制case调用恢复，均拒绝。
 
@@ -94,7 +105,7 @@ DB.Check 固定 MaxPages=3、MaxPageReads=512；要求 Scope正确、Pages=3、T
 
 此节是人工核验合同，全部执行步骤当前 NOT_RUN，不能把 tag、环境变量、旧 binary 或旧 receipt 当作新许可。
 
-- 枚举只在旧 SQLDBSyncBefore 后追加 SQLIndexPrefix64Error，旧数值 Unknown=0、Control=1、nil-prefix=2、Sync-before=3 不变，新值=4。该第四格版本原先仅四个固定名字放行；本 overlay 在其后追加三个精确名字，不更改旧四格。armer 先按 PrefixError 区分两种 prefix，再将完整 PlanSpec 与 SQLPlan 冻结值相等比较。caller 在打开 writer 前也绑定 c.caseID 与完整 plan。
+- 枚举只在旧 SQLDBSyncBefore 后追加 SQLIndexPrefix64Error，旧数值 Unknown=0、Control=1、nil-prefix=2、Sync-before=3 不变，新值=4。该第四格版本原先仅四个固定名字放行；pre-DB 后继曾追加三个精确名字；当前 post-DB 后继再追加两个名字，旧七格数值不变。armer 先按 PrefixError 区分两种 prefix，再将完整 PlanSpec 与 SQLPlan 冻结值相等比较。caller 在打开 writer 前也绑定 c.caseID 与完整 plan。
 - 目标 Returned 必须为 Executed=true、NativeN=64、NativeError=None/0、ReturnedN=64、ReturnedError=Injected/0、NormalizedError=Injected/0、Effect=EffectPrefix。CommitReturned 为 CommitRecoveryRequired、LogicalClosed、TargetError=Injected/0。Finish 使用实际 errors.Is(commitErr, targetError) 建立因果；report.CommitError 仍是 public Commit 原对象。不得从 plan 直接填一份看似正确的实际观察。
 - 若 native 实际不足64字节或返回非 nil error，保留原生结果；不得由注入覆盖、转换成 io.ErrShortWrite、忽略错误、补写或 retry。即使错误链保留正确，这也只是 unexpected native failure，不能让固定注入计划成功。非目标 I/O 出错、owner 未退休、事件缺失/重复、错误恢复范围同样停止并保留输入。
 - 两个 prefix case 都检查 trial 第三页从 offset=8192+64 到文件末尾的字节仍等于基线尾部；这只是写入范围约束，不替代恢复后整个数据库与索引的 OLD 判定。恢复后的七查询、完整三行类型/值、Rows.Plan/Stats、EOF/Err/Close、DB.Check，以及完整字节 hash 和原件 inode/长度不变都沿用前文要求。
@@ -102,11 +113,11 @@ DB.Check 固定 MaxPages=3、MaxPageReads=512；要求 Scope正确、Pages=3、T
 
 ### 可复用与需要重新核验的范围
 
-既有公开测试根名称全部保留，包括 TestSQLLedgerThreeFrozenScenariosRemainObservationOnly。该旧名字在第四格版本遍历四格，本 overlay 扩展为七格，避免破坏原精确 selector。第四格新增的三个 descriptor-free 模型根仍保留：TestSQLLedgerPrefixErrorFreezesNativeAndAdapterReturns、TestSQLLedgerPrefixErrorRejectsPlanAndReceiptConfusion、TestSQLLedgerPrefixErrorRequiresCompleteOldReplayAndOwners。它们只处理合成值，没有 native 权限。
+既有公开测试根名称全部保留，包括 TestSQLLedgerThreeFrozenScenariosRemainObservationOnly。该旧名字在第四格版本遍历四格，pre-DB 后继扩展为七格，当前扩展为九格，避免破坏原精确 selector。第四格新增的三个 descriptor-free 模型根仍保留：TestSQLLedgerPrefixErrorFreezesNativeAndAdapterReturns、TestSQLLedgerPrefixErrorRejectsPlanAndReceiptConfusion、TestSQLLedgerPrefixErrorRequiresCompleteOldReplayAndOwners。它们只处理合成值，没有 native 权限。
 
 在后续明确允许的环境中，只计划受影响的 internal/testkit/rollbackfault 与 internal/testscope 包的精确模型/SQL guard 验证；SQL guard 负例必须同时重钉 byte hash 与完整 shape，再命中语义诊断，不能依赖过期 pin。保留既有负例并新增错误格映射、位翻转、错误分类、case/plan错配与只检查旧格尾部等反例。若需格式、AST 或编译检查，先绑定最终文件字节，再记录实际命令、工具版本/哈希、退出码和输出；本次并未执行这些检查。
 
-第四格原建议的 compile-only 范围为 ./sqlite、manual_fault_rollback 及只读 symbol inventory；这是历史范围。本次协调者批准的后续兼容性编译可检查既有 manual_fault_rollback 与 manual_restart_rollback 双 tag 及其已冻结符号集合，只为确认未改 A5 wiring 的共享依赖仍可编译，不执行任何二进制，也不新增 A5 物理资格。A5 controller、全仓测试、宽 selector、真实 SQL/恢复执行仍不属于本切片验证。新的 source manifest、compile receipt、tool/binary hash 必须重新对应最终源码；旧设施证据可保留复用其原范围，不能冒充本格已验证。平台限制下跳过的检查明确记为 NOT_RUN／BLOCKED，绝不记为 PASS。
+第四格原建议的 compile-only 范围为 ./sqlite、manual_fault_rollback 及只读 symbol inventory；这是历史范围。较早 pre-DB 阶段协调者批准的兼容性编译可检查既有 manual_fault_rollback 与 manual_restart_rollback 双 tag 及其已冻结符号集合，只为确认未改 A5 wiring 的共享依赖仍可编译，不执行任何二进制，也不新增 A5 物理资格。A5 controller、全仓测试、宽 selector、真实 SQL/恢复执行仍不属于本切片验证。新的 source manifest、compile receipt、tool/binary hash 必须重新对应最终源码；旧设施证据可保留复用其原范围，不能冒充本格已验证。平台限制下跳过的检查明确记为 NOT_RUN／BLOCKED，绝不记为 PASS。
 
 
 ## 三个 pre-DB caller 的有限源审与模型清单
@@ -119,3 +130,13 @@ DB.Check 固定 MaxPages=3、MaxPageReads=512；要求 Scope正确、Pages=3、T
 - 源审应对最终完整文件／函数 body、全部相关 byte/shape pins 和语义负例一起核验，确认未靠旧 pin、部分重构或只覆盖旧四格绕过守卫。受影响模型／守卫的后续验证仍须遵守已批准的精确范围与最终字节绑定，不增加重复全量复制、宽 selector 或额外全仓测试。compile-only 和实际物理注入状态必须分开记录；本 overlay 当前均为 NOT_RUN，旧第四格通过不推出新三格通过。
 
 本次不编辑 A5 文件，也不重新宣称 A5 已获资格。A5 的既有共享依赖仍需准确纳入源审：internal/pager/rollback_restart_manual_linux.go 使用 SQLPlan(...SQLControl)，restart caller 复用 baseline／read／open／RecoverCopy／owner helpers，但不调用 manualRollbackSQLCommit，也不使用 ManualRollbackSQLReport。本 overlay 保持 SQLControl 计划输出及这些共享 helper 的函数字节不变；这只是源码边界说明，不是 A5 新执行或新 PASS。
+
+
+## 两个 post-DB caller 的有限源审与模型清单
+
+- 只追加 SQLJournalUnlinkBefore=8、SQLFinalDirectorySyncBefore=9，旧0至7不变。SQLPlan、isSQLPostDBFailure、needsSQLRecovery、artifact/recovery 分类均按精确 enum 判定，未来10至255及未知0不获默认分类。
+- 新增三根 descriptor-free 模型测试：TestSQLLedgerPostDBFailuresFreezeSkippedTargetAndPublicationPrefix、TestSQLLedgerPostDBFailuresRejectTraceAndClassificationConfusion、TestSQLLedgerPostDBFailuresRequireNewCopyAndExactRecoveryDecision。它们是有限合成值，不会执行 SQL、文件 I/O、native、Commit 或回放；本次执行状态 NOT_RUN。
+- 字面正例核对完整18步路径的所选17／18前缀；负例覆盖已完成 DB write／DB Sync／unlink 被跳过或返回实际错误、错误被 masked、目标实际执行、错误 cause/class/token、重复 Commit、额外 cleanup cause、缺失 owner 退休、recovery-after-unlink、unlink-before 缺 journal、NEW 副本被 OLD／混合索引／同数错误成员替换、额外 PostCommit 字段、缺 EOF／Err／Close／Check，以及虚假 durable ack／physical claim。保留旧七格全部测试根和原负例，不以新格替换旧反例。
+- guard 的四份完整 source snapshot／byte pin 与语义负例必须同步重钉；独立语义仍需拒绝错误 case mapping、额外枚举／range default、Commit 后非紧邻 Finish、替换 error 对象、从 plan 制造 cause flag、错误 sentinel 集合、自定义 Is／As 晚于 unwrap、未知 join、跳过 NEW snapshot／owner退休、恢复原件及不该回放的分支。hash 一致并不能代替语义审查。
+- 人工核验按顺序先独立源码审查，再另行获准的纯模型／AST guard 与有限 source-selection inspection，最后另获准的 compile-only；不能执行输出 binary。source 完成、源审结果、模型／guard 结果、compile-only、实际手工故障以及平台/硬件资格必须分别记录。当前新增两格的后五项均未由本次源码编辑完成，物理状态仍 NOT_RUN。
+- 无新增 native precondition 路径、环境／权限设置、OS errno matrix、实际 Sync-error-return、A5 controller 或 A6 replay cut。ANN V4、41-target fuzz campaign、未知或被拒绝的旧中断链均不在本片范围，不可改名或换入口运行。

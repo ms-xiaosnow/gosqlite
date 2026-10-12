@@ -1,3 +1,13 @@
+# 当前阶段：九格 plain rollback SQL 手工设施源码闭环
+
+2026-10-12 21:31:34 UTC，新受测树 `449d420ca57e9ab7a454dcfdd33bc2d9aec8871a` 六项影响验证PASS：normal模型1565复用、guard1110新跑、两包race2675新跑、源码guard与Linux双tag编译/nm454/18。原normal 1FAIL和四行期望注释修正保留。详情：[源码与测试证据](evidence/20261012-postdb/README.zh.md)。
+
+新增JUNLINK／FINAL_DIRSYNC的FailBefore caller分别观察恢复OLD和uncertain NEW；默认shipping协议未改，实际物理场景仍NOT_RUN。本提交是阶段源码及证据保存，不是M10或整体验收。a49的CI/恢复已PASS；4dc的源码bundle3368文件完整性已PASS，精确CI38309383658截至21:24:17 UTC观察为oracle成功、ordinary运行中，不能记全SUCCESS。后续终态按精确SHA另存。
+
+A8六格root-negative入口已完成独立source-only审查并单独备份，尚未合入本检查点或运行普通验证。[有限剩余清单](testing/remaining-goal-boundary-20261012-zh.md)继续区分真实代码缺口、普通验证、受限手工及外部资格。仅未受影响闭包复用PASS，不为文档或bundle恢复重跑全套。
+
+## 以下为较早时点历史记录
+
 # 三设施检查点验收矩阵
 
 | 项目 | 实际结果与来源 | 边界 |

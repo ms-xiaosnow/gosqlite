@@ -1,0 +1,14 @@
+{
+  "library_file_id": "libfile_61f98d644b8c819189c89c27ad158961",
+  "commit": "4dc3979aa8d503913b75e3c0c432c234d7bc0a40",
+  "tree": "4fbf9a52417eedcd7dcf6e08ecb31a4147915a9f",
+  "bytes": 7459815,
+  "bundle_sha256": "867144b25c8a2e61c6815f7dba95123b80c35efe89784a567ced3ab99f971789",
+  "result": "PASS",
+  "restored_git_blob_bytes_and_modes": 3368,
+  "fsck_stdout": "",
+  "fsck_stderr": "",
+  "restore": "bare Git only; no extra working tree",
+  "runtime_tests": "NOT_RERUN: identical tested source, integrity only",
+  "posix_metadata": "not claimed identical to historical execution directory"
+}

@@ -1,0 +1,21 @@
+{
+  "base_commit": "4dc3979aa8d503913b75e3c0c432c234d7bc0a40",
+  "base_tree": "4fbf9a52417eedcd7dcf6e08ecb31a4147915a9f",
+  "candidate_tree": "449d420ca57e9ab7a454dcfdd33bc2d9aec8871a",
+  "independent_source_review": "CLEAR_SOURCE_ONLY",
+  "files": {
+    "docs/testing/rollback-fault-sql-manual-zh.md": "27f57991b9140b9ec20823b5ce5eb1c497fd11d58024bbfef22bc7f1e4edb6c5",
+    "internal/pager/rollback_fault_sql_manual_linux.go": "ad9f263e2d15a496cc70b1d35038f5b0393e8b94c0923ea5db96bf4eff71c0f9",
+    "internal/testkit/rollbackfault/sql_ledger.go": "7d47e46b34204c12a4df50d02a24179bf22e081d45f2816e3c048b0bc7dd04dc",
+    "internal/testkit/rollbackfault/sql_ledger_test.go": "5bea133008de83e9c5e737582305034cf24e1b99a25d402cba61c596f52ef2a3",
+    "internal/testscope/rollback_fault_sql.go": "0647edf67ae831b8d99b3caddf02fbf8e65380fc391405effe433145c5374969",
+    "internal/testscope/rollback_fault_sql_test.go": "977605cd7e68411e1ccc6521003e028edc44969a42cb33d0f605d2d39a4eb525",
+    "sqlite/rollback_fault_sql_manual_linux_test.go": "c368296059cbf29a4756cbb760b3836c580d8615e25a7330f76d83ba97427037"
+  },
+  "manual_physical": "NOT_RUN",
+  "actual_tests": "NOT_RUN",
+  "correction": "Expected nested GenDecl.Doc comment mirrors actual source; parser.ParseComments retains both, exact function semantics unchanged",
+  "docs_merge": "Preserved and explicitly scoped previous seven-case validation header; new source paragraph separate",
+  "prior_failed_tree": "83fc646ddb702369b6fed4705323990910d59c64",
+  "correction_review_sha256": "c9a3d025b6d1d26295d3b67f89e3b577c3e95251569cf38c361c0c8c2ba69a08"
+}

@@ -1,3 +1,5 @@
+> 2026-10-12 post-DB更新：JUNLINK/FINAL_DIRSYNC两格caller已实现并通过受影响普通验证，plain rollback SQL设施现九格；见[准确结果](../evidence/20261012-postdb/README.zh.md)。下表旧审计状态保留；受限物理与其余明确代码缺口不因该小片闭合。A8六格入口正在独立源审/有限验证准备，未因此算完成。
+
 > 2026-10-12 21:06 UTC 当前状态更新：下文旧表保留审计时点。第1组第四格已提交a49并完成恢复/CI；第2组pre-DB三格已实现并通过影响验证，实际Sync故障及其余格未因此闭合。下一片是JUNLINK/FINAL_DIRSYNC两边界caller，仍在源码实现；A8六格root磁盘负面入口确认有代码缺口后source-only补齐，既有memory AEAD测试不重做。不增加新的验收义务，物理受限项目继续详细手册NOT_RUN。参阅[最新准确结果](../evidence/20261012-presync/README.zh.md)。
 
 # 原目标有限剩余工作与完成边界

@@ -25,6 +25,8 @@ const (
 	SQLJournalBodySyncBefore
 	SQLJournalHeaderSyncBefore
 	SQLPublishDirectorySyncBefore
+	SQLJournalUnlinkBefore
+	SQLFinalDirectorySyncBefore
 )
 
 type SQLState uint8
@@ -197,8 +199,9 @@ type SQLArtifactEvidence struct {
 
 // Counts are observations, not instructions to close or retry anything. A
 // failed Commit must be followed by retired writer owners and a fresh read-only
-// open. Only the three post-write failures call recovery; the three pre-DB
-// failures require an untouched OLD copy and zero recovery calls. No second
+// open. Four fixed post-write failures call recovery; pre-DB failures and
+// final-directory uncertainty require zero recovery calls. The two post-DB
+// cases also read the retained post-Commit copy as NEW before any replay. No second
 // Commit or Rollback attempt is permitted. The two recovery-boundary flags also
 // bind the no-recovery path: retirement and the zero-call decision precede open.
 type SQLLifecycleEvidence struct {
@@ -220,12 +223,14 @@ type SQLLifecycleEvidence struct {
 	PublicCommitUncertain        bool
 	PublicCleanupPending         bool
 	PreDBOnlyTargetCause         bool
+	PostDBOnlyTargetCause        bool
 }
 
 type SQLLedgerEvidence struct {
 	Identity      Identity
 	Case          SQLCase
 	Before        SQLSnapshotEvidence
+	PostCommit    SQLSnapshotEvidence
 	After         SQLSnapshotEvidence
 	Originals     SQLOriginalEvidence
 	Artifacts     [SQLArtifactCount]SQLArtifactEvidence
@@ -357,6 +362,12 @@ func SQLPlan(identity Identity, which SQLCase) (Plan, Problem) {
 	case SQLPublishDirectorySyncBefore:
 		spec.Target, spec.Action = spec.Calls[11], FailBefore
 		spec.ExpectedCommit, spec.CallCount = CommitFailed, 14
+	case SQLJournalUnlinkBefore:
+		spec.Target, spec.Action = spec.Calls[16], FailBefore
+		spec.ExpectedCommit, spec.CallCount = CommitRecoveryRequired, 17
+	case SQLFinalDirectorySyncBefore:
+		spec.Target, spec.Action = spec.Calls[17], FailBefore
+		spec.ExpectedCommit, spec.CallCount = CommitUncertain, 18
 	default:
 		return Plan{}, ProblemTarget
 	}
@@ -405,6 +416,11 @@ func ObserveSQLLedger(plan Plan, receipt Receipt, evidence SQLLedgerEvidence) SQ
 		lifecycle.PublicRecoveryRequired = needsSQLRecovery(evidence.Case)
 		lifecycle.PublicShortWrite = evidence.Case == SQLIndexPrefix64
 		lifecycle.PreDBOnlyTargetCause = isSQLPreDBFailure(evidence.Case)
+		lifecycle.PostDBOnlyTargetCause = isSQLPostDBFailure(evidence.Case)
+		lifecycle.PublicCommitUncertain = evidence.Case == SQLFinalDirectorySyncBefore
+	}
+	if isSQLPostDBFailure(evidence.Case) {
+		lifecycle.ReopenCalls = 2
 	}
 	if evidence.Lifecycle != lifecycle {
 		result.Problem = SQLProblemLifecycle
@@ -418,10 +434,30 @@ func ObserveSQLLedger(plan Plan, receipt Receipt, evidence SQLLedgerEvidence) SQ
 		return result
 	}
 	state := SQLOld
-	if evidence.Case == SQLControl {
+	if evidence.Case == SQLControl || evidence.Case == SQLFinalDirectorySyncBefore {
 		state = SQLNew
 	}
 	if result.Problem = validateSQLSnapshot(evidence.After, evidence.Identity, state); result.Problem != SQLProblemNone {
+		return result
+	}
+	if isSQLPostDBFailure(evidence.Case) {
+		if evidence.PostCommit.Identity != evidence.Identity || !validSQLReaderOwners(plan.spec, evidence.Before.Owner, evidence.PostCommit.Owner) || !validSQLReaderOwners(plan.spec, evidence.After.Owner, evidence.PostCommit.Owner) {
+			result.Problem = SQLProblemLifecycle
+			return result
+		}
+		if result.Problem = validateSQLSnapshot(evidence.PostCommit, evidence.Identity, SQLNew); result.Problem != SQLProblemNone {
+			return result
+		}
+		for _, post := range evidence.PostCommit.Queries {
+			for i := 0; i < SQLQueryCount; i++ {
+				if post.Iterator == evidence.Before.Queries[i].Iterator || post.Iterator == evidence.After.Queries[i].Iterator {
+					result.Problem = SQLProblemLifecycle
+					return result
+				}
+			}
+		}
+	} else if evidence.PostCommit != (SQLSnapshotEvidence{}) {
+		result.Problem = SQLProblemLifecycle
 		return result
 	}
 	// Iterator identities must not be re-used across the independent before and
@@ -580,14 +616,18 @@ func isSQLPreDBFailure(which SQLCase) bool {
 	return which == SQLJournalBodySyncBefore || which == SQLJournalHeaderSyncBefore || which == SQLPublishDirectorySyncBefore
 }
 
+func isSQLPostDBFailure(which SQLCase) bool {
+	return which == SQLJournalUnlinkBefore || which == SQLFinalDirectorySyncBefore
+}
+
 func needsSQLRecovery(which SQLCase) bool {
-	return which == SQLIndexPrefix64 || which == SQLDBSyncBefore || which == SQLIndexPrefix64Error
+	return which == SQLIndexPrefix64 || which == SQLDBSyncBefore || which == SQLIndexPrefix64Error || which == SQLJournalUnlinkBefore
 }
 
 func validSQLRecovery(which SQLCase, recovery SQLRecoveryEvidence) bool {
-	if which == SQLControl || isSQLPreDBFailure(which) {
-		// Control and pre-DB failures must not call recovery, even as a no-op.
-		// The copied input is opened read-only, NEW for control and OLD pre-DB.
+	if which == SQLControl || isSQLPreDBFailure(which) || which == SQLFinalDirectorySyncBefore {
+		// Control, pre-DB failures and final-directory uncertainty must not
+		// call recovery, even as a no-op. NEW readback is not a durable ack.
 		return recovery == (SQLRecoveryEvidence{Identity: recovery.Identity, OwnersRetired: true})
 	}
 	if !needsSQLRecovery(which) || recovery.Calls != 1 || recovery.Error != None || recovery.ErrorToken != 0 || !recovery.OwnersRetired || recovery.JournalPresentAfter || recovery.Limits != (SQLRecoveryLimits{MaxJournalBytes: SQLJournalBytes, MaxRecords: SQLPageCount, MaxDatabaseBytes: SQLDatabaseBytes}) {
@@ -602,7 +642,7 @@ func validSQLArtifacts(which SQLCase, artifacts [SQLArtifactCount]SQLArtifactEvi
 			return false
 		}
 		journal := artifact.Role == SQLOriginalJournalArtifact || artifact.Role == SQLJournalCopyArtifact || artifact.Role == SQLReplayJournalArtifact
-		if journal && (which == SQLControl || isSQLPreDBFailure(which)) {
+		if journal && (which == SQLControl || isSQLPreDBFailure(which) || which == SQLFinalDirectorySyncBefore) {
 			if artifact.Before != (SQLArtifactStamp{}) || artifact.After != (SQLArtifactStamp{}) {
 				return false
 			}
@@ -649,7 +689,7 @@ func validSQLArtifacts(which SQLCase, artifacts [SQLArtifactCount]SQLArtifactEvi
 	if baseline == trial {
 		return false
 	}
-	if which == SQLControl {
+	if which == SQLControl || which == SQLFinalDirectorySyncBefore {
 		return replayAfter == trial
 	}
 	if !needsSQLRecovery(which) {

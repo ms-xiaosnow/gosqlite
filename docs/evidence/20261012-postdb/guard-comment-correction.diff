@@ -1,0 +1,21 @@
+--- a/internal/testscope/rollback_fault_sql.go
++++ b/internal/testscope/rollback_fault_sql.go
+@@ -54,7 +54,7 @@
+ 	}
+ 	// Parse this fixed semantic literal independently of mutable file snapshots.
+ 	// Compact both ASTs so source formatting and trailing commas confer nothing.
+-	frozen, err := parser.ParseFile(token.NewFileSet(), "closed_sql_semantic.go", "package frozen\n"+expected, 0)
++	frozen, err := parser.ParseFile(token.NewFileSet(), "closed_sql_semantic.go", "package frozen\n"+expected, parser.ParseComments)
+ 	if err != nil || len(frozen.Decls) != 1 {
+ 		return []string{path + ": rollback SQL contract: invalid closed semantic literal: " + name}
+ 	}
+@@ -1146,6 +1146,9 @@
+ 		t.Fatal(err)
+ 	}
+ 	report, commitCheckErr := manualRollbackSQLCommit(&c, ctx, filepath.Join(c.root, "trial.db"), plan)
++	// Retain the untouched public error text and all original diagnostics even
++	// when the trial must stop before copying/recovery. JSON is supplementary
++	// evidence; error identity checks occurred directly on the original object.
+ 	var diagnosticTexts [rollbackfault.MaxEvents]string
+ 	for i, diagnostic := range report.Diagnostics {
+ 		if diagnostic != nil {

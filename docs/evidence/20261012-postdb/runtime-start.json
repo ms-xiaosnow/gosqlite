@@ -1,0 +1,10 @@
+{
+  "utc": "2026-10-12T21:27:17.677474+00:00",
+  "pid": 2,
+  "base_commit": "4dc3979aa8d503913b75e3c0c432c234d7bc0a40",
+  "scope": "two affected pure/source packages normal/race; sourceguard; compile/nm only",
+  "source_manifest_sha256": "310dcf3f785b57a2ccbc2ee34dda4972999faa4186870d6d03bf0c1f206d9dfc",
+  "tool_go_sha256": "548d3c32f83fa81152f543eb1526be7884cfe0526eb5e9ce29d3eca14786e7e0",
+  "tool_gofmt_sha256": "5583dbb3339147fee7cdb067eb3cd4a50015b48c27084377f49d93833aa4ad77",
+  "process_scope": "single coordinated Go queue; no claim of global cross-namespace visibility"
+}

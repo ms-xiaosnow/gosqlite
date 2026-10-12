@@ -1,0 +1,7 @@
+{
+  "utc": "2026-10-12T21:23:51.694013+00:00",
+  "error_type": "AssertionError",
+  "error": "('gate failed', {'name': '02_normal', 'start_utc': '2026-10-12T21:23:25.495057+00:00', 'end_utc': '2026-10-12T21:23:51.502896+00:00', 'exit_code': 1, 'resource_breach_latched': False, 'observer_error': None, 'stdout_sha256': '336f404538a003fd1c7071472a413f6d82f76e1fd73607d07088575c5eb20539', 'stderr_sha256': 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'})",
+  "remaining_commands": "NOT_RUN",
+  "physical_manual_executed": false
+}
