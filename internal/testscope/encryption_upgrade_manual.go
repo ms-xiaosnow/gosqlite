@@ -27,7 +27,7 @@ var formatUpgradePins = map[string]string{
 	formatUpgradeNative:          "61944780e8a3c4e4d809c9d2ce335da5a6b92ec4ef4c10371ab3d2b577b490d4",
 	formatUpgradePure:            "74c615d7adda5ecfcd6d1e296832f8f0078030ca4699b1e93c42e3c987357c9d",
 	formatUpgradePureTest:        "678923185ace3852da1c588441a9c7b491c8c11c89baabae015a8053cfa043de",
-	"internal/testscope/main.go": "e31c233fed8976fddff3236a8804f84d493e2567d6b6d85d11355de2ca0da52b",
+	"internal/testscope/main.go": "6dbab48ff374858bfafe578f0fca99f5176ced7b6bdc008bec04ce6a6d1d0eb2",
 }
 
 func formatUpgradeName(x ast.Expr) string {

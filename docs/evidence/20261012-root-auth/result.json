@@ -1,0 +1,209 @@
+{
+  "utc": "2026-10-12T21:47:51.604501+00:00",
+  "status": "PASS",
+  "commands": [
+    {
+      "name": "01_format",
+      "start_utc": "2026-10-12T21:46:32.658481+00:00",
+      "end_utc": "2026-10-12T21:46:34.660328+00:00",
+      "exit_code": 0,
+      "resource_breach_latched": false,
+      "observer_error": null,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "PASS"
+    },
+    {
+      "name": "02_normal",
+      "start_utc": "2026-10-12T21:46:35.020432+00:00",
+      "end_utc": "2026-10-12T21:46:41.023269+00:00",
+      "exit_code": 0,
+      "resource_breach_latched": false,
+      "observer_error": null,
+      "stdout_sha256": "5f090683a7ea7479a9d8abdbc8d2393d132b2a30233ef71ebaa17564ba853fa4",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tests": {
+        "github.com/ms-xiaosnow/gosqlite/internal/testscope": {
+          "roots": [
+            "TestEncryptedRootFalsePassSourcesEvenWhenRepinned",
+            "TestEncryptedRootFiniteStructure",
+            "TestEncryptedRootPinsRequireIndependentRelease",
+            "TestEncryptedRootWholeSourceAndCapabilityBoundary",
+            "TestFormatUpgradeMainKeepsExistingPolicies",
+            "TestReadOnlyWALManualWholeRootInventory",
+            "TestRollbackFaultGuardWiringPreservesPriorPolicies",
+            "TestRollbackFaultSQLWiringAndMainReviewHold",
+            "TestRollbackRestartWiringPreservesAllPoliciesAndReviewHold",
+            "TestWALPublicationGuardFixedSourceAndWiring"
+          ],
+          "root_count": 10,
+          "named_pass": 10,
+          "child_pass": 0,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "status": "PASS"
+    },
+    {
+      "name": "03_race",
+      "start_utc": "2026-10-12T21:46:41.384297+00:00",
+      "end_utc": "2026-10-12T21:47:27.400840+00:00",
+      "exit_code": 0,
+      "resource_breach_latched": false,
+      "observer_error": null,
+      "stdout_sha256": "5b0a927fd734267f6eb8d0a36bb68848a4d4e3504805a4e4288227242dc29f61",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tests": {
+        "github.com/ms-xiaosnow/gosqlite/internal/testkit/encryptedroot": {
+          "roots": [
+            "TestRootErrorFactsRejectUnrelatedFailures",
+            "TestRootOwnerRetiresOnlyOnce",
+            "TestRootReceiptRejectsFiniteFalsePasses",
+            "TestSixRootPlansAndScalarReceipts"
+          ],
+          "root_count": 4,
+          "named_pass": 36,
+          "child_pass": 32,
+          "fail": 0,
+          "skip": 0
+        },
+        "github.com/ms-xiaosnow/gosqlite/internal/testscope": {
+          "roots": [
+            "TestEncryptedRootFalsePassSourcesEvenWhenRepinned",
+            "TestEncryptedRootFiniteStructure",
+            "TestEncryptedRootPinsRequireIndependentRelease",
+            "TestEncryptedRootWholeSourceAndCapabilityBoundary",
+            "TestFormatUpgradeMainKeepsExistingPolicies",
+            "TestReadOnlyWALManualWholeRootInventory",
+            "TestRollbackFaultGuardWiringPreservesPriorPolicies",
+            "TestRollbackFaultSQLWiringAndMainReviewHold",
+            "TestRollbackRestartWiringPreservesAllPoliciesAndReviewHold",
+            "TestWALPublicationGuardFixedSourceAndWiring"
+          ],
+          "root_count": 10,
+          "named_pass": 10,
+          "child_pass": 0,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "status": "PASS"
+    },
+    {
+      "name": "04_sourceguard",
+      "start_utc": "2026-10-12T21:47:27.768408+00:00",
+      "end_utc": "2026-10-12T21:47:35.774672+00:00",
+      "exit_code": 0,
+      "resource_breach_latched": false,
+      "observer_error": null,
+      "stdout_sha256": "ba0cb4aff7a9c991c087485ff3499bf86b9b57f990c78b979c1f08ffc42a3505",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "PASS"
+    },
+    {
+      "name": "05_list_default",
+      "start_utc": "2026-10-12T21:47:36.162632+00:00",
+      "end_utc": "2026-10-12T21:47:38.164012+00:00",
+      "exit_code": 0,
+      "resource_breach_latched": false,
+      "observer_error": null,
+      "stdout_sha256": "722b57f4bd2a75c211d8549d3e51ee18e2e122e32f1be726847106d8ba53e864",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "selection": {
+        "manual_external_file_selected": false,
+        "physical_execution": false,
+        "package": "sqlite_test"
+      },
+      "status": "PASS"
+    },
+    {
+      "name": "06_list_manual",
+      "start_utc": "2026-10-12T21:47:38.549667+00:00",
+      "end_utc": "2026-10-12T21:47:40.551292+00:00",
+      "exit_code": 0,
+      "resource_breach_latched": false,
+      "observer_error": null,
+      "stdout_sha256": "7209d6ee62e28e30878af0661b9c73d2924eec1217ee6c3fe289bb7a2eced7c0",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "selection": {
+        "manual_external_file_selected": true,
+        "physical_execution": false,
+        "package": "sqlite_test"
+      },
+      "status": "PASS"
+    },
+    {
+      "name": "07_manual_compile",
+      "start_utc": "2026-10-12T21:47:40.926506+00:00",
+      "end_utc": "2026-10-12T21:47:48.936300+00:00",
+      "exit_code": 0,
+      "resource_breach_latched": false,
+      "observer_error": null,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "PASS"
+    },
+    {
+      "name": "08_nm",
+      "start_utc": "2026-10-12T21:47:49.323946+00:00",
+      "end_utc": "2026-10-12T21:47:51.325446+00:00",
+      "exit_code": 0,
+      "resource_breach_latched": false,
+      "observer_error": null,
+      "stdout_sha256": "076b09a51c21a3cd9ece5f96c1939fccecbfc459461a8f8f8ed032667f5cba84",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "symbols": {
+        "nm_rows": 11786,
+        "required": 451,
+        "absent": 22,
+        "image_executed": false,
+        "image_sha256": "0539172b7a0e0b205a031446446944c5de26ac1284293576013d7db5f45ee9c8"
+      },
+      "status": "PASS"
+    }
+  ],
+  "source_unchanged": true,
+  "manual_image_executed": false,
+  "unrelated_tests": "REUSED, not rerun",
+  "normal_model_reuse": "17139 encryptedroot4roots32children36PASS unchanged byreadonly2fileguardfix",
+  "rerun_reason": "existingreadonlyWALwiring exact2hook registration:repeat9affectedASTroots plus1existingmatrixroot; priorrace/sourceguard/list/compile/nmNOT_RUN; nootherchecks repeated",
+  "lease": "RELEASED_ON_RETURN",
+  "base_commit": "6d668f80d199b2c49647a3cbc949442d125988ae",
+  "tested_tree": "a6ca3b307531c7479a08add7325de8d996cd7246",
+  "session": 17741,
+  "original_failure": {
+    "tree": "cae45848a0e1054f61ef7a2077e6f04875be6db7",
+    "session": 17139,
+    "model_pass": 36,
+    "guard_pass": 8,
+    "guard_fail": 1,
+    "skip": 0,
+    "test": "TestRollbackRestartWiringPreservesAllPoliciesAndReviewHold",
+    "reason": "Existing readonly-WAL closed wiring inventory omitted the newly reviewed root-auth source capture and repository hook."
+  },
+  "raw_logs": [
+    {
+      "path": "v1-normal.events.jsonl.gz",
+      "raw_bytes": 45762,
+      "raw_sha256": "c3de4c2c14e865e78312c3a6b614d0b51bbf4d696399a31f0eaf74896f9e4027",
+      "gzip_bytes": 3326,
+      "gzip_sha256": "4477b5ee826c371a17ebbbd4ddbaef5fe9ef4cbf202174040768ce3372871b31"
+    },
+    {
+      "path": "v2-normal.events.jsonl.gz",
+      "raw_bytes": 9711,
+      "raw_sha256": "5f090683a7ea7479a9d8abdbc8d2393d132b2a30233ef71ebaa17564ba853fa4",
+      "gzip_bytes": 1067,
+      "gzip_sha256": "e78db194f376dc0d1084b0c75d2cf66e42df445bbd2d1d273dbdb3336dd4e2de"
+    },
+    {
+      "path": "v2-race.events.jsonl.gz",
+      "raw_bytes": 46146,
+      "raw_sha256": "5b0a927fd734267f6eb8d0a36bb68848a4d4e3504805a4e4288227242dc29f61",
+      "gzip_bytes": 3355,
+      "gzip_sha256": "76266ab623df31733f00fec3fd2e048a943c4f9a8882ca8994c268ccd45a6a2f"
+    }
+  ],
+  "publication": "Developer checkpoint; containing commit identified by Git history; not final acceptance"
+}

@@ -1,0 +1,202 @@
+{
+  "schema_version": 1,
+  "repository": {
+    "full_name": "ms-xiaosnow/gosqlite",
+    "private": true
+  },
+  "run": {
+    "id": 38309383658,
+    "name": "ordinary-checks",
+    "head_branch": "main",
+    "head_sha": "4dc3979aa8d503913b75e3c0c432c234d7bc0a40",
+    "path": ".github/workflows/check.yml",
+    "display_title": "test: cover rollback pre-DB failures",
+    "run_number": 55,
+    "event": "push",
+    "status": "completed",
+    "conclusion": "success",
+    "workflow_id": 380397707,
+    "check_suite_id": 103795742237,
+    "url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/actions/runs/38309383658",
+    "html_url": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38309383658",
+    "created_at": "2026-10-12T21:14:35Z",
+    "updated_at": "2026-10-12T21:41:39Z",
+    "run_attempt": 1,
+    "run_started_at": "2026-10-12T21:14:35Z"
+  },
+  "head_tree": "4fbf9a52417eedcd7dcf6e08ecb31a4147915a9f",
+  "terminal_observed_at": "2026-10-12T21:42:30.584Z",
+  "jobs": [
+    {
+      "id": 115011121005,
+      "run_id": 38309383658,
+      "name": "ordinary",
+      "head_sha": "4dc3979aa8d503913b75e3c0c432c234d7bc0a40",
+      "head_branch": "main",
+      "run_attempt": 1,
+      "workflow_name": "ordinary-checks",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-12T21:14:36Z",
+      "started_at": "2026-10-12T21:14:38Z",
+      "completed_at": "2026-10-12T21:41:38Z",
+      "html_url": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38309383658/job/115011121005",
+      "url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/actions/jobs/115011121005",
+      "check_run_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/check-runs/115011121005",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-12T21:14:39Z",
+          "completed_at": "2026-10-12T21:14:39Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-12T21:14:39Z",
+          "completed_at": "2026-10-12T21:14:42Z"
+        },
+        {
+          "name": "Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-12T21:14:42Z",
+          "completed_at": "2026-10-12T21:14:54Z"
+        },
+        {
+          "name": "Run ./scripts/check.sh",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-12T21:14:54Z",
+          "completed_at": "2026-10-12T21:41:35Z"
+        },
+        {
+          "name": "Post Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-12T21:41:35Z",
+          "completed_at": "2026-10-12T21:41:35Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-12T21:41:35Z",
+          "completed_at": "2026-10-12T21:41:36Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-12T21:41:36Z",
+          "completed_at": "2026-10-12T21:41:36Z"
+        }
+      ]
+    },
+    {
+      "id": 115011121204,
+      "run_id": 38309383658,
+      "name": "oracle",
+      "head_sha": "4dc3979aa8d503913b75e3c0c432c234d7bc0a40",
+      "head_branch": "main",
+      "run_attempt": 1,
+      "workflow_name": "ordinary-checks",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-12T21:14:36Z",
+      "started_at": "2026-10-12T21:14:38Z",
+      "completed_at": "2026-10-12T21:24:17Z",
+      "html_url": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38309383658/job/115011121204",
+      "url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/actions/jobs/115011121204",
+      "check_run_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/check-runs/115011121204",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-12T21:14:39Z",
+          "completed_at": "2026-10-12T21:14:40Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-12T21:14:40Z",
+          "completed_at": "2026-10-12T21:14:41Z"
+        },
+        {
+          "name": "Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-12T21:14:41Z",
+          "completed_at": "2026-10-12T21:14:54Z"
+        },
+        {
+          "name": "Build and verify pinned official SQLite oracle",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-12T21:14:54Z",
+          "completed_at": "2026-10-12T21:15:52Z"
+        },
+        {
+          "name": "Run complete guarded ordinary oracle suite",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-12T21:15:52Z",
+          "completed_at": "2026-10-12T21:24:14Z"
+        },
+        {
+          "name": "Post Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-12T21:24:14Z",
+          "completed_at": "2026-10-12T21:24:14Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-12T21:24:14Z",
+          "completed_at": "2026-10-12T21:24:15Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-10-12T21:24:15Z",
+          "completed_at": "2026-10-12T21:24:15Z"
+        }
+      ]
+    }
+  ],
+  "capture": {
+    "kind": "complete decoded per-job logs plus selected sanitized metadata",
+    "workflow_zip_original": false,
+    "logs_modified": false,
+    "project_executed_by_capture_worker": false,
+    "capture_time": "2026-10-12T21:43:08.725Z"
+  }
+}

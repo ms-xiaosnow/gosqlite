@@ -1,0 +1,107 @@
+--- a/internal/testscope/readonly_wal_manual.go
++++ b/internal/testscope/readonly_wal_manual.go
+@@ -1256,6 +1256,10 @@
+ 	report := func(name string) {
+ 		findings = append(findings, diagnostic+": direct placement and checked findings/error propagation required for "+name)
+ 	}
++	rootNegative := readOnlyWALManualSequence(walkBody, `rootNegative, rootNegativeErr := inspectEncryptedRootNegativeSource(path,raw)`, `if rootNegativeErr != nil { return rootNegativeErr }`, `findings = append(findings,rootNegative...)`)
++	if rootNegative < 0 {
++		report("encrypted root negative source")
++	}
+ 	formatUpgrade := readOnlyWALManualSequence(walkBody, `formatUpgrade, formatErr := inspectFormatUpgradeSource(path,raw)`, `if formatErr != nil { return formatErr }`, `findings = append(findings,formatUpgrade...)`)
+ 	if formatUpgrade < 0 {
+ 		report("format upgrade source")
+@@ -1304,7 +1308,7 @@
+ 	}
+ 	backup := readOnlyWALManualSequence(walkBody, `manual, err := inspectBackupManualSource(path,raw)`, `if err != nil { return err }`, `findings = append(findings,manual...)`)
+ 	readonly := readOnlyWALManualSequence(walkBody, `readonlyManual, err := inspectReadOnlyWALManualSource(path,raw)`, `if err != nil { return err }`, `findings = append(findings,readonlyManual...)`)
+-	if formatUpgrade < 0 || backup <= formatUpgrade || rollbackFault <= backup || rollbackSQL <= rollbackFault || restart <= rollbackSQL || recovery <= restart || readonly <= recovery || ordinary <= readonly || oracle <= ordinary {
++	if rootNegative < 0 || formatUpgrade <= rootNegative || backup <= formatUpgrade || rollbackFault <= backup || rollbackSQL <= rollbackFault || restart <= rollbackSQL || recovery <= restart || readonly <= recovery || ordinary <= readonly || oracle <= ordinary {
+ 		report("earlier source filter order")
+ 	}
+ 	last, first := -1, -1
+@@ -1319,6 +1323,7 @@
+ 		{"inspectDarwinInventoryManualContract", "darwinManual", "err"},
+ 		{"inspectFormatUpgradeContracts", "formatContracts", "formatErr"},
+ 		{"inspectReadOnlyWALManualContracts", "readonlyContracts", "err"},
++		{"inspectEncryptedRootNegativeContracts", "rootNegativeContracts", "rootNegativeErr"},
+ 	} {
+ 		index := readOnlyWALManualSequence(mainBody,
+ 			contract.result+", "+contract.err+" := "+contract.name+`(".")`,
+@@ -1356,9 +1361,10 @@
+ 	// A correctly placed append/error block is insufficient if later code
+ 	// silently resets its accumulator. Preserve the actual result state too.
+ 	initializations := 0
+-	// Only the exact combined, SQL, restart and recovery triplets extend the append inventory.
++	// Only exact encrypted-root, combined, SQL, restart and recovery triplets extend the append inventory.
+ 	// Matching append text alone never grants a helper or placement exemption.
+ 	allowedAppends := map[string]int{
++		"findings=append(findings,rootNegative...)":   0,
+ 		"findings=append(findings,formatUpgrade...)":  0,
+ 		"findings=append(findings,rollbackFault...)":  0,
+ 		"findings=append(findings,rollbackSQL...)":    0,
+@@ -1530,7 +1536,7 @@
+ 	if perFile < 0 || ordinaryFilter < 0 || oracleFilter < 0 || perFile > ordinaryFilter || perFile > oracleFilter {
+ 		findings = append(findings, "readonly WAL manual traversal must precede platform/test filters")
+ 	}
+-	for _, call := range []string{"inspectFormatUpgradeSource(path,raw)", "inspectBackupManualSource(path,raw)", "inspectRollbackFaultSource(path,raw)", "inspectRollbackFaultSQLSource(path,raw)", "inspectRollbackRestartSource(path,raw)", "inspectRollbackFaultRecoverySource(path,raw)", "inspectSource(path,raw)", "inspectWALPublicationSource(path,raw)", "inspectOracleSource(path,raw)", `inspectOracleContracts(".")`, `inspectBackupManualContracts(".")`, `inspectRollbackFaultContracts(".")`, `inspectRollbackFaultSQLContracts(".")`, `inspectRollbackRestartContracts(".")`, `inspectRollbackFaultRecoveryContracts(".")`, `inspectWALPublicationContracts(".")`, `inspectDarwinInventoryManualContract(".")`, `inspectFormatUpgradeContracts(".")`} {
++	for _, call := range []string{"inspectEncryptedRootNegativeSource(path,raw)", "inspectFormatUpgradeSource(path,raw)", "inspectBackupManualSource(path,raw)", "inspectRollbackFaultSource(path,raw)", "inspectRollbackFaultSQLSource(path,raw)", "inspectRollbackRestartSource(path,raw)", "inspectRollbackFaultRecoverySource(path,raw)", "inspectSource(path,raw)", "inspectWALPublicationSource(path,raw)", "inspectOracleSource(path,raw)", `inspectOracleContracts(".")`, `inspectBackupManualContracts(".")`, `inspectRollbackFaultContracts(".")`, `inspectRollbackFaultSQLContracts(".")`, `inspectRollbackRestartContracts(".")`, `inspectRollbackFaultRecoveryContracts(".")`, `inspectWALPublicationContracts(".")`, `inspectDarwinInventoryManualContract(".")`, `inspectFormatUpgradeContracts(".")`, `inspectEncryptedRootNegativeContracts(".")`} {
+ 		if strings.Count(body, call) != 1 {
+ 			findings = append(findings, "readonly WAL manual previous guard wiring weakened")
+ 		}
+--- a/internal/testscope/readonly_wal_manual_test.go
++++ b/internal/testscope/readonly_wal_manual_test.go
+@@ -607,7 +607,7 @@
+ 	}
+ }
+ 
+-// Eight combined/SQL/restart hooks, fourteen inert counterexamples each. Keep the old
++// Twelve encrypted-root/combined/SQL/restart/recovery hooks, fourteen inert counterexamples each. Keep the old
+ // propagation rows above unchanged and add no Test root or named child.
+ func readOnlyWALManualCombinedPolicyPropagationMutations(t *testing.T) {
+ 	raw := readOnlyWALManualFixture(t, "internal/testscope/main.go")
+@@ -619,6 +619,17 @@
+ 	cases := []struct {
+ 		assignment, helper, result, resultName, errorBlock, errorName, errorReport, moveBefore, state string
+ 	}{
++		{
++			assignment:  `rootNegative, rootNegativeErr := inspectEncryptedRootNegativeSource(path, raw)`,
++			helper:      "inspectEncryptedRootNegativeSource",
++			result:      `findings = append(findings, rootNegative...)`,
++			resultName:  "rootNegative",
++			errorBlock:  "if rootNegativeErr != nil {\n\t\t\treturn rootNegativeErr\n\t\t}",
++			errorName:   "rootNegativeErr",
++			errorReport: `return rootNegativeErr`,
++			moveBefore:  `for _, f := range findings {`,
++			state:       "findings",
++		},
+ 		{
+ 			assignment:  `formatUpgrade, formatErr := inspectFormatUpgradeSource(path, raw)`,
+ 			helper:      "inspectFormatUpgradeSource",
+@@ -726,6 +737,17 @@
+ 			errorBlock:  "if rollbackRecoveryErr != nil {\n\t\tfmt.Fprintln(os.Stderr, rollbackRecoveryErr)\n\t\tfailed = true\n\t}",
+ 			errorName:   "rollbackRecoveryErr",
+ 			errorReport: `fmt.Fprintln(os.Stderr, rollbackRecoveryErr)`,
++			moveBefore:  `contracts, err := inspectOracleContracts(".")`,
++			state:       "failed",
++		},
++		{
++			assignment:  `rootNegativeContracts, rootNegativeErr := inspectEncryptedRootNegativeContracts(".")`,
++			helper:      "inspectEncryptedRootNegativeContracts",
++			result:      "for _, finding := range rootNegativeContracts {\n\t\tfmt.Fprintln(os.Stderr, finding)\n\t\tfailed = true\n\t}",
++			resultName:  "rootNegativeContracts",
++			errorBlock:  "if rootNegativeErr != nil {\n\t\tfmt.Fprintln(os.Stderr, rootNegativeErr)\n\t\tfailed = true\n\t}",
++			errorName:   "rootNegativeErr",
++			errorReport: `fmt.Fprintln(os.Stderr, rootNegativeErr)`,
+ 			moveBefore:  `contracts, err := inspectOracleContracts(".")`,
+ 			state:       "failed",
+ 		},
+@@ -770,7 +792,7 @@
+ 		readOnlyWALManualReject(t, "internal/testscope/main.go", moved, diagnostic)
+ 		checked++
+ 	}
+-	if len(cases) != 10 || checked != 140 {
++	if len(cases) != 12 || checked != 168 {
+ 		t.Fatal("combined wiring counterexample inventory", len(cases), checked)
+ 	}
+ }

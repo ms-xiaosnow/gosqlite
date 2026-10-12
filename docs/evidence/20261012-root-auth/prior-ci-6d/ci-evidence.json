@@ -1,0 +1,288 @@
+{
+  "schema_version": 1,
+  "observed_at": "2026-10-12T21:56:46.871Z",
+  "repository": "ms-xiaosnow/gosqlite",
+  "run": {
+    "id": 38311861065,
+    "name": "ordinary-checks",
+    "head_sha": "6d668f80d199b2c49647a3cbc949442d125988ae",
+    "path": ".github/workflows/check.yml",
+    "run_number": 56,
+    "event": "push",
+    "status": "completed",
+    "conclusion": "success",
+    "run_attempt": 1,
+    "created_at": "2026-10-12T21:38:11Z",
+    "updated_at": "2026-10-12T21:56:19Z",
+    "run_started_at": "2026-10-12T21:38:11Z",
+    "html_url": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38311861065"
+  },
+  "tree": "ce11dea8ec544a099692443aef43140f063e699b",
+  "jobs": [
+    {
+      "id": 115019235397,
+      "run_id": 38311861065,
+      "head_sha": "6d668f80d199b2c49647a3cbc949442d125988ae",
+      "name": "oracle",
+      "status": "completed",
+      "conclusion": "success",
+      "run_attempt": 1,
+      "created_at": "2026-10-12T21:38:11Z",
+      "started_at": "2026-10-12T21:38:13Z",
+      "completed_at": "2026-10-12T21:44:21Z",
+      "html_url": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38311861065/job/115019235397",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-12T21:38:14Z",
+          "completed_at": "2026-10-12T21:38:15Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-12T21:38:15Z",
+          "completed_at": "2026-10-12T21:38:16Z"
+        },
+        {
+          "name": "Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-12T21:38:16Z",
+          "completed_at": "2026-10-12T21:38:26Z"
+        },
+        {
+          "name": "Build and verify pinned official SQLite oracle",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-12T21:38:26Z",
+          "completed_at": "2026-10-12T21:39:04Z"
+        },
+        {
+          "name": "Run complete guarded ordinary oracle suite",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-12T21:39:04Z",
+          "completed_at": "2026-10-12T21:44:17Z"
+        },
+        {
+          "name": "Post Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-12T21:44:17Z",
+          "completed_at": "2026-10-12T21:44:17Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-12T21:44:17Z",
+          "completed_at": "2026-10-12T21:44:17Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-10-12T21:44:17Z",
+          "completed_at": "2026-10-12T21:44:17Z"
+        }
+      ]
+    },
+    {
+      "id": 115019235657,
+      "run_id": 38311861065,
+      "head_sha": "6d668f80d199b2c49647a3cbc949442d125988ae",
+      "name": "ordinary",
+      "status": "completed",
+      "conclusion": "success",
+      "run_attempt": 1,
+      "created_at": "2026-10-12T21:38:11Z",
+      "started_at": "2026-10-12T21:38:13Z",
+      "completed_at": "2026-10-12T21:56:18Z",
+      "html_url": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38311861065/job/115019235657",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-12T21:38:14Z",
+          "completed_at": "2026-10-12T21:38:16Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-12T21:38:16Z",
+          "completed_at": "2026-10-12T21:38:19Z"
+        },
+        {
+          "name": "Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-12T21:38:19Z",
+          "completed_at": "2026-10-12T21:38:35Z"
+        },
+        {
+          "name": "Run ./scripts/check.sh",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-12T21:38:35Z",
+          "completed_at": "2026-10-12T21:56:14Z"
+        },
+        {
+          "name": "Post Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-12T21:56:14Z",
+          "completed_at": "2026-10-12T21:56:15Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-12T21:56:15Z",
+          "completed_at": "2026-10-12T21:56:15Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-12T21:56:15Z",
+          "completed_at": "2026-10-12T21:56:15Z"
+        }
+      ]
+    }
+  ],
+  "identity_checks": {
+    "run_commit_tree_job_membership": "PASS",
+    "expected_jobs": [
+      115019235397,
+      115019235657
+    ]
+  },
+  "provenance": {
+    "run_endpoint": "https://api.github.com/repos/ms-xiaosnow/gosqlite/actions/runs/38311861065",
+    "jobs_endpoint": "https://api.github.com/repos/ms-xiaosnow/gosqlite/actions/runs/38311861065/jobs",
+    "log_method": "GitHub connector fetch_workflow_job_logs; decoded UTF-8 text written without normalization",
+    "original_github_run_zip": "Not retrieved. This archive contains decoded job-log representations and selected API metadata, not GitHub's original workflow ZIP."
+  },
+  "log_files": [
+    {
+      "file": "oracle-115019235397.decoded.log",
+      "encoding": "UTF-8",
+      "byte_length": 21796,
+      "sha256": "a98a4cfc3c8dffe4f25d87bba9539b16842429dcecd8cf211a31a364601abccb",
+      "lines": 276,
+      "first_log_timestamp": "2026-10-12T21:38:14.4943764Z",
+      "last_log_timestamp": "2026-10-12T21:44:17.4806293Z",
+      "fetched_at": "2026-10-12T21:57:04.394521+00:00",
+      "contains_expected_checkout_sha": true,
+      "scan": {
+        "unexpected_secret_pattern_counts": {
+          "github_token": 0,
+          "aws_key": 0,
+          "private_key": 0,
+          "bearer_token": 0,
+          "basic_token": 0,
+          "credential_url": 0
+        },
+        "credential_related_lines_reviewed": 12,
+        "existing_github_masked_lines": 3,
+        "additional_redactions": 0,
+        "limit": "Pattern and credential-keyword review; not a proof that no secret exists."
+      }
+    },
+    {
+      "file": "ordinary-115019235657.decoded.log",
+      "encoding": "UTF-8",
+      "byte_length": 25065,
+      "sha256": "c536b04842fc9926349785176ec8073c738e2682b0c9320e3032a4f4caf480a8",
+      "lines": 311,
+      "first_log_timestamp": "2026-10-12T21:38:14.2468619Z",
+      "last_log_timestamp": "2026-10-12T21:56:15.7075120Z",
+      "fetched_at": "2026-10-12T21:57:04.397018+00:00",
+      "contains_expected_checkout_sha": true,
+      "scan": {
+        "unexpected_secret_pattern_counts": {
+          "github_token": 0,
+          "aws_key": 0,
+          "private_key": 0,
+          "bearer_token": 0,
+          "basic_token": 0,
+          "credential_url": 0
+        },
+        "credential_related_lines_reviewed": 12,
+        "existing_github_masked_lines": 3,
+        "additional_redactions": 0,
+        "limit": "Pattern and credential-keyword review; not a proof that no secret exists."
+      }
+    }
+  ],
+  "source_files": [
+    {
+      "file": "source-snapshot/.github/workflows/check.yml",
+      "repository_path": ".github/workflows/check.yml",
+      "commit": "6d668f80d199b2c49647a3cbc949442d125988ae",
+      "git_mode": "100644",
+      "blob_sha": "8c848cc567765c2308cf569328bfdd73db922e31",
+      "byte_length": 929,
+      "sha256": "58dee6239ef272454efb7f45a220de5c7a75839f6449002a4ed176f858304f64"
+    },
+    {
+      "file": "source-snapshot/scripts/check.sh",
+      "repository_path": "scripts/check.sh",
+      "commit": "6d668f80d199b2c49647a3cbc949442d125988ae",
+      "git_mode": "100755",
+      "blob_sha": "635b42b443e4de2cf63745bdde5c272a5d74ca39",
+      "byte_length": 365,
+      "sha256": "55851844f35325b38fbd368558af4e229d5bfe7c42928685e57dd799274b8f18"
+    },
+    {
+      "file": "source-snapshot/scripts/test-oracle.sh",
+      "repository_path": "scripts/test-oracle.sh",
+      "commit": "6d668f80d199b2c49647a3cbc949442d125988ae",
+      "git_mode": "100755",
+      "blob_sha": "64a583228454ba36bd24d54ee8e4e810a6fcd187",
+      "byte_length": 2769,
+      "sha256": "b8e3e443a3fbe17b96526cfdb22b6a297dedf0eac2d9c3063cd7f9da05a64f79"
+    },
+    {
+      "file": "source-snapshot/scripts/build-oracle.sh",
+      "repository_path": "scripts/build-oracle.sh",
+      "commit": "6d668f80d199b2c49647a3cbc949442d125988ae",
+      "git_mode": "100755",
+      "blob_sha": "5828c66f1c7cc56e856309e06f40d7dbecee01f4",
+      "byte_length": 4723,
+      "sha256": "0826180e18c7e67bd3ab35b0b534409578932adba13041b8e5b1e32fb43cca66"
+    }
+  ],
+  "scope": {
+    "ordinary": "Source-reference guards; ordinary go test ./...; go vet ./...; go build -trimpath ./...; ordinary go test -race ./... via pinned scripts/check.sh. All step success implies set -eu completed.",
+    "oracle": "Pinned official SQLite 3.54.0 archive/amalgamation/identity checks and complete guarded ordinary go test -count=1 -timeout=30m -tags oracle ./... on Linux.",
+    "excluded": "Manual crash/fault/process-exit, physical failure/recovery, OS Sync return failure, hardware durability and M10 acceptance are not established by these jobs.",
+    "local_execution": "This evidence preservation step ran no Go, test binary, SQLite binary, or second worktree."
+  }
+}

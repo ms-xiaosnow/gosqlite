@@ -172,6 +172,11 @@ func main() {
 			return err
 		}
 		var findings []string
+		rootNegative, rootNegativeErr := inspectEncryptedRootNegativeSource(path, raw)
+		if rootNegativeErr != nil {
+			return rootNegativeErr
+		}
+		findings = append(findings, rootNegative...)
 		formatUpgrade, formatErr := inspectFormatUpgradeSource(path, raw)
 		if formatErr != nil {
 			return formatErr
@@ -333,6 +338,15 @@ func main() {
 		failed = true
 	}
 	for _, finding := range readonlyContracts {
+		fmt.Fprintln(os.Stderr, finding)
+		failed = true
+	}
+	rootNegativeContracts, rootNegativeErr := inspectEncryptedRootNegativeContracts(".")
+	if rootNegativeErr != nil {
+		fmt.Fprintln(os.Stderr, rootNegativeErr)
+		failed = true
+	}
+	for _, finding := range rootNegativeContracts {
 		fmt.Fprintln(os.Stderr, finding)
 		failed = true
 	}

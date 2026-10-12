@@ -1,0 +1,18 @@
+{
+  "library_file_id": "libfile_524d6497621c8191a8a5e691187a3a4c",
+  "file_id": "file_00000000222c81f5ba6a348b4c1e6ba9",
+  "filename": "gosqlite-root-auth-A8-first-FAIL-cae45848.zip",
+  "version": 0,
+  "source_path": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/gosqlite-root-auth-A8-first-FAIL-cae45848.zip",
+  "readback_path": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/root-auth-first-fail-readback/gosqlite-root-auth-A8-first-FAIL-cae45848.zip",
+  "bytes": 281974,
+  "sha256": "2497cd8c0d96b4e807c49477760db260789c73f708b9838f5323982baff0fe23",
+  "byte_exact_full_readback": "PASS",
+  "zip_CRC": "PASS",
+  "all_member_sha256": "PASS",
+  "member_count": 39,
+  "source_payload_12_sha256": "PASS",
+  "original_and_readback_Library_identity": "PASS",
+  "validation_status": "FAIL",
+  "secret_check": "PASS"
+}

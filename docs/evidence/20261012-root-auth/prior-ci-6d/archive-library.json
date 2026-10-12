@@ -1,0 +1,21 @@
+{
+  "operation": "create_library_file",
+  "status": "succeeded",
+  "path": "/gosqlite-6d668f8-ci-38311861065-success.zip",
+  "file_id": "file_0000000068ec820daab060ab27996afd",
+  "library_file_id": "libfile_75dc2f9d1d588191b2158f3ef956df42",
+  "file_name": "gosqlite-6d668f8-ci-38311861065-success.zip",
+  "current_version_number": 0,
+  "restored_from_version_number": null,
+  "xattrs": [
+    {
+      "name": "user.library-file-version",
+      "value": "0"
+    }
+  ],
+  "directory_id": "libdir_1064175b1a0c8191a612be8a51e00075",
+  "mime_type": "application/zip",
+  "library_artifact_type": "other",
+  "file_size_bytes": 22317,
+  "external_connectors_accessed": false
+}

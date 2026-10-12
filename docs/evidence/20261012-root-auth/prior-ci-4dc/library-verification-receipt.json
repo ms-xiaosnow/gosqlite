@@ -1,0 +1,15 @@
+{
+  "archive": "gosqlite-ci-38309383658-4dc3979.zip",
+  "library_file_id": "libfile_f093c0ac294c8191a3a025b0826f8ed7",
+  "file_id": "file_0000000079a081f581c90ee6bd19c210",
+  "version": 0,
+  "bytes": 17738,
+  "sha256": "225cd22d302913ef6a6de3efaafbe11bc734e1e74ed7cfa0e30569c90143173b",
+  "library_exact_byte_readback": "PASS",
+  "zip_integrity": "PASS",
+  "all_8_member_bytes_and_7_manifest_hashes": "PASS",
+  "local_library_identity_metadata": "PASS",
+  "verified_at": "2026-10-12T21:44:42.629221+00:00",
+  "repository_edited": false,
+  "project_execution": false
+}

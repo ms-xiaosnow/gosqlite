@@ -232,7 +232,7 @@ func TestRollbackRestartWiringPreservesAllPoliciesAndReviewHold(t *testing.T) {
 	}
 	// The independent whole-main review releases only these exact source bytes.
 	// The exact scalar forwarding is reviewed too; unreviewed main bytes HOLD.
-	const reviewedWholeMain = "e31c233fed8976fddff3236a8804f84d493e2567d6b6d85d11355de2ca0da52b"
+	const reviewedWholeMain = "6dbab48ff374858bfafe578f0fca99f5176ced7b6bdc008bec04ce6a6d1d0eb2"
 	const priorOrdinaryBody = "98341345e43f39b39dbc78eaf49a916a0701f3d7f2f383d4949b9a3ed439d199"
 	if walPublicationFrozenSources["internal/testscope/main.go"] != reviewedWholeMain || formatUpgradePins["internal/testscope/main.go"] != reviewedWholeMain || readOnlyWALManualPriorOrdinarySHA256 != priorOrdinaryBody {
 		t.Fatal("whole-main/body guard pins differ from independently reviewed literals")

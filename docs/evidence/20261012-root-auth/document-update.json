@@ -1,0 +1,8 @@
+{
+  "source_identity": "a6ca3b307531c7479a08add7325de8d996cd7246",
+  "non_document_payloads": 13,
+  "all_tested_non_document_payloads_unchanged": true,
+  "manual_sha256": "17334ffb451479927821be5aaad2fce5384db965199db4acc3893f3d18884c61",
+  "manual_static_shell_syntax": "PASS; no snippet executed",
+  "reason_no_go_rerun": "Only manuals, evidence and status prose changed since exact finite validation"
+}

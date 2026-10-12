@@ -1,0 +1,29 @@
+{
+  "base_commit": "6d668f80d199b2c49647a3cbc949442d125988ae",
+  "base_tree": "ce11dea8ec544a099692443aef43140f063e699b",
+  "candidate_tree": "a6ca3b307531c7479a08add7325de8d996cd7246",
+  "independent_source_review": "CLEAR_SOURCE_ONLY",
+  "files": {
+    "docs/testing/encrypted-root-negative-manual-zh.md": "8c9edf1e27cac4635ef6282ee878d70016c54290d06100960fe88e01dadb47f3",
+    "internal/testkit/encryptedroot/contract.go": "21713928744c666e6bccc08e053d6f18ab4e3a92740c655db5896c38f3fd1a3f",
+    "internal/testkit/encryptedroot/contract_test.go": "4fcfaaa2b47fc8fbaa58e096b0db56f6be2c01c9b75c021590ed91e2e59facbf",
+    "internal/testscope/encrypted_root_negative.go": "6d78b1b56319ab4743ce0186070bcd125b5f222df2b14cc6fba5a4f29b8a2577",
+    "internal/testscope/encrypted_root_negative_test.go": "a7131758eb24d5824bf0b6c461aa3efd39c360e66c4a902bcd25e9180fb8faac",
+    "internal/testscope/main.go": "6dbab48ff374858bfafe578f0fca99f5176ced7b6bdc008bec04ce6a6d1d0eb2",
+    "sqlite/encrypted_root_negative_manual_linux_test.go": "3e1e3640ff321a7673d9f39c29d32cfe73ec2d4c53858205ee9a61b7738bbbc3",
+    "internal/testscope/encryption_upgrade_manual.go": "e18ce9f99b8da25f9771d64334420b1cf2b3bed3330b7f1959bd38494ad470f8",
+    "internal/testscope/wal_tail_publication.go": "49869eb013cd79a3be54aebbf7c312e6f9446fd9ef4b51c300ec0f91fd7e6336",
+    "internal/testscope/rollback_fault_sql_test.go": "9a840e46fdc15454367b5486912beade2bcc2ee79179108bddf5f3275677fe97",
+    "internal/testscope/rollback_fault_test.go": "2b2c35a0e73292d42a0b5cc7e631d984978803342a4fa56f077076b7cc2f46d0",
+    "internal/testscope/rollback_restart_test.go": "490001fb99c9239b69b264119ba894a5b0734f121ebd6f6ac1866fc66b43fff7",
+    "internal/testscope/readonly_wal_manual.go": "cfe6597ed00b9bec1b86727aec720258a2b872c952a75049d2ab381f5f8e9478",
+    "internal/testscope/readonly_wal_manual_test.go": "3187dbca3556f0331baaca6d906778a9c0d257c85070eae228e9af61df27bab1"
+  },
+  "manual_physical": "NOT_RUN",
+  "actual_tests": "NOT_RUN",
+  "main_review_sha256": "a992637f944e4738430212a3fceb1521bcfdeaa16cdd3a51ce5db16e8301a4e6",
+  "overlap_resolution": "exact five literal replacements on current6d tree, preserved postDB SQLguard tests and helperfix",
+  "prior_failed_tree": "cae45848a0e1054f61ef7a2077e6f04875be6db7",
+  "correction": "Exact root-auth hook capture/error/append and ordered repository contract registered in existingreadonly-WALwiring guard;2matrixrows added,old10rows/14transformations retained",
+  "correction_independent_review": "CLEAR_SOURCE_ONLY"
+}

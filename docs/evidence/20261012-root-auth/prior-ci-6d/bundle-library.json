@@ -1,0 +1,21 @@
+{
+  "operation": "create_library_file",
+  "status": "succeeded",
+  "path": "/gosqlite-postdb-6d668f8.bundle",
+  "file_id": "file_00000000110881f6a0aaed3757deccb2",
+  "library_file_id": "libfile_2b1fb26dd0ac81919893086bf6f7192a",
+  "file_name": "gosqlite-postdb-6d668f8.bundle",
+  "current_version_number": 0,
+  "restored_from_version_number": null,
+  "xattrs": [
+    {
+      "name": "user.library-file-version",
+      "value": "0"
+    }
+  ],
+  "directory_id": "libdir_1064175b1a0c8191a612be8a51e00075",
+  "mime_type": null,
+  "library_artifact_type": "other",
+  "file_size_bytes": 7862905,
+  "external_connectors_accessed": false
+}

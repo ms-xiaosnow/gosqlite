@@ -1,0 +1,21 @@
+{
+  "library_file_id": "libfile_81f40036715c819193c46c843c2fe799",
+  "file_id": "file_00000000028882308daec2d1a6f93fda",
+  "filename": "gosqlite-root-auth-A8-V2-a6ca3b30-validation-PASS-physical-NOT_RUN.zip",
+  "version": 0,
+  "source_path": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/root-auth-validation-v2-archive/gosqlite-root-auth-A8-V2-a6ca3b30-validation-PASS-physical-NOT_RUN.zip",
+  "readback_path": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/root-auth-validation-v2-readback/gosqlite-root-auth-A8-V2-a6ca3b30-validation-PASS-physical-NOT_RUN.zip",
+  "bytes": 8951100,
+  "sha256": "c8609efff09e81addf9b21596e32cab291531227f94c4a5c98a3d765af7bea52",
+  "member_count": 96,
+  "byte_exact_full_readback": "PASS",
+  "zip_CRC": "PASS",
+  "exact_member_set_and_all_member_SHA256": "PASS",
+  "source_payload_14_SHA256": "PASS",
+  "compiled_image_SHA256": "PASS",
+  "original_and_readback_Library_identity": "PASS",
+  "status": "BOUNDED_NONPHYSICAL_VALIDATION_PASS",
+  "physical_cases": "NOT_RUN",
+  "manual_image_executed": false,
+  "restore": "Restore separately retained base 6d668f80d199b2c49647a3cbc949442d125988ae bundle, overlay exactly source/ 14 paths, verify full source-before identities. See archive RESTORE.txt. No runner or image executed during restore verification."
+}

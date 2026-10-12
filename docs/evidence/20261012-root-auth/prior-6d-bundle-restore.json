@@ -1,0 +1,17 @@
+{
+  "commit": "6d668f80d199b2c49647a3cbc949442d125988ae",
+  "tree": "ce11dea8ec544a099692443aef43140f063e699b",
+  "parent": "4dc3979aa8d503913b75e3c0c432c234d7bc0a40",
+  "bundle_library_file_id": "libfile_2b1fb26dd0ac81919893086bf6f7192a",
+  "bundle_file_id": "file_00000000110881f6a0aaed3757deccb2",
+  "bundle_bytes": 7862905,
+  "bundle_sha256": "ed43c8ef6ca710612f4d186230d2f27ed9520f5a451a55a2821dde23507891fe",
+  "verified_tracked_files": 3387,
+  "verified_tracked_bytes": 53417387,
+  "all_git_modes_and_blob_sha256_match": true,
+  "fsck_exit": 0,
+  "fsck_output": "",
+  "restore_kind": "bare, no second worktree",
+  "restore_branch": "main",
+  "verified_at": "2026-10-12T21:40:55.106322+00:00"
+}

@@ -1,3 +1,13 @@
+# 当前阶段：A8 六格手工设施的有限验证闭合
+
+2026-10-12 21:47:51 UTC，受测树 `a6ca3b307531c7479a08add7325de8d996cd7246` 八项影响检查PASS：AST normal10、race46、sourceguard、两种选择、Linux手工compile/nm451/22。模型normal36和未变普通闭包复用；首轮guard1FAIL及两文件修复保留。[源码与测试记录](evidence/20261012-root-auth/README.zh.md)。真实六格磁盘入口全部NOT_RUN，生产路径未改。
+
+上一main `6d668f80d199b2c49647a3cbc949442d125988ae` 的Library bundle恢复3387文件/Git模式/字节完整性PASS，CI38311861065已于21:56:19 UTC完整SUCCESS（ordinary115019235657、oracle115019235397）；[原始日志与终态](evidence/20261012-root-auth/prior-ci-6d/README.zh.md)。其父4dc的CI38309383658已在21:41:39 UTC完整SUCCESS，两个任务原始日志及精确身份随本检查点保存。不因文档或bundle恢复重跑同码全套。
+
+[可逐项勾选的有限收尾清单](testing/goal-finite-closure-checklist-20261012-zh.md)明确4组6项真实代码缺口，并单列受阻ANN修正、外部/手工资格。已有fake-resource生产状态机和AEAD内存负面计有效覆盖，不扩展OS×IO×profile。整体未验收，M10未通过。
+
+## 以下为较早时点历史记录
+
 # 当前阶段：九格 plain rollback SQL 手工设施源码闭环
 
 2026-10-12 21:31:34 UTC，新受测树 `449d420ca57e9ab7a454dcfdd33bc2d9aec8871a` 六项影响验证PASS：normal模型1565复用、guard1110新跑、两包race2675新跑、源码guard与Linux双tag编译/nm454/18。原normal 1FAIL和四行期望注释修正保留。详情：[源码与测试证据](evidence/20261012-postdb/README.zh.md)。

@@ -1,0 +1,30 @@
+--- a/internal/testscope/main.go
++++ b/internal/testscope/main.go
+@@ -172,6 +172,11 @@
+ 			return err
+ 		}
+ 		var findings []string
++		rootNegative, rootNegativeErr := inspectEncryptedRootNegativeSource(path, raw)
++		if rootNegativeErr != nil {
++			return rootNegativeErr
++		}
++		findings = append(findings, rootNegative...)
+ 		formatUpgrade, formatErr := inspectFormatUpgradeSource(path, raw)
+ 		if formatErr != nil {
+ 			return formatErr
+@@ -336,6 +341,15 @@
+ 		fmt.Fprintln(os.Stderr, finding)
+ 		failed = true
+ 	}
++	rootNegativeContracts, rootNegativeErr := inspectEncryptedRootNegativeContracts(".")
++	if rootNegativeErr != nil {
++		fmt.Fprintln(os.Stderr, rootNegativeErr)
++		failed = true
++	}
++	for _, finding := range rootNegativeContracts {
++		fmt.Fprintln(os.Stderr, finding)
++		failed = true
++	}
+ 	if failed {
+ 		os.Exit(1)
+ 	}
