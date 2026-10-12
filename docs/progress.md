@@ -1,3 +1,13 @@
+# 当前阶段：有限 R1–R6 设施代码及受影响验证闭合，整体未验收
+
+2026-10-12 23:30:52 UTC，最后R3/R4共用checkpoint/扩展索引设施完成有限验证：12纯值根、38AST共120命名、3健康默认根normal/race各9命名、额外1根metadata源码审计、sourceguard及manual compile/nm均PASS。三种源码选择复用未变闭包；原unused-import编译FAIL及两文件修复完整保留。[精确源码与验证证据](evidence/20261012-checkpoint-extensions/README.zh.md)。未重跑无关全套，物理十格仍NOT_RUN。
+
+锁定有限清单R1–R6已闭合；已知受阻ANN报告修正仍是实际代码/报告缺口。原生/受限物理、真实输入及独立审查资格单列待完成。[六项证据与可操作三类剩余清单](testing/finite-acceptance-summary-20261012-zh.md)。整体未验收，M10未通过，不作最终交付或生产可用声明。
+
+R2/R5源码和测试记录已保存远端b06606020fdbb5b73dd0e9b000773f3f02c6979d，Library精确裸恢复3868路径/mode/字节及fsck PASS；CI38321827127编写时仍运行，终态另记录。
+
+## 以下为较早时点历史记录
+
 # 当前阶段：R2 与 R5 有限代码和受影响验证闭合
 
 2026-10-12 23:04:54 UTC，组合受测树 cdcce9e3145d7811b0448b4f02d21e71dbe32345：R2 最后13门PASS（91根race共2418命名PASS；两个旧失败根修复后235命名normal PASS），R5此前11门PASS。旧适用结果明确复用，原FAIL保留；没有重跑无关全套。[完整源码、命令和测试记录](evidence/20261012-rekey-misplacement/README.zh.md)。

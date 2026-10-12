@@ -1,0 +1,196 @@
+{
+  "schema": 1,
+  "base_commit": "b06606020fdbb5b73dd0e9b000773f3f02c6979d",
+  "source_tree": "ffc73262e0314f46827b7f4cee1cdac766dbd889",
+  "source_file_count": 30,
+  "files": [
+    {
+      "path": "docs/testing/checkpoint-restart-manual-zh.md",
+      "bytes": 14201,
+      "sha256": "297d6b94908880fb56274e7d743a5c0374892a9b8c63bebf7a0a465e9f5067b7",
+      "git_blob": "4bd2c093a6ff439282e479fea46628c56c5704bb"
+    },
+    {
+      "path": "internal/encstore/checkpoint_observation.go",
+      "bytes": 267,
+      "sha256": "53e8e9d5f624dd5c5048451f39d6100d84e552b964b54734e397e0b203418f2b",
+      "git_blob": "45c1f73810c7bfcbbac04cbc2903fb86831698ed"
+    },
+    {
+      "path": "internal/encstore/checkpoint_observation_default.go",
+      "bytes": 192,
+      "sha256": "9207c7cd19343bc0bd7e49741015288bc5e819303c7b1bfc7252085c7581ec99",
+      "git_blob": "94f83971b9bce790389e4b5c5ba2016ef481de7c"
+    },
+    {
+      "path": "internal/encstore/checkpoint_restart_manual_linux.go",
+      "bytes": 1145,
+      "sha256": "ff528903720dba67a17814120da9d066749c5641fab4b4e1a76bb09c47b0bd8c",
+      "git_blob": "0d31f4d4d25edc92ceb9cc8a6c450957d540dfb4"
+    },
+    {
+      "path": "internal/encstore/publish.go",
+      "bytes": 15081,
+      "sha256": "76b24327571e519ed8a59661fd552571d4d4ae6ef19bb9bb2e1c680d86bcc86b",
+      "git_blob": "217375a1fcf23700639d35951f9e810726e3f229"
+    },
+    {
+      "path": "internal/pager/checkpoint.go",
+      "bytes": 5457,
+      "sha256": "3b70e940343ccdd2a02bb88d086dc3304364f6c842d6ef985645c5ebc3f2a36f",
+      "git_blob": "711d5265c6448a3568fab5fc66a3ead274680b84"
+    },
+    {
+      "path": "internal/pager/checkpoint_observation.go",
+      "bytes": 247,
+      "sha256": "4283c5c8cda005988f65c018cb79de16887fa9947e01c280ecf4ccd20ba11136",
+      "git_blob": "83ea6765a783168c1f530364b0a1ac0e01c7507e"
+    },
+    {
+      "path": "internal/pager/checkpoint_observation_default.go",
+      "bytes": 221,
+      "sha256": "7d9af5a08acad66e20fc39e753e37f45d628a7c5a052c8d6458b321d4751bb02",
+      "git_blob": "5bd7c11b50903308663bf7fad9992668d642b7df"
+    },
+    {
+      "path": "internal/pager/checkpoint_restart_manual_linux.go",
+      "bytes": 544,
+      "sha256": "eb6a14c2ac23c55e2063b3154c5002abb02ec5c879140d2f657e521b2e380a65",
+      "git_blob": "dfad47a06cc871942cc08102bf0e7147da11bdf6"
+    },
+    {
+      "path": "internal/pager/shared_checkpoint.go",
+      "bytes": 6372,
+      "sha256": "a32ba18f1f7e365cbdbc7aa5bb1a91063254d238016117c2298bce242906940d",
+      "git_blob": "a3b12bc620765c5a4a024dba368f132d9b91fbbc"
+    },
+    {
+      "path": "internal/testkit/checkpointrestart/contract.go",
+      "bytes": 44671,
+      "sha256": "42281d899772be55222137744b0638b4c073e7d96772367604a9553eaf1fff8a",
+      "git_blob": "e467d9920ecd2dc5a6b31ef6911cc58234526ea3"
+    },
+    {
+      "path": "internal/testkit/checkpointrestart/contract_test.go",
+      "bytes": 20473,
+      "sha256": "f5d74cd9a812d5210f7898aaf207f3002cd4504f2813ffb46401fa2bd935c565",
+      "git_blob": "5a36140c87bdf04d37c7060800e21bb5d7a0a978"
+    },
+    {
+      "path": "internal/testkit/checkpointrestart/extension_ledger.go",
+      "bytes": 38684,
+      "sha256": "37c8de96e7140e5d6702b3fce10d8cb78fdaab29617c229c23947a2b2f9c4afa",
+      "git_blob": "9329550577737de5ebbaad2443c2cf8f6e5089f7"
+    },
+    {
+      "path": "internal/testkit/checkpointrestart/extension_ledger_test.go",
+      "bytes": 12924,
+      "sha256": "b419fc94a3178a847b53a114d4a66baa647dc5f61dd98d24af4df943c718c5d3",
+      "git_blob": "54efd56b24963a1c76365f75da1c52e0211438e5"
+    },
+    {
+      "path": "internal/testkit/checkpointrestart/manual_linux.go",
+      "bytes": 14013,
+      "sha256": "c287ed91ff456c29a02ed00fbe7bdc72e127ea0a55995d6f0bfffa4659955542",
+      "git_blob": "e584b8dd932be454f8291e2fcc9f33617069d817"
+    },
+    {
+      "path": "internal/testscope/checkpoint_restart.go",
+      "bytes": 311344,
+      "sha256": "f9d6f0843e50a745922b223b6f11e1dd557e0acd17c94cfb53ea2811951811c9",
+      "git_blob": "a8b1f6eaeb58414b25fa8dc7615de2205e408be8"
+    },
+    {
+      "path": "internal/testscope/checkpoint_restart_test.go",
+      "bytes": 14135,
+      "sha256": "34fe14791bba5cd2118ccb21d36fd0d20e4b4ff63335464f813db64cdb9150d6",
+      "git_blob": "b0135489fa7fadc68c9a6d529005af9765e6e9de"
+    },
+    {
+      "path": "internal/testscope/encrypted_root_negative.go",
+      "bytes": 15570,
+      "sha256": "6402d12cd0e7856c203ce616f38ade96c90c55602da3371e9b086fa93a994cdb",
+      "git_blob": "2d277868766a97e50e290bdf473829248e6ea197"
+    },
+    {
+      "path": "internal/testscope/encryption_upgrade_manual.go",
+      "bytes": 26592,
+      "sha256": "dcd6ca1ce5d8ea5c13e8ed39436e9e17c2233110365dc09eac6e8e255d9d96fd",
+      "git_blob": "b984f961ed7de4adbb68de2a2510b82d6c344852"
+    },
+    {
+      "path": "internal/testscope/main.go",
+      "bytes": 12044,
+      "sha256": "9d29dda532e851dd0fa2211473a5abb24309f798a849483c7efca09a7a3a058f",
+      "git_blob": "7e0e1468f044bcf0351066b248128788352da6f5"
+    },
+    {
+      "path": "internal/testscope/oracle_startup.go",
+      "bytes": 11371,
+      "sha256": "f7d7f6f02e886dfe057a4494564093f78a7644dffe2fa4c41fafa2929227edda",
+      "git_blob": "bc4bb31eaa861f3c0a040fedf4fe0911e59255f5"
+    },
+    {
+      "path": "internal/testscope/readonly_wal_manual.go",
+      "bytes": 84945,
+      "sha256": "81e4a67d1d142e29e530c7f7ce90e93723f4aa3ea2152d596e0e8f7c9566417d",
+      "git_blob": "0ad53c6a202981c280d030703fc34712ccbefa72"
+    },
+    {
+      "path": "internal/testscope/readonly_wal_manual_test.go",
+      "bytes": 51055,
+      "sha256": "feb4257d9fd68a501c0289242eeb199aa8ebca7e3ebae197aff7cbe7814770da",
+      "git_blob": "3ce4c7330bcb8e0d0429852aa80807f90bc7b8f1"
+    },
+    {
+      "path": "internal/testscope/rekey_interruption.go",
+      "bytes": 293660,
+      "sha256": "851d5b344d3e975e2136ed227d91906753b4b8a651a29c1130d56e0f5d09ab14",
+      "git_blob": "9ed5d8756d3eebce03bcaa5cb56d3e906564e600"
+    },
+    {
+      "path": "internal/testscope/rekey_interruption_test.go",
+      "bytes": 11950,
+      "sha256": "4e58cb737ad468ca0a43861752a6549ebb117e4858c1b7fd1316430bc92d14f0",
+      "git_blob": "a617ae8aa5cb91add6bba49fb6995fc0ae70417f"
+    },
+    {
+      "path": "internal/testscope/rollback_fault_sql_test.go",
+      "bytes": 72010,
+      "sha256": "b9c98b33cb733f184db00a64902328a45dd5df8308b6ec1ee82fd5434789155d",
+      "git_blob": "3d3fb83fec1fa3d4bb49ab21e5730fdc62a85f85"
+    },
+    {
+      "path": "internal/testscope/rollback_fault_test.go",
+      "bytes": 20339,
+      "sha256": "c5702b519be67955c77b3ea3956173193f035c0018b70687bd35710c83acec60",
+      "git_blob": "537e92f768c583871e2e5af929ec51e6eda1a08e"
+    },
+    {
+      "path": "internal/testscope/rollback_restart_test.go",
+      "bytes": 62443,
+      "sha256": "ddbbc38db85131294b5465b86baf5ba87fd19f9b109fd8f970c605b52bd53af2",
+      "git_blob": "d85a298a3ff6072ce4a53a523c5491e42c1e1db4"
+    },
+    {
+      "path": "internal/testscope/wal_tail_publication.go",
+      "bytes": 23786,
+      "sha256": "4f0c385c993c03069ae3f6a2a38bf317c0c590f464ae280f13799b455f0b88ee",
+      "git_blob": "ffc8626c3f81c7b0856d13e68a4ad59454550fbe"
+    },
+    {
+      "path": "sqlite/checkpoint_restart_manual_linux_test.go",
+      "bytes": 81784,
+      "sha256": "e14ba4a5ea3bacdf0d9f124e97dedde529db4c980628de8968b1e435d3abaed8",
+      "git_blob": "5c980ac3379f2ebc63607c8d87b67db55670c3ef"
+    }
+  ],
+  "full_source_identity_record": "records/checkpoint-unused-import-fix/SOURCE-IDENTITY.json",
+  "full_source_identity_sha256": "5f6e0631b750fc9fba1e9e1e1a8242d590f8bada839aa60b4dbc52eb549d628a",
+  "format_manifest_sha256": "112820790a2727e1b8d30f801ab0f7ae0fcb06e37e5f28a0c73d63ab1e7b2b94",
+  "correction_paths": [
+    "internal/testkit/checkpointrestart/contract.go",
+    "internal/testscope/checkpoint_restart.go"
+  ],
+  "freeze_policy": "All final source bytes are read from immutable Git tree objects, not mutable W."
+}

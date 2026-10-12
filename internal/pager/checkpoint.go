@@ -60,6 +60,7 @@ func (s *Session) checkpointLocked(ctx context.Context) (retErr error) {
 			if err := writeFullAt(s.file, p, int64(n-1)*int64(s.header.PageSize)); err != nil {
 				return fail(err)
 			}
+			checkpointObserve(ctx, checkpointExclusiveCopy, s.path, n, uint32(len(pages)), s.snapshot.DBSize, s.snapshot.FrameCount, s.snapshot.Header.Salt, [2]uint32(s.snapshot.Checksum), 0, 0)
 		}
 		if err := s.file.Truncate(int64(s.snapshot.DBSize) * int64(s.header.PageSize)); err != nil {
 			return fail(err)
@@ -79,6 +80,7 @@ func (s *Session) checkpointLocked(ctx context.Context) (retErr error) {
 	if err := os.Remove(s.path + "-wal"); err != nil {
 		return fail(err)
 	}
+	checkpointObserve(ctx, checkpointExclusiveRetired, s.path, 0, uint32(len(s.snapshot.Pages)), s.snapshot.DBSize, s.snapshot.FrameCount, s.snapshot.Header.Salt, [2]uint32(s.snapshot.Checksum), 0, 0)
 	// No SQLite connection can hold SHARED while we hold EXCLUSIVE. A stale
 	// shared-memory index has no role in this exclusive protocol. Remove it
 	// only after checkpoint, so a later shared-WAL opener rebuilds its index.

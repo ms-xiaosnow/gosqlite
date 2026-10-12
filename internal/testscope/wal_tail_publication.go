@@ -74,7 +74,7 @@ var walPublicationFrozenSources = map[string]string{
 	walPublicationManualPath:                     "79cd3adaf4e946fcb93cbcf66f844d5cdc6596d1dffbfe2a9aac3e101dcfd59d",
 	walPublicationElapsedPath:                    "22874ed59d4ba7549aad1670573cde98d5079a24811e51c5201c6efa5c9506c5",
 	"internal/vfs/wal_publication_model_test.go": "465813a5c6c4b1324ad6b4ed4850585c24d145e5e3a7a4f7e22ca1d178cd0902",
-	"internal/testscope/main.go":                 "1d9f41ed857bf64a3d2913f96fee3409a173f036df753efd81a7a9190ee2536a",
+	"internal/testscope/main.go":                 "9d29dda532e851dd0fa2211473a5abb24309f798a849483c7efca09a7a3a058f",
 	"sqlite/wal_tail_publication.go":             "a2e699dd0de40fadba140adc644fc41954516c425afc45fc509400c8342d001f",
 	"sqlite/wal_tail_publication_test.go":        "b4344960fc0be27f33f71c54717f41fa88b2574bf0c0fcdf7ee3289e58c351d8",
 	"driver/wal_tail_publication_test.go":        "b64ea77b48bff5c6592f5bb1fcac69d98c616821b3c1bced02cc5dcc70b58418",

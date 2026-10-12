@@ -1,3 +1,5 @@
+> 最新有限状态（2026-10-12 23:30 UTC）见 [六项与三类剩余](testing/finite-acceptance-summary-20261012-zh.md)、[progress](progress.md) 和 [acceptance](acceptance-status.md) 顶部。下文旧时间/树身份是历史过程；所有受限实际执行状态仍NOT_RUN，不能从编译或普通PASS推断物理资格。
+
 # gosqlite 中文手工验收操作手册
 
 ## CHECK / EOF 检查点：完整正常门已通过（2026-10-12 07:22 UTC）

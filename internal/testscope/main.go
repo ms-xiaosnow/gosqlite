@@ -172,6 +172,11 @@ func main() {
 			return err
 		}
 		var findings []string
+		checkpoint, checkpointErr := inspectCheckpointRestartSource(path, raw)
+		if checkpointErr != nil {
+			return checkpointErr
+		}
+		findings = append(findings, checkpoint...)
 		rekey, rekeyErr := inspectRekeyInterruptionSource(path, raw)
 		if rekeyErr != nil {
 			return rekeyErr
@@ -361,6 +366,15 @@ func main() {
 		failed = true
 	}
 	for _, finding := range rekeyContracts {
+		fmt.Fprintln(os.Stderr, finding)
+		failed = true
+	}
+	checkpointContracts, checkpointContractErr := inspectCheckpointRestartContracts(".")
+	if checkpointContractErr != nil {
+		fmt.Fprintln(os.Stderr, checkpointContractErr)
+		failed = true
+	}
+	for _, finding := range checkpointContracts {
 		fmt.Fprintln(os.Stderr, finding)
 		failed = true
 	}

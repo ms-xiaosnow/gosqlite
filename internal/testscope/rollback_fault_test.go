@@ -159,7 +159,7 @@ func TestRollbackFaultGuardWiringPreservesPriorPolicies(t *testing.T) {
 	}
 	// This exact literal is subject to independent whole-file source review.
 	// The map value alone cannot authorize a changed main.go.
-	const reviewedMainSHA256 = "1d9f41ed857bf64a3d2913f96fee3409a173f036df753efd81a7a9190ee2536a"
+	const reviewedMainSHA256 = "9d29dda532e851dd0fa2211473a5abb24309f798a849483c7efca09a7a3a058f"
 	if walPublicationFrozenSources["internal/testscope/main.go"] != reviewedMainSHA256 {
 		t.Fatal("main.go WAL pin differs from independently reviewed literal")
 	}

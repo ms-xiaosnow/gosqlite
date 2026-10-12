@@ -1256,6 +1256,10 @@ func readOnlyWALManualPreviousWiring(mainBody, walkBody *ast.BlockStmt) []string
 	report := func(name string) {
 		findings = append(findings, diagnostic+": direct placement and checked findings/error propagation required for "+name)
 	}
+	checkpoint := readOnlyWALManualSequence(walkBody, `checkpoint, checkpointErr := inspectCheckpointRestartSource(path,raw)`, `if checkpointErr != nil { return checkpointErr }`, `findings = append(findings,checkpoint...)`)
+	if checkpoint < 0 {
+		report("checkpoint restart source")
+	}
 	rekey := readOnlyWALManualSequence(walkBody, `rekey, rekeyErr := inspectRekeyInterruptionSource(path,raw)`, `if rekeyErr != nil { return rekeyErr }`, `findings = append(findings,rekey...)`)
 	if rekey < 0 {
 		report("rekey interruption source")
@@ -1312,7 +1316,7 @@ func readOnlyWALManualPreviousWiring(mainBody, walkBody *ast.BlockStmt) []string
 	}
 	backup := readOnlyWALManualSequence(walkBody, `manual, err := inspectBackupManualSource(path,raw)`, `if err != nil { return err }`, `findings = append(findings,manual...)`)
 	readonly := readOnlyWALManualSequence(walkBody, `readonlyManual, err := inspectReadOnlyWALManualSource(path,raw)`, `if err != nil { return err }`, `findings = append(findings,readonlyManual...)`)
-	if rekey < 0 || rootNegative <= rekey || formatUpgrade <= rootNegative || backup <= formatUpgrade || rollbackFault <= backup || rollbackSQL <= rollbackFault || restart <= rollbackSQL || recovery <= restart || readonly <= recovery || ordinary <= readonly || oracle <= ordinary {
+	if checkpoint < 0 || rekey <= checkpoint || rootNegative <= rekey || formatUpgrade <= rootNegative || backup <= formatUpgrade || rollbackFault <= backup || rollbackSQL <= rollbackFault || restart <= rollbackSQL || recovery <= restart || readonly <= recovery || ordinary <= readonly || oracle <= ordinary {
 		report("earlier source filter order")
 	}
 	last, first := -1, -1
@@ -1329,6 +1333,7 @@ func readOnlyWALManualPreviousWiring(mainBody, walkBody *ast.BlockStmt) []string
 		{"inspectReadOnlyWALManualContracts", "readonlyContracts", "err"},
 		{"inspectEncryptedRootNegativeContracts", "rootNegativeContracts", "rootNegativeErr"},
 		{"inspectRekeyInterruptionContracts", "rekeyContracts", "rekeyContractErr"},
+		{"inspectCheckpointRestartContracts", "checkpointContracts", "checkpointContractErr"},
 	} {
 		index := readOnlyWALManualSequence(mainBody,
 			contract.result+", "+contract.err+" := "+contract.name+`(".")`,
@@ -1369,6 +1374,7 @@ func readOnlyWALManualPreviousWiring(mainBody, walkBody *ast.BlockStmt) []string
 	// Only exact rekey, encrypted-root, combined, SQL, restart and recovery triplets extend the append inventory.
 	// Matching append text alone never grants a helper or placement exemption.
 	allowedAppends := map[string]int{
+		"findings=append(findings,checkpoint...)":     0,
 		"findings=append(findings,rekey...)":          0,
 		"findings=append(findings,rootNegative...)":   0,
 		"findings=append(findings,formatUpgrade...)":  0,
@@ -1542,7 +1548,7 @@ func inspectReadOnlyWALManualWiring(raw []byte) []string {
 	if perFile < 0 || ordinaryFilter < 0 || oracleFilter < 0 || perFile > ordinaryFilter || perFile > oracleFilter {
 		findings = append(findings, "readonly WAL manual traversal must precede platform/test filters")
 	}
-	for _, call := range []string{"inspectRekeyInterruptionSource(path,raw)", "inspectEncryptedRootNegativeSource(path,raw)", "inspectFormatUpgradeSource(path,raw)", "inspectBackupManualSource(path,raw)", "inspectRollbackFaultSource(path,raw)", "inspectRollbackFaultSQLSource(path,raw)", "inspectRollbackRestartSource(path,raw)", "inspectRollbackFaultRecoverySource(path,raw)", "inspectSource(path,raw)", "inspectWALPublicationSource(path,raw)", "inspectOracleSource(path,raw)", `inspectOracleContracts(".")`, `inspectBackupManualContracts(".")`, `inspectRollbackFaultContracts(".")`, `inspectRollbackFaultSQLContracts(".")`, `inspectRollbackRestartContracts(".")`, `inspectRollbackFaultRecoveryContracts(".")`, `inspectWALPublicationContracts(".")`, `inspectDarwinInventoryManualContract(".")`, `inspectFormatUpgradeContracts(".")`, `inspectEncryptedRootNegativeContracts(".")`, `inspectRekeyInterruptionContracts(".")`} {
+	for _, call := range []string{"inspectCheckpointRestartSource(path,raw)", "inspectRekeyInterruptionSource(path,raw)", "inspectEncryptedRootNegativeSource(path,raw)", "inspectFormatUpgradeSource(path,raw)", "inspectBackupManualSource(path,raw)", "inspectRollbackFaultSource(path,raw)", "inspectRollbackFaultSQLSource(path,raw)", "inspectRollbackRestartSource(path,raw)", "inspectRollbackFaultRecoverySource(path,raw)", "inspectSource(path,raw)", "inspectWALPublicationSource(path,raw)", "inspectOracleSource(path,raw)", `inspectOracleContracts(".")`, `inspectBackupManualContracts(".")`, `inspectRollbackFaultContracts(".")`, `inspectRollbackFaultSQLContracts(".")`, `inspectRollbackRestartContracts(".")`, `inspectRollbackFaultRecoveryContracts(".")`, `inspectWALPublicationContracts(".")`, `inspectDarwinInventoryManualContract(".")`, `inspectFormatUpgradeContracts(".")`, `inspectEncryptedRootNegativeContracts(".")`, `inspectRekeyInterruptionContracts(".")`, `inspectCheckpointRestartContracts(".")`} {
 		if strings.Count(body, call) != 1 {
 			findings = append(findings, "readonly WAL manual previous guard wiring weakened")
 		}

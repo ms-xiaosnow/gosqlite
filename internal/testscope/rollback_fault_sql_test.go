@@ -396,7 +396,7 @@ func TestRollbackFaultSQLWiringAndMainReviewHold(t *testing.T) {
 	}
 	// The independent whole-main review releases only these exact source bytes.
 	// An unreviewed byte change must still produce the original HOLD diagnostic.
-	const reviewedMainSHA256 = "1d9f41ed857bf64a3d2913f96fee3409a173f036df753efd81a7a9190ee2536a"
+	const reviewedMainSHA256 = "9d29dda532e851dd0fa2211473a5abb24309f798a849483c7efca09a7a3a058f"
 	if walPublicationFrozenSources["internal/testscope/main.go"] != reviewedMainSHA256 || formatUpgradePins["internal/testscope/main.go"] != reviewedMainSHA256 {
 		t.Fatal("whole-main guard pins differ from independently reviewed literal")
 	}

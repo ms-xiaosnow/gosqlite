@@ -607,7 +607,7 @@ func readOnlyWALManualPreviousPolicyPropagationMutations(t *testing.T) {
 	}
 }
 
-// Fourteen rekey/encrypted-root/combined/SQL/restart/recovery hooks, fourteen inert counterexamples each. Keep the old
+// Sixteen checkpoint/rekey/encrypted-root/combined/SQL/restart/recovery hooks, fourteen inert counterexamples each. Keep the old
 // propagation rows above unchanged and add no Test root or named child.
 func readOnlyWALManualCombinedPolicyPropagationMutations(t *testing.T) {
 	raw := readOnlyWALManualFixture(t, "internal/testscope/main.go")
@@ -619,6 +619,28 @@ func readOnlyWALManualCombinedPolicyPropagationMutations(t *testing.T) {
 	cases := []struct {
 		assignment, helper, result, resultName, errorBlock, errorName, errorReport, moveBefore, state string
 	}{
+		{
+			assignment:  `checkpoint, checkpointErr := inspectCheckpointRestartSource(path, raw)`,
+			helper:      "inspectCheckpointRestartSource",
+			result:      `findings = append(findings, checkpoint...)`,
+			resultName:  "checkpoint",
+			errorBlock:  "if checkpointErr != nil {\n\t\t\treturn checkpointErr\n\t\t}",
+			errorName:   "checkpointErr",
+			errorReport: `return checkpointErr`,
+			moveBefore:  `for _, f := range findings {`,
+			state:       "findings",
+		},
+		{
+			assignment:  `checkpointContracts, checkpointContractErr := inspectCheckpointRestartContracts(".")`,
+			helper:      "inspectCheckpointRestartContracts",
+			result:      "for _, finding := range checkpointContracts {\n\t\tfmt.Fprintln(os.Stderr, finding)\n\t\tfailed = true\n\t}",
+			resultName:  "checkpointContracts",
+			errorBlock:  "if checkpointContractErr != nil {\n\t\tfmt.Fprintln(os.Stderr, checkpointContractErr)\n\t\tfailed = true\n\t}",
+			errorName:   "checkpointContractErr",
+			errorReport: `fmt.Fprintln(os.Stderr, checkpointContractErr)`,
+			moveBefore:  `contracts, err := inspectOracleContracts(".")`,
+			state:       "failed",
+		},
 		{
 			assignment:  `rekey, rekeyErr := inspectRekeyInterruptionSource(path, raw)`,
 			helper:      "inspectRekeyInterruptionSource",
@@ -814,7 +836,7 @@ func readOnlyWALManualCombinedPolicyPropagationMutations(t *testing.T) {
 		readOnlyWALManualReject(t, "internal/testscope/main.go", moved, diagnostic)
 		checked++
 	}
-	if len(cases) != 14 || checked != 196 {
+	if len(cases) != 16 || checked != 224 {
 		t.Fatal("combined wiring counterexample inventory", len(cases), checked)
 	}
 }

@@ -176,6 +176,7 @@ func (s *SharedSession) checkpointLocked(ctx context.Context) (err error) {
 		if err = writeFullAt(s.file, page, int64(n-1)*int64(h.PageSize)); err != nil {
 			return fail(err)
 		}
+		checkpointObserve(ctx, checkpointSharedCopy, s.path, n, uint32(len(images)), h.DBSize, h.MaxFrame, [2]uint32{binary.BigEndian.Uint32(h.Salt[:4]), binary.BigEndian.Uint32(h.Salt[4:])}, h.FrameChecksum, safe, backfill)
 	}
 	if safe == h.MaxFrame {
 		if err = s.file.Truncate(int64(h.DBSize) * int64(h.PageSize)); err != nil {
@@ -188,6 +189,7 @@ func (s *SharedSession) checkpointLocked(ctx context.Context) (err error) {
 	if err = s.index.SetBackfill(safe); err != nil {
 		return fail(sharedIndexError(err))
 	}
+	checkpointObserve(ctx, checkpointSharedBackfill, s.path, 0, uint32(len(images)), h.DBSize, h.MaxFrame, [2]uint32{binary.BigEndian.Uint32(h.Salt[:4]), binary.BigEndian.Uint32(h.Salt[4:])}, h.FrameChecksum, safe, backfill)
 	if safe < h.MaxFrame {
 		return ErrBusy
 	}

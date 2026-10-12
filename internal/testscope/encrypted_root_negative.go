@@ -31,7 +31,7 @@ var encryptedRootPins = map[string]string{
 	encryptedRootNative:          "3e1e3640ff321a7673d9f39c29d32cfe73ec2d4c53858205ee9a61b7738bbbc3",
 	encryptedRootModel:           "21713928744c666e6bccc08e053d6f18ab4e3a92740c655db5896c38f3fd1a3f",
 	encryptedRootModelTest:       "4fcfaaa2b47fc8fbaa58e096b0db56f6be2c01c9b75c021590ed91e2e59facbf",
-	"internal/testscope/main.go": "1d9f41ed857bf64a3d2913f96fee3409a173f036df753efd81a7a9190ee2536a",
+	"internal/testscope/main.go": "9d29dda532e851dd0fa2211473a5abb24309f798a849483c7efca09a7a3a058f",
 }
 
 func encryptedRootName(x ast.Expr) string {

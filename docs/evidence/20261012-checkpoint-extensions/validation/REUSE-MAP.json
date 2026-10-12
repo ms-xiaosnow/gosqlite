@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "final_source_tree": "ffc73262e0314f46827b7f4cee1cdac766dbd889",
+  "historical_source_tree": "4ebb3108d4add7122cad73d583eccd01573827c4",
+  "reused_gates": [
+    {
+      "run": "checkpoint-focused-validation",
+      "gate": "02_list_linux_default",
+      "claim": "source file/tag/root selection only",
+      "status": "REUSED_PASS"
+    },
+    {
+      "run": "checkpoint-focused-validation",
+      "gate": "03_list_linux_manual",
+      "claim": "source file/tag/root selection only",
+      "status": "REUSED_PASS"
+    },
+    {
+      "run": "checkpoint-focused-validation",
+      "gate": "04_list_nonlinux_fallback",
+      "claim": "source file/tag/root selection only",
+      "status": "REUSED_PASS"
+    }
+  ],
+  "basis": "Only the unused bytes import and its exact guard pin/template/import inventory changed. No filenames, build tags or roots changed. Earlier go-list selection remains applicable; its historical import data is not claimed as freshly regenerated final-tree metadata.",
+  "format_basis": "Original format/list gates passed. V2 freshly checks formatting only on the two correction files; unchanged formatted files retain original evidence.",
+  "source_manifest_comparison": {
+    "old_entries": 3883,
+    "new_entries": 3883,
+    "changed_paths": [
+      "internal/testkit/checkpointrestart/contract.go",
+      "internal/testscope/checkpoint_restart.go"
+    ],
+    "V2_and_supplemental_race_manifests_identical": true,
+    "old_sha256": "96e11b4ccd3b5c2a87ade48e31d097f723553bb7d150a18694d216395d61586d",
+    "new_sha256": "fecd3a30b972b16d7d97098102a4be15be27a481cc0d6eeebcfe8be09b08d261"
+  },
+  "historical_failure": {
+    "run": "checkpoint-focused-validation",
+    "gate": "05_pure_models",
+    "exit_code": 1,
+    "cause": "unused bytes import",
+    "test_execution": "NONE: build failed before any Test event",
+    "remaining_commands": "NOT_RUN",
+    "corrected_by": "checkpoint-unused-import-fix",
+    "review": "checkpoint-unused-import-fix-independent-review.md"
+  },
+  "not_run": [
+    "manual checkpoint interruption/process-exit/recovery native scenario",
+    "manual test-image execution",
+    "physical persistence qualification",
+    "oracle campaign",
+    "full repository suite",
+    "model or AST race rerun",
+    "unrelated tests"
+  ],
+  "separate_source_only_artifact": {
+    "library_file_id": "libfile_06b177484f4881919a5c6e8171dd9baa",
+    "sha256": "5b18d3de184699e192179e2b84d7d464e281aeb06fcc585afe582ca603c52f18",
+    "status": "Prior separately preserved pending SOURCE_ONLY archive; this task does not reupload it."
+  }
+}

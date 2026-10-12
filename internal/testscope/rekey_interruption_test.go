@@ -107,6 +107,13 @@ func TestRekeyGuardInventoryGate(t *testing.T) {
 }
 
 func TestRekeyGuardPublicationOrder(t *testing.T) {
+	// The exact checkpoint neighbors are inert for R5's own purpose. Their
+	// placement is admitted explicitly; no general observer whitelist exists.
+	rekeyGuardMutant(t, rekeyGuardPublish,
+		`checkpointPublicationObserve(ctx, checkpointBeforeRootRename, s.path, s.rootBytes, raw)`,
+		`checkpointPublicationObserve(ctx, checkpointAfterRootRename, s.path, s.rootBytes, raw)`)
+	rekeyGuardMutant(t, rekeyGuardPublish,
+		`checkpointPublicationObserve(ctx, checkpointAfterRootRename, s.path, s.rootBytes, raw)`, "")
 	rekeyGuardPositive(t, rekeyGuardPublish)
 	rekeyGuardMutant(t, rekeyGuardPublish,
 		`rekeyPublicationObserve(ctx, rekeyBeforeRootRename, s.path, s.rootBytes, raw)`,

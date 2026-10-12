@@ -1,0 +1,880 @@
+{
+  "schema": 1,
+  "created_utc": "2026-10-12T23:33:01.214614+00:00",
+  "base_commit": "b06606020fdbb5b73dd0e9b000773f3f02c6979d",
+  "source_tree": "ffc73262e0314f46827b7f4cee1cdac766dbd889",
+  "status": "PASS for the bounded evidence below; historical build FAIL preserved",
+  "focused_completed_utc": "2026-10-12T23:28:13.259069+00:00",
+  "race_completed_utc": "2026-10-12T23:29:24.383942+00:00",
+  "metadata_source_completed_utc": "2026-10-12T23:30:52.381825+00:00",
+  "new_evidence": {
+    "pure_models": {
+      "roots": 12,
+      "named_pass": 12
+    },
+    "AST_source_contracts": {
+      "roots": 39,
+      "named_pass": 121,
+      "focused_roots": 38,
+      "focused_named_pass": 120,
+      "supplemental_metadata_source_roots": 1,
+      "supplemental_metadata_source_named_pass": 1
+    },
+    "healthy_default_normal": {
+      "roots": 3,
+      "named_pass": 9
+    },
+    "healthy_default_race": {
+      "roots": 3,
+      "named_pass": 9
+    },
+    "V2_executed_gates": 8,
+    "race_executed_gates": 1,
+    "supplemental_metadata_source_gates": 1,
+    "sourceguard": "PASS",
+    "manual_compile_and_nm": "PASS; image NOT_EXECUTED"
+  },
+  "reused_go_list_gates": 3,
+  "historical_build_failures": 1,
+  "historical_named_test_failures": 0,
+  "manual_checkpoint_interruption_exit_recovery": "NOT_RUN",
+  "physical_persistence": "NOT_RUN",
+  "oracle_campaign": "NOT_RUN",
+  "full_suite": "NOT_RUN",
+  "image": {
+    "path": "records/checkpoint-focused-validation-v2/checkpoint-sqlite.test",
+    "bytes": 16561175,
+    "sha256": "6881de129ec2c0bb426d6edf3f039f7d8261dea16d5e99da2eeae149404d1885",
+    "required_symbols": 454,
+    "manual_root_symbols": [
+      "github.com/ms-xiaosnow/gosqlite/sqlite_test.TestManualCheckpointRestartController",
+      "github.com/ms-xiaosnow/gosqlite/sqlite_test.TestManualCheckpointRestartProbe",
+      "github.com/ms-xiaosnow/gosqlite/sqlite_test.TestManualCheckpointRestartWriter"
+    ],
+    "image_executed": false
+  },
+  "reviews": [
+    {
+      "path": "records/checkpoint-extension-independent-review.md",
+      "sha256": "23c8f2ce1273991d1ca95decdaddcdb924b0614be1a2c431ddefdafa7f811d14",
+      "verdict": "CLEAR",
+      "scope": "source review only; execution boundaries remain as stated in the original review"
+    },
+    {
+      "path": "records/checkpoint-guard-independent-review.md",
+      "sha256": "846c309f404b0c7550483f44958e947a3d23cd59b90c8d97962af69f139da663",
+      "verdict": "CLEAR",
+      "scope": "source review only; execution boundaries remain as stated in the original review"
+    },
+    {
+      "path": "records/checkpoint-format-independent-review.md",
+      "sha256": "4b6569f482870709832dca1a4f25296be6e5f9c3f73c0263bd79ad2fe51557e2",
+      "verdict": "CLEAR",
+      "scope": "source review only; execution boundaries remain as stated in the original review"
+    },
+    {
+      "path": "records/checkpoint-unused-import-fix-independent-review.md",
+      "sha256": "0af3d8cf1525d4c1c572c792be5ab7f44ec924126fc230ae5b52976e21b834a6",
+      "verdict": "CLEAR",
+      "scope": "source review only; execution boundaries remain as stated in the original review"
+    }
+  ],
+  "gates": [
+    {
+      "run": "checkpoint-focused-validation",
+      "gate": "01_format",
+      "status": "PASS",
+      "result": {
+        "name": "01_format",
+        "start_utc": "2026-10-12T23:24:38.677744+00:00",
+        "end_utc": "2026-10-12T23:24:40.679623+00:00",
+        "exit_code": 0,
+        "resource_breach_latched": false,
+        "observer_error": null,
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "status": "PASS"
+      },
+      "result_record": "records/checkpoint-focused-validation/01_format.result.json",
+      "test_events": {
+        "named": {
+          "pass": 0,
+          "fail": 0,
+          "skip": 0
+        },
+        "roots": {
+          "pass": [],
+          "fail": [],
+          "skip": []
+        },
+        "root_counts": {
+          "pass": 0,
+          "fail": 0,
+          "skip": 0
+        }
+      }
+    },
+    {
+      "run": "checkpoint-focused-validation",
+      "gate": "02_list_linux_default",
+      "status": "PASS",
+      "result": {
+        "name": "02_list_linux_default",
+        "start_utc": "2026-10-12T23:24:41.203533+00:00",
+        "end_utc": "2026-10-12T23:24:43.204896+00:00",
+        "exit_code": 0,
+        "resource_breach_latched": false,
+        "observer_error": null,
+        "stdout_sha256": "5acad7aea2d674bb09bf06cd7d890fcd66c561ad7249fc1a4ae3dd13abeb5b39",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "status": "PASS"
+      },
+      "result_record": "records/checkpoint-focused-validation/02_list_linux_default.result.json",
+      "test_events": {
+        "named": {
+          "pass": 0,
+          "fail": 0,
+          "skip": 0
+        },
+        "roots": {
+          "pass": [],
+          "fail": [],
+          "skip": []
+        },
+        "root_counts": {
+          "pass": 0,
+          "fail": 0,
+          "skip": 0
+        }
+      }
+    },
+    {
+      "run": "checkpoint-focused-validation",
+      "gate": "03_list_linux_manual",
+      "status": "PASS",
+      "result": {
+        "name": "03_list_linux_manual",
+        "start_utc": "2026-10-12T23:24:43.770316+00:00",
+        "end_utc": "2026-10-12T23:24:45.771681+00:00",
+        "exit_code": 0,
+        "resource_breach_latched": false,
+        "observer_error": null,
+        "stdout_sha256": "b1f63a231f65bd4f87c97d5eac810f58bc3060d79f01f0d232413206cf49da11",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "status": "PASS"
+      },
+      "result_record": "records/checkpoint-focused-validation/03_list_linux_manual.result.json",
+      "test_events": {
+        "named": {
+          "pass": 0,
+          "fail": 0,
+          "skip": 0
+        },
+        "roots": {
+          "pass": [],
+          "fail": [],
+          "skip": []
+        },
+        "root_counts": {
+          "pass": 0,
+          "fail": 0,
+          "skip": 0
+        }
+      }
+    },
+    {
+      "run": "checkpoint-focused-validation",
+      "gate": "04_list_nonlinux_fallback",
+      "status": "PASS",
+      "result": {
+        "name": "04_list_nonlinux_fallback",
+        "start_utc": "2026-10-12T23:24:46.317477+00:00",
+        "end_utc": "2026-10-12T23:24:48.318819+00:00",
+        "exit_code": 0,
+        "resource_breach_latched": false,
+        "observer_error": null,
+        "stdout_sha256": "725f7ce4a1975edbeccbb90a5cf721ea2fc06cf18c79b227c149f2627224a011",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "status": "PASS"
+      },
+      "result_record": "records/checkpoint-focused-validation/04_list_nonlinux_fallback.result.json",
+      "test_events": {
+        "named": {
+          "pass": 0,
+          "fail": 0,
+          "skip": 0
+        },
+        "roots": {
+          "pass": [],
+          "fail": [],
+          "skip": []
+        },
+        "root_counts": {
+          "pass": 0,
+          "fail": 0,
+          "skip": 0
+        }
+      }
+    },
+    {
+      "run": "checkpoint-focused-validation",
+      "gate": "05_pure_models",
+      "status": "FAIL",
+      "result": {
+        "name": "05_pure_models",
+        "start_utc": "2026-10-12T23:24:48.856741+00:00",
+        "end_utc": "2026-10-12T23:24:50.859053+00:00",
+        "exit_code": 1,
+        "resource_breach_latched": false,
+        "observer_error": null,
+        "stdout_sha256": "228cde63c631039c78f8c67cdac5f34954b82c0da7b1cc35de6ec7dd4525edaf",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "result_record": "records/checkpoint-focused-validation/05_pure_models.result.json",
+      "test_events": {
+        "named": {
+          "pass": 0,
+          "fail": 0,
+          "skip": 0
+        },
+        "roots": {
+          "pass": [],
+          "fail": [],
+          "skip": []
+        },
+        "root_counts": {
+          "pass": 0,
+          "fail": 0,
+          "skip": 0
+        }
+      }
+    },
+    {
+      "run": "checkpoint-focused-validation",
+      "gate": "06_ast_guards",
+      "status": "NOT_RUN"
+    },
+    {
+      "run": "checkpoint-focused-validation",
+      "gate": "07_healthy_pager",
+      "status": "NOT_RUN"
+    },
+    {
+      "run": "checkpoint-focused-validation",
+      "gate": "08_healthy_sqlite",
+      "status": "NOT_RUN"
+    },
+    {
+      "run": "checkpoint-focused-validation",
+      "gate": "09_sourceguard",
+      "status": "NOT_RUN"
+    },
+    {
+      "run": "checkpoint-focused-validation",
+      "gate": "10_compile_manual_sqlite",
+      "status": "NOT_RUN"
+    },
+    {
+      "run": "checkpoint-focused-validation",
+      "gate": "11_nm_manual_sqlite",
+      "status": "NOT_RUN"
+    },
+    {
+      "run": "checkpoint-focused-validation-v2",
+      "gate": "01_format",
+      "status": "PASS",
+      "result": {
+        "name": "01_format",
+        "start_utc": "2026-10-12T23:27:07.590795+00:00",
+        "end_utc": "2026-10-12T23:27:09.593966+00:00",
+        "exit_code": 0,
+        "resource_breach_latched": false,
+        "observer_error": null,
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "status": "PASS"
+      },
+      "result_record": "records/checkpoint-focused-validation-v2/01_format.result.json",
+      "test_events": {
+        "named": {
+          "pass": 0,
+          "fail": 0,
+          "skip": 0
+        },
+        "roots": {
+          "pass": [],
+          "fail": [],
+          "skip": []
+        },
+        "root_counts": {
+          "pass": 0,
+          "fail": 0,
+          "skip": 0
+        }
+      }
+    },
+    {
+      "run": "checkpoint-focused-validation-v2",
+      "gate": "05_pure_models",
+      "status": "PASS",
+      "result": {
+        "name": "05_pure_models",
+        "start_utc": "2026-10-12T23:27:10.041903+00:00",
+        "end_utc": "2026-10-12T23:27:16.048502+00:00",
+        "exit_code": 0,
+        "resource_breach_latched": false,
+        "observer_error": null,
+        "stdout_sha256": "37b62ef5113adc3e74483132c5b7143102bfc763a36bcb1e92d1fb2cbfa55b68",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "evidence_kind": "pure_models",
+        "status": "PASS"
+      },
+      "result_record": "records/checkpoint-focused-validation-v2/05_pure_models.result.json",
+      "test_events": {
+        "named": {
+          "pass": 12,
+          "fail": 0,
+          "skip": 0
+        },
+        "roots": {
+          "pass": [
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/checkpointrestart",
+              "root": "TestCheckpointExtensionFixtureRows"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/checkpointrestart",
+              "root": "TestCheckpointExtensionGramsLedger"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/checkpointrestart",
+              "root": "TestCheckpointExtensionGraphMembershipLedger"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/checkpointrestart",
+              "root": "TestCheckpointExtensionQueryPathsAndCheck"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/checkpointrestart",
+              "root": "TestCheckpointRestartAuthorityCuts"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/checkpointrestart",
+              "root": "TestCheckpointRestartCommittedHeadCausality"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/checkpointrestart",
+              "root": "TestCheckpointRestartEncryptedSameEpoch"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/checkpointrestart",
+              "root": "TestCheckpointRestartNeverPhysicalPass"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/checkpointrestart",
+              "root": "TestCheckpointRestartOwnerWaitAndUnknown"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/checkpointrestart",
+              "root": "TestCheckpointRestartPrivateFamilyCopies"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/checkpointrestart",
+              "root": "TestCheckpointRestartTenCases"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/checkpointrestart",
+              "root": "TestCheckpointRestartTransportBinding"
+            }
+          ],
+          "fail": [],
+          "skip": []
+        },
+        "root_counts": {
+          "pass": 12,
+          "fail": 0,
+          "skip": 0
+        }
+      }
+    },
+    {
+      "run": "checkpoint-focused-validation-v2",
+      "gate": "06_ast_guards",
+      "status": "PASS",
+      "result": {
+        "name": "06_ast_guards",
+        "start_utc": "2026-10-12T23:27:16.507373+00:00",
+        "end_utc": "2026-10-12T23:27:32.515927+00:00",
+        "exit_code": 0,
+        "resource_breach_latched": false,
+        "observer_error": null,
+        "stdout_sha256": "e686d0da2811c44ebc996b5855dc9b1cc587932ee74bcde92b52499f8c00147a",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "evidence_kind": "AST_source_contracts",
+        "status": "PASS"
+      },
+      "result_record": "records/checkpoint-focused-validation-v2/06_ast_guards.result.json",
+      "test_events": {
+        "named": {
+          "pass": 120,
+          "fail": 0,
+          "skip": 0
+        },
+        "roots": {
+          "pass": [
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestCheckpointRestartGuardDefaultAndIntegration"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestCheckpointRestartGuardFullExtensionLedger"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestCheckpointRestartGuardInventoryAndGate"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestCheckpointRestartGuardObserverPurpose"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestCheckpointRestartGuardPrivateCopiesAndProbe"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestCheckpointRestartGuardProcessOwnership"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestCheckpointRestartGuardProductionOrder"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestCheckpointRestartGuardPublicEntryAndCommitReceipt"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestEncryptedRootFalsePassSourcesEvenWhenRepinned"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestEncryptedRootFiniteStructure"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestEncryptedRootPinsRequireIndependentRelease"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestEncryptedRootWholeSourceAndCapabilityBoundary"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestFormatUpgradeMainKeepsExistingPolicies"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestOracleSourceConstructorGuard"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestOracleSourceFactoryLiteralGuard"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestOracleSourceImportAndMutationGuard"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestOracleSourceNativeExceptionGuard"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestOracleSourcePathScope"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestReadOnlyWALManualDefaultExclusion"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestReadOnlyWALManualEffectBoundaryMutations"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestReadOnlyWALManualGateAndProfileMutations"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestReadOnlyWALManualOwnershipMutations"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestReadOnlyWALManualPureClosureMutations"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestReadOnlyWALManualSourceContract"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestReadOnlyWALManualWholeRootInventory"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRekeyGuardIntegrationDefault"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRekeyGuardInventoryGate"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRekeyGuardObserverIsolation"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRekeyGuardProbeLedger"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRekeyGuardProcessOwnership"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRekeyGuardPublicReturnACK"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRekeyGuardPublicationOrder"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackFaultGuardWiringPreservesPriorPolicies"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackFaultSQLWiringAndMainReviewHold"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackRestartOracleExceptionRequiresCompletePinnedNativeClosure"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackRestartWiringPreservesAllPoliciesAndReviewHold"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestScopeSourceReferenceGuard"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestWALPublicationGuardFixedSourceAndWiring"
+            }
+          ],
+          "fail": [],
+          "skip": []
+        },
+        "root_counts": {
+          "pass": 38,
+          "fail": 0,
+          "skip": 0
+        }
+      }
+    },
+    {
+      "run": "checkpoint-focused-validation-v2",
+      "gate": "07_healthy_pager",
+      "status": "PASS",
+      "result": {
+        "name": "07_healthy_pager",
+        "start_utc": "2026-10-12T23:27:33.030345+00:00",
+        "end_utc": "2026-10-12T23:27:37.035329+00:00",
+        "exit_code": 0,
+        "resource_breach_latched": false,
+        "observer_error": null,
+        "stdout_sha256": "181df6ca78ad90aa16e6b90b2a51762be1437fa770a3cd36658b331e5bdce432",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "evidence_kind": "healthy_default_database",
+        "status": "PASS"
+      },
+      "result_record": "records/checkpoint-focused-validation-v2/07_healthy_pager.result.json",
+      "test_events": {
+        "named": {
+          "pass": 4,
+          "fail": 0,
+          "skip": 0
+        },
+        "roots": {
+          "pass": [
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/pager",
+              "root": "TestSharedWALSnapshotsPromotionAndCheckpoint"
+            }
+          ],
+          "fail": [],
+          "skip": []
+        },
+        "root_counts": {
+          "pass": 1,
+          "fail": 0,
+          "skip": 0
+        }
+      }
+    },
+    {
+      "run": "checkpoint-focused-validation-v2",
+      "gate": "08_healthy_sqlite",
+      "status": "PASS",
+      "result": {
+        "name": "08_healthy_sqlite",
+        "start_utc": "2026-10-12T23:27:37.483687+00:00",
+        "end_utc": "2026-10-12T23:27:45.487568+00:00",
+        "exit_code": 0,
+        "resource_breach_latched": false,
+        "observer_error": null,
+        "stdout_sha256": "1470cb50ce18f3bbe30c8b8be412b7b78acec899011ae3fc65c788dfe81b66b6",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "evidence_kind": "healthy_default_database",
+        "status": "PASS"
+      },
+      "result_record": "records/checkpoint-focused-validation-v2/08_healthy_sqlite.result.json",
+      "test_events": {
+        "named": {
+          "pass": 5,
+          "fail": 0,
+          "skip": 0
+        },
+        "roots": {
+          "pass": [
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/sqlite",
+              "root": "TestNativeWALConnectionLifecycle"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/sqlite",
+              "root": "TestReviewEncryptionSharedLatestCheckpointMetadata"
+            }
+          ],
+          "fail": [],
+          "skip": []
+        },
+        "root_counts": {
+          "pass": 2,
+          "fail": 0,
+          "skip": 0
+        }
+      }
+    },
+    {
+      "run": "checkpoint-focused-validation-v2",
+      "gate": "09_sourceguard",
+      "status": "PASS",
+      "result": {
+        "name": "09_sourceguard",
+        "start_utc": "2026-10-12T23:27:46.037755+00:00",
+        "end_utc": "2026-10-12T23:28:00.046793+00:00",
+        "exit_code": 0,
+        "resource_breach_latched": false,
+        "observer_error": null,
+        "stdout_sha256": "ba0cb4aff7a9c991c087485ff3499bf86b9b57f990c78b979c1f08ffc42a3505",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "direct_checkpoint_hooks": [
+          "inspectCheckpointRestartSource(path, raw)",
+          "inspectCheckpointRestartContracts(\".\")"
+        ],
+        "status": "PASS"
+      },
+      "result_record": "records/checkpoint-focused-validation-v2/09_sourceguard.result.json",
+      "test_events": {
+        "named": {
+          "pass": 0,
+          "fail": 0,
+          "skip": 0
+        },
+        "roots": {
+          "pass": [],
+          "fail": [],
+          "skip": []
+        },
+        "root_counts": {
+          "pass": 0,
+          "fail": 0,
+          "skip": 0
+        }
+      }
+    },
+    {
+      "run": "checkpoint-focused-validation-v2",
+      "gate": "10_compile_manual_sqlite",
+      "status": "PASS",
+      "result": {
+        "name": "10_compile_manual_sqlite",
+        "start_utc": "2026-10-12T23:28:00.485287+00:00",
+        "end_utc": "2026-10-12T23:28:10.491664+00:00",
+        "exit_code": 0,
+        "resource_breach_latched": false,
+        "observer_error": null,
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "image_sha256": "6881de129ec2c0bb426d6edf3f039f7d8261dea16d5e99da2eeae149404d1885",
+        "image_executed": false,
+        "status": "PASS"
+      },
+      "result_record": "records/checkpoint-focused-validation-v2/10_compile_manual_sqlite.result.json",
+      "test_events": {
+        "named": {
+          "pass": 0,
+          "fail": 0,
+          "skip": 0
+        },
+        "roots": {
+          "pass": [],
+          "fail": [],
+          "skip": []
+        },
+        "root_counts": {
+          "pass": 0,
+          "fail": 0,
+          "skip": 0
+        }
+      }
+    },
+    {
+      "run": "checkpoint-focused-validation-v2",
+      "gate": "11_nm_manual_sqlite",
+      "status": "PASS",
+      "result": {
+        "name": "11_nm_manual_sqlite",
+        "start_utc": "2026-10-12T23:28:10.957960+00:00",
+        "end_utc": "2026-10-12T23:28:12.959270+00:00",
+        "exit_code": 0,
+        "resource_breach_latched": false,
+        "observer_error": null,
+        "stdout_sha256": "42d3eb10b60f6f65f14b1010480636f9223b9b27f0d132f87792f3eca98c3afb",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "symbols": {
+          "required": 454,
+          "exact_root_set": true,
+          "manual_symbols": [
+            "github.com/ms-xiaosnow/gosqlite/sqlite_test.TestManualCheckpointRestartController",
+            "github.com/ms-xiaosnow/gosqlite/sqlite_test.TestManualCheckpointRestartProbe",
+            "github.com/ms-xiaosnow/gosqlite/sqlite_test.TestManualCheckpointRestartWriter"
+          ],
+          "image_sha256": "6881de129ec2c0bb426d6edf3f039f7d8261dea16d5e99da2eeae149404d1885",
+          "image_executed": false
+        },
+        "status": "PASS"
+      },
+      "result_record": "records/checkpoint-focused-validation-v2/11_nm_manual_sqlite.result.json",
+      "test_events": {
+        "named": {
+          "pass": 0,
+          "fail": 0,
+          "skip": 0
+        },
+        "roots": {
+          "pass": [],
+          "fail": [],
+          "skip": []
+        },
+        "root_counts": {
+          "pass": 0,
+          "fail": 0,
+          "skip": 0
+        }
+      }
+    },
+    {
+      "run": "checkpoint-default-race-validation",
+      "gate": "07_healthy_race",
+      "status": "PASS",
+      "result": {
+        "name": "07_healthy_race",
+        "start_utc": "2026-10-12T23:29:02.142702+00:00",
+        "end_utc": "2026-10-12T23:29:24.151521+00:00",
+        "exit_code": 0,
+        "resource_breach_latched": false,
+        "observer_error": null,
+        "stdout_sha256": "11615bdfccdd159d50d2500b46cca57948a98d49bcf923e13a330296dbc7ebc5",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "evidence_kind": "healthy_default_database",
+        "status": "PASS"
+      },
+      "result_record": "records/checkpoint-default-race-validation/07_healthy_race.result.json",
+      "test_events": {
+        "named": {
+          "pass": 9,
+          "fail": 0,
+          "skip": 0
+        },
+        "roots": {
+          "pass": [
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/pager",
+              "root": "TestSharedWALSnapshotsPromotionAndCheckpoint"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/sqlite",
+              "root": "TestNativeWALConnectionLifecycle"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/sqlite",
+              "root": "TestReviewEncryptionSharedLatestCheckpointMetadata"
+            }
+          ],
+          "fail": [],
+          "skip": []
+        },
+        "root_counts": {
+          "pass": 3,
+          "fail": 0,
+          "skip": 0
+        }
+      }
+    },
+    {
+      "run": "checkpoint-metadata-source-validation",
+      "gate": "12_metadata_source",
+      "status": "PASS",
+      "result": {
+        "name": "12_metadata_source",
+        "start_utc": "2026-10-12T23:30:50.185971+00:00",
+        "end_utc": "2026-10-12T23:30:52.187352+00:00",
+        "exit_code": 0,
+        "resource_breach_latched": false,
+        "observer_error": null,
+        "stdout_sha256": "94620644558760803c4a59e51dfccaf511bfdab5f4031df320045c88a0e3f949",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "evidence_kind": "AST_source_contracts",
+        "status": "PASS"
+      },
+      "result_record": "records/checkpoint-metadata-source-validation/12_metadata_source.result.json",
+      "test_events": {
+        "named": {
+          "pass": 1,
+          "fail": 0,
+          "skip": 0
+        },
+        "roots": {
+          "pass": [
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/vfs",
+              "root": "TestMetadataOwnershipCallChainSource"
+            }
+          ],
+          "fail": [],
+          "skip": []
+        },
+        "root_counts": {
+          "pass": 1,
+          "fail": 0,
+          "skip": 0
+        }
+      }
+    }
+  ]
+}

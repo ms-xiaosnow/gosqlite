@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "zip_name": "gosqlite-R3-R4-checkpoint-focused-validation-ffc7326.zip",
+  "bytes": 13887028,
+  "sha256": "dba9d7762678cd4cc7679e809d01825612188c0ff4ad5918b96f0d87e0c93a60",
+  "members": 296,
+  "verified_nonmanifest_members": 295,
+  "manifest_sha256": "53270a367676754757812466e4d25eecaf5f31f6758e9115d54a4465c444ea9b",
+  "unexecuted_image_members": 1,
+  "immutable_source_files_verified": 30
+}

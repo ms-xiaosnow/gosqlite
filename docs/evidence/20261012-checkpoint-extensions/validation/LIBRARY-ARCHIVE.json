@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "status": "PASS",
+  "verified_utc": "2026-10-12T23:34:39.490269+00:00",
+  "library": {
+    "library_file_id": "libfile_0fc5c52616148191981ea46ff3d48ead",
+    "file_id": "file_00000000525481f8b1da2a589dbef1bb",
+    "file_name": "gosqlite-R3-R4-checkpoint-focused-validation-ffc7326.zip",
+    "current_version_number": 0,
+    "path": "/gosqlite-R3-R4-checkpoint-focused-validation-ffc7326.zip",
+    "mime_type": "application/zip",
+    "file_size_bytes": 13887028,
+    "library_artifact_type": "other"
+  },
+  "readback_metadata": {
+    "library_file_id": "libfile_0fc5c52616148191981ea46ff3d48ead",
+    "file_id": "file_00000000525481f8b1da2a589dbef1bb",
+    "name": "gosqlite-R3-R4-checkpoint-focused-validation-ffc7326.zip",
+    "size_bytes": 13887028,
+    "requested_file_id": "libfile_0fc5c52616148191981ea46ff3d48ead"
+  },
+  "archive_sha256": "dba9d7762678cd4cc7679e809d01825612188c0ff4ad5918b96f0d87e0c93a60",
+  "archive_bytes": 13887028,
+  "exact_local_and_Library_readback_bytes_equal": true,
+  "all_members": 296,
+  "all_member_sha256_verified": true,
+  "manifest_payload_members_verified": 295,
+  "manifest_sha256": "53270a367676754757812466e4d25eecaf5f31f6758e9115d54a4465c444ea9b",
+  "member_hash_index": "MANIFEST.json",
+  "immutable_source_tree": "ffc73262e0314f46827b7f4cee1cdac766dbd889",
+  "immutable_source_files_verified": 30,
+  "unexecuted_manual_images_verified": 1,
+  "manual_image_executed": false,
+  "compact_raw_member_count": 130,
+  "compact_raw_members_exact_equal_to_Library_archive": true,
+  "Library_create_count": 1,
+  "pending_source_only_artifact_reuploaded": false
+}

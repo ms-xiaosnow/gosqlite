@@ -368,15 +368,18 @@ func (s *Store) publishRoot(ctx context.Context, master *encryption.MasterKey, o
 	}
 	uncertain := func(e error) error { s.poisoned = errors.Join(ErrUncertain, e); return s.poisoned }
 	rekeyPublicationObserve(ctx, rekeyBeforeRootRename, s.path, s.rootBytes, raw)
+	checkpointPublicationObserve(ctx, checkpointBeforeRootRename, s.path, s.rootBytes, raw)
 	attempted = true
 	if e = s.ns.rename(pending, s.path, len(s.rootBytes) == 0); e != nil {
 		return uncertain(e)
 	}
 	rekeyPublicationObserve(ctx, rekeyAfterRootRename, s.path, s.rootBytes, raw)
+	checkpointPublicationObserve(ctx, checkpointAfterRootRename, s.path, s.rootBytes, raw)
 	if e = s.ns.sync(s.path); e != nil {
 		return uncertain(e)
 	}
 	rekeyPublicationObserve(ctx, rekeyAfterRootDirSync, s.path, s.rootBytes, raw)
+	checkpointPublicationObserve(ctx, checkpointAfterRootDirSync, s.path, s.rootBytes, raw)
 	root, ri, e := s.ns.checked(s.path, os.O_RDONLY)
 	if e != nil {
 		return uncertain(e)

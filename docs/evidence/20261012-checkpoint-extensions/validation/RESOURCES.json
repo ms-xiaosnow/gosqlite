@@ -1,0 +1,1318 @@
+{
+  "checkpoint-focused-validation": {
+    "01_format": {
+      "before": {
+        "utc": "2026-10-12T23:24:38.677769+00:00",
+        "paths": {
+          "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+            "available_bytes": 29936771072,
+            "available_inodes": 2062151,
+            "minimum_bytes": 2147483648
+          },
+          "/tmp": {
+            "available_bytes": 5225664512,
+            "available_inodes": 1275780,
+            "minimum_bytes": 1073741824
+          }
+        },
+        "qualified": true
+      },
+      "samples": [
+        {
+          "utc": "2026-10-12T23:24:38.678679+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29936766976,
+              "available_inodes": 2062147,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5225664512,
+              "available_inodes": 1275780,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:24:40.679311+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29936762880,
+              "available_inodes": 2062147,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5225664512,
+              "available_inodes": 1275780,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        }
+      ]
+    },
+    "02_list_linux_default": {
+      "before": {
+        "utc": "2026-10-12T23:24:41.203554+00:00",
+        "paths": {
+          "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+            "available_bytes": 29936758784,
+            "available_inodes": 2062146,
+            "minimum_bytes": 2147483648
+          },
+          "/tmp": {
+            "available_bytes": 5225664512,
+            "available_inodes": 1275780,
+            "minimum_bytes": 1073741824
+          }
+        },
+        "qualified": true
+      },
+      "samples": [
+        {
+          "utc": "2026-10-12T23:24:41.204333+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29936754688,
+              "available_inodes": 2062142,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5225664512,
+              "available_inodes": 1275780,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:24:43.204587+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29936558080,
+              "available_inodes": 2062132,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5225664512,
+              "available_inodes": 1275780,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        }
+      ]
+    },
+    "03_list_linux_manual": {
+      "before": {
+        "utc": "2026-10-12T23:24:43.770337+00:00",
+        "paths": {
+          "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+            "available_bytes": 29936422912,
+            "available_inodes": 2062131,
+            "minimum_bytes": 2147483648
+          },
+          "/tmp": {
+            "available_bytes": 5225664512,
+            "available_inodes": 1275780,
+            "minimum_bytes": 1073741824
+          }
+        },
+        "qualified": true
+      },
+      "samples": [
+        {
+          "utc": "2026-10-12T23:24:43.771083+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29936418816,
+              "available_inodes": 2062127,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5225664512,
+              "available_inodes": 1275780,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:24:45.771391+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29936377856,
+              "available_inodes": 2062127,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5225664512,
+              "available_inodes": 1275780,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        }
+      ]
+    },
+    "04_list_nonlinux_fallback": {
+      "before": {
+        "utc": "2026-10-12T23:24:46.317499+00:00",
+        "paths": {
+          "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+            "available_bytes": 29936238592,
+            "available_inodes": 2062126,
+            "minimum_bytes": 2147483648
+          },
+          "/tmp": {
+            "available_bytes": 5225664512,
+            "available_inodes": 1275780,
+            "minimum_bytes": 1073741824
+          }
+        },
+        "qualified": true
+      },
+      "samples": [
+        {
+          "utc": "2026-10-12T23:24:46.318273+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29936234496,
+              "available_inodes": 2062122,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5225664512,
+              "available_inodes": 1275780,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:24:48.318506+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29936185344,
+              "available_inodes": 2062120,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5225664512,
+              "available_inodes": 1275780,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        }
+      ]
+    },
+    "05_pure_models": {
+      "before": {
+        "utc": "2026-10-12T23:24:48.856765+00:00",
+        "paths": {
+          "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+            "available_bytes": 29936050176,
+            "available_inodes": 2062119,
+            "minimum_bytes": 2147483648
+          },
+          "/tmp": {
+            "available_bytes": 5225664512,
+            "available_inodes": 1275780,
+            "minimum_bytes": 1073741824
+          }
+        },
+        "qualified": true
+      },
+      "samples": [
+        {
+          "utc": "2026-10-12T23:24:48.858485+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29936046080,
+              "available_inodes": 2062115,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5225664512,
+              "available_inodes": 1275780,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:24:50.858749+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29936029696,
+              "available_inodes": 2062113,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5225664512,
+              "available_inodes": 1275780,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        }
+      ]
+    }
+  },
+  "checkpoint-focused-validation-v2": {
+    "01_format": {
+      "before": {
+        "utc": "2026-10-12T23:27:07.590818+00:00",
+        "paths": {
+          "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+            "available_bytes": 29919916032,
+            "available_inodes": 2062036,
+            "minimum_bytes": 2147483648
+          },
+          "/tmp": {
+            "available_bytes": 5225664512,
+            "available_inodes": 1275780,
+            "minimum_bytes": 1073741824
+          }
+        },
+        "qualified": true
+      },
+      "samples": [
+        {
+          "utc": "2026-10-12T23:27:07.592884+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29919911936,
+              "available_inodes": 2062032,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5225664512,
+              "available_inodes": 1275780,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:27:09.593233+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29919903744,
+              "available_inodes": 2062031,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5225664512,
+              "available_inodes": 1275780,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        }
+      ]
+    },
+    "05_pure_models": {
+      "before": {
+        "utc": "2026-10-12T23:27:10.041924+00:00",
+        "paths": {
+          "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+            "available_bytes": 29919899648,
+            "available_inodes": 2062030,
+            "minimum_bytes": 2147483648
+          },
+          "/tmp": {
+            "available_bytes": 5225664512,
+            "available_inodes": 1275780,
+            "minimum_bytes": 1073741824
+          }
+        },
+        "qualified": true
+      },
+      "samples": [
+        {
+          "utc": "2026-10-12T23:27:10.042789+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29919895552,
+              "available_inodes": 2062026,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5225664512,
+              "available_inodes": 1275780,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:27:12.042987+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29918408704,
+              "available_inodes": 2062015,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5219942400,
+              "available_inodes": 1275770,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:27:14.047505+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29918404608,
+              "available_inodes": 2062015,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5219942400,
+              "available_inodes": 1275770,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:27:16.048175+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29918400512,
+              "available_inodes": 2062015,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5225664512,
+              "available_inodes": 1275780,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        }
+      ]
+    },
+    "06_ast_guards": {
+      "before": {
+        "utc": "2026-10-12T23:27:16.507394+00:00",
+        "paths": {
+          "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+            "available_bytes": 29918396416,
+            "available_inodes": 2062014,
+            "minimum_bytes": 2147483648
+          },
+          "/tmp": {
+            "available_bytes": 5225664512,
+            "available_inodes": 1275780,
+            "minimum_bytes": 1073741824
+          }
+        },
+        "qualified": true
+      },
+      "samples": [
+        {
+          "utc": "2026-10-12T23:27:16.508287+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29918392320,
+              "available_inodes": 2062010,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5225664512,
+              "available_inodes": 1275780,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:27:18.508553+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29918375936,
+              "available_inodes": 2062007,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5225648128,
+              "available_inodes": 1275775,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:27:20.509305+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29911162880,
+              "available_inodes": 2061999,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5212049408,
+              "available_inodes": 1275770,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:27:22.509686+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29911162880,
+              "available_inodes": 2061999,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5212049408,
+              "available_inodes": 1275770,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:27:24.510688+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29911162880,
+              "available_inodes": 2061999,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5212049408,
+              "available_inodes": 1275770,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:27:26.513018+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29911162880,
+              "available_inodes": 2061999,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5212049408,
+              "available_inodes": 1275770,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:27:28.514048+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29911150592,
+              "available_inodes": 2061997,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5212049408,
+              "available_inodes": 1275770,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:27:30.515177+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29911134208,
+              "available_inodes": 2061996,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5212049408,
+              "available_inodes": 1275770,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:27:32.515545+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29911113728,
+              "available_inodes": 2061996,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5225664512,
+              "available_inodes": 1275780,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        }
+      ]
+    },
+    "07_healthy_pager": {
+      "before": {
+        "utc": "2026-10-12T23:27:33.030367+00:00",
+        "paths": {
+          "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+            "available_bytes": 29911109632,
+            "available_inodes": 2061995,
+            "minimum_bytes": 2147483648
+          },
+          "/tmp": {
+            "available_bytes": 5225664512,
+            "available_inodes": 1275780,
+            "minimum_bytes": 1073741824
+          }
+        },
+        "qualified": true
+      },
+      "samples": [
+        {
+          "utc": "2026-10-12T23:27:33.031312+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29911105536,
+              "available_inodes": 2061991,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5225664512,
+              "available_inodes": 1275780,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:27:35.033939+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29909270528,
+              "available_inodes": 2061984,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5223821312,
+              "available_inodes": 1275772,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:27:37.034800+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29902815232,
+              "available_inodes": 2061976,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5225664512,
+              "available_inodes": 1275780,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        }
+      ]
+    },
+    "08_healthy_sqlite": {
+      "before": {
+        "utc": "2026-10-12T23:27:37.483708+00:00",
+        "paths": {
+          "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+            "available_bytes": 29902811136,
+            "available_inodes": 2061975,
+            "minimum_bytes": 2147483648
+          },
+          "/tmp": {
+            "available_bytes": 5225664512,
+            "available_inodes": 1275780,
+            "minimum_bytes": 1073741824
+          }
+        },
+        "qualified": true
+      },
+      "samples": [
+        {
+          "utc": "2026-10-12T23:27:37.484414+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29902807040,
+              "available_inodes": 2061971,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5225664512,
+              "available_inodes": 1275780,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:27:39.484582+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29898850304,
+              "available_inodes": 2061961,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5221670912,
+              "available_inodes": 1275769,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:27:41.484934+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29898850304,
+              "available_inodes": 2061961,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5221670912,
+              "available_inodes": 1275769,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:27:43.485415+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29887320064,
+              "available_inodes": 2061953,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5210152960,
+              "available_inodes": 1275763,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:27:45.485847+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29881851904,
+              "available_inodes": 2061945,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5225664512,
+              "available_inodes": 1275780,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        }
+      ]
+    },
+    "09_sourceguard": {
+      "before": {
+        "utc": "2026-10-12T23:27:46.037778+00:00",
+        "paths": {
+          "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+            "available_bytes": 29881847808,
+            "available_inodes": 2061944,
+            "minimum_bytes": 2147483648
+          },
+          "/tmp": {
+            "available_bytes": 5225664512,
+            "available_inodes": 1275780,
+            "minimum_bytes": 1073741824
+          }
+        },
+        "qualified": true
+      },
+      "samples": [
+        {
+          "utc": "2026-10-12T23:27:46.039445+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29881843712,
+              "available_inodes": 2061940,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5225664512,
+              "available_inodes": 1275780,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:27:48.039792+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29873164288,
+              "available_inodes": 2061931,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5216993280,
+              "available_inodes": 1275773,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:27:50.041700+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29873164288,
+              "available_inodes": 2061931,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5216993280,
+              "available_inodes": 1275773,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:27:52.042045+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29873164288,
+              "available_inodes": 2061931,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5216993280,
+              "available_inodes": 1275773,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:27:54.042949+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29873164288,
+              "available_inodes": 2061931,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5216993280,
+              "available_inodes": 1275773,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:27:56.045750+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29873164288,
+              "available_inodes": 2061931,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5216993280,
+              "available_inodes": 1275773,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:27:58.046151+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29873164288,
+              "available_inodes": 2061931,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5216993280,
+              "available_inodes": 1275773,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:28:00.046501+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29873160192,
+              "available_inodes": 2061931,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5225664512,
+              "available_inodes": 1275780,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        }
+      ]
+    },
+    "10_compile_manual_sqlite": {
+      "before": {
+        "utc": "2026-10-12T23:28:00.485310+00:00",
+        "paths": {
+          "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+            "available_bytes": 29873156096,
+            "available_inodes": 2061930,
+            "minimum_bytes": 2147483648
+          },
+          "/tmp": {
+            "available_bytes": 5225664512,
+            "available_inodes": 1275780,
+            "minimum_bytes": 1073741824
+          }
+        },
+        "qualified": true
+      },
+      "samples": [
+        {
+          "utc": "2026-10-12T23:28:00.486155+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29873152000,
+              "available_inodes": 2061926,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5225664512,
+              "available_inodes": 1275780,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:28:02.486382+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29867323392,
+              "available_inodes": 2061910,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5219827712,
+              "available_inodes": 1275766,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:28:04.489706+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29866356736,
+              "available_inodes": 2061906,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5218861056,
+              "available_inodes": 1275763,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:28:06.490451+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29866352640,
+              "available_inodes": 2061905,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5207769088,
+              "available_inodes": 1275762,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:28:08.490985+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29848535040,
+              "available_inodes": 2061890,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5201039360,
+              "available_inodes": 1275753,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:28:10.491360+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29831966720,
+              "available_inodes": 2061888,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5225664512,
+              "available_inodes": 1275780,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        }
+      ]
+    },
+    "11_nm_manual_sqlite": {
+      "before": {
+        "utc": "2026-10-12T23:28:10.957981+00:00",
+        "paths": {
+          "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+            "available_bytes": 29831962624,
+            "available_inodes": 2061887,
+            "minimum_bytes": 2147483648
+          },
+          "/tmp": {
+            "available_bytes": 5225664512,
+            "available_inodes": 1275780,
+            "minimum_bytes": 1073741824
+          }
+        },
+        "qualified": true
+      },
+      "samples": [
+        {
+          "utc": "2026-10-12T23:28:10.958713+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29831958528,
+              "available_inodes": 2061883,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5225664512,
+              "available_inodes": 1275780,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:28:12.958938+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29831282688,
+              "available_inodes": 2061883,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5225664512,
+              "available_inodes": 1275780,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        }
+      ]
+    }
+  },
+  "checkpoint-default-race-validation": {
+    "07_healthy_race": {
+      "before": {
+        "utc": "2026-10-12T23:29:02.142726+00:00",
+        "paths": {
+          "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+            "available_bytes": 29826609152,
+            "available_inodes": 2061868,
+            "minimum_bytes": 2147483648
+          },
+          "/tmp": {
+            "available_bytes": 5225664512,
+            "available_inodes": 1275780,
+            "minimum_bytes": 1073741824
+          }
+        },
+        "qualified": true
+      },
+      "samples": [
+        {
+          "utc": "2026-10-12T23:29:02.143634+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29826605056,
+              "available_inodes": 2061864,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5225664512,
+              "available_inodes": 1275780,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:29:04.143870+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29824413696,
+              "available_inodes": 2061859,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5223415808,
+              "available_inodes": 1275769,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:29:06.144237+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29820919808,
+              "available_inodes": 2061855,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5219921920,
+              "available_inodes": 1275767,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:29:08.144558+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29820919808,
+              "available_inodes": 2061855,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5219921920,
+              "available_inodes": 1275767,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:29:10.144906+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29813104640,
+              "available_inodes": 2061847,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5202063360,
+              "available_inodes": 1275762,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:29:12.145295+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29811884032,
+              "available_inodes": 2061842,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5211144192,
+              "available_inodes": 1275763,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:29:14.145772+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29811884032,
+              "available_inodes": 2061842,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5211144192,
+              "available_inodes": 1275763,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:29:16.149725+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29811884032,
+              "available_inodes": 2061842,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5211144192,
+              "available_inodes": 1275763,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:29:18.150093+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29797539840,
+              "available_inodes": 2061834,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5196812288,
+              "available_inodes": 1275757,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:29:20.150469+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29797539840,
+              "available_inodes": 2061834,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5196812288,
+              "available_inodes": 1275757,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:29:22.150825+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29790887936,
+              "available_inodes": 2061826,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5173530624,
+              "available_inodes": 1275752,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:29:24.151214+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29790887936,
+              "available_inodes": 2061826,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5225664512,
+              "available_inodes": 1275780,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        }
+      ]
+    }
+  },
+  "checkpoint-metadata-source-validation": {
+    "12_metadata_source": {
+      "before": {
+        "utc": "2026-10-12T23:30:50.185994+00:00",
+        "paths": {
+          "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+            "available_bytes": 29789507584,
+            "available_inodes": 2061815,
+            "minimum_bytes": 2147483648
+          },
+          "/tmp": {
+            "available_bytes": 5225664512,
+            "available_inodes": 1275780,
+            "minimum_bytes": 1073741824
+          }
+        },
+        "qualified": true
+      },
+      "samples": [
+        {
+          "utc": "2026-10-12T23:30:50.186776+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29789503488,
+              "available_inodes": 2061811,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5225664512,
+              "available_inodes": 1275780,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        },
+        {
+          "utc": "2026-10-12T23:30:52.187032+00:00",
+          "paths": {
+            "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+              "available_bytes": 29789495296,
+              "available_inodes": 2061811,
+              "minimum_bytes": 2147483648
+            },
+            "/tmp": {
+              "available_bytes": 5225664512,
+              "available_inodes": 1275780,
+              "minimum_bytes": 1073741824
+            }
+          },
+          "qualified": true
+        }
+      ]
+    }
+  }
+}
