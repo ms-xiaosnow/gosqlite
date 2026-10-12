@@ -1,0 +1,57 @@
+{
+  "internal/pager/rollback_fault_sql_manual_linux.go": {
+    "protected_literal_comment_and_nonspace_text_equal": true,
+    "changed_bytes": true,
+    "normalized_sha256": "f1b07d3bded1bc001c40779b0b1acc3212f0b4f1560f74d502428db95a3ba9c4"
+  },
+  "internal/pager/rollback_io_manual_linux.go": {
+    "protected_literal_comment_and_nonspace_text_equal": true,
+    "changed_bytes": false,
+    "normalized_sha256": "6d5ec7c776b75c083f7824ddf0e33392507c0665cef05537634fc994f4f4c5cf"
+  },
+  "internal/testkit/rollbackfault/contract.go": {
+    "protected_literal_comment_and_nonspace_text_equal": true,
+    "changed_bytes": false,
+    "normalized_sha256": "979346002ee197cec2effb770d441cfe6559b0d4c95ebca82c74f08e24a53077"
+  },
+  "internal/testkit/rollbackfault/contract_test.go": {
+    "protected_literal_comment_and_nonspace_text_equal": true,
+    "changed_bytes": true,
+    "normalized_sha256": "23908e5cc7ce2cb2448c52889bf74678c6b498f32abcc3ff00558688d728a434"
+  },
+  "internal/testkit/rollbackfault/sql_ledger.go": {
+    "protected_literal_comment_and_nonspace_text_equal": true,
+    "changed_bytes": false,
+    "normalized_sha256": "de524e9b15c212a56c6662d590e8e5bd95b10e3bd8491de279237571008ad768"
+  },
+  "internal/testkit/rollbackfault/sql_ledger_test.go": {
+    "protected_literal_comment_and_nonspace_text_equal": true,
+    "changed_bytes": true,
+    "normalized_sha256": "cc91a5a3ce4c5d3729381ab4732e554c186e927f7885340f113e1241357777ff"
+  },
+  "internal/testscope/rollback_fault.go": {
+    "protected_literal_comment_and_nonspace_text_equal": true,
+    "changed_bytes": true,
+    "normalized_sha256": "59f94e7c10b6660c74fad3221b5992376760a40a69cca0b213069e97ccbf8a0b"
+  },
+  "internal/testscope/rollback_fault_sql.go": {
+    "protected_literal_comment_and_nonspace_text_equal": true,
+    "changed_bytes": true,
+    "normalized_sha256": "69cca895075d0da86a2bb722f80fa6f6a762878f86a8e23ed914ebe54fefe2b3"
+  },
+  "internal/testscope/rollback_fault_sql_test.go": {
+    "protected_literal_comment_and_nonspace_text_equal": true,
+    "changed_bytes": false,
+    "normalized_sha256": "f8558c584c6dce2e942d7e48b0e18b8ecde551360e069166f75c7f658465666e"
+  },
+  "internal/testscope/rollback_fault_test.go": {
+    "protected_literal_comment_and_nonspace_text_equal": true,
+    "changed_bytes": true,
+    "normalized_sha256": "1a59cb2c6b688403c14f311074917b31f91a4c1941aa736d3780858683c98948"
+  },
+  "sqlite/rollback_fault_sql_manual_linux_test.go": {
+    "protected_literal_comment_and_nonspace_text_equal": true,
+    "changed_bytes": true,
+    "normalized_sha256": "62d17576cece01fd2a86667029b7b8ad280c4035475af0008499dc0a14002e88"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "utc": "2026-10-12T23:01:34.556699+00:00",
+  "pid": 2,
+  "base_commit": "01c63e6f8fb3d9e196afe2f42a163eb3eac4ad5a",
+  "scope": "2failednormalroots rechecked,89oldnormalroots reused;91race then sourceguard/3list/3compile/3nm;noimageexecution",
+  "source_manifest_sha256": "bc62cc27b00c7830b308ea39c14a1c1dab73016feda08d591670ab6a33490550",
+  "tool_go_sha256": "548d3c32f83fa81152f543eb1526be7884cfe0526eb5e9ce29d3eca14786e7e0",
+  "tool_gofmt_sha256": "5583dbb3339147fee7cdb067eb3cd4a50015b48c27084377f49d93833aa4ad77",
+  "process_scope": "single coordinated Go queue; no claim of global cross-namespace visibility"
+}

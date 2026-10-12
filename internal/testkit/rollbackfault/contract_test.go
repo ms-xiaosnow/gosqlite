@@ -72,6 +72,8 @@ func fixtureEvents(spec PlanSpec) []Event {
 		switch action {
 		case FailBefore:
 			result = Result{ReturnedError: Injected, NormalizedError: Injected, Effect: EffectNone}
+		case MisplaceIndexPageMinus64:
+			result = Result{Executed: true, NativeN: 4096, ReturnedN: 4096, ReturnedError: Injected, NormalizedError: Injected, Effect: EffectPossible}
 		case PrefixShortWrite:
 			result = Result{Executed: true, NativeN: spec.Prefix, ReturnedN: spec.Prefix, NormalizedError: ShortWrite, Effect: EffectPrefix}
 			if spec.Prefix == 0 {
@@ -958,5 +960,201 @@ func TestRollbackFaultLargeBackedValidSubstringsPreserveAdmittedValues(t *testin
 	}
 	if observation.Pass() || observation.PhysicalValidated() {
 		t.Fatal("valid substring receipt became physical PASS")
+	}
+}
+
+// Independent literal plan: this fixture does not call the SQL plan builder.
+func misplacedIndexSpec() PlanSpec {
+	spec := PlanSpec{
+		Identity:  onePageSpec(Pass, 8).Identity,
+		MainOwner: 11, JournalOwner: 12, DirectoryOwner: 13, CleanupOwner: 14,
+		OriginalPages: 3, DirtyPages: 3, PageSize: 4096, SectorSize: 4096,
+		Action: MisplaceIndexPageMinus64, ExpectedCommit: CommitRecoveryRequired, CallCount: 15,
+		Calls: [MaxCalls]Call{
+			{Point: JournalCreate, Occurrence: 1, Role: Journal, Owner: 12},
+			{Point: JournalInvalid, Occurrence: 1, Role: Journal, Owner: 12, Length: 4096},
+			{Point: DBOriginalRead, Occurrence: 1, Role: Database, Owner: 11, Offset: 0, Length: 4096},
+			{Point: JournalRecord, Occurrence: 1, Role: Journal, Owner: 12, Offset: 4096, Length: 4104},
+			{Point: DBOriginalRead, Occurrence: 2, Role: Database, Owner: 11, Offset: 4096, Length: 4096},
+			{Point: JournalRecord, Occurrence: 2, Role: Journal, Owner: 12, Offset: 8200, Length: 4104},
+			{Point: DBOriginalRead, Occurrence: 3, Role: Database, Owner: 11, Offset: 8192, Length: 4096},
+			{Point: JournalRecord, Occurrence: 3, Role: Journal, Owner: 12, Offset: 12304, Length: 4104},
+			{Point: JournalBodySync, Occurrence: 1, Role: Journal, Owner: 12},
+			{Point: JournalValidHeader, Occurrence: 1, Role: Journal, Owner: 12, Length: 12},
+			{Point: JournalHeaderSync, Occurrence: 1, Role: Journal, Owner: 12},
+			{Point: PublishDirectorySync, Occurrence: 1, Role: Directory, Owner: 13},
+			{Point: DBPage, Occurrence: 1, Role: Database, Owner: 11, Offset: 0, Length: 4096},
+			{Point: DBPage, Occurrence: 2, Role: Database, Owner: 11, Offset: 4096, Length: 4096},
+			{Point: DBPage, Occurrence: 3, Role: Database, Owner: 11, Offset: 8192, Length: 4096},
+		},
+	}
+	spec.Target = spec.Calls[14]
+	return spec
+}
+
+// The only additional action is a fixed actual placement, not a caller offset.
+func TestRollbackFaultMisplacementAdmissionIsExact(t *testing.T) {
+	plan, problem := NewPlan(misplacedIndexSpec())
+	if problem != NoProblem {
+		t.Fatal(problem)
+	}
+	spec := plan.Spec()
+	if spec.Action != MisplaceIndexPageMinus64 || spec.CallCount != 15 || spec.Target != (Call{Point: DBPage, Occurrence: 3, Role: Database, Offset: 8192, Length: 4096, Owner: 11}) || spec.Prefix != 0 || spec.PrefixError || spec.ExpectedCommit != CommitRecoveryRequired {
+		t.Fatal("fixed misplacement plan differs", spec)
+	}
+	observation := observe(t, spec, fixtureEvents(spec))
+	if observation.Outcome != AdapterObserved || observation.EventCount != 35 || observation.TargetHits != 1 || observation.Problem != NoProblem || observation.Pass() || observation.PhysicalValidated() {
+		t.Fatal("one complete misplaced-write trace must remain nonphysical", observation)
+	}
+	for _, name := range []string{"occurrence", "journal-role", "directory-role", "owner", "offset-minus64", "offset-plus64", "offset-zero", "length-prefix", "length-short", "dirty-two", "dirty-four", "original-two", "original-four", "page-size", "sector-size", "prefix", "prefix-error", "call-count", "success", "uncertain", "original-read-inventory", "dirty-write-inventory"} {
+		bad := spec
+		switch name {
+		case "occurrence":
+			bad.Target.Occurrence = 2
+		case "journal-role":
+			bad.Target.Role = Journal
+		case "directory-role":
+			bad.Target.Role = Directory
+		case "owner":
+			bad.Target.Owner = bad.JournalOwner
+		case "offset-minus64":
+			bad.Target.Offset = 8128
+		case "offset-plus64":
+			bad.Target.Offset = 8256
+		case "offset-zero":
+			bad.Target.Offset = 0
+		case "length-prefix":
+			bad.Target.Length = 64
+		case "length-short":
+			bad.Target.Length = 4095
+		case "dirty-two":
+			bad.DirtyPages = 2
+		case "dirty-four":
+			bad.DirtyPages = 4
+		case "original-two":
+			bad.OriginalPages = 2
+		case "original-four":
+			bad.OriginalPages = 4
+		case "page-size":
+			bad.PageSize = 8192
+		case "sector-size":
+			bad.SectorSize = 512
+		case "prefix":
+			bad.Prefix = 64
+		case "prefix-error":
+			bad.PrefixError = true
+		case "call-count":
+			bad.CallCount = 16
+		case "success":
+			bad.ExpectedCommit = CommitSucceeded
+		case "uncertain":
+			bad.ExpectedCommit = CommitUncertain
+		case "original-read-inventory":
+			bad.Calls[4].Offset = 8192
+		case "dirty-write-inventory":
+			bad.Calls[13].Offset = 8192
+		}
+		if _, problem := NewPlan(bad); problem == NoProblem {
+			t.Fatal("misplacement selector accepted", name)
+		}
+	}
+	for value := 0; value <= 255; value++ {
+		bad := spec
+		bad.Target.Point = Point(value)
+		if bad.Target.Point != DBPage {
+			if _, problem := NewPlan(bad); problem == NoProblem {
+				t.Fatal("misplacement point accepted", value)
+			}
+		}
+		bad = spec
+		bad.Target.Role = Role(value)
+		if bad.Target.Role != Database {
+			if _, problem := NewPlan(bad); problem == NoProblem {
+				t.Fatal("misplacement role accepted", value)
+			}
+		}
+		bad = spec
+		bad.Target.Occurrence = uint8(value)
+		if value != 3 {
+			if _, problem := NewPlan(bad); problem == NoProblem {
+				t.Fatal("misplacement occurrence accepted", value)
+			}
+		}
+		bad = spec
+		bad.Action = Action(value)
+		if value > int(MisplaceIndexPageMinus64) {
+			if _, problem := NewPlan(bad); problem == NoProblem {
+				t.Fatal("future action accepted", value)
+			}
+		}
+	}
+	for i := 0; i < 12; i++ {
+		if _, problem := NewPlan(onePageSpec(MisplaceIndexPageMinus64, i)); problem == NoProblem {
+			t.Fatal("one-page action accepted", i)
+		}
+	}
+}
+
+func TestRollbackFaultMisplacementNativeResultsKeepOriginalError(t *testing.T) {
+	plan, problem := NewPlan(misplacedIndexSpec())
+	if problem != NoProblem {
+		t.Fatal(problem)
+	}
+	spec := plan.Spec()
+	for _, name := range []string{"success-exposed", "prefix", "short-nil", "negative-native", "oversized-native", "unexecuted", "wrong-effect", "short-write", "normalized-nil", "returned-token", "requested-offset", "masked-native-error", "masked-native-token", "success-commit", "uncertain-commit", "missing-target", "logical-open", "pending-owner", "unknown-owner"} {
+		events := fixtureEvents(spec)
+		result := &events[30].Result
+		switch name {
+		case "success-exposed":
+			result.ReturnedError, result.NormalizedError = None, None
+		case "prefix":
+			result.NativeN, result.ReturnedN = 64, 64
+		case "short-nil":
+			result.NativeN, result.ReturnedN, result.ReturnedError, result.NormalizedError = 4095, 4095, None, ShortWrite
+		case "negative-native":
+			result.NativeN = -1
+		case "oversized-native":
+			result.NativeN = 4097
+		case "unexecuted":
+			result.Executed = false
+		case "wrong-effect":
+			result.Effect = EffectPrefix
+		case "short-write":
+			result.ReturnedError, result.NormalizedError = ShortWrite, ShortWrite
+		case "normalized-nil":
+			result.NormalizedError = None
+		case "returned-token":
+			result.ReturnedErrorToken = 71
+		case "requested-offset":
+			events[30].Call.Offset = 8128
+		case "masked-native-error":
+			result.NativeError, result.NativeErrorToken, result.Effect = Underlying, 71, EffectUnknown
+		case "masked-native-token":
+			result.NativeError, result.NativeErrorToken, result.Effect = Underlying, 71, EffectUnknown
+			result.ReturnedError, result.ReturnedErrorToken = Underlying, 72
+			result.NormalizedError, result.NormalizedErrorToken = Underlying, 72
+		case "success-commit":
+			events[31].Commit.Class = CommitSucceeded
+		case "uncertain-commit":
+			events[31].Commit.Class = CommitUncertain
+		case "missing-target":
+			events[31].Commit.TargetError = None
+		case "logical-open":
+			events[31].Commit.Logical = LogicalOpen
+		case "pending-owner":
+			events[32].Owners.Cleanup = OwnerPending
+		case "unknown-owner":
+			events[32].Owners.Journal = OwnerUnknown
+		}
+		mustNotQualify(t, observe(t, spec, events))
+	}
+	for _, count := range []int{0, 64, 4095, 4096} {
+		events := fixtureEvents(spec)
+		events[30].Result = Result{Executed: true, NativeN: count, NativeError: Underlying, NativeErrorToken: 71, ReturnedN: count, ReturnedError: Underlying, ReturnedErrorToken: 71, NormalizedError: Underlying, NormalizedErrorToken: 71, Effect: EffectUnknown}
+		events[31].Commit.TargetError, events[31].Commit.TargetErrorToken = Underlying, 71
+		observation := observe(t, spec, events)
+		if observation.Outcome != ObservationRefused || observation.Problem != ProblemUnderlyingFailure {
+			t.Fatal("original native error must remain refused evidence", count, observation)
+		}
 	}
 }

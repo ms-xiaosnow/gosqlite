@@ -1,0 +1,37 @@
+{
+  "files": {
+    "internal/testscope/rollback_fault_test.go": [
+      "TestRollbackFaultSourceContracts",
+      "TestRollbackFaultRepinnedSemanticCounterexamples",
+      "TestRollbackFaultOutsideConsumersRejected",
+      "TestRollbackFaultGuardWiringPreservesPriorPolicies",
+      "TestRollbackFaultMisplacementDoubleRepinnedCounterexamples"
+    ],
+    "internal/testscope/rollback_fault_sql_test.go": [
+      "TestRollbackFaultSQLSourceContracts",
+      "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+      "TestRollbackFaultSQLOutsideConsumersAndOldEntriesRejected",
+      "TestRollbackFaultSQLOrdinaryRecoveryExceptionIsOneReference",
+      "TestRollbackFaultSQLWiringAndMainReviewHold",
+      "TestRollbackFaultSQLOrdinaryExampleFields",
+      "TestRollbackFaultSQLOrdinaryExamplesKeepModelBoundary",
+      "TestRollbackFaultSQLOrdinaryFieldBindingsReject",
+      "TestRollbackFaultSQLOrdinaryCompanionFailures"
+    ],
+    "internal/testscope/rollback_restart_test.go": [
+      "TestRollbackRestartOwnedSourceContracts",
+      "TestRollbackRestartDoubleRepinnedSelectionAndStubCounterexamples",
+      "TestRollbackRestartOutsideConsumersAndAliasesRejected",
+      "TestRollbackRestartOldCoreAndMutexWrapperStayExact",
+      "TestRollbackRestartWiringPreservesAllPoliciesAndReviewHold",
+      "TestRollbackRestartDoubleRepinnedNativeProtocolCounterexamples",
+      "TestRollbackRestartDoubleRepinnedModelCausalCounterexamples",
+      "TestRollbackRestartOracleExceptionRequiresCompletePinnedNativeClosure",
+      "TestRollbackRestartDoubleRepinnedCommandCapabilityClosure",
+      "TestRollbackRestartDoubleRepinnedLaunchInputClosure"
+    ]
+  },
+  "root_count": 24,
+  "run_selector": "^(TestRollbackFaultSourceContracts|TestRollbackFaultRepinnedSemanticCounterexamples|TestRollbackFaultOutsideConsumersRejected|TestRollbackFaultGuardWiringPreservesPriorPolicies|TestRollbackFaultMisplacementDoubleRepinnedCounterexamples|TestRollbackFaultSQLSourceContracts|TestRollbackFaultSQLRepinnedSemanticCounterexamples|TestRollbackFaultSQLOutsideConsumersAndOldEntriesRejected|TestRollbackFaultSQLOrdinaryRecoveryExceptionIsOneReference|TestRollbackFaultSQLWiringAndMainReviewHold|TestRollbackFaultSQLOrdinaryExampleFields|TestRollbackFaultSQLOrdinaryExamplesKeepModelBoundary|TestRollbackFaultSQLOrdinaryFieldBindingsReject|TestRollbackFaultSQLOrdinaryCompanionFailures|TestRollbackRestartOwnedSourceContracts|TestRollbackRestartDoubleRepinnedSelectionAndStubCounterexamples|TestRollbackRestartOutsideConsumersAndAliasesRejected|TestRollbackRestartOldCoreAndMutexWrapperStayExact|TestRollbackRestartWiringPreservesAllPoliciesAndReviewHold|TestRollbackRestartDoubleRepinnedNativeProtocolCounterexamples|TestRollbackRestartDoubleRepinnedModelCausalCounterexamples|TestRollbackRestartOracleExceptionRequiresCompletePinnedNativeClosure|TestRollbackRestartDoubleRepinnedCommandCapabilityClosure|TestRollbackRestartDoubleRepinnedLaunchInputClosure)$",
+  "status": "NOT_RUN"
+}

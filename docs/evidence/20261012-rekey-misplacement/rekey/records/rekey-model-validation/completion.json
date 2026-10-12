@@ -1,0 +1,53 @@
+{
+  "utc": "2026-10-12T22:26:15.044698+00:00",
+  "status": "PASS",
+  "commands": [
+    {
+      "name": "01_format",
+      "start_utc": "2026-10-12T22:26:10.332991+00:00",
+      "end_utc": "2026-10-12T22:26:12.334663+00:00",
+      "exit_code": 0,
+      "resource_breach_latched": false,
+      "observer_error": null,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "PASS"
+    },
+    {
+      "name": "02_normal",
+      "start_utc": "2026-10-12T22:26:12.794897+00:00",
+      "end_utc": "2026-10-12T22:26:14.796503+00:00",
+      "exit_code": 0,
+      "resource_breach_latched": false,
+      "observer_error": null,
+      "stdout_sha256": "03c2626750df24688c0b46efaf1c33656fea3ce7f3b9deae6e0bc954d1c99d2e",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tests": {
+        "github.com/ms-xiaosnow/gosqlite/internal/testkit/rekeyinterruption": {
+          "roots": [
+            "TestRekeyInterruptionAckCausality",
+            "TestRekeyInterruptionCredentialPurpose",
+            "TestRekeyInterruptionCutOrder",
+            "TestRekeyInterruptionNeverPhysicalPass",
+            "TestRekeyInterruptionOwnersAndArtifacts",
+            "TestRekeyInterruptionSQLIndexLedger",
+            "TestRekeyInterruptionSelectedGeneration",
+            "TestRekeyInterruptionSixCases"
+          ],
+          "root_count": 8,
+          "named_pass": 8,
+          "child_pass": 0,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "status": "PASS"
+    }
+  ],
+  "source_unchanged": true,
+  "manual_image_executed": false,
+  "unrelated_tests": "REUSED, not rerun",
+  "prior_tests": "Unchanged unrelated source closures reuse their recorded applicable evidence",
+  "rerun_reason": "New independent value-only model package initial8rootnormal. Native/controller/guard not integrated or executed; no priorchecksrepeated",
+  "lease": "RELEASED_ON_RETURN"
+}

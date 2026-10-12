@@ -1,0 +1,121 @@
+{
+  "status": "SOURCE_ONLY_REVIEW_HOLD",
+  "proposal_sha256": "f1a563a176bd09ed5c3718ed1571b6900ef5e87f787bf35b1ac5fbdfa28a1e1e",
+  "overlay_files": [
+    {
+      "path": "docs/testing/rekey-interruption-manual-zh.md",
+      "bytes": 12983,
+      "sha256": "25baafd77286649973669711218f8c6d1ffdc1ce434ae4a4315664ac503e8ce8",
+      "base_sha256": null
+    },
+    {
+      "path": "internal/encstore/publish.go",
+      "bytes": 14815,
+      "sha256": "d4a3d5f2cfb99e2413dbd271f113cc2b08203a4635ef10638bc43ff022d2fc29",
+      "base_sha256": "adffe2f3c8c4db58a39e3719a72c5ee69f389eccefde876b4e36285dc663ae93"
+    },
+    {
+      "path": "internal/encstore/rekey_interruption_manual_linux.go",
+      "bytes": 11679,
+      "sha256": "c7b8362b2098e9ec046acca468b0dcc698552a827bcc01586bf5b3d80c72be8a",
+      "base_sha256": null
+    },
+    {
+      "path": "internal/encstore/rekey_observation.go",
+      "bytes": 236,
+      "sha256": "5328be5bb42fb4207331d24d8c7bc157d37244836c24384a72b01ed26f68fbcc",
+      "base_sha256": null
+    },
+    {
+      "path": "internal/encstore/rekey_observation_default.go",
+      "bytes": 181,
+      "sha256": "0c44d0577df486ca116b3f332a71f45e34e58367df64e112dba8387c2dfe51bb",
+      "base_sha256": null
+    },
+    {
+      "path": "internal/testkit/rekeyinterruption/contract.go",
+      "bytes": 42671,
+      "sha256": "fd351a9dc85d574d32d5e67763ae898b732ce30a23949c10f7a7ccdc13ab796a",
+      "base_sha256": null
+    },
+    {
+      "path": "internal/testkit/rekeyinterruption/contract_test.go",
+      "bytes": 24332,
+      "sha256": "2b7b89d5f367fb6dba1985feaaa9f2d4b52c68c076ec5ed270bd7233b80300df",
+      "base_sha256": null
+    },
+    {
+      "path": "sqlite/rekey_interruption_manual_linux_test.go",
+      "bytes": 68567,
+      "sha256": "f267deaf827ce746dbe6ac70b7be134c6c0418e777a843ce1a11e65f5c7a183f",
+      "base_sha256": null
+    }
+  ],
+  "patch_sha256": "6e6f1744c5db6d49e394f6c30c4c90395ca26d8a63a818b9f3a5f023b36f4d36",
+  "model_roots": [
+    "TestRekeyInterruptionSixCases",
+    "TestRekeyInterruptionCutOrder",
+    "TestRekeyInterruptionCredentialPurpose",
+    "TestRekeyInterruptionSelectedGeneration",
+    "TestRekeyInterruptionSQLIndexLedger",
+    "TestRekeyInterruptionAckCausality",
+    "TestRekeyInterruptionOwnersAndArtifacts",
+    "TestRekeyInterruptionNeverPhysicalPass"
+  ],
+  "model_selector": "^(TestRekeyInterruptionSixCases|TestRekeyInterruptionCutOrder|TestRekeyInterruptionCredentialPurpose|TestRekeyInterruptionSelectedGeneration|TestRekeyInterruptionSQLIndexLedger|TestRekeyInterruptionAckCausality|TestRekeyInterruptionOwnersAndArtifacts|TestRekeyInterruptionNeverPhysicalPass)$",
+  "guard_roots": [
+    "TestRekeyGuardInventoryGate",
+    "TestRekeyGuardPublicationOrder",
+    "TestRekeyGuardObserverIsolation",
+    "TestRekeyGuardPublicReturnACK",
+    "TestRekeyGuardProcessOwnership",
+    "TestRekeyGuardProbeLedger",
+    "TestRekeyGuardIntegrationDefault"
+  ],
+  "guard_selector": "^(TestRekeyGuardInventoryGate|TestRekeyGuardPublicationOrder|TestRekeyGuardObserverIsolation|TestRekeyGuardPublicReturnACK|TestRekeyGuardProcessOwnership|TestRekeyGuardProbeLedger|TestRekeyGuardIntegrationDefault)$",
+  "native_roots": [
+    "TestManualRekeyInterruptionController",
+    "TestManualRekeyInterruptionWriter",
+    "TestManualRekeyInterruptionOldProbe",
+    "TestManualRekeyInterruptionNewProbe",
+    "TestManualRekeyInterruptionArchive"
+  ],
+  "model_test_count": 8,
+  "guard_test_count": 7,
+  "cases": [
+    "control",
+    "before-root-rename",
+    "after-root-rename-before-dirsync",
+    "after-root-dirsync-before-adoption",
+    "rekey-returned-no-ack",
+    "acknowledged-exit"
+  ],
+  "profile": "linux-layout1-rawkey256-4096",
+  "execution": {
+    "Go": "NOT_RUN",
+    "gofmt": "NOT_RUN",
+    "parser": "NOT_RUN",
+    "tests": "NOT_RUN",
+    "compiler": "NOT_RUN",
+    "source_selection": "NOT_RUN",
+    "fixture": "NOT_RUN",
+    "wrong_key": "NOT_RUN",
+    "process_exit": "NOT_RUN",
+    "archive": "NOT_RUN",
+    "recovery": "NOT_RUN",
+    "physical": "NOT_RUN"
+  },
+  "guard_overlay": "../rekey-guard-overlay",
+  "independent_review": "SOURCE_REVIEW_CLEAR_WITH_LIMITS for observer/native/model/docs; separate guard/main review pending",
+  "physical_validated": false,
+  "review_corrections": [
+    "controller retains unresolved actual Wait across failed test return",
+    "nil ProcessState stays unknown in timer-backed passive hold without another Wait",
+    "terminal event EOF rejects trailing protocol bytes",
+    "native/model fixture.gse and distinct role generations",
+    "optional Control archive modeled both ways",
+    "exact restore family nonce labeling",
+    "SignalNumber scalar preserves existing inspectSource exception",
+    "plaintext logical-page/counter equality explicitly synthetic-only"
+  ]
+}

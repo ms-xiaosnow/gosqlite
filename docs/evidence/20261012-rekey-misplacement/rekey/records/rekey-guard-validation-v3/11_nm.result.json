@@ -1,0 +1,18 @@
+{
+  "name": "11_nm",
+  "start_utc": "2026-10-12T22:53:29.156759+00:00",
+  "end_utc": "2026-10-12T22:53:31.158239+00:00",
+  "exit_code": 0,
+  "resource_breach_latched": false,
+  "observer_error": null,
+  "stdout_sha256": "c05720894bc946afc7490c4caadb0c45ce07b407532990344ba5dcfb33c9bdc8",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "symbols": {
+    "required": 456,
+    "absent": 10,
+    "nm_rows": 11874,
+    "image_sha256": "af32b10e083dc53fb297737881edfa50b1f66d6db824ab2a56a1ef71ce337173",
+    "image_executed": false
+  },
+  "status": "PASS"
+}

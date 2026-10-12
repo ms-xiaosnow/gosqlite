@@ -1,0 +1,8 @@
+[
+  {
+    "path": "rekey-final-integration/processes-before-format.txt",
+    "bytes": 4256,
+    "sha256": "5dc0fe5adf53c85d2038a919bf3e4d601a111ca9e9a9b2c15d50ebe8e622c2dd",
+    "reason": "Process-wrapper infrastructure and non-task environment details are outside the fixed recorded validation environment; original remains local."
+  }
+]

@@ -3,6 +3,7 @@
 package pager
 
 import (
+	"crypto/sha256"
 	"errors"
 	"io"
 	"os"
@@ -44,6 +45,7 @@ type rollbackFaultScope struct {
 	journalUnknown   bool
 	targetError      error
 	targetErrorToken uint64
+	misplacedWrite   rollbackfault.SQLMisplacedWrite
 }
 
 type rollbackFaultTicket struct {
@@ -94,6 +96,11 @@ func armRollbackFault(t *Tx, plan rollbackfault.Plan) (*rollbackFaultScope, erro
 	originals := t.journalPages(dirty)
 	if len(originals) == 0 || len(originals) > 4 || int(spec.OriginalPages) != len(originals) || int(spec.DirtyPages) != len(dirty) {
 		return nil, errRollbackFaultScope
+	}
+	if spec.Action == rollbackfault.MisplaceIndexPageMinus64 {
+		if t.info.Size() != 12288 || t.originalPages != 3 || t.header.PageCount != 3 || len(dirty) != 3 || dirty[0] != 1 || dirty[1] != 2 || dirty[2] != 3 || len(originals) != 3 || originals[0] != 1 || originals[1] != 2 || originals[2] != 3 || len(t.dirty[2]) != 4096 || len(t.dirty[3]) != 4096 || t.dirty[1][100] != 13 || t.dirty[2][0] != 13 || t.dirty[3][0] != 10 {
+			return nil, errRollbackFaultScope
+		}
 	}
 	// Bind the frozen manifest to this Tx's exact page order, not a similar path.
 	for i := 0; i < int(spec.CallCount); i++ {
@@ -356,11 +363,30 @@ type rollbackFaultWriter struct {
 	nativeErr   error
 	returnedN   int
 	returnedErr error
+	misplaced   rollbackfault.SQLMisplacedWrite
 }
 
 // Only the original managed owner is invoked, once. No raw descriptor, bypass,
 // arbitrary callback, retry, extra Sync or hidden second injected failure.
 func (w *rollbackFaultWriter) WriteAt(b []byte, off int64) (int, error) {
+	if w.action == rollbackfault.MisplaceIndexPageMinus64 {
+		if off != 8192 || len(b) != 4096 || w.misplaced != (rollbackfault.SQLMisplacedWrite{}) {
+			w.returnedErr = errRollbackFaultScope
+			return 0, w.returnedErr
+		}
+		nativeOffset := off - 64
+		w.misplaced.RequestedOffset, w.misplaced.RequestedBytes = off, len(b)
+		w.misplaced.NativeOffset, w.misplaced.NativeBytes = nativeOffset, len(b)
+		w.misplaced.PayloadSHA256 = sha256.Sum256(b)
+		w.executed = true
+		w.misplaced.NativeCalls++
+		w.nativeN, w.nativeErr = w.file.WriteAt(b, nativeOffset)
+		w.returnedN, w.returnedErr = w.nativeN, w.nativeErr
+		if w.nativeErr == nil && w.nativeN == 4096 {
+			w.returnedErr = errRollbackFaultInjected
+		}
+		return w.returnedN, w.returnedErr
+	}
 	if w.action == rollbackfault.FailBefore {
 		w.returnedErr = errRollbackFaultInjected
 		return 0, w.returnedErr
@@ -395,6 +421,16 @@ func rollbackWrite(t *Tx, point rollbackIOPoint, f *vfs.File, b []byte, off int6
 		effect = rollbackfault.EffectNone
 	} else if w.action == rollbackfault.PrefixShortWrite && w.nativeN == w.prefix {
 		effect = rollbackfault.EffectPrefix
+	}
+	if ticket.action == rollbackfault.MisplaceIndexPageMinus64 {
+		s := ticket.scope
+		s.mu.Lock()
+		if s.misplacedWrite != (rollbackfault.SQLMisplacedWrite{}) || !s.inFlight || ticket.call != spec.Target || ticket.call.Point != rollbackfault.DBPage || ticket.call.Occurrence != 3 || ticket.call.Owner != spec.MainOwner || ticket.call.Role != rollbackfault.Database || ticket.call.Offset != 8192 || ticket.call.Length != 4096 || w.misplaced.RequestedOffset != ticket.call.Offset || w.misplaced.RequestedBytes != ticket.call.Length || w.misplaced.NativeOffset != 8128 || w.misplaced.NativeBytes != 4096 || w.misplaced.NativeCalls != 1 {
+			s.problem = errRollbackFaultScope
+		} else {
+			s.misplacedWrite = w.misplaced
+		}
+		s.mu.Unlock()
 	}
 	rollbackFaultAfter(ticket, w.executed, w.nativeN, w.nativeErr, w.returnedN, w.returnedErr, err, effect)
 	return err

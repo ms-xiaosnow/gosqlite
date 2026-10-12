@@ -1,0 +1,8 @@
+{
+  "status": "RELEASED",
+  "identity_sha256": "55200eba71c1b1ed412704a0a433ca0e59fc5f44dc35e651629e48fa6c0f6b27",
+  "review": "Independent reviewer CLEAR message2026-10-12T22:56:03Z; source54+13models/24AST andexact2seams+13commandtemplate verified",
+  "runner_sha256": "0c78621e787e630cb0c9b4b03e1125e47d320ca2a390e123e170fd542cf13ab0",
+  "scope": "91pure/source roots normal/race,sourceguard,3list,3compile,3nm; never execute target images",
+  "utc": "2026-10-12T22:56:27.992067+00:00"
+}

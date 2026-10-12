@@ -1,0 +1,17 @@
+{
+  "name": "12_nm_fault-pager",
+  "start_utc": "2026-10-12T23:04:49.657478+00:00",
+  "end_utc": "2026-10-12T23:04:51.658861+00:00",
+  "exit_code": 0,
+  "resource_breach_latched": false,
+  "observer_error": null,
+  "stdout_sha256": "38b65661654dc2666ec5e96c00f718866e047f7b8dacc1eee513ed8b74e526d4",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "symbols": {
+    "required": 156,
+    "exact_root_set": true,
+    "image_sha256": "618fc6b07f18f7ce309b1c74af5b8e8ea51196791cb57f6f63e993e7ff65bb93",
+    "image_executed": false
+  },
+  "status": "PASS"
+}

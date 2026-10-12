@@ -1,0 +1,1 @@
+5583dbb3339147fee7cdb067eb3cd4a50015b48c27084377f49d93833aa4ad77  /workspace/scratch/5e06a74e5f65/restart-20261012T2033/toolchains/go1.27.2/bin/gofmt

@@ -1,0 +1,564 @@
+{
+  "observed_at": "2026-10-12T22:34:49.007Z",
+  "run": {
+    "id": 38315462277,
+    "name": "ordinary-checks",
+    "node_id": "WFR_kwLOVDg6U88AAAAI68eOhQ",
+    "head_branch": "main",
+    "head_sha": "01c63e6f8fb3d9e196afe2f42a163eb3eac4ad5a",
+    "path": ".github/workflows/check.yml",
+    "display_title": "test: check publication errno and nonce reuse",
+    "run_number": 58,
+    "event": "push",
+    "status": "completed",
+    "conclusion": "success",
+    "workflow_id": 380397707,
+    "check_suite_id": 103812017924,
+    "check_suite_node_id": "CS_kwDOVDg6U88AAAAYK62vBA",
+    "url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/actions/runs/38315462277",
+    "html_url": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38315462277",
+    "pull_requests": [],
+    "created_at": "2026-10-12T22:14:05Z",
+    "updated_at": "2026-10-12T22:32:36Z",
+    "actor": {
+      "login": "ms-xiaosnow",
+      "id": 16814637,
+      "node_id": "MDQ6VXNlcjE2ODE0NjM3",
+      "avatar_url": "https://avatars.githubusercontent.com/u/16814637?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/ms-xiaosnow",
+      "html_url": "https://github.com/ms-xiaosnow",
+      "followers_url": "https://api.github.com/users/ms-xiaosnow/followers",
+      "following_url": "https://api.github.com/users/ms-xiaosnow/following{/other_user}",
+      "gists_url": "https://api.github.com/users/ms-xiaosnow/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/ms-xiaosnow/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/ms-xiaosnow/subscriptions",
+      "organizations_url": "https://api.github.com/users/ms-xiaosnow/orgs",
+      "repos_url": "https://api.github.com/users/ms-xiaosnow/repos",
+      "events_url": "https://api.github.com/users/ms-xiaosnow/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/ms-xiaosnow/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "run_attempt": 1,
+    "referenced_workflows": [],
+    "run_started_at": "2026-10-12T22:14:05Z",
+    "triggering_actor": {
+      "login": "ms-xiaosnow",
+      "id": 16814637,
+      "node_id": "MDQ6VXNlcjE2ODE0NjM3",
+      "avatar_url": "https://avatars.githubusercontent.com/u/16814637?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/ms-xiaosnow",
+      "html_url": "https://github.com/ms-xiaosnow",
+      "followers_url": "https://api.github.com/users/ms-xiaosnow/followers",
+      "following_url": "https://api.github.com/users/ms-xiaosnow/following{/other_user}",
+      "gists_url": "https://api.github.com/users/ms-xiaosnow/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/ms-xiaosnow/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/ms-xiaosnow/subscriptions",
+      "organizations_url": "https://api.github.com/users/ms-xiaosnow/orgs",
+      "repos_url": "https://api.github.com/users/ms-xiaosnow/repos",
+      "events_url": "https://api.github.com/users/ms-xiaosnow/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/ms-xiaosnow/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "jobs_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/actions/runs/38315462277/jobs",
+    "logs_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/actions/runs/38315462277/logs",
+    "check_suite_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/check-suites/103812017924",
+    "artifacts_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/actions/runs/38315462277/artifacts",
+    "cancel_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/actions/runs/38315462277/cancel",
+    "rerun_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/actions/runs/38315462277/rerun",
+    "previous_attempt_url": null,
+    "workflow_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/actions/workflows/380397707",
+    "head_commit": {
+      "id": "01c63e6f8fb3d9e196afe2f42a163eb3eac4ad5a",
+      "tree_id": "f7f21edf0c5c2dbde7c55340d14f39d004d218e3",
+      "message": "test: check publication errno and nonce reuse",
+      "timestamp": "2026-10-12T22:13:55Z",
+      "author": {
+        "name": "ms-xiaosnow",
+        "email": "1103184133@qq.com"
+      },
+      "committer": {
+        "name": "ms-xiaosnow",
+        "email": "1103184133@qq.com"
+      }
+    },
+    "repository": {
+      "id": 1412971091,
+      "node_id": "R_kgDOVDg6Uw",
+      "name": "gosqlite",
+      "full_name": "ms-xiaosnow/gosqlite",
+      "private": true,
+      "owner": {
+        "login": "ms-xiaosnow",
+        "id": 16814637,
+        "node_id": "MDQ6VXNlcjE2ODE0NjM3",
+        "avatar_url": "https://avatars.githubusercontent.com/u/16814637?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/ms-xiaosnow",
+        "html_url": "https://github.com/ms-xiaosnow",
+        "followers_url": "https://api.github.com/users/ms-xiaosnow/followers",
+        "following_url": "https://api.github.com/users/ms-xiaosnow/following{/other_user}",
+        "gists_url": "https://api.github.com/users/ms-xiaosnow/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/ms-xiaosnow/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/ms-xiaosnow/subscriptions",
+        "organizations_url": "https://api.github.com/users/ms-xiaosnow/orgs",
+        "repos_url": "https://api.github.com/users/ms-xiaosnow/repos",
+        "events_url": "https://api.github.com/users/ms-xiaosnow/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/ms-xiaosnow/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/ms-xiaosnow/gosqlite",
+      "description": null,
+      "fork": false,
+      "url": "https://api.github.com/repos/ms-xiaosnow/gosqlite",
+      "forks_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/forks",
+      "keys_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/keys{/key_id}",
+      "collaborators_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/collaborators{/collaborator}",
+      "teams_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/teams",
+      "hooks_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/hooks",
+      "issue_events_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/issues/events{/number}",
+      "events_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/events",
+      "assignees_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/assignees{/user}",
+      "branches_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/branches{/branch}",
+      "tags_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/tags",
+      "blobs_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/git/blobs{/sha}",
+      "git_tags_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/git/tags{/sha}",
+      "git_refs_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/git/refs{/sha}",
+      "trees_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/git/trees{/sha}",
+      "statuses_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/statuses/{sha}",
+      "languages_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/languages",
+      "stargazers_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/stargazers",
+      "contributors_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/contributors",
+      "subscribers_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/subscribers",
+      "subscription_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/subscription",
+      "commits_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/commits{/sha}",
+      "git_commits_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/git/commits{/sha}",
+      "comments_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/comments{/number}",
+      "issue_comment_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/issues/comments{/number}",
+      "contents_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/contents/{+path}",
+      "compare_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/compare/{base}...{head}",
+      "merges_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/merges",
+      "archive_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/{archive_format}{/ref}",
+      "downloads_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/downloads",
+      "issues_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/issues{/number}",
+      "pulls_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/pulls{/number}",
+      "milestones_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/milestones{/number}",
+      "notifications_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/notifications{?since,all,participating}",
+      "labels_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/labels{/name}",
+      "releases_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/releases{/id}",
+      "deployments_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/deployments"
+    },
+    "head_repository": {
+      "id": 1412971091,
+      "node_id": "R_kgDOVDg6Uw",
+      "name": "gosqlite",
+      "full_name": "ms-xiaosnow/gosqlite",
+      "private": true,
+      "owner": {
+        "login": "ms-xiaosnow",
+        "id": 16814637,
+        "node_id": "MDQ6VXNlcjE2ODE0NjM3",
+        "avatar_url": "https://avatars.githubusercontent.com/u/16814637?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/ms-xiaosnow",
+        "html_url": "https://github.com/ms-xiaosnow",
+        "followers_url": "https://api.github.com/users/ms-xiaosnow/followers",
+        "following_url": "https://api.github.com/users/ms-xiaosnow/following{/other_user}",
+        "gists_url": "https://api.github.com/users/ms-xiaosnow/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/ms-xiaosnow/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/ms-xiaosnow/subscriptions",
+        "organizations_url": "https://api.github.com/users/ms-xiaosnow/orgs",
+        "repos_url": "https://api.github.com/users/ms-xiaosnow/repos",
+        "events_url": "https://api.github.com/users/ms-xiaosnow/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/ms-xiaosnow/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/ms-xiaosnow/gosqlite",
+      "description": null,
+      "fork": false,
+      "url": "https://api.github.com/repos/ms-xiaosnow/gosqlite",
+      "forks_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/forks",
+      "keys_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/keys{/key_id}",
+      "collaborators_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/collaborators{/collaborator}",
+      "teams_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/teams",
+      "hooks_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/hooks",
+      "issue_events_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/issues/events{/number}",
+      "events_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/events",
+      "assignees_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/assignees{/user}",
+      "branches_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/branches{/branch}",
+      "tags_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/tags",
+      "blobs_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/git/blobs{/sha}",
+      "git_tags_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/git/tags{/sha}",
+      "git_refs_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/git/refs{/sha}",
+      "trees_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/git/trees{/sha}",
+      "statuses_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/statuses/{sha}",
+      "languages_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/languages",
+      "stargazers_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/stargazers",
+      "contributors_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/contributors",
+      "subscribers_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/subscribers",
+      "subscription_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/subscription",
+      "commits_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/commits{/sha}",
+      "git_commits_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/git/commits{/sha}",
+      "comments_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/comments{/number}",
+      "issue_comment_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/issues/comments{/number}",
+      "contents_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/contents/{+path}",
+      "compare_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/compare/{base}...{head}",
+      "merges_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/merges",
+      "archive_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/{archive_format}{/ref}",
+      "downloads_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/downloads",
+      "issues_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/issues{/number}",
+      "pulls_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/pulls{/number}",
+      "milestones_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/milestones{/number}",
+      "notifications_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/notifications{?since,all,participating}",
+      "labels_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/labels{/name}",
+      "releases_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/releases{/id}",
+      "deployments_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/deployments"
+    }
+  },
+  "jobs": {
+    "total_count": 2,
+    "jobs": [
+      {
+        "id": 115030907357,
+        "run_id": 38315462277,
+        "workflow_name": "ordinary-checks",
+        "head_branch": "main",
+        "run_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/actions/runs/38315462277",
+        "run_attempt": 1,
+        "node_id": "CR_kwDOVDg6U88AAAAayGBZ3Q",
+        "head_sha": "01c63e6f8fb3d9e196afe2f42a163eb3eac4ad5a",
+        "url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/actions/jobs/115030907357",
+        "html_url": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38315462277/job/115030907357",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-10-12T22:14:05Z",
+        "started_at": "2026-10-12T22:14:07Z",
+        "completed_at": "2026-10-12T22:20:52Z",
+        "name": "oracle",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-10-12T22:14:08Z",
+            "completed_at": "2026-10-12T22:14:11Z"
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-10-12T22:14:11Z",
+            "completed_at": "2026-10-12T22:14:14Z"
+          },
+          {
+            "name": "Run actions/setup-go@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-10-12T22:14:14Z",
+            "completed_at": "2026-10-12T22:14:28Z"
+          },
+          {
+            "name": "Build and verify pinned official SQLite oracle",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-10-12T22:14:28Z",
+            "completed_at": "2026-10-12T22:15:11Z"
+          },
+          {
+            "name": "Run complete guarded ordinary oracle suite",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-10-12T22:15:11Z",
+            "completed_at": "2026-10-12T22:20:49Z"
+          },
+          {
+            "name": "Post Run actions/setup-go@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-10-12T22:20:49Z",
+            "completed_at": "2026-10-12T22:20:49Z"
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10,
+            "started_at": "2026-10-12T22:20:49Z",
+            "completed_at": "2026-10-12T22:20:49Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11,
+            "started_at": "2026-10-12T22:20:50Z",
+            "completed_at": "2026-10-12T22:20:50Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/check-runs/115030907357",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000000107,
+        "runner_name": "GitHub Actions 1000000107",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 115030907689,
+        "run_id": 38315462277,
+        "workflow_name": "ordinary-checks",
+        "head_branch": "main",
+        "run_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/actions/runs/38315462277",
+        "run_attempt": 1,
+        "node_id": "CR_kwDOVDg6U88AAAAayGBbKQ",
+        "head_sha": "01c63e6f8fb3d9e196afe2f42a163eb3eac4ad5a",
+        "url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/actions/jobs/115030907689",
+        "html_url": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38315462277/job/115030907689",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-10-12T22:14:05Z",
+        "started_at": "2026-10-12T22:14:07Z",
+        "completed_at": "2026-10-12T22:32:35Z",
+        "name": "ordinary",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-10-12T22:14:08Z",
+            "completed_at": "2026-10-12T22:14:10Z"
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-10-12T22:14:10Z",
+            "completed_at": "2026-10-12T22:14:12Z"
+          },
+          {
+            "name": "Run actions/setup-go@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-10-12T22:14:12Z",
+            "completed_at": "2026-10-12T22:14:26Z"
+          },
+          {
+            "name": "Run ./scripts/check.sh",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-10-12T22:14:26Z",
+            "completed_at": "2026-10-12T22:32:30Z"
+          },
+          {
+            "name": "Post Run actions/setup-go@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-10-12T22:32:30Z",
+            "completed_at": "2026-10-12T22:32:31Z"
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-10-12T22:32:31Z",
+            "completed_at": "2026-10-12T22:32:31Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-10-12T22:32:31Z",
+            "completed_at": "2026-10-12T22:32:32Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/ms-xiaosnow/gosqlite/check-runs/115030907689",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000000108,
+        "runner_name": "GitHub Actions 1000000108",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      }
+    ]
+  },
+  "log_files": [
+    {
+      "file": "oracle-115030907357.decoded.log",
+      "job_id": 115030907357,
+      "encoding": "UTF-8",
+      "byte_length": 21902,
+      "sha256": "49fcec7557bfc875d5792360cf2c43b1a469d696f3c539b627ee923e1dad1c73",
+      "lines": 277,
+      "first_log_timestamp": "2026-10-12T22:14:08.4540992Z",
+      "last_log_timestamp": "2026-10-12T22:20:50.0217792Z",
+      "fetched_at": "2026-10-12T22:34:49.007Z",
+      "contains_expected_checkout_sha": true,
+      "scan": {
+        "unexpected_secret_pattern_counts": {
+          "github_token": 0,
+          "aws_key": 0,
+          "private_key": 0,
+          "bearer_token": 0,
+          "basic_token": 0,
+          "credential_url": 0,
+          "signed_url": 0
+        },
+        "credential_related_lines_reviewed": 12,
+        "review": [
+          {
+            "line": 22,
+            "classification": "GitHub permissions label"
+          },
+          {
+            "line": 26,
+            "classification": "GitHub source label; no secret value"
+          },
+          {
+            "line": 37,
+            "classification": "GitHub already-masked setting"
+          },
+          {
+            "line": 40,
+            "classification": "checkout option default"
+          },
+          {
+            "line": 85,
+            "classification": "git extraheader config key/query/removal; no credential value"
+          },
+          {
+            "line": 86,
+            "classification": "git extraheader config key/query/removal; no credential value"
+          },
+          {
+            "line": 89,
+            "classification": "GitHub already-masked setting"
+          },
+          {
+            "line": 112,
+            "classification": "GitHub already-masked setting"
+          },
+          {
+            "line": 270,
+            "classification": "git extraheader config key/query/removal; no credential value"
+          },
+          {
+            "line": 271,
+            "classification": "git extraheader config key/query/removal; no credential value"
+          },
+          {
+            "line": 272,
+            "classification": "git extraheader config key/query/removal; no credential value"
+          },
+          {
+            "line": 273,
+            "classification": "git extraheader config key/query/removal; no credential value"
+          }
+        ],
+        "existing_github_masked_lines": 3,
+        "additional_redactions": 0,
+        "limit": "Pattern and credential-keyword review; not a proof that no secret exists."
+      }
+    },
+    {
+      "file": "ordinary-115030907689.decoded.log",
+      "job_id": 115030907689,
+      "encoding": "UTF-8",
+      "byte_length": 25272,
+      "sha256": "2b8c5b33054548e388dc5ad6b5d2bf23724dbb6935aba294fd10d833028a2f61",
+      "lines": 313,
+      "first_log_timestamp": "2026-10-12T22:14:08.6527767Z",
+      "last_log_timestamp": "2026-10-12T22:32:32.0054769Z",
+      "fetched_at": "2026-10-12T22:34:49.007Z",
+      "contains_expected_checkout_sha": true,
+      "scan": {
+        "unexpected_secret_pattern_counts": {
+          "github_token": 0,
+          "aws_key": 0,
+          "private_key": 0,
+          "bearer_token": 0,
+          "basic_token": 0,
+          "credential_url": 0,
+          "signed_url": 0
+        },
+        "credential_related_lines_reviewed": 12,
+        "review": [
+          {
+            "line": 22,
+            "classification": "GitHub permissions label"
+          },
+          {
+            "line": 26,
+            "classification": "GitHub source label; no secret value"
+          },
+          {
+            "line": 37,
+            "classification": "GitHub already-masked setting"
+          },
+          {
+            "line": 40,
+            "classification": "checkout option default"
+          },
+          {
+            "line": 85,
+            "classification": "git extraheader config key/query/removal; no credential value"
+          },
+          {
+            "line": 86,
+            "classification": "git extraheader config key/query/removal; no credential value"
+          },
+          {
+            "line": 89,
+            "classification": "GitHub already-masked setting"
+          },
+          {
+            "line": 112,
+            "classification": "GitHub already-masked setting"
+          },
+          {
+            "line": 306,
+            "classification": "git extraheader config key/query/removal; no credential value"
+          },
+          {
+            "line": 307,
+            "classification": "git extraheader config key/query/removal; no credential value"
+          },
+          {
+            "line": 308,
+            "classification": "git extraheader config key/query/removal; no credential value"
+          },
+          {
+            "line": 309,
+            "classification": "git extraheader config key/query/removal; no credential value"
+          }
+        ],
+        "existing_github_masked_lines": 3,
+        "additional_redactions": 0,
+        "limit": "Pattern and credential-keyword review; not a proof that no secret exists."
+      }
+    }
+  ]
+}

@@ -1,0 +1,303 @@
+[
+  {
+    "path": "sqlite/rekey_interruption_manual_linux_test.go",
+    "from": "//go:build linux && manual_rekey_interruption",
+    "to": "//go:build linux || manual_rekey_interruption",
+    "before_count": 1,
+    "formatted_count": 1
+  },
+  {
+    "path": "internal/testkit/rekeyinterruption/contract.go",
+    "from": "\"crypto/sha256\"",
+    "to": "\"crypto/sha256\"; \"os\"",
+    "before_count": 1,
+    "formatted_count": 1
+  },
+  {
+    "path": "internal/testkit/rekeyinterruption/contract.go",
+    "from": "type Hash = [32]byte",
+    "to": "type Hash = [32]byte\ntype Effect func()",
+    "before_count": 1,
+    "formatted_count": 1
+  },
+  {
+    "path": "internal/testkit/rekeyinterruption/contract.go",
+    "from": "PayloadHash Hash",
+    "to": "PayloadHash [16]byte",
+    "before_count": 1,
+    "formatted_count": 1
+  },
+  {
+    "path": "sqlite/rekey_interruption_manual_linux_test.go",
+    "from": "if os.Getenv(\"GOSQLITE_MANUAL_REKEY_INTERRUPTION\") != \"independently_authorized\"",
+    "to": "if os.Getenv(\"GOSQLITE_MANUAL_REKEY_INTERRUPTION\") == \"independently_authorized\"",
+    "before_count": 1,
+    "formatted_count": 1
+  },
+  {
+    "path": "sqlite/rekey_interruption_manual_linux_test.go",
+    "from": "r := manualRekeyAdmit(t, \"writer\")",
+    "to": "_ = os.Getenv(\"GOFLAGS\"); r := manualRekeyAdmit(t, \"writer\")",
+    "before_count": 1,
+    "formatted_count": 1
+  },
+  {
+    "path": "internal/encstore/publish.go",
+    "from": "rekeyPublicationObserve(ctx, rekeyBeforeRootRename, s.path, s.rootBytes, raw)",
+    "to": "rekeyPublicationObserve(ctx, rekeyAfterRootRename, s.path, s.rootBytes, raw)",
+    "before_count": 1,
+    "formatted_count": 1
+  },
+  {
+    "path": "internal/encstore/publish.go",
+    "from": "rekeyPublicationObserve(ctx, rekeyAfterRootDirSync, s.path, s.rootBytes, raw)",
+    "to": "",
+    "before_count": 1,
+    "formatted_count": 1
+  },
+  {
+    "path": "internal/encstore/publish.go",
+    "from": "rekeyPublicationObserve(ctx, rekeyAfterRootRename, s.path, s.rootBytes, raw)",
+    "to": "if false { rekeyPublicationObserve(ctx, rekeyAfterRootRename, s.path, s.rootBytes, raw) }",
+    "before_count": 1,
+    "formatted_count": 1
+  },
+  {
+    "path": "internal/encstore/publish.go",
+    "from": "attempted = true",
+    "to": "attempted = false",
+    "before_count": 1,
+    "formatted_count": 1
+  },
+  {
+    "path": "internal/encstore/publish.go",
+    "from": "rekeyPublicationObserve(ctx, rekeyBeforeRootRename, s.path, s.rootBytes, raw)",
+    "to": "alias := rekeyPublicationObserve; alias(ctx, rekeyBeforeRootRename, s.path, s.rootBytes, raw)",
+    "before_count": 1,
+    "formatted_count": 1
+  },
+  {
+    "path": "internal/encstore/rekey_interruption_manual_linux.go",
+    "from": "scope, ok := ctx.Value(manualRekeyContextKey{}).(*manualRekeyScope)",
+    "to": "oldRoot[0] = 0; scope, ok := ctx.Value(manualRekeyContextKey{}).(*manualRekeyScope)",
+    "before_count": 2,
+    "formatted_count": 2
+  },
+  {
+    "path": "internal/encstore/rekey_interruption_manual_linux.go",
+    "from": "scope.mu.Unlock()",
+    "to": "scope.mu.Lock()",
+    "before_count": 1,
+    "formatted_count": 1
+  },
+  {
+    "path": "internal/encstore/rekey_interruption_manual_linux.go",
+    "from": "grant, err := scope.channel.Exchange(\"publication\", uint8(point), observation, [32]byte{})",
+    "to": "clear(candidateRoot); grant, err := scope.channel.Exchange(\"publication\", uint8(point), observation, [32]byte{})",
+    "before_count": 1,
+    "formatted_count": 1
+  },
+  {
+    "path": "internal/encstore/rekey_interruption_manual_linux.go",
+    "from": "control := os.NewFile(3, \"rekey-control\")",
+    "to": "control := os.NewFile(8, \"rekey-control\")",
+    "before_count": 1,
+    "formatted_count": 1
+  },
+  {
+    "path": "internal/encstore/rekey_interruption_manual_linux.go",
+    "from": "os.Exit(ManualRekeyExitCode)",
+    "to": "os.Exit(0)",
+    "before_count": 3,
+    "formatted_count": 3
+  },
+  {
+    "path": "internal/testkit/rekeyinterruption/contract.go",
+    "from": "func (Result) Pass() bool { return false }",
+    "to": "func (Result) Pass() bool { return true }",
+    "before_count": 1,
+    "formatted_count": 0
+  },
+  {
+    "path": "sqlite/rekey_interruption_manual_linux_test.go",
+    "from": "capturedRekeyErr := rekeyErr",
+    "to": "capturedRekeyErr := error(nil)",
+    "before_count": 1,
+    "formatted_count": 1
+  },
+  {
+    "path": "sqlite/rekey_interruption_manual_linux_test.go",
+    "from": "capturedRekeyErr := rekeyErr",
+    "to": "capturedRekeyErr := rekeyErr; rekeyErr = nil",
+    "before_count": 1,
+    "formatted_count": 1
+  },
+  {
+    "path": "sqlite/rekey_interruption_manual_linux_test.go",
+    "from": "event.Kind == \"public-nil\" && event == child.last",
+    "to": "event.Kind == \"publication\" && event == child.last",
+    "before_count": 1,
+    "formatted_count": 1
+  },
+  {
+    "path": "sqlite/rekey_interruption_manual_linux_test.go",
+    "from": "\"control/parent-ack.frame\"), raw, true",
+    "to": "\"control/parent-ack.frame\"), raw, false",
+    "before_count": 1,
+    "formatted_count": 1
+  },
+  {
+    "path": "sqlite/rekey_interruption_manual_linux_test.go",
+    "from": "os.O_WRONLY|os.O_CREATE|os.O_EXCL",
+    "to": "os.O_WRONLY|os.O_CREATE",
+    "before_count": 1,
+    "formatted_count": 1
+  },
+  {
+    "path": "internal/encstore/rekey_interruption_manual_linux.go",
+    "from": "scope.seen != 3",
+    "to": "scope.seen != 2",
+    "before_count": 1,
+    "formatted_count": 1
+  },
+  {
+    "path": "sqlite/rekey_interruption_manual_linux_test.go",
+    "from": "go func() { err := command.Wait(); child.wait <- manualRekeyWait{State: command.ProcessState, Err: err} }()",
+    "to": "if true { go func() { err := command.Wait(); child.wait <- manualRekeyWait{State: command.ProcessState, Err: err} }() }",
+    "before_count": 1,
+    "formatted_count": 1
+  },
+  {
+    "path": "sqlite/rekey_interruption_manual_linux_test.go",
+    "from": "exec.Command(r.admission.BinaryPath, manualRekeyFlags(role)...)",
+    "to": "exec.Command(\"/bin/sh\", manualRekeyFlags(role)...)",
+    "before_count": 1,
+    "formatted_count": 1
+  },
+  {
+    "path": "sqlite/rekey_interruption_manual_linux_test.go",
+    "from": "command.ExtraFiles = []*os.File{controlRead, eventWrite}",
+    "to": "command.ExtraFiles = []*os.File{eventWrite, controlRead}",
+    "before_count": 1,
+    "formatted_count": 1
+  },
+  {
+    "path": "sqlite/rekey_interruption_manual_linux_test.go",
+    "from": "err := command.Wait(); child.wait <-",
+    "to": "err := error(nil); child.wait <-",
+    "before_count": 1,
+    "formatted_count": 1
+  },
+  {
+    "path": "sqlite/rekey_interruption_manual_linux_test.go",
+    "from": "child.live, child.unknown = true, true",
+    "to": "child.waited, child.unknown = true, false",
+    "before_count": 2,
+    "formatted_count": 2
+  },
+  {
+    "path": "sqlite/rekey_interruption_manual_linux_test.go",
+    "from": "command := exec.Command(r.admission.BinaryPath, manualRekeyFlags(role)...)",
+    "to": "command := exec.Command(r.admission.BinaryPath, manualRekeyFlags(role)...); command.Process.Kill()",
+    "before_count": 1,
+    "formatted_count": 1
+  },
+  {
+    "path": "sqlite/rekey_interruption_manual_linux_test.go",
+    "from": "r.require(writer.waited && !writer.live && !writer.unknown",
+    "to": "r.require(true || writer.waited && !writer.live && !writer.unknown",
+    "before_count": 1,
+    "formatted_count": 1
+  },
+  {
+    "path": "sqlite/rekey_interruption_manual_linux_test.go",
+    "from": "sqlite.Options{ReadOnly: true, NoCreate: true, Encryption: &options}",
+    "to": "sqlite.Options{ReadOnly: false, NoCreate: true, Encryption: &options}",
+    "before_count": 2,
+    "formatted_count": 2
+  },
+  {
+    "path": "sqlite/rekey_interruption_manual_linux_test.go",
+    "from": "detail.Code != sqlite.CodeNotADB",
+    "to": "detail.Code != sqlite.CodeIO",
+    "before_count": 1,
+    "formatted_count": 1
+  },
+  {
+    "path": "sqlite/rekey_interruption_manual_linux_test.go",
+    "from": "p.label, p.path, p.operation = \"NEW\", r.path(\"probe-new\")",
+    "to": "p.label, p.path, p.operation = \"OLD\", r.path(\"probe-new\")",
+    "before_count": 1,
+    "formatted_count": 1
+  },
+  {
+    "path": "sqlite/rekey_interruption_manual_linux_test.go",
+    "from": "\"int64\", 3, \"string\", \"red\", \"string\", \"three\"",
+    "to": "\"int64\", 3, \"string\", \"red\", \"string\", \"wrong\"",
+    "before_count": 1,
+    "formatted_count": 1
+  },
+  {
+    "path": "sqlite/rekey_interruption_manual_linux_test.go",
+    "from": "s.IndexPageReads <= 0",
+    "to": "s.IndexPageReads < 0",
+    "before_count": 1,
+    "formatted_count": 1
+  },
+  {
+    "path": "sqlite/rekey_interruption_manual_linux_test.go",
+    "from": "q.CloseCalls != 1",
+    "to": "q.CloseCalls > 1",
+    "before_count": 1,
+    "formatted_count": 1
+  },
+  {
+    "path": "sqlite/rekey_interruption_manual_linux_test.go",
+    "from": "MaxPages: 3, MaxPageReads: 512",
+    "to": "MaxPages: 3, MaxPageReads: 0",
+    "before_count": 1,
+    "formatted_count": 1
+  },
+  {
+    "path": "internal/encstore/rekey_observation_default.go",
+    "from": "//go:build !linux || !manual_rekey_interruption",
+    "to": "//go:build linux && !manual_rekey_interruption",
+    "before_count": 1,
+    "formatted_count": 1
+  },
+  {
+    "path": "internal/encstore/rekey_observation_default.go",
+    "from": "func rekeyPublicationObserve(context.Context, rekeyPublicationPoint, string, []byte, []byte) {}",
+    "to": "func rekeyPublicationObserve(context.Context, rekeyPublicationPoint, string, []byte, []byte) { panic(\"effect\") }",
+    "before_count": 1,
+    "formatted_count": 1
+  },
+  {
+    "path": "internal/testscope/main.go",
+    "from": "rekeyContracts, rekeyContractErr := inspectRekeyInterruptionContracts(\".\")",
+    "to": "rekeyContracts, rekeyContractErr := inspectEncryptedRootNegativeContracts(\".\")",
+    "before_count": 1,
+    "formatted_count": 1
+  },
+  {
+    "path": "internal/testscope/main.go",
+    "from": "findings = append(findings, rekey...)",
+    "to": "findings = rekey",
+    "before_count": 1,
+    "formatted_count": 1
+  },
+  {
+    "path": "internal/testscope/main.go",
+    "from": "restart, restartErr := inspectRollbackRestartSource(path, raw)",
+    "to": "restart, restartErr := inspectRekeyInterruptionSource(path, raw)",
+    "before_count": 1,
+    "formatted_count": 1
+  },
+  {
+    "path": "internal/testscope/main.go",
+    "from": "rootNegative, rootNegativeErr := inspectEncryptedRootNegativeSource(path, raw)",
+    "to": "rootNegative, rootNegativeErr := inspectRekeyInterruptionSource(path, raw)",
+    "before_count": 1,
+    "formatted_count": 1
+  }
+]

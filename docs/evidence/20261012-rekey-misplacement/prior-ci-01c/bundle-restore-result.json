@@ -1,0 +1,15 @@
+{
+  "commit": "01c63e6f8fb3d9e196afe2f42a163eb3eac4ad5a",
+  "tree": "f7f21edf0c5c2dbde7c55340d14f39d004d218e3",
+  "parent": "edcc8be3e4c0d0dc46066020dc900a5effcaee30",
+  "bundle_library_file_id": "libfile_09de94fe57b48191872e993c7ef6dd13",
+  "bundle_bytes": 8040620,
+  "bundle_sha256": "b86ed2f8fae7c3cc65c00794a02c5ab231542da424790bd6ae27f6da585e56e9",
+  "readback": "byte_exact_PASS",
+  "tracked_files": 3466,
+  "tracked_bytes": 54001521,
+  "all_git_modes_and_blob_sha256_match": true,
+  "fsck_exit": 0,
+  "restore": "bare main; no second worktree or Go repeat",
+  "utc": "2026-10-12T22:15:57.301113+00:00"
+}

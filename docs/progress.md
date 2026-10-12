@@ -1,3 +1,13 @@
+# 当前阶段：R2 与 R5 有限代码和受影响验证闭合
+
+2026-10-12 23:04:54 UTC，组合受测树 cdcce9e3145d7811b0448b4f02d21e71dbe32345：R2 最后13门PASS（91根race共2418命名PASS；两个旧失败根修复后235命名normal PASS），R5此前11门PASS。旧适用结果明确复用，原FAIL保留；没有重跑无关全套。[完整源码、命令和测试记录](evidence/20261012-rekey-misplacement/README.zh.md)。
+
+R2一个错位caller、R5六格换钥中断controller源码与手册已具备。实际物理场景没有执行；R5两个健康默认路径已执行。有限R1/R2/R5/R6已闭合，最后R3/R4共用设施仍待集成验证；已知ANN报告修正保持单列阻塞。整体未验收，M10未通过。
+
+01c精确CI38315462277与edcc精确CI38314186578均双任务SUCCESS，原始日志和bundle完整性证据随本批保存。不因文档或同码归档恢复重复全套。
+
+## 以下为较早时点历史记录
+
 # 当前阶段：有限清单 R1 与 R6 的代码和普通验证闭合
 
 2026-10-12 22:08:23 UTC，R1生产fake-ops errno断言normal/race各127PASS，R6三个普通健康/纯值nonce生命周期根normal/race各3PASS，两批format/sourceguard均PASS。只跑受影响范围，组合复用已过R1；没有重跑无关全套。详见[源码/命令/原始测试记录](evidence/20261012-publication-nonce/README.zh.md)。

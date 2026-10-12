@@ -1,0 +1,11 @@
+{
+  "zip_name": "gosqlite-R2-misplacement-focused-validation-cdcce9e.zip",
+  "bytes": 25696053,
+  "sha256": "641b693405c91501b0d03273d66fba23b469a4bbfe6dfb963b340a7d0a5c2918",
+  "members": 200,
+  "verified_nonmanifest_members": 199,
+  "manifest_sha256": "7aab4f6d5d54c784f9dd91e192ccf5b9682795d9c0f08394176c77abb6cc9fcb",
+  "manual_binary_members": 3,
+  "final_source_sha256_match_count": 13,
+  "status": "PASS"
+}

@@ -1,0 +1,38 @@
+[
+  {
+    "file": "source-snapshot/.github/workflows/check.yml",
+    "repository_path": ".github/workflows/check.yml",
+    "commit": "01c63e6f8fb3d9e196afe2f42a163eb3eac4ad5a",
+    "git_mode": "100644",
+    "blob_sha": "8c848cc567765c2308cf569328bfdd73db922e31",
+    "byte_length": 929,
+    "sha256": "58dee6239ef272454efb7f45a220de5c7a75839f6449002a4ed176f858304f64"
+  },
+  {
+    "file": "source-snapshot/scripts/check.sh",
+    "repository_path": "scripts/check.sh",
+    "commit": "01c63e6f8fb3d9e196afe2f42a163eb3eac4ad5a",
+    "git_mode": "100755",
+    "blob_sha": "635b42b443e4de2cf63745bdde5c272a5d74ca39",
+    "byte_length": 365,
+    "sha256": "55851844f35325b38fbd368558af4e229d5bfe7c42928685e57dd799274b8f18"
+  },
+  {
+    "file": "source-snapshot/scripts/test-oracle.sh",
+    "repository_path": "scripts/test-oracle.sh",
+    "commit": "01c63e6f8fb3d9e196afe2f42a163eb3eac4ad5a",
+    "git_mode": "100755",
+    "blob_sha": "64a583228454ba36bd24d54ee8e4e810a6fcd187",
+    "byte_length": 2769,
+    "sha256": "b8e3e443a3fbe17b96526cfdb22b6a297dedf0eac2d9c3063cd7f9da05a64f79"
+  },
+  {
+    "file": "source-snapshot/scripts/build-oracle.sh",
+    "repository_path": "scripts/build-oracle.sh",
+    "commit": "01c63e6f8fb3d9e196afe2f42a163eb3eac4ad5a",
+    "git_mode": "100755",
+    "blob_sha": "5828c66f1c7cc56e856309e06f40d7dbecee01f4",
+    "byte_length": 4723,
+    "sha256": "0826180e18c7e67bd3ab35b0b534409578932adba13041b8e5b1e32fb43cca66"
+  }
+]

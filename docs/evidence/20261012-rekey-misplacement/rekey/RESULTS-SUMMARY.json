@@ -1,0 +1,728 @@
+{
+  "schema": 1,
+  "created_utc": "2026-10-12T22:57:26.416162+00:00",
+  "base_commit": "01c63e6f8fb3d9e196afe2f42a163eb3eac4ad5a",
+  "final_candidate_tree": "8751a3bed18341a299c060ff494c437d5176b024",
+  "final_source_file_count": 20,
+  "final_validation_completed_utc": "2026-10-12T22:53:31.465288+00:00",
+  "final_V3_gates": 11,
+  "final_V3_status": "PASS",
+  "historical_failures_preserved": 2,
+  "manual_image_executed": false,
+  "physical": "NOT_RUN",
+  "gates": [
+    {
+      "run": "rekey-model-validation",
+      "gate": "01_format",
+      "command_record": "records/rekey-model-validation/commands.json",
+      "status": "PASS",
+      "exit_code": 0,
+      "start_utc": "2026-10-12T22:26:10.332991+00:00",
+      "end_utc": "2026-10-12T22:26:12.334663+00:00",
+      "result_record": "records/rekey-model-validation/01_format.result.json",
+      "resource_breach_latched": false,
+      "observer_error": null
+    },
+    {
+      "run": "rekey-model-validation",
+      "gate": "02_normal",
+      "command_record": "records/rekey-model-validation/commands.json",
+      "status": "PASS",
+      "exit_code": 0,
+      "start_utc": "2026-10-12T22:26:12.794897+00:00",
+      "end_utc": "2026-10-12T22:26:14.796503+00:00",
+      "result_record": "records/rekey-model-validation/02_normal.result.json",
+      "resource_breach_latched": false,
+      "observer_error": null,
+      "test_events": {
+        "named": {
+          "pass": 8,
+          "fail": 0,
+          "skip": 0
+        },
+        "root_counts": {
+          "pass": 8,
+          "fail": 0,
+          "skip": 0
+        },
+        "roots": {
+          "pass": [
+            "TestRekeyInterruptionAckCausality",
+            "TestRekeyInterruptionCredentialPurpose",
+            "TestRekeyInterruptionCutOrder",
+            "TestRekeyInterruptionNeverPhysicalPass",
+            "TestRekeyInterruptionOwnersAndArtifacts",
+            "TestRekeyInterruptionSQLIndexLedger",
+            "TestRekeyInterruptionSelectedGeneration",
+            "TestRekeyInterruptionSixCases"
+          ],
+          "fail": [],
+          "skip": []
+        }
+      }
+    },
+    {
+      "run": "rekey-guard-validation",
+      "gate": "01_format",
+      "command_record": "records/rekey-guard-validation/commands.json",
+      "status": "PASS",
+      "exit_code": 0,
+      "start_utc": "2026-10-12T22:39:49.239348+00:00",
+      "end_utc": "2026-10-12T22:39:51.240928+00:00",
+      "result_record": "records/rekey-guard-validation/01_format.result.json",
+      "resource_breach_latched": false,
+      "observer_error": null
+    },
+    {
+      "run": "rekey-guard-validation",
+      "gate": "02_guard_normal",
+      "command_record": "records/rekey-guard-validation/commands.json",
+      "status": "FAIL",
+      "exit_code": 1,
+      "start_utc": "2026-10-12T22:39:51.587458+00:00",
+      "end_utc": "2026-10-12T22:40:17.600145+00:00",
+      "result_record": "records/rekey-guard-validation/02_guard_normal.result.json",
+      "resource_breach_latched": false,
+      "observer_error": null,
+      "test_events": {
+        "named": {
+          "pass": 786,
+          "fail": 1,
+          "skip": 0
+        },
+        "root_counts": {
+          "pass": 60,
+          "fail": 1,
+          "skip": 0
+        },
+        "roots": {
+          "pass": [
+            "TestEncryptedRootFalsePassSourcesEvenWhenRepinned",
+            "TestEncryptedRootFiniteStructure",
+            "TestEncryptedRootPinsRequireIndependentRelease",
+            "TestEncryptedRootWholeSourceAndCapabilityBoundary",
+            "TestFormatUpgradeMainKeepsExistingPolicies",
+            "TestFormatUpgradeManualStructuralCounterexamples",
+            "TestFormatUpgradePureClosureCounterexamples",
+            "TestOracleSourceConstructorGuard",
+            "TestOracleSourceFactoryLiteralGuard",
+            "TestOracleSourceImportAndMutationGuard",
+            "TestOracleSourceNativeExceptionGuard",
+            "TestOracleSourcePathScope",
+            "TestReadOnlyWALManualDefaultExclusion",
+            "TestReadOnlyWALManualEffectBoundaryMutations",
+            "TestReadOnlyWALManualGateAndProfileMutations",
+            "TestReadOnlyWALManualOwnershipMutations",
+            "TestReadOnlyWALManualPureClosureMutations",
+            "TestReadOnlyWALManualSourceContract",
+            "TestReadOnlyWALManualWholeRootInventory",
+            "TestRekeyGuardInventoryGate",
+            "TestRekeyGuardObserverIsolation",
+            "TestRekeyGuardProbeLedger",
+            "TestRekeyGuardProcessOwnership",
+            "TestRekeyGuardPublicReturnACK",
+            "TestRekeyGuardPublicationOrder",
+            "TestRollbackFaultGuardWiringPreservesPriorPolicies",
+            "TestRollbackFaultOutsideConsumersRejected",
+            "TestRollbackFaultRepinnedSemanticCounterexamples",
+            "TestRollbackFaultSQLOrdinaryCompanionFailures",
+            "TestRollbackFaultSQLOrdinaryExampleFields",
+            "TestRollbackFaultSQLOrdinaryExamplesKeepModelBoundary",
+            "TestRollbackFaultSQLOrdinaryFieldBindingsReject",
+            "TestRollbackFaultSQLOrdinaryRecoveryExceptionIsOneReference",
+            "TestRollbackFaultSQLOutsideConsumersAndOldEntriesRejected",
+            "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+            "TestRollbackFaultSQLSourceContracts",
+            "TestRollbackFaultSQLWiringAndMainReviewHold",
+            "TestRollbackFaultSourceContracts",
+            "TestRollbackRestartDoubleRepinnedCommandCapabilityClosure",
+            "TestRollbackRestartDoubleRepinnedLaunchInputClosure",
+            "TestRollbackRestartDoubleRepinnedModelCausalCounterexamples",
+            "TestRollbackRestartDoubleRepinnedNativeProtocolCounterexamples",
+            "TestRollbackRestartDoubleRepinnedSelectionAndStubCounterexamples",
+            "TestRollbackRestartOldCoreAndMutexWrapperStayExact",
+            "TestRollbackRestartOracleExceptionRequiresCompletePinnedNativeClosure",
+            "TestRollbackRestartOutsideConsumersAndAliasesRejected",
+            "TestRollbackRestartOwnedSourceContracts",
+            "TestRollbackRestartWiringPreservesAllPoliciesAndReviewHold",
+            "TestScopeSourceReferenceGuard",
+            "TestWALPublicationGuardElapsedRejectsTimingAndQualificationDrift",
+            "TestWALPublicationGuardElapsedSourceIsInertAndPinned",
+            "TestWALPublicationGuardExactCallBoundaries",
+            "TestWALPublicationGuardFakeFactoryIsExactSource",
+            "TestWALPublicationGuardFixedSourceAndWiring",
+            "TestWALPublicationGuardManualSourceIsExactAndDoubleGated",
+            "TestWALPublicationGuardProductionBoundariesAreRequired",
+            "TestWALPublicationGuardPureFilesRejectNativeAliasesAndVariables",
+            "TestWALPublicationGuardRejectsActivationReferences",
+            "TestWALPublicationGuardRejectsControlFlowAndFactoryDrift",
+            "TestWALPublicationGuardSafeControls"
+          ],
+          "fail": [
+            "TestRekeyGuardIntegrationDefault"
+          ],
+          "skip": []
+        }
+      }
+    },
+    {
+      "run": "rekey-guard-validation",
+      "gate": "03_guard_race",
+      "command_record": "records/rekey-guard-validation/commands.json",
+      "status": "NOT_RUN"
+    },
+    {
+      "run": "rekey-guard-validation",
+      "gate": "04_model_race",
+      "command_record": "records/rekey-guard-validation/commands.json",
+      "status": "NOT_RUN"
+    },
+    {
+      "run": "rekey-guard-validation",
+      "gate": "05_healthy_default",
+      "command_record": "records/rekey-guard-validation/commands.json",
+      "status": "NOT_RUN"
+    },
+    {
+      "run": "rekey-guard-validation",
+      "gate": "06_sourceguard",
+      "command_record": "records/rekey-guard-validation/commands.json",
+      "status": "NOT_RUN"
+    },
+    {
+      "run": "rekey-guard-validation",
+      "gate": "07_list_default",
+      "command_record": "records/rekey-guard-validation/commands.json",
+      "status": "NOT_RUN"
+    },
+    {
+      "run": "rekey-guard-validation",
+      "gate": "08_list_manual",
+      "command_record": "records/rekey-guard-validation/commands.json",
+      "status": "NOT_RUN"
+    },
+    {
+      "run": "rekey-guard-validation",
+      "gate": "09_list_windows_default",
+      "command_record": "records/rekey-guard-validation/commands.json",
+      "status": "NOT_RUN"
+    },
+    {
+      "run": "rekey-guard-validation",
+      "gate": "10_manual_compile",
+      "command_record": "records/rekey-guard-validation/commands.json",
+      "status": "NOT_RUN"
+    },
+    {
+      "run": "rekey-guard-validation",
+      "gate": "11_nm",
+      "command_record": "records/rekey-guard-validation/commands.json",
+      "status": "NOT_RUN"
+    },
+    {
+      "run": "rekey-guard-validation-v2",
+      "gate": "01_format",
+      "command_record": "records/rekey-guard-validation-v2/commands.json",
+      "status": "PASS",
+      "exit_code": 0,
+      "start_utc": "2026-10-12T22:43:26.867214+00:00",
+      "end_utc": "2026-10-12T22:43:28.868773+00:00",
+      "result_record": "records/rekey-guard-validation-v2/01_format.result.json",
+      "resource_breach_latched": false,
+      "observer_error": null
+    },
+    {
+      "run": "rekey-guard-validation-v2",
+      "gate": "02_guard_normal",
+      "command_record": "records/rekey-guard-validation-v2/commands.json",
+      "status": "PASS",
+      "exit_code": 0,
+      "start_utc": "2026-10-12T22:43:29.232901+00:00",
+      "end_utc": "2026-10-12T22:43:33.235604+00:00",
+      "result_record": "records/rekey-guard-validation-v2/02_guard_normal.result.json",
+      "resource_breach_latched": false,
+      "observer_error": null,
+      "test_events": {
+        "named": {
+          "pass": 7,
+          "fail": 0,
+          "skip": 0
+        },
+        "root_counts": {
+          "pass": 7,
+          "fail": 0,
+          "skip": 0
+        },
+        "roots": {
+          "pass": [
+            "TestRekeyGuardIntegrationDefault",
+            "TestRekeyGuardInventoryGate",
+            "TestRekeyGuardObserverIsolation",
+            "TestRekeyGuardProbeLedger",
+            "TestRekeyGuardProcessOwnership",
+            "TestRekeyGuardPublicReturnACK",
+            "TestRekeyGuardPublicationOrder"
+          ],
+          "fail": [],
+          "skip": []
+        }
+      }
+    },
+    {
+      "run": "rekey-guard-validation-v2",
+      "gate": "03_guard_race",
+      "command_record": "records/rekey-guard-validation-v2/commands.json",
+      "status": "PASS",
+      "exit_code": 0,
+      "start_utc": "2026-10-12T22:43:33.632977+00:00",
+      "end_utc": "2026-10-12T22:47:04.014780+00:00",
+      "result_record": "records/rekey-guard-validation-v2/03_guard_race.result.json",
+      "resource_breach_latched": false,
+      "observer_error": null,
+      "test_events": {
+        "named": {
+          "pass": 787,
+          "fail": 0,
+          "skip": 0
+        },
+        "root_counts": {
+          "pass": 61,
+          "fail": 0,
+          "skip": 0
+        },
+        "roots": {
+          "pass": [
+            "TestEncryptedRootFalsePassSourcesEvenWhenRepinned",
+            "TestEncryptedRootFiniteStructure",
+            "TestEncryptedRootPinsRequireIndependentRelease",
+            "TestEncryptedRootWholeSourceAndCapabilityBoundary",
+            "TestFormatUpgradeMainKeepsExistingPolicies",
+            "TestFormatUpgradeManualStructuralCounterexamples",
+            "TestFormatUpgradePureClosureCounterexamples",
+            "TestOracleSourceConstructorGuard",
+            "TestOracleSourceFactoryLiteralGuard",
+            "TestOracleSourceImportAndMutationGuard",
+            "TestOracleSourceNativeExceptionGuard",
+            "TestOracleSourcePathScope",
+            "TestReadOnlyWALManualDefaultExclusion",
+            "TestReadOnlyWALManualEffectBoundaryMutations",
+            "TestReadOnlyWALManualGateAndProfileMutations",
+            "TestReadOnlyWALManualOwnershipMutations",
+            "TestReadOnlyWALManualPureClosureMutations",
+            "TestReadOnlyWALManualSourceContract",
+            "TestReadOnlyWALManualWholeRootInventory",
+            "TestRekeyGuardIntegrationDefault",
+            "TestRekeyGuardInventoryGate",
+            "TestRekeyGuardObserverIsolation",
+            "TestRekeyGuardProbeLedger",
+            "TestRekeyGuardProcessOwnership",
+            "TestRekeyGuardPublicReturnACK",
+            "TestRekeyGuardPublicationOrder",
+            "TestRollbackFaultGuardWiringPreservesPriorPolicies",
+            "TestRollbackFaultOutsideConsumersRejected",
+            "TestRollbackFaultRepinnedSemanticCounterexamples",
+            "TestRollbackFaultSQLOrdinaryCompanionFailures",
+            "TestRollbackFaultSQLOrdinaryExampleFields",
+            "TestRollbackFaultSQLOrdinaryExamplesKeepModelBoundary",
+            "TestRollbackFaultSQLOrdinaryFieldBindingsReject",
+            "TestRollbackFaultSQLOrdinaryRecoveryExceptionIsOneReference",
+            "TestRollbackFaultSQLOutsideConsumersAndOldEntriesRejected",
+            "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+            "TestRollbackFaultSQLSourceContracts",
+            "TestRollbackFaultSQLWiringAndMainReviewHold",
+            "TestRollbackFaultSourceContracts",
+            "TestRollbackRestartDoubleRepinnedCommandCapabilityClosure",
+            "TestRollbackRestartDoubleRepinnedLaunchInputClosure",
+            "TestRollbackRestartDoubleRepinnedModelCausalCounterexamples",
+            "TestRollbackRestartDoubleRepinnedNativeProtocolCounterexamples",
+            "TestRollbackRestartDoubleRepinnedSelectionAndStubCounterexamples",
+            "TestRollbackRestartOldCoreAndMutexWrapperStayExact",
+            "TestRollbackRestartOracleExceptionRequiresCompletePinnedNativeClosure",
+            "TestRollbackRestartOutsideConsumersAndAliasesRejected",
+            "TestRollbackRestartOwnedSourceContracts",
+            "TestRollbackRestartWiringPreservesAllPoliciesAndReviewHold",
+            "TestScopeSourceReferenceGuard",
+            "TestWALPublicationGuardElapsedRejectsTimingAndQualificationDrift",
+            "TestWALPublicationGuardElapsedSourceIsInertAndPinned",
+            "TestWALPublicationGuardExactCallBoundaries",
+            "TestWALPublicationGuardFakeFactoryIsExactSource",
+            "TestWALPublicationGuardFixedSourceAndWiring",
+            "TestWALPublicationGuardManualSourceIsExactAndDoubleGated",
+            "TestWALPublicationGuardProductionBoundariesAreRequired",
+            "TestWALPublicationGuardPureFilesRejectNativeAliasesAndVariables",
+            "TestWALPublicationGuardRejectsActivationReferences",
+            "TestWALPublicationGuardRejectsControlFlowAndFactoryDrift",
+            "TestWALPublicationGuardSafeControls"
+          ],
+          "fail": [],
+          "skip": []
+        }
+      }
+    },
+    {
+      "run": "rekey-guard-validation-v2",
+      "gate": "04_model_race",
+      "command_record": "records/rekey-guard-validation-v2/commands.json",
+      "status": "PASS",
+      "exit_code": 0,
+      "start_utc": "2026-10-12T22:47:04.596568+00:00",
+      "end_utc": "2026-10-12T22:47:08.598645+00:00",
+      "result_record": "records/rekey-guard-validation-v2/04_model_race.result.json",
+      "resource_breach_latched": false,
+      "observer_error": null,
+      "test_events": {
+        "named": {
+          "pass": 8,
+          "fail": 0,
+          "skip": 0
+        },
+        "root_counts": {
+          "pass": 8,
+          "fail": 0,
+          "skip": 0
+        },
+        "roots": {
+          "pass": [
+            "TestRekeyInterruptionAckCausality",
+            "TestRekeyInterruptionCredentialPurpose",
+            "TestRekeyInterruptionCutOrder",
+            "TestRekeyInterruptionNeverPhysicalPass",
+            "TestRekeyInterruptionOwnersAndArtifacts",
+            "TestRekeyInterruptionSQLIndexLedger",
+            "TestRekeyInterruptionSelectedGeneration",
+            "TestRekeyInterruptionSixCases"
+          ],
+          "fail": [],
+          "skip": []
+        }
+      }
+    },
+    {
+      "run": "rekey-guard-validation-v2",
+      "gate": "05_healthy_default",
+      "command_record": "records/rekey-guard-validation-v2/commands.json",
+      "status": "PASS",
+      "exit_code": 0,
+      "start_utc": "2026-10-12T22:47:08.952045+00:00",
+      "end_utc": "2026-10-12T22:47:18.955494+00:00",
+      "result_record": "records/rekey-guard-validation-v2/05_healthy_default.result.json",
+      "resource_breach_latched": false,
+      "observer_error": null,
+      "test_events": {
+        "named": {
+          "pass": 2,
+          "fail": 0,
+          "skip": 0
+        },
+        "root_counts": {
+          "pass": 2,
+          "fail": 0,
+          "skip": 0
+        },
+        "roots": {
+          "pass": [
+            "TestEncryptionReviewFreshIdentityAndRetainedBytes",
+            "TestEncryptionWALPasswordOrdinaryReopenAndCancellation"
+          ],
+          "fail": [],
+          "skip": []
+        }
+      }
+    },
+    {
+      "run": "rekey-guard-validation-v2",
+      "gate": "06_sourceguard",
+      "command_record": "records/rekey-guard-validation-v2/commands.json",
+      "status": "FAIL",
+      "exit_code": 1,
+      "start_utc": "2026-10-12T22:47:19.344326+00:00",
+      "end_utc": "2026-10-12T22:47:29.347538+00:00",
+      "result_record": "records/rekey-guard-validation-v2/06_sourceguard.result.json",
+      "resource_breach_latched": false,
+      "observer_error": null
+    },
+    {
+      "run": "rekey-guard-validation-v2",
+      "gate": "07_list_default",
+      "command_record": "records/rekey-guard-validation-v2/commands.json",
+      "status": "NOT_RUN"
+    },
+    {
+      "run": "rekey-guard-validation-v2",
+      "gate": "08_list_manual",
+      "command_record": "records/rekey-guard-validation-v2/commands.json",
+      "status": "NOT_RUN"
+    },
+    {
+      "run": "rekey-guard-validation-v2",
+      "gate": "09_list_windows_default",
+      "command_record": "records/rekey-guard-validation-v2/commands.json",
+      "status": "NOT_RUN"
+    },
+    {
+      "run": "rekey-guard-validation-v2",
+      "gate": "10_manual_compile",
+      "command_record": "records/rekey-guard-validation-v2/commands.json",
+      "status": "NOT_RUN"
+    },
+    {
+      "run": "rekey-guard-validation-v2",
+      "gate": "11_nm",
+      "command_record": "records/rekey-guard-validation-v2/commands.json",
+      "status": "NOT_RUN"
+    },
+    {
+      "run": "rekey-guard-validation-v3",
+      "gate": "01_format",
+      "command_record": "records/rekey-guard-validation-v3/commands.json",
+      "status": "PASS",
+      "exit_code": 0,
+      "start_utc": "2026-10-12T22:52:41.580650+00:00",
+      "end_utc": "2026-10-12T22:52:43.582333+00:00",
+      "result_record": "records/rekey-guard-validation-v3/01_format.result.json",
+      "resource_breach_latched": false,
+      "observer_error": null
+    },
+    {
+      "run": "rekey-guard-validation-v3",
+      "gate": "02_guard_normal",
+      "command_record": "records/rekey-guard-validation-v3/commands.json",
+      "status": "PASS",
+      "exit_code": 0,
+      "start_utc": "2026-10-12T22:52:43.947913+00:00",
+      "end_utc": "2026-10-12T22:52:47.949924+00:00",
+      "result_record": "records/rekey-guard-validation-v3/02_guard_normal.result.json",
+      "resource_breach_latched": false,
+      "observer_error": null,
+      "test_events": {
+        "named": {
+          "pass": 7,
+          "fail": 0,
+          "skip": 0
+        },
+        "root_counts": {
+          "pass": 7,
+          "fail": 0,
+          "skip": 0
+        },
+        "roots": {
+          "pass": [
+            "TestRekeyGuardIntegrationDefault",
+            "TestRekeyGuardInventoryGate",
+            "TestRekeyGuardObserverIsolation",
+            "TestRekeyGuardProbeLedger",
+            "TestRekeyGuardProcessOwnership",
+            "TestRekeyGuardPublicReturnACK",
+            "TestRekeyGuardPublicationOrder"
+          ],
+          "fail": [],
+          "skip": []
+        }
+      }
+    },
+    {
+      "run": "rekey-guard-validation-v3",
+      "gate": "03_guard_race",
+      "command_record": "records/rekey-guard-validation-v3/commands.json",
+      "status": "PASS",
+      "exit_code": 0,
+      "start_utc": "2026-10-12T22:52:48.336663+00:00",
+      "end_utc": "2026-10-12T22:52:58.339991+00:00",
+      "result_record": "records/rekey-guard-validation-v3/03_guard_race.result.json",
+      "resource_breach_latched": false,
+      "observer_error": null,
+      "test_events": {
+        "named": {
+          "pass": 7,
+          "fail": 0,
+          "skip": 0
+        },
+        "root_counts": {
+          "pass": 7,
+          "fail": 0,
+          "skip": 0
+        },
+        "roots": {
+          "pass": [
+            "TestRekeyGuardIntegrationDefault",
+            "TestRekeyGuardInventoryGate",
+            "TestRekeyGuardObserverIsolation",
+            "TestRekeyGuardProbeLedger",
+            "TestRekeyGuardProcessOwnership",
+            "TestRekeyGuardPublicReturnACK",
+            "TestRekeyGuardPublicationOrder"
+          ],
+          "fail": [],
+          "skip": []
+        }
+      }
+    },
+    {
+      "run": "rekey-guard-validation-v3",
+      "gate": "04_model_normal",
+      "command_record": "records/rekey-guard-validation-v3/commands.json",
+      "status": "PASS",
+      "exit_code": 0,
+      "start_utc": "2026-10-12T22:52:58.684066+00:00",
+      "end_utc": "2026-10-12T22:53:00.685444+00:00",
+      "result_record": "records/rekey-guard-validation-v3/04_model_normal.result.json",
+      "resource_breach_latched": false,
+      "observer_error": null,
+      "test_events": {
+        "named": {
+          "pass": 8,
+          "fail": 0,
+          "skip": 0
+        },
+        "root_counts": {
+          "pass": 8,
+          "fail": 0,
+          "skip": 0
+        },
+        "roots": {
+          "pass": [
+            "TestRekeyInterruptionAckCausality",
+            "TestRekeyInterruptionCredentialPurpose",
+            "TestRekeyInterruptionCutOrder",
+            "TestRekeyInterruptionNeverPhysicalPass",
+            "TestRekeyInterruptionOwnersAndArtifacts",
+            "TestRekeyInterruptionSQLIndexLedger",
+            "TestRekeyInterruptionSelectedGeneration",
+            "TestRekeyInterruptionSixCases"
+          ],
+          "fail": [],
+          "skip": []
+        }
+      }
+    },
+    {
+      "run": "rekey-guard-validation-v3",
+      "gate": "04b_model_race",
+      "command_record": "records/rekey-guard-validation-v3/commands.json",
+      "status": "PASS",
+      "exit_code": 0,
+      "start_utc": "2026-10-12T22:53:01.027042+00:00",
+      "end_utc": "2026-10-12T22:53:03.028280+00:00",
+      "result_record": "records/rekey-guard-validation-v3/04b_model_race.result.json",
+      "resource_breach_latched": false,
+      "observer_error": null,
+      "test_events": {
+        "named": {
+          "pass": 8,
+          "fail": 0,
+          "skip": 0
+        },
+        "root_counts": {
+          "pass": 8,
+          "fail": 0,
+          "skip": 0
+        },
+        "roots": {
+          "pass": [
+            "TestRekeyInterruptionAckCausality",
+            "TestRekeyInterruptionCredentialPurpose",
+            "TestRekeyInterruptionCutOrder",
+            "TestRekeyInterruptionNeverPhysicalPass",
+            "TestRekeyInterruptionOwnersAndArtifacts",
+            "TestRekeyInterruptionSQLIndexLedger",
+            "TestRekeyInterruptionSelectedGeneration",
+            "TestRekeyInterruptionSixCases"
+          ],
+          "fail": [],
+          "skip": []
+        }
+      }
+    },
+    {
+      "run": "rekey-guard-validation-v3",
+      "gate": "06_sourceguard",
+      "command_record": "records/rekey-guard-validation-v3/commands.json",
+      "status": "PASS",
+      "exit_code": 0,
+      "start_utc": "2026-10-12T22:53:03.373677+00:00",
+      "end_utc": "2026-10-12T22:53:13.376488+00:00",
+      "result_record": "records/rekey-guard-validation-v3/06_sourceguard.result.json",
+      "resource_breach_latched": false,
+      "observer_error": null
+    },
+    {
+      "run": "rekey-guard-validation-v3",
+      "gate": "07_list_default",
+      "command_record": "records/rekey-guard-validation-v3/commands.json",
+      "status": "PASS",
+      "exit_code": 0,
+      "start_utc": "2026-10-12T22:53:13.721073+00:00",
+      "end_utc": "2026-10-12T22:53:15.722416+00:00",
+      "result_record": "records/rekey-guard-validation-v3/07_list_default.result.json",
+      "resource_breach_latched": false,
+      "observer_error": null,
+      "selection_summary": {
+        "manual_selected": false,
+        "native_executed": false
+      }
+    },
+    {
+      "run": "rekey-guard-validation-v3",
+      "gate": "08_list_manual",
+      "command_record": "records/rekey-guard-validation-v3/commands.json",
+      "status": "PASS",
+      "exit_code": 0,
+      "start_utc": "2026-10-12T22:53:16.083886+00:00",
+      "end_utc": "2026-10-12T22:53:18.085432+00:00",
+      "result_record": "records/rekey-guard-validation-v3/08_list_manual.result.json",
+      "resource_breach_latched": false,
+      "observer_error": null,
+      "selection_summary": {
+        "manual_selected": true,
+        "native_executed": false
+      }
+    },
+    {
+      "run": "rekey-guard-validation-v3",
+      "gate": "09_list_windows_default",
+      "command_record": "records/rekey-guard-validation-v3/commands.json",
+      "status": "PASS",
+      "exit_code": 0,
+      "start_utc": "2026-10-12T22:53:18.444040+00:00",
+      "end_utc": "2026-10-12T22:53:20.445785+00:00",
+      "result_record": "records/rekey-guard-validation-v3/09_list_windows_default.result.json",
+      "resource_breach_latched": false,
+      "observer_error": null,
+      "selection_summary": {
+        "manual_selected": false,
+        "native_executed": false
+      }
+    },
+    {
+      "run": "rekey-guard-validation-v3",
+      "gate": "10_manual_compile",
+      "command_record": "records/rekey-guard-validation-v3/commands.json",
+      "status": "PASS",
+      "exit_code": 0,
+      "start_utc": "2026-10-12T22:53:20.794249+00:00",
+      "end_utc": "2026-10-12T22:53:28.800547+00:00",
+      "result_record": "records/rekey-guard-validation-v3/10_manual_compile.result.json",
+      "resource_breach_latched": false,
+      "observer_error": null
+    },
+    {
+      "run": "rekey-guard-validation-v3",
+      "gate": "11_nm",
+      "command_record": "records/rekey-guard-validation-v3/commands.json",
+      "status": "PASS",
+      "exit_code": 0,
+      "start_utc": "2026-10-12T22:53:29.156759+00:00",
+      "end_utc": "2026-10-12T22:53:31.158239+00:00",
+      "result_record": "records/rekey-guard-validation-v3/11_nm.result.json",
+      "resource_breach_latched": false,
+      "observer_error": null,
+      "symbols": {
+        "required": 456,
+        "absent": 10,
+        "nm_rows": 11874,
+        "image_sha256": "af32b10e083dc53fb297737881edfa50b1f66d6db824ab2a56a1ef71ce337173",
+        "image_executed": false
+      }
+    }
+  ]
+}

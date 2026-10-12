@@ -15,14 +15,16 @@ import (
 type manualRollbackSQLScope struct{ scope *rollbackFaultScope }
 
 type ManualRollbackSQLReport struct {
-	Observation           rollbackfault.Observation
-	Events                [rollbackfault.MaxEvents]rollbackfault.Event
-	EventCount            uint8
-	Diagnostics           [rollbackfault.MaxEvents]error
-	CommitError           error
-	Problem               error
-	PreDBOnlyTargetCause  bool
-	PostDBOnlyTargetCause bool
+	Observation             rollbackfault.Observation
+	Events                  [rollbackfault.MaxEvents]rollbackfault.Event
+	EventCount              uint8
+	Diagnostics             [rollbackfault.MaxEvents]error
+	CommitError             error
+	Problem                 error
+	PreDBOnlyTargetCause    bool
+	PostDBOnlyTargetCause   bool
+	MisplacedWrite          rollbackfault.SQLMisplacedWrite
+	MisplaceOnlyTargetCause bool
 }
 
 // Snapshots are separately locked scalar observations, not an atomic proof of
@@ -79,6 +81,8 @@ func ArmManualRollbackSQLFault(tx *Tx, plan rollbackfault.Plan) (*manualRollback
 		if spec.PrefixError {
 			caseID = rollbackfault.SQLIndexPrefix64Error
 		}
+	case rollbackfault.MisplaceIndexPageMinus64:
+		caseID = rollbackfault.SQLIndexMisplaceMinus64Error
 	case rollbackfault.FailBefore:
 		switch spec.Target.Point {
 		case rollbackfault.DBSync:
@@ -132,6 +136,7 @@ func FinishManualRollbackSQLFault(scope *manualRollbackSQLScope, commitErr error
 	report := finishRollbackFault(scope.scope, commitErr)
 	scope.scope.mu.Lock()
 	target, point := scope.scope.targetError, scope.scope.plan.Spec().Target.Point
+	action, misplaced := scope.scope.plan.Spec().Action, scope.scope.misplacedWrite
 	scope.scope.mu.Unlock()
 	preDBOnlyTargetCause := false
 	if point == rollbackfault.JournalBodySync || point == rollbackfault.JournalHeaderSync || point == rollbackfault.PublishDirectorySync {
@@ -151,7 +156,14 @@ func FinishManualRollbackSQLFault(scope *manualRollbackSQLScope, commitErr error
 		}
 		postDBOnlyTargetCause = manualRollbackSQLOnlyTargetCause(commitErr, poison, target, permitted)
 	}
-	return ManualRollbackSQLReport{Observation: report.Observation, Events: report.Events, EventCount: report.EventCount, Diagnostics: report.Diagnostics, CommitError: report.CommitError, Problem: report.Problem, PreDBOnlyTargetCause: preDBOnlyTargetCause, PostDBOnlyTargetCause: postDBOnlyTargetCause}
+	misplaceOnlyTargetCause := false
+	if action == rollbackfault.MisplaceIndexPageMinus64 {
+		scope.scope.tx.mu.Lock()
+		poison := scope.scope.tx.poisoned
+		scope.scope.tx.mu.Unlock()
+		misplaceOnlyTargetCause = manualRollbackSQLOnlyTargetCause(commitErr, poison, target, ErrRecoveryRequired)
+	}
+	return ManualRollbackSQLReport{Observation: report.Observation, Events: report.Events, EventCount: report.EventCount, Diagnostics: report.Diagnostics, CommitError: report.CommitError, Problem: report.Problem, PreDBOnlyTargetCause: preDBOnlyTargetCause, PostDBOnlyTargetCause: postDBOnlyTargetCause, MisplacedWrite: misplaced, MisplaceOnlyTargetCause: misplaceOnlyTargetCause}
 }
 
 // This observation is limited to the original public wrapper and the actual

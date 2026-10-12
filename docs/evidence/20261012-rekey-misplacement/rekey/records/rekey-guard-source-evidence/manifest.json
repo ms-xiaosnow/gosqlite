@@ -1,0 +1,98 @@
+{
+  "status": "SOURCE_ONLY_GUARD_FREEZE_REVIEW_HOLD",
+  "facility_manifest_sha256": "e78dcdf71c2a6cff108436f16c120982457ad810aa2d39bba487afbfb99f9b99",
+  "overlay_files": [
+    {
+      "path": "internal/testscope/rekey_interruption.go",
+      "bytes": 276145,
+      "sha256": "8311b7e601d005c89da71b63323efaba668a7d697a61bafdfd315f5390f6bd84",
+      "base_sha256": null
+    },
+    {
+      "path": "internal/testscope/rekey_interruption_test.go",
+      "bytes": 10841,
+      "sha256": "82aed5860c429d40dadb6ba0b10335a759d12431c93ead88822c717ab59eb0c7",
+      "base_sha256": null
+    },
+    {
+      "path": "internal/testscope/main.go",
+      "bytes": 11580,
+      "sha256": "1d9f41ed857bf64a3d2913f96fee3409a173f036df753efd81a7a9190ee2536a",
+      "base_sha256": "6dbab48ff374858bfafe578f0fca99f5176ced7b6bdc008bec04ce6a6d1d0eb2"
+    },
+    {
+      "path": "internal/testscope/oracle_startup.go",
+      "bytes": 11306,
+      "sha256": "0e480e214568b935c16c34ef9226f7ef2c86fce81151ebe09aa91087a62ec6a4",
+      "base_sha256": "991999aaa17813b49780bacd2b51e0c38d2550034da345666f11491033372f72"
+    },
+    {
+      "path": "internal/testscope/readonly_wal_manual.go",
+      "bytes": 84407,
+      "sha256": "2c4c667a1a31e0d8efb341f2b94a03c011189fca44fa2349248814af1b19f389",
+      "base_sha256": "cfe6597ed00b9bec1b86727aec720258a2b872c952a75049d2ab381f5f8e9478"
+    },
+    {
+      "path": "internal/testscope/readonly_wal_manual_test.go",
+      "bytes": 49916,
+      "sha256": "8a7af77ba419ed25908148ec9e076a249c766b6e33a46b0853e69d54d572f35e",
+      "base_sha256": "3187dbca3556f0331baaca6d906778a9c0d257c85070eae228e9af61df27bab1"
+    }
+  ],
+  "patch_sha256": "8586750456c9579495369c2d462207400e3d23a80c14e5284d1462c05c2276db",
+  "guard_roots": [
+    "TestRekeyGuardInventoryGate",
+    "TestRekeyGuardPublicationOrder",
+    "TestRekeyGuardObserverIsolation",
+    "TestRekeyGuardPublicReturnACK",
+    "TestRekeyGuardProcessOwnership",
+    "TestRekeyGuardProbeLedger",
+    "TestRekeyGuardIntegrationDefault"
+  ],
+  "guard_selector": "^(TestRekeyGuardInventoryGate|TestRekeyGuardPublicationOrder|TestRekeyGuardObserverIsolation|TestRekeyGuardPublicReturnACK|TestRekeyGuardProcessOwnership|TestRekeyGuardProbeLedger|TestRekeyGuardIntegrationDefault)$",
+  "guard_test_count": 7,
+  "full_source_pins": "ALL_NINE_EXPLICIT_HOLD_PENDING_INDEPENDENT_REKEY_FULL_SOURCE_REVIEW",
+  "inspectSource_unchanged": true,
+  "inspectSource_bytes_sha256": "98341345e43f39b39dbc78eaf49a916a0701f3d7f2f383d4949b9a3ed439d199",
+  "base_main_sha256": "6dbab48ff374858bfafe578f0fca99f5176ced7b6bdc008bec04ce6a6d1d0eb2",
+  "candidate_main_sha256": "1d9f41ed857bf64a3d2913f96fee3409a173f036df753efd81a7a9190ee2536a",
+  "ordinary_admission_change": "oracle_startup.go: one OR branch, exact new native path/tag/direct exec.Command/import/complete source guard only",
+  "a5_files_changed": false,
+  "main_hooks": {
+    "per_file": 1,
+    "whole_contract": 1
+  },
+  "execution": {
+    "Go": "NOT_RUN",
+    "gofmt": "NOT_RUN",
+    "parser": "NOT_RUN",
+    "tests": "NOT_RUN",
+    "compiler": "NOT_RUN",
+    "source_selection": "NOT_RUN",
+    "fixture": "NOT_RUN",
+    "wrong_key": "NOT_RUN",
+    "process_exit": "NOT_RUN",
+    "archive": "NOT_RUN",
+    "recovery": "NOT_RUN",
+    "physical": "NOT_RUN"
+  },
+  "independent_guard_review": "IN_PROGRESS; exact Wait closure false rejection corrected in source; no execution",
+  "physical_validated": false,
+  "readonly_wal_integration": {
+    "new_rows": 2,
+    "old_rows_retained": 12,
+    "total_rows": 14,
+    "mutants_per_row": 14,
+    "total_mutants": 196,
+    "new_test_roots": 0,
+    "changes": "exact source/contract triplets, source/contract order, once-call inventory, and one exact findings append only"
+  },
+  "existing_whole_main_pin_review_paths": [
+    "internal/testscope/wal_tail_publication.go",
+    "internal/testscope/encryption_upgrade_manual.go",
+    "internal/testscope/rollback_fault_test.go",
+    "internal/testscope/rollback_fault_sql_test.go",
+    "internal/testscope/rollback_restart_test.go",
+    "internal/testscope/encrypted_root_negative.go"
+  ]
+}

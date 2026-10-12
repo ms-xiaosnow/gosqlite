@@ -1,0 +1,18 @@
+{
+  "scan": {
+    "unexpected_secret_pattern_counts": {
+      "github_token": 0,
+      "aws_key": 0,
+      "private_key": 0,
+      "bearer_token": 0,
+      "basic_token": 0,
+      "credential_url": 0,
+      "signed_url": 0
+    },
+    "credential_related_lines_reviewed": 8,
+    "existing_github_masked_lines": 3,
+    "additional_redactions": 0,
+    "limit": "Pattern and credential-keyword review; not a proof that no secret exists."
+  },
+  "fetched_at": "2026-10-12T22:11:27.037Z"
+}

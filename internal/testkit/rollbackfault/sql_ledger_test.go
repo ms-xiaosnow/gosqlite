@@ -100,7 +100,7 @@ func sqlEvidenceFixture(t *testing.T, which SQLCase) (Plan, Receipt, SQLLedgerEv
 		Recovery:  SQLRecoveryEvidence{Identity: identity, OwnersRetired: true},
 		Lifecycle: SQLLifecycleEvidence{ArmCalls: 1, CommitCalls: 1, FinishCalls: 1, DisarmCalls: 1, WriterOpens: 1, ReopenCalls: 1, ReopenReadOnly: true, WriterRetiredBeforeRecovery: true, RecoveryFinishedBeforeReopen: true, CommitCapturedUnchanged: true},
 	}
-	if which == SQLIndexPrefix64 || which == SQLDBSyncBefore || which == SQLIndexPrefix64Error || which == SQLJournalUnlinkBefore {
+	if which == SQLIndexPrefix64 || which == SQLDBSyncBefore || which == SQLIndexPrefix64Error || which == SQLJournalUnlinkBefore || which == SQLIndexMisplaceMinus64Error {
 		evidence.Recovery.Calls = 1
 		evidence.Recovery.Limits = SQLRecoveryLimits{MaxJournalBytes: 16408, MaxRecords: 3, MaxDatabaseBytes: 12288}
 		evidence.Recovery.JournalPresentBefore = true
@@ -138,11 +138,17 @@ func sqlEvidenceFixture(t *testing.T, which SQLCase) (Plan, Receipt, SQLLedgerEv
 			stamp.Bytes, stamp.SHA256[0] = 16408, 33
 		}
 		evidence.Artifacts[i].Before, evidence.Artifacts[i].After = stamp, stamp
-		if (which == SQLIndexPrefix64 || which == SQLDBSyncBefore || which == SQLIndexPrefix64Error || which == SQLJournalUnlinkBefore) && role == SQLReplayArtifact {
+		if (which == SQLIndexPrefix64 || which == SQLDBSyncBefore || which == SQLIndexPrefix64Error || which == SQLJournalUnlinkBefore || which == SQLIndexMisplaceMinus64Error) && role == SQLReplayArtifact {
 			evidence.Artifacts[i].After.SHA256[0] = 11
 		}
 		if role == SQLReplayJournalArtifact {
 			evidence.Artifacts[i].After = SQLArtifactStamp{}
+		}
+	}
+	if which == SQLIndexMisplaceMinus64Error {
+		evidence.Misplacement = SQLMisplacementEvidence{
+			Writer:        SQLMisplacedWrite{RequestedOffset: 8192, RequestedBytes: 4096, NativeOffset: 8128, NativeBytes: 4096, NativeCalls: 1, PayloadSHA256: [32]byte{44}},
+			ShiftedSHA256: [32]byte{44}, BaselineRangeSHA256: [32]byte{55}, BaselineTailSHA256: [32]byte{66}, UntouchedTailSHA256: [32]byte{66}, JournalOriginals: hashes, OnlyTargetCause: true,
 		}
 	}
 	return plan, sqlReceipt(t, plan, fixtureEvents(plan.Spec())), evidence
@@ -213,7 +219,7 @@ func TestSQLLedgerPlansFreezeThreePageSelectorsAndLimits(t *testing.T) {
 			if read.Point != DBOriginalRead || read.Occurrence != uint8(i+1) || read.Offset != int64(i*4096) || record.Point != JournalRecord || record.Occurrence != uint8(i+1) || record.Offset != int64(4096+i*4104) {
 				t.Fatalf("original page role %v was not independently selected", i)
 			}
-			if which == SQLControl || which == SQLIndexPrefix64 || which == SQLDBSyncBefore || which == SQLIndexPrefix64Error || which == SQLJournalUnlinkBefore || which == SQLFinalDirectorySyncBefore {
+			if which == SQLControl || which == SQLIndexPrefix64 || which == SQLDBSyncBefore || which == SQLIndexPrefix64Error || which == SQLJournalUnlinkBefore || which == SQLIndexMisplaceMinus64Error || which == SQLFinalDirectorySyncBefore {
 				write := spec.Calls[12+i]
 				if write.Point != DBPage || write.Occurrence != uint8(i+1) || write.Offset != int64(i*4096) {
 					t.Fatalf("dirty page role %v was not independently selected", i)
@@ -986,7 +992,7 @@ func TestSQLLedgerCasePartitionsUseOnlyExactIDs(t *testing.T) {
 	for value := 0; value <= 255; value++ {
 		which := SQLCase(value)
 		wantPreDB := value == 5 || value == 6 || value == 7
-		wantRecovery := value == 2 || value == 3 || value == 4 || value == 8
+		wantRecovery := value == 2 || value == 3 || value == 4 || value == 8 || value == 10
 		wantPostDB := value == 8 || value == 9
 		if isSQLPreDBFailure(which) != wantPreDB || needsSQLRecovery(which) != wantRecovery || isSQLPostDBFailure(which) != wantPostDB {
 			t.Fatalf("case %d entered the wrong exact-ID partition", value)
@@ -1470,7 +1476,7 @@ func TestSQLLedgerPostDBFailuresRejectTraceAndClassificationConfusion(t *testing
 					evidence.Case = SQLFinalDirectorySyncBefore
 				}
 			case "unknown-case":
-				evidence.Case = SQLCase(10)
+				evidence.Case = SQLCase(11)
 			case "wrong-target":
 				plan.spec.Target.Point = DBSync
 			case "wrong-owner":
@@ -1680,10 +1686,156 @@ func TestSQLLedgerPostDBFailuresRequireNewCopyAndExactRecoveryDecision(t *testin
 		sqlMustReject(t, ObserveSQLLedger(plan, receipt, evidence))
 	}
 	plan, _, evidence := sqlEvidenceFixture(t, SQLFinalDirectorySyncBefore)
-	for value := 10; value <= 255; value++ {
+	for value := 11; value <= 255; value++ {
 		which := SQLCase(value)
 		if _, problem := SQLPlan(plan.Spec().Identity, which); problem == NoProblem || validSQLRecovery(which, evidence.Recovery) || validSQLArtifacts(which, evidence.Artifacts) {
 			t.Fatalf("future SQL case %d received a classification", value)
+		}
+	}
+}
+
+func TestSQLLedgerMisplacementRequiresCompleteOldAndActualEvidence(t *testing.T) {
+	plan, receipt, evidence := sqlEvidenceFixture(t, SQLIndexMisplaceMinus64Error)
+	observed := ObserveSQLLedger(plan, receipt, evidence)
+	if !observed.EvidenceConsistent || !observed.ScenarioObserved || observed.Problem != SQLProblemNone || observed.Adapter.EventCount != 35 || observed.Adapter.TargetHits != 1 || observed.Pass() || observed.PhysicalValidated() {
+		t.Fatal("fixed misplaced-write evidence rejected or became physical", observed)
+	}
+	if int(SQLIndexMisplaceMinus64Error) != 10 || isSQLPreDBFailure(SQLIndexMisplaceMinus64Error) || isSQLPostDBFailure(SQLIndexMisplaceMinus64Error) || !needsSQLRecovery(SQLIndexMisplaceMinus64Error) || evidence.PostCommit != (SQLSnapshotEvidence{}) || evidence.Lifecycle.ReopenCalls != 1 {
+		t.Fatal("misplaced-write case partition changed")
+	}
+	for _, name := range []string{"missing", "requested-offset", "requested-length", "native-correct-offset", "native-plus64", "native-minus128", "native-zero", "native-prefix", "native-short", "zero-calls", "two-calls", "zero-payload", "wrong-payload", "baseline-payload", "zero-baseline-range", "changed-tail", "zero-tails", "journal-missing", "journal-wrong", "journal-reordered", "extra-close-cause", "NEW", "mixed-index", "wrong-member", "post-copy-NEW", "recovery-zero", "recovery-two", "wrong-limits", "journal-before-absent", "journal-after-present", "owners-live", "replay-alias", "changed-original", "changed-trial", "replay-NEW", "public-success", "public-uncertain", "public-short", "public-pending", "pre-DB-cause", "post-DB-cause", "two-reopens", "physical"} {
+		bad := evidence
+		m := &bad.Misplacement
+		switch name {
+		case "missing":
+			*m = SQLMisplacementEvidence{}
+		case "requested-offset":
+			m.Writer.RequestedOffset = 8128
+		case "requested-length":
+			m.Writer.RequestedBytes = 64
+		case "native-correct-offset":
+			m.Writer.NativeOffset = 8192
+		case "native-plus64":
+			m.Writer.NativeOffset = 8256
+		case "native-minus128":
+			m.Writer.NativeOffset = 8064
+		case "native-zero":
+			m.Writer.NativeOffset = 0
+		case "native-prefix":
+			m.Writer.NativeBytes = 64
+		case "native-short":
+			m.Writer.NativeBytes = 4095
+		case "zero-calls":
+			m.Writer.NativeCalls = 0
+		case "two-calls":
+			m.Writer.NativeCalls = 2
+		case "zero-payload":
+			m.Writer.PayloadSHA256, m.ShiftedSHA256 = [32]byte{}, [32]byte{}
+		case "wrong-payload":
+			m.ShiftedSHA256[0]++
+		case "baseline-payload":
+			m.BaselineRangeSHA256 = m.Writer.PayloadSHA256
+		case "zero-baseline-range":
+			m.BaselineRangeSHA256 = [32]byte{}
+		case "changed-tail":
+			m.UntouchedTailSHA256[0]++
+		case "zero-tails":
+			m.BaselineTailSHA256, m.UntouchedTailSHA256 = [32]byte{}, [32]byte{}
+		case "journal-missing":
+			m.JournalOriginals[2] = [32]byte{}
+		case "journal-wrong":
+			m.JournalOriginals[1][0]++
+		case "journal-reordered":
+			m.JournalOriginals[1], m.JournalOriginals[2] = m.JournalOriginals[2], m.JournalOriginals[1]
+		case "extra-close-cause":
+			m.OnlyTargetCause = false
+		case "NEW":
+			bad.After = sqlSnapshot(bad.Identity, 102, 8, SQLNew)
+		case "mixed-index":
+			bad.After.Queries[SQLBlueIndex] = sqlSnapshot(bad.Identity, 102, 8, SQLNew).Queries[SQLBlueIndex]
+		case "wrong-member":
+			bad.After.Queries[SQLBlueIndex].Rows[0].ID = 77
+		case "post-copy-NEW":
+			bad.PostCommit = sqlSnapshot(bad.Identity, 103, 15, SQLNew)
+		case "recovery-zero":
+			bad.Recovery.Calls = 0
+		case "recovery-two":
+			bad.Recovery.Calls = 2
+		case "wrong-limits":
+			bad.Recovery.Limits.MaxJournalBytes++
+		case "journal-before-absent":
+			bad.Recovery.JournalPresentBefore = false
+		case "journal-after-present":
+			bad.Recovery.JournalPresentAfter = true
+		case "owners-live":
+			bad.Recovery.OwnersRetired = false
+		case "replay-alias":
+			bad.Artifacts[SQLReplayArtifact].Before.Inode = bad.Artifacts[SQLTrialArtifact].Before.Inode
+		case "changed-original":
+			bad.Originals.After[1][0]++
+		case "changed-trial":
+			bad.Artifacts[SQLTrialArtifact].After.SHA256[0]++
+		case "replay-NEW":
+			bad.Artifacts[SQLReplayArtifact].After.SHA256 = bad.Artifacts[SQLTrialArtifact].Before.SHA256
+		case "public-success":
+			bad.Lifecycle.PublicCodeIOErr = false
+		case "public-uncertain":
+			bad.Lifecycle.PublicCommitUncertain = true
+		case "public-short":
+			bad.Lifecycle.PublicShortWrite = true
+		case "public-pending":
+			bad.Lifecycle.PublicCleanupPending = true
+		case "pre-DB-cause":
+			bad.Lifecycle.PreDBOnlyTargetCause = true
+		case "post-DB-cause":
+			bad.Lifecycle.PostDBOnlyTargetCause = true
+		case "two-reopens":
+			bad.Lifecycle.ReopenCalls = 2
+		case "physical":
+			bad.PhysicalClaim = true
+		}
+		if observed := ObserveSQLLedger(plan, receipt, bad); observed.EvidenceConsistent || observed.ScenarioObserved || observed.Problem == SQLProblemNone || observed.Pass() || observed.PhysicalValidated() {
+			t.Fatal("misplaced-write counterexample accepted", name, observed)
+		}
+	}
+}
+
+func TestSQLLedgerOldNineCasesRequireZeroMisplacement(t *testing.T) {
+	for _, which := range []SQLCase{SQLControl, SQLIndexPrefix64, SQLDBSyncBefore, SQLIndexPrefix64Error, SQLJournalBodySyncBefore, SQLJournalHeaderSyncBefore, SQLPublishDirectorySyncBefore, SQLJournalUnlinkBefore, SQLFinalDirectorySyncBefore} {
+		plan, receipt, evidence := sqlEvidenceFixture(t, which)
+		if evidence.Misplacement != (SQLMisplacementEvidence{}) {
+			t.Fatal("old case gained misplacement evidence", which)
+		}
+		for _, name := range []string{"requested-offset", "requested-bytes", "native-offset", "native-bytes", "native-calls", "payload", "shifted", "baseline-range", "baseline-tail", "tail", "journal", "cause"} {
+			bad := evidence
+			m := &bad.Misplacement
+			switch name {
+			case "requested-offset":
+				m.Writer.RequestedOffset = 8192
+			case "requested-bytes":
+				m.Writer.RequestedBytes = 4096
+			case "native-offset":
+				m.Writer.NativeOffset = 8128
+			case "native-bytes":
+				m.Writer.NativeBytes = 4096
+			case "native-calls":
+				m.Writer.NativeCalls = 1
+			case "payload":
+				m.Writer.PayloadSHA256[0] = 44
+			case "shifted":
+				m.ShiftedSHA256[0] = 44
+			case "baseline-range":
+				m.BaselineRangeSHA256[0] = 55
+			case "baseline-tail":
+				m.BaselineTailSHA256[0] = 66
+			case "tail":
+				m.UntouchedTailSHA256[0] = 66
+			case "journal":
+				m.JournalOriginals[0][0] = 11
+			case "cause":
+				m.OnlyTargetCause = true
+			}
+			sqlMustReject(t, ObserveSQLLedger(plan, receipt, bad))
 		}
 	}
 }

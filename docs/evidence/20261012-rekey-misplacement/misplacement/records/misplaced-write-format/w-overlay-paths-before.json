@@ -1,0 +1,15 @@
+{
+  "docs/testing/rollback-fault-adapter-zh.md": "c04e93be4481f4b635bc7ecccff46dc352ddf5ea53415252554ec2b4b740ab0b",
+  "docs/testing/rollback-fault-sql-manual-zh.md": "9967acb6a803c2c1f71374b62bb4d4db2bc1b5252e50f64e819d25b73c6d23c7",
+  "internal/pager/rollback_fault_sql_manual_linux.go": "ad9f263e2d15a496cc70b1d35038f5b0393e8b94c0923ea5db96bf4eff71c0f9",
+  "internal/pager/rollback_io_manual_linux.go": "4f26bfec0de7b3c22f056ec374a4c453691f5cd2a5ee5e62116f2f8c66b5e498",
+  "internal/testkit/rollbackfault/contract.go": "dc7ec44ec7be3f444f4e7501c84d6875a1a0e9b4d46e06e5586b2e5d225828ed",
+  "internal/testkit/rollbackfault/contract_test.go": "8c43b22c2fbfdc6d4aef423abd44956196a2b15e223a8f56ef00065c8d77c362",
+  "internal/testkit/rollbackfault/sql_ledger.go": "7d47e46b34204c12a4df50d02a24179bf22e081d45f2816e3c048b0bc7dd04dc",
+  "internal/testkit/rollbackfault/sql_ledger_test.go": "5bea133008de83e9c5e737582305034cf24e1b99a25d402cba61c596f52ef2a3",
+  "internal/testscope/rollback_fault.go": "1e82d659ac17f3568f34338e951d6e8a044eeec0e07e45498368bda491a09c59",
+  "internal/testscope/rollback_fault_sql.go": "0647edf67ae831b8d99b3caddf02fbf8e65380fc391405effe433145c5374969",
+  "internal/testscope/rollback_fault_sql_test.go": "a13a82fd127d81eb7df85eb0286f156f575ae0a17417d2c33a6127388dce0d7d",
+  "internal/testscope/rollback_fault_test.go": "79dea110d8eb481b7d6e7f055ef8ff93e2f7032f19d370f3f5279ba255878dbb",
+  "sqlite/rollback_fault_sql_manual_linux_test.go": "c368296059cbf29a4756cbb760b3836c580d8615e25a7330f76d83ba97427037"
+}

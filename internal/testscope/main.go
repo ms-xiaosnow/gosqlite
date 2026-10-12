@@ -172,6 +172,11 @@ func main() {
 			return err
 		}
 		var findings []string
+		rekey, rekeyErr := inspectRekeyInterruptionSource(path, raw)
+		if rekeyErr != nil {
+			return rekeyErr
+		}
+		findings = append(findings, rekey...)
 		rootNegative, rootNegativeErr := inspectEncryptedRootNegativeSource(path, raw)
 		if rootNegativeErr != nil {
 			return rootNegativeErr
@@ -347,6 +352,15 @@ func main() {
 		failed = true
 	}
 	for _, finding := range rootNegativeContracts {
+		fmt.Fprintln(os.Stderr, finding)
+		failed = true
+	}
+	rekeyContracts, rekeyContractErr := inspectRekeyInterruptionContracts(".")
+	if rekeyContractErr != nil {
+		fmt.Fprintln(os.Stderr, rekeyContractErr)
+		failed = true
+	}
+	for _, finding := range rekeyContracts {
 		fmt.Fprintln(os.Stderr, finding)
 		failed = true
 	}

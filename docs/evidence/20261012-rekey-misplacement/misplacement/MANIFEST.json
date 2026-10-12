@@ -1,0 +1,1003 @@
+{
+  "schema": 1,
+  "hash_algorithm": "sha256",
+  "manifest_excludes_itself": true,
+  "member_count_without_manifest": 199,
+  "files": [
+    {
+      "path": "EXCLUSIONS.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "README-zh.md",
+      "bytes": 4000,
+      "sha256": "be5a0f4474a0b027b48d2a74b7d482c34103776a31cb06c27d4f23b8c59ae75b"
+    },
+    {
+      "path": "RESULTS-SUMMARY.json",
+      "bytes": 49987,
+      "sha256": "0d35cdb75c07ec4c47981d7a0f1c7fc3cc4cc8340f42e438797cd4a79dafbf46"
+    },
+    {
+      "path": "REUSE-MAP.json",
+      "bytes": 17592,
+      "sha256": "81de6806fe5beab04f21e156f979a9470b4e9aa89f5db4af79cd56badfa54ae7"
+    },
+    {
+      "path": "SOURCE-BLOB-VERIFICATION.json",
+      "bytes": 3775,
+      "sha256": "417ba1e806b236abaa56292d14a2d2ef6d77216604d12823f9d63abfdde41248"
+    },
+    {
+      "path": "SOURCE-IDENTITY.json",
+      "bytes": 2399,
+      "sha256": "2855b329d20ae8ef7465681db160854985db870c6701364dc27ac4b834ee1160"
+    },
+    {
+      "path": "final-source/docs/testing/rollback-fault-adapter-zh.md",
+      "bytes": 20092,
+      "sha256": "e0e683b7e2c57c31980a606c4ccf9abf5263cdd96e6c5f887b690390012afe60"
+    },
+    {
+      "path": "final-source/docs/testing/rollback-fault-sql-manual-zh.md",
+      "bytes": 36410,
+      "sha256": "8ddd2eac317c52b365bd82ba515487e0067a4c7931f410254fea16a271e682d7"
+    },
+    {
+      "path": "final-source/internal/pager/rollback_fault_sql_manual_linux.go",
+      "bytes": 9045,
+      "sha256": "9847b258f401c52c8748b2e380a8b96e33eda64567a38edd1833f16df188431a"
+    },
+    {
+      "path": "final-source/internal/pager/rollback_io_manual_linux.go",
+      "bytes": 22187,
+      "sha256": "1e15ab58e49a4d6eedd72274e20c59f644546609f61a19d96e588688eb0c5940"
+    },
+    {
+      "path": "final-source/internal/testkit/rollbackfault/contract.go",
+      "bytes": 23364,
+      "sha256": "dff18faca43a384de7ec37aedee877d30320823e540be71c7486d3ff5a24198d"
+    },
+    {
+      "path": "final-source/internal/testkit/rollbackfault/contract_test.go",
+      "bytes": 46965,
+      "sha256": "3de6db2bb1cfd222a04af78c9f0b88c5b5dfefb163ef63967ec44ed6ee417993"
+    },
+    {
+      "path": "final-source/internal/testkit/rollbackfault/sql_ledger.go",
+      "bytes": 27231,
+      "sha256": "96def5b6a7545f7e7f8e9e2acaf16e540237cfa2bccd92875b7961560e328267"
+    },
+    {
+      "path": "final-source/internal/testkit/rollbackfault/sql_ledger_test.go",
+      "bytes": 90153,
+      "sha256": "07083e68442522330edae5a562e74b2e6d901a9429c846b196737e02b5d7d469"
+    },
+    {
+      "path": "final-source/internal/testscope/rollback_fault.go",
+      "bytes": 147779,
+      "sha256": "bb3d93fea9959906fff0093d320fecac1d7dbfae58cb4a6221012b4a8fc04448"
+    },
+    {
+      "path": "final-source/internal/testscope/rollback_fault_sql.go",
+      "bytes": 311499,
+      "sha256": "d5ff12fe8bb17e4976b17561762de95f0086fa927c601ee815e50dcf23e51468"
+    },
+    {
+      "path": "final-source/internal/testscope/rollback_fault_sql_test.go",
+      "bytes": 72010,
+      "sha256": "39457022d5a8de687a2418ba627f675d69fc0028d0d0ec953c3fbefe840cfbf0"
+    },
+    {
+      "path": "final-source/internal/testscope/rollback_fault_test.go",
+      "bytes": 20339,
+      "sha256": "259a3060ddeea65e2933dde29fcb3d9539a0efc48f3e1249be43575321b28dfb"
+    },
+    {
+      "path": "final-source/sqlite/rollback_fault_sql_manual_linux_test.go",
+      "bytes": 50735,
+      "sha256": "78464b9d6f948be4d1efc0686f8b57a17f1a0ae530081230edc7c553d996bf09"
+    },
+    {
+      "path": "records/misplaced-write-caller-edit.py",
+      "bytes": 7866,
+      "sha256": "8a6ad71bac3ec2d8fed9adb3722a582093f9eb31ea2ae568877f9a03673b6922"
+    },
+    {
+      "path": "records/misplaced-write-edit.py",
+      "bytes": 10531,
+      "sha256": "bea09bdfa6f99984b99641bdbbac57669418a330dd847c2b6dfe3db2592a647f"
+    },
+    {
+      "path": "records/misplaced-write-finish-edit.py",
+      "bytes": 8000,
+      "sha256": "6c9ffab2caf36ea202e9d3f7883e523523b82589324f333d199dbc3b49782623"
+    },
+    {
+      "path": "records/misplaced-write-format/01-gofmt.diff",
+      "bytes": 29547,
+      "sha256": "f9685dd8bae36c8e97a81af7b008163a56673e6210da599cd162e8a660760937"
+    },
+    {
+      "path": "records/misplaced-write-format/02-repin.diff",
+      "bytes": 365015,
+      "sha256": "6a859898af32714616a49fc510eed39935f89bbf6726d06066a73b1a8831c307"
+    },
+    {
+      "path": "records/misplaced-write-format/03-anchor-adaptation.diff",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "records/misplaced-write-format/before/docs/testing/rollback-fault-adapter-zh.md",
+      "bytes": 20092,
+      "sha256": "e0e683b7e2c57c31980a606c4ccf9abf5263cdd96e6c5f887b690390012afe60"
+    },
+    {
+      "path": "records/misplaced-write-format/before/docs/testing/rollback-fault-sql-manual-zh.md",
+      "bytes": 36410,
+      "sha256": "8ddd2eac317c52b365bd82ba515487e0067a4c7931f410254fea16a271e682d7"
+    },
+    {
+      "path": "records/misplaced-write-format/before/internal/pager/rollback_fault_sql_manual_linux.go",
+      "bytes": 9027,
+      "sha256": "50ff5277bd0811f4f5f9080520797d9fff6689cce1eb5fb2345d81cbce923b5c"
+    },
+    {
+      "path": "records/misplaced-write-format/before/internal/pager/rollback_io_manual_linux.go",
+      "bytes": 22187,
+      "sha256": "1e15ab58e49a4d6eedd72274e20c59f644546609f61a19d96e588688eb0c5940"
+    },
+    {
+      "path": "records/misplaced-write-format/before/internal/testkit/rollbackfault/contract.go",
+      "bytes": 23364,
+      "sha256": "dff18faca43a384de7ec37aedee877d30320823e540be71c7486d3ff5a24198d"
+    },
+    {
+      "path": "records/misplaced-write-format/before/internal/testkit/rollbackfault/contract_test.go",
+      "bytes": 46803,
+      "sha256": "3b4aae0c648444bf2031b625637aedc2de2a5c9b2632243512b89d8ac3258f31"
+    },
+    {
+      "path": "records/misplaced-write-format/before/internal/testkit/rollbackfault/sql_ledger.go",
+      "bytes": 27231,
+      "sha256": "96def5b6a7545f7e7f8e9e2acaf16e540237cfa2bccd92875b7961560e328267"
+    },
+    {
+      "path": "records/misplaced-write-format/before/internal/testkit/rollbackfault/sql_ledger_test.go",
+      "bytes": 89949,
+      "sha256": "5d0fede7585d788714a380d72691083931c738c903391f0cec76aaecb394f8e3"
+    },
+    {
+      "path": "records/misplaced-write-format/before/internal/testscope/rollback_fault.go",
+      "bytes": 147628,
+      "sha256": "c854bfafe0ecedc33e4676595d21a99d460d129ae0a2d6a9ca776178d002caed"
+    },
+    {
+      "path": "records/misplaced-write-format/before/internal/testscope/rollback_fault_sql.go",
+      "bytes": 311020,
+      "sha256": "ae4adc9a0636e7ca3b9067276fee83965e2aa2002b4754571f661f8926d7f895"
+    },
+    {
+      "path": "records/misplaced-write-format/before/internal/testscope/rollback_fault_sql_test.go",
+      "bytes": 71196,
+      "sha256": "fde0e37a3afe4affc649624978eaeaa2f580e9b55b3b5a7d73d9012bce70dab4"
+    },
+    {
+      "path": "records/misplaced-write-format/before/internal/testscope/rollback_fault_test.go",
+      "bytes": 20318,
+      "sha256": "9aa79c9ea8bfeef4ab0f164187e3134ffb5713b6c0292910bab59d45d35ce08e"
+    },
+    {
+      "path": "records/misplaced-write-format/before/source-manifest.json",
+      "bytes": 13746,
+      "sha256": "d77db0fad47ad18637d8a70a77ab4af43a53436410b56ca19f2cbed29de1cd3a"
+    },
+    {
+      "path": "records/misplaced-write-format/before/sqlite/rollback_fault_sql_manual_linux_test.go",
+      "bytes": 50722,
+      "sha256": "576f77b415b98ff02879534480be4753086b949aaea39376fb9488918f9bd8b7"
+    },
+    {
+      "path": "records/misplaced-write-format/check-format-text.py",
+      "bytes": 9229,
+      "sha256": "b7fe57ff6ed003f98f39a0352388c5926059e91256cdb720e2f905ec2550cbbf"
+    },
+    {
+      "path": "records/misplaced-write-format/final-format-and-repin.diff",
+      "bytes": 394392,
+      "sha256": "2ca0b8afec0287b2cb4d7236e3638e06a53e65e11131de7d973911f1fae47dea"
+    },
+    {
+      "path": "records/misplaced-write-format/final-overlay-from-01c.patch",
+      "bytes": 560804,
+      "sha256": "b84d4048a89ebfc8908c9512c3cbb49bb66069dc6393061061bd7b37cccedd3e"
+    },
+    {
+      "path": "records/misplaced-write-format/final-path-sha256-manifest.json",
+      "bytes": 10078,
+      "sha256": "fae80cd29f7a027839d7429e954056b0956c6d7a772a5ae22c5d80f50d949a0e"
+    },
+    {
+      "path": "records/misplaced-write-format/final-text-check.json",
+      "bytes": 2607,
+      "sha256": "18d935fc08f0ceda1ff07247ec425dc27bc487261835718b3d5e95ec338cf001"
+    },
+    {
+      "path": "records/misplaced-write-format/go-files.txt",
+      "bytes": 1350,
+      "sha256": "36d732972bb2de3d8565e28367f81a10c331c2a51367aaaf0fa64eca7f944d3b"
+    },
+    {
+      "path": "records/misplaced-write-format/gofmt-invocation.txt",
+      "bytes": 1523,
+      "sha256": "4f85aa3779ce9fc991962de6b9fb7574e2c9e9eab5177b32cbda218ceba6c7f8"
+    },
+    {
+      "path": "records/misplaced-write-format/gofmt-text-check.json",
+      "bytes": 2633,
+      "sha256": "fca1f4dbc6b6c12e87efd5c110f73c1b956260e216587d095e7ff1417bf392ff"
+    },
+    {
+      "path": "records/misplaced-write-format/gofmt.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "records/misplaced-write-format/gofmt.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "records/misplaced-write-format/handoff.md",
+      "bytes": 5652,
+      "sha256": "02ef172e238619b5b785f64f9a24f19ec2325d1a36b52d9c23d229435da60e54"
+    },
+    {
+      "path": "records/misplaced-write-format/known-w-overlap-paths.txt",
+      "bytes": 88,
+      "sha256": "040dd5ec8b33e386581c0b122558378f696a662f44e28e532d0ea6e9784196d6"
+    },
+    {
+      "path": "records/misplaced-write-format/mutation-anchor-check.json",
+      "bytes": 111846,
+      "sha256": "1d4f2795c61742c1a6bf8f8fa5d477189767d80476ffd85a30a92261b9e0dea2"
+    },
+    {
+      "path": "records/misplaced-write-format/old-main-pins.json",
+      "bytes": 237,
+      "sha256": "27a7f6965a1623c48168e617f943cbecf62656874e02471f345a1c0f67241189"
+    },
+    {
+      "path": "records/misplaced-write-format/post-gofmt-sha256.json",
+      "bytes": 1531,
+      "sha256": "0308d6067eb04e2228f5b3fb3b38f82356da13b40d4e8ef8ad3d1f7bfd9b1e72"
+    },
+    {
+      "path": "records/misplaced-write-format/repin.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "records/misplaced-write-format/repin.stdout",
+      "bytes": 99,
+      "sha256": "b98579caf02bbc116eb2a2df3d6d495bcd54f3957c550ecfe5675321628fbaec"
+    },
+    {
+      "path": "records/misplaced-write-format/selected-testscope-roots.json",
+      "bytes": 2973,
+      "sha256": "ddd36a1c2d8d3457af24c46f8a8b60fac40592d5b40e65657b8545d3b84a974f"
+    },
+    {
+      "path": "records/misplaced-write-format/selected-testscope-run-selector.txt",
+      "bytes": 1250,
+      "sha256": "4c7f67b20ef6396cab05d5bc00241918fd78477abea34145928dc934c50d7baf"
+    },
+    {
+      "path": "records/misplaced-write-format/seven-pin-snapshot-check.json",
+      "bytes": 2214,
+      "sha256": "0a1462a2bf7080cf7a02f9ba6e3ae19f7c4e8c2a03bae0f14e640bb4b661533d"
+    },
+    {
+      "path": "records/misplaced-write-format/w-overlap-diff-from-01c.patch",
+      "bytes": 1739,
+      "sha256": "f14c0ff252bc083837262495d36fe429b2a921845b8e8f227a93bf1544b8450a"
+    },
+    {
+      "path": "records/misplaced-write-format/w-overlay-paths-after.json",
+      "bytes": 1531,
+      "sha256": "da7f6ec3f0cab2c24b082afba025d510050d56f13fd78b68438da649703c6f4a"
+    },
+    {
+      "path": "records/misplaced-write-format/w-overlay-paths-before.json",
+      "bytes": 1531,
+      "sha256": "da7f6ec3f0cab2c24b082afba025d510050d56f13fd78b68438da649703c6f4a"
+    },
+    {
+      "path": "records/misplaced-write-format/w-status-before.txt",
+      "bytes": 928,
+      "sha256": "55b8c4e407bac2995f46ef5bc6ceecf632ddfabf1778929cfd38eaa7e3a98f76"
+    },
+    {
+      "path": "records/misplaced-write-formatted-independent-review.md",
+      "bytes": 8013,
+      "sha256": "96ee5e8c2d7f9ef8069e53fe945026baa8ee4a77ec1aaba06f93f52c17038ce9"
+    },
+    {
+      "path": "records/misplaced-write-guards-edit.py",
+      "bytes": 10853,
+      "sha256": "67b0deabf02fe6582db491ef61630de99bb535162604c5dd6bc3fee05da4855f"
+    },
+    {
+      "path": "records/misplaced-write-independent-review.md",
+      "bytes": 14657,
+      "sha256": "facb10a83ac7f7007f0537e18179d4be71680a04d120f8dff71f706c8b11fcba"
+    },
+    {
+      "path": "records/misplaced-write-integration/EXECUTION-RELEASE.json",
+      "bytes": 491,
+      "sha256": "3a951620ab102ca578063aa044efad13791ab2e9ac2bac3a260dd5081c4b60d7"
+    },
+    {
+      "path": "records/misplaced-write-integration/SOURCE-IDENTITY.json",
+      "bytes": 2182,
+      "sha256": "55200eba71c1b1ed412704a0a433ca0e59fc5f44dc35e651629e48fa6c0f6b27"
+    },
+    {
+      "path": "records/misplaced-write-integration/before/docs/testing/rollback-fault-adapter-zh.md",
+      "bytes": 14606,
+      "sha256": "c04e93be4481f4b635bc7ecccff46dc352ddf5ea53415252554ec2b4b740ab0b"
+    },
+    {
+      "path": "records/misplaced-write-integration/before/docs/testing/rollback-fault-sql-manual-zh.md",
+      "bytes": 30924,
+      "sha256": "9967acb6a803c2c1f71374b62bb4d4db2bc1b5252e50f64e819d25b73c6d23c7"
+    },
+    {
+      "path": "records/misplaced-write-integration/before/internal/pager/rollback_fault_sql_manual_linux.go",
+      "bytes": 8391,
+      "sha256": "ad9f263e2d15a496cc70b1d35038f5b0393e8b94c0923ea5db96bf4eff71c0f9"
+    },
+    {
+      "path": "records/misplaced-write-integration/before/internal/pager/rollback_io_manual_linux.go",
+      "bytes": 20135,
+      "sha256": "4f26bfec0de7b3c22f056ec374a4c453691f5cd2a5ee5e62116f2f8c66b5e498"
+    },
+    {
+      "path": "records/misplaced-write-integration/before/internal/testkit/rollbackfault/contract.go",
+      "bytes": 21920,
+      "sha256": "dc7ec44ec7be3f444f4e7501c84d6875a1a0e9b4d46e06e5586b2e5d225828ed"
+    },
+    {
+      "path": "records/misplaced-write-integration/before/internal/testkit/rollbackfault/contract_test.go",
+      "bytes": 38521,
+      "sha256": "8c43b22c2fbfdc6d4aef423abd44956196a2b15e223a8f56ef00065c8d77c362"
+    },
+    {
+      "path": "records/misplaced-write-integration/before/internal/testkit/rollbackfault/sql_ledger.go",
+      "bytes": 25282,
+      "sha256": "7d47e46b34204c12a4df50d02a24179bf22e081d45f2816e3c048b0bc7dd04dc"
+    },
+    {
+      "path": "records/misplaced-write-integration/before/internal/testkit/rollbackfault/sql_ledger_test.go",
+      "bytes": 83124,
+      "sha256": "5bea133008de83e9c5e737582305034cf24e1b99a25d402cba61c596f52ef2a3"
+    },
+    {
+      "path": "records/misplaced-write-integration/before/internal/testscope/rollback_fault.go",
+      "bytes": 117415,
+      "sha256": "1e82d659ac17f3568f34338e951d6e8a044eeec0e07e45498368bda491a09c59"
+    },
+    {
+      "path": "records/misplaced-write-integration/before/internal/testscope/rollback_fault_sql.go",
+      "bytes": 285522,
+      "sha256": "0647edf67ae831b8d99b3caddf02fbf8e65380fc391405effe433145c5374969"
+    },
+    {
+      "path": "records/misplaced-write-integration/before/internal/testscope/rollback_fault_sql_test.go",
+      "bytes": 65601,
+      "sha256": "a13a82fd127d81eb7df85eb0286f156f575ae0a17417d2c33a6127388dce0d7d"
+    },
+    {
+      "path": "records/misplaced-write-integration/before/internal/testscope/rollback_fault_test.go",
+      "bytes": 14393,
+      "sha256": "79dea110d8eb481b7d6e7f055ef8ff93e2f7032f19d370f3f5279ba255878dbb"
+    },
+    {
+      "path": "records/misplaced-write-integration/before/sqlite/rollback_fault_sql_manual_linux_test.go",
+      "bytes": 45972,
+      "sha256": "c368296059cbf29a4756cbb760b3836c580d8615e25a7330f76d83ba97427037"
+    },
+    {
+      "path": "records/misplaced-write-integration/integration.diff",
+      "bytes": 560921,
+      "sha256": "d20c3a48b364ab1cdb55eba0f5d7a343cb336bdb8a6982ba0791d0d33c4a61be"
+    },
+    {
+      "path": "records/misplaced-write-integration/review-receipt.json",
+      "bytes": 291,
+      "sha256": "366b7cd469e9463d85208cce9cb97c9354c559ce95b86d9635316b222fac453d"
+    },
+    {
+      "path": "records/misplaced-write-manifest.py",
+      "bytes": 9575,
+      "sha256": "582fdc7825f5929c3d702fca99519291759d64279e205a69acbd5ff0ac7b6ef3"
+    },
+    {
+      "path": "records/misplaced-write-model-tests-edit.py",
+      "bytes": 13837,
+      "sha256": "20faf8c2136ebe9f90d4e58bd3a77ac6ac6fbc8dde240d4576d778d6e7c33ce7"
+    },
+    {
+      "path": "records/misplaced-write-overlay/docs/testing/rollback-fault-adapter-zh.md",
+      "bytes": 20092,
+      "sha256": "e0e683b7e2c57c31980a606c4ccf9abf5263cdd96e6c5f887b690390012afe60"
+    },
+    {
+      "path": "records/misplaced-write-overlay/docs/testing/rollback-fault-sql-manual-zh.md",
+      "bytes": 36410,
+      "sha256": "8ddd2eac317c52b365bd82ba515487e0067a4c7931f410254fea16a271e682d7"
+    },
+    {
+      "path": "records/misplaced-write-overlay/internal/pager/rollback_fault_sql_manual_linux.go",
+      "bytes": 9045,
+      "sha256": "9847b258f401c52c8748b2e380a8b96e33eda64567a38edd1833f16df188431a"
+    },
+    {
+      "path": "records/misplaced-write-overlay/internal/pager/rollback_io_manual_linux.go",
+      "bytes": 22187,
+      "sha256": "1e15ab58e49a4d6eedd72274e20c59f644546609f61a19d96e588688eb0c5940"
+    },
+    {
+      "path": "records/misplaced-write-overlay/internal/testkit/rollbackfault/contract.go",
+      "bytes": 23364,
+      "sha256": "dff18faca43a384de7ec37aedee877d30320823e540be71c7486d3ff5a24198d"
+    },
+    {
+      "path": "records/misplaced-write-overlay/internal/testkit/rollbackfault/contract_test.go",
+      "bytes": 46965,
+      "sha256": "3de6db2bb1cfd222a04af78c9f0b88c5b5dfefb163ef63967ec44ed6ee417993"
+    },
+    {
+      "path": "records/misplaced-write-overlay/internal/testkit/rollbackfault/sql_ledger.go",
+      "bytes": 27231,
+      "sha256": "96def5b6a7545f7e7f8e9e2acaf16e540237cfa2bccd92875b7961560e328267"
+    },
+    {
+      "path": "records/misplaced-write-overlay/internal/testkit/rollbackfault/sql_ledger_test.go",
+      "bytes": 90138,
+      "sha256": "c043511f850e067833c715b13e6442433e58bdedef9f640bb145a06db967e998"
+    },
+    {
+      "path": "records/misplaced-write-overlay/internal/testscope/rollback_fault.go",
+      "bytes": 147779,
+      "sha256": "bb3d93fea9959906fff0093d320fecac1d7dbfae58cb4a6221012b4a8fc04448"
+    },
+    {
+      "path": "records/misplaced-write-overlay/internal/testscope/rollback_fault_sql.go",
+      "bytes": 311484,
+      "sha256": "8e98e9b83e5c2f379b223fa49b20eb8aeef703476083b507aa29949fda662b21"
+    },
+    {
+      "path": "records/misplaced-write-overlay/internal/testscope/rollback_fault_sql_test.go",
+      "bytes": 71196,
+      "sha256": "fde0e37a3afe4affc649624978eaeaa2f580e9b55b3b5a7d73d9012bce70dab4"
+    },
+    {
+      "path": "records/misplaced-write-overlay/internal/testscope/rollback_fault_test.go",
+      "bytes": 20339,
+      "sha256": "65a0786b2b1359bc956defd1e76eb93e1d6dda169afe264427a8a9d97aca7662"
+    },
+    {
+      "path": "records/misplaced-write-overlay/sqlite/rollback_fault_sql_manual_linux_test.go",
+      "bytes": 50735,
+      "sha256": "78464b9d6f948be4d1efc0686f8b57a17f1a0ae530081230edc7c553d996bf09"
+    },
+    {
+      "path": "records/misplaced-write-regression-fix/EXECUTION-RELEASE.json",
+      "bytes": 475,
+      "sha256": "03a2d2fd512174e8da42f5a2df643e0777c583f893d04604edaecd0f98940f17"
+    },
+    {
+      "path": "records/misplaced-write-regression-fix/SOURCE-IDENTITY.json",
+      "bytes": 2399,
+      "sha256": "2855b329d20ae8ef7465681db160854985db870c6701364dc27ac4b834ee1160"
+    },
+    {
+      "path": "records/misplaced-write-regression-fix/before/internal/testkit/rollbackfault/sql_ledger_test.go",
+      "bytes": 90138,
+      "sha256": "c043511f850e067833c715b13e6442433e58bdedef9f640bb145a06db967e998"
+    },
+    {
+      "path": "records/misplaced-write-regression-fix/before/internal/testscope/rollback_fault_sql.go",
+      "bytes": 311484,
+      "sha256": "8e98e9b83e5c2f379b223fa49b20eb8aeef703476083b507aa29949fda662b21"
+    },
+    {
+      "path": "records/misplaced-write-regression-fix/before/internal/testscope/rollback_fault_sql_test.go",
+      "bytes": 71196,
+      "sha256": "4d3f75d9b7e09332b28d83e0faf317d59c916f7ef7afce9f79e8f6fa9b1c8981"
+    },
+    {
+      "path": "records/misplaced-write-regression-fix/change.diff",
+      "bytes": 294698,
+      "sha256": "a1ddcfdb045915cc3ed580af4953af6512a6877216f3c5ed872af712f8a84385"
+    },
+    {
+      "path": "records/misplaced-write-regression-fix/independent-review.md",
+      "bytes": 4496,
+      "sha256": "f4d1a3a8ea444d105fd4b2522a62fe879c5c617aa0fefd3329ca8571cf5c4934"
+    },
+    {
+      "path": "records/misplaced-write-repin-text.py",
+      "bytes": 1748,
+      "sha256": "bbec39f0155e164359d1572ee2f3a7b3e51a3061205df1ec3c9b11ad4192f0b2"
+    },
+    {
+      "path": "records/misplaced-write-source-evidence/handoff.md",
+      "bytes": 5556,
+      "sha256": "f0e033f66003a8abd1b64bd3b3703a240891242929a4c0b34f71a532f130a5f2"
+    },
+    {
+      "path": "records/misplaced-write-source-evidence/misplaced-write.patch",
+      "bytes": 558948,
+      "sha256": "6dbe0c46e7c12a9cf7a23350d68bdac1e57a6d89722ee840bb62b396582044ae"
+    },
+    {
+      "path": "records/misplaced-write-source-evidence/source-manifest.json",
+      "bytes": 13746,
+      "sha256": "d77db0fad47ad18637d8a70a77ab4af43a53436410b56ca19f2cbed29de1cd3a"
+    },
+    {
+      "path": "records/misplaced-write-source-proposal.md",
+      "bytes": 30435,
+      "sha256": "c902cdb544f7225337f14a5c07471c70e32a8d12814baab3f1aac2e3d80a8337"
+    },
+    {
+      "path": "records/misplaced-write-source-tests-edit.py",
+      "bytes": 14669,
+      "sha256": "94fab5ac41334c9e8ff7bd9a32c36471a840aa2e3128f9c8dca31e637e1f6714"
+    },
+    {
+      "path": "records/misplaced-write-validation/01_format.resources-before.json",
+      "bytes": 390,
+      "sha256": "62fff93bf14b38daf71ff6f3751e0a85e93f3888411df3b4c23b6f3d3c34bfc3"
+    },
+    {
+      "path": "records/misplaced-write-validation/01_format.resources.jsonl",
+      "bytes": 644,
+      "sha256": "3db6ad1dcd6e817bd542c9987c6d5a2372639b7896f9061d804c0b779e1b3c2c"
+    },
+    {
+      "path": "records/misplaced-write-validation/01_format.result.json",
+      "bytes": 400,
+      "sha256": "bd2ebea59f8334c03a3657a2eda0a661b773efc48fe255db230756aadf62cc91"
+    },
+    {
+      "path": "records/misplaced-write-validation/01_format.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "records/misplaced-write-validation/01_format.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "records/misplaced-write-validation/02_normal.resources-before.json",
+      "bytes": 390,
+      "sha256": "82a74192c26724d04561f687db19353adcb1c625e428bfa375b27804ad0c7a3e"
+    },
+    {
+      "path": "records/misplaced-write-validation/02_normal.resources.jsonl",
+      "bytes": 3864,
+      "sha256": "69823dab6d544c79c1bdcfe5d26a22b8ac0f0bdb89539372bc8f709d022462cc"
+    },
+    {
+      "path": "records/misplaced-write-validation/02_normal.result.json",
+      "bytes": 380,
+      "sha256": "725f072c084f1207424b42394806dee7cbed6b8dab8014cdb9eeba6f2ff4d602"
+    },
+    {
+      "path": "records/misplaced-write-validation/02_normal.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "records/misplaced-write-validation/02_normal.stdout",
+      "bytes": 2787317,
+      "sha256": "82eecb0da8c4f6afb8cedfb440cc82e871302281d510dfd7e557d0a0abf52884"
+    },
+    {
+      "path": "records/misplaced-write-validation/STOP.json",
+      "bytes": 547,
+      "sha256": "4dd3b731bc2f27fef2227eb6238744dd27759ae8997181c2a1202e75bdcaf27e"
+    },
+    {
+      "path": "records/misplaced-write-validation/commands.json",
+      "bytes": 30546,
+      "sha256": "70c89c0020ccd3e5e11d097fbb42fa563e45593054a7332082746a07455c4af5"
+    },
+    {
+      "path": "records/misplaced-write-validation/source-before.json",
+      "bytes": 663304,
+      "sha256": "acd1d0ffb4dac130d4abfd4e0ef0d90c6022b6f9eba802dfbcf6a3e78658e44e"
+    },
+    {
+      "path": "records/misplaced-write-validation/start.json",
+      "bytes": 606,
+      "sha256": "f751da6c69798ff816c478b455c872d9fd108922959dfd3904f524eb73009a8f"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/01_format.resources-before.json",
+      "bytes": 390,
+      "sha256": "2e87a82d7266eb73f72a08627f1d5a7a39fc1a378d16df30d41bc6811f2b30db"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/01_format.resources.jsonl",
+      "bytes": 644,
+      "sha256": "78dea8bacbe9f9511a2dbfa7474b76725af1b74e48d963a15a319926189571e2"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/01_format.result.json",
+      "bytes": 400,
+      "sha256": "29df9c635ec4ee079ac03921f6022ee3f3c2b4b9b53584c6428d5a1d840cd02c"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/01_format.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/01_format.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/02_normal.resources-before.json",
+      "bytes": 390,
+      "sha256": "47e16ab6ed1d4abd3482a4174bd3b56f08057155681cde6843598c2cbe3609f3"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/02_normal.resources.jsonl",
+      "bytes": 2254,
+      "sha256": "f98a03904abe95ec958a69fd9a0f33d4108c12a518de00a55422b3be7dbb129f"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/02_normal.result.json",
+      "bytes": 938,
+      "sha256": "f3bcb578b20bdac58c01027f3469c0e0ceab8e36b3f3445775e04727b722b804"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/02_normal.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/02_normal.stdout",
+      "bytes": 266564,
+      "sha256": "3976876d4fbd654d67379951b6b8680d3fad1fb51d6c791b88b033736e3757b3"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/03_race.resources-before.json",
+      "bytes": 390,
+      "sha256": "8dcba3029a0fa5e2f6a9d1e552b717256687f7fc3cffbc322ba9e6b4665afd39"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/03_race.resources.jsonl",
+      "bytes": 21896,
+      "sha256": "db4908225130ce290fc56265ab8f499e33d6f19b0eaacb9725770227b7a09ee0"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/03_race.result.json",
+      "bytes": 7121,
+      "sha256": "831c465cde3bf2c27c149743868da0110e8560a1e840722810be9568b4a909d0"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/03_race.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/03_race.stdout",
+      "bytes": 2785633,
+      "sha256": "008d3bec028943f2626f940212b0e84c20feae09c4bb1967abdec675f66055eb"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/04_sourceguard.resources-before.json",
+      "bytes": 390,
+      "sha256": "bd24fd9480d11d74b0c50aa71ab1a2f1bb29e4d09882db86ee9ed0f800e18752"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/04_sourceguard.resources.jsonl",
+      "bytes": 2254,
+      "sha256": "efa078bee3d754e50bea6277e78161e376290a4c11caf6660eb8bc7acf6f6780"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/04_sourceguard.result.json",
+      "bytes": 405,
+      "sha256": "e626f2a548980704d5382d52aec7855096df0b82a4f2f0b4efa1866aca3d8a84"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/04_sourceguard.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/04_sourceguard.stdout",
+      "bytes": 138,
+      "sha256": "ba0cb4aff7a9c991c087485ff3499bf86b9b57f990c78b979c1f08ffc42a3505"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/05_list_fault-sqlite.resources-before.json",
+      "bytes": 390,
+      "sha256": "0fc3ac14d904cc3ea50157e72661fb55a5e7a240c67ec38763c5a71eb50b41ca"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/05_list_fault-sqlite.resources.jsonl",
+      "bytes": 644,
+      "sha256": "415238ac988659737ec7e7f99434e42e26acea330278bc1b7401861b6248ce2f"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/05_list_fault-sqlite.result.json",
+      "bytes": 59624,
+      "sha256": "0103691ea9ad84870fb33250320e9ce0211d5f8e2a0250ff4e2149b8f43efe2c"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/05_list_fault-sqlite.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/05_list_fault-sqlite.stdout",
+      "bytes": 13753,
+      "sha256": "94424e1f2cd84361ec2153d53398e3583a3ba9959dddf29b23d35b39ee576e44"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/06_list_fault-pager.resources-before.json",
+      "bytes": 390,
+      "sha256": "9256b8214beb0e3bdf03eaf9c84ef6dcc6a7adcf509eea34e9c57dcce13d7fce"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/06_list_fault-pager.resources.jsonl",
+      "bytes": 644,
+      "sha256": "b9495d0259ea172516f0c22c979849c3d55c1af30aad149017fa87725e8f9e60"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/06_list_fault-pager.result.json",
+      "bytes": 25819,
+      "sha256": "f6b7b2a6ea5f04734f6616f32d70a000700fe95ad790ae5f1ef30652c18e1ea0"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/06_list_fault-pager.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/06_list_fault-pager.stdout",
+      "bytes": 7437,
+      "sha256": "3c2dc6ffb6ea3c8cd959495fbb182315a2b0773f33581bb74da379be9ac7fb2e"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/07_list_restart-sqlite.resources-before.json",
+      "bytes": 390,
+      "sha256": "5db7400a00d19f34dc5af4f57d64386ad090298994cd917a7def9d0e6e966863"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/07_list_restart-sqlite.resources.jsonl",
+      "bytes": 644,
+      "sha256": "ad61934db3ff737912dd4bae6e6552c5cd4c3409d34c5df3e96042d39a39ceb9"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/07_list_restart-sqlite.result.json",
+      "bytes": 60063,
+      "sha256": "2a0f8fc3ccb82c2dbfbac381c1c300676bbd2b85c345ed28ab2a43dfaae3a48a"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/07_list_restart-sqlite.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/07_list_restart-sqlite.stdout",
+      "bytes": 13924,
+      "sha256": "1677f433d6f087ad557c9bfff4d9392592946d2f8f8473aed0597aebdc6eb204"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/08_compile_fault-sqlite.resources-before.json",
+      "bytes": 390,
+      "sha256": "26d8bfbf096de7fece93ff74aa467dd851d4a0aaeddcd5987fa0d3c5d495f54b"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/08_compile_fault-sqlite.resources.jsonl",
+      "bytes": 1610,
+      "sha256": "7a52722bfd98c07c76b54d61fd94cda19bb7dd7241308dee856402cea7aa2d3a"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/08_compile_fault-sqlite.result.json",
+      "bytes": 414,
+      "sha256": "5d05acd27ace62913e05079d7520a816dde6e3cecd930be56b7a19374f1570a8"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/08_compile_fault-sqlite.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/08_compile_fault-sqlite.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/09_compile_fault-pager.resources-before.json",
+      "bytes": 390,
+      "sha256": "d8540c0139398ee3f557dd64b47a4de527acdfa2889b2877f433238d60681817"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/09_compile_fault-pager.resources.jsonl",
+      "bytes": 966,
+      "sha256": "d57d017a6f7caa99d640caa970265fe3bf9381c7e8bd0b7f59c6810303e0a503"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/09_compile_fault-pager.result.json",
+      "bytes": 413,
+      "sha256": "bc0e69f09fd1f1db2df1e4dcdf8c9e8ef6969ff83b0d8d50ddc64569e831ded2"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/09_compile_fault-pager.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/09_compile_fault-pager.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/10_compile_restart-sqlite.resources-before.json",
+      "bytes": 390,
+      "sha256": "73f9d3dab891c4824ab94f0bde1d074c35393902d8dc6862d488bce7b72d4e9f"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/10_compile_restart-sqlite.resources.jsonl",
+      "bytes": 1932,
+      "sha256": "7d893edc70877f50323b4be7212398deb48d5797a74523b39cffc1e87a785193"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/10_compile_restart-sqlite.result.json",
+      "bytes": 416,
+      "sha256": "c34c8b74125b2399180725093ae592275ea76c6cec1280421e4ace8a6cc73ead"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/10_compile_restart-sqlite.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/10_compile_restart-sqlite.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/11_nm_fault-sqlite.resources-before.json",
+      "bytes": 390,
+      "sha256": "987ae2bca97ab960a9ccaa722e25de8b1213798d166ec83bbc1c372551066623"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/11_nm_fault-sqlite.resources.jsonl",
+      "bytes": 644,
+      "sha256": "b1d915c777f59199fb9ed86bb734882d6875ae2cc5d07f2e4577270254c80dcf"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/11_nm_fault-sqlite.result.json",
+      "bytes": 594,
+      "sha256": "1c4abd31d9d5d6bd00fabac25a9c8bed68b909f583523dba6ba432cd6731398d"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/11_nm_fault-sqlite.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/11_nm_fault-sqlite.stdout",
+      "bytes": 668926,
+      "sha256": "00e59fd20894c9f18c14cd8531b43ea1bc88d7db5cc989ab14f9d1e92b510983"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/12_nm_fault-pager.resources-before.json",
+      "bytes": 390,
+      "sha256": "4badfe6b2e0121b02167272cb58d4b028ac5f1a64ea30457af5c79be01b0c6e4"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/12_nm_fault-pager.resources.jsonl",
+      "bytes": 644,
+      "sha256": "8759e8c8b74d6331302ece2651fc9978e9ad2b9defc2ed4db5a9a73d8ce4d7f0"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/12_nm_fault-pager.result.json",
+      "bytes": 593,
+      "sha256": "dbfcccb48feb79d57f580c329983383286c2795697573c772850bd9793726548"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/12_nm_fault-pager.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/12_nm_fault-pager.stdout",
+      "bytes": 450463,
+      "sha256": "38b65661654dc2666ec5e96c00f718866e047f7b8dacc1eee513ed8b74e526d4"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/13_nm_restart-sqlite.resources-before.json",
+      "bytes": 390,
+      "sha256": "fc31fa1772b786bedeeccfdb398bbf7fa71bbec7c985acaa46fdb75f67dd22ae"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/13_nm_restart-sqlite.resources.jsonl",
+      "bytes": 644,
+      "sha256": "98d1e9629f0750574b33e7b847b909185a73d634c2c44db83b60d040e72ba14f"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/13_nm_restart-sqlite.result.json",
+      "bytes": 596,
+      "sha256": "feedea7870fd8c3b615e7fa293f70d9e371eb3fb3f98311178bbdcbe6b6954ee"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/13_nm_restart-sqlite.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/13_nm_restart-sqlite.stdout",
+      "bytes": 678240,
+      "sha256": "75d555bd580d521eb394305cb0a71bb01d3fa0f4b30907500d8bcfdc20105991"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/commands.json",
+      "bytes": 25108,
+      "sha256": "68b720a252b656c0fc04ab4ac7ccf0ed41d7aefed1f1d9ee6d08e8f05e2ffb5f"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/completion.json",
+      "bytes": 168665,
+      "sha256": "95cda0695d3096b2e6b15961f0d5b52c8991176aa645f86701801f2ad6ae1fd8"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/fault-pager.test",
+      "bytes": 10836333,
+      "sha256": "618fc6b07f18f7ce309b1c74af5b8e8ea51196791cb57f6f63e993e7ff65bb93"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/fault-sqlite.test",
+      "bytes": 16710250,
+      "sha256": "81214cd458936e1089655ae17d2bac384702e24083d3f9d4e17d8a57811b9071"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/restart-sqlite.test",
+      "bytes": 17304731,
+      "sha256": "48f9345d29fcce0c94a60eee4cc3435c712d8f439d1c5095f225f7e105e09b78"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/source-before.json",
+      "bytes": 663304,
+      "sha256": "bc62cc27b00c7830b308ea39c14a1c1dab73016feda08d591670ab6a33490550"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/start.json",
+      "bytes": 620,
+      "sha256": "2a6f60dd72f006402680313b02e6dd1df53f88b466c1cd41696cee043f943951"
+    },
+    {
+      "path": "records/run_misplaced_write_validation.py",
+      "bytes": 17034,
+      "sha256": "0c78621e787e630cb0c9b4b03e1125e47d320ca2a390e123e170fd542cf13ab0"
+    },
+    {
+      "path": "records/run_misplaced_write_validation_v2.py",
+      "bytes": 17520,
+      "sha256": "ddb2d3825e16d551783a4bb1f08b437d1eda14cef02a882f651323605bd6c27e"
+    }
+  ]
+}

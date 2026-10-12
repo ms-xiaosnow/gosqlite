@@ -607,7 +607,7 @@ func readOnlyWALManualPreviousPolicyPropagationMutations(t *testing.T) {
 	}
 }
 
-// Twelve encrypted-root/combined/SQL/restart/recovery hooks, fourteen inert counterexamples each. Keep the old
+// Fourteen rekey/encrypted-root/combined/SQL/restart/recovery hooks, fourteen inert counterexamples each. Keep the old
 // propagation rows above unchanged and add no Test root or named child.
 func readOnlyWALManualCombinedPolicyPropagationMutations(t *testing.T) {
 	raw := readOnlyWALManualFixture(t, "internal/testscope/main.go")
@@ -619,6 +619,17 @@ func readOnlyWALManualCombinedPolicyPropagationMutations(t *testing.T) {
 	cases := []struct {
 		assignment, helper, result, resultName, errorBlock, errorName, errorReport, moveBefore, state string
 	}{
+		{
+			assignment:  `rekey, rekeyErr := inspectRekeyInterruptionSource(path, raw)`,
+			helper:      "inspectRekeyInterruptionSource",
+			result:      `findings = append(findings, rekey...)`,
+			resultName:  "rekey",
+			errorBlock:  "if rekeyErr != nil {\n\t\t\treturn rekeyErr\n\t\t}",
+			errorName:   "rekeyErr",
+			errorReport: `return rekeyErr`,
+			moveBefore:  `for _, f := range findings {`,
+			state:       "findings",
+		},
 		{
 			assignment:  `rootNegative, rootNegativeErr := inspectEncryptedRootNegativeSource(path, raw)`,
 			helper:      "inspectEncryptedRootNegativeSource",
@@ -751,6 +762,17 @@ func readOnlyWALManualCombinedPolicyPropagationMutations(t *testing.T) {
 			moveBefore:  `contracts, err := inspectOracleContracts(".")`,
 			state:       "failed",
 		},
+		{
+			assignment:  `rekeyContracts, rekeyContractErr := inspectRekeyInterruptionContracts(".")`,
+			helper:      "inspectRekeyInterruptionContracts",
+			result:      "for _, finding := range rekeyContracts {\n\t\tfmt.Fprintln(os.Stderr, finding)\n\t\tfailed = true\n\t}",
+			resultName:  "rekeyContracts",
+			errorBlock:  "if rekeyContractErr != nil {\n\t\tfmt.Fprintln(os.Stderr, rekeyContractErr)\n\t\tfailed = true\n\t}",
+			errorName:   "rekeyContractErr",
+			errorReport: `fmt.Fprintln(os.Stderr, rekeyContractErr)`,
+			moveBefore:  `contracts, err := inspectOracleContracts(".")`,
+			state:       "failed",
+		},
 	}
 	checked := 0
 	for _, policy := range cases {
@@ -792,7 +814,7 @@ func readOnlyWALManualCombinedPolicyPropagationMutations(t *testing.T) {
 		readOnlyWALManualReject(t, "internal/testscope/main.go", moved, diagnostic)
 		checked++
 	}
-	if len(cases) != 12 || checked != 168 {
+	if len(cases) != 14 || checked != 196 {
 		t.Fatal("combined wiring counterexample inventory", len(cases), checked)
 	}
 }

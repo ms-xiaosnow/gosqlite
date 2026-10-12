@@ -1,0 +1,21 @@
+{
+  "operation": "create_library_file",
+  "status": "succeeded",
+  "path": "/gosqlite-publication-nonce-01c63e6.bundle",
+  "file_id": "file_000000001df482468c0665017b6f1363",
+  "library_file_id": "libfile_09de94fe57b48191872e993c7ef6dd13",
+  "file_name": "gosqlite-publication-nonce-01c63e6.bundle",
+  "current_version_number": 0,
+  "restored_from_version_number": null,
+  "xattrs": [
+    {
+      "name": "user.library-file-version",
+      "value": "0"
+    }
+  ],
+  "directory_id": "libdir_1064175b1a0c8191a612be8a51e00075",
+  "mime_type": null,
+  "library_artifact_type": "other",
+  "file_size_bytes": 8040620,
+  "external_connectors_accessed": false
+}

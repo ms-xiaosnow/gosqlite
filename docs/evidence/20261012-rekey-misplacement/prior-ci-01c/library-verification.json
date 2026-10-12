@@ -1,0 +1,14 @@
+{
+  "library_file_id": "libfile_c7cd09ce10148191bc7be363e627c972",
+  "file_id": "file_000000009d1c820cbb6419a43350c3b6",
+  "file_name": "gosqlite-01c63e6-ci-38315462277-success.zip",
+  "current_version_number": 0,
+  "bytes": 260477,
+  "sha256": "61b618b5cd706509e7e61bba62c0e5ca3cb978d4e6cbe5f5702ec0ee32ed28dd",
+  "exact_id_readback": "PASS",
+  "zip_crc": "PASS",
+  "all_members_byte_match": "PASS",
+  "sha256sums": "PASS",
+  "members": 14,
+  "verified_at": "2026-10-12T22:36:57.430088+00:00"
+}

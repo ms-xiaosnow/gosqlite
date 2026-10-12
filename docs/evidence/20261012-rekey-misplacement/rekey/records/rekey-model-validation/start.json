@@ -1,0 +1,10 @@
+{
+  "utc": "2026-10-12T22:26:10.130841+00:00",
+  "pid": 2,
+  "base_commit": "01c63e6f8fb3d9e196afe2f42a163eb3eac4ad5a",
+  "scope": "exact8 descriptor-free rekey model roots only; no encstore/sqlite/os/observer/native dependency or sourceguard execution",
+  "source_manifest_sha256": "fa95d90b638420cf35c574faf865b54670f82ad36178f14e653bf75707adb36f",
+  "tool_go_sha256": "548d3c32f83fa81152f543eb1526be7884cfe0526eb5e9ce29d3eca14786e7e0",
+  "tool_gofmt_sha256": "5583dbb3339147fee7cdb067eb3cd4a50015b48c27084377f49d93833aa4ad77",
+  "process_scope": "single coordinated Go queue; no claim of global cross-namespace visibility"
+}

@@ -1,0 +1,11 @@
+{
+  "name": "09_compile_fault-pager",
+  "start_utc": "2026-10-12T23:04:32.449420+00:00",
+  "end_utc": "2026-10-12T23:04:36.451232+00:00",
+  "exit_code": 0,
+  "resource_breach_latched": false,
+  "observer_error": null,
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "status": "PASS"
+}

@@ -1,0 +1,80 @@
+[
+  {
+    "path": "docs/testing/rollback-fault-adapter-zh.md",
+    "bytes": 20092,
+    "sha256": "e0e683b7e2c57c31980a606c4ccf9abf5263cdd96e6c5f887b690390012afe60",
+    "source": "git cat-file blob cdcce9e3145d7811b0448b4f02d21e71dbe32345:docs/testing/rollback-fault-adapter-zh.md"
+  },
+  {
+    "path": "docs/testing/rollback-fault-sql-manual-zh.md",
+    "bytes": 36410,
+    "sha256": "8ddd2eac317c52b365bd82ba515487e0067a4c7931f410254fea16a271e682d7",
+    "source": "git cat-file blob cdcce9e3145d7811b0448b4f02d21e71dbe32345:docs/testing/rollback-fault-sql-manual-zh.md"
+  },
+  {
+    "path": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "bytes": 9045,
+    "sha256": "9847b258f401c52c8748b2e380a8b96e33eda64567a38edd1833f16df188431a",
+    "source": "git cat-file blob cdcce9e3145d7811b0448b4f02d21e71dbe32345:internal/pager/rollback_fault_sql_manual_linux.go"
+  },
+  {
+    "path": "internal/pager/rollback_io_manual_linux.go",
+    "bytes": 22187,
+    "sha256": "1e15ab58e49a4d6eedd72274e20c59f644546609f61a19d96e588688eb0c5940",
+    "source": "git cat-file blob cdcce9e3145d7811b0448b4f02d21e71dbe32345:internal/pager/rollback_io_manual_linux.go"
+  },
+  {
+    "path": "internal/testkit/rollbackfault/contract.go",
+    "bytes": 23364,
+    "sha256": "dff18faca43a384de7ec37aedee877d30320823e540be71c7486d3ff5a24198d",
+    "source": "git cat-file blob cdcce9e3145d7811b0448b4f02d21e71dbe32345:internal/testkit/rollbackfault/contract.go"
+  },
+  {
+    "path": "internal/testkit/rollbackfault/contract_test.go",
+    "bytes": 46965,
+    "sha256": "3de6db2bb1cfd222a04af78c9f0b88c5b5dfefb163ef63967ec44ed6ee417993",
+    "source": "git cat-file blob cdcce9e3145d7811b0448b4f02d21e71dbe32345:internal/testkit/rollbackfault/contract_test.go"
+  },
+  {
+    "path": "internal/testkit/rollbackfault/sql_ledger.go",
+    "bytes": 27231,
+    "sha256": "96def5b6a7545f7e7f8e9e2acaf16e540237cfa2bccd92875b7961560e328267",
+    "source": "git cat-file blob cdcce9e3145d7811b0448b4f02d21e71dbe32345:internal/testkit/rollbackfault/sql_ledger.go"
+  },
+  {
+    "path": "internal/testkit/rollbackfault/sql_ledger_test.go",
+    "bytes": 90153,
+    "sha256": "07083e68442522330edae5a562e74b2e6d901a9429c846b196737e02b5d7d469",
+    "source": "git cat-file blob cdcce9e3145d7811b0448b4f02d21e71dbe32345:internal/testkit/rollbackfault/sql_ledger_test.go"
+  },
+  {
+    "path": "internal/testscope/rollback_fault.go",
+    "bytes": 147779,
+    "sha256": "bb3d93fea9959906fff0093d320fecac1d7dbfae58cb4a6221012b4a8fc04448",
+    "source": "git cat-file blob cdcce9e3145d7811b0448b4f02d21e71dbe32345:internal/testscope/rollback_fault.go"
+  },
+  {
+    "path": "internal/testscope/rollback_fault_sql.go",
+    "bytes": 311499,
+    "sha256": "d5ff12fe8bb17e4976b17561762de95f0086fa927c601ee815e50dcf23e51468",
+    "source": "git cat-file blob cdcce9e3145d7811b0448b4f02d21e71dbe32345:internal/testscope/rollback_fault_sql.go"
+  },
+  {
+    "path": "internal/testscope/rollback_fault_sql_test.go",
+    "bytes": 72010,
+    "sha256": "39457022d5a8de687a2418ba627f675d69fc0028d0d0ec953c3fbefe840cfbf0",
+    "source": "git cat-file blob cdcce9e3145d7811b0448b4f02d21e71dbe32345:internal/testscope/rollback_fault_sql_test.go"
+  },
+  {
+    "path": "internal/testscope/rollback_fault_test.go",
+    "bytes": 20339,
+    "sha256": "259a3060ddeea65e2933dde29fcb3d9539a0efc48f3e1249be43575321b28dfb",
+    "source": "git cat-file blob cdcce9e3145d7811b0448b4f02d21e71dbe32345:internal/testscope/rollback_fault_test.go"
+  },
+  {
+    "path": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "bytes": 50735,
+    "sha256": "78464b9d6f948be4d1efc0686f8b57a17f1a0ae530081230edc7c553d996bf09",
+    "source": "git cat-file blob cdcce9e3145d7811b0448b4f02d21e71dbe32345:sqlite/rollback_fault_sql_manual_linux_test.go"
+  }
+]

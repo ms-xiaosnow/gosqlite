@@ -1,0 +1,17 @@
+{
+  "name": "11_nm_fault-sqlite",
+  "start_utc": "2026-10-12T23:04:47.211618+00:00",
+  "end_utc": "2026-10-12T23:04:49.212873+00:00",
+  "exit_code": 0,
+  "resource_breach_latched": false,
+  "observer_error": null,
+  "stdout_sha256": "00e59fd20894c9f18c14cd8531b43ea1bc88d7db5cc989ab14f9d1e92b510983",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "symbols": {
+    "required": 452,
+    "exact_root_set": true,
+    "image_sha256": "81214cd458936e1089655ae17d2bac384702e24083d3f9d4e17d8a57811b9071",
+    "image_executed": false
+  },
+  "status": "PASS"
+}

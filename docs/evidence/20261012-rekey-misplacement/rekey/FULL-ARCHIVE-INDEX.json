@@ -1,0 +1,1089 @@
+{
+  "zip": {
+    "zip_name": "gosqlite-R5-rekey-focused-validation-8751a3b.zip",
+    "bytes": 11074069,
+    "sha256": "1e05e2f947f133073ab81fc947dcf637f78b9f558af390839ae02b3e0315cc5e",
+    "members": 253,
+    "verified_nonmanifest_members": 252,
+    "manifest_sha256": "121a63099d8ad08ab452abb4d12cf38d96cc5b06af29663b0166876e111b7b2b",
+    "manual_binary_members": 1,
+    "final_source_sha256_match_count": 20,
+    "status": "PASS"
+  },
+  "library_record": "LIBRARY-ARCHIVE.json",
+  "items": [
+    {
+      "path": "final-source/docs/testing/rekey-interruption-manual-zh.md",
+      "bytes": 12983,
+      "sha256": "25baafd77286649973669711218f8c6d1ffdc1ce434ae4a4315664ac503e8ce8",
+      "reason": "final source blob exists in candidate tree; snapshot retained in full archive"
+    },
+    {
+      "path": "final-source/internal/encstore/publish.go",
+      "bytes": 14815,
+      "sha256": "d4a3d5f2cfb99e2413dbd271f113cc2b08203a4635ef10638bc43ff022d2fc29",
+      "reason": "final source blob exists in candidate tree; snapshot retained in full archive"
+    },
+    {
+      "path": "final-source/internal/encstore/rekey_interruption_manual_linux.go",
+      "bytes": 11984,
+      "sha256": "f6ec88c3c6d0e8c1bb40b1e514414e0fe0fc05b029919ebf80231cba67e64819",
+      "reason": "final source blob exists in candidate tree; snapshot retained in full archive"
+    },
+    {
+      "path": "final-source/internal/encstore/rekey_observation.go",
+      "bytes": 236,
+      "sha256": "5328be5bb42fb4207331d24d8c7bc157d37244836c24384a72b01ed26f68fbcc",
+      "reason": "final source blob exists in candidate tree; snapshot retained in full archive"
+    },
+    {
+      "path": "final-source/internal/encstore/rekey_observation_default.go",
+      "bytes": 181,
+      "sha256": "0c44d0577df486ca116b3f332a71f45e34e58367df64e112dba8387c2dfe51bb",
+      "reason": "final source blob exists in candidate tree; snapshot retained in full archive"
+    },
+    {
+      "path": "final-source/internal/testkit/rekeyinterruption/contract.go",
+      "bytes": 48919,
+      "sha256": "e834e098a978d1715189e3cee293aab62ea2b806d27f892a60b3d6f4d89f888e",
+      "reason": "final source blob exists in candidate tree; snapshot retained in full archive"
+    },
+    {
+      "path": "final-source/internal/testkit/rekeyinterruption/contract_test.go",
+      "bytes": 25036,
+      "sha256": "41f7343636c45b56f081875db9ab0b81273bbef212282a02a46f6ae1e5978cc6",
+      "reason": "final source blob exists in candidate tree; snapshot retained in full archive"
+    },
+    {
+      "path": "final-source/internal/testscope/encrypted_root_negative.go",
+      "bytes": 15570,
+      "sha256": "78828cfc0b5b4a0cd594119d29eb828006ecf75250922d4753b12254670e577f",
+      "reason": "final source blob exists in candidate tree; snapshot retained in full archive"
+    },
+    {
+      "path": "final-source/internal/testscope/encryption_upgrade_manual.go",
+      "bytes": 26592,
+      "sha256": "4b9ba0f8912ff953db3bc01a286aac3b8be29315506b2b4ab9fdfdd940bf550f",
+      "reason": "final source blob exists in candidate tree; snapshot retained in full archive"
+    },
+    {
+      "path": "final-source/internal/testscope/main.go",
+      "bytes": 11580,
+      "sha256": "1d9f41ed857bf64a3d2913f96fee3409a173f036df753efd81a7a9190ee2536a",
+      "reason": "final source blob exists in candidate tree; snapshot retained in full archive"
+    },
+    {
+      "path": "final-source/internal/testscope/oracle_startup.go",
+      "bytes": 11306,
+      "sha256": "0e480e214568b935c16c34ef9226f7ef2c86fce81151ebe09aa91087a62ec6a4",
+      "reason": "final source blob exists in candidate tree; snapshot retained in full archive"
+    },
+    {
+      "path": "final-source/internal/testscope/readonly_wal_manual.go",
+      "bytes": 84407,
+      "sha256": "2c4c667a1a31e0d8efb341f2b94a03c011189fca44fa2349248814af1b19f389",
+      "reason": "final source blob exists in candidate tree; snapshot retained in full archive"
+    },
+    {
+      "path": "final-source/internal/testscope/readonly_wal_manual_test.go",
+      "bytes": 49916,
+      "sha256": "8a7af77ba419ed25908148ec9e076a249c766b6e33a46b0853e69d54d572f35e",
+      "reason": "final source blob exists in candidate tree; snapshot retained in full archive"
+    },
+    {
+      "path": "final-source/internal/testscope/rekey_interruption.go",
+      "bytes": 292427,
+      "sha256": "9bab65139005fd2a296f8db023528613c41df94860d60304ad1564f073f7c6a8",
+      "reason": "final source blob exists in candidate tree; snapshot retained in full archive"
+    },
+    {
+      "path": "final-source/internal/testscope/rekey_interruption_test.go",
+      "bytes": 11440,
+      "sha256": "f562a86ac3c986561a21f219fc5eb0d7793546b7732594dd781897b72913cc3a",
+      "reason": "final source blob exists in candidate tree; snapshot retained in full archive"
+    },
+    {
+      "path": "final-source/internal/testscope/rollback_fault_sql_test.go",
+      "bytes": 65601,
+      "sha256": "a13a82fd127d81eb7df85eb0286f156f575ae0a17417d2c33a6127388dce0d7d",
+      "reason": "final source blob exists in candidate tree; snapshot retained in full archive"
+    },
+    {
+      "path": "final-source/internal/testscope/rollback_fault_test.go",
+      "bytes": 14393,
+      "sha256": "79dea110d8eb481b7d6e7f055ef8ff93e2f7032f19d370f3f5279ba255878dbb",
+      "reason": "final source blob exists in candidate tree; snapshot retained in full archive"
+    },
+    {
+      "path": "final-source/internal/testscope/rollback_restart_test.go",
+      "bytes": 62443,
+      "sha256": "b5606806555cc53f36e5c130e3480e9609f2c0467470523402ff3e457c254a4e",
+      "reason": "final source blob exists in candidate tree; snapshot retained in full archive"
+    },
+    {
+      "path": "final-source/internal/testscope/wal_tail_publication.go",
+      "bytes": 23786,
+      "sha256": "310b3fff4d5b4c5750929546e8eca8ca37a838aa897962a45f9d65bda02f8704",
+      "reason": "final source blob exists in candidate tree; snapshot retained in full archive"
+    },
+    {
+      "path": "final-source/sqlite/rekey_interruption_manual_linux_test.go",
+      "bytes": 71315,
+      "sha256": "57eb002b233f902bc441743d880203e6762fdd18c7c15dc264a009f64e7dcaca",
+      "reason": "final source blob exists in candidate tree; snapshot retained in full archive"
+    },
+    {
+      "path": "records/rekey-final-integration/after-format/docs/testing/rekey-interruption-manual-zh.md",
+      "bytes": 12983,
+      "sha256": "25baafd77286649973669711218f8c6d1ffdc1ce434ae4a4315664ac503e8ce8",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-final-integration/after-format/internal/encstore/publish.go",
+      "bytes": 14815,
+      "sha256": "d4a3d5f2cfb99e2413dbd271f113cc2b08203a4635ef10638bc43ff022d2fc29",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-final-integration/after-format/internal/encstore/rekey_interruption_manual_linux.go",
+      "bytes": 11984,
+      "sha256": "f6ec88c3c6d0e8c1bb40b1e514414e0fe0fc05b029919ebf80231cba67e64819",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-final-integration/after-format/internal/encstore/rekey_observation.go",
+      "bytes": 236,
+      "sha256": "5328be5bb42fb4207331d24d8c7bc157d37244836c24384a72b01ed26f68fbcc",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-final-integration/after-format/internal/encstore/rekey_observation_default.go",
+      "bytes": 181,
+      "sha256": "0c44d0577df486ca116b3f332a71f45e34e58367df64e112dba8387c2dfe51bb",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-final-integration/after-format/internal/testscope/main.go",
+      "bytes": 11580,
+      "sha256": "1d9f41ed857bf64a3d2913f96fee3409a173f036df753efd81a7a9190ee2536a",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-final-integration/after-format/internal/testscope/oracle_startup.go",
+      "bytes": 11306,
+      "sha256": "0e480e214568b935c16c34ef9226f7ef2c86fce81151ebe09aa91087a62ec6a4",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-final-integration/after-format/internal/testscope/readonly_wal_manual.go",
+      "bytes": 84407,
+      "sha256": "2c4c667a1a31e0d8efb341f2b94a03c011189fca44fa2349248814af1b19f389",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-final-integration/after-format/internal/testscope/readonly_wal_manual_test.go",
+      "bytes": 49916,
+      "sha256": "8a7af77ba419ed25908148ec9e076a249c766b6e33a46b0853e69d54d572f35e",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-final-integration/after-format/internal/testscope/rekey_interruption.go",
+      "bytes": 277612,
+      "sha256": "ab2f0b7a30d6a12019600c1e31ebdcbcfdd15fde9ae6f282dd5c3023a3f1ff00",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-final-integration/after-format/internal/testscope/rekey_interruption_test.go",
+      "bytes": 10913,
+      "sha256": "7c952695fdc9af8086f3c39915a7ce73fffd9ef7b10720376757552ecae62f2f",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-final-integration/after-format/sqlite/rekey_interruption_manual_linux_test.go",
+      "bytes": 71315,
+      "sha256": "57eb002b233f902bc441743d880203e6762fdd18c7c15dc264a009f64e7dcaca",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-final-integration/before-files/internal/encstore/publish.go",
+      "bytes": 14579,
+      "sha256": "adffe2f3c8c4db58a39e3719a72c5ee69f389eccefde876b4e36285dc663ae93",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-final-integration/before-files/internal/testkit/rekeyinterruption/contract.go",
+      "bytes": 48901,
+      "sha256": "b9a179e2ca3f82678842f86a3e330b52cc916097408ccc1716fa74ebf08a0e02",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-final-integration/before-files/internal/testkit/rekeyinterruption/contract_test.go",
+      "bytes": 25020,
+      "sha256": "ac32dd1977e8283aa66dec82f66f2635125ef0d16ef52c321303ee3d9e847159",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-final-integration/before-files/internal/testscope/encrypted_root_negative.go",
+      "bytes": 15570,
+      "sha256": "6d78b1b56319ab4743ce0186070bcd125b5f222df2b14cc6fba5a4f29b8a2577",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-final-integration/before-files/internal/testscope/encryption_upgrade_manual.go",
+      "bytes": 26592,
+      "sha256": "e18ce9f99b8da25f9771d64334420b1cf2b3bed3330b7f1959bd38494ad470f8",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-final-integration/before-files/internal/testscope/main.go",
+      "bytes": 11166,
+      "sha256": "6dbab48ff374858bfafe578f0fca99f5176ced7b6bdc008bec04ce6a6d1d0eb2",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-final-integration/before-files/internal/testscope/oracle_startup.go",
+      "bytes": 11246,
+      "sha256": "991999aaa17813b49780bacd2b51e0c38d2550034da345666f11491033372f72",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-final-integration/before-files/internal/testscope/readonly_wal_manual.go",
+      "bytes": 83917,
+      "sha256": "cfe6597ed00b9bec1b86727aec720258a2b872c952a75049d2ab381f5f8e9478",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-final-integration/before-files/internal/testscope/readonly_wal_manual_test.go",
+      "bytes": 48859,
+      "sha256": "3187dbca3556f0331baaca6d906778a9c0d257c85070eae228e9af61df27bab1",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-final-integration/before-files/internal/testscope/rollback_fault_sql_test.go",
+      "bytes": 65601,
+      "sha256": "9a840e46fdc15454367b5486912beade2bcc2ee79179108bddf5f3275677fe97",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-final-integration/before-files/internal/testscope/rollback_fault_test.go",
+      "bytes": 14393,
+      "sha256": "2b2c35a0e73292d42a0b5cc7e631d984978803342a4fa56f077076b7cc2f46d0",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-final-integration/before-files/internal/testscope/rollback_restart_test.go",
+      "bytes": 62443,
+      "sha256": "490001fb99c9239b69b264119ba894a5b0734f121ebd6f6ac1866fc66b43fff7",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-final-integration/before-files/internal/testscope/wal_tail_publication.go",
+      "bytes": 23786,
+      "sha256": "bf572575fd3440b46d7ec13d3f094bdb9cac09c9acde16f7d93273b5b647d1c5",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-final-integration/before-format/docs/testing/rekey-interruption-manual-zh.md",
+      "bytes": 12983,
+      "sha256": "25baafd77286649973669711218f8c6d1ffdc1ce434ae4a4315664ac503e8ce8",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-final-integration/before-format/internal/encstore/publish.go",
+      "bytes": 14815,
+      "sha256": "d4a3d5f2cfb99e2413dbd271f113cc2b08203a4635ef10638bc43ff022d2fc29",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-final-integration/before-format/internal/encstore/rekey_interruption_manual_linux.go",
+      "bytes": 11679,
+      "sha256": "c7b8362b2098e9ec046acca468b0dcc698552a827bcc01586bf5b3d80c72be8a",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-final-integration/before-format/internal/encstore/rekey_observation.go",
+      "bytes": 236,
+      "sha256": "5328be5bb42fb4207331d24d8c7bc157d37244836c24384a72b01ed26f68fbcc",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-final-integration/before-format/internal/encstore/rekey_observation_default.go",
+      "bytes": 181,
+      "sha256": "0c44d0577df486ca116b3f332a71f45e34e58367df64e112dba8387c2dfe51bb",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-final-integration/before-format/internal/testscope/encrypted_root_negative.go",
+      "bytes": 15570,
+      "sha256": "6d78b1b56319ab4743ce0186070bcd125b5f222df2b14cc6fba5a4f29b8a2577",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-final-integration/before-format/internal/testscope/encryption_upgrade_manual.go",
+      "bytes": 26592,
+      "sha256": "e18ce9f99b8da25f9771d64334420b1cf2b3bed3330b7f1959bd38494ad470f8",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-final-integration/before-format/internal/testscope/main.go",
+      "bytes": 11580,
+      "sha256": "1d9f41ed857bf64a3d2913f96fee3409a173f036df753efd81a7a9190ee2536a",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-final-integration/before-format/internal/testscope/oracle_startup.go",
+      "bytes": 11306,
+      "sha256": "0e480e214568b935c16c34ef9226f7ef2c86fce81151ebe09aa91087a62ec6a4",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-final-integration/before-format/internal/testscope/readonly_wal_manual.go",
+      "bytes": 84407,
+      "sha256": "2c4c667a1a31e0d8efb341f2b94a03c011189fca44fa2349248814af1b19f389",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-final-integration/before-format/internal/testscope/readonly_wal_manual_test.go",
+      "bytes": 49916,
+      "sha256": "8a7af77ba419ed25908148ec9e076a249c766b6e33a46b0853e69d54d572f35e",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-final-integration/before-format/internal/testscope/rekey_interruption.go",
+      "bytes": 276145,
+      "sha256": "8311b7e601d005c89da71b63323efaba668a7d697a61bafdfd315f5390f6bd84",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-final-integration/before-format/internal/testscope/rekey_interruption_test.go",
+      "bytes": 10841,
+      "sha256": "82aed5860c429d40dadb6ba0b10335a759d12431c93ead88822c717ab59eb0c7",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-final-integration/before-format/internal/testscope/rollback_fault_sql_test.go",
+      "bytes": 65601,
+      "sha256": "9a840e46fdc15454367b5486912beade2bcc2ee79179108bddf5f3275677fe97",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-final-integration/before-format/internal/testscope/rollback_fault_test.go",
+      "bytes": 14393,
+      "sha256": "2b2c35a0e73292d42a0b5cc7e631d984978803342a4fa56f077076b7cc2f46d0",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-final-integration/before-format/internal/testscope/rollback_restart_test.go",
+      "bytes": 62443,
+      "sha256": "490001fb99c9239b69b264119ba894a5b0734f121ebd6f6ac1866fc66b43fff7",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-final-integration/before-format/internal/testscope/wal_tail_publication.go",
+      "bytes": 23786,
+      "sha256": "bf572575fd3440b46d7ec13d3f094bdb9cac09c9acde16f7d93273b5b647d1c5",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-final-integration/before-format/sqlite/rekey_interruption_manual_linux_test.go",
+      "bytes": 68567,
+      "sha256": "f267deaf827ce746dbe6ac70b7be134c6c0418e777a843ce1a11e65f5c7a183f",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-final-integration/final-integration.diff",
+      "bytes": 497888,
+      "sha256": "f9abaff7fb5b0c6b597d8a48e61379737fd29177a36f8043501491c733ce01bb",
+      "git_path": "records/rekey-final-integration/final-integration.diff.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "42fb59c2132da1f32651bf9ec83a57b430325acbe94350965738732426faa5aa"
+    },
+    {
+      "path": "records/rekey-final-integration/format-only.diff",
+      "bytes": 623906,
+      "sha256": "2690f4c6a0382559cd0766ac3fd468ca322d3988efa7b533548e671ec194d49a",
+      "git_path": "records/rekey-final-integration/format-only.diff.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "5a70b4e79ce74f572280f08030ba972ce9fc599f3788208a3f52f80fca933c2a"
+    },
+    {
+      "path": "records/rekey-final-integration/gofmt.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/rekey-final-integration/gofmt.stderr.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/rekey-final-integration/gofmt.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/rekey-final-integration/gofmt.stdout.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/rekey-final-integration/pin-snapshot-anchor-sync.diff",
+      "bytes": 385494,
+      "sha256": "b84c0c5a47f2693404fbe59df12601c9ee445c5810750a84862709d184926438",
+      "git_path": "records/rekey-final-integration/pin-snapshot-anchor-sync.diff.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "a545d2e042f1416bebe7bb3ae910032d356f32f399a422d1945c83ba0281c0e3"
+    },
+    {
+      "path": "records/rekey-guard-source-evidence/overlay.patch",
+      "bytes": 297153,
+      "sha256": "8586750456c9579495369c2d462207400e3d23a80c14e5284d1462c05c2276db",
+      "git_path": "records/rekey-guard-source-evidence/overlay.patch.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "2f566ed51bc31f13ce5d98c865aa9546db6402a5d7553bb900c739492631acd9"
+    },
+    {
+      "path": "records/rekey-guard-validation/01_format.resources.jsonl",
+      "bytes": 644,
+      "sha256": "5f1c167fa759a58bc02d8373800ea548e2a8a82439a4608cbee912b4edf1fc3a",
+      "git_path": "records/rekey-guard-validation/01_format.resources.jsonl.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "89c55a1a3c8659fbc5b659d851681bc4a23aa01d5572119cdb9affd8e3089a92"
+    },
+    {
+      "path": "records/rekey-guard-validation/01_format.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/rekey-guard-validation/01_format.stderr.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/rekey-guard-validation/01_format.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/rekey-guard-validation/01_format.stdout.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/rekey-guard-validation/02_guard_normal.resources.jsonl",
+      "bytes": 4508,
+      "sha256": "b2028a11d351e6bfabde69bed4f3aa88dce07d44447cea053136f6a0a6572ec1",
+      "git_path": "records/rekey-guard-validation/02_guard_normal.resources.jsonl.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "43b5a08b7084ddec67574e8c1f924061d57a24e5834ab0e210c7ae791306881d"
+    },
+    {
+      "path": "records/rekey-guard-validation/02_guard_normal.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/rekey-guard-validation/02_guard_normal.stderr.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/rekey-guard-validation/02_guard_normal.stdout",
+      "bytes": 862829,
+      "sha256": "f2fd59f590c1462ee41682c30a87693017745e000a36088ff5a4dcf3cd55ce7e",
+      "git_path": "records/rekey-guard-validation/02_guard_normal.stdout.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "6bba6e84e543f328473413a5be6899634eb572bae85c8410bcd53f8198de98f0"
+    },
+    {
+      "path": "records/rekey-guard-validation/source-before.json",
+      "bytes": 663304,
+      "sha256": "7f2b36b60bf957f4edd64b068c1434c10ed0ccb971ab9811f23ad9330f782cb8",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-guard-validation-v2/01_format.resources.jsonl",
+      "bytes": 644,
+      "sha256": "1e8588f7d7e67ef2525c18b5074f9876ce8c67e3f9646acbf7bc295b6b3a3876",
+      "git_path": "records/rekey-guard-validation-v2/01_format.resources.jsonl.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "801a3baf90a9130316652c4014d70d892d7819d99b1b3cf2bdd513be81513f9a"
+    },
+    {
+      "path": "records/rekey-guard-validation-v2/01_format.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/rekey-guard-validation-v2/01_format.stderr.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/rekey-guard-validation-v2/01_format.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/rekey-guard-validation-v2/01_format.stdout.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/rekey-guard-validation-v2/02_guard_normal.resources.jsonl",
+      "bytes": 966,
+      "sha256": "a5d5f9225d5d697ed25247e4a2f7a4f306b1437cb0fee73de4e3e2f2e089dc5e",
+      "git_path": "records/rekey-guard-validation-v2/02_guard_normal.resources.jsonl.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "bf19be5c0b1452b8f44d4217023c921b82d408b4b2b2b48554e55f3056c7a14d"
+    },
+    {
+      "path": "records/rekey-guard-validation-v2/02_guard_normal.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/rekey-guard-validation-v2/02_guard_normal.stderr.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/rekey-guard-validation-v2/02_guard_normal.stdout",
+      "bytes": 6322,
+      "sha256": "3a823bcaaab819cf0168277f185488db056783acfb4c7b4f497528386036bd46",
+      "git_path": "records/rekey-guard-validation-v2/02_guard_normal.stdout.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "a3169a5fbdef1d104b268928668cfd290cdbd8b2a602e23c9be6b6abdacc4dfa"
+    },
+    {
+      "path": "records/rekey-guard-validation-v2/03_guard_race.resources.jsonl",
+      "bytes": 34132,
+      "sha256": "3c36e183d3ab6f9a9999ff39faefb51c0840635bf6431e12da8efec0982f7dd9",
+      "git_path": "records/rekey-guard-validation-v2/03_guard_race.resources.jsonl.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "0cff7535805778736f3681d928f08f7c5b616d80d9fb31ec44d18df5a3660aae"
+    },
+    {
+      "path": "records/rekey-guard-validation-v2/03_guard_race.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/rekey-guard-validation-v2/03_guard_race.stderr.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/rekey-guard-validation-v2/03_guard_race.stdout",
+      "bytes": 862641,
+      "sha256": "10c101b2728a57dc9d8bb2b687e744d3ac261f9f14148bf309edda5546dd534c",
+      "git_path": "records/rekey-guard-validation-v2/03_guard_race.stdout.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "75c4fab39a2eaffd668c58f379c7be761bc99bde9bdf3859cef9ef76e523b86c"
+    },
+    {
+      "path": "records/rekey-guard-validation-v2/04_model_race.resources.jsonl",
+      "bytes": 966,
+      "sha256": "cdceb0ea74ff50d732118dc3551470912906795116f99f6c51dabc9319532c92",
+      "git_path": "records/rekey-guard-validation-v2/04_model_race.resources.jsonl.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "593ca15403ed5b0aa79bef3fdd1a5fb4a88c611fda86efbf225c55ddce19c472"
+    },
+    {
+      "path": "records/rekey-guard-validation-v2/04_model_race.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/rekey-guard-validation-v2/04_model_race.stderr.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/rekey-guard-validation-v2/04_model_race.stdout",
+      "bytes": 8009,
+      "sha256": "8f13fa752d56053cb909ad427a76cbefef68b771f02c3be2c29e9068c3e32416",
+      "git_path": "records/rekey-guard-validation-v2/04_model_race.stdout.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "88faf30301d5e0fbe0f7727421e1658fa0c2870871305a85a085f2c1c01b5dba"
+    },
+    {
+      "path": "records/rekey-guard-validation-v2/05_healthy_default.resources.jsonl",
+      "bytes": 1932,
+      "sha256": "147026b6eeea3fadbbc3242659e21aac03676502b2d57d47657d9d4799d10c1a",
+      "git_path": "records/rekey-guard-validation-v2/05_healthy_default.resources.jsonl.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "af8440bc22347c68a4e9f83502d2c8fe1bbeb8e156d6c0156196696cb5d5be12"
+    },
+    {
+      "path": "records/rekey-guard-validation-v2/05_healthy_default.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/rekey-guard-validation-v2/05_healthy_default.stderr.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/rekey-guard-validation-v2/05_healthy_default.stdout",
+      "bytes": 2361,
+      "sha256": "69d4a51773025685bdbf5639795d0fff9732cf54747242dcee3b834c1d6e41e5",
+      "git_path": "records/rekey-guard-validation-v2/05_healthy_default.stdout.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "9958f23e091a49cead2c7c5bcf3ab2c143b0a7101a12643bb8afb60538b680f9"
+    },
+    {
+      "path": "records/rekey-guard-validation-v2/06_sourceguard.resources.jsonl",
+      "bytes": 1932,
+      "sha256": "95400f4e15f1ad80e2b438f4015d8446691b86aa8a917fe229e5f38c3ac599b9",
+      "git_path": "records/rekey-guard-validation-v2/06_sourceguard.resources.jsonl.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "407a84792f4f572c79efdb4a3edfcdd25db24b551dde224f3281f9da2d578a17"
+    },
+    {
+      "path": "records/rekey-guard-validation-v2/06_sourceguard.stderr",
+      "bytes": 897,
+      "sha256": "e2568de2f140a3ee15d6e3ea25b8a0c9509c57c886415d7397299ba7f45e273c",
+      "git_path": "records/rekey-guard-validation-v2/06_sourceguard.stderr.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "6106d491c94b6bd30d5e171ed90aa3380cb53670d00ff6805e238f485902b9c8"
+    },
+    {
+      "path": "records/rekey-guard-validation-v2/06_sourceguard.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/rekey-guard-validation-v2/06_sourceguard.stdout.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/rekey-guard-validation-v2/source-before.json",
+      "bytes": 663304,
+      "sha256": "9f69145489ce2d479dd6779c7f208a80e944c5bfc3ce759e7619f26fe8cef0cb",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-guard-validation-v3/01_format.resources.jsonl",
+      "bytes": 644,
+      "sha256": "9178da271183f3b58c7b5fc4ffacd8dc4ab9ce52b0de52371a401b11affdc7cc",
+      "git_path": "records/rekey-guard-validation-v3/01_format.resources.jsonl.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "c86e649c49549b4fcf8220efd71c85ee3f60435a18caf964c1931a94b269b00d"
+    },
+    {
+      "path": "records/rekey-guard-validation-v3/01_format.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/rekey-guard-validation-v3/01_format.stderr.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/rekey-guard-validation-v3/01_format.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/rekey-guard-validation-v3/01_format.stdout.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/rekey-guard-validation-v3/02_guard_normal.resources.jsonl",
+      "bytes": 966,
+      "sha256": "9d6a7eee06801df21eb5e00d9d0edb92163b1cd7da799430966da9f9154dd386",
+      "git_path": "records/rekey-guard-validation-v3/02_guard_normal.resources.jsonl.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "c6813991c79d3b08ae914a6f2151c3f3dc0cfcb60e0f808025510381c445f2bc"
+    },
+    {
+      "path": "records/rekey-guard-validation-v3/02_guard_normal.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/rekey-guard-validation-v3/02_guard_normal.stderr.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/rekey-guard-validation-v3/02_guard_normal.stdout",
+      "bytes": 6324,
+      "sha256": "592174200b49c09868381f74de19346c73fb513ab09636433e51db10c5428073",
+      "git_path": "records/rekey-guard-validation-v3/02_guard_normal.stdout.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "2b6ab80d22cdec39877c6004e7f1e927b9e8cd81da32bb7e54f054d3b37911b9"
+    },
+    {
+      "path": "records/rekey-guard-validation-v3/03_guard_race.resources.jsonl",
+      "bytes": 1932,
+      "sha256": "02af8363cbe1afdc601c7fbfb6808f286f287459a7eb5f3b60ba7e29fdd81b5b",
+      "git_path": "records/rekey-guard-validation-v3/03_guard_race.resources.jsonl.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "7acd29c38f66a199db784024069681d523397271da0a2df4dd843e14f3ed705f"
+    },
+    {
+      "path": "records/rekey-guard-validation-v3/03_guard_race.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/rekey-guard-validation-v3/03_guard_race.stderr.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/rekey-guard-validation-v3/03_guard_race.stdout",
+      "bytes": 6322,
+      "sha256": "ac1577c4c743ff9ac1b82d8adcfd9da3ffbcedd2beefaa9489e81b73901e69f2",
+      "git_path": "records/rekey-guard-validation-v3/03_guard_race.stdout.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "9058290c8516ddea4fc383cb9b89c0f19d04ea01b24742ce01d1fe4b0161140a"
+    },
+    {
+      "path": "records/rekey-guard-validation-v3/04_model_normal.resources.jsonl",
+      "bytes": 644,
+      "sha256": "52cafebc16f466b36526a9a0f24e42ca0e230e1e2edc164d80a38bf6d5b1b37e",
+      "git_path": "records/rekey-guard-validation-v3/04_model_normal.resources.jsonl.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "5f154d9f3d702bcf7f70f289b124681a0e7b06101b32c24b8437709af1ea97c7"
+    },
+    {
+      "path": "records/rekey-guard-validation-v3/04_model_normal.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/rekey-guard-validation-v3/04_model_normal.stderr.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/rekey-guard-validation-v3/04_model_normal.stdout",
+      "bytes": 7985,
+      "sha256": "15ac243170a622adf27012297c19b053f085c9bd0ec9fd73db7980869cb30365",
+      "git_path": "records/rekey-guard-validation-v3/04_model_normal.stdout.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "4df1316de2e1850005539687d6daa11de5381f832cbe1bdbd13c34d899685e45"
+    },
+    {
+      "path": "records/rekey-guard-validation-v3/04b_model_race.resources.jsonl",
+      "bytes": 644,
+      "sha256": "33176598cb5168b0c75cc83c65008829fc41f64cd987ec9c4ead4892aca965fb",
+      "git_path": "records/rekey-guard-validation-v3/04b_model_race.resources.jsonl.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "6ae0bd87fe5cfced2ab35db84288aa5ddf586c1532945db987cf214ce641aa54"
+    },
+    {
+      "path": "records/rekey-guard-validation-v3/04b_model_race.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/rekey-guard-validation-v3/04b_model_race.stderr.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/rekey-guard-validation-v3/04b_model_race.stdout",
+      "bytes": 8005,
+      "sha256": "6b9cf880535384801d894c27577700dced8a8367bd5385201a05ea20cd75bd91",
+      "git_path": "records/rekey-guard-validation-v3/04b_model_race.stdout.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "338e9666dbf262803815593c475164dba2904c37e1bcf986596c83973895485c"
+    },
+    {
+      "path": "records/rekey-guard-validation-v3/06_sourceguard.resources.jsonl",
+      "bytes": 1932,
+      "sha256": "a8402bdd90d5e8b6127a2adc1369df532bb298a2098e6e5c546ff89afea3bc05",
+      "git_path": "records/rekey-guard-validation-v3/06_sourceguard.resources.jsonl.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "bd17791d927e71a2d9a59cc60bd17017acaaf7fee36a7a08c3494ff7b59d2f77"
+    },
+    {
+      "path": "records/rekey-guard-validation-v3/06_sourceguard.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/rekey-guard-validation-v3/06_sourceguard.stderr.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/rekey-guard-validation-v3/06_sourceguard.stdout",
+      "bytes": 138,
+      "sha256": "ba0cb4aff7a9c991c087485ff3499bf86b9b57f990c78b979c1f08ffc42a3505",
+      "git_path": "records/rekey-guard-validation-v3/06_sourceguard.stdout.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "bde1ca9581b6db92f345781fcae442d0be90a723609ae430afb75b75b1f887a8"
+    },
+    {
+      "path": "records/rekey-guard-validation-v3/07_list_default.resources.jsonl",
+      "bytes": 644,
+      "sha256": "21d77297560d7d5dd178f41ab6582c8ae14a410dce230fe9810a2991a776e75d",
+      "git_path": "records/rekey-guard-validation-v3/07_list_default.resources.jsonl.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "aa22e8ee525d2b042f5dd901a187be281632926077131ccf718d837c08dd218b"
+    },
+    {
+      "path": "records/rekey-guard-validation-v3/07_list_default.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/rekey-guard-validation-v3/07_list_default.stderr.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/rekey-guard-validation-v3/07_list_default.stdout",
+      "bytes": 22506,
+      "sha256": "71cb4d247800fd132ba264c282e560fc792725095c6b187e831fd8f2ec7b5119",
+      "git_path": "records/rekey-guard-validation-v3/07_list_default.stdout.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "15004172227424bbe06bd126bdf33833b77445a8bf9e744827948c18f26608f2"
+    },
+    {
+      "path": "records/rekey-guard-validation-v3/08_list_manual.resources.jsonl",
+      "bytes": 644,
+      "sha256": "98e6f8a75c7c5aac2ded5066b094908f6b5dbc3a7b5c9f0009c5735bed26afe0",
+      "git_path": "records/rekey-guard-validation-v3/08_list_manual.resources.jsonl.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "0484c1751bec9e4043a226fd56c82ccebf60b1a90a5eaf20f49379510bb81eea"
+    },
+    {
+      "path": "records/rekey-guard-validation-v3/08_list_manual.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/rekey-guard-validation-v3/08_list_manual.stderr.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/rekey-guard-validation-v3/08_list_manual.stdout",
+      "bytes": 23052,
+      "sha256": "de1639025f54d98e1fd8243dd01423f214c7e15a4f84b3819640c926c3ded8b2",
+      "git_path": "records/rekey-guard-validation-v3/08_list_manual.stdout.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "e98ff33f0d200522fb0acdb6f8a9ef8b665366ff8ae7d12decb11e1e3bca9eff"
+    },
+    {
+      "path": "records/rekey-guard-validation-v3/09_list_windows_default.resources.jsonl",
+      "bytes": 644,
+      "sha256": "9c6a5b0c14977341fcb38c26a69a6a7aa781c2b53edc9b562d1110265191adbf",
+      "git_path": "records/rekey-guard-validation-v3/09_list_windows_default.resources.jsonl.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "b67a7e2196f7c0af2b732ee7ac1f5154b910fca691fcfa0a417beee3154ee449"
+    },
+    {
+      "path": "records/rekey-guard-validation-v3/09_list_windows_default.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/rekey-guard-validation-v3/09_list_windows_default.stderr.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/rekey-guard-validation-v3/09_list_windows_default.stdout",
+      "bytes": 23117,
+      "sha256": "1993dabfde0a2d8a4555072568058c0fe36d0a059d8ac53d7297479ab9d6494d",
+      "git_path": "records/rekey-guard-validation-v3/09_list_windows_default.stdout.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "b0d7699fc34e6d852e8cc63dc57e1114a9df3279bb96966861cb0c77de391004"
+    },
+    {
+      "path": "records/rekey-guard-validation-v3/10_manual_compile.resources.jsonl",
+      "bytes": 1610,
+      "sha256": "6cf3379e275e4a7cbe55385cd91c940a023bcaaea73d5b2d5fd10f5cc2cd0e24",
+      "git_path": "records/rekey-guard-validation-v3/10_manual_compile.resources.jsonl.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "028d919071821a5969afbc804f18ffdc9c61c6398299ffe924a5fdad626e6d3f"
+    },
+    {
+      "path": "records/rekey-guard-validation-v3/10_manual_compile.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/rekey-guard-validation-v3/10_manual_compile.stderr.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/rekey-guard-validation-v3/10_manual_compile.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/rekey-guard-validation-v3/10_manual_compile.stdout.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/rekey-guard-validation-v3/11_nm.resources.jsonl",
+      "bytes": 644,
+      "sha256": "de4ec603cda1b0fadbb70c3ab504be24ebcc6997b2c12c87b37e8d39e2489310",
+      "git_path": "records/rekey-guard-validation-v3/11_nm.resources.jsonl.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "3f076d0e5f259cc6375cc6c21f9483e9529e56ab985645451e114f1a77d7f72a"
+    },
+    {
+      "path": "records/rekey-guard-validation-v3/11_nm.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/rekey-guard-validation-v3/11_nm.stderr.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/rekey-guard-validation-v3/11_nm.stdout",
+      "bytes": 666295,
+      "sha256": "c05720894bc946afc7490c4caadb0c45ce07b407532990344ba5dcfb33c9bdc8",
+      "git_path": "records/rekey-guard-validation-v3/11_nm.stdout.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "95ea31a1407ca00f361d35751a8e1820cae48a831ced5c2ea81c08d49f6c5634"
+    },
+    {
+      "path": "records/rekey-guard-validation-v3/completion.json",
+      "bytes": 242510,
+      "sha256": "a438716e25e89423383d93ff52572d3e86969c92fb6a9273e57b0a5ce380d08a",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-guard-validation-v3/source-before.json",
+      "bytes": 663304,
+      "sha256": "b2b4e4ee54ca99f84664246ba5162536280bd4f6c2541e52a1a42fbf542371c0",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-guard-validation-v3/sqlite-rekey-interruption-manual.test",
+      "bytes": 16439540,
+      "sha256": "af32b10e083dc53fb297737881edfa50b1f66d6db824ab2a56a1ef71ce337173",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/rekey-interruption-source-evidence/rekey-interruption-source-only.patch",
+      "bytes": 164792,
+      "sha256": "6e6f1744c5db6d49e394f6c30c4c90395ca26d8a63a818b9f3a5f023b36f4d36",
+      "git_path": "records/rekey-interruption-source-evidence/rekey-interruption-source-only.patch.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "cf14efd55ab16db67d5271251d78e12819de166c062d000ba617c1f1eeb131fe"
+    },
+    {
+      "path": "records/rekey-main-scope-fix/change.diff",
+      "bytes": 1865,
+      "sha256": "90966890cff431a516175cc5c7700ad228cb6b8d7b0fc93142c86fa3a35d2c77",
+      "git_path": "records/rekey-main-scope-fix/change.diff.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "b511fee43045c29651c1de5bca248fbd9f9dc0f59782dfbcffe5a2e571ff1617"
+    },
+    {
+      "path": "records/rekey-main-scope-fix/rekey_interruption.go.before",
+      "bytes": 291997,
+      "sha256": "7146988730aa2012027573f19589a92840d6a1ec417db225192f70d96797bf11",
+      "git_path": "records/rekey-main-scope-fix/rekey_interruption.go.before.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f5acd414301832b0057ecb1c6d1fba61447672f4701cc5020b45701193e57258"
+    },
+    {
+      "path": "records/rekey-main-scope-fix/rekey_interruption_test.go.before",
+      "bytes": 10939,
+      "sha256": "5ee5c4178d8141fef7d7068e0728f99c7b86fdc948238a8417bbad3ef4d1ac73",
+      "git_path": "records/rekey-main-scope-fix/rekey_interruption_test.go.before.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "8e1bc06c7393298a348f15779c4e6191f365c64b532f4635a7bcc8e48cc7ae31"
+    },
+    {
+      "path": "records/rekey-model-integration/contract.go.before",
+      "bytes": 42671,
+      "sha256": "fd351a9dc85d574d32d5e67763ae898b732ce30a23949c10f7a7ccdc13ab796a",
+      "git_path": "records/rekey-model-integration/contract.go.before.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "344f7e27d6773bf4224974dd8d258e48a53c60ec75da74badfee7e9922d2690e"
+    },
+    {
+      "path": "records/rekey-model-integration/contract_test.go.before",
+      "bytes": 24332,
+      "sha256": "2b7b89d5f367fb6dba1985feaaa9f2d4b52c68c076ec5ed270bd7233b80300df",
+      "git_path": "records/rekey-model-integration/contract_test.go.before.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "57e6ad62ec9ca9801f97e840a6a6408f687582980a3cb20881d1095e2eb34d21"
+    },
+    {
+      "path": "records/rekey-model-integration/format-only.diff",
+      "bytes": 103393,
+      "sha256": "f52c04bd3ffbc7887e282317aa37b63d6fccdf64e7d211b8ec9afd701c81a51a",
+      "git_path": "records/rekey-model-integration/format-only.diff.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "431295e6d5723ee2cca76fa7e5c7dde87f7f067229b6d92f3687633fc3cf2119"
+    },
+    {
+      "path": "records/rekey-model-name-fix/before/internal/testkit/rekeyinterruption/contract.go",
+      "bytes": 48901,
+      "sha256": "b9a179e2ca3f82678842f86a3e330b52cc916097408ccc1716fa74ebf08a0e02",
+      "git_path": "records/rekey-model-name-fix/before/internal/testkit/rekeyinterruption/contract.go.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "c8ee1d21988ff50cecc58e71863cfe50d31ec93e4d977c4b8686ccf07d71e514"
+    },
+    {
+      "path": "records/rekey-model-name-fix/before/internal/testkit/rekeyinterruption/contract_test.go",
+      "bytes": 25020,
+      "sha256": "ac32dd1977e8283aa66dec82f66f2635125ef0d16ef52c321303ee3d9e847159",
+      "git_path": "records/rekey-model-name-fix/before/internal/testkit/rekeyinterruption/contract_test.go.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "b102d657910910317faf14ae08a68006d25c13140382cbaeb251530af9058436"
+    },
+    {
+      "path": "records/rekey-model-name-fix/before/internal/testscope/rekey_interruption.go",
+      "bytes": 292391,
+      "sha256": "02e4a370883e04f26a5d04678970a33056d3d08c20f74a96a14aa99a38e32a83",
+      "git_path": "records/rekey-model-name-fix/before/internal/testscope/rekey_interruption.go.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "d2e84ecf94d3f67e93af981f01129b383adfcbf1a50e59482b9b3558d37e9a1a"
+    },
+    {
+      "path": "records/rekey-model-name-fix/before/internal/testscope/rekey_interruption_test.go",
+      "bytes": 11143,
+      "sha256": "fdb0b19e44a966846963b498f62a8c70ac0d643e72726d0e013554cd87af3c7b",
+      "git_path": "records/rekey-model-name-fix/before/internal/testscope/rekey_interruption_test.go.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "b5985d18f38fd51e650ae497afbb95ec981041ebf732e49b8f2f671098d22cbf"
+    },
+    {
+      "path": "records/rekey-model-name-fix/change.diff",
+      "bytes": 282062,
+      "sha256": "a3686e894b3e95a70efe8567f0c38b513dd3c686a535570b0b97e44ec934cb56",
+      "git_path": "records/rekey-model-name-fix/change.diff.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "63465c0a461c0f41de42048c1fa7c42edc6f182647c5ad4ed7fab40b519824fb"
+    },
+    {
+      "path": "records/rekey-model-validation/01_format.resources.jsonl",
+      "bytes": 644,
+      "sha256": "0d6ab94128c0a9236f5c67c21b4f7ece4c49c99acb3a68022827c788ce57a568",
+      "git_path": "records/rekey-model-validation/01_format.resources.jsonl.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "a35412c97e8cce2ebec1690cc750f4588a60271bf76e49c36069185e2c978c09"
+    },
+    {
+      "path": "records/rekey-model-validation/01_format.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/rekey-model-validation/01_format.stderr.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/rekey-model-validation/01_format.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/rekey-model-validation/01_format.stdout.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/rekey-model-validation/02_normal.resources.jsonl",
+      "bytes": 644,
+      "sha256": "02ed5b4e528879c7ab0333032678e87cb668b4cc36fc73f94265bed520d10b8d",
+      "git_path": "records/rekey-model-validation/02_normal.resources.jsonl.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "793696cb514d126a3b47551fa0bb8d73c1d38e6697107681d37956ed628c1b53"
+    },
+    {
+      "path": "records/rekey-model-validation/02_normal.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/rekey-model-validation/02_normal.stderr.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/rekey-model-validation/02_normal.stdout",
+      "bytes": 7992,
+      "sha256": "03c2626750df24688c0b46efaf1c33656fea3ce7f3b9deae6e0bc954d1c99d2e",
+      "git_path": "records/rekey-model-validation/02_normal.stdout.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "294260cee52cf539abb3402583585472bd3df868718fb61f8411aceb47e3dd65"
+    },
+    {
+      "path": "records/rekey-model-validation/source-before.json",
+      "bytes": 662016,
+      "sha256": "fa95d90b638420cf35c574faf865b54670f82ad36178f14e653bf75707adb36f",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    }
+  ],
+  "library": {
+    "library_file_id": "libfile_eeb34ff5e724819181121483fee3ca10",
+    "file_id": "file_0000000056bc81f8a243d1f213aaf39b",
+    "file_name": "gosqlite-R5-rekey-focused-validation-8751a3b.zip",
+    "current_version_number": 0,
+    "path": "/gosqlite-R5-rekey-focused-validation-8751a3b.zip",
+    "mime_type": "application/zip",
+    "file_size_bytes": 11074069,
+    "library_artifact_type": "other"
+  },
+  "readback_status": "PASS"
+}

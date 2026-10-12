@@ -1,0 +1,916 @@
+{
+  "zip": {
+    "zip_name": "gosqlite-R2-misplacement-focused-validation-cdcce9e.zip",
+    "bytes": 25696053,
+    "sha256": "641b693405c91501b0d03273d66fba23b469a4bbfe6dfb963b340a7d0a5c2918",
+    "members": 200,
+    "verified_nonmanifest_members": 199,
+    "manifest_sha256": "7aab4f6d5d54c784f9dd91e192ccf5b9682795d9c0f08394176c77abb6cc9fcb",
+    "manual_binary_members": 3,
+    "final_source_sha256_match_count": 13,
+    "status": "PASS"
+  },
+  "library_record": "LIBRARY-ARCHIVE.json",
+  "items": [
+    {
+      "path": "final-source/docs/testing/rollback-fault-adapter-zh.md",
+      "bytes": 20092,
+      "sha256": "e0e683b7e2c57c31980a606c4ccf9abf5263cdd96e6c5f887b690390012afe60",
+      "reason": "final source blob exists in candidate tree; snapshot retained in full archive"
+    },
+    {
+      "path": "final-source/docs/testing/rollback-fault-sql-manual-zh.md",
+      "bytes": 36410,
+      "sha256": "8ddd2eac317c52b365bd82ba515487e0067a4c7931f410254fea16a271e682d7",
+      "reason": "final source blob exists in candidate tree; snapshot retained in full archive"
+    },
+    {
+      "path": "final-source/internal/pager/rollback_fault_sql_manual_linux.go",
+      "bytes": 9045,
+      "sha256": "9847b258f401c52c8748b2e380a8b96e33eda64567a38edd1833f16df188431a",
+      "reason": "final source blob exists in candidate tree; snapshot retained in full archive"
+    },
+    {
+      "path": "final-source/internal/pager/rollback_io_manual_linux.go",
+      "bytes": 22187,
+      "sha256": "1e15ab58e49a4d6eedd72274e20c59f644546609f61a19d96e588688eb0c5940",
+      "reason": "final source blob exists in candidate tree; snapshot retained in full archive"
+    },
+    {
+      "path": "final-source/internal/testkit/rollbackfault/contract.go",
+      "bytes": 23364,
+      "sha256": "dff18faca43a384de7ec37aedee877d30320823e540be71c7486d3ff5a24198d",
+      "reason": "final source blob exists in candidate tree; snapshot retained in full archive"
+    },
+    {
+      "path": "final-source/internal/testkit/rollbackfault/contract_test.go",
+      "bytes": 46965,
+      "sha256": "3de6db2bb1cfd222a04af78c9f0b88c5b5dfefb163ef63967ec44ed6ee417993",
+      "reason": "final source blob exists in candidate tree; snapshot retained in full archive"
+    },
+    {
+      "path": "final-source/internal/testkit/rollbackfault/sql_ledger.go",
+      "bytes": 27231,
+      "sha256": "96def5b6a7545f7e7f8e9e2acaf16e540237cfa2bccd92875b7961560e328267",
+      "reason": "final source blob exists in candidate tree; snapshot retained in full archive"
+    },
+    {
+      "path": "final-source/internal/testkit/rollbackfault/sql_ledger_test.go",
+      "bytes": 90153,
+      "sha256": "07083e68442522330edae5a562e74b2e6d901a9429c846b196737e02b5d7d469",
+      "reason": "final source blob exists in candidate tree; snapshot retained in full archive"
+    },
+    {
+      "path": "final-source/internal/testscope/rollback_fault.go",
+      "bytes": 147779,
+      "sha256": "bb3d93fea9959906fff0093d320fecac1d7dbfae58cb4a6221012b4a8fc04448",
+      "reason": "final source blob exists in candidate tree; snapshot retained in full archive"
+    },
+    {
+      "path": "final-source/internal/testscope/rollback_fault_sql.go",
+      "bytes": 311499,
+      "sha256": "d5ff12fe8bb17e4976b17561762de95f0086fa927c601ee815e50dcf23e51468",
+      "reason": "final source blob exists in candidate tree; snapshot retained in full archive"
+    },
+    {
+      "path": "final-source/internal/testscope/rollback_fault_sql_test.go",
+      "bytes": 72010,
+      "sha256": "39457022d5a8de687a2418ba627f675d69fc0028d0d0ec953c3fbefe840cfbf0",
+      "reason": "final source blob exists in candidate tree; snapshot retained in full archive"
+    },
+    {
+      "path": "final-source/internal/testscope/rollback_fault_test.go",
+      "bytes": 20339,
+      "sha256": "259a3060ddeea65e2933dde29fcb3d9539a0efc48f3e1249be43575321b28dfb",
+      "reason": "final source blob exists in candidate tree; snapshot retained in full archive"
+    },
+    {
+      "path": "final-source/sqlite/rollback_fault_sql_manual_linux_test.go",
+      "bytes": 50735,
+      "sha256": "78464b9d6f948be4d1efc0686f8b57a17f1a0ae530081230edc7c553d996bf09",
+      "reason": "final source blob exists in candidate tree; snapshot retained in full archive"
+    },
+    {
+      "path": "records/misplaced-write-format/01-gofmt.diff",
+      "bytes": 29547,
+      "sha256": "f9685dd8bae36c8e97a81af7b008163a56673e6210da599cd162e8a660760937",
+      "git_path": "records/misplaced-write-format/01-gofmt.diff.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "8a2f2a9fc67373227ae1872d9ef551d868c4083d7ee3596db58926e76c8a40a1"
+    },
+    {
+      "path": "records/misplaced-write-format/02-repin.diff",
+      "bytes": 365015,
+      "sha256": "6a859898af32714616a49fc510eed39935f89bbf6726d06066a73b1a8831c307",
+      "git_path": "records/misplaced-write-format/02-repin.diff.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "4288dcfb231a615ad9632ad1d9a71a3f76586aac4ee799e93e29ed0999595975"
+    },
+    {
+      "path": "records/misplaced-write-format/03-anchor-adaptation.diff",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/misplaced-write-format/03-anchor-adaptation.diff.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/misplaced-write-format/before/docs/testing/rollback-fault-adapter-zh.md",
+      "bytes": 20092,
+      "sha256": "e0e683b7e2c57c31980a606c4ccf9abf5263cdd96e6c5f887b690390012afe60",
+      "git_path": "records/misplaced-write-format/before/docs/testing/rollback-fault-adapter-zh.md.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "1bd0ac7571edec4b7b22ba05feaeaf9764edff7e32bd733ac7616ea8fe4b9ff6"
+    },
+    {
+      "path": "records/misplaced-write-format/before/docs/testing/rollback-fault-sql-manual-zh.md",
+      "bytes": 36410,
+      "sha256": "8ddd2eac317c52b365bd82ba515487e0067a4c7931f410254fea16a271e682d7",
+      "git_path": "records/misplaced-write-format/before/docs/testing/rollback-fault-sql-manual-zh.md.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "4555905e369a2b4e05814aa388076e7a8824fd7663f0782571072c839966b7df"
+    },
+    {
+      "path": "records/misplaced-write-format/before/internal/pager/rollback_fault_sql_manual_linux.go",
+      "bytes": 9027,
+      "sha256": "50ff5277bd0811f4f5f9080520797d9fff6689cce1eb5fb2345d81cbce923b5c",
+      "git_path": "records/misplaced-write-format/before/internal/pager/rollback_fault_sql_manual_linux.go.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "fde51fbdcc1cd781f922f626728ee03d6c4d5471af36e8f2d557f7ed67f67992"
+    },
+    {
+      "path": "records/misplaced-write-format/before/internal/pager/rollback_io_manual_linux.go",
+      "bytes": 22187,
+      "sha256": "1e15ab58e49a4d6eedd72274e20c59f644546609f61a19d96e588688eb0c5940",
+      "git_path": "records/misplaced-write-format/before/internal/pager/rollback_io_manual_linux.go.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "b6364386d38fca5e7ff47043f7923f043cf56eedc56451343fc6de9681be306c"
+    },
+    {
+      "path": "records/misplaced-write-format/before/internal/testkit/rollbackfault/contract.go",
+      "bytes": 23364,
+      "sha256": "dff18faca43a384de7ec37aedee877d30320823e540be71c7486d3ff5a24198d",
+      "git_path": "records/misplaced-write-format/before/internal/testkit/rollbackfault/contract.go.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "b74bcf1021036a2c96aa0726402a36fe56556c1f0c79a3eb4b547beac1f0c04d"
+    },
+    {
+      "path": "records/misplaced-write-format/before/internal/testkit/rollbackfault/contract_test.go",
+      "bytes": 46803,
+      "sha256": "3b4aae0c648444bf2031b625637aedc2de2a5c9b2632243512b89d8ac3258f31",
+      "git_path": "records/misplaced-write-format/before/internal/testkit/rollbackfault/contract_test.go.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "0cb39fddb9134eeff10ad1211f9729ad71eb35e82c7b96389cf92aa630196965"
+    },
+    {
+      "path": "records/misplaced-write-format/before/internal/testkit/rollbackfault/sql_ledger.go",
+      "bytes": 27231,
+      "sha256": "96def5b6a7545f7e7f8e9e2acaf16e540237cfa2bccd92875b7961560e328267",
+      "git_path": "records/misplaced-write-format/before/internal/testkit/rollbackfault/sql_ledger.go.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "dcacb98eb445c7eab86ca67c992a8670f9e65adebfa443f2d4de057dcb8f5f3d"
+    },
+    {
+      "path": "records/misplaced-write-format/before/internal/testkit/rollbackfault/sql_ledger_test.go",
+      "bytes": 89949,
+      "sha256": "5d0fede7585d788714a380d72691083931c738c903391f0cec76aaecb394f8e3",
+      "git_path": "records/misplaced-write-format/before/internal/testkit/rollbackfault/sql_ledger_test.go.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "095d63a1e07c9476d9877e51c2caf245514c7bcebb03d5875d63d68081784175"
+    },
+    {
+      "path": "records/misplaced-write-format/before/internal/testscope/rollback_fault.go",
+      "bytes": 147628,
+      "sha256": "c854bfafe0ecedc33e4676595d21a99d460d129ae0a2d6a9ca776178d002caed",
+      "git_path": "records/misplaced-write-format/before/internal/testscope/rollback_fault.go.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "c540f4352fd59cf53b7bab68261e9b9bd8d3eec915b49f15b1eba7ee598fb2f7"
+    },
+    {
+      "path": "records/misplaced-write-format/before/internal/testscope/rollback_fault_sql.go",
+      "bytes": 311020,
+      "sha256": "ae4adc9a0636e7ca3b9067276fee83965e2aa2002b4754571f661f8926d7f895",
+      "git_path": "records/misplaced-write-format/before/internal/testscope/rollback_fault_sql.go.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "2458afac044566320427debe84e816f034d514c9313ae1e328188c94d2c88638"
+    },
+    {
+      "path": "records/misplaced-write-format/before/internal/testscope/rollback_fault_sql_test.go",
+      "bytes": 71196,
+      "sha256": "fde0e37a3afe4affc649624978eaeaa2f580e9b55b3b5a7d73d9012bce70dab4",
+      "git_path": "records/misplaced-write-format/before/internal/testscope/rollback_fault_sql_test.go.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "1846cd35624de01e5d300d202c6787f12fae435ed00ed137f64bbeb90ebdc3db"
+    },
+    {
+      "path": "records/misplaced-write-format/before/internal/testscope/rollback_fault_test.go",
+      "bytes": 20318,
+      "sha256": "9aa79c9ea8bfeef4ab0f164187e3134ffb5713b6c0292910bab59d45d35ce08e",
+      "git_path": "records/misplaced-write-format/before/internal/testscope/rollback_fault_test.go.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "c580657c3c3666445270b9c14ddc57887855fc739b396b07ff9a4672d9e1c999"
+    },
+    {
+      "path": "records/misplaced-write-format/before/source-manifest.json",
+      "bytes": 13746,
+      "sha256": "d77db0fad47ad18637d8a70a77ab4af43a53436410b56ca19f2cbed29de1cd3a",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/misplaced-write-format/before/sqlite/rollback_fault_sql_manual_linux_test.go",
+      "bytes": 50722,
+      "sha256": "576f77b415b98ff02879534480be4753086b949aaea39376fb9488918f9bd8b7",
+      "git_path": "records/misplaced-write-format/before/sqlite/rollback_fault_sql_manual_linux_test.go.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "5c7484702aa7d052b3909b6624510a9bfa8bd256db58e6c37ab0643b664ff7c5"
+    },
+    {
+      "path": "records/misplaced-write-format/final-format-and-repin.diff",
+      "bytes": 394392,
+      "sha256": "2ca0b8afec0287b2cb4d7236e3638e06a53e65e11131de7d973911f1fae47dea",
+      "git_path": "records/misplaced-write-format/final-format-and-repin.diff.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "2b678f8cf88eb3399c5e3eea240970cfbede82b001e4a7395a56032c371dfe93"
+    },
+    {
+      "path": "records/misplaced-write-format/final-overlay-from-01c.patch",
+      "bytes": 560804,
+      "sha256": "b84d4048a89ebfc8908c9512c3cbb49bb66069dc6393061061bd7b37cccedd3e",
+      "git_path": "records/misplaced-write-format/final-overlay-from-01c.patch.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f6f3019991bfe9be45de2d2ce7dfee0bff06a5c9599b775b9e385db14197c5c3"
+    },
+    {
+      "path": "records/misplaced-write-format/gofmt.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/misplaced-write-format/gofmt.stderr.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/misplaced-write-format/gofmt.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/misplaced-write-format/gofmt.stdout.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/misplaced-write-format/repin.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/misplaced-write-format/repin.stderr.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/misplaced-write-format/repin.stdout",
+      "bytes": 99,
+      "sha256": "b98579caf02bbc116eb2a2df3d6d495bcd54f3957c550ecfe5675321628fbaec",
+      "git_path": "records/misplaced-write-format/repin.stdout.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "1d15e1c6a7ed58fe13bd40d4b058a396232818afacb35a90872c65037c3f5e1d"
+    },
+    {
+      "path": "records/misplaced-write-format/w-overlap-diff-from-01c.patch",
+      "bytes": 1739,
+      "sha256": "f14c0ff252bc083837262495d36fe429b2a921845b8e8f227a93bf1544b8450a",
+      "git_path": "records/misplaced-write-format/w-overlap-diff-from-01c.patch.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "5d33ba7e42098fee3f655f22170c94a7c9cc7383d2a90d0e74c9ae1c0144d122"
+    },
+    {
+      "path": "records/misplaced-write-integration/before/docs/testing/rollback-fault-adapter-zh.md",
+      "bytes": 14606,
+      "sha256": "c04e93be4481f4b635bc7ecccff46dc352ddf5ea53415252554ec2b4b740ab0b",
+      "git_path": "records/misplaced-write-integration/before/docs/testing/rollback-fault-adapter-zh.md.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f29c9c25ec9a936f207011ee5cbfa51a4cc41e8e44925c234ca52c54c39f4e28"
+    },
+    {
+      "path": "records/misplaced-write-integration/before/docs/testing/rollback-fault-sql-manual-zh.md",
+      "bytes": 30924,
+      "sha256": "9967acb6a803c2c1f71374b62bb4d4db2bc1b5252e50f64e819d25b73c6d23c7",
+      "git_path": "records/misplaced-write-integration/before/docs/testing/rollback-fault-sql-manual-zh.md.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "15c9daf338c513e8e7c20bd0337416e8e8ead61cb63b19b6b752a94c8414f263"
+    },
+    {
+      "path": "records/misplaced-write-integration/before/internal/pager/rollback_fault_sql_manual_linux.go",
+      "bytes": 8391,
+      "sha256": "ad9f263e2d15a496cc70b1d35038f5b0393e8b94c0923ea5db96bf4eff71c0f9",
+      "git_path": "records/misplaced-write-integration/before/internal/pager/rollback_fault_sql_manual_linux.go.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "8405a1b2a12c874871f3f29c2c0b720306a1c9352013fac4ad5ad96d7bfa1f6b"
+    },
+    {
+      "path": "records/misplaced-write-integration/before/internal/pager/rollback_io_manual_linux.go",
+      "bytes": 20135,
+      "sha256": "4f26bfec0de7b3c22f056ec374a4c453691f5cd2a5ee5e62116f2f8c66b5e498",
+      "git_path": "records/misplaced-write-integration/before/internal/pager/rollback_io_manual_linux.go.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "e57cc5529d805cd9af4d9a5b3f2343cdfa9f4ac252e1760596d943b5b3cb5cb3"
+    },
+    {
+      "path": "records/misplaced-write-integration/before/internal/testkit/rollbackfault/contract.go",
+      "bytes": 21920,
+      "sha256": "dc7ec44ec7be3f444f4e7501c84d6875a1a0e9b4d46e06e5586b2e5d225828ed",
+      "git_path": "records/misplaced-write-integration/before/internal/testkit/rollbackfault/contract.go.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "fd5d4b408966a798991278f0fc974431fd248a75a7472131bd1bf6d0d4fa62fd"
+    },
+    {
+      "path": "records/misplaced-write-integration/before/internal/testkit/rollbackfault/contract_test.go",
+      "bytes": 38521,
+      "sha256": "8c43b22c2fbfdc6d4aef423abd44956196a2b15e223a8f56ef00065c8d77c362",
+      "git_path": "records/misplaced-write-integration/before/internal/testkit/rollbackfault/contract_test.go.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "7b5d211f7aa045b7524e8f5b5d92669b67772456bc194ff9a222dd8e2e15653d"
+    },
+    {
+      "path": "records/misplaced-write-integration/before/internal/testkit/rollbackfault/sql_ledger.go",
+      "bytes": 25282,
+      "sha256": "7d47e46b34204c12a4df50d02a24179bf22e081d45f2816e3c048b0bc7dd04dc",
+      "git_path": "records/misplaced-write-integration/before/internal/testkit/rollbackfault/sql_ledger.go.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "bc73553f11d4feeb1b1e00d4d69cfa35977cd4365681eed55f661a4a75eea370"
+    },
+    {
+      "path": "records/misplaced-write-integration/before/internal/testkit/rollbackfault/sql_ledger_test.go",
+      "bytes": 83124,
+      "sha256": "5bea133008de83e9c5e737582305034cf24e1b99a25d402cba61c596f52ef2a3",
+      "git_path": "records/misplaced-write-integration/before/internal/testkit/rollbackfault/sql_ledger_test.go.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "fe7a9dcb32b95c8e0893ab8e871f0b893f03871908ac21c92cd6d37d50e21a53"
+    },
+    {
+      "path": "records/misplaced-write-integration/before/internal/testscope/rollback_fault.go",
+      "bytes": 117415,
+      "sha256": "1e82d659ac17f3568f34338e951d6e8a044eeec0e07e45498368bda491a09c59",
+      "git_path": "records/misplaced-write-integration/before/internal/testscope/rollback_fault.go.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "28be5f1e7a7fb9cdbf84da40f307bc41631e1f976d3b832b9052e0926cb0d3c0"
+    },
+    {
+      "path": "records/misplaced-write-integration/before/internal/testscope/rollback_fault_sql.go",
+      "bytes": 285522,
+      "sha256": "0647edf67ae831b8d99b3caddf02fbf8e65380fc391405effe433145c5374969",
+      "git_path": "records/misplaced-write-integration/before/internal/testscope/rollback_fault_sql.go.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "80561022d06f6e41f6d0407839b07e2d9bbe0a1b68d06232eae34613700d5d1f"
+    },
+    {
+      "path": "records/misplaced-write-integration/before/internal/testscope/rollback_fault_sql_test.go",
+      "bytes": 65601,
+      "sha256": "a13a82fd127d81eb7df85eb0286f156f575ae0a17417d2c33a6127388dce0d7d",
+      "git_path": "records/misplaced-write-integration/before/internal/testscope/rollback_fault_sql_test.go.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "0c6bcfda683764f850c764cd2b21c7affb482765ceb0117b4bce0057a39cb62d"
+    },
+    {
+      "path": "records/misplaced-write-integration/before/internal/testscope/rollback_fault_test.go",
+      "bytes": 14393,
+      "sha256": "79dea110d8eb481b7d6e7f055ef8ff93e2f7032f19d370f3f5279ba255878dbb",
+      "git_path": "records/misplaced-write-integration/before/internal/testscope/rollback_fault_test.go.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "6ce142840540fcfeb36db70df062e4278c38df539d9754441ec87403989dc558"
+    },
+    {
+      "path": "records/misplaced-write-integration/before/sqlite/rollback_fault_sql_manual_linux_test.go",
+      "bytes": 45972,
+      "sha256": "c368296059cbf29a4756cbb760b3836c580d8615e25a7330f76d83ba97427037",
+      "git_path": "records/misplaced-write-integration/before/sqlite/rollback_fault_sql_manual_linux_test.go.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "e4c340d69f2e07d4b68d234dd877225e9b913a867d89c129dc714133fbb26e3f"
+    },
+    {
+      "path": "records/misplaced-write-integration/integration.diff",
+      "bytes": 560921,
+      "sha256": "d20c3a48b364ab1cdb55eba0f5d7a343cb336bdb8a6982ba0791d0d33c4a61be",
+      "git_path": "records/misplaced-write-integration/integration.diff.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "cae29cbb46f1907826ba3b0dfa6d6f8c9f491ba47b2dd18aeac8de7dfedfa4fd"
+    },
+    {
+      "path": "records/misplaced-write-overlay/docs/testing/rollback-fault-adapter-zh.md",
+      "bytes": 20092,
+      "sha256": "e0e683b7e2c57c31980a606c4ccf9abf5263cdd96e6c5f887b690390012afe60",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/misplaced-write-overlay/docs/testing/rollback-fault-sql-manual-zh.md",
+      "bytes": 36410,
+      "sha256": "8ddd2eac317c52b365bd82ba515487e0067a4c7931f410254fea16a271e682d7",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/misplaced-write-overlay/internal/pager/rollback_fault_sql_manual_linux.go",
+      "bytes": 9045,
+      "sha256": "9847b258f401c52c8748b2e380a8b96e33eda64567a38edd1833f16df188431a",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/misplaced-write-overlay/internal/pager/rollback_io_manual_linux.go",
+      "bytes": 22187,
+      "sha256": "1e15ab58e49a4d6eedd72274e20c59f644546609f61a19d96e588688eb0c5940",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/misplaced-write-overlay/internal/testkit/rollbackfault/contract.go",
+      "bytes": 23364,
+      "sha256": "dff18faca43a384de7ec37aedee877d30320823e540be71c7486d3ff5a24198d",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/misplaced-write-overlay/internal/testkit/rollbackfault/contract_test.go",
+      "bytes": 46965,
+      "sha256": "3de6db2bb1cfd222a04af78c9f0b88c5b5dfefb163ef63967ec44ed6ee417993",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/misplaced-write-overlay/internal/testkit/rollbackfault/sql_ledger.go",
+      "bytes": 27231,
+      "sha256": "96def5b6a7545f7e7f8e9e2acaf16e540237cfa2bccd92875b7961560e328267",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/misplaced-write-overlay/internal/testkit/rollbackfault/sql_ledger_test.go",
+      "bytes": 90138,
+      "sha256": "c043511f850e067833c715b13e6442433e58bdedef9f640bb145a06db967e998",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/misplaced-write-overlay/internal/testscope/rollback_fault.go",
+      "bytes": 147779,
+      "sha256": "bb3d93fea9959906fff0093d320fecac1d7dbfae58cb4a6221012b4a8fc04448",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/misplaced-write-overlay/internal/testscope/rollback_fault_sql.go",
+      "bytes": 311484,
+      "sha256": "8e98e9b83e5c2f379b223fa49b20eb8aeef703476083b507aa29949fda662b21",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/misplaced-write-overlay/internal/testscope/rollback_fault_sql_test.go",
+      "bytes": 71196,
+      "sha256": "fde0e37a3afe4affc649624978eaeaa2f580e9b55b3b5a7d73d9012bce70dab4",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/misplaced-write-overlay/internal/testscope/rollback_fault_test.go",
+      "bytes": 20339,
+      "sha256": "65a0786b2b1359bc956defd1e76eb93e1d6dda169afe264427a8a9d97aca7662",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/misplaced-write-overlay/sqlite/rollback_fault_sql_manual_linux_test.go",
+      "bytes": 50735,
+      "sha256": "78464b9d6f948be4d1efc0686f8b57a17f1a0ae530081230edc7c553d996bf09",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/misplaced-write-regression-fix/before/internal/testkit/rollbackfault/sql_ledger_test.go",
+      "bytes": 90138,
+      "sha256": "c043511f850e067833c715b13e6442433e58bdedef9f640bb145a06db967e998",
+      "git_path": "records/misplaced-write-regression-fix/before/internal/testkit/rollbackfault/sql_ledger_test.go.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "91118bc3c20a8b74cbc74913d9ae5af3f490e134a9fec88e9eb856ac46737ac1"
+    },
+    {
+      "path": "records/misplaced-write-regression-fix/before/internal/testscope/rollback_fault_sql.go",
+      "bytes": 311484,
+      "sha256": "8e98e9b83e5c2f379b223fa49b20eb8aeef703476083b507aa29949fda662b21",
+      "git_path": "records/misplaced-write-regression-fix/before/internal/testscope/rollback_fault_sql.go.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "0dd12e20f1bd3815c7778c344319b1eaf8c1ce53fb7bf06f0140ba13e938294e"
+    },
+    {
+      "path": "records/misplaced-write-regression-fix/before/internal/testscope/rollback_fault_sql_test.go",
+      "bytes": 71196,
+      "sha256": "4d3f75d9b7e09332b28d83e0faf317d59c916f7ef7afce9f79e8f6fa9b1c8981",
+      "git_path": "records/misplaced-write-regression-fix/before/internal/testscope/rollback_fault_sql_test.go.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "a6e038621d997f3a72f24cd5a190b051621fc2944c67972e79e9bc535e872d5a"
+    },
+    {
+      "path": "records/misplaced-write-regression-fix/change.diff",
+      "bytes": 294698,
+      "sha256": "a1ddcfdb045915cc3ed580af4953af6512a6877216f3c5ed872af712f8a84385",
+      "git_path": "records/misplaced-write-regression-fix/change.diff.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "cc5d8c1d5e9356b3b8379df6c1d9dacc4579a35f2c3f8cb3baf98b823f26265b"
+    },
+    {
+      "path": "records/misplaced-write-source-evidence/misplaced-write.patch",
+      "bytes": 558948,
+      "sha256": "6dbe0c46e7c12a9cf7a23350d68bdac1e57a6d89722ee840bb62b396582044ae",
+      "git_path": "records/misplaced-write-source-evidence/misplaced-write.patch.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "4c157a11151dc48acb675e5479c0750a32442d0ef021ddac6763f8797b80fe19"
+    },
+    {
+      "path": "records/misplaced-write-source-evidence/source-manifest.json",
+      "bytes": 13746,
+      "sha256": "d77db0fad47ad18637d8a70a77ab4af43a53436410b56ca19f2cbed29de1cd3a",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/misplaced-write-validation/01_format.resources.jsonl",
+      "bytes": 644,
+      "sha256": "3db6ad1dcd6e817bd542c9987c6d5a2372639b7896f9061d804c0b779e1b3c2c",
+      "git_path": "records/misplaced-write-validation/01_format.resources.jsonl.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "c31f69c231d7e49e0f8ed74db7c5979b2f500905dd8d7aa25eb222a794e381b9"
+    },
+    {
+      "path": "records/misplaced-write-validation/01_format.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/misplaced-write-validation/01_format.stderr.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/misplaced-write-validation/01_format.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/misplaced-write-validation/01_format.stdout.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/misplaced-write-validation/02_normal.resources.jsonl",
+      "bytes": 3864,
+      "sha256": "69823dab6d544c79c1bdcfe5d26a22b8ac0f0bdb89539372bc8f709d022462cc",
+      "git_path": "records/misplaced-write-validation/02_normal.resources.jsonl.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "357559aa9a377b6787eb648edfd10c1efe4c37ba37f41b5870a814dd9e402218"
+    },
+    {
+      "path": "records/misplaced-write-validation/02_normal.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/misplaced-write-validation/02_normal.stderr.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/misplaced-write-validation/02_normal.stdout",
+      "bytes": 2787317,
+      "sha256": "82eecb0da8c4f6afb8cedfb440cc82e871302281d510dfd7e557d0a0abf52884",
+      "git_path": "records/misplaced-write-validation/02_normal.stdout.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "3086fa7fd4346a114f2963ac005251c9ef9642ec99493d37ff760fe59d6e96fd"
+    },
+    {
+      "path": "records/misplaced-write-validation/source-before.json",
+      "bytes": 663304,
+      "sha256": "acd1d0ffb4dac130d4abfd4e0ef0d90c6022b6f9eba802dfbcf6a3e78658e44e",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/01_format.resources.jsonl",
+      "bytes": 644,
+      "sha256": "78dea8bacbe9f9511a2dbfa7474b76725af1b74e48d963a15a319926189571e2",
+      "git_path": "records/misplaced-write-validation-v2/01_format.resources.jsonl.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "97fe112a4bf82ba262eecbcff275f8a935f865912f60438ff2eed974ee0ea007"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/01_format.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/misplaced-write-validation-v2/01_format.stderr.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/01_format.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/misplaced-write-validation-v2/01_format.stdout.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/02_normal.resources.jsonl",
+      "bytes": 2254,
+      "sha256": "f98a03904abe95ec958a69fd9a0f33d4108c12a518de00a55422b3be7dbb129f",
+      "git_path": "records/misplaced-write-validation-v2/02_normal.resources.jsonl.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "a6d71c8e686e0572be7b11cf0055bc445b88b7977a62eca920b732739af7319a"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/02_normal.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/misplaced-write-validation-v2/02_normal.stderr.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/02_normal.stdout",
+      "bytes": 266564,
+      "sha256": "3976876d4fbd654d67379951b6b8680d3fad1fb51d6c791b88b033736e3757b3",
+      "git_path": "records/misplaced-write-validation-v2/02_normal.stdout.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "5901f4ddec3cb10e5038c739b9a3b1d9846511e29d99dca40ec4caaa8d73a98c"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/03_race.resources.jsonl",
+      "bytes": 21896,
+      "sha256": "db4908225130ce290fc56265ab8f499e33d6f19b0eaacb9725770227b7a09ee0",
+      "git_path": "records/misplaced-write-validation-v2/03_race.resources.jsonl.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "914dbd68603c80d3825de682cd5480e97dd10f433b3cb105108c0c53b8115a53"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/03_race.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/misplaced-write-validation-v2/03_race.stderr.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/03_race.stdout",
+      "bytes": 2785633,
+      "sha256": "008d3bec028943f2626f940212b0e84c20feae09c4bb1967abdec675f66055eb",
+      "git_path": "records/misplaced-write-validation-v2/03_race.stdout.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "465c8736baca41665785cd71c26afcfded9e884612b0ff419b94e0c96bddac11"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/04_sourceguard.resources.jsonl",
+      "bytes": 2254,
+      "sha256": "efa078bee3d754e50bea6277e78161e376290a4c11caf6660eb8bc7acf6f6780",
+      "git_path": "records/misplaced-write-validation-v2/04_sourceguard.resources.jsonl.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "937dbe8a528c117f2314f370b4e26b5d47c7eee721cce5b2e9cc47cf2ac9d64d"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/04_sourceguard.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/misplaced-write-validation-v2/04_sourceguard.stderr.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/04_sourceguard.stdout",
+      "bytes": 138,
+      "sha256": "ba0cb4aff7a9c991c087485ff3499bf86b9b57f990c78b979c1f08ffc42a3505",
+      "git_path": "records/misplaced-write-validation-v2/04_sourceguard.stdout.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "bde1ca9581b6db92f345781fcae442d0be90a723609ae430afb75b75b1f887a8"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/05_list_fault-sqlite.resources.jsonl",
+      "bytes": 644,
+      "sha256": "415238ac988659737ec7e7f99434e42e26acea330278bc1b7401861b6248ce2f",
+      "git_path": "records/misplaced-write-validation-v2/05_list_fault-sqlite.resources.jsonl.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "b9b289884a62aa3f1530d8e1fe2f2582f42408b693480d78ff42e852ad54ff17"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/05_list_fault-sqlite.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/misplaced-write-validation-v2/05_list_fault-sqlite.stderr.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/05_list_fault-sqlite.stdout",
+      "bytes": 13753,
+      "sha256": "94424e1f2cd84361ec2153d53398e3583a3ba9959dddf29b23d35b39ee576e44",
+      "git_path": "records/misplaced-write-validation-v2/05_list_fault-sqlite.stdout.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "217878ccc3b6d42be2d1a94387255d8f92e7c7c2912adce414263d9b156b9dbe"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/06_list_fault-pager.resources.jsonl",
+      "bytes": 644,
+      "sha256": "b9495d0259ea172516f0c22c979849c3d55c1af30aad149017fa87725e8f9e60",
+      "git_path": "records/misplaced-write-validation-v2/06_list_fault-pager.resources.jsonl.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "09e551575897dac36bb7dffdcd86b3f2eef99f25538dc64c359e43b317efd818"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/06_list_fault-pager.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/misplaced-write-validation-v2/06_list_fault-pager.stderr.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/06_list_fault-pager.stdout",
+      "bytes": 7437,
+      "sha256": "3c2dc6ffb6ea3c8cd959495fbb182315a2b0773f33581bb74da379be9ac7fb2e",
+      "git_path": "records/misplaced-write-validation-v2/06_list_fault-pager.stdout.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "7915b0252a3eec38923ca18e9d92bcea0b80243fe9ed75092fc3d9216d451759"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/07_list_restart-sqlite.resources.jsonl",
+      "bytes": 644,
+      "sha256": "ad61934db3ff737912dd4bae6e6552c5cd4c3409d34c5df3e96042d39a39ceb9",
+      "git_path": "records/misplaced-write-validation-v2/07_list_restart-sqlite.resources.jsonl.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "08880329c20d48ba26c6cf2ea4b6ebf9be77ee345ffd430e083cf1cd7c206897"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/07_list_restart-sqlite.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/misplaced-write-validation-v2/07_list_restart-sqlite.stderr.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/07_list_restart-sqlite.stdout",
+      "bytes": 13924,
+      "sha256": "1677f433d6f087ad557c9bfff4d9392592946d2f8f8473aed0597aebdc6eb204",
+      "git_path": "records/misplaced-write-validation-v2/07_list_restart-sqlite.stdout.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "86fbe2dc0ed3db94432fcd8b5495879d9faafa09d852c1820dc19796bdacad77"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/08_compile_fault-sqlite.resources.jsonl",
+      "bytes": 1610,
+      "sha256": "7a52722bfd98c07c76b54d61fd94cda19bb7dd7241308dee856402cea7aa2d3a",
+      "git_path": "records/misplaced-write-validation-v2/08_compile_fault-sqlite.resources.jsonl.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "2e2f19b3a6df09dff28a5328c57e44b7400240ec624a26f13259b1ace33937ad"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/08_compile_fault-sqlite.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/misplaced-write-validation-v2/08_compile_fault-sqlite.stderr.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/08_compile_fault-sqlite.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/misplaced-write-validation-v2/08_compile_fault-sqlite.stdout.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/09_compile_fault-pager.resources.jsonl",
+      "bytes": 966,
+      "sha256": "d57d017a6f7caa99d640caa970265fe3bf9381c7e8bd0b7f59c6810303e0a503",
+      "git_path": "records/misplaced-write-validation-v2/09_compile_fault-pager.resources.jsonl.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "51f933acf84cf213101e12d3fb4ec5dd7b059fe1f851ba06451042102821aa92"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/09_compile_fault-pager.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/misplaced-write-validation-v2/09_compile_fault-pager.stderr.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/09_compile_fault-pager.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/misplaced-write-validation-v2/09_compile_fault-pager.stdout.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/10_compile_restart-sqlite.resources.jsonl",
+      "bytes": 1932,
+      "sha256": "7d893edc70877f50323b4be7212398deb48d5797a74523b39cffc1e87a785193",
+      "git_path": "records/misplaced-write-validation-v2/10_compile_restart-sqlite.resources.jsonl.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "1663cc85f639ae5882dea7b3563e3429e2d9ffd2f21db09cf2e72f7807789e63"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/10_compile_restart-sqlite.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/misplaced-write-validation-v2/10_compile_restart-sqlite.stderr.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/10_compile_restart-sqlite.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/misplaced-write-validation-v2/10_compile_restart-sqlite.stdout.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/11_nm_fault-sqlite.resources.jsonl",
+      "bytes": 644,
+      "sha256": "b1d915c777f59199fb9ed86bb734882d6875ae2cc5d07f2e4577270254c80dcf",
+      "git_path": "records/misplaced-write-validation-v2/11_nm_fault-sqlite.resources.jsonl.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f741e9eeb2c127b9c9c5af89d1046b0bd26fad77be534bcdd7598ce038d8cf59"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/11_nm_fault-sqlite.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/misplaced-write-validation-v2/11_nm_fault-sqlite.stderr.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/11_nm_fault-sqlite.stdout",
+      "bytes": 668926,
+      "sha256": "00e59fd20894c9f18c14cd8531b43ea1bc88d7db5cc989ab14f9d1e92b510983",
+      "git_path": "records/misplaced-write-validation-v2/11_nm_fault-sqlite.stdout.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "c2a827a6a3c9a135916c1b2327a962af59d49b78c7ce2cd02d169723020affc8"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/12_nm_fault-pager.resources.jsonl",
+      "bytes": 644,
+      "sha256": "8759e8c8b74d6331302ece2651fc9978e9ad2b9defc2ed4db5a9a73d8ce4d7f0",
+      "git_path": "records/misplaced-write-validation-v2/12_nm_fault-pager.resources.jsonl.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "2c34b212ebf9907cd3affbad52366e5d050b925942320c04e682fb240e674e40"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/12_nm_fault-pager.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/misplaced-write-validation-v2/12_nm_fault-pager.stderr.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/12_nm_fault-pager.stdout",
+      "bytes": 450463,
+      "sha256": "38b65661654dc2666ec5e96c00f718866e047f7b8dacc1eee513ed8b74e526d4",
+      "git_path": "records/misplaced-write-validation-v2/12_nm_fault-pager.stdout.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "48ba98f789ba79020641f3e53300737125a02c2f2fdcb08ed732525f571fd8e0"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/13_nm_restart-sqlite.resources.jsonl",
+      "bytes": 644,
+      "sha256": "98d1e9629f0750574b33e7b847b909185a73d634c2c44db83b60d040e72ba14f",
+      "git_path": "records/misplaced-write-validation-v2/13_nm_restart-sqlite.resources.jsonl.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "235b50cfcdd863a8f835d95047c30127340d7724901183277166586b2a4940e7"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/13_nm_restart-sqlite.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_path": "records/misplaced-write-validation-v2/13_nm_restart-sqlite.stderr.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/13_nm_restart-sqlite.stdout",
+      "bytes": 678240,
+      "sha256": "75d555bd580d521eb394305cb0a71bb01d3fa0f4b30907500d8bcfdc20105991",
+      "git_path": "records/misplaced-write-validation-v2/13_nm_restart-sqlite.stdout.gz",
+      "encoding": "gzip",
+      "compressed_sha256": "5188a27fc2dbef59bc6e8ac65fd0d7953600e5e8b433c61b0679452cdece93f2"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/completion.json",
+      "bytes": 168665,
+      "sha256": "95cda0695d3096b2e6b15961f0d5b52c8991176aa645f86701801f2ad6ae1fd8",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/fault-pager.test",
+      "bytes": 10836333,
+      "sha256": "618fc6b07f18f7ce309b1c74af5b8e8ea51196791cb57f6f63e993e7ff65bb93",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/fault-sqlite.test",
+      "bytes": 16710250,
+      "sha256": "81214cd458936e1089655ae17d2bac384702e24083d3f9d4e17d8a57811b9071",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/restart-sqlite.test",
+      "bytes": 17304731,
+      "sha256": "48f9345d29fcce0c94a60eee4cc3435c712d8f439d1c5095f225f7e105e09b78",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/source-before.json",
+      "bytes": 663304,
+      "sha256": "bc62cc27b00c7830b308ea39c14a1c1dab73016feda08d591670ab6a33490550",
+      "reason": "large historical metadata, duplicate source snapshot or nonexecuted compile artifact retained in full archive"
+    }
+  ]
+}

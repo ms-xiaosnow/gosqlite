@@ -1,0 +1,10 @@
+{
+  "name": "06_sourceguard",
+  "start_utc": "2026-10-12T22:47:19.344326+00:00",
+  "end_utc": "2026-10-12T22:47:29.347538+00:00",
+  "exit_code": 1,
+  "resource_breach_latched": false,
+  "observer_error": null,
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "e2568de2f140a3ee15d6e3ea25b8a0c9509c57c886415d7397299ba7f45e273c"
+}

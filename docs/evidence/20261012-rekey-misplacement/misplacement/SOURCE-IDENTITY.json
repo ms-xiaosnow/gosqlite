@@ -1,0 +1,28 @@
+{
+  "base_commit": "01c63e6f8fb3d9e196afe2f42a163eb3eac4ad5a",
+  "candidate_tree": "cdcce9e3145d7811b0448b4f02d21e71dbe32345",
+  "prior_r5_tree": "8751a3bed18341a299c060ff494c437d5176b024",
+  "files": {
+    "docs/testing/rollback-fault-adapter-zh.md": "e0e683b7e2c57c31980a606c4ccf9abf5263cdd96e6c5f887b690390012afe60",
+    "docs/testing/rollback-fault-sql-manual-zh.md": "8ddd2eac317c52b365bd82ba515487e0067a4c7931f410254fea16a271e682d7",
+    "internal/pager/rollback_fault_sql_manual_linux.go": "9847b258f401c52c8748b2e380a8b96e33eda64567a38edd1833f16df188431a",
+    "internal/pager/rollback_io_manual_linux.go": "1e15ab58e49a4d6eedd72274e20c59f644546609f61a19d96e588688eb0c5940",
+    "internal/testkit/rollbackfault/contract.go": "dff18faca43a384de7ec37aedee877d30320823e540be71c7486d3ff5a24198d",
+    "internal/testkit/rollbackfault/contract_test.go": "3de6db2bb1cfd222a04af78c9f0b88c5b5dfefb163ef63967ec44ed6ee417993",
+    "internal/testkit/rollbackfault/sql_ledger.go": "96def5b6a7545f7e7f8e9e2acaf16e540237cfa2bccd92875b7961560e328267",
+    "internal/testkit/rollbackfault/sql_ledger_test.go": "07083e68442522330edae5a562e74b2e6d901a9429c846b196737e02b5d7d469",
+    "internal/testscope/rollback_fault.go": "bb3d93fea9959906fff0093d320fecac1d7dbfae58cb4a6221012b4a8fc04448",
+    "internal/testscope/rollback_fault_sql.go": "d5ff12fe8bb17e4976b17561762de95f0086fa927c601ee815e50dcf23e51468",
+    "internal/testscope/rollback_fault_sql_test.go": "39457022d5a8de687a2418ba627f675d69fc0028d0d0ec953c3fbefe840cfbf0",
+    "internal/testscope/rollback_fault_test.go": "259a3060ddeea65e2933dde29fcb3d9539a0efc48f3e1249be43575321b28dfb",
+    "sqlite/rollback_fault_sql_manual_linux_test.go": "78464b9d6f948be4d1efc0686f8b57a17f1a0ae530081230edc7c553d996bf09"
+  },
+  "source_review_sha256": "facb10a83ac7f7007f0537e18179d4be71680a04d120f8dff71f706c8b11fcba",
+  "format_manifest_sha256": "fae80cd29f7a027839d7429e954056b0956c6d7a772a5ae22c5d80f50d949a0e",
+  "main_pin_seams": {
+    "internal/testscope/rollback_fault_sql_test.go": "preserved reviewedR5wholemainpin; nootherWdelta",
+    "internal/testscope/rollback_fault_test.go": "preserved reviewedR5wholemainpin; nootherWdelta"
+  },
+  "prior_candidate_tree": "02e421a5c803175d5497ce2e3603b9ac2b6de724",
+  "reason": "Fix observed stalecase10partition expectation and bind3oldrecoverymutants to exactRecoverRollback call; production/nativeunchanged."
+}

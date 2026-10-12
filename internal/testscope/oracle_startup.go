@@ -234,7 +234,7 @@ func inspectOracleSource(path string, raw []byte) ([]string, error) {
 					report(sel.Pos(), "unreviewed os/exec error-type reference")
 				}
 			default:
-				if oracleApprovedNativeCall(path, sel, parents, set, raw) || restartGuardProcessReference(path, sel, parents, set, raw) {
+				if oracleApprovedNativeCall(path, sel, parents, set, raw) || restartGuardProcessReference(path, sel, parents, set, raw) || rekeyGuardProcessReference(path, sel, parents, set, raw) {
 					nativeCount++
 				} else {
 					report(sel.Pos(), "os/exec reference "+sel.Sel.Name+" must use testoracle.ForTest")

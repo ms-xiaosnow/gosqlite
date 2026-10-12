@@ -159,7 +159,7 @@ func TestRollbackFaultGuardWiringPreservesPriorPolicies(t *testing.T) {
 	}
 	// This exact literal is subject to independent whole-file source review.
 	// The map value alone cannot authorize a changed main.go.
-	const reviewedMainSHA256 = "6dbab48ff374858bfafe578f0fca99f5176ced7b6bdc008bec04ce6a6d1d0eb2"
+	const reviewedMainSHA256 = "1d9f41ed857bf64a3d2913f96fee3409a173f036df753efd81a7a9190ee2536a"
 	if walPublicationFrozenSources["internal/testscope/main.go"] != reviewedMainSHA256 {
 		t.Fatal("main.go WAL pin differs from independently reviewed literal")
 	}
@@ -172,5 +172,57 @@ func TestRollbackFaultGuardWiringPreservesPriorPolicies(t *testing.T) {
 	changed := append(append([]byte(nil), raw...), []byte("\n// unreviewed main.go change\n")...)
 	if findings := inspectWALPublicationFrozenSource("internal/testscope/main.go", changed); len(findings) == 0 {
 		t.Fatal("unreviewed main.go comment accepted by existing WAL source guard")
+	}
+}
+
+// Repin both layers. Only the independent closed semantic decision can reject.
+func TestRollbackFaultMisplacementDoubleRepinnedCounterexamples(t *testing.T) {
+	sources := rollbackFaultSources(t)
+	variants := []struct{ name, path, old, replacement, finding string }{
+		{"actual correct offset", rollbackFaultManual, "w.file.WriteAt(b, nativeOffset)", "w.file.WriteAt(b, off)", "fixed misplaced-write WriteAt"},
+		{"actual plus64", rollbackFaultManual, "nativeOffset := off - 64", "nativeOffset := off + 64", "fixed misplaced-write WriteAt"},
+		{"reported offset reconstructed from plan", rollbackFaultManual, "s.misplacedWrite = w.misplaced", "s.misplacedWrite = w.misplaced; s.misplacedWrite.NativeOffset = spec.Target.Offset - 64", "fixed misplaced-write rollbackWrite"},
+		{"actual 64-byte write", rollbackFaultManual, "w.file.WriteAt(b, nativeOffset)", "w.file.WriteAt(b[:64], nativeOffset)", "fixed misplaced-write WriteAt"},
+		{"native call fabricated", rollbackFaultManual, "w.nativeN, w.nativeErr = w.file.WriteAt(b, nativeOffset)", "w.nativeN, w.nativeErr = 4096, nil", "fixed misplaced-write WriteAt"},
+		{"native retry", rollbackFaultManual, "w.nativeN, w.nativeErr = w.file.WriteAt(b, nativeOffset)", "w.nativeN, w.nativeErr = w.file.WriteAt(b, nativeOffset); w.nativeN, w.nativeErr = w.file.WriteAt(b, nativeOffset)", "fixed misplaced-write WriteAt"},
+		{"actual payload hash forged", rollbackFaultManual, "w.misplaced.PayloadSHA256 = sha256.Sum256(b)", "w.misplaced.PayloadSHA256 = [32]byte{44}", "fixed misplaced-write WriteAt"},
+		{"native count forged", rollbackFaultManual, "w.misplaced.NativeCalls++", "w.misplaced.NativeCalls = 1", "fixed misplaced-write WriteAt"},
+		{"injection dropped", rollbackFaultManual, "if w.nativeErr == nil && w.nativeN == 4096 {\n\t\t\tw.returnedErr = errRollbackFaultInjected", "if w.nativeErr == nil && w.nativeN == 4096 {\n\t\t\tw.returnedErr = nil", "fixed misplaced-write WriteAt"},
+		{"native errno masked", rollbackFaultManual, "if w.nativeErr == nil && w.nativeN == 4096 {", "if w.nativeN == 4096 {", "fixed misplaced-write WriteAt"},
+		{"short native injection", rollbackFaultManual, "if w.nativeErr == nil && w.nativeN == 4096 {", "if w.nativeErr == nil {", "fixed misplaced-write WriteAt"},
+		{"wrong extent accepted", rollbackFaultManual, "t.info.Size() != 12288", "t.info.Size() < 12288", "fixed misplaced-write armRollbackFault"},
+		{"actual pages not exact", rollbackFaultManual, "t.originalPages != 3 || t.header.PageCount != 3", "t.originalPages > 3 || t.header.PageCount > 3", "fixed misplaced-write armRollbackFault"},
+		{"journal originals reordered admitted", rollbackFaultManual, "originals[1] != 2 || originals[2] != 3", "originals[1] != 3 || originals[2] != 2", "fixed misplaced-write armRollbackFault"},
+		{"index kind unchecked", rollbackFaultManual, "t.dirty[3][0] != 10", "false", "fixed misplaced-write armRollbackFault"},
+		{"requested call overwritten", rollbackFaultManual, "s.misplacedWrite = w.misplaced", "s.misplacedWrite = w.misplaced; ticket.call.Offset = w.misplaced.NativeOffset", "fixed misplaced-write rollbackWrite"},
+		{"second observation admitted", rollbackFaultManual, "s.misplacedWrite != (rollbackfault.SQLMisplacedWrite{}) ||", "false ||", "fixed misplaced-write rollbackWrite"},
+		{"used registry cleared", rollbackFaultManual, "rollbackFaultRegistry.used = true", "rollbackFaultRegistry.used = false", "fixed misplaced-write armRollbackFault"},
+		{"A5 after core order", rollbackFaultManual, "rollbackFaultAfterCore(ticket, executed, nativeN, nativeErr, returnedN, returnedErr, normalizedErr, effect)\n\trollbackRestartAfter(ticket)", "rollbackRestartAfter(ticket)\n\trollbackFaultAfterCore(ticket, executed, nativeN, nativeErr, returnedN, returnedErr, normalizedErr, effect)", "fixed misplaced-write rollbackFaultAfter"},
+		{"A5 core deferred unlock changed", rollbackFaultManual, "defer s.mu.Unlock()\n\tresult := rollbackfault.Result", "s.mu.Unlock()\n\tresult := rollbackfault.Result", "fixed misplaced-write rollbackFaultAfterCore"},
+		{"model arbitrary placement admission", rollbackFaultContract, "spec.Action == MisplaceIndexPageMinus64 && !validMisplacedIndexPlan(spec)", "false", "fixed misplaced-write NewPlan"},
+		{"model two dirty pages admitted", rollbackFaultContract, "spec.DirtyPages != 3", "spec.DirtyPages > 3", "fixed misplaced-write validMisplacedIndexPlan"},
+		{"model native original cause masked", rollbackFaultContract, "result.ReturnedErrorToken != result.NativeErrorToken", "false", "fixed misplaced-write validResult"},
+		{"model no injected result", rollbackFaultContract, "result.NativeN != 4096 || result.ReturnedN != 4096 || result.ReturnedError != Injected", "result.NativeN != 4096 || result.ReturnedN != 4096 || result.ReturnedError != None", "fixed misplaced-write validResult"},
+	}
+	for _, variant := range variants {
+		t.Run(variant.name, func(t *testing.T) {
+			original := string(sources[variant.path])
+			if !strings.Contains(original, variant.old) {
+				t.Fatal("misplacement mutation anchor missing", variant.name)
+			}
+			changed := []byte(strings.Replace(original, variant.old, variant.replacement, 1))
+			pin, shape := rollbackFaultPins[variant.path], rollbackFaultOwnedShapes[variant.path]
+			rollbackFaultPins[variant.path] = fmt.Sprintf("%x", sha256.Sum256(changed))
+			rollbackFaultOwnedShapes[variant.path] = string(changed)
+			t.Cleanup(func() { rollbackFaultPins[variant.path], rollbackFaultOwnedShapes[variant.path] = pin, shape })
+			findings, err := inspectRollbackFaultSource(variant.path, changed)
+			if err != nil {
+				t.Fatal("misplacement mutant must parse", err)
+			}
+			joined := strings.Join(findings, "\n")
+			if !strings.Contains(joined, variant.finding) || strings.Contains(joined, "complete-source pin changed") || strings.Contains(joined, "source binding/body/order changed") {
+				t.Fatal("independent misplacement rejection missing", variant.name, findings)
+			}
+		})
 	}
 }

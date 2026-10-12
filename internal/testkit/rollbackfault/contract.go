@@ -64,6 +64,7 @@ const (
 	Pass Action = iota
 	FailBefore
 	PrefixShortWrite
+	MisplaceIndexPageMinus64
 )
 
 type Call struct {
@@ -172,13 +173,16 @@ func NewPlan(spec PlanSpec) (Plan, Problem) {
 	if spec.PageSize != 4096 || spec.SectorSize != 4096 || spec.OriginalPages < 1 || spec.OriginalPages > 4 || spec.DirtyPages < 1 || spec.DirtyPages > 4 || spec.OriginalPages > spec.DirtyPages {
 		return Plan{}, ProblemGeometry
 	}
-	if spec.Action > PrefixShortWrite || (spec.Action != PrefixShortWrite && (spec.Prefix != 0 || spec.PrefixError)) {
+	if (spec.Action != Pass && spec.Action != FailBefore && spec.Action != PrefixShortWrite && spec.Action != MisplaceIndexPageMinus64) || (spec.Action != PrefixShortWrite && (spec.Prefix != 0 || spec.PrefixError)) {
 		return Plan{}, ProblemAction
 	}
 	if spec.Target.Point < JournalCreate || spec.Target.Point > FinalDirectorySync || spec.Target.Occurrence == 0 {
 		return Plan{}, ProblemTarget
 	}
 	if spec.Action == PrefixShortWrite && (!writePoint(spec.Target.Point) || spec.Prefix < 0 || spec.Prefix >= spec.Target.Length) {
+		return Plan{}, ProblemAction
+	}
+	if spec.Action == MisplaceIndexPageMinus64 && !validMisplacedIndexPlan(spec) {
 		return Plan{}, ProblemAction
 	}
 	if spec.ExpectedCommit != expectedCommit(spec) {
@@ -191,6 +195,20 @@ func NewPlan(spec PlanSpec) (Plan, Problem) {
 	// Freeze only these already validated bytes, never the caller's storage.
 	spec.Identity = copyIdentity(spec.Identity)
 	return Plan{spec: spec, valid: true}, ProblemNone
+}
+
+// This action is one closed three-page SQL geometry, never an offset API.
+// OriginalPages counts journal images; the native armer checks actual extent.
+func validMisplacedIndexPlan(spec PlanSpec) bool {
+	if spec.OriginalPages != 3 || spec.DirtyPages != 3 || spec.PageSize != 4096 || spec.SectorSize != 4096 || spec.Prefix != 0 || spec.PrefixError || spec.CallCount != 15 || spec.ExpectedCommit != CommitRecoveryRequired || spec.Target != (Call{Point: DBPage, Occurrence: 3, Role: Database, Offset: 8192, Length: 4096, Owner: spec.MainOwner}) {
+		return false
+	}
+	for i := 0; i < 3; i++ {
+		if spec.Calls[2+2*i] != (Call{Point: DBOriginalRead, Occurrence: uint8(i + 1), Role: Database, Offset: int64(i) * 4096, Length: 4096, Owner: spec.MainOwner}) || spec.Calls[12+i] != (Call{Point: DBPage, Occurrence: uint8(i + 1), Role: Database, Offset: int64(i) * 4096, Length: 4096, Owner: spec.MainOwner}) {
+			return false
+		}
+	}
+	return true
 }
 
 func copyIdentity(id Identity) Identity {
@@ -711,6 +729,12 @@ func validResult(spec PlanSpec, call Call, action Action, result Result) Problem
 			return ProblemErrorMasked
 		}
 		if action == PrefixShortWrite && result.NativeN > spec.Prefix {
+			return ProblemNativeResult
+		}
+		return ProblemNone
+	}
+	if action == MisplaceIndexPageMinus64 {
+		if result.NativeN != 4096 || result.ReturnedN != 4096 || result.ReturnedError != Injected || result.NormalizedError != Injected || result.Effect != EffectPossible {
 			return ProblemNativeResult
 		}
 		return ProblemNone

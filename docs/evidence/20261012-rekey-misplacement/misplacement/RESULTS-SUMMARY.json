@@ -1,0 +1,1131 @@
+{
+  "schema": 1,
+  "created_utc": "2026-10-12T23:10:07.513699+00:00",
+  "base_commit": "01c63e6f8fb3d9e196afe2f42a163eb3eac4ad5a",
+  "final_candidate_tree": "cdcce9e3145d7811b0448b4f02d21e71dbe32345",
+  "final_source_file_count": 13,
+  "final_validation_completed_utc": "2026-10-12T23:04:54.335454+00:00",
+  "final_V2_gates": 13,
+  "final_V2_status": "PASS",
+  "historical_failed_gates": 1,
+  "historical_failed_roots": 2,
+  "historical_named_fail_events": 5,
+  "manual_image_executed": false,
+  "physical": "NOT_RUN",
+  "compiled_images": [
+    {
+      "path": "records/misplaced-write-validation-v2/fault-sqlite.test",
+      "bytes": 16710250,
+      "sha256": "81214cd458936e1089655ae17d2bac384702e24083d3f9d4e17d8a57811b9071",
+      "required_symbols": 452,
+      "image_executed": false
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/fault-pager.test",
+      "bytes": 10836333,
+      "sha256": "618fc6b07f18f7ce309b1c74af5b8e8ea51196791cb57f6f63e993e7ff65bb93",
+      "required_symbols": 156,
+      "image_executed": false
+    },
+    {
+      "path": "records/misplaced-write-validation-v2/restart-sqlite.test",
+      "bytes": 17304731,
+      "sha256": "48f9345d29fcce0c94a60eee4cc3435c712d8f439d1c5095f225f7e105e09b78",
+      "required_symbols": 455,
+      "image_executed": false
+    }
+  ],
+  "gates": [
+    {
+      "run": "misplaced-write-validation",
+      "gate": "01_format",
+      "command_record": "records/misplaced-write-validation/commands.json",
+      "status": "PASS",
+      "exit_code": 0,
+      "start_utc": "2026-10-12T22:56:28.579907+00:00",
+      "end_utc": "2026-10-12T22:56:30.584182+00:00",
+      "result_record": "records/misplaced-write-validation/01_format.result.json",
+      "resource_breach_latched": false,
+      "observer_error": null
+    },
+    {
+      "run": "misplaced-write-validation",
+      "gate": "02_normal",
+      "command_record": "records/misplaced-write-validation/commands.json",
+      "status": "FAIL",
+      "exit_code": 1,
+      "start_utc": "2026-10-12T22:56:31.002990+00:00",
+      "end_utc": "2026-10-12T22:56:53.014516+00:00",
+      "result_record": "records/misplaced-write-validation/02_normal.result.json",
+      "resource_breach_latched": false,
+      "observer_error": null,
+      "test_events": {
+        "named": {
+          "pass": 2413,
+          "fail": 5,
+          "skip": 0
+        },
+        "root_counts": {
+          "pass": 89,
+          "fail": 2,
+          "skip": 0
+        },
+        "roots": {
+          "pass": [
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackFaultAcknowledgementAndRecoveryLedgersRemainUnproven"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackFaultBoundedStorageCannotOverflowOrBecomeNewTrial"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackFaultCleanupIsCompleteAndObservationOnly"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackFaultEveryIdentityFieldRejectsOversizedRetention"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackFaultEveryTruncationAndOutOfOrderEventFailsClosed"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackFaultFiniteActionsAreAdapterObservationOnly"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackFaultFourPageManifestUsesPerPointOccurrences"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackFaultIdentityRejectionKeepsFirstMarkerAndDetachedSnapshot"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackFaultLargeBackedValidSubstringsPreserveAdmittedValues"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackFaultMisplacementAdmissionIsExact"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackFaultMisplacementNativeResultsKeepOriginalError"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackFaultOwnersAndLogicalClosureAreIndependent"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackFaultPhysicalEvidenceCannotBeManufactured"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackFaultPlanRejectsMalformedFrozenSelectors"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackFaultRejectionMarkerAndMetadataCannotQualify"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackFaultResultNormalizationAndEffectClaimsFailClosed"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackFaultStaleIdentityAndBadProfileUseBoundedMarkers"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackFaultStaleIdentityAndMismatchedCallFailClosed"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackFaultUncertainAndUnqualifiedCommitNeverPass"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackFaultUnderlyingErrorNeverBecomesExpectedInjection"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackFaultValueCopiesAndStickyTerminal"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackRecoveryHashBindsFullNestedPlanAndEventPayload"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackRecoveryNestedTranscriptEveryTruncationOmissionDuplicateAndOrder"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackRecoveryRejectsCasePlanAndProvenanceFalsePass"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackRecoveryRejectsCommitAndAdapterFalsePass"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackRecoveryRejectsRecoveryReadbackOwnerAndTerminalFalsePass"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackRecoveryRejectsRetainedInputAndReplayFalsePass"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackRecoverySyntheticConsistencyNeverPhysicalPass"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerAllSevenCasesRequireExactPublicFailureFlags"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerAllSevenQueriesRequireEOFCheckAndRetiredOwners"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerBindsSourceToolBinaryManifestTrialAndScopeEverywhere"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerLiteralExpectationsAndQueriesAreDetached"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerMisplacementRequiresCompleteOldAndActualEvidence"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerOldNineCasesRequireZeroMisplacement"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerPlansFreezeThreePageSelectorsAndLimits"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerPostDBFailuresFreezeSkippedTargetAndPublicationPrefix"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerPostDBFailuresRejectTraceAndClassificationConfusion"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerPostDBFailuresRequireNewCopyAndExactRecoveryDecision"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerPreDBFailuresFreezeSkippedTargetAndNormalCleanup"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerPreDBFailuresRejectPlanTargetAndCleanupConfusion"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerPreDBFailuresRequireBaselineCopiesAndZeroRecovery"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerPrefixErrorFreezesNativeAndAdapterReturns"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerPrefixErrorRejectsPlanAndReceiptConfusion"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerPrefixErrorRequiresCompleteOldReplayAndOwners"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerRejectsLogicalMixturesAndEqualCountWrongMembers"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerRejectsOtherwiseAdmittedNonFrozenFaultPlans"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerRejectsPlanClaimsWithoutActualIndexWorkAndIndependentScans"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerRequiresCheckHashesAndExactRecoveryEvidence"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerRequiresEOFErrOnceCloseAndIndependentRetiredOwners"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerRetainsOriginalsAndRejectsAliasedOrMixedReplayArtifacts"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerRevalidatesReceiptRatherThanTrustingAnObservation"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerSnapshotAdmissionRejectsBeforeCommitMismatches"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerThreeFrozenScenariosRemainObservationOnly"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackrestart",
+              "root": "TestRestartAcknowledgementRequiresExactCausalDurability"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackrestart",
+              "root": "TestRestartCanonicalBoundedFraming"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackrestart",
+              "root": "TestRestartCompleteSuiteRejectsMissingDuplicateAndReuse"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackrestart",
+              "root": "TestRestartExactSQLSnapshotFalsePositives"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackrestart",
+              "root": "TestRestartExactlyFiveCasesAndEighteenCalls"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackrestart",
+              "root": "TestRestartFiveCompleteValueTranscripts"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackrestart",
+              "root": "TestRestartFrozenProtocolBudgetAndDetachedReceipt"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackrestart",
+              "root": "TestRestartIncompleteLivenessAndStickyFailure"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackrestart",
+              "root": "TestRestartNewGenerationCanReuseLocalOrdinalsAndPID"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackrestart",
+              "root": "TestRestartPlanIdentityAndClosedValues"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackrestart",
+              "root": "TestRestartRejectsOwnerRecoveryAndArtifactFalsePositives"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackrestart",
+              "root": "TestRestartRejectsProtocolAndAdapterFalsePositives"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackrestart",
+              "root": "TestRestartUnderlyingResultAndIdentityFailuresRemainRaw"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackFaultGuardWiringPreservesPriorPolicies"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackFaultMisplacementDoubleRepinnedCounterexamples"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackFaultOutsideConsumersRejected"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackFaultRepinnedSemanticCounterexamples"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackFaultSQLOrdinaryCompanionFailures"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackFaultSQLOrdinaryExampleFields"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackFaultSQLOrdinaryExamplesKeepModelBoundary"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackFaultSQLOrdinaryFieldBindingsReject"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackFaultSQLOrdinaryRecoveryExceptionIsOneReference"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackFaultSQLOutsideConsumersAndOldEntriesRejected"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackFaultSQLSourceContracts"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackFaultSQLWiringAndMainReviewHold"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackFaultSourceContracts"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackRestartDoubleRepinnedCommandCapabilityClosure"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackRestartDoubleRepinnedLaunchInputClosure"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackRestartDoubleRepinnedModelCausalCounterexamples"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackRestartDoubleRepinnedNativeProtocolCounterexamples"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackRestartDoubleRepinnedSelectionAndStubCounterexamples"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackRestartOldCoreAndMutexWrapperStayExact"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackRestartOracleExceptionRequiresCompletePinnedNativeClosure"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackRestartOutsideConsumersAndAliasesRejected"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackRestartOwnedSourceContracts"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackRestartWiringPreservesAllPoliciesAndReviewHold"
+            }
+          ],
+          "fail": [
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerCasePartitionsUseOnlyExactIDs"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackFaultSQLRepinnedSemanticCounterexamples"
+            }
+          ],
+          "skip": []
+        },
+        "failed_named": [
+          {
+            "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+            "test": "TestSQLLedgerCasePartitionsUseOnlyExactIDs"
+          },
+          {
+            "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+            "test": "TestRollbackFaultSQLRepinnedSemanticCounterexamples/recovery_unbounded_journal"
+          },
+          {
+            "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+            "test": "TestRollbackFaultSQLRepinnedSemanticCounterexamples/recovery_extra_records"
+          },
+          {
+            "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+            "test": "TestRollbackFaultSQLRepinnedSemanticCounterexamples/recovery_wrong_extent"
+          },
+          {
+            "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+            "test": "TestRollbackFaultSQLRepinnedSemanticCounterexamples"
+          }
+        ]
+      }
+    },
+    {
+      "run": "misplaced-write-validation",
+      "gate": "03_race",
+      "command_record": "records/misplaced-write-validation/commands.json",
+      "status": "NOT_RUN"
+    },
+    {
+      "run": "misplaced-write-validation",
+      "gate": "04_sourceguard",
+      "command_record": "records/misplaced-write-validation/commands.json",
+      "status": "NOT_RUN"
+    },
+    {
+      "run": "misplaced-write-validation",
+      "gate": "05_list_fault-sqlite",
+      "command_record": "records/misplaced-write-validation/commands.json",
+      "status": "NOT_RUN"
+    },
+    {
+      "run": "misplaced-write-validation",
+      "gate": "06_list_fault-pager",
+      "command_record": "records/misplaced-write-validation/commands.json",
+      "status": "NOT_RUN"
+    },
+    {
+      "run": "misplaced-write-validation",
+      "gate": "07_list_restart-sqlite",
+      "command_record": "records/misplaced-write-validation/commands.json",
+      "status": "NOT_RUN"
+    },
+    {
+      "run": "misplaced-write-validation",
+      "gate": "08_compile_fault-sqlite",
+      "command_record": "records/misplaced-write-validation/commands.json",
+      "status": "NOT_RUN"
+    },
+    {
+      "run": "misplaced-write-validation",
+      "gate": "09_compile_fault-pager",
+      "command_record": "records/misplaced-write-validation/commands.json",
+      "status": "NOT_RUN"
+    },
+    {
+      "run": "misplaced-write-validation",
+      "gate": "10_compile_restart-sqlite",
+      "command_record": "records/misplaced-write-validation/commands.json",
+      "status": "NOT_RUN"
+    },
+    {
+      "run": "misplaced-write-validation",
+      "gate": "11_nm_fault-sqlite",
+      "command_record": "records/misplaced-write-validation/commands.json",
+      "status": "NOT_RUN"
+    },
+    {
+      "run": "misplaced-write-validation",
+      "gate": "12_nm_fault-pager",
+      "command_record": "records/misplaced-write-validation/commands.json",
+      "status": "NOT_RUN"
+    },
+    {
+      "run": "misplaced-write-validation",
+      "gate": "13_nm_restart-sqlite",
+      "command_record": "records/misplaced-write-validation/commands.json",
+      "status": "NOT_RUN"
+    },
+    {
+      "run": "misplaced-write-validation-v2",
+      "gate": "01_format",
+      "command_record": "records/misplaced-write-validation-v2/commands.json",
+      "status": "PASS",
+      "exit_code": 0,
+      "start_utc": "2026-10-12T23:01:34.734594+00:00",
+      "end_utc": "2026-10-12T23:01:36.736241+00:00",
+      "result_record": "records/misplaced-write-validation-v2/01_format.result.json",
+      "resource_breach_latched": false,
+      "observer_error": null
+    },
+    {
+      "run": "misplaced-write-validation-v2",
+      "gate": "02_normal",
+      "command_record": "records/misplaced-write-validation-v2/commands.json",
+      "status": "PASS",
+      "exit_code": 0,
+      "start_utc": "2026-10-12T23:01:37.090621+00:00",
+      "end_utc": "2026-10-12T23:01:49.099728+00:00",
+      "result_record": "records/misplaced-write-validation-v2/02_normal.result.json",
+      "resource_breach_latched": false,
+      "observer_error": null,
+      "test_events": {
+        "named": {
+          "pass": 235,
+          "fail": 0,
+          "skip": 0
+        },
+        "root_counts": {
+          "pass": 2,
+          "fail": 0,
+          "skip": 0
+        },
+        "roots": {
+          "pass": [
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerCasePartitionsUseOnlyExactIDs"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackFaultSQLRepinnedSemanticCounterexamples"
+            }
+          ],
+          "fail": [],
+          "skip": []
+        },
+        "failed_named": []
+      }
+    },
+    {
+      "run": "misplaced-write-validation-v2",
+      "gate": "03_race",
+      "command_record": "records/misplaced-write-validation-v2/commands.json",
+      "status": "PASS",
+      "exit_code": 0,
+      "start_utc": "2026-10-12T23:01:49.540782+00:00",
+      "end_utc": "2026-10-12T23:04:03.691186+00:00",
+      "result_record": "records/misplaced-write-validation-v2/03_race.result.json",
+      "resource_breach_latched": false,
+      "observer_error": null,
+      "test_events": {
+        "named": {
+          "pass": 2418,
+          "fail": 0,
+          "skip": 0
+        },
+        "root_counts": {
+          "pass": 91,
+          "fail": 0,
+          "skip": 0
+        },
+        "roots": {
+          "pass": [
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackFaultAcknowledgementAndRecoveryLedgersRemainUnproven"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackFaultBoundedStorageCannotOverflowOrBecomeNewTrial"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackFaultCleanupIsCompleteAndObservationOnly"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackFaultEveryIdentityFieldRejectsOversizedRetention"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackFaultEveryTruncationAndOutOfOrderEventFailsClosed"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackFaultFiniteActionsAreAdapterObservationOnly"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackFaultFourPageManifestUsesPerPointOccurrences"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackFaultIdentityRejectionKeepsFirstMarkerAndDetachedSnapshot"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackFaultLargeBackedValidSubstringsPreserveAdmittedValues"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackFaultMisplacementAdmissionIsExact"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackFaultMisplacementNativeResultsKeepOriginalError"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackFaultOwnersAndLogicalClosureAreIndependent"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackFaultPhysicalEvidenceCannotBeManufactured"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackFaultPlanRejectsMalformedFrozenSelectors"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackFaultRejectionMarkerAndMetadataCannotQualify"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackFaultResultNormalizationAndEffectClaimsFailClosed"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackFaultStaleIdentityAndBadProfileUseBoundedMarkers"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackFaultStaleIdentityAndMismatchedCallFailClosed"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackFaultUncertainAndUnqualifiedCommitNeverPass"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackFaultUnderlyingErrorNeverBecomesExpectedInjection"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackFaultValueCopiesAndStickyTerminal"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackRecoveryHashBindsFullNestedPlanAndEventPayload"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackRecoveryNestedTranscriptEveryTruncationOmissionDuplicateAndOrder"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackRecoveryRejectsCasePlanAndProvenanceFalsePass"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackRecoveryRejectsCommitAndAdapterFalsePass"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackRecoveryRejectsRecoveryReadbackOwnerAndTerminalFalsePass"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackRecoveryRejectsRetainedInputAndReplayFalsePass"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestRollbackRecoverySyntheticConsistencyNeverPhysicalPass"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerAllSevenCasesRequireExactPublicFailureFlags"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerAllSevenQueriesRequireEOFCheckAndRetiredOwners"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerBindsSourceToolBinaryManifestTrialAndScopeEverywhere"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerCasePartitionsUseOnlyExactIDs"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerLiteralExpectationsAndQueriesAreDetached"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerMisplacementRequiresCompleteOldAndActualEvidence"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerOldNineCasesRequireZeroMisplacement"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerPlansFreezeThreePageSelectorsAndLimits"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerPostDBFailuresFreezeSkippedTargetAndPublicationPrefix"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerPostDBFailuresRejectTraceAndClassificationConfusion"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerPostDBFailuresRequireNewCopyAndExactRecoveryDecision"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerPreDBFailuresFreezeSkippedTargetAndNormalCleanup"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerPreDBFailuresRejectPlanTargetAndCleanupConfusion"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerPreDBFailuresRequireBaselineCopiesAndZeroRecovery"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerPrefixErrorFreezesNativeAndAdapterReturns"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerPrefixErrorRejectsPlanAndReceiptConfusion"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerPrefixErrorRequiresCompleteOldReplayAndOwners"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerRejectsLogicalMixturesAndEqualCountWrongMembers"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerRejectsOtherwiseAdmittedNonFrozenFaultPlans"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerRejectsPlanClaimsWithoutActualIndexWorkAndIndependentScans"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerRequiresCheckHashesAndExactRecoveryEvidence"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerRequiresEOFErrOnceCloseAndIndependentRetiredOwners"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerRetainsOriginalsAndRejectsAliasedOrMixedReplayArtifacts"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerRevalidatesReceiptRatherThanTrustingAnObservation"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerSnapshotAdmissionRejectsBeforeCommitMismatches"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault",
+              "root": "TestSQLLedgerThreeFrozenScenariosRemainObservationOnly"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackrestart",
+              "root": "TestRestartAcknowledgementRequiresExactCausalDurability"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackrestart",
+              "root": "TestRestartCanonicalBoundedFraming"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackrestart",
+              "root": "TestRestartCompleteSuiteRejectsMissingDuplicateAndReuse"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackrestart",
+              "root": "TestRestartExactSQLSnapshotFalsePositives"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackrestart",
+              "root": "TestRestartExactlyFiveCasesAndEighteenCalls"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackrestart",
+              "root": "TestRestartFiveCompleteValueTranscripts"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackrestart",
+              "root": "TestRestartFrozenProtocolBudgetAndDetachedReceipt"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackrestart",
+              "root": "TestRestartIncompleteLivenessAndStickyFailure"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackrestart",
+              "root": "TestRestartNewGenerationCanReuseLocalOrdinalsAndPID"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackrestart",
+              "root": "TestRestartPlanIdentityAndClosedValues"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackrestart",
+              "root": "TestRestartRejectsOwnerRecoveryAndArtifactFalsePositives"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackrestart",
+              "root": "TestRestartRejectsProtocolAndAdapterFalsePositives"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackrestart",
+              "root": "TestRestartUnderlyingResultAndIdentityFailuresRemainRaw"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackFaultGuardWiringPreservesPriorPolicies"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackFaultMisplacementDoubleRepinnedCounterexamples"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackFaultOutsideConsumersRejected"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackFaultRepinnedSemanticCounterexamples"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackFaultSQLOrdinaryCompanionFailures"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackFaultSQLOrdinaryExampleFields"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackFaultSQLOrdinaryExamplesKeepModelBoundary"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackFaultSQLOrdinaryFieldBindingsReject"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackFaultSQLOrdinaryRecoveryExceptionIsOneReference"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackFaultSQLOutsideConsumersAndOldEntriesRejected"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackFaultSQLRepinnedSemanticCounterexamples"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackFaultSQLSourceContracts"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackFaultSQLWiringAndMainReviewHold"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackFaultSourceContracts"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackRestartDoubleRepinnedCommandCapabilityClosure"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackRestartDoubleRepinnedLaunchInputClosure"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackRestartDoubleRepinnedModelCausalCounterexamples"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackRestartDoubleRepinnedNativeProtocolCounterexamples"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackRestartDoubleRepinnedSelectionAndStubCounterexamples"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackRestartOldCoreAndMutexWrapperStayExact"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackRestartOracleExceptionRequiresCompletePinnedNativeClosure"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackRestartOutsideConsumersAndAliasesRejected"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackRestartOwnedSourceContracts"
+            },
+            {
+              "package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+              "root": "TestRollbackRestartWiringPreservesAllPoliciesAndReviewHold"
+            }
+          ],
+          "fail": [],
+          "skip": []
+        },
+        "failed_named": []
+      }
+    },
+    {
+      "run": "misplaced-write-validation-v2",
+      "gate": "04_sourceguard",
+      "command_record": "records/misplaced-write-validation-v2/commands.json",
+      "status": "PASS",
+      "exit_code": 0,
+      "start_utc": "2026-10-12T23:04:04.441942+00:00",
+      "end_utc": "2026-10-12T23:04:16.534912+00:00",
+      "result_record": "records/misplaced-write-validation-v2/04_sourceguard.result.json",
+      "resource_breach_latched": false,
+      "observer_error": null
+    },
+    {
+      "run": "misplaced-write-validation-v2",
+      "gate": "05_list_fault-sqlite",
+      "command_record": "records/misplaced-write-validation-v2/commands.json",
+      "status": "PASS",
+      "exit_code": 0,
+      "start_utc": "2026-10-12T23:04:16.904242+00:00",
+      "end_utc": "2026-10-12T23:04:18.905546+00:00",
+      "result_record": "records/misplaced-write-validation-v2/05_list_fault-sqlite.result.json",
+      "resource_breach_latched": false,
+      "observer_error": null,
+      "selection_summary": {
+        "target": "fault-sqlite",
+        "manual_executed": false
+      }
+    },
+    {
+      "run": "misplaced-write-validation-v2",
+      "gate": "06_list_fault-pager",
+      "command_record": "records/misplaced-write-validation-v2/commands.json",
+      "status": "PASS",
+      "exit_code": 0,
+      "start_utc": "2026-10-12T23:04:19.293736+00:00",
+      "end_utc": "2026-10-12T23:04:21.295135+00:00",
+      "result_record": "records/misplaced-write-validation-v2/06_list_fault-pager.result.json",
+      "resource_breach_latched": false,
+      "observer_error": null,
+      "selection_summary": {
+        "target": "fault-pager",
+        "manual_executed": false
+      }
+    },
+    {
+      "run": "misplaced-write-validation-v2",
+      "gate": "07_list_restart-sqlite",
+      "command_record": "records/misplaced-write-validation-v2/commands.json",
+      "status": "PASS",
+      "exit_code": 0,
+      "start_utc": "2026-10-12T23:04:21.685753+00:00",
+      "end_utc": "2026-10-12T23:04:23.687317+00:00",
+      "result_record": "records/misplaced-write-validation-v2/07_list_restart-sqlite.result.json",
+      "resource_breach_latched": false,
+      "observer_error": null,
+      "selection_summary": {
+        "target": "restart-sqlite",
+        "manual_executed": false
+      }
+    },
+    {
+      "run": "misplaced-write-validation-v2",
+      "gate": "08_compile_fault-sqlite",
+      "command_record": "records/misplaced-write-validation-v2/commands.json",
+      "status": "PASS",
+      "exit_code": 0,
+      "start_utc": "2026-10-12T23:04:24.078875+00:00",
+      "end_utc": "2026-10-12T23:04:32.083385+00:00",
+      "result_record": "records/misplaced-write-validation-v2/08_compile_fault-sqlite.result.json",
+      "resource_breach_latched": false,
+      "observer_error": null
+    },
+    {
+      "run": "misplaced-write-validation-v2",
+      "gate": "09_compile_fault-pager",
+      "command_record": "records/misplaced-write-validation-v2/commands.json",
+      "status": "PASS",
+      "exit_code": 0,
+      "start_utc": "2026-10-12T23:04:32.449420+00:00",
+      "end_utc": "2026-10-12T23:04:36.451232+00:00",
+      "result_record": "records/misplaced-write-validation-v2/09_compile_fault-pager.result.json",
+      "resource_breach_latched": false,
+      "observer_error": null
+    },
+    {
+      "run": "misplaced-write-validation-v2",
+      "gate": "10_compile_restart-sqlite",
+      "command_record": "records/misplaced-write-validation-v2/commands.json",
+      "status": "PASS",
+      "exit_code": 0,
+      "start_utc": "2026-10-12T23:04:36.816231+00:00",
+      "end_utc": "2026-10-12T23:04:46.820972+00:00",
+      "result_record": "records/misplaced-write-validation-v2/10_compile_restart-sqlite.result.json",
+      "resource_breach_latched": false,
+      "observer_error": null
+    },
+    {
+      "run": "misplaced-write-validation-v2",
+      "gate": "11_nm_fault-sqlite",
+      "command_record": "records/misplaced-write-validation-v2/commands.json",
+      "status": "PASS",
+      "exit_code": 0,
+      "start_utc": "2026-10-12T23:04:47.211618+00:00",
+      "end_utc": "2026-10-12T23:04:49.212873+00:00",
+      "result_record": "records/misplaced-write-validation-v2/11_nm_fault-sqlite.result.json",
+      "resource_breach_latched": false,
+      "observer_error": null,
+      "symbols": {
+        "required": 452,
+        "exact_root_set": true,
+        "image_sha256": "81214cd458936e1089655ae17d2bac384702e24083d3f9d4e17d8a57811b9071",
+        "image_executed": false
+      }
+    },
+    {
+      "run": "misplaced-write-validation-v2",
+      "gate": "12_nm_fault-pager",
+      "command_record": "records/misplaced-write-validation-v2/commands.json",
+      "status": "PASS",
+      "exit_code": 0,
+      "start_utc": "2026-10-12T23:04:49.657478+00:00",
+      "end_utc": "2026-10-12T23:04:51.658861+00:00",
+      "result_record": "records/misplaced-write-validation-v2/12_nm_fault-pager.result.json",
+      "resource_breach_latched": false,
+      "observer_error": null,
+      "symbols": {
+        "required": 156,
+        "exact_root_set": true,
+        "image_sha256": "618fc6b07f18f7ce309b1c74af5b8e8ea51196791cb57f6f63e993e7ff65bb93",
+        "image_executed": false
+      }
+    },
+    {
+      "run": "misplaced-write-validation-v2",
+      "gate": "13_nm_restart-sqlite",
+      "command_record": "records/misplaced-write-validation-v2/commands.json",
+      "status": "PASS",
+      "exit_code": 0,
+      "start_utc": "2026-10-12T23:04:52.052614+00:00",
+      "end_utc": "2026-10-12T23:04:54.054943+00:00",
+      "result_record": "records/misplaced-write-validation-v2/13_nm_restart-sqlite.result.json",
+      "resource_breach_latched": false,
+      "observer_error": null,
+      "symbols": {
+        "required": 455,
+        "exact_root_set": true,
+        "image_sha256": "48f9345d29fcce0c94a60eee4cc3435c712d8f439d1c5095f225f7e105e09b78",
+        "image_executed": false
+      }
+    }
+  ]
+}

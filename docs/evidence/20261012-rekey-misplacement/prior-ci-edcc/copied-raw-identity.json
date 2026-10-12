@@ -1,0 +1,66 @@
+{
+  "README.zh.md": {
+    "bytes": 2415,
+    "sha256": "370f7557fc67bb0b5756656a79cf957638d571e8d8bdd1cd4b9e3944f62b9229"
+  },
+  "oracle-115026774110.decoded.log": {
+    "bytes": 21902,
+    "sha256": "625b6edf1a5f6074f80a95c962dc604659a4c8022d72e59d25fdc31af7f960f6"
+  },
+  "bundle-restore-result.json": {
+    "bytes": 1295,
+    "sha256": "cdfb649a084b41face7d924c77126e8d7b7e7e80c6189ef358fc85e3a5391ca8"
+  },
+  "archive-library.json": {
+    "bytes": 670,
+    "sha256": "f82adef293edfcee2a12b73a9a073373f752eb513e49c675d02974e221a652ec"
+  },
+  "library-verification.json": {
+    "bytes": 441,
+    "sha256": "4aed907dd988ce4af801b260789fba460ae1a7259695b584e0fa86584194ce15"
+  },
+  "terminal-metadata.json": {
+    "bytes": 21634,
+    "sha256": "1a503abe79a701fe1eca3b0c5744781946d02190bab232d246334223069c0a02"
+  },
+  "bundle-library.json": {
+    "bytes": 638,
+    "sha256": "074fa1367e5124e88c27ae6ac41d20be582a43d8e6aa9c3820269c3bd8769a97"
+  },
+  "oracle-log-scan.json": {
+    "bytes": 484,
+    "sha256": "52918fc8e6016ff42c0c6f9b9dab06b8ff778bf83f44e16850ef1e1702e05a9a"
+  },
+  "ordinary-115026774139.decoded.log": {
+    "bytes": 25277,
+    "sha256": "5a69219984bbc2e03cad852726b9ebf1088c95f1de645a2631237e8d1d04e51d"
+  },
+  "source-snapshot-manifest.json": {
+    "bytes": 1449,
+    "sha256": "30dfaa5ffac6a639bc5dbaded1d489490feb8dc85e6b6f671720d898a4d01c5f"
+  },
+  "ci-evidence.json": {
+    "bytes": 10540,
+    "sha256": "05de2147bbd7e6cd872caeb52c9292b85c11b152ec6ec906a293597dc306f76f"
+  },
+  "archive-verification.json": {
+    "bytes": 293,
+    "sha256": "cee2750689d6a9a385a87fd48b70dc0c6252483a6cceafe034c9cba1c61e8e15"
+  },
+  "source-snapshot/scripts/test-oracle.sh": {
+    "bytes": 2769,
+    "sha256": "b8e3e443a3fbe17b96526cfdb22b6a297dedf0eac2d9c3063cd7f9da05a64f79"
+  },
+  "source-snapshot/scripts/build-oracle.sh": {
+    "bytes": 4723,
+    "sha256": "0826180e18c7e67bd3ab35b0b534409578932adba13041b8e5b1e32fb43cca66"
+  },
+  "source-snapshot/scripts/check.sh": {
+    "bytes": 365,
+    "sha256": "55851844f35325b38fbd368558af4e229d5bfe7c42928685e57dd799274b8f18"
+  },
+  "source-snapshot/.github/workflows/check.yml": {
+    "bytes": 929,
+    "sha256": "58dee6239ef272454efb7f45a220de5c7a75839f6449002a4ed176f858304f64"
+  }
+}

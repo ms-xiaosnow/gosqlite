@@ -1,0 +1,178 @@
+{
+  "base_commit": "01c63e6f8fb3d9e196afe2f42a163eb3eac4ad5a",
+  "candidate_tree": "165bd1e232e41f57b5f6a22e0657b86104e4901e",
+  "files": {
+    "docs/testing/rekey-interruption-manual-zh.md": "25baafd77286649973669711218f8c6d1ffdc1ce434ae4a4315664ac503e8ce8",
+    "internal/encstore/publish.go": "d4a3d5f2cfb99e2413dbd271f113cc2b08203a4635ef10638bc43ff022d2fc29",
+    "internal/encstore/rekey_interruption_manual_linux.go": "f6ec88c3c6d0e8c1bb40b1e514414e0fe0fc05b029919ebf80231cba67e64819",
+    "internal/encstore/rekey_observation.go": "5328be5bb42fb4207331d24d8c7bc157d37244836c24384a72b01ed26f68fbcc",
+    "internal/encstore/rekey_observation_default.go": "0c44d0577df486ca116b3f332a71f45e34e58367df64e112dba8387c2dfe51bb",
+    "internal/testkit/rekeyinterruption/contract.go": "b9a179e2ca3f82678842f86a3e330b52cc916097408ccc1716fa74ebf08a0e02",
+    "internal/testkit/rekeyinterruption/contract_test.go": "ac32dd1977e8283aa66dec82f66f2635125ef0d16ef52c321303ee3d9e847159",
+    "internal/testscope/encrypted_root_negative.go": "78828cfc0b5b4a0cd594119d29eb828006ecf75250922d4753b12254670e577f",
+    "internal/testscope/encryption_upgrade_manual.go": "4b9ba0f8912ff953db3bc01a286aac3b8be29315506b2b4ab9fdfdd940bf550f",
+    "internal/testscope/main.go": "1d9f41ed857bf64a3d2913f96fee3409a173f036df753efd81a7a9190ee2536a",
+    "internal/testscope/oracle_startup.go": "0e480e214568b935c16c34ef9226f7ef2c86fce81151ebe09aa91087a62ec6a4",
+    "internal/testscope/readonly_wal_manual.go": "2c4c667a1a31e0d8efb341f2b94a03c011189fca44fa2349248814af1b19f389",
+    "internal/testscope/readonly_wal_manual_test.go": "8a7af77ba419ed25908148ec9e076a249c766b6e33a46b0853e69d54d572f35e",
+    "internal/testscope/rekey_interruption.go": "7146988730aa2012027573f19589a92840d6a1ec417db225192f70d96797bf11",
+    "internal/testscope/rekey_interruption_test.go": "5ee5c4178d8141fef7d7068e0728f99c7b86fdc948238a8417bbad3ef4d1ac73",
+    "internal/testscope/rollback_fault_sql_test.go": "a13a82fd127d81eb7df85eb0286f156f575ae0a17417d2c33a6127388dce0d7d",
+    "internal/testscope/rollback_fault_test.go": "79dea110d8eb481b7d6e7f055ef8ff93e2f7032f19d370f3f5279ba255878dbb",
+    "internal/testscope/rollback_restart_test.go": "b5606806555cc53f36e5c130e3480e9609f2c0467470523402ff3e457c254a4e",
+    "internal/testscope/wal_tail_publication.go": "310b3fff4d5b4c5750929546e8eca8ca37a838aa897962a45f9d65bda02f8704",
+    "sqlite/rekey_interruption_manual_linux_test.go": "57eb002b233f902bc441743d880203e6762fdd18c7c15dc264a009f64e7dcaca"
+  },
+  "file_details": [
+    {
+      "path": "docs/testing/rekey-interruption-manual-zh.md",
+      "full_path": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/gosqlite/docs/testing/rekey-interruption-manual-zh.md",
+      "bytes": 12983,
+      "sha256": "25baafd77286649973669711218f8c6d1ffdc1ce434ae4a4315664ac503e8ce8"
+    },
+    {
+      "path": "internal/encstore/publish.go",
+      "full_path": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/gosqlite/internal/encstore/publish.go",
+      "bytes": 14815,
+      "sha256": "d4a3d5f2cfb99e2413dbd271f113cc2b08203a4635ef10638bc43ff022d2fc29"
+    },
+    {
+      "path": "internal/encstore/rekey_interruption_manual_linux.go",
+      "full_path": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/gosqlite/internal/encstore/rekey_interruption_manual_linux.go",
+      "bytes": 11984,
+      "sha256": "f6ec88c3c6d0e8c1bb40b1e514414e0fe0fc05b029919ebf80231cba67e64819"
+    },
+    {
+      "path": "internal/encstore/rekey_observation.go",
+      "full_path": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/gosqlite/internal/encstore/rekey_observation.go",
+      "bytes": 236,
+      "sha256": "5328be5bb42fb4207331d24d8c7bc157d37244836c24384a72b01ed26f68fbcc"
+    },
+    {
+      "path": "internal/encstore/rekey_observation_default.go",
+      "full_path": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/gosqlite/internal/encstore/rekey_observation_default.go",
+      "bytes": 181,
+      "sha256": "0c44d0577df486ca116b3f332a71f45e34e58367df64e112dba8387c2dfe51bb"
+    },
+    {
+      "path": "internal/testkit/rekeyinterruption/contract.go",
+      "full_path": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/gosqlite/internal/testkit/rekeyinterruption/contract.go",
+      "bytes": 48901,
+      "sha256": "b9a179e2ca3f82678842f86a3e330b52cc916097408ccc1716fa74ebf08a0e02"
+    },
+    {
+      "path": "internal/testkit/rekeyinterruption/contract_test.go",
+      "full_path": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/gosqlite/internal/testkit/rekeyinterruption/contract_test.go",
+      "bytes": 25020,
+      "sha256": "ac32dd1977e8283aa66dec82f66f2635125ef0d16ef52c321303ee3d9e847159"
+    },
+    {
+      "path": "internal/testscope/encrypted_root_negative.go",
+      "full_path": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/gosqlite/internal/testscope/encrypted_root_negative.go",
+      "bytes": 15570,
+      "sha256": "78828cfc0b5b4a0cd594119d29eb828006ecf75250922d4753b12254670e577f"
+    },
+    {
+      "path": "internal/testscope/encryption_upgrade_manual.go",
+      "full_path": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/gosqlite/internal/testscope/encryption_upgrade_manual.go",
+      "bytes": 26592,
+      "sha256": "4b9ba0f8912ff953db3bc01a286aac3b8be29315506b2b4ab9fdfdd940bf550f"
+    },
+    {
+      "path": "internal/testscope/main.go",
+      "full_path": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/gosqlite/internal/testscope/main.go",
+      "bytes": 11580,
+      "sha256": "1d9f41ed857bf64a3d2913f96fee3409a173f036df753efd81a7a9190ee2536a"
+    },
+    {
+      "path": "internal/testscope/oracle_startup.go",
+      "full_path": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/gosqlite/internal/testscope/oracle_startup.go",
+      "bytes": 11306,
+      "sha256": "0e480e214568b935c16c34ef9226f7ef2c86fce81151ebe09aa91087a62ec6a4"
+    },
+    {
+      "path": "internal/testscope/readonly_wal_manual.go",
+      "full_path": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/gosqlite/internal/testscope/readonly_wal_manual.go",
+      "bytes": 84407,
+      "sha256": "2c4c667a1a31e0d8efb341f2b94a03c011189fca44fa2349248814af1b19f389"
+    },
+    {
+      "path": "internal/testscope/readonly_wal_manual_test.go",
+      "full_path": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/gosqlite/internal/testscope/readonly_wal_manual_test.go",
+      "bytes": 49916,
+      "sha256": "8a7af77ba419ed25908148ec9e076a249c766b6e33a46b0853e69d54d572f35e"
+    },
+    {
+      "path": "internal/testscope/rekey_interruption.go",
+      "full_path": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/gosqlite/internal/testscope/rekey_interruption.go",
+      "bytes": 291997,
+      "sha256": "7146988730aa2012027573f19589a92840d6a1ec417db225192f70d96797bf11"
+    },
+    {
+      "path": "internal/testscope/rekey_interruption_test.go",
+      "full_path": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/gosqlite/internal/testscope/rekey_interruption_test.go",
+      "bytes": 10939,
+      "sha256": "5ee5c4178d8141fef7d7068e0728f99c7b86fdc948238a8417bbad3ef4d1ac73"
+    },
+    {
+      "path": "internal/testscope/rollback_fault_sql_test.go",
+      "full_path": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/gosqlite/internal/testscope/rollback_fault_sql_test.go",
+      "bytes": 65601,
+      "sha256": "a13a82fd127d81eb7df85eb0286f156f575ae0a17417d2c33a6127388dce0d7d"
+    },
+    {
+      "path": "internal/testscope/rollback_fault_test.go",
+      "full_path": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/gosqlite/internal/testscope/rollback_fault_test.go",
+      "bytes": 14393,
+      "sha256": "79dea110d8eb481b7d6e7f055ef8ff93e2f7032f19d370f3f5279ba255878dbb"
+    },
+    {
+      "path": "internal/testscope/rollback_restart_test.go",
+      "full_path": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/gosqlite/internal/testscope/rollback_restart_test.go",
+      "bytes": 62443,
+      "sha256": "b5606806555cc53f36e5c130e3480e9609f2c0467470523402ff3e457c254a4e"
+    },
+    {
+      "path": "internal/testscope/wal_tail_publication.go",
+      "full_path": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/gosqlite/internal/testscope/wal_tail_publication.go",
+      "bytes": 23786,
+      "sha256": "310b3fff4d5b4c5750929546e8eca8ca37a838aa897962a45f9d65bda02f8704"
+    },
+    {
+      "path": "sqlite/rekey_interruption_manual_linux_test.go",
+      "full_path": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/gosqlite/sqlite/rekey_interruption_manual_linux_test.go",
+      "bytes": 71315,
+      "sha256": "57eb002b233f902bc441743d880203e6762fdd18c7c15dc264a009f64e7dcaca"
+    }
+  ],
+  "models_preserved": {
+    "internal/testkit/rekeyinterruption/contract.go": "b9a179e2ca3f82678842f86a3e330b52cc916097408ccc1716fa74ebf08a0e02",
+    "internal/testkit/rekeyinterruption/contract_test.go": "ac32dd1977e8283aa66dec82f66f2635125ef0d16ef52c321303ee3d9e847159"
+  },
+  "final_main_sha256": "1d9f41ed857bf64a3d2913f96fee3409a173f036df753efd81a7a9190ee2536a",
+  "ordinary_function_sha256": "98341345e43f39b39dbc78eaf49a916a0701f3d7f2f383d4949b9a3ed439d199",
+  "scoped_files": 20,
+  "new_source_docs_files_integrated": 12,
+  "exact_old_main_pin_owners_updated": 6,
+  "supplemental_R5_pins_released": 9,
+  "snapshot_sources_synchronized": 9,
+  "gofmt": {
+    "path": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/toolchains/go1.27.2/bin/gofmt",
+    "sha256": "5583dbb3339147fee7cdb067eb3cd4a50015b48c27084377f49d93833aa4ad77",
+    "invocations": 1,
+    "files": 11,
+    "exit_code": 0,
+    "serialization_lock": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/go-queue.lock"
+  },
+  "validation_this_integration": {
+    "Go_tests": "NOT_RUN",
+    "Go_parser_or_scanner_execution": "NOT_RUN_EXCEPT_AUTHORIZED_GOFMT",
+    "compiler": "NOT_RUN",
+    "source_selection": "NOT_RUN",
+    "source_guard": "NOT_RUN",
+    "native_fixture_wrongkey_process_exit_archive_restore_physical": "NOT_RUN"
+  },
+  "independent_narrow_format_pin_review": "PENDING",
+  "git_commit": "NOT_CREATED",
+  "remote_action": "NONE"
+}

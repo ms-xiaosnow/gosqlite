@@ -1,0 +1,117 @@
+{
+  "final_candidate_tree": "8751a3bed18341a299c060ff494c437d5176b024",
+  "policy": "Actual historical PASS and FAIL remain unchanged. Reuse is identified explicitly; it is not a fresh final-tree full-suite run.",
+  "legacy_AST": {
+    "root_count": 54,
+    "roots": [
+      "TestEncryptedRootFalsePassSourcesEvenWhenRepinned",
+      "TestEncryptedRootFiniteStructure",
+      "TestEncryptedRootPinsRequireIndependentRelease",
+      "TestEncryptedRootWholeSourceAndCapabilityBoundary",
+      "TestFormatUpgradeMainKeepsExistingPolicies",
+      "TestFormatUpgradeManualStructuralCounterexamples",
+      "TestFormatUpgradePureClosureCounterexamples",
+      "TestOracleSourceConstructorGuard",
+      "TestOracleSourceFactoryLiteralGuard",
+      "TestOracleSourceImportAndMutationGuard",
+      "TestOracleSourceNativeExceptionGuard",
+      "TestOracleSourcePathScope",
+      "TestReadOnlyWALManualDefaultExclusion",
+      "TestReadOnlyWALManualEffectBoundaryMutations",
+      "TestReadOnlyWALManualGateAndProfileMutations",
+      "TestReadOnlyWALManualOwnershipMutations",
+      "TestReadOnlyWALManualPureClosureMutations",
+      "TestReadOnlyWALManualSourceContract",
+      "TestReadOnlyWALManualWholeRootInventory",
+      "TestRollbackFaultGuardWiringPreservesPriorPolicies",
+      "TestRollbackFaultOutsideConsumersRejected",
+      "TestRollbackFaultRepinnedSemanticCounterexamples",
+      "TestRollbackFaultSQLOrdinaryCompanionFailures",
+      "TestRollbackFaultSQLOrdinaryExampleFields",
+      "TestRollbackFaultSQLOrdinaryExamplesKeepModelBoundary",
+      "TestRollbackFaultSQLOrdinaryFieldBindingsReject",
+      "TestRollbackFaultSQLOrdinaryRecoveryExceptionIsOneReference",
+      "TestRollbackFaultSQLOutsideConsumersAndOldEntriesRejected",
+      "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+      "TestRollbackFaultSQLSourceContracts",
+      "TestRollbackFaultSQLWiringAndMainReviewHold",
+      "TestRollbackFaultSourceContracts",
+      "TestRollbackRestartDoubleRepinnedCommandCapabilityClosure",
+      "TestRollbackRestartDoubleRepinnedLaunchInputClosure",
+      "TestRollbackRestartDoubleRepinnedModelCausalCounterexamples",
+      "TestRollbackRestartDoubleRepinnedNativeProtocolCounterexamples",
+      "TestRollbackRestartDoubleRepinnedSelectionAndStubCounterexamples",
+      "TestRollbackRestartOldCoreAndMutexWrapperStayExact",
+      "TestRollbackRestartOracleExceptionRequiresCompletePinnedNativeClosure",
+      "TestRollbackRestartOutsideConsumersAndAliasesRejected",
+      "TestRollbackRestartOwnedSourceContracts",
+      "TestRollbackRestartWiringPreservesAllPoliciesAndReviewHold",
+      "TestScopeSourceReferenceGuard",
+      "TestWALPublicationGuardElapsedRejectsTimingAndQualificationDrift",
+      "TestWALPublicationGuardElapsedSourceIsInertAndPinned",
+      "TestWALPublicationGuardExactCallBoundaries",
+      "TestWALPublicationGuardFakeFactoryIsExactSource",
+      "TestWALPublicationGuardFixedSourceAndWiring",
+      "TestWALPublicationGuardManualSourceIsExactAndDoubleGated",
+      "TestWALPublicationGuardProductionBoundariesAreRequired",
+      "TestWALPublicationGuardPureFilesRejectNativeAliasesAndVariables",
+      "TestWALPublicationGuardRejectsActivationReferences",
+      "TestWALPublicationGuardRejectsControlFlowAndFactoryDrift",
+      "TestWALPublicationGuardSafeControls"
+    ],
+    "normal": "rekey-guard-validation/02_guard_normal.stdout",
+    "race": "rekey-guard-validation-v2/03_guard_race.stdout",
+    "basis": "Across V1/V2 to V3 only the two new R5 model files and two R5 guard/test files differ in the complete recorded source manifests. Legacy source/test roots are unchanged. Scope fix and model-name fixes have independent bounded reviews; V3 reruns the affected seven R5 roots normal/race and the whole sourceguard."
+  },
+  "healthy_default": {
+    "root_count": 2,
+    "evidence": "rekey-guard-validation-v2/05_healthy_default.result.json",
+    "basis": "Final four-file correction does not change healthy default production/observer source; retain V2 PASS as reused, not rerun."
+  },
+  "early_model": {
+    "normal": "rekey-model-validation/02_normal.result.json",
+    "race": "rekey-guard-validation-v2/04_model_race.result.json",
+    "status": "HISTORICAL_PASS_OLD_NAMES",
+    "semantic_identity": "Exact byte comparison of final model files against preserved before files succeeds after only SQLPlan→RekeyQueryPlan and SQLQueryText→RekeyQueryText substitutions. This is not counted as current-name evidence; both eight-root model modes were rerun in V3."
+  },
+  "final_R5": {
+    "AST_normal": "rekey-guard-validation-v3/02_guard_normal.result.json",
+    "AST_race": "rekey-guard-validation-v3/03_guard_race.result.json",
+    "models_normal": "rekey-guard-validation-v3/04_model_normal.result.json",
+    "models_race": "rekey-guard-validation-v3/04b_model_race.result.json"
+  },
+  "source_manifest_comparisons": [
+    {
+      "run": "rekey-guard-validation",
+      "source_before_sha256": "7f2b36b60bf957f4edd64b068c1434c10ed0ccb971ab9811f23ad9330f782cb8",
+      "changed_paths_vs_final_recorded_source": [
+        "internal/testkit/rekeyinterruption/contract.go",
+        "internal/testkit/rekeyinterruption/contract_test.go",
+        "internal/testscope/rekey_interruption.go",
+        "internal/testscope/rekey_interruption_test.go"
+      ]
+    },
+    {
+      "run": "rekey-guard-validation-v2",
+      "source_before_sha256": "9f69145489ce2d479dd6779c7f208a80e944c5bfc3ce759e7619f26fe8cef0cb",
+      "changed_paths_vs_final_recorded_source": [
+        "internal/testkit/rekeyinterruption/contract.go",
+        "internal/testkit/rekeyinterruption/contract_test.go",
+        "internal/testscope/rekey_interruption.go",
+        "internal/testscope/rekey_interruption_test.go"
+      ]
+    },
+    {
+      "run": "rekey-guard-validation-v3",
+      "source_before_sha256": "b2b4e4ee54ca99f84664246ba5162536280bd4f6c2541e52a1a42fbf542371c0",
+      "changed_paths_vs_final_recorded_source": []
+    }
+  ],
+  "not_run": [
+    "manual image execution",
+    "physical six-case rekey interruption matrix",
+    "native wrong-key probes / process-exit crash scenarios",
+    "full repository test suite in this preservation task",
+    "new Go, native, parser, sourceguard or compilation invocation in this preservation task"
+  ]
+}

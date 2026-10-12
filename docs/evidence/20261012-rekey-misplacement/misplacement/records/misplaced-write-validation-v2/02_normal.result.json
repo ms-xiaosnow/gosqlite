@@ -1,0 +1,33 @@
+{
+  "name": "02_normal",
+  "start_utc": "2026-10-12T23:01:37.090621+00:00",
+  "end_utc": "2026-10-12T23:01:49.099728+00:00",
+  "exit_code": 0,
+  "resource_breach_latched": false,
+  "observer_error": null,
+  "stdout_sha256": "3976876d4fbd654d67379951b6b8680d3fad1fb51d6c791b88b033736e3757b3",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "tests": {
+    "github.com/ms-xiaosnow/gosqlite/internal/testkit/rollbackfault": {
+      "roots": [
+        "TestSQLLedgerCasePartitionsUseOnlyExactIDs"
+      ],
+      "root_count": 1,
+      "named_pass": 1,
+      "child_pass": 0,
+      "fail": 0,
+      "skip": 0
+    },
+    "github.com/ms-xiaosnow/gosqlite/internal/testscope": {
+      "roots": [
+        "TestRollbackFaultSQLRepinnedSemanticCounterexamples"
+      ],
+      "root_count": 1,
+      "named_pass": 234,
+      "child_pass": 233,
+      "fail": 0,
+      "skip": 0
+    }
+  },
+  "status": "PASS"
+}

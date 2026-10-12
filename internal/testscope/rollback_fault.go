@@ -33,10 +33,10 @@ var rollbackFaultPins = map[string]string{
 	rollbackFaultCommit:       "9ae36612afac5cfae48bd972e6162c94722bcf7355ea462b4e15289b5188aa32",
 	rollbackFaultPoints:       "e9f4349eac27fe2f2ee6726edeb3cd26e3f5e851e75ae342f2f3a7995f038905",
 	rollbackFaultDefault:      "f1d45680aa93940d9d181f01ecc40f5e88c258970c940a28b4f19df712182bd1",
-	rollbackFaultManual:       "4f26bfec0de7b3c22f056ec374a4c453691f5cd2a5ee5e62116f2f8c66b5e498",
+	rollbackFaultManual:       "1e15ab58e49a4d6eedd72274e20c59f644546609f61a19d96e588688eb0c5940",
 	rollbackFaultWriterTest:   "a7695da7b49488be37a98b239b1b31d59bc406455d0b3300709081fd96ae49c4",
-	rollbackFaultContract:     "dc7ec44ec7be3f444f4e7501c84d6875a1a0e9b4d46e06e5586b2e5d225828ed",
-	rollbackFaultContractTest: "8c43b22c2fbfdc6d4aef423abd44956196a2b15e223a8f56ef00065c8d77c362",
+	rollbackFaultContract:     "dff18faca43a384de7ec37aedee877d30320823e540be71c7486d3ff5a24198d",
+	rollbackFaultContractTest: "3de6db2bb1cfd222a04af78c9f0b88c5b5dfefb163ef63967ec44ed6ee417993",
 }
 
 var rollbackFaultPointIDs = map[string]string{
@@ -376,6 +376,395 @@ func inspectRollbackFaultOwned(path string, raw []byte, set *token.FileSet, file
 		findings = append(findings, rollbackFaultDeclarationShape(path, raw, set, file, expected)...)
 	} else {
 		report("missing closed declaration contract")
+	}
+	functions := readOnlyWALManualFunctions(file)
+	if path == rollbackFaultManual {
+		findings = append(findings, rollbackFaultSQLExactFunction(path, functions, "armRollbackFault", "fixed misplaced-write armRollbackFault semantics", `func armRollbackFault(t *Tx, plan rollbackfault.Plan) (*rollbackFaultScope, error) {
+	if os.Getenv("GOSQLITE_MANUAL_FAULT_ROLLBACK") != "independently_authorized" {
+		return nil, errRollbackFaultGate
+	}
+	if t == nil {
+		return nil, errRollbackFaultScope
+	}
+	spec := plan.Spec()
+	receipt, problem := rollbackfault.NewReceipt(plan)
+	if problem != rollbackfault.NoProblem {
+		return nil, errRollbackFaultScope
+	}
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	if t.session != nil || t.shared != nil || t.encrypted != nil || t.keepFile || t.borrowedCleanup != nil || t.readOnly || t.statement || t.poisoned != nil || t.file == nil || t.cleanup == nil || t.path == "" || t.info == nil {
+		return nil, errRollbackFaultScope
+	}
+	if t.header.PageSize != 4096 || t.opts.SectorSize != 4096 || t.header.ReadVersion != 1 || t.header.WriteVersion != 1 || t.originalPages == 0 || t.originalPages > 4 || t.header.PageCount == 0 || t.header.PageCount > 4 || len(t.dirty) == 0 || len(t.dirty) > 4 || len(t.dirty[1]) != 4096 {
+		return nil, errRollbackFaultScope
+	}
+	for page, data := range t.dirty {
+		if page == 0 || page > t.header.PageCount || len(data) != 4096 {
+			return nil, errRollbackFaultScope
+		}
+	}
+	dirty := sortedPages(t.dirty)
+	originals := t.journalPages(dirty)
+	if len(originals) == 0 || len(originals) > 4 || int(spec.OriginalPages) != len(originals) || int(spec.DirtyPages) != len(dirty) {
+		return nil, errRollbackFaultScope
+	}
+	if spec.Action == rollbackfault.MisplaceIndexPageMinus64 {
+		if t.info.Size() != 12288 || t.originalPages != 3 || t.header.PageCount != 3 || len(dirty) != 3 || dirty[0] != 1 || dirty[1] != 2 || dirty[2] != 3 || len(originals) != 3 || originals[0] != 1 || originals[1] != 2 || originals[2] != 3 || len(t.dirty[2]) != 4096 || len(t.dirty[3]) != 4096 || t.dirty[1][100] != 13 || t.dirty[2][0] != 13 || t.dirty[3][0] != 10 {
+			return nil, errRollbackFaultScope
+		}
+	}
+	// Bind the frozen manifest to this Tx's exact page order, not a similar path.
+	for i := 0; i < int(spec.CallCount); i++ {
+		call := spec.Calls[i]
+		if call.Point == rollbackfault.DBOriginalRead {
+			index := int(call.Occurrence) - 1
+			if index < 0 || index >= len(originals) || call.Offset != int64(originals[index]-1)*4096 {
+				return nil, errRollbackFaultScope
+			}
+		}
+		if call.Point == rollbackfault.DBPage {
+			index := int(call.Occurrence) - 1
+			if index < 0 || index >= len(dirty) || call.Offset != int64(dirty[index]-1)*4096 {
+				return nil, errRollbackFaultScope
+			}
+		}
+	}
+	g := t.cleanup
+	g.mu.Lock()
+	main, concrete := g.main.(plainFile)
+	healthy := concrete && main.file == t.file && !g.started && !g.done && g.cause == nil && g.pending.Load() == nil && g.temporary == nil && !g.temporaryReserved && !g.temporaryRequested && g.wal == nil && !g.walReserved && !g.walRequested && len(g.nested) == 0
+	g.mu.Unlock()
+	if !healthy || t.file.RetirementComplete() {
+		return nil, errRollbackFaultScope
+	}
+	s := &rollbackFaultScope{tx: t, main: t.file, cleanup: g, plan: plan, receipt: receipt}
+	s.append(rollbackfault.Event{Kind: rollbackfault.RunStarted})
+	if s.problem != nil {
+		return nil, s.problem
+	}
+	// Admission contains no owner queries and no native operation.
+	rollbackFaultRegistry.mu.Lock()
+	defer rollbackFaultRegistry.mu.Unlock()
+	if rollbackFaultRegistry.used || rollbackFaultRegistry.active != nil {
+		return nil, errRollbackFaultScope
+	}
+	rollbackFaultRegistry.used = true
+	rollbackFaultRegistry.active = s
+	return s, nil
+}`)...)
+		findings = append(findings, rollbackFaultSQLExactFunction(path, functions, "WriteAt", "fixed misplaced-write WriteAt semantics", `func (w *rollbackFaultWriter) WriteAt(b []byte, off int64) (int, error) {
+	if w.action == rollbackfault.MisplaceIndexPageMinus64 {
+		if off != 8192 || len(b) != 4096 || w.misplaced != (rollbackfault.SQLMisplacedWrite{}) {
+			w.returnedErr = errRollbackFaultScope
+			return 0, w.returnedErr
+		}
+		nativeOffset := off - 64
+		w.misplaced.RequestedOffset, w.misplaced.RequestedBytes = off, len(b)
+		w.misplaced.NativeOffset, w.misplaced.NativeBytes = nativeOffset, len(b)
+		w.misplaced.PayloadSHA256 = sha256.Sum256(b)
+		w.executed = true
+		w.misplaced.NativeCalls++
+		w.nativeN, w.nativeErr = w.file.WriteAt(b, nativeOffset)
+		w.returnedN, w.returnedErr = w.nativeN, w.nativeErr
+		if w.nativeErr == nil && w.nativeN == 4096 {
+			w.returnedErr = errRollbackFaultInjected
+		}
+		return w.returnedN, w.returnedErr
+	}
+	if w.action == rollbackfault.FailBefore {
+		w.returnedErr = errRollbackFaultInjected
+		return 0, w.returnedErr
+	}
+	write := b
+	if w.action == rollbackfault.PrefixShortWrite {
+		write = b[:w.prefix]
+	}
+	w.executed = true
+	w.nativeN, w.nativeErr = w.file.WriteAt(write, off)
+	w.returnedN, w.returnedErr = w.nativeN, w.nativeErr
+	if w.action == rollbackfault.PrefixShortWrite && w.nativeErr == nil && w.nativeN == w.prefix && w.prefixError {
+		w.returnedErr = errRollbackFaultInjected
+	}
+	return w.returnedN, w.returnedErr
+}`)...)
+		findings = append(findings, rollbackFaultSQLExactFunction(path, functions, "rollbackWrite", "fixed misplaced-write rollbackWrite semantics", `func rollbackWrite(t *Tx, point rollbackIOPoint, f *vfs.File, b []byte, off int64) error {
+	ticket := rollbackFaultBefore(t, point, f, "", off, len(b))
+	if ticket.scope == nil {
+		return writeFullAt(f, b, off)
+	}
+	spec := ticket.scope.plan.Spec()
+	w := &rollbackFaultWriter{file: f, action: ticket.action, prefix: spec.Prefix, prefixError: spec.PrefixError}
+	err := writeFullAt(w, b, off)
+	effect := rollbackfault.EffectPossible
+	if !w.executed {
+		effect = rollbackfault.EffectNone
+	} else if w.nativeErr != nil || w.nativeN < 0 || w.nativeN > len(b) {
+		effect = rollbackfault.EffectUnknown
+	} else if w.action == rollbackfault.PrefixShortWrite && w.nativeN == w.prefix && w.prefix == 0 {
+		effect = rollbackfault.EffectNone
+	} else if w.action == rollbackfault.PrefixShortWrite && w.nativeN == w.prefix {
+		effect = rollbackfault.EffectPrefix
+	}
+	if ticket.action == rollbackfault.MisplaceIndexPageMinus64 {
+		s := ticket.scope
+		s.mu.Lock()
+		if s.misplacedWrite != (rollbackfault.SQLMisplacedWrite{}) || !s.inFlight || ticket.call != spec.Target || ticket.call.Point != rollbackfault.DBPage || ticket.call.Occurrence != 3 || ticket.call.Owner != spec.MainOwner || ticket.call.Role != rollbackfault.Database || ticket.call.Offset != 8192 || ticket.call.Length != 4096 || w.misplaced.RequestedOffset != ticket.call.Offset || w.misplaced.RequestedBytes != ticket.call.Length || w.misplaced.NativeOffset != 8128 || w.misplaced.NativeBytes != 4096 || w.misplaced.NativeCalls != 1 {
+			s.problem = errRollbackFaultScope
+		} else {
+			s.misplacedWrite = w.misplaced
+		}
+		s.mu.Unlock()
+	}
+	rollbackFaultAfter(ticket, w.executed, w.nativeN, w.nativeErr, w.returnedN, w.returnedErr, err, effect)
+	return err
+}`)...)
+		findings = append(findings, rollbackFaultSQLExactFunction(path, functions, "disarmRollbackFault", "fixed misplaced-write disarmRollbackFault semantics", `func disarmRollbackFault(s *rollbackFaultScope) error {
+	if s == nil {
+		return errRollbackFaultScope
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if !s.finalized || !s.retired || s.problem != nil || s.receipt.Seal().Outcome != rollbackfault.AdapterObserved {
+		return errRollbackFaultScope
+	}
+	rollbackFaultRegistry.mu.Lock()
+	defer rollbackFaultRegistry.mu.Unlock()
+	if rollbackFaultRegistry.active != s {
+		return errRollbackFaultScope
+	}
+	rollbackFaultRegistry.active = nil
+	// used remains true. Pending/unknown owners never reach this assignment.
+	return nil
+}`)...)
+		findings = append(findings, rollbackFaultSQLExactFunction(path, functions, "rollbackFaultBefore", "fixed misplaced-write rollbackFaultBefore semantics", `func rollbackFaultBefore(t *Tx, point rollbackIOPoint, f *vfs.File, path string, off int64, length int) rollbackFaultTicket {
+	ticket := rollbackFaultBeforeCore(t, point, f, path, off, length)
+	rollbackRestartBefore(ticket)
+	return ticket
+}`)...)
+		findings = append(findings, rollbackFaultSQLExactFunction(path, functions, "rollbackFaultBeforeCore", "fixed misplaced-write rollbackFaultBeforeCore semantics", `func rollbackFaultBeforeCore(t *Tx, point rollbackIOPoint, f *vfs.File, path string, off int64, length int) rollbackFaultTicket {
+	s := rollbackFaultFor(t)
+	if s == nil {
+		return rollbackFaultTicket{action: rollbackfault.Pass}
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	p, index := rollbackFaultPoint(point)
+	if index < 0 || s.finalized || s.inFlight || s.counts[index] >= 4 {
+		s.problem = errRollbackFaultScope
+		return rollbackFaultTicket{action: rollbackfault.Pass}
+	}
+	s.counts[index]++
+	spec := s.plan.Spec()
+	call := rollbackfault.Call{Point: p, Occurrence: s.counts[index], Offset: off, Length: length}
+	valid := t.file == s.main && t.cleanup == s.cleanup && t.session == nil && t.shared == nil && t.encrypted == nil && !t.keepFile && t.borrowedCleanup == nil
+	switch point {
+	case rbDBOriginalRead, rbDBPage, rbDBSync:
+		call.Role, call.Owner = rollbackfault.Database, spec.MainOwner
+		valid = valid && f == s.main && path == ""
+	case rbPublishDirSync, rbFinalDirSync, rbCleanupDirSync:
+		call.Role, call.Owner = rollbackfault.Directory, spec.DirectoryOwner
+		valid = valid && f == nil && path == t.path
+	case rbJCreate, rbJUnlink, rbCleanupUnlink:
+		call.Role, call.Owner = rollbackfault.Journal, spec.JournalOwner
+		valid = valid && f == nil && path == t.path+"-journal"
+	default:
+		call.Role, call.Owner = rollbackfault.Journal, spec.JournalOwner
+		valid = valid && f != nil && f == s.journal && path == ""
+	}
+	if !valid {
+		s.problem = errRollbackFaultScope
+	}
+	action := rollbackfault.Pass
+	if valid && !s.firstError && s.problem == nil && call == spec.Target && point != rbCleanupUnlink && point != rbCleanupDirSync {
+		action = spec.Action
+	}
+	s.inFlight = true
+	s.append(rollbackfault.Event{Kind: rollbackfault.Intent, Call: call, Action: action})
+	if s.problem != nil {
+		action = rollbackfault.Pass
+	}
+	return rollbackFaultTicket{scope: s, call: call, action: action}
+}`)...)
+		findings = append(findings, rollbackFaultSQLExactFunction(path, functions, "rollbackFaultAfter", "fixed misplaced-write rollbackFaultAfter semantics", `func rollbackFaultAfter(ticket rollbackFaultTicket, executed bool, nativeN int, nativeErr error, returnedN int, returnedErr error, normalizedErr error, effect rollbackfault.SideEffect) {
+	rollbackFaultAfterCore(ticket, executed, nativeN, nativeErr, returnedN, returnedErr, normalizedErr, effect)
+	rollbackRestartAfter(ticket)
+}`)...)
+		findings = append(findings, rollbackFaultSQLExactFunction(path, functions, "rollbackFaultAfterCore", "fixed misplaced-write rollbackFaultAfterCore semantics", `func rollbackFaultAfterCore(ticket rollbackFaultTicket, executed bool, nativeN int, nativeErr error, returnedN int, returnedErr error, normalizedErr error, effect rollbackfault.SideEffect) {
+	s := ticket.scope
+	if s == nil {
+		return
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	result := rollbackfault.Result{Executed: executed, NativeN: nativeN, ReturnedN: returnedN, Effect: effect}
+	if nativeErr != nil {
+		result.NativeError = rollbackfault.Underlying
+		result.NativeErrorToken = s.diagnostic(nativeErr)
+	}
+	if returnedErr != nil {
+		switch {
+		case nativeErr != nil && returnedErr == nativeErr:
+			result.ReturnedError, result.ReturnedErrorToken = rollbackfault.Underlying, result.NativeErrorToken
+		case returnedErr == errRollbackFaultInjected:
+			result.ReturnedError = rollbackfault.Injected
+		default:
+			s.problem = errRollbackFaultScope
+		}
+	}
+	if normalizedErr != nil {
+		switch {
+		case nativeErr != nil && normalizedErr == nativeErr:
+			result.NormalizedError, result.NormalizedErrorToken = rollbackfault.Underlying, result.NativeErrorToken
+		case normalizedErr == errRollbackFaultInjected:
+			result.NormalizedError = rollbackfault.Injected
+		case normalizedErr == io.ErrShortWrite:
+			result.NormalizedError = rollbackfault.ShortWrite
+		default:
+			s.problem = errRollbackFaultScope
+		}
+	}
+	if ticket.call == s.plan.Spec().Target {
+		s.targetError = normalizedErr
+		s.targetErrorToken = result.NormalizedErrorToken
+	}
+	if normalizedErr != nil || returnedErr != nil || nativeErr != nil {
+		s.firstError = true
+	}
+	s.inFlight = false
+	s.append(rollbackfault.Event{Kind: rollbackfault.Returned, Call: ticket.call, Action: ticket.action, Result: result})
+}`)...)
+	}
+	if path == rollbackFaultContract {
+		findings = append(findings, rollbackFaultSQLExactFunction(path, functions, "NewPlan", "fixed misplaced-write NewPlan semantics", `func NewPlan(spec PlanSpec) (Plan, Problem) {
+	if !validIdentity(spec.Identity) {
+		return Plan{}, ProblemIdentity
+	}
+	if spec.Identity.Profile != PlainRollback4096 {
+		return Plan{}, ProblemProfile
+	}
+	owners := [4]uint64{spec.MainOwner, spec.JournalOwner, spec.DirectoryOwner, spec.CleanupOwner}
+	for i, owner := range owners {
+		if owner == 0 {
+			return Plan{}, ProblemOwners
+		}
+		for j := 0; j < i; j++ {
+			if owners[j] == owner {
+				return Plan{}, ProblemOwners
+			}
+		}
+	}
+	if spec.PageSize != 4096 || spec.SectorSize != 4096 || spec.OriginalPages < 1 || spec.OriginalPages > 4 || spec.DirtyPages < 1 || spec.DirtyPages > 4 || spec.OriginalPages > spec.DirtyPages {
+		return Plan{}, ProblemGeometry
+	}
+	if (spec.Action != Pass && spec.Action != FailBefore && spec.Action != PrefixShortWrite && spec.Action != MisplaceIndexPageMinus64) || (spec.Action != PrefixShortWrite && (spec.Prefix != 0 || spec.PrefixError)) {
+		return Plan{}, ProblemAction
+	}
+	if spec.Target.Point < JournalCreate || spec.Target.Point > FinalDirectorySync || spec.Target.Occurrence == 0 {
+		return Plan{}, ProblemTarget
+	}
+	if spec.Action == PrefixShortWrite && (!writePoint(spec.Target.Point) || spec.Prefix < 0 || spec.Prefix >= spec.Target.Length) {
+		return Plan{}, ProblemAction
+	}
+	if spec.Action == MisplaceIndexPageMinus64 && !validMisplacedIndexPlan(spec) {
+		return Plan{}, ProblemAction
+	}
+	if spec.ExpectedCommit != expectedCommit(spec) {
+		return Plan{}, ProblemCommitExpectation
+	}
+	if problem := validCalls(spec); problem != ProblemNone {
+		return Plan{}, problem
+	}
+	// A short caller substring can share a much larger backing allocation.
+	// Freeze only these already validated bytes, never the caller's storage.
+	spec.Identity = copyIdentity(spec.Identity)
+	return Plan{spec: spec, valid: true}, ProblemNone
+}`)...)
+		findings = append(findings, rollbackFaultSQLExactFunction(path, functions, "validMisplacedIndexPlan", "fixed misplaced-write validMisplacedIndexPlan semantics", `func validMisplacedIndexPlan(spec PlanSpec) bool {
+	if spec.OriginalPages != 3 || spec.DirtyPages != 3 || spec.PageSize != 4096 || spec.SectorSize != 4096 || spec.Prefix != 0 || spec.PrefixError || spec.CallCount != 15 || spec.ExpectedCommit != CommitRecoveryRequired || spec.Target != (Call{Point: DBPage, Occurrence: 3, Role: Database, Offset: 8192, Length: 4096, Owner: spec.MainOwner}) {
+		return false
+	}
+	for i := 0; i < 3; i++ {
+		if spec.Calls[2+2*i] != (Call{Point: DBOriginalRead, Occurrence: uint8(i + 1), Role: Database, Offset: int64(i) * 4096, Length: 4096, Owner: spec.MainOwner}) || spec.Calls[12+i] != (Call{Point: DBPage, Occurrence: uint8(i + 1), Role: Database, Offset: int64(i) * 4096, Length: 4096, Owner: spec.MainOwner}) {
+			return false
+		}
+	}
+	return true
+}`)...)
+		findings = append(findings, rollbackFaultSQLExactFunction(path, functions, "validResult", "fixed misplaced-write validResult semantics", `func validResult(spec PlanSpec, call Call, action Action, result Result) Problem {
+	if !validError(result.NativeError, result.NativeErrorToken) || !validError(result.ReturnedError, result.ReturnedErrorToken) || !validError(result.NormalizedError, result.NormalizedErrorToken) || result.Effect > EffectPossible {
+		return ProblemErrorEvidence
+	}
+	if result.NativeN < 0 || result.ReturnedN < 0 || result.NativeN > call.Length || result.ReturnedN > call.Length {
+		return ProblemNativeResult
+	}
+	if action == FailBefore {
+		if result.Executed || result.NativeN != 0 || result.NativeError != None || result.ReturnedN != 0 || result.ReturnedError != Injected || result.NormalizedError != Injected || result.Effect != EffectNone {
+			return ProblemNativeResult
+		}
+		return ProblemNone
+	}
+	if !result.Executed || result.NativeError == Injected {
+		return ProblemNativeResult
+	}
+	if result.NativeError != None {
+		expectedEffect := EffectUnknown
+		if call.Point == DBOriginalRead {
+			expectedEffect = EffectNone
+		}
+		if result.Effect != expectedEffect {
+			return ProblemNativeResult
+		}
+		if result.ReturnedN != result.NativeN || result.ReturnedError != result.NativeError || result.ReturnedErrorToken != result.NativeErrorToken || result.NormalizedError != result.NativeError || result.NormalizedErrorToken != result.NativeErrorToken {
+			return ProblemErrorMasked
+		}
+		if action == PrefixShortWrite && result.NativeN > spec.Prefix {
+			return ProblemNativeResult
+		}
+		return ProblemNone
+	}
+	if action == MisplaceIndexPageMinus64 {
+		if result.NativeN != 4096 || result.ReturnedN != 4096 || result.ReturnedError != Injected || result.NormalizedError != Injected || result.Effect != EffectPossible {
+			return ProblemNativeResult
+		}
+		return ProblemNone
+	}
+	if action == PrefixShortWrite {
+		exposed, normalized := None, ShortWrite
+		if spec.PrefixError {
+			exposed, normalized = Injected, Injected
+		}
+		effect := EffectPrefix
+		if spec.Prefix == 0 {
+			effect = EffectNone
+		}
+		if result.NativeN != spec.Prefix || result.ReturnedN != spec.Prefix || result.ReturnedError != exposed || result.NormalizedError != normalized || result.Effect != effect {
+			return ProblemNativeResult
+		}
+		return ProblemNone
+	}
+	if result.ReturnedN != result.NativeN || result.ReturnedError != None {
+		return ProblemErrorMasked
+	}
+	expectedEffect := EffectUnknown
+	if call.Point == DBOriginalRead {
+		expectedEffect = EffectNone
+	}
+	if writePoint(call.Point) {
+		expectedEffect = EffectPossible
+	}
+	if result.Effect != expectedEffect {
+		return ProblemNativeResult
+	}
+	normalized := None
+	if writePoint(call.Point) && result.NativeN != call.Length {
+		normalized = ShortWrite
+	}
+	if result.NormalizedError != normalized || (call.Point == DBOriginalRead && result.NativeN != call.Length) {
+		return ProblemNativeResult
+	}
+	return ProblemNone
+}`)...)
 	}
 	if path == rollbackFaultPoints {
 		if len(imports) != 0 {
@@ -974,6 +1363,7 @@ func rollbackUnlink(t *Tx, point rollbackIOPoint, path string) error {
 package pager
 
 import (
+	"crypto/sha256"
 	"errors"
 	"io"
 	"os"
@@ -1015,6 +1405,7 @@ type rollbackFaultScope struct {
 	journalUnknown   bool
 	targetError      error
 	targetErrorToken uint64
+	misplacedWrite   rollbackfault.SQLMisplacedWrite
 }
 
 type rollbackFaultTicket struct {
@@ -1065,6 +1456,11 @@ func armRollbackFault(t *Tx, plan rollbackfault.Plan) (*rollbackFaultScope, erro
 	originals := t.journalPages(dirty)
 	if len(originals) == 0 || len(originals) > 4 || int(spec.OriginalPages) != len(originals) || int(spec.DirtyPages) != len(dirty) {
 		return nil, errRollbackFaultScope
+	}
+	if spec.Action == rollbackfault.MisplaceIndexPageMinus64 {
+		if t.info.Size() != 12288 || t.originalPages != 3 || t.header.PageCount != 3 || len(dirty) != 3 || dirty[0] != 1 || dirty[1] != 2 || dirty[2] != 3 || len(originals) != 3 || originals[0] != 1 || originals[1] != 2 || originals[2] != 3 || len(t.dirty[2]) != 4096 || len(t.dirty[3]) != 4096 || t.dirty[1][100] != 13 || t.dirty[2][0] != 13 || t.dirty[3][0] != 10 {
+			return nil, errRollbackFaultScope
+		}
 	}
 	// Bind the frozen manifest to this Tx's exact page order, not a similar path.
 	for i := 0; i < int(spec.CallCount); i++ {
@@ -1327,11 +1723,30 @@ type rollbackFaultWriter struct {
 	nativeErr   error
 	returnedN   int
 	returnedErr error
+	misplaced   rollbackfault.SQLMisplacedWrite
 }
 
 // Only the original managed owner is invoked, once. No raw descriptor, bypass,
 // arbitrary callback, retry, extra Sync or hidden second injected failure.
 func (w *rollbackFaultWriter) WriteAt(b []byte, off int64) (int, error) {
+	if w.action == rollbackfault.MisplaceIndexPageMinus64 {
+		if off != 8192 || len(b) != 4096 || w.misplaced != (rollbackfault.SQLMisplacedWrite{}) {
+			w.returnedErr = errRollbackFaultScope
+			return 0, w.returnedErr
+		}
+		nativeOffset := off - 64
+		w.misplaced.RequestedOffset, w.misplaced.RequestedBytes = off, len(b)
+		w.misplaced.NativeOffset, w.misplaced.NativeBytes = nativeOffset, len(b)
+		w.misplaced.PayloadSHA256 = sha256.Sum256(b)
+		w.executed = true
+		w.misplaced.NativeCalls++
+		w.nativeN, w.nativeErr = w.file.WriteAt(b, nativeOffset)
+		w.returnedN, w.returnedErr = w.nativeN, w.nativeErr
+		if w.nativeErr == nil && w.nativeN == 4096 {
+			w.returnedErr = errRollbackFaultInjected
+		}
+		return w.returnedN, w.returnedErr
+	}
 	if w.action == rollbackfault.FailBefore {
 		w.returnedErr = errRollbackFaultInjected
 		return 0, w.returnedErr
@@ -1366,6 +1781,16 @@ func rollbackWrite(t *Tx, point rollbackIOPoint, f *vfs.File, b []byte, off int6
 		effect = rollbackfault.EffectNone
 	} else if w.action == rollbackfault.PrefixShortWrite && w.nativeN == w.prefix {
 		effect = rollbackfault.EffectPrefix
+	}
+	if ticket.action == rollbackfault.MisplaceIndexPageMinus64 {
+		s := ticket.scope
+		s.mu.Lock()
+		if s.misplacedWrite != (rollbackfault.SQLMisplacedWrite{}) || !s.inFlight || ticket.call != spec.Target || ticket.call.Point != rollbackfault.DBPage || ticket.call.Occurrence != 3 || ticket.call.Owner != spec.MainOwner || ticket.call.Role != rollbackfault.Database || ticket.call.Offset != 8192 || ticket.call.Length != 4096 || w.misplaced.RequestedOffset != ticket.call.Offset || w.misplaced.RequestedBytes != ticket.call.Length || w.misplaced.NativeOffset != 8128 || w.misplaced.NativeBytes != 4096 || w.misplaced.NativeCalls != 1 {
+			s.problem = errRollbackFaultScope
+		} else {
+			s.misplacedWrite = w.misplaced
+		}
+		s.mu.Unlock()
 	}
 	rollbackFaultAfter(ticket, w.executed, w.nativeN, w.nativeErr, w.returnedN, w.returnedErr, err, effect)
 	return err
@@ -1622,6 +2047,7 @@ const (
 	Pass Action = iota
 	FailBefore
 	PrefixShortWrite
+	MisplaceIndexPageMinus64
 )
 
 type Call struct {
@@ -1730,13 +2156,16 @@ func NewPlan(spec PlanSpec) (Plan, Problem) {
 	if spec.PageSize != 4096 || spec.SectorSize != 4096 || spec.OriginalPages < 1 || spec.OriginalPages > 4 || spec.DirtyPages < 1 || spec.DirtyPages > 4 || spec.OriginalPages > spec.DirtyPages {
 		return Plan{}, ProblemGeometry
 	}
-	if spec.Action > PrefixShortWrite || (spec.Action != PrefixShortWrite && (spec.Prefix != 0 || spec.PrefixError)) {
+	if (spec.Action != Pass && spec.Action != FailBefore && spec.Action != PrefixShortWrite && spec.Action != MisplaceIndexPageMinus64) || (spec.Action != PrefixShortWrite && (spec.Prefix != 0 || spec.PrefixError)) {
 		return Plan{}, ProblemAction
 	}
 	if spec.Target.Point < JournalCreate || spec.Target.Point > FinalDirectorySync || spec.Target.Occurrence == 0 {
 		return Plan{}, ProblemTarget
 	}
 	if spec.Action == PrefixShortWrite && (!writePoint(spec.Target.Point) || spec.Prefix < 0 || spec.Prefix >= spec.Target.Length) {
+		return Plan{}, ProblemAction
+	}
+	if spec.Action == MisplaceIndexPageMinus64 && !validMisplacedIndexPlan(spec) {
 		return Plan{}, ProblemAction
 	}
 	if spec.ExpectedCommit != expectedCommit(spec) {
@@ -1749,6 +2178,20 @@ func NewPlan(spec PlanSpec) (Plan, Problem) {
 	// Freeze only these already validated bytes, never the caller's storage.
 	spec.Identity = copyIdentity(spec.Identity)
 	return Plan{spec: spec, valid: true}, ProblemNone
+}
+
+// This action is one closed three-page SQL geometry, never an offset API.
+// OriginalPages counts journal images; the native armer checks actual extent.
+func validMisplacedIndexPlan(spec PlanSpec) bool {
+	if spec.OriginalPages != 3 || spec.DirtyPages != 3 || spec.PageSize != 4096 || spec.SectorSize != 4096 || spec.Prefix != 0 || spec.PrefixError || spec.CallCount != 15 || spec.ExpectedCommit != CommitRecoveryRequired || spec.Target != (Call{Point: DBPage, Occurrence: 3, Role: Database, Offset: 8192, Length: 4096, Owner: spec.MainOwner}) {
+		return false
+	}
+	for i := 0; i < 3; i++ {
+		if spec.Calls[2+2*i] != (Call{Point: DBOriginalRead, Occurrence: uint8(i + 1), Role: Database, Offset: int64(i) * 4096, Length: 4096, Owner: spec.MainOwner}) || spec.Calls[12+i] != (Call{Point: DBPage, Occurrence: uint8(i + 1), Role: Database, Offset: int64(i) * 4096, Length: 4096, Owner: spec.MainOwner}) {
+			return false
+		}
+	}
+	return true
 }
 
 func copyIdentity(id Identity) Identity {
@@ -2273,6 +2716,12 @@ func validResult(spec PlanSpec, call Call, action Action, result Result) Problem
 		}
 		return ProblemNone
 	}
+	if action == MisplaceIndexPageMinus64 {
+		if result.NativeN != 4096 || result.ReturnedN != 4096 || result.ReturnedError != Injected || result.NormalizedError != Injected || result.Effect != EffectPossible {
+			return ProblemNativeResult
+		}
+		return ProblemNone
+	}
 	if action == PrefixShortWrite {
 		exposed, normalized := None, ShortWrite
 		if spec.PrefixError {
@@ -2412,6 +2861,8 @@ func fixtureEvents(spec PlanSpec) []Event {
 		switch action {
 		case FailBefore:
 			result = Result{ReturnedError: Injected, NormalizedError: Injected, Effect: EffectNone}
+		case MisplaceIndexPageMinus64:
+			result = Result{Executed: true, NativeN: 4096, ReturnedN: 4096, ReturnedError: Injected, NormalizedError: Injected, Effect: EffectPossible}
 		case PrefixShortWrite:
 			result = Result{Executed: true, NativeN: spec.Prefix, ReturnedN: spec.Prefix, NormalizedError: ShortWrite, Effect: EffectPrefix}
 			if spec.Prefix == 0 {
@@ -3298,6 +3749,202 @@ func TestRollbackFaultLargeBackedValidSubstringsPreserveAdmittedValues(t *testin
 	}
 	if observation.Pass() || observation.PhysicalValidated() {
 		t.Fatal("valid substring receipt became physical PASS")
+	}
+}
+
+// Independent literal plan: this fixture does not call the SQL plan builder.
+func misplacedIndexSpec() PlanSpec {
+	spec := PlanSpec{
+		Identity:  onePageSpec(Pass, 8).Identity,
+		MainOwner: 11, JournalOwner: 12, DirectoryOwner: 13, CleanupOwner: 14,
+		OriginalPages: 3, DirtyPages: 3, PageSize: 4096, SectorSize: 4096,
+		Action: MisplaceIndexPageMinus64, ExpectedCommit: CommitRecoveryRequired, CallCount: 15,
+		Calls: [MaxCalls]Call{
+			{Point: JournalCreate, Occurrence: 1, Role: Journal, Owner: 12},
+			{Point: JournalInvalid, Occurrence: 1, Role: Journal, Owner: 12, Length: 4096},
+			{Point: DBOriginalRead, Occurrence: 1, Role: Database, Owner: 11, Offset: 0, Length: 4096},
+			{Point: JournalRecord, Occurrence: 1, Role: Journal, Owner: 12, Offset: 4096, Length: 4104},
+			{Point: DBOriginalRead, Occurrence: 2, Role: Database, Owner: 11, Offset: 4096, Length: 4096},
+			{Point: JournalRecord, Occurrence: 2, Role: Journal, Owner: 12, Offset: 8200, Length: 4104},
+			{Point: DBOriginalRead, Occurrence: 3, Role: Database, Owner: 11, Offset: 8192, Length: 4096},
+			{Point: JournalRecord, Occurrence: 3, Role: Journal, Owner: 12, Offset: 12304, Length: 4104},
+			{Point: JournalBodySync, Occurrence: 1, Role: Journal, Owner: 12},
+			{Point: JournalValidHeader, Occurrence: 1, Role: Journal, Owner: 12, Length: 12},
+			{Point: JournalHeaderSync, Occurrence: 1, Role: Journal, Owner: 12},
+			{Point: PublishDirectorySync, Occurrence: 1, Role: Directory, Owner: 13},
+			{Point: DBPage, Occurrence: 1, Role: Database, Owner: 11, Offset: 0, Length: 4096},
+			{Point: DBPage, Occurrence: 2, Role: Database, Owner: 11, Offset: 4096, Length: 4096},
+			{Point: DBPage, Occurrence: 3, Role: Database, Owner: 11, Offset: 8192, Length: 4096},
+		},
+	}
+	spec.Target = spec.Calls[14]
+	return spec
+}
+
+// The only additional action is a fixed actual placement, not a caller offset.
+func TestRollbackFaultMisplacementAdmissionIsExact(t *testing.T) {
+	plan, problem := NewPlan(misplacedIndexSpec())
+	if problem != NoProblem {
+		t.Fatal(problem)
+	}
+	spec := plan.Spec()
+	if spec.Action != MisplaceIndexPageMinus64 || spec.CallCount != 15 || spec.Target != (Call{Point: DBPage, Occurrence: 3, Role: Database, Offset: 8192, Length: 4096, Owner: 11}) || spec.Prefix != 0 || spec.PrefixError || spec.ExpectedCommit != CommitRecoveryRequired {
+		t.Fatal("fixed misplacement plan differs", spec)
+	}
+	observation := observe(t, spec, fixtureEvents(spec))
+	if observation.Outcome != AdapterObserved || observation.EventCount != 35 || observation.TargetHits != 1 || observation.Problem != NoProblem || observation.Pass() || observation.PhysicalValidated() {
+		t.Fatal("one complete misplaced-write trace must remain nonphysical", observation)
+	}
+	for _, name := range []string{"occurrence", "journal-role", "directory-role", "owner", "offset-minus64", "offset-plus64", "offset-zero", "length-prefix", "length-short", "dirty-two", "dirty-four", "original-two", "original-four", "page-size", "sector-size", "prefix", "prefix-error", "call-count", "success", "uncertain", "original-read-inventory", "dirty-write-inventory"} {
+		bad := spec
+		switch name {
+		case "occurrence":
+			bad.Target.Occurrence = 2
+		case "journal-role":
+			bad.Target.Role = Journal
+		case "directory-role":
+			bad.Target.Role = Directory
+		case "owner":
+			bad.Target.Owner = bad.JournalOwner
+		case "offset-minus64":
+			bad.Target.Offset = 8128
+		case "offset-plus64":
+			bad.Target.Offset = 8256
+		case "offset-zero":
+			bad.Target.Offset = 0
+		case "length-prefix":
+			bad.Target.Length = 64
+		case "length-short":
+			bad.Target.Length = 4095
+		case "dirty-two":
+			bad.DirtyPages = 2
+		case "dirty-four":
+			bad.DirtyPages = 4
+		case "original-two":
+			bad.OriginalPages = 2
+		case "original-four":
+			bad.OriginalPages = 4
+		case "page-size":
+			bad.PageSize = 8192
+		case "sector-size":
+			bad.SectorSize = 512
+		case "prefix":
+			bad.Prefix = 64
+		case "prefix-error":
+			bad.PrefixError = true
+		case "call-count":
+			bad.CallCount = 16
+		case "success":
+			bad.ExpectedCommit = CommitSucceeded
+		case "uncertain":
+			bad.ExpectedCommit = CommitUncertain
+		case "original-read-inventory":
+			bad.Calls[4].Offset = 8192
+		case "dirty-write-inventory":
+			bad.Calls[13].Offset = 8192
+		}
+		if _, problem := NewPlan(bad); problem == NoProblem {
+			t.Fatal("misplacement selector accepted", name)
+		}
+	}
+	for value := 0; value <= 255; value++ {
+		bad := spec
+		bad.Target.Point = Point(value)
+		if bad.Target.Point != DBPage {
+			if _, problem := NewPlan(bad); problem == NoProblem {
+				t.Fatal("misplacement point accepted", value)
+			}
+		}
+		bad = spec
+		bad.Target.Role = Role(value)
+		if bad.Target.Role != Database {
+			if _, problem := NewPlan(bad); problem == NoProblem {
+				t.Fatal("misplacement role accepted", value)
+			}
+		}
+		bad = spec
+		bad.Target.Occurrence = uint8(value)
+		if value != 3 {
+			if _, problem := NewPlan(bad); problem == NoProblem {
+				t.Fatal("misplacement occurrence accepted", value)
+			}
+		}
+		bad = spec
+		bad.Action = Action(value)
+		if value > int(MisplaceIndexPageMinus64) {
+			if _, problem := NewPlan(bad); problem == NoProblem {
+				t.Fatal("future action accepted", value)
+			}
+		}
+	}
+	for i := 0; i < 12; i++ {
+		if _, problem := NewPlan(onePageSpec(MisplaceIndexPageMinus64, i)); problem == NoProblem {
+			t.Fatal("one-page action accepted", i)
+		}
+	}
+}
+
+func TestRollbackFaultMisplacementNativeResultsKeepOriginalError(t *testing.T) {
+	plan, problem := NewPlan(misplacedIndexSpec())
+	if problem != NoProblem {
+		t.Fatal(problem)
+	}
+	spec := plan.Spec()
+	for _, name := range []string{"success-exposed", "prefix", "short-nil", "negative-native", "oversized-native", "unexecuted", "wrong-effect", "short-write", "normalized-nil", "returned-token", "requested-offset", "masked-native-error", "masked-native-token", "success-commit", "uncertain-commit", "missing-target", "logical-open", "pending-owner", "unknown-owner"} {
+		events := fixtureEvents(spec)
+		result := &events[30].Result
+		switch name {
+		case "success-exposed":
+			result.ReturnedError, result.NormalizedError = None, None
+		case "prefix":
+			result.NativeN, result.ReturnedN = 64, 64
+		case "short-nil":
+			result.NativeN, result.ReturnedN, result.ReturnedError, result.NormalizedError = 4095, 4095, None, ShortWrite
+		case "negative-native":
+			result.NativeN = -1
+		case "oversized-native":
+			result.NativeN = 4097
+		case "unexecuted":
+			result.Executed = false
+		case "wrong-effect":
+			result.Effect = EffectPrefix
+		case "short-write":
+			result.ReturnedError, result.NormalizedError = ShortWrite, ShortWrite
+		case "normalized-nil":
+			result.NormalizedError = None
+		case "returned-token":
+			result.ReturnedErrorToken = 71
+		case "requested-offset":
+			events[30].Call.Offset = 8128
+		case "masked-native-error":
+			result.NativeError, result.NativeErrorToken, result.Effect = Underlying, 71, EffectUnknown
+		case "masked-native-token":
+			result.NativeError, result.NativeErrorToken, result.Effect = Underlying, 71, EffectUnknown
+			result.ReturnedError, result.ReturnedErrorToken = Underlying, 72
+			result.NormalizedError, result.NormalizedErrorToken = Underlying, 72
+		case "success-commit":
+			events[31].Commit.Class = CommitSucceeded
+		case "uncertain-commit":
+			events[31].Commit.Class = CommitUncertain
+		case "missing-target":
+			events[31].Commit.TargetError = None
+		case "logical-open":
+			events[31].Commit.Logical = LogicalOpen
+		case "pending-owner":
+			events[32].Owners.Cleanup = OwnerPending
+		case "unknown-owner":
+			events[32].Owners.Journal = OwnerUnknown
+		}
+		mustNotQualify(t, observe(t, spec, events))
+	}
+	for _, count := range []int{0, 64, 4095, 4096} {
+		events := fixtureEvents(spec)
+		events[30].Result = Result{Executed: true, NativeN: count, NativeError: Underlying, NativeErrorToken: 71, ReturnedN: count, ReturnedError: Underlying, ReturnedErrorToken: 71, NormalizedError: Underlying, NormalizedErrorToken: 71, Effect: EffectUnknown}
+		events[31].Commit.TargetError, events[31].Commit.TargetErrorToken = Underlying, 71
+		observation := observe(t, spec, events)
+		if observation.Outcome != ObservationRefused || observation.Problem != ProblemUnderlyingFailure {
+			t.Fatal("original native error must remain refused evidence", count, observation)
+		}
 	}
 }
 `,

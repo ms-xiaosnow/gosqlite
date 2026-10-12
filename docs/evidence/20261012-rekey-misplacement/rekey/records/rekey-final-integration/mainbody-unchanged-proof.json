@@ -1,0 +1,17 @@
+{
+  "base_commit": "01c63e6f8fb3d9e196afe2f42a163eb3eac4ad5a",
+  "base_main_sha256": "6dbab48ff374858bfafe578f0fca99f5176ced7b6bdc008bec04ce6a6d1d0eb2",
+  "final_main_sha256": "1d9f41ed857bf64a3d2913f96fee3409a173f036df753efd81a7a9190ee2536a",
+  "ordinary_function_byte_identical": true,
+  "ordinary_function_sha256": "98341345e43f39b39dbc78eaf49a916a0701f3d7f2f383d4949b9a3ed439d199",
+  "ordinary_pin_definition": "complete inspectSource declaration, from func through closing brace",
+  "six_old_main_literal_replacements": [
+    "internal/testscope/wal_tail_publication.go",
+    "internal/testscope/encryption_upgrade_manual.go",
+    "internal/testscope/encrypted_root_negative.go",
+    "internal/testscope/rollback_fault_test.go",
+    "internal/testscope/rollback_fault_sql_test.go",
+    "internal/testscope/rollback_restart_test.go"
+  ],
+  "R1_wal_model_pin_unchanged": "465813a5c6c4b1324ad6b4ed4850585c24d145e5e3a7a4f7e22ca1d178cd0902"
+}

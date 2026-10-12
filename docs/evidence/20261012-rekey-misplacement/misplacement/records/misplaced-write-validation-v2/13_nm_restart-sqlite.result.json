@@ -1,0 +1,17 @@
+{
+  "name": "13_nm_restart-sqlite",
+  "start_utc": "2026-10-12T23:04:52.052614+00:00",
+  "end_utc": "2026-10-12T23:04:54.054943+00:00",
+  "exit_code": 0,
+  "resource_breach_latched": false,
+  "observer_error": null,
+  "stdout_sha256": "75d555bd580d521eb394305cb0a71bb01d3fa0f4b30907500d8bcfdc20105991",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "symbols": {
+    "required": 455,
+    "exact_root_set": true,
+    "image_sha256": "48f9345d29fcce0c94a60eee4cc3435c712d8f439d1c5095f225f7e105e09b78",
+    "image_executed": false
+  },
+  "status": "PASS"
+}

@@ -1,0 +1,11 @@
+{
+  "zip_name": "gosqlite-R5-rekey-focused-validation-8751a3b.zip",
+  "bytes": 11074069,
+  "sha256": "1e05e2f947f133073ab81fc947dcf637f78b9f558af390839ae02b3e0315cc5e",
+  "members": 253,
+  "verified_nonmanifest_members": 252,
+  "manifest_sha256": "121a63099d8ad08ab452abb4d12cf38d96cc5b06af29663b0166876e111b7b2b",
+  "manual_binary_members": 1,
+  "final_source_sha256_match_count": 20,
+  "status": "PASS"
+}

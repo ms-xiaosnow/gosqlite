@@ -1,0 +1,2612 @@
+[
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultRepinnedSemanticCounterexamples",
+    "name": "default build broadened",
+    "source": "internal/pager/rollback_io_default.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "84f29539fcf1b04a0c0996a02eeb1391feece1b57bc0bb0a5811b0bdc8a9060d"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultRepinnedSemanticCounterexamples",
+    "name": "manual OR gate",
+    "source": "internal/pager/rollback_io_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "d48d8cbc49e9329851f5b12aae7c756a9ea796c960a0158a18abd8e1f2339ff5"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultRepinnedSemanticCounterexamples",
+    "name": "manual env weakened",
+    "source": "internal/pager/rollback_io_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "0e62563a58680a9e43cfc873b2f462069bde61f7bae086602ab4b5b3298f628f"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultRepinnedSemanticCounterexamples",
+    "name": "effect before gate",
+    "source": "internal/pager/rollback_io_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "5e854023dd95b377d67f8139f0209f22e4f6e15a070d2d36933e60c8e8994e4b"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultRepinnedSemanticCounterexamples",
+    "name": "default owner changed",
+    "source": "internal/pager/rollback_io_default.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "1d4a9b412184984d1e811b346ad7af0d424277d7a8cb521eaf0d508b1f4f4fc0"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultRepinnedSemanticCounterexamples",
+    "name": "default extra environment",
+    "source": "internal/pager/rollback_io_default.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "e8f0c02fad278cc050554e7e3a42c3e389e78499f13dba2c6aff1e625fdbc7d3"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultRepinnedSemanticCounterexamples",
+    "name": "default alias call",
+    "source": "internal/pager/rollback_io_default.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "e8f0c02fad278cc050554e7e3a42c3e389e78499f13dba2c6aff1e625fdbc7d3"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultRepinnedSemanticCounterexamples",
+    "name": "default observer initializer",
+    "source": "internal/pager/rollback_io_default.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "8f1a2a59389efc7e3b46eb6d05dab9b348b090a703fdbd764def67711815e28f"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultRepinnedSemanticCounterexamples",
+    "name": "point ID changed",
+    "source": "internal/pager/rollback_io_points.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "28782a683f1601998bf5ea2391e2c444c870eb5916335db6fb95fe330ca1c5a9"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultRepinnedSemanticCounterexamples",
+    "name": "point alias",
+    "source": "internal/pager/rollback_io_points.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "34f8fcd4e52cb367c08f175760df9cbe8051f6081c22b849f7fdb49770596619"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultRepinnedSemanticCounterexamples",
+    "name": "Commit original owner changed",
+    "source": "internal/pager/commit.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "66003518261c0feee45d79debeb3bd252c4e8c49d0f27cda7a6af354a867841c"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultRepinnedSemanticCounterexamples",
+    "name": "Commit point repeated",
+    "source": "internal/pager/commit.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "cbaf62806105cabf306cc952195736b7b0d1e513f9844267e62ad17b6e8fcaf8"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultRepinnedSemanticCounterexamples",
+    "name": "Commit bridge alias",
+    "source": "internal/pager/commit.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "24849e81fd1517b6e2875887dc5777d9824197f03eaea5f322d01b77651d9f6c"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultRepinnedSemanticCounterexamples",
+    "name": "Commit bridge method value",
+    "source": "internal/pager/commit.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "24849e81fd1517b6e2875887dc5777d9824197f03eaea5f322d01b77651d9f6c"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultRepinnedSemanticCounterexamples",
+    "name": "write helper retries",
+    "source": "internal/pager/commit.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "6b7ae619f33ac437f6ad5f7ead909c8901c8440d605dd54c529765f6e7f115ae"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultRepinnedSemanticCounterexamples",
+    "name": "write helper error priority",
+    "source": "internal/pager/commit.go",
+    "before_count": 4,
+    "after_count": 4,
+    "anchor_sha256": "99e0933f069f2c1059dbbb010ea37962d9f34b8a4df6542eda7ae813752f3828"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultRepinnedSemanticCounterexamples",
+    "name": "write helper concrete signature",
+    "source": "internal/pager/commit.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "54ea85a04ec0abe6bd57a7088643fb09e5c8f40cbae7e5f9d2b4ae2d28401b84"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultRepinnedSemanticCounterexamples",
+    "name": "manual contract alias",
+    "source": "internal/pager/rollback_io_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "a4951ddcc35aa089dd03bbdbf4fe57e8bf7babb7365a0297472e49e082d58814"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultRepinnedSemanticCounterexamples",
+    "name": "manual contract dot import",
+    "source": "internal/pager/rollback_io_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "a4951ddcc35aa089dd03bbdbf4fe57e8bf7babb7365a0297472e49e082d58814"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultRepinnedSemanticCounterexamples",
+    "name": "manual armer invoked internally",
+    "source": "internal/pager/rollback_io_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "9d550b7ffae5dca34e9bf91b0a8b0dd7d6fa140f4b73edf6b7054b9b1b779592"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultRepinnedSemanticCounterexamples",
+    "name": "manual registry reused",
+    "source": "internal/pager/rollback_io_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "0811cf7bcf8d3392404c4167ef9968f7c33e63645c030bba52bb1d07b849c523"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultRepinnedSemanticCounterexamples",
+    "name": "manual owner raw descriptor",
+    "source": "internal/pager/rollback_io_manual_linux.go",
+    "before_count": 2,
+    "after_count": 2,
+    "anchor_sha256": "2aac429d2e9935a8c068a700a25fc76df98bd1ce857c834cd8260d669dd09e9b"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultRepinnedSemanticCounterexamples",
+    "name": "manual explicit close",
+    "source": "internal/pager/rollback_io_manual_linux.go",
+    "before_count": 2,
+    "after_count": 2,
+    "anchor_sha256": "2aac429d2e9935a8c068a700a25fc76df98bd1ce857c834cd8260d669dd09e9b"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultRepinnedSemanticCounterexamples",
+    "name": "manual fake physical validation",
+    "source": "internal/pager/rollback_io_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "da01f3f6b72849b27db39f11a212f25200525f661d660976cd1c1f048721102f"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultRepinnedSemanticCounterexamples",
+    "name": "contract imports descriptors",
+    "source": "internal/testkit/rollbackfault/contract.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "331336980d3edc7b84d662f3419b1c7892cda1a80033e28e432c3c0f7eba17ee"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultRepinnedSemanticCounterexamples",
+    "name": "contract retains callback",
+    "source": "internal/testkit/rollbackfault/contract.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "a6f932fd619d860884ef97481c499cff796fd6ce887e7e1bedd42f88b9e6e68f"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultRepinnedSemanticCounterexamples",
+    "name": "contract retains descriptor",
+    "source": "internal/testkit/rollbackfault/contract.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "a6f932fd619d860884ef97481c499cff796fd6ce887e7e1bedd42f88b9e6e68f"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultRepinnedSemanticCounterexamples",
+    "name": "contract mutable state",
+    "source": "internal/testkit/rollbackfault/contract.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "331336980d3edc7b84d662f3419b1c7892cda1a80033e28e432c3c0f7eba17ee"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultRepinnedSemanticCounterexamples",
+    "name": "contract physical PASS",
+    "source": "internal/testkit/rollbackfault/contract.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "85ef9266de302f9d0c098e30882a4ffd24b782a566066247e2df8aeac007ee59"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultRepinnedSemanticCounterexamples",
+    "name": "contract physical validation",
+    "source": "internal/testkit/rollbackfault/contract.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "ab72b778715c75f6c66d0594ec9412c0bf95f5b89dcb0237538b35a751100781"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultRepinnedSemanticCounterexamples",
+    "name": "fake writer imports native",
+    "source": "internal/pager/rollback_io_contract_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "d0daecb5aa0201413b60798f4ba478746100c217fbfa35f0f5b94a7a9b15d914"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultRepinnedSemanticCounterexamples",
+    "name": "fake writer fixture",
+    "source": "internal/pager/rollback_io_contract_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "b11886be824408bf324728352006c294bd17cecf8f48bad3c3aa6b359d66039d"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultRepinnedSemanticCounterexamples",
+    "name": "fake writer silent skip",
+    "source": "internal/pager/rollback_io_contract_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "b11886be824408bf324728352006c294bd17cecf8f48bad3c3aa6b359d66039d"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultMisplacementDoubleRepinnedCounterexamples",
+    "name": "actual correct offset",
+    "source": "internal/pager/rollback_io_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "beb5da853b69574225b225ad0fb7feb814b6156b5bcd5bd66782e81488fa3793"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultMisplacementDoubleRepinnedCounterexamples",
+    "name": "actual plus64",
+    "source": "internal/pager/rollback_io_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "0ca902a74b5973d7673b346b664d61353ccce0979678be4d4a7f0dd5d6ce22e6"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultMisplacementDoubleRepinnedCounterexamples",
+    "name": "reported offset reconstructed from plan",
+    "source": "internal/pager/rollback_io_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "94eea010914f0f95b769a7f442bef8ea8b44d9744a43b7701b585120a3c5aac8"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultMisplacementDoubleRepinnedCounterexamples",
+    "name": "actual 64-byte write",
+    "source": "internal/pager/rollback_io_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "beb5da853b69574225b225ad0fb7feb814b6156b5bcd5bd66782e81488fa3793"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultMisplacementDoubleRepinnedCounterexamples",
+    "name": "native call fabricated",
+    "source": "internal/pager/rollback_io_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "b81c12b7acd166c46b91ee21aa8c9794065d0c0ddb92e9864b45caf90c77449d"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultMisplacementDoubleRepinnedCounterexamples",
+    "name": "native retry",
+    "source": "internal/pager/rollback_io_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "b81c12b7acd166c46b91ee21aa8c9794065d0c0ddb92e9864b45caf90c77449d"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultMisplacementDoubleRepinnedCounterexamples",
+    "name": "actual payload hash forged",
+    "source": "internal/pager/rollback_io_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "c86aeae7a4789f401ba2016ca3d553b380fa0c5ebd4418d18bacff9a186e3e39"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultMisplacementDoubleRepinnedCounterexamples",
+    "name": "native count forged",
+    "source": "internal/pager/rollback_io_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "2afd872448037a3ff0bf2d2aa78f9e1980389a048112c443e7efe278433eed63"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultMisplacementDoubleRepinnedCounterexamples",
+    "name": "injection dropped",
+    "source": "internal/pager/rollback_io_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "2abbd38ab8fa89eaeff0c52ecea311f8288f6fa4a0395b53969b4896654b4b8b"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultMisplacementDoubleRepinnedCounterexamples",
+    "name": "native errno masked",
+    "source": "internal/pager/rollback_io_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "03dd2920bcf553f751383e15f4c1fb99dc0010c3f083a9d6e0e2b69a0c531a16"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultMisplacementDoubleRepinnedCounterexamples",
+    "name": "short native injection",
+    "source": "internal/pager/rollback_io_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "03dd2920bcf553f751383e15f4c1fb99dc0010c3f083a9d6e0e2b69a0c531a16"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultMisplacementDoubleRepinnedCounterexamples",
+    "name": "wrong extent accepted",
+    "source": "internal/pager/rollback_io_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "bd7264559c398d7e0f2626a3d3056c4dc3f9e51963bc922d1a341c76f44b9c65"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultMisplacementDoubleRepinnedCounterexamples",
+    "name": "actual pages not exact",
+    "source": "internal/pager/rollback_io_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "11ee9b8f9216022f0b1d70fc13b2402d1a1c0c183d4ba02e8097e48a68807650"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultMisplacementDoubleRepinnedCounterexamples",
+    "name": "journal originals reordered admitted",
+    "source": "internal/pager/rollback_io_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "3149794ab0ee1f6fdcfc5f8e6ed791ec5d1bb4eda334e8689a3c4bc409f9ed65"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultMisplacementDoubleRepinnedCounterexamples",
+    "name": "index kind unchecked",
+    "source": "internal/pager/rollback_io_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "11fdda302e3ad7eb0c534d2ddbe3580c03d53122cdb2d38b85bc02c3ca01083f"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultMisplacementDoubleRepinnedCounterexamples",
+    "name": "requested call overwritten",
+    "source": "internal/pager/rollback_io_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "94eea010914f0f95b769a7f442bef8ea8b44d9744a43b7701b585120a3c5aac8"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultMisplacementDoubleRepinnedCounterexamples",
+    "name": "second observation admitted",
+    "source": "internal/pager/rollback_io_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "5f02b217148eea0fea5c8d233361a7edc33df6c7c88f990e24cac0b7183e04c8"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultMisplacementDoubleRepinnedCounterexamples",
+    "name": "used registry cleared",
+    "source": "internal/pager/rollback_io_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "0811cf7bcf8d3392404c4167ef9968f7c33e63645c030bba52bb1d07b849c523"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultMisplacementDoubleRepinnedCounterexamples",
+    "name": "A5 after core order",
+    "source": "internal/pager/rollback_io_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "0007254383d41cd9c4edab43b33fe09fca2fb89d2623fa050014f3fb67ff06ee"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultMisplacementDoubleRepinnedCounterexamples",
+    "name": "A5 core deferred unlock changed",
+    "source": "internal/pager/rollback_io_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "a59f813ad6cd8d8057bd841a6bc119d244e7501a62e9348c221eb97ba5967c00"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultMisplacementDoubleRepinnedCounterexamples",
+    "name": "model arbitrary placement admission",
+    "source": "internal/testkit/rollbackfault/contract.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "f4cf71f371d4f25da3eb62fc5601da06994ddda9b8c737a176620520b5d4b2fb"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultMisplacementDoubleRepinnedCounterexamples",
+    "name": "model two dirty pages admitted",
+    "source": "internal/testkit/rollbackfault/contract.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "416a5eb217d837ec1dbca46017d15ab2d925ac3b36c84d697876150039dad11d"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultMisplacementDoubleRepinnedCounterexamples",
+    "name": "model native original cause masked",
+    "source": "internal/testkit/rollbackfault/contract.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "d2fc5a6c469a2031e4c0c1c13e806f4369c998259080eae05976cc0f12ad05e1"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_test.go",
+    "function": "TestRollbackFaultMisplacementDoubleRepinnedCounterexamples",
+    "name": "model no injected result",
+    "source": "internal/testkit/rollbackfault/contract.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "0481fb766bc2ed157d1450efb37507e4ece159279b3e02cb22925ec4fca69df0"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "misplacement helper post-hoc payload",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "5df20b8be7e0f2870da3eb2a98601fd8508304a84826132270e2bd860d622f7a"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "misplacement shifted proof bypassed",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "e82f085f6f4b4583010e9b094f1f86e4bf9359ca1c132c9185535faad5fe2784"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "misplacement tail comparison bypassed",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "124ae6199933008acc5c8566d0df355f2aa61898b5236039ea8f03346d632cc6"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "misplacement journal bytes bypassed",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "f8453cf66711cb0821fb1f1d447ef8b4f696abbdd5a86a09e89e4012e6db3553"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "misplacement EOF count admitted",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "4d896f8a6cc15de5448337cb40fcfb531f0b5b11090f75af363837f5c08887f6"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "misplacement parsed from post bytes",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "8a66dee215b693f733e9fd89b86898facbaa1784259da69f47ecca308270619a"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "misplacement extent not checked",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "86e54ecfc136fef184bf92b6756f3dcf025490618e3137e16e3433bd79a5ae7b"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "misplacement journal helper bypassed",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "74800f2a0405abfa5c2074b60e24c50533cd621e16f6b4bebab56408a6f1a108"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "misplacement proof copied from plan",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "4facb1f57d90f85465266fe3df28cf95f7113b054418b635c825d96f5340a64a"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "misplacement captured evidence lost",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "1d57677694222bf74658311f03a9d574872185839d2b8260996e09e50f5140b1"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "misplacement public cause bypassed",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "6caaae902a30a83005e68ade38a4dc84fe108a0e5872fe00ec32ce80b5528e8f"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "misplacement capture before owners retired",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "e17b5b9f89a067d2dcd4e14c73129bcea53e9dd693fe5015a1813a40c9e65097"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "misplacement bridge cause fabricated",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "c689054e4b06b71ad07ebb267fe13a9d4d2c72c2b431b769a2c95f620e3e2bae"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "misplacement bridge writer fabricated",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "62e2a31a7ecb0b83b6f275ddd9b9d9db1d5817675aaca7bb173ec55f3664da76"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "misplacement bridge wrong permitted cause",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "d2551d7d14912049c94bfed1960af0bdada2e1cc6045b3d7bdccf1f155682ba5"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "misplacement pre-DB predicate",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "b7d69d0aa29b528adc90da555eec31b2eb7234b8d8e7f7b866f56b3ac4b9ab99"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "misplacement post-DB predicate",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "36b80a130e71cfde919456a063dbdf6e6d5aa634554517bc233df3affc8aadad"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "misplacement replay removed",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "fc0bf098ee437299f34dd79861683a9c7db93ef373520486cd335798a0446f0a"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "misplacement NEW allowed",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "1c4bdf4dfb9e2c15fa1db30c1871c1cfca2b2b17fdcecdb99aea6e4f28e87d8b"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "misplacement actual evidence bypassed",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "970223a3acf5c488df7fb3678d5c5184a2bd27e76be22678b0d38d5d56f4d4c6"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "misplacement old-nine evidence allowed",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "53600fa21e11deafc85b5d2078e794ed456c55ca1f2fa8a5f96e77916dd497ab"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "misplacement native offset unchecked",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "16ccc60aef94693ace6274ecf9d9e44ffb80e41985310f4ac11edd2b37d41a6a"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "misplacement native count unchecked",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "876b661d5341c8a38c8c8a26908e7b3c5593e07bca781d2d3d1ee5233b26fb76"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "misplacement cause unchecked",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "5fc9e48cd0a9e57f3e67a4ea543ae40e50272a5903501165670af1180c884d6b"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "misplacement journal hashes unchecked",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "11e232a722b6b0f2d1fde449b743bf37a76ddd70b53e3047be4b953459db0eb4"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB helper early return",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "315ff7998cdf9fd3ae2d185bcd3a5cd0b7d978da376eb8a6ba49ed66247c593b"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "recovery helper early return",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "993fbbccc0dde846fa98be0c502a1c8333b9cd2e2cd687db058ca3cfb8676a10"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB target identity weakened",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "f63b400cd4ad65075b0794cf2de85573ddd7a5b49938b955aaa01b36013fa0e4"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB raw poison nil admitted",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "4a11843c97a7efb5bad81c50a2c757c47231cc2d1efd2d8b08813267477fb35b"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB nil joined cause admitted",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "cafaea06a386bf19fc3e3669f5322105f4fe60de34ed30ccadc939a4170861c8"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB empty join accepted",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "82aa6c722db56a171b5d9f342438bceb13106c42ec586a7498357969fdcee729"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB child capacity widened",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "b544491d1ff0dd908b2aabc9979eef0968158ba0cc470b04b4968bd7454a6a8c"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB target leaf requirement lost",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "aea4f4ce24b07165e903fdbcfd60900dc49d8e24d3a89b1e6e994cd55b3b58cc"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB poisoned leaf requirement lost",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "aea4f4ce24b07165e903fdbcfd60900dc49d8e24d3a89b1e6e994cd55b3b58cc"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB pending bound widened",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "d564a9a50b76e4baf60befb6d9c73b291b03b604164ce3344141066981c44b13"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB public checks moved after Unwrap",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "5d8b870dcf4ea60583812f6a658753eba1e8688cbd93a109bf305a1f88a392a1"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB known join check moved after Unwrap",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "7420d6969471d09315ceabf590043fca792437d53865076de76bef2d37ce494b"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB inner checks moved after Unwrap",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "b2161d63e489fb64c0b5bcb19be0e9f0fedc128620147cc667c5c6c2dcfcce3a"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB body target moved",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "4bfb801cc0344da2535fca3f81ed85e2e31dab1ee8d8612f4e387b5e5f74757a"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB body count widened",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "ab86081bbebe43d47f26b058ffbd77b7c6b138cd00f9fac8a9476d8d36fc89f3"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB body recovery classification",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "ab86081bbebe43d47f26b058ffbd77b7c6b138cd00f9fac8a9476d8d36fc89f3"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB body bridge relabeled",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "7245ea38d020429e7c35190cf029808d2d89ef306775147f5ab039aedc52ade2"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB body admission relabeled",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "0198773d900c50cfcc5f68d8c26f4e013566229ba8e4e9586e68eb4320e74e89"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB header target moved",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "55cf3f50304594714b8c2175187d191b0baaeaac4df6dc86436c61c855c4a83f"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB header count widened",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "9d4adac406182dd754e6f774aeb44ea9896d5827dbbc7905574a4e77e8082cea"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB header recovery classification",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "9d4adac406182dd754e6f774aeb44ea9896d5827dbbc7905574a4e77e8082cea"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB header bridge relabeled",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "38fea86fcea7d794abded824d37bedc7d8647b313a4a813c7dc53312fd2b4f8c"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB header admission relabeled",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "480816a35a2caf4684ebfe72a928c13c7614fbb8ab78954af331190d393dd0a0"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB publish target moved",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "98d3000c5ba591e7ff7d74910cf66607a3b11dba5feef79a179f359b8b4d4942"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB publish count widened",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "a7f23d8b9a5f71597fa23062663365c00f7bf735a81e38f71176f6d77ddb6fcd"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB publish recovery classification",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "a7f23d8b9a5f71597fa23062663365c00f7bf735a81e38f71176f6d77ddb6fcd"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB publish bridge relabeled",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "547fcec104337b5a14b9582ac7546f5ae378bb53f579fcdb447b7a26369ffcb7"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB publish admission relabeled",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "30c18ac39d501ef8fd5500ca8dcac147fdabeb68e4c03ca09757d92f97b5769a"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB IDs relabeled",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "e251a495fc30bb3ecd9a5a46a3a072cd9165db4cfebe1d994ea0de8f3151faab"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB IDs reordered",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "5f52b5a0c86c5514ace26ab735be782a3f72a1aefb12a77241397c8716a4efb8"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB cleanup unlink skipped",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "1fda9bd6b775f5fd577cc27bd64cdfa5be0fed79ed210b8e557257dc483caa2d"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB cleanup sync skipped",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "07acc0954d007972b6dad2d2bb1461abffd665bd87e5770399955c85939dc7c1"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB cleanup owner changed",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "214e5c5c183848ca3016dabf36797555ccae912aa94a31695cb893b0a7f608a7"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB case predicate widened",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "b7d69d0aa29b528adc90da555eec31b2eb7234b8d8e7f7b866f56b3ac4b9ab99"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB recovery predicate widened",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "6ff9a5211af14d1d1830ebad15b0ff1af66398708aabcecbd43b96bd56065f99"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB missing poison classification",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "9ffe3e57650bc72bd237db182fa0d98ab15c254cfb3827c1b09808f547160059"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB claims recovery sentinel",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "099efd388a01b95923f1f2a46f24b91f727caa0c7708818df4b89c49fa2b98c2"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB missing cause evidence",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "fa03deb152c5ea8c2ef0d2653ad0c5d9307695912a67c90d6f3e9953ea87a056"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB uncertain accepted",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "8e9daf7b4d51a446f441ad42b5e146a3ef6c8165e53b28c3209dfb3ddab58e32"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB cleanup pending accepted",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "041ed2e6c08b0df560e42930910b94c346d9ca899d88ecacee031ea18a9e1c56"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB lifecycle field omitted",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "6ba93ee00e30b1da4d578c4cf80a5bd8ba66dec7dd24b5c453c1c56bfa72d341"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB recovery zero branch lost",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "97d14912a957ae7d87a30c280331a4c42c74f583535189f04dc9b70095ffb9ee"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "unknown recovery case admitted",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "842c22ea6e29edc375abbec2c4d911420d7d330520d9c9241873a474d000ede0"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB journal presence admitted",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "0a571286042bcab3d08ad8f072555be8ba65b0dc55bcc8d36d24c8ac7bc778f9"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB whole OLD input weakened",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "069073de5f454a565092567f1214b359f29adac739d599f10c019d11eb0a1169"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB copied result changed",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "069073de5f454a565092567f1214b359f29adac739d599f10c019d11eb0a1169"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB cause target fabricated",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "43a86bc8e57cf655a58cf49b1684f97f4a0d3a401634e050dff0e300de12ab3a"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB poison substituted",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 3,
+    "after_count": 3,
+    "anchor_sha256": "9f81ecb00e7d82b8801335b0ad46946ce9cf9c6df0f474113edab19c2ed3adca"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB public unwrap identity dropped",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "e566f7a3c8d499d71bd0714f99544bd9c53971088285138b3ffb037a77ae8999"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB custom Is accepted",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "fd52be5efb6352f0283dee4660bd7972bd86a8202a857934eec02073286d1a09"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB custom As accepted",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "31d7096b9ed90185afa8bd5487d96fd6741caafc88833feac545638c31e01060"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB unknown cause shape accepted",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "62fe6684e50bf6644c33776ac0d88af1aa657636b66e9f3c1035e003da99e1a8"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB traversal unbounded",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "4f03ba1ef5168387c4a846eeccde4c2e9c0edb6ab83fafb8ad016baafb827af6"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB extra leaf admitted",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "7f9cde87795ba6dd8d91339a07bc9c4d2d65363b1b5d8a96d79293e98e0f7072"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB sentinel evidence disjoined",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "aea4f4ce24b07165e903fdbcfd60900dc49d8e24d3a89b1e6e994cd55b3b58cc"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB custom error reflection retained",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "d45ef6f0eb023efc183f201201deabe6e229b3c4b23455ed67cfb87bb04f4c0b"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB helper function value",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "1095e0de453ad83e882f6770a346e70040bfc8f88140048358578c3e68ccb17e"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB public wrapper replaced",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "618805be210f7457cd5218b48b7c988c1baea0d5d6d7021658a931b2c7ec5a22"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB cause boolean ignored",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "618805be210f7457cd5218b48b7c988c1baea0d5d6d7021658a931b2c7ec5a22"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB recovery sentinel allowed",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "b48cd0761f5abd8bf4bff3cd2dd965b1d39a10c94d5297b0b654f20fb8f9aafd"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB public poisoned ignored",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "d0be2cf13e7cfaa7266cdc30a507bbad80d4f926a35fdacd20603f1535f67fb8"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB validates only page prefix",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "bbd0ed9067a230123bf0a99ee23f5e1ab65420cf54f6ec7601d8b200fd878317"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB journal absence bypassed",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "6c55eba728be88ef744340dc83b6d5874aa203600928d122dcd921fa07a580e5"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB journal copy admitted",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "82bdf36dc7b1f4e546cdf1c12532c12acb0014cc95ffbb006a5e06c0d1af2e72"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB executes recovery",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "522e7e4310fd8f36d740c98cfe01a7e43e436e14b969dd3df2638e79be331a71"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB selector later reassigned",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "04ad58083ef06f6a7d2149ea9ccb8e52474659d7afabbcaa125b851ce4a283f2"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB selector shadowed",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "04ad58083ef06f6a7d2149ea9ccb8e52474659d7afabbcaa125b851ce4a283f2"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB actual poison observation faked",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "c48708b1179ad73b40fe359d5ef106c27bf460c13f5476abd675af2a4f777f64"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB actual cleanup observation faked",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "ba9eadeb6b72874cb379d11812bb84bd86c9f27dac4241eb65020b5505c15c1a"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pre-DB actual cause observation faked",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "7690bf55906eff51741918e0c03b579c0b79d700d4f0981ae5e30355df35aa5d"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "bridge error case mapped to nil",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "522d3ed4201bb90d39193386273f3eb4e003bd5e4ff61a9fe9a375b21145ef23"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "bridge prefix bit flipped",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "cd2921ad1084661e9eae81acea735ba491c3d294117f3e1d5dbd9be76eec6556"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "new prefix bit dropped",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "bf12a744ef2eed956a6b9bc0a784064f809af2acfbdcf70d054d6416e65d84b2"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "new prefix length changed",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "bf12a744ef2eed956a6b9bc0a784064f809af2acfbdcf70d054d6416e65d84b2"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "new plan name aliased",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "01cc37eda6c4fea5b1d5c064c7fb0027fa99bbcb9f63ba57879b2f63d5f2cd1e"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "new admission mapped to nil",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "5e942c48d5696ac87345fff1734854cbdf53f45c8bd141f1cb027cdf1b8c2ffc"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "new admission name widened",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "ad726217547ff22f421a3e592856fdbba9c694844716e85229f01a671ea9ed64"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "public plan case binding dropped",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "df9edade6e6d6cdf9ba2249c0cbd122b5070df9a9f819ca4335b4831419ab275"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "public new cause inverted",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "1a8c587a8a07ff7691e07590ad2e6c757ae09fb364364183a87ae211dea959a2"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "public new error accepted as nil",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "e7833a9466519259e1924ee15e0c6b9a80c0bcb2813d6dddcf94e1ca6d4bf9d9"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "nil prefix public cause no longer required",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "716fb832cc6fc0282cbb48460a8a05af0aea02b54b6d13f8c60089f0e3d28045"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "prefix tail checks only nil case",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "c8922c830a54ce0b496b7be643346c8af7bedb64ef0491535fb2f935007a9e15"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "prefix error claims public shortwrite",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "c27bcd7c01ed9933b67b0709ec0799d011c12c85ba16633adaacf77d0a88649d"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "bridge OR tag",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "d48d8cbc49e9329851f5b12aae7c756a9ea796c960a0158a18abd8e1f2339ff5"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "root OR tag",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "d48d8cbc49e9329851f5b12aae7c756a9ea796c960a0158a18abd8e1f2339ff5"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "bridge permissive environment",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "0e62563a58680a9e43cfc873b2f462069bde61f7bae086602ab4b5b3298f628f"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "bridge action before environment",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "5e854023dd95b377d67f8139f0209f22e4f6e15a070d2d36933e60c8e8994e4b"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "root weakened environment",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "0e62563a58680a9e43cfc873b2f462069bde61f7bae086602ab4b5b3298f628f"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "root action before gate",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "5e854023dd95b377d67f8139f0209f22e4f6e15a070d2d36933e60c8e8994e4b"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "extra manual root",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "6cbba6d61ad2ed609245e952e0b0a32f85fa2193e8151a2487ef21d53f7b3b22"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "bridge owner close",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "23e9b30008da0c096756dc830dff97bd9728a6d723b775d00d2e43864d400baa"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "bridge reset registry",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "23e9b30008da0c096756dc830dff97bd9728a6d723b775d00d2e43864d400baa"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "bridge deletes retirement registry",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "1d9dec096d5431e068bb2878a64d318bc2b829152b709d43e8491a8b4f57b5ea"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "bridge clears retirement registry",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "23e9b30008da0c096756dc830dff97bd9728a6d723b775d00d2e43864d400baa"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "snapshot owner pointer",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "02676dcc01690deca6cd02ed2da397958674a9bfdc4e1855a943de3d6c41975a"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "actual fourth page admitted",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "12b2b8f3a89078db62ccce7fecf772885589835c6df827b2132f2e2d0d2a0c5a"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "pending retirement ignored",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "bc8c76e2c9f13900bb3081e3e78bfc7c2fad913b59e634d075a8d53b3c602ae7"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "private entry alias",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "2c42abde4a0eb13f23a51b4c875d47e226ee70bebaaf9ea3c7437cb152424ead"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "storage Commit bypass",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "b105645b254befb4f4f37ad0ac87117fc293cb3e9f6cc8b54eda17b56a0de770"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "hidden bootstrap Commit",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "9a9bc40c1188e1d144131d665d835dcc7c71919f3572a89c6cc6417c352a2ab2"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "second public Commit",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "b105645b254befb4f4f37ad0ac87117fc293cb3e9f6cc8b54eda17b56a0de770"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "root repeats Commit helper",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "50dd8ed1b705c1d50415be94524734d2a06d0159b645fcaa39377d5e7e143b7d"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "root loops Commit helper",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "50dd8ed1b705c1d50415be94524734d2a06d0159b645fcaa39377d5e7e143b7d"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "root retains Commit helper",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "50dd8ed1b705c1d50415be94524734d2a06d0159b645fcaa39377d5e7e143b7d"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "Commit function value",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "b105645b254befb4f4f37ad0ac87117fc293cb3e9f6cc8b54eda17b56a0de770"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "Finish delayed",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "4552544c59e365381763950d747113ae611ce97bb9e1ba3beffbf371fea4e93d"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "Finish error substituted",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "99ed49cb969f270693b9d1cc2e969a8415f8b260d965545681d00cb018e9de25"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "public error identity dropped",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "09c421ca3025f0fe4c5acf5b379495a751248c3047fb30059093615df1fe2d56"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "IOErr classification weakened",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "97640b89c71314ff62f1c8e42045018691058369b867136a6dcbc36cdfaf6183"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "recovery sentinel ignored",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "a9d752ca82e90fb25ed10617d8cfd770f4c490be06a5e53c03beaa39658a0ee8"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "cleanup pending ignored",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "7ebe7cfd1b1e9f7b99547910cc4f0c08366f71e990447645e94b8e61979f033f"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "healthy cleanup bypass",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "0255882e511fbb0df3861b1b9860073f66f64440c95bfc51aabfa445532c9dd1"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "retry deferred owner",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "65c404deef134003bcd4365c670ec1683ac9e9b6be7509e69206abf2f6542994"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "owner double close",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "51a54ec87561037b54dddbd68187e22a8ac1a01ffa11e19237dd18c921beb2a8"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "open creates files",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "04c47594fc1f8fcf30f91e1cca6516b45b4b2cf93201a305a1e0197f03624395"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "readback writable",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "f7be824be85fedcca5c0c349292c257c5377690d517c4c3d4b29ca376ea576bb"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "recovery unbounded journal",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 3,
+    "after_count": 3,
+    "anchor_sha256": "ff60ad734ce7c699be0d661ed3a49ee6974685ea3336e398581639b677d99c50"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "recovery extra records",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 3,
+    "after_count": 3,
+    "anchor_sha256": "35a67cc0bea682b48fb8bfe3e4c78ec9a9abe3e2c105df80fe08138cd4484ab3"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "recovery wrong extent",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 3,
+    "after_count": 3,
+    "anchor_sha256": "97f2137ac1cbaf4824fa8163519bd24498ac38fe5a8d355f8027fc38efb713fa"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "recovery original basename",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "833fb6d0b92f27f38692fc06ee88bccf0ba3a11ce22fbd8a62d2a37e96febede"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "recovery copied helper",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "48a941eb943ceee3fe34731621780dc9844c810fab1bba9aba7aaf6a09585530"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "recovery function value",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "cb3503bf837a4e3b95208feeaabdfbf95987d8a62d55def2d9222a95401ca177"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "equal-count old-new baseline",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "05c5e62cf1627d665a3f3b64afcd2b40450a0dab94406d7973a3f120b64f9d5f"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "Rows Err omitted",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "d18a625d265b604415861dc476ede563b66b6f9df086560fa05bafcb14b48d53"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "Rows int type widened",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "2a46397f0395a214e0a316f87003a74e5cc648c05c7710cd667214ce67f58a40"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "Check omitted",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "edc0794970e298bfebe75abab9e03ef1956ab12070f5ae63ae009d278ccbbd26"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "test run regex union",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "6fb8b45fbd5ad6f48c85fce1694f503a38c72546bd3f0b5c48ed25b2ae61790e"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "test repeated case",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "bebac21699041b454ee975f00c334cf30f3950289abac4074b37f9a1df822268"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "plan wrong short prefix",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "e20f506092b1a8a2a8a3ef9faf0d1c9f4d6b735975c076a4f4173441990df10e"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "plan wrong DBPage occurrence",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "a7569829601c263e4abfa328aefa8936f9d2914b3970d8bd124a392998d7918e"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "plan wrong third-page offset",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "a3048585446bc5683578100dc2f03a933d09f0f7f5dca1689a48b4f3a79fc27e"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "model count-only rows",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "efdbb223eeca0b3d25ae346038f040289a51c2e569bcf414b25c305976796446"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "model receipt trusted",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "00f3e734afe5ca736dd646a456b2f3e182dd37567876049d525a619b4b596522"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "model old-new mixture",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "c0c692062f24dc85d3f846b70ea6913a9033c4a266b038d944daab2e32415da3"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "model index zero-work accepted",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "1103ea3f8ee369f6dcfc73921bd398e8248beaefe0b08fe5be3888bbf991e00b"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "model EOF ignored",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "6244ca0c50da85f1d047fb6e8e5b88fd57dfce910bbef8fe83e9d97e0a606f3e"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "model digest substitution",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "1846ef82be462a7c7b0c82d5630ff1e5b45663d6cd042d44736854b153d2fed2"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "control recovery call admitted",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "1b43897a374c36a6d489df937b2d7b54f548b137af15ea1c827f47964d9599b0"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "model physical pass",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "36a2f006cbceb028f2e666d02264e73bb97505aea4508d15d137a42599ee1bce"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "model owner pointer",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "24f98e345daf734a2186751a1aa77824a353b61b07afed3c42ce39ebe38d7b91"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "model aliases replay",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "0e178db7a488b248f584a4d0d337444fcaea4a9e1d321489480fdf8748e4789a"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "post-DB full ledger field omitted",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "feba9b849c4d1aa5ea209cae08206fc0182ed8edfa82ba9578b60f4ba6dcff6a"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "post-DB extra readback site",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "fd9b936ce66472ff6cea3ef333c0d76b7a0672fd06d145b27ec344550128d48a"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "post-DB case IDs reordered",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "7ddd7e2275faa2463126333adfee8a8729b8fdc212774ec4bd1aeb07c1d13363"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "post-DB future case appended",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "7706d5d6f7b40e598b70ce6e65df642d9430a318effd0ef8a78d453bb8707cfb"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "unlink target moved before DB sync",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "1e6872753aefb36bf58ccb74a03be4951c25e900263af5f09aff238edf02f37f"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "unlink case executes final sync",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "3a0649585b096a886dd1e1df5eabb0c04797c388eddf806aa31cadfe2feb4588"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "unlink incorrectly acknowledged",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "3a0649585b096a886dd1e1df5eabb0c04797c388eddf806aa31cadfe2feb4588"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "final sync target becomes unlink",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "42ef345d706420ea1f35b195d1d4d6ae43a6b53c46ba232eda3bb07ef30b4d84"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "final sync trace truncated",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "0166c34c3451a7b0772fdddfae5ed664c3633a3dff86f14a7395bfe5121d9462"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "final sync incorrectly recovery-required",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "0166c34c3451a7b0772fdddfae5ed664c3633a3dff86f14a7395bfe5121d9462"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "post-DB unlink occurrence changed",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "fc56209584d12ea4fff110b1a054245ac821f7aec15ce45d85310793af5137af"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "post-DB final sync role changed",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "df9bd862301e4a329a5cf8228138400c881aa230ee7a7e62890e5c91af8f4779"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "post-DB future predicate admitted",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "36b80a130e71cfde919456a063dbdf6e6d5aa634554517bc233df3affc8aadad"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "post-DB predicate early return",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "c983d88c8274534856325828a04adb10d5db37ea1f4f099acad5eb2979ebe358"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "future recovery classifier admitted",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "9ac79484f843551d64f10c6c99f1c8e00cf68b30e667f71e71f86fb7b5f7ab82"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "unlink recovery omitted",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "2a9a2097ce74d86ad2c7db243ff1eadd03c83d5858dfd02e4e5f5e7d47204f1d"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "post-DB target reflection skipped",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "00f3e734afe5ca736dd646a456b2f3e182dd37567876049d525a619b4b596522"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "post-DB receipt plan identity lost",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "2dd976ecfbbaf99e79b928ae4d3dc71737d4cf1297984286241794b28c9ddd1a"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "post-DB public chain scalar omitted",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "4ee2066405dbc3c7690e8f0c5d0fa6f7c5eb2205688efa2ca0f0af54261dcf7a"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "final sync uncertainty scalar lost",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "8e9daf7b4d51a446f441ad42b5e146a3ef6c8165e53b28c3209dfb3ddab58e32"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "unlink uncertainty falsely accepted",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "8e9daf7b4d51a446f441ad42b5e146a3ef6c8165e53b28c3209dfb3ddab58e32"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "post-DB second reader omitted",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "9ed3c788e13192bd01becc8c8a4947c0b92d740b3eef5ed1ab028305c01bebcf"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "post-DB NEW snapshot omitted",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "f129ac0a65dc53dc8ff7292f48b1a24122972446da292583a9b93fac656ef6db"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "post-DB accepts OLD intermediate ledger",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "f129ac0a65dc53dc8ff7292f48b1a24122972446da292583a9b93fac656ef6db"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "post-DB prior reader owner reused",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "2b270164c487709239327f35f07adcdf95bb2a256781b0d43f4a8954fa44a032"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "post-DB final reader owner reused",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "b5a27e8fab40d0cfbd911fd3fdcdd31cb2bc8508d03f2e446f92f2fa31fdd707"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "post-DB final iterator reused",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "1fa5e57f987b7bebaefb09a57c8cc63efba7b4487296fbf67d52ff13d2dcea9f"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "old seven nonzero PostCommit admitted",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "9055d4e9ade0f7d4e257ef20b346cafca32ea23ae14afe0ec3c6affcfdaccd7b"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "final sync OLD ledger wrongly accepted",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "1c4bdf4dfb9e2c15fa1db30c1871c1cfca2b2b17fdcecdb99aea6e4f28e87d8b"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "final sync recovery allowed",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "97d14912a957ae7d87a30c280331a4c42c74f583535189f04dc9b70095ffb9ee"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "future recovery accepted by early return",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "0a094a96e88d1fbb53de244a083373dccdd5fc10fbbd5ac7c7260c70c14227d2"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "final sync journal artifacts admitted",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "0a571286042bcab3d08ad8f072555be8ba65b0dc55bcc8d36d24c8ac7bc778f9"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "final sync artifact output changed",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "1feb42f5f90660fa0d214d9dc2c27fde7639bb5637067af59157e11a3c4fce0f"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "future artifact accepted by early return",
+    "source": "internal/testkit/rollbackfault/sql_ledger.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "585ec17c1159a1fa290fa9fffeeb182d730066ee2d8c3de41674900b284f0738"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "unlink bridge target mislabeled",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "4269bd0e838b13e3710fc57c50bb36e6ea2b5956c749c1f7793f4b4393615138"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "final sync bridge target mislabeled",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "940949f79f808186c550344fafc6610daed4b6011499db228266ac4913fd5742"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "post-DB bridge sentinel relabeled",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "84a4f3ebd02d115feb4ecc52d0b82fc04a9d28d4446d8c4173aee03c0878e6db"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "final sync bridge sentinel lost",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "114c529d40ce825c3ec85abf2acba56cd0239099ef4068e808f34286a9026065"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "post-DB third sentinel admitted",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "66ecd270172809ef4510b627aa4e1fff1090df6b7036dd9530cdc95d068dd1bb"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "post-DB permitted sentinel optional",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "e30ffe09cee451d9752554952bf2463d807268cb68e4430f5d251ea7cac1173e"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "post-DB permitted leaf omitted",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "136aaf99690ee31df1455368d2d52159f6dad2646b80d5d707db4f961869f7e5"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "post-DB either classification leaf accepted",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "60cf8c72535c428d49a799cc4506fa0f80bd15f5e11570b80a75b5f644297ea9"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "post-DB bridge uses public error as poison",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "d44445e3036adcda4faaf7dbede127c3d3566cff7cd6c14a02addbc55f67572a"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "post-DB bridge result fabricated",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "8912362adcccc521ca9aa949b6702b86843b5eab19b8bce6f936f99bbe99d6b8"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "post-DB helper copied by function value",
+    "source": "internal/pager/rollback_fault_sql_manual_linux.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "d44445e3036adcda4faaf7dbede127c3d3566cff7cd6c14a02addbc55f67572a"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "unlink admission mislabeled",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "b990c54ede52a028ae67c7885be350c82137f0b192b6cc260879b05f7dc94e86"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "final sync admission name broadened",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "d393afc44f859146d02598ba1db6cb403a34df139ad21798acdad6409fd0cf2d"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "final sync uncertainty forced false",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "27b9f4b138822f9d862366cb453ac74ad95cf98f52bc7a6da7bd0d05d1bfa771"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "post-DB public wrapper identity removed",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "96f4127fefabd78a8db64bcd4d632510c79062cebfb26b53982629d8658a094a"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "post-DB cause observation ignored",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "96f4127fefabd78a8db64bcd4d632510c79062cebfb26b53982629d8658a094a"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "post-DB recovery versus uncertainty inverted",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "858724d8aa241fb0806cd280555e21224c19f4165d4e100985e6e20a3a801978"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "post-DB classification flag fabricated",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "5ce3166e0357aa55f3fa00bbab0666a12724f87193fe8ecccbd9d04110ca0879"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "final sync captured uncertainty fabricated",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "54f7e09be90ea254aa91e00dfeaacdaff2a2de4701766eaf16c054c4264cf0f9"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "post-DB captured report overwritten later",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "5ce3166e0357aa55f3fa00bbab0666a12724f87193fe8ecccbd9d04110ca0879"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "post-DB NEW snapshot condition widened",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "d0f2a71d921ca288a3b19dfc59652e4e93c3293e087879dbefcfc71177a81ce7"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "post-DB intermediate read opens original",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "8d051110e2b34821393a8d75ebf636f4800d409fa57afbe257772075d77bb25e"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "post-DB intermediate NEW validated as OLD",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "4021c2b13ee22868162dbdef4a01d9dc2fd4660dfa604f6811152df6d93afe7e"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "post-DB intermediate result fabricated",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "a672073a92e912233e2d5ebe168bc60e999f40bd8755f251a7cafad647b3e454"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "post-DB intermediate retirement ignored",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "6d3b4d54484eb5e24ba0e5d7f97dd910943ce765ce11d7390bf71cb07f2cbd30"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "post-DB selector later reassigned",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "04ad58083ef06f6a7d2149ea9ccb8e52474659d7afabbcaa125b851ce4a283f2"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "post-DB future selector admitted",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 2,
+    "after_count": 2,
+    "anchor_sha256": "dcf05591f549596eee32d1d7dd456c56cd66527f35e13a6e75e6032718720a11"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "final sync executes recovery",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "522e7e4310fd8f36d740c98cfe01a7e43e436e14b969dd3df2638e79be331a71"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "unlink skips recovery",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "522e7e4310fd8f36d740c98cfe01a7e43e436e14b969dd3df2638e79be331a71"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "final sync journal absence ignored",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "6c55eba728be88ef744340dc83b6d5874aa203600928d122dcd921fa07a580e5"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "final sync final ledger changed to OLD",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "a838d53dfefe83fa1e6248bace44185e8f687e50199b429a6210108cb127c557"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "post-DB retirement failure accepted",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "fdf010605b8e4768450ecd70010a9caef4652080216e85be2a8eb30680bfd353"
+  },
+  {
+    "test_file": "internal/testscope/rollback_fault_sql_test.go",
+    "function": "TestRollbackFaultSQLRepinnedSemanticCounterexamples",
+    "name": "post-DB physical validation no longer rejected",
+    "source": "sqlite/rollback_fault_sql_manual_linux_test.go",
+    "before_count": 1,
+    "after_count": 1,
+    "anchor_sha256": "d6446e30585644437d09dbfdbc42583fd94a80053910749839c35c7ce66421ad"
+  }
+]

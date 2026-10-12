@@ -1,0 +1,30 @@
+{
+  "name": "04_model_race",
+  "start_utc": "2026-10-12T22:47:04.596568+00:00",
+  "end_utc": "2026-10-12T22:47:08.598645+00:00",
+  "exit_code": 0,
+  "resource_breach_latched": false,
+  "observer_error": null,
+  "stdout_sha256": "8f13fa752d56053cb909ad427a76cbefef68b771f02c3be2c29e9068c3e32416",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "tests": {
+    "github.com/ms-xiaosnow/gosqlite/internal/testkit/rekeyinterruption": {
+      "roots": [
+        "TestRekeyInterruptionAckCausality",
+        "TestRekeyInterruptionCredentialPurpose",
+        "TestRekeyInterruptionCutOrder",
+        "TestRekeyInterruptionNeverPhysicalPass",
+        "TestRekeyInterruptionOwnersAndArtifacts",
+        "TestRekeyInterruptionSQLIndexLedger",
+        "TestRekeyInterruptionSelectedGeneration",
+        "TestRekeyInterruptionSixCases"
+      ],
+      "root_count": 8,
+      "named_pass": 8,
+      "child_pass": 0,
+      "fail": 0,
+      "skip": 0
+    }
+  },
+  "status": "PASS"
+}

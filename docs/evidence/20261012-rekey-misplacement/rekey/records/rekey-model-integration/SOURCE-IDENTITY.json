@@ -1,0 +1,21 @@
+{
+  "base_commit": "01c63e6f8fb3d9e196afe2f42a163eb3eac4ad5a",
+  "candidate_tree": "009bc803195f5c8f25943d0c49c39e82abb1c329",
+  "independent_source_review": "SOURCE_REVIEW_CLEAR_WITH_LIMITS",
+  "files": {
+    "internal/testkit/rekeyinterruption/contract.go": "b9a179e2ca3f82678842f86a3e330b52cc916097408ccc1716fa74ebf08a0e02",
+    "internal/testkit/rekeyinterruption/contract_test.go": "ac32dd1977e8283aa66dec82f66f2635125ef0d16ef52c321303ee3d9e847159"
+  },
+  "roots": [
+    "TestRekeyInterruptionSixCases",
+    "TestRekeyInterruptionCutOrder",
+    "TestRekeyInterruptionCredentialPurpose",
+    "TestRekeyInterruptionSelectedGeneration",
+    "TestRekeyInterruptionSQLIndexLedger",
+    "TestRekeyInterruptionAckCausality",
+    "TestRekeyInterruptionOwnersAndArtifacts",
+    "TestRekeyInterruptionNeverPhysicalPass"
+  ],
+  "native_integration": "NOT_APPLIED",
+  "physical": "NOT_RUN"
+}

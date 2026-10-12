@@ -27,6 +27,7 @@ const (
 	SQLPublishDirectorySyncBefore
 	SQLJournalUnlinkBefore
 	SQLFinalDirectorySyncBefore
+	SQLIndexMisplaceMinus64Error
 )
 
 type SQLState uint8
@@ -197,9 +198,32 @@ type SQLArtifactEvidence struct {
 	After  SQLArtifactStamp
 }
 
+// The writer supplies these real arguments before its one native invocation.
+// The generic receipt still records the requested Call without alteration.
+type SQLMisplacedWrite struct {
+	RequestedOffset int64
+	RequestedBytes  int
+	NativeOffset    int64
+	NativeBytes     int
+	NativeCalls     uint8
+	PayloadSHA256   [32]byte
+}
+
+// This fixed evidence is zero for every other case. Hashes remain supplied
+// labels here; only the source-gated manual caller derives them from bytes.
+type SQLMisplacementEvidence struct {
+	Writer              SQLMisplacedWrite
+	ShiftedSHA256       [32]byte
+	BaselineRangeSHA256 [32]byte
+	BaselineTailSHA256  [32]byte
+	UntouchedTailSHA256 [32]byte
+	JournalOriginals    [SQLPageCount][32]byte
+	OnlyTargetCause     bool
+}
+
 // Counts are observations, not instructions to close or retry anything. A
 // failed Commit must be followed by retired writer owners and a fresh read-only
-// open. Four fixed post-write failures call recovery; pre-DB failures and
+// open. Five fixed post-write failures call recovery; pre-DB failures and
 // final-directory uncertainty require zero recovery calls. The two post-DB
 // cases also read the retained post-Commit copy as NEW before any replay. No second
 // Commit or Rollback attempt is permitted. The two recovery-boundary flags also
@@ -236,6 +260,7 @@ type SQLLedgerEvidence struct {
 	Artifacts     [SQLArtifactCount]SQLArtifactEvidence
 	Recovery      SQLRecoveryEvidence
 	Lifecycle     SQLLifecycleEvidence
+	Misplacement  SQLMisplacementEvidence
 	PhysicalClaim bool
 }
 
@@ -257,6 +282,7 @@ const (
 	SQLProblemLifecycle
 	SQLProblemPhysicalClaim
 	SQLProblemArtifacts
+	SQLProblemMisplacement
 )
 
 type SQLObservation struct {
@@ -368,6 +394,9 @@ func SQLPlan(identity Identity, which SQLCase) (Plan, Problem) {
 	case SQLFinalDirectorySyncBefore:
 		spec.Target, spec.Action = spec.Calls[17], FailBefore
 		spec.ExpectedCommit, spec.CallCount = CommitUncertain, 18
+	case SQLIndexMisplaceMinus64Error:
+		spec.Action = MisplaceIndexPageMinus64
+		spec.ExpectedCommit, spec.CallCount = CommitRecoveryRequired, 15
 	default:
 		return Plan{}, ProblemTarget
 	}
@@ -481,6 +510,10 @@ func ObserveSQLLedger(plan Plan, receipt Receipt, evidence SQLLedgerEvidence) SQ
 			return result
 		}
 	}
+	if !validSQLMisplacement(evidence.Case, evidence.Misplacement, original.Frozen) {
+		result.Problem = SQLProblemMisplacement
+		return result
+	}
 	if !validSQLRecovery(evidence.Case, evidence.Recovery) {
 		result.Problem = SQLProblemRecovery
 		return result
@@ -491,6 +524,14 @@ func ObserveSQLLedger(plan Plan, receipt Receipt, evidence SQLLedgerEvidence) SQ
 	}
 	result.EvidenceConsistent, result.ScenarioObserved = true, true
 	return result
+}
+
+func validSQLMisplacement(which SQLCase, evidence SQLMisplacementEvidence, originals [SQLPageCount][32]byte) bool {
+	if which != SQLIndexMisplaceMinus64Error {
+		return evidence == (SQLMisplacementEvidence{})
+	}
+	writer := evidence.Writer
+	return writer.RequestedOffset == 8192 && writer.RequestedBytes == 4096 && writer.NativeOffset == 8128 && writer.NativeBytes == 4096 && writer.NativeCalls == 1 && writer.PayloadSHA256 != ([32]byte{}) && writer.PayloadSHA256 == evidence.ShiftedSHA256 && evidence.BaselineRangeSHA256 != ([32]byte{}) && evidence.ShiftedSHA256 != evidence.BaselineRangeSHA256 && evidence.BaselineTailSHA256 != ([32]byte{}) && evidence.UntouchedTailSHA256 == evidence.BaselineTailSHA256 && evidence.JournalOriginals == originals && evidence.OnlyTargetCause
 }
 
 func validSQLReaderOwners(spec PlanSpec, before, after uint64) bool {
@@ -621,7 +662,7 @@ func isSQLPostDBFailure(which SQLCase) bool {
 }
 
 func needsSQLRecovery(which SQLCase) bool {
-	return which == SQLIndexPrefix64 || which == SQLDBSyncBefore || which == SQLIndexPrefix64Error || which == SQLJournalUnlinkBefore
+	return which == SQLIndexPrefix64 || which == SQLDBSyncBefore || which == SQLIndexPrefix64Error || which == SQLJournalUnlinkBefore || which == SQLIndexMisplaceMinus64Error
 }
 
 func validSQLRecovery(which SQLCase, recovery SQLRecoveryEvidence) bool {

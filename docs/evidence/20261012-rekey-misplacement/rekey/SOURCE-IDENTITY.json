@@ -1,0 +1,28 @@
+{
+  "base_commit": "01c63e6f8fb3d9e196afe2f42a163eb3eac4ad5a",
+  "candidate_tree": "8751a3bed18341a299c060ff494c437d5176b024",
+  "files": {
+    "docs/testing/rekey-interruption-manual-zh.md": "25baafd77286649973669711218f8c6d1ffdc1ce434ae4a4315664ac503e8ce8",
+    "internal/encstore/publish.go": "d4a3d5f2cfb99e2413dbd271f113cc2b08203a4635ef10638bc43ff022d2fc29",
+    "internal/encstore/rekey_interruption_manual_linux.go": "f6ec88c3c6d0e8c1bb40b1e514414e0fe0fc05b029919ebf80231cba67e64819",
+    "internal/encstore/rekey_observation.go": "5328be5bb42fb4207331d24d8c7bc157d37244836c24384a72b01ed26f68fbcc",
+    "internal/encstore/rekey_observation_default.go": "0c44d0577df486ca116b3f332a71f45e34e58367df64e112dba8387c2dfe51bb",
+    "internal/testkit/rekeyinterruption/contract.go": "e834e098a978d1715189e3cee293aab62ea2b806d27f892a60b3d6f4d89f888e",
+    "internal/testkit/rekeyinterruption/contract_test.go": "41f7343636c45b56f081875db9ab0b81273bbef212282a02a46f6ae1e5978cc6",
+    "internal/testscope/encrypted_root_negative.go": "78828cfc0b5b4a0cd594119d29eb828006ecf75250922d4753b12254670e577f",
+    "internal/testscope/encryption_upgrade_manual.go": "4b9ba0f8912ff953db3bc01a286aac3b8be29315506b2b4ab9fdfdd940bf550f",
+    "internal/testscope/main.go": "1d9f41ed857bf64a3d2913f96fee3409a173f036df753efd81a7a9190ee2536a",
+    "internal/testscope/oracle_startup.go": "0e480e214568b935c16c34ef9226f7ef2c86fce81151ebe09aa91087a62ec6a4",
+    "internal/testscope/readonly_wal_manual.go": "2c4c667a1a31e0d8efb341f2b94a03c011189fca44fa2349248814af1b19f389",
+    "internal/testscope/readonly_wal_manual_test.go": "8a7af77ba419ed25908148ec9e076a249c766b6e33a46b0853e69d54d572f35e",
+    "internal/testscope/rekey_interruption.go": "9bab65139005fd2a296f8db023528613c41df94860d60304ad1564f073f7c6a8",
+    "internal/testscope/rekey_interruption_test.go": "f562a86ac3c986561a21f219fc5eb0d7793546b7732594dd781897b72913cc3a",
+    "internal/testscope/rollback_fault_sql_test.go": "a13a82fd127d81eb7df85eb0286f156f575ae0a17417d2c33a6127388dce0d7d",
+    "internal/testscope/rollback_fault_test.go": "79dea110d8eb481b7d6e7f055ef8ff93e2f7032f19d370f3f5279ba255878dbb",
+    "internal/testscope/rollback_restart_test.go": "b5606806555cc53f36e5c130e3480e9609f2c0467470523402ff3e457c254a4e",
+    "internal/testscope/wal_tail_publication.go": "310b3fff4d5b4c5750929546e8eca8ca37a838aa897962a45f9d65bda02f8704",
+    "sqlite/rekey_interruption_manual_linux_test.go": "57eb002b233f902bc441743d880203e6762fdd18c7c15dc264a009f64e7dcaca"
+  },
+  "prior_candidate_tree": "39287e51e468247908585027e5ebeca5733bf3ba",
+  "reason": "Complete original7diagnostics:4SQLPlan type+3SQLQueryText function references renamed withinnewR5only; oldguardunchanged."
+}

@@ -1,0 +1,202 @@
+{
+  "anchor_status": {
+    "adaptations": 0,
+    "all_present": true,
+    "count": 290,
+    "prior_handoff_count_270_is_stale": true
+  },
+  "base_commit": "01c63e6f8fb3d9e196afe2f42a163eb3eac4ad5a",
+  "evidence_files": {
+    "01-gofmt.diff": {
+      "bytes": 29547,
+      "sha256": "f9685dd8bae36c8e97a81af7b008163a56673e6210da599cd162e8a660760937"
+    },
+    "02-repin.diff": {
+      "bytes": 365015,
+      "sha256": "6a859898af32714616a49fc510eed39935f89bbf6726d06066a73b1a8831c307"
+    },
+    "03-anchor-adaptation.diff": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "final-format-and-repin.diff": {
+      "bytes": 394392,
+      "sha256": "2ca0b8afec0287b2cb4d7236e3638e06a53e65e11131de7d973911f1fae47dea"
+    },
+    "final-overlay-from-01c.patch": {
+      "bytes": 560804,
+      "sha256": "b84d4048a89ebfc8908c9512c3cbb49bb66069dc6393061061bd7b37cccedd3e"
+    },
+    "final-text-check.json": {
+      "bytes": 2607,
+      "sha256": "18d935fc08f0ceda1ff07247ec425dc27bc487261835718b3d5e95ec338cf001"
+    },
+    "gofmt-text-check.json": {
+      "bytes": 2633,
+      "sha256": "fca1f4dbc6b6c12e87efd5c110f73c1b956260e216587d095e7ff1417bf392ff"
+    },
+    "known-w-overlap-paths.txt": {
+      "bytes": 88,
+      "sha256": "040dd5ec8b33e386581c0b122558378f696a662f44e28e532d0ea6e9784196d6"
+    },
+    "mutation-anchor-check.json": {
+      "bytes": 111846,
+      "sha256": "1d4f2795c61742c1a6bf8f8fa5d477189767d80476ffd85a30a92261b9e0dea2"
+    },
+    "old-main-pins.json": {
+      "bytes": 237,
+      "sha256": "27a7f6965a1623c48168e617f943cbecf62656874e02471f345a1c0f67241189"
+    },
+    "selected-testscope-roots.json": {
+      "bytes": 2973,
+      "sha256": "ddd36a1c2d8d3457af24c46f8a8b60fac40592d5b40e65657b8545d3b84a974f"
+    },
+    "selected-testscope-run-selector.txt": {
+      "bytes": 1250,
+      "sha256": "4c7f67b20ef6396cab05d5bc00241918fd78477abea34145928dc934c50d7baf"
+    },
+    "seven-pin-snapshot-check.json": {
+      "bytes": 2214,
+      "sha256": "0a1462a2bf7080cf7a02f9ba6e3ae19f7c4e8c2a03bae0f14e640bb4b661533d"
+    },
+    "w-overlap-diff-from-01c.patch": {
+      "bytes": 1739,
+      "sha256": "f14c0ff252bc083837262495d36fe429b2a921845b8e8f227a93bf1544b8450a"
+    }
+  },
+  "excluded_current_w_sources": {
+    "goal.md": {
+      "current_w_sha256": "9ae7b1d776856669a10eb753408c7754d015d266f8783240165450e96e4bac81",
+      "reviewed_sha256": "9ae7b1d776856669a10eb753408c7754d015d266f8783240165450e96e4bac81"
+    },
+    "internal/pager/commit.go": {
+      "current_w_sha256": "9ae36612afac5cfae48bd972e6162c94722bcf7355ea462b4e15289b5188aa32",
+      "reviewed_sha256": "9ae36612afac5cfae48bd972e6162c94722bcf7355ea462b4e15289b5188aa32"
+    },
+    "internal/pager/recovery.go": {
+      "current_w_sha256": "8865a4dcf37bf40f27245a949372d6e8ef62ec84f804d7f128c0d7d53f140786",
+      "reviewed_sha256": "8865a4dcf37bf40f27245a949372d6e8ef62ec84f804d7f128c0d7d53f140786"
+    },
+    "internal/pager/rollback_io_contract_test.go": {
+      "current_w_sha256": "a7695da7b49488be37a98b239b1b31d59bc406455d0b3300709081fd96ae49c4",
+      "reviewed_sha256": "a7695da7b49488be37a98b239b1b31d59bc406455d0b3300709081fd96ae49c4"
+    },
+    "internal/pager/rollback_io_default.go": {
+      "current_w_sha256": "f1d45680aa93940d9d181f01ecc40f5e88c258970c940a28b4f19df712182bd1",
+      "reviewed_sha256": "f1d45680aa93940d9d181f01ecc40f5e88c258970c940a28b4f19df712182bd1"
+    },
+    "internal/pager/rollback_io_points.go": {
+      "current_w_sha256": "e9f4349eac27fe2f2ee6726edeb3cd26e3f5e851e75ae342f2f3a7995f038905",
+      "reviewed_sha256": "e9f4349eac27fe2f2ee6726edeb3cd26e3f5e851e75ae342f2f3a7995f038905"
+    },
+    "internal/pager/rollback_restart_manual_linux.go": {
+      "current_w_sha256": "580c1726e059ed36c86fbaafbe491ec8062f527e9b7db3ef4d45cb501b1f4625",
+      "reviewed_sha256": "580c1726e059ed36c86fbaafbe491ec8062f527e9b7db3ef4d45cb501b1f4625"
+    },
+    "internal/testscope/main.go": {
+      "current_w_sha256": "1d9f41ed857bf64a3d2913f96fee3409a173f036df753efd81a7a9190ee2536a",
+      "reviewed_sha256": "6dbab48ff374858bfafe578f0fca99f5176ced7b6bdc008bec04ce6a6d1d0eb2"
+    },
+    "internal/testscope/rollback_restart.go": {
+      "current_w_sha256": "a6edb3a708ecf81c688c766835b349c26777553613de587673847b451a0e8ab2",
+      "reviewed_sha256": "a6edb3a708ecf81c688c766835b349c26777553613de587673847b451a0e8ab2"
+    }
+  },
+  "files": {
+    "docs/testing/rollback-fault-adapter-zh.md": {
+      "base_sha256": "c04e93be4481f4b635bc7ecccff46dc352ddf5ea53415252554ec2b4b740ab0b",
+      "bytes": 20092,
+      "reviewed_sha256": "e0e683b7e2c57c31980a606c4ccf9abf5263cdd96e6c5f887b690390012afe60",
+      "sha256": "e0e683b7e2c57c31980a606c4ccf9abf5263cdd96e6c5f887b690390012afe60"
+    },
+    "docs/testing/rollback-fault-sql-manual-zh.md": {
+      "base_sha256": "9967acb6a803c2c1f71374b62bb4d4db2bc1b5252e50f64e819d25b73c6d23c7",
+      "bytes": 36410,
+      "reviewed_sha256": "8ddd2eac317c52b365bd82ba515487e0067a4c7931f410254fea16a271e682d7",
+      "sha256": "8ddd2eac317c52b365bd82ba515487e0067a4c7931f410254fea16a271e682d7"
+    },
+    "internal/pager/rollback_fault_sql_manual_linux.go": {
+      "base_sha256": "ad9f263e2d15a496cc70b1d35038f5b0393e8b94c0923ea5db96bf4eff71c0f9",
+      "bytes": 9045,
+      "reviewed_sha256": "50ff5277bd0811f4f5f9080520797d9fff6689cce1eb5fb2345d81cbce923b5c",
+      "sha256": "9847b258f401c52c8748b2e380a8b96e33eda64567a38edd1833f16df188431a"
+    },
+    "internal/pager/rollback_io_manual_linux.go": {
+      "base_sha256": "4f26bfec0de7b3c22f056ec374a4c453691f5cd2a5ee5e62116f2f8c66b5e498",
+      "bytes": 22187,
+      "reviewed_sha256": "1e15ab58e49a4d6eedd72274e20c59f644546609f61a19d96e588688eb0c5940",
+      "sha256": "1e15ab58e49a4d6eedd72274e20c59f644546609f61a19d96e588688eb0c5940"
+    },
+    "internal/testkit/rollbackfault/contract.go": {
+      "base_sha256": "dc7ec44ec7be3f444f4e7501c84d6875a1a0e9b4d46e06e5586b2e5d225828ed",
+      "bytes": 23364,
+      "reviewed_sha256": "dff18faca43a384de7ec37aedee877d30320823e540be71c7486d3ff5a24198d",
+      "sha256": "dff18faca43a384de7ec37aedee877d30320823e540be71c7486d3ff5a24198d"
+    },
+    "internal/testkit/rollbackfault/contract_test.go": {
+      "base_sha256": "8c43b22c2fbfdc6d4aef423abd44956196a2b15e223a8f56ef00065c8d77c362",
+      "bytes": 46965,
+      "reviewed_sha256": "3b4aae0c648444bf2031b625637aedc2de2a5c9b2632243512b89d8ac3258f31",
+      "sha256": "3de6db2bb1cfd222a04af78c9f0b88c5b5dfefb163ef63967ec44ed6ee417993"
+    },
+    "internal/testkit/rollbackfault/sql_ledger.go": {
+      "base_sha256": "7d47e46b34204c12a4df50d02a24179bf22e081d45f2816e3c048b0bc7dd04dc",
+      "bytes": 27231,
+      "reviewed_sha256": "96def5b6a7545f7e7f8e9e2acaf16e540237cfa2bccd92875b7961560e328267",
+      "sha256": "96def5b6a7545f7e7f8e9e2acaf16e540237cfa2bccd92875b7961560e328267"
+    },
+    "internal/testkit/rollbackfault/sql_ledger_test.go": {
+      "base_sha256": "5bea133008de83e9c5e737582305034cf24e1b99a25d402cba61c596f52ef2a3",
+      "bytes": 90138,
+      "reviewed_sha256": "5d0fede7585d788714a380d72691083931c738c903391f0cec76aaecb394f8e3",
+      "sha256": "c043511f850e067833c715b13e6442433e58bdedef9f640bb145a06db967e998"
+    },
+    "internal/testscope/rollback_fault.go": {
+      "base_sha256": "1e82d659ac17f3568f34338e951d6e8a044eeec0e07e45498368bda491a09c59",
+      "bytes": 147779,
+      "reviewed_sha256": "c854bfafe0ecedc33e4676595d21a99d460d129ae0a2d6a9ca776178d002caed",
+      "sha256": "bb3d93fea9959906fff0093d320fecac1d7dbfae58cb4a6221012b4a8fc04448"
+    },
+    "internal/testscope/rollback_fault_sql.go": {
+      "base_sha256": "0647edf67ae831b8d99b3caddf02fbf8e65380fc391405effe433145c5374969",
+      "bytes": 311484,
+      "reviewed_sha256": "ae4adc9a0636e7ca3b9067276fee83965e2aa2002b4754571f661f8926d7f895",
+      "sha256": "8e98e9b83e5c2f379b223fa49b20eb8aeef703476083b507aa29949fda662b21"
+    },
+    "internal/testscope/rollback_fault_sql_test.go": {
+      "base_sha256": "9a840e46fdc15454367b5486912beade2bcc2ee79179108bddf5f3275677fe97",
+      "bytes": 71196,
+      "reviewed_sha256": "fde0e37a3afe4affc649624978eaeaa2f580e9b55b3b5a7d73d9012bce70dab4",
+      "sha256": "fde0e37a3afe4affc649624978eaeaa2f580e9b55b3b5a7d73d9012bce70dab4"
+    },
+    "internal/testscope/rollback_fault_test.go": {
+      "base_sha256": "2b2c35a0e73292d42a0b5cc7e631d984978803342a4fa56f077076b7cc2f46d0",
+      "bytes": 20339,
+      "reviewed_sha256": "9aa79c9ea8bfeef4ab0f164187e3134ffb5713b6c0292910bab59d45d35ce08e",
+      "sha256": "65a0786b2b1359bc956defd1e76eb93e1d6dda169afe264427a8a9d97aca7662"
+    },
+    "sqlite/rollback_fault_sql_manual_linux_test.go": {
+      "base_sha256": "c368296059cbf29a4756cbb760b3836c580d8615e25a7330f76d83ba97427037",
+      "bytes": 50735,
+      "reviewed_sha256": "576f77b415b98ff02879534480be4753086b949aaea39376fb9488918f9bd8b7",
+      "sha256": "78464b9d6f948be4d1efc0686f8b57a17f1a0ae530081230edc7c553d996bf09"
+    }
+  },
+  "format_status": "COMPLETE_EXACT_ELEVEN_FILES_ONE_GO_FMT_INVOCATION",
+  "go_parser_scanner_ast_execution_status": "NOT_RUN_EXCEPT_GOFMT_INTERNALS",
+  "gofmt_sha256": "5583dbb3339147fee7cdb067eb3cd4a50015b48c27084377f49d93833aa4ad77",
+  "known_w_overlap_paths": [
+    "internal/testscope/rollback_fault_sql_test.go",
+    "internal/testscope/rollback_fault_test.go"
+  ],
+  "main_pin_status": "OLD_REVIEWED_PIN_PRESERVED_FOR_SEPARATE_THREE_WAY_W_MERGE",
+  "model_guard_compile_status": "NOT_RUN",
+  "native_execution_status": "NOT_RUN",
+  "overlay": "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/misplaced-write-overlay",
+  "repin_script_sha256": "bbec39f0155e164359d1572ee2f3a7b3e51a3061205df1ec3c9b11ad4192f0b2",
+  "review_sha256": "facb10a83ac7f7007f0537e18179d4be71680a04d120f8dff71f706c8b11fcba",
+  "reviewed_source_manifest_sha256": "d77db0fad47ad18637d8a70a77ab4af43a53436410b56ca19f2cbed29de1cd3a",
+  "schema": "rollback-misplaced-write-format-overlay-v1",
+  "text_check_status": "WHITESPACE_ONLY_WITH_LITERAL_COMMENT_PRESERVATION_PLUS_SEVEN_OWNED_PIN_SNAPSHOTS",
+  "w_overlay_paths_unchanged_during_worker": true
+}

@@ -1,0 +1,8 @@
+{
+  "status": "RELEASED",
+  "identity_sha256": "019b42af2cbf11ff4ae654948af2f793726db028dcc1f647042e90136462f3be",
+  "review_sha256": "c6beb7d6522d69b119d9c5c7ef2845f0e3ff640ed7b9ea9fb1b7261aa0b10f4f",
+  "runner_sha256": "7f4db59c9ddb5bf1492704013e789b50688fd24faa79840ca70e5ee3f0a25de9",
+  "scope": "Exact eleven reviewed commands; native/manual images never executed",
+  "utc": "2026-10-12T22:39:48.784008+00:00"
+}

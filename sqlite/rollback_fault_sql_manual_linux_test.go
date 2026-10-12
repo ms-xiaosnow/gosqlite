@@ -327,8 +327,10 @@ func manualRollbackSQLAdmit(c *manualRollbackSQLConfig) error {
 		c.caseID = rollbackfault.SQLJournalUnlinkBefore
 	case "final-dirsync-before":
 		c.caseID = rollbackfault.SQLFinalDirectorySyncBefore
+	case "index-misplace-minus64-error":
+		c.caseID = rollbackfault.SQLIndexMisplaceMinus64Error
 	default:
-		return fmt.Errorf("exactly one of nine fixed cases required")
+		return fmt.Errorf("exactly one of ten fixed cases required")
 	}
 	manifest, _, err := manualRollbackSQLRead(&c.ledger, c.binding.SourceManifestPath, 4<<20)
 	if err != nil {
@@ -672,6 +674,9 @@ func manualRollbackSQLCommit(c *manualRollbackSQLConfig, ctx context.Context, pa
 		if c.caseID == rollbackfault.SQLIndexPrefix64 && !errors.Is(commitErr, io.ErrShortWrite) {
 			return report, fmt.Errorf("original short-write cause lost")
 		}
+		if c.caseID == rollbackfault.SQLIndexMisplaceMinus64Error && (commitErr != publicError || !report.MisplaceOnlyTargetCause || errors.Is(commitErr, io.ErrShortWrite)) {
+			return report, fmt.Errorf("INCOMPLETE: misplaced-write public cause or cleanup differs: %v", commitErr)
+		}
 		// Finish has checked errors.Is against the actual private target error.
 		// Native (64, nil) becomes adapter (64, injected), never ErrShortWrite.
 		if c.caseID == rollbackfault.SQLIndexPrefix64Error && errors.Is(commitErr, io.ErrShortWrite) {
@@ -688,6 +693,43 @@ func manualRollbackSQLCommit(c *manualRollbackSQLConfig, ctx context.Context, pa
 		return report, fmt.Errorf("Commit owner retirement incomplete")
 	}
 	return report, nil
+}
+
+// Inspect only the already-read bounded buffers. These checks are separate
+// from the successful journal-publication events in the generic receipt.
+func manualRollbackSQLMisplacement(report pager.ManualRollbackSQLReport, baseline, post, journalBytes []byte) (rollbackfault.SQLMisplacementEvidence, error) {
+	evidence := rollbackfault.SQLMisplacementEvidence{Writer: report.MisplacedWrite, OnlyTargetCause: report.MisplaceOnlyTargetCause}
+	if len(baseline) != 12288 || len(post) != 12288 || len(journalBytes) != 16408 {
+		return evidence, fmt.Errorf("misplaced-write exact retained extents required")
+	}
+	evidence.ShiftedSHA256 = sha256.Sum256(post[8128:12224])
+	evidence.BaselineRangeSHA256 = sha256.Sum256(baseline[8128:12224])
+	evidence.BaselineTailSHA256 = sha256.Sum256(baseline[12224:12288])
+	evidence.UntouchedTailSHA256 = sha256.Sum256(post[12224:12288])
+	writer := evidence.Writer
+	if writer.RequestedOffset != 8192 || writer.RequestedBytes != 4096 || writer.NativeOffset != 8128 || writer.NativeBytes != 4096 || writer.NativeCalls != 1 || writer.PayloadSHA256 == ([32]byte{}) || writer.PayloadSHA256 != evidence.ShiftedSHA256 || evidence.ShiftedSHA256 == evidence.BaselineRangeSHA256 || !bytes.Equal(post[12224:12288], baseline[12224:12288]) || !evidence.OnlyTargetCause {
+		return evidence, fmt.Errorf("misplaced-write actual argument/payload/tail/cause proof differs")
+	}
+	if report.EventCount != 35 || report.Events[30].Kind != rollbackfault.Returned || report.Events[30].Action != rollbackfault.MisplaceIndexPageMinus64 || report.Events[30].Call != (rollbackfault.Call{Point: rollbackfault.DBPage, Occurrence: 3, Role: rollbackfault.Database, Offset: 8192, Length: 4096, Owner: 11}) || report.Events[30].Result != (rollbackfault.Result{Executed: true, NativeN: 4096, ReturnedN: 4096, ReturnedError: rollbackfault.Injected, NormalizedError: rollbackfault.Injected, Effect: rollbackfault.EffectPossible}) {
+		return evidence, fmt.Errorf("misplaced-write original requested call and native return differ")
+	}
+	plan, err := journal.ParseReplay(journalBytes, journal.ReplayLimits{MaxJournalBytes: 16408, MaxRecords: 3, MaxDatabaseBytes: 12288})
+	if err != nil {
+		return evidence, err
+	}
+	if plan.CountEvidence != journal.ReplayCountFiniteHeaders || plan.Header.Records != 3 || plan.Header.OriginalPages != 3 || plan.Header.PageSize != 4096 || plan.Header.SectorSize != 4096 || plan.DatabaseBytes != 12288 || len(plan.Pages) != 3 {
+		return evidence, fmt.Errorf("misplaced-write complete finite journal inventory required")
+	}
+	if err := plan.ValidateExtent(12288); err != nil {
+		return evidence, err
+	}
+	for i, page := range plan.Pages {
+		if page.Number != uint32(i+1) || len(page.Data) != 4096 || !bytes.Equal(page.Data, baseline[i*4096:(i+1)*4096]) {
+			return evidence, fmt.Errorf("misplaced-write journal original differs from independent baseline")
+		}
+		evidence.JournalOriginals[i] = sha256.Sum256(page.Data)
+	}
+	return evidence, nil
 }
 
 func manualRollbackSQLRecoverCopy(ctx context.Context, replayPath string) (pager.RecoveryResult, error) {
@@ -922,7 +964,7 @@ func TestManualRollbackFaultSQLLedger(t *testing.T) {
 	}
 	preDB := c.caseID == rollbackfault.SQLJournalBodySyncBefore || c.caseID == rollbackfault.SQLJournalHeaderSyncBefore || c.caseID == rollbackfault.SQLPublishDirectorySyncBefore
 	postDB := c.caseID == rollbackfault.SQLJournalUnlinkBefore || c.caseID == rollbackfault.SQLFinalDirectorySyncBefore
-	needsRecovery := c.caseID == rollbackfault.SQLIndexPrefix64 || c.caseID == rollbackfault.SQLDBSyncBefore || c.caseID == rollbackfault.SQLIndexPrefix64Error || c.caseID == rollbackfault.SQLJournalUnlinkBefore
+	needsRecovery := c.caseID == rollbackfault.SQLIndexPrefix64 || c.caseID == rollbackfault.SQLDBSyncBefore || c.caseID == rollbackfault.SQLIndexPrefix64Error || c.caseID == rollbackfault.SQLJournalUnlinkBefore || c.caseID == rollbackfault.SQLIndexMisplaceMinus64Error
 	baseline, err := manualRollbackSQLBaseline()
 	if err != nil {
 		t.Fatal(err)
@@ -953,6 +995,27 @@ func TestManualRollbackFaultSQLLedger(t *testing.T) {
 		t.Fatal(err)
 	}
 	report, commitCheckErr := manualRollbackSQLCommit(&c, ctx, filepath.Join(c.root, "trial.db"), plan)
+	misplaced := c.caseID == rollbackfault.SQLIndexMisplaceMinus64Error
+	var misplacement rollbackfault.SQLMisplacementEvidence
+	var misplacementErr error
+	var post, journalBytes []byte
+	var postInfo os.FileInfo
+	if misplaced {
+		misplacement.Writer, misplacement.OnlyTargetCause = report.MisplacedWrite, report.MisplaceOnlyTargetCause
+		if commitCheckErr == nil {
+			post, postInfo, err = manualRollbackSQLRead(&c.ledger, filepath.Join(c.root, "trial.db"), 12288)
+			misplacementErr = err
+			if err == nil && (len(post) != 12288 || !os.SameFile(trialInfo, postInfo)) {
+				misplacementErr = fmt.Errorf("misplaced-write post-Commit extent/identity changed")
+			}
+			if misplacementErr == nil {
+				journalBytes, _, misplacementErr = manualRollbackSQLRead(&c.ledger, filepath.Join(c.root, "trial.db-journal"), 16408)
+			}
+			if misplacementErr == nil {
+				misplacement, misplacementErr = manualRollbackSQLMisplacement(report, baseline[:], post, journalBytes)
+			}
+		}
+	}
 	// Retain the untouched public error text and all original diagnostics even
 	// when the trial must stop before copying/recovery. JSON is supplementary
 	// evidence; error identity checks occurred directly on the original object.
@@ -966,6 +1029,10 @@ func TestManualRollbackFaultSQLLedger(t *testing.T) {
 	if report.CommitError != nil {
 		commitText = report.CommitError.Error()
 	}
+	misplacementText := ""
+	if misplacementErr != nil {
+		misplacementText = misplacementErr.Error()
+	}
 	commitRecord, marshalErr := json.MarshalIndent(struct {
 		Identity              rollbackfault.Identity
 		Plan                  rollbackfault.PlanSpec
@@ -976,7 +1043,9 @@ func TestManualRollbackFaultSQLLedger(t *testing.T) {
 		Diagnostics           [rollbackfault.MaxEvents]string
 		PreDBOnlyTargetCause  bool
 		PostDBOnlyTargetCause bool
-	}{identity, plan.Spec(), report.Observation, report.Events, report.EventCount, commitText, diagnosticTexts, report.PreDBOnlyTargetCause, report.PostDBOnlyTargetCause}, "", "  ")
+		Misplacement          rollbackfault.SQLMisplacementEvidence
+		MisplacementError     string
+	}{identity, plan.Spec(), report.Observation, report.Events, report.EventCount, commitText, diagnosticTexts, report.PreDBOnlyTargetCause, report.PostDBOnlyTargetCause, misplacement, misplacementText}, "", "  ")
 	if marshalErr != nil {
 		t.Fatal(marshalErr)
 	}
@@ -985,6 +1054,9 @@ func TestManualRollbackFaultSQLLedger(t *testing.T) {
 	}
 	if commitCheckErr != nil {
 		t.Fatalf("INCOMPLETE: original Commit=%v; adapter=%+v; problem=%v; all inputs retained", report.CommitError, report.Observation, commitCheckErr)
+	}
+	if misplacementErr != nil {
+		t.Fatalf("INCOMPLETE: misplaced-write byte/journal proof: %v; all inputs retained", misplacementErr)
 	}
 	receipt, receiptProblem := rollbackfault.NewReceipt(plan)
 	if receiptProblem != rollbackfault.NoProblem {
@@ -998,7 +1070,7 @@ func TestManualRollbackFaultSQLLedger(t *testing.T) {
 	if receipt.Seal() != report.Observation {
 		t.Fatal("adapter transcript/observation mismatch")
 	}
-	evidence := rollbackfault.SQLLedgerEvidence{Identity: identity, Case: c.caseID, Before: before}
+	evidence := rollbackfault.SQLLedgerEvidence{Identity: identity, Case: c.caseID, Before: before, Misplacement: misplacement}
 	evidence.Lifecycle = rollbackfault.SQLLifecycleEvidence{ArmCalls: 1, CommitCalls: 1, FinishCalls: 1, DisarmCalls: 1, WriterOpens: 1, ReopenCalls: 1, ReopenReadOnly: true, WriterRetiredBeforeRecovery: true, RecoveryFinishedBeforeReopen: true, CommitCapturedUnchanged: true}
 	var publicError *Error
 	evidence.Lifecycle.PublicCodeIOErr = errors.As(report.CommitError, &publicError) && publicError.Code == CodeIOErr
@@ -1009,7 +1081,9 @@ func TestManualRollbackFaultSQLLedger(t *testing.T) {
 	evidence.Lifecycle.PublicCleanupPending = errors.Is(report.CommitError, pager.ErrPlaintextCleanupPending)
 	evidence.Lifecycle.PreDBOnlyTargetCause = report.PreDBOnlyTargetCause
 	evidence.Lifecycle.PostDBOnlyTargetCause = report.PostDBOnlyTargetCause
-	post, postInfo, err := manualRollbackSQLRead(&c.ledger, filepath.Join(c.root, "trial.db"), 12288)
+	if !misplaced {
+		post, postInfo, err = manualRollbackSQLRead(&c.ledger, filepath.Join(c.root, "trial.db"), 12288)
+	}
 	if err != nil || len(post) != 12288 || !os.SameFile(trialInfo, postInfo) {
 		t.Fatalf("post-Commit extent/identity: %v", err)
 	}
@@ -1044,13 +1118,14 @@ func TestManualRollbackFaultSQLLedger(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	var journalBytes []byte
 	if !needsRecovery {
 		if _, err := os.Lstat(filepath.Join(c.root, "trial.db-journal")); !os.IsNotExist(err) {
 			t.Fatalf("zero-recovery case journal must be absent after Commit: %v", err)
 		}
 	} else {
-		journalBytes, _, err = manualRollbackSQLRead(&c.ledger, filepath.Join(c.root, "trial.db-journal"), 16408)
+		if !misplaced {
+			journalBytes, _, err = manualRollbackSQLRead(&c.ledger, filepath.Join(c.root, "trial.db-journal"), 16408)
+		}
 		if err != nil || len(journalBytes) != 16408 {
 			t.Fatalf("exact original three-record journal: %v", err)
 		}

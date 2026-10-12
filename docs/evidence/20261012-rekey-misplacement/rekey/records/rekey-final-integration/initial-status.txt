@@ -1,0 +1,2 @@
+A  internal/testkit/rekeyinterruption/contract.go
+A  internal/testkit/rekeyinterruption/contract_test.go

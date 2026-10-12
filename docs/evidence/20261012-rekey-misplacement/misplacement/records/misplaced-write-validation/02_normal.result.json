@@ -1,0 +1,10 @@
+{
+  "name": "02_normal",
+  "start_utc": "2026-10-12T22:56:31.002990+00:00",
+  "end_utc": "2026-10-12T22:56:53.014516+00:00",
+  "exit_code": 1,
+  "resource_breach_latched": false,
+  "observer_error": null,
+  "stdout_sha256": "82eecb0da8c4f6afb8cedfb440cc82e871302281d510dfd7e557d0a0abf52884",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

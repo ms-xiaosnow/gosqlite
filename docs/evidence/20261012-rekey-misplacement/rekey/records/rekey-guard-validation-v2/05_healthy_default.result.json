@@ -1,0 +1,24 @@
+{
+  "name": "05_healthy_default",
+  "start_utc": "2026-10-12T22:47:08.952045+00:00",
+  "end_utc": "2026-10-12T22:47:18.955494+00:00",
+  "exit_code": 0,
+  "resource_breach_latched": false,
+  "observer_error": null,
+  "stdout_sha256": "69d4a51773025685bdbf5639795d0fff9732cf54747242dcee3b834c1d6e41e5",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "tests": {
+    "github.com/ms-xiaosnow/gosqlite/sqlite": {
+      "roots": [
+        "TestEncryptionReviewFreshIdentityAndRetainedBytes",
+        "TestEncryptionWALPasswordOrdinaryReopenAndCancellation"
+      ],
+      "root_count": 2,
+      "named_pass": 2,
+      "child_pass": 0,
+      "fail": 0,
+      "skip": 0
+    }
+  },
+  "status": "PASS"
+}
