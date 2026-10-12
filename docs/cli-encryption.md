@@ -52,15 +52,24 @@ SQLite process, plaintext spill, fallback or custom publication protocol is used
 A manifest alone is not a backup. Destination publication, owned descriptors,
 locking, synchronization and error cleanup remain the existing native API's work.
 
-**Plaintext backup is unimplemented in this CLI and its public copy API.**
-`gosqlite backup plain.db --out new.db` returns an explicit unsupported error
-before opening either path. It does not silently copy a main file or a live
-SQLite/WAL family. `DB.BackupEncrypted` requires an encrypted session;
-`DB.ExportPlaintext` explicitly exports an encrypted source; `ImportEncrypted`
-creates an encrypted family from a supported rollback-mode plaintext snapshot.
-None is a generic plaintext-to-plaintext backup API. A future plaintext snapshot
-backup needs a public pinned-page/copy/publication implementation and separate
-scope/evidence. Native plaintext WAL backup remains a phased core item.
+**Plaintext backup has a restricted, experimental source implementation.**
+`gosqlite backup plain.db --out new.db` without encryption flags selects
+`DB.Backup`; the public API also permits a pinned, explicitly read-only
+`Tx.Backup`. Only checked ordinary rollback snapshots are in scope. This path
+requires Linux ext-family admission, actual statx unique mount-ID fields,
+Openat2 resolution protections, and no-replace publication in an existing
+trusted/private directory with bounded ASCII main names. A private candidate
+holds EXCLUSIVE before copying and stays protected through file Sync,
+publication, directory Sync and directory retirement. These conditions are not
+proof of general filesystem, concurrency or crash durability qualification.
+WAL sources (including read-only WAL), non-Linux and other filesystems, including
+tmpfs/overlay in the current environment, remain Unsupported. Native acceptance
+is NOT_RUN; do not use irreplaceable data or retry/replace/remove artifacts after
+an uncertain error. See the full [Backup contract](plaintext-backup.md) and
+[separately gated manual procedure](testing/plaintext-backup-manual.md).
+`DB.BackupEncrypted`, `DB.ExportPlaintext` and `ImportEncrypted` retain their
+separate encrypted-source/archive/import contracts; no plaintext WAL-family
+copy or fallback is introduced.
 
 The result is a **portable encrypted archive**, not an openable live database.
 Restore it with `sqlite.RestoreEncrypted(ctx, archive, absentDestination,
@@ -198,4 +207,6 @@ gosqlite rekey /private/source.gse --key-provider env-hex:GOSQLITE_NEW --current
 ```
 
 Use `--mode wal` or `--mode shared` only for families created in those modes.
-There is no plaintext success example because that route is unsupported.
+No plaintext success example is provided here; the separately gated
+[manual procedure](testing/plaintext-backup-manual.md) has its own qualification
+requirements and remains NOT_RUN.

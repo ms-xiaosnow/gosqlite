@@ -1,5 +1,21 @@
 # gosqlite
 
+## 2026-10-12 Storage + UNIQUE development checkpoint
+
+The frozen source tree `4008bd9442ffd21e1e993d4f1c72dbeed3c910f3` (3,238 files) naturally
+completed **all 26 gates / 28 Go invocations at 00:49:41 UTC**, with its lease
+released. Ordinary and race each passed **8,231 named cases / 7 expected oracle
+skips**; the complete pinned oracle passed **9,925 / zero skips**, and LIMIT
+oracle/race passed **394**. Foreign images were compiled and inspected, never run.
+This checkpoint adds only documentation to that tested source; its new commit,
+bundle, exact restore and matching hosted CI are still **PENDING**.
+The bounded explicit ordinary UNIQUE index profile is included. Strict Linux
+plaintext Backup and opt-in WAL tail publication remain **PARTIAL / NATIVE_NOT_RUN**,
+including native Backup of UNIQUE databases. This is not production-ready or M10
+acceptance. See [exact evidence and remaining gaps](docs/evidence/storage-unique-checkpoint-20261012.md).
+
+### Historical RO-WAL / IPK checkpoint (2026-10-11; retained original record)
+
 2026-10-11 当前未发布组合：Linux 显式 `ReadOnly + WALShared` 的 live-index
 真只读连接、`--wal-readonly` query/check/inspect、有限 IPK equality 修正与
 健康官方 live-writer 测试已纳入。精确冻结树 `cace45621c10259231a2e764cfbefdcdbe312ccf`
@@ -82,7 +98,7 @@ func read(ctx context.Context) error {
 
 上述片段要求已有 `docs` 表；`examples/readonly` 使用已有 `samples` 表，并通过 `driver.NewConnector` 显式设置 `ReadOnly:true, NoCreate:true`，即使传入 `mode=rw/rwc` 也不会放宽只读限制。该可执行示例传递上下文、检查输出错误，且在诊断和退出前依次释放 Rows 与 DB，保留迭代和关闭错误。 For writes, use a normal path or mode=rwc DSN, or mode=rw to require an existing file. Native sqlite.Options{} is writable/create; ReadOnly and NoCreate are explicit alternatives. See examples/write for prepared inserts and transactions. Native transactions can retry BUSY Commit after readers close; database/sql transactions cannot be reused after Commit, so the adapter rolls back on an error. Close Rows promptly to release their snapshot locks.
 
-CREATE TABLE, nonunique BINARY ASC CREATE INDEX, INSERT, UPDATE, DELETE and retained-connection SQL/native/driver transactions with nested savepoints are implemented for the documented subset. Ordinary secondary indices are maintained on disk. Registered grams13 posting indices accelerate supported LIKE and configured MATCH predicates. Eligible rowid equality/inequality and ordinary leading equality-prefix/leading-field inequality predicates use real source/index seeks; proven rowid ordering can stream without sorting, while unsupported shapes scan. See [ordinary index planning](docs/ordinary-index.md). Unsupported schema objects/constraints reject writes to the database rather than being ignored. Existing journals require recovery and are refused. Existing zero-byte files are conservatively rejected. Normal successful commit tests do not qualify crash durability; use only disposable data.
+CREATE TABLE, nonunique BINARY ASC CREATE INDEX, explicit ordinary named-column BINARY ASC CREATE UNIQUE INDEX, INSERT, UPDATE, DELETE and retained-connection SQL/native/driver transactions with nested savepoints are implemented for the documented subset. The [bounded UNIQUE profile](docs/unique-index.md) enforces immediate non-NULL uniqueness and Check consistency; table/column UNIQUE constraints, implicit autoindexes, partial/expression/DESC/non-BINARY indexes and conflict policies/UPSERT remain unsupported. Ordinary SELECT planners still skip UNIQUE indexes. Ordinary secondary indices are maintained on disk. Registered grams13 posting indices accelerate supported LIKE and configured MATCH predicates. Eligible rowid equality/inequality and ordinary leading equality-prefix/leading-field inequality predicates use real source/index seeks; proven rowid ordering can stream without sorting, while unsupported shapes scan. See [ordinary index planning](docs/ordinary-index.md). Unsupported schema objects/constraints reject writes to the database rather than being ignored. Existing journals require recovery and are refused. Existing zero-byte files are conservatively rejected. Normal successful commit tests do not qualify crash durability; use only disposable data.
 
 If home is read-only, set GOCACHE and GOPATH to writable directories. The Unicode tokenizer uses pinned pure-Go golang.org/x/text; go.sum records verified module checksums and third_party/ retains its license. Official SQLite is a separately built test oracle only:
 
@@ -370,8 +386,14 @@ explicitly partial; final M10 qualification is outstanding.
 
 Required tooling now includes [encrypted CLI backup/rekey](docs/cli-encryption.md),
 [caller-dataset numerical verification](docs/import-distance-verification.md) and
-[grams measurements](benchmarks/grams/README.md). Generic plaintext backup,
-general/cold plaintext-WAL read-only CLI and final release qualification remain open; the explicit Linux live-index subset now has unexecuted source above.
+[grams measurements](benchmarks/grams/README.md). This source also contains a
+[strict Linux rollback plaintext Backup](docs/plaintext-backup.md) API/CLI and an
+[explicit exclusive-WAL tail publisher](docs/decisions/0017-wal-tail-prefix.md);
+both remain partial and native NOT_RUN under their strict filesystem/namespace
+contracts. General plaintext Backup, WAL/readonly-WAL backup sources, broader
+platforms/filesystems, cold readonly WAL and final release qualification remain
+open. The separate Linux initialized live-SHM readonly-WAL subset has prior
+ordinary/live-writer evidence; it does not qualify either new publisher.
 
 [Native full-profile DB/Tx/CLI checks](docs/native-check.md) and the
 [ordinary transaction/concurrent-soak harness](benchmarks/transactions/README.md)

@@ -1,5 +1,28 @@
 # 源码开发与受限执行的证据分类
 
+## 2026-10-12 Storage + UNIQUE：冻结组合完整 26 门 PASS
+
+冻结运行树 `4008bd9442ffd21e1e993d4f1c72dbeed3c910f3`（3,238 文件）于 **00:49:41 UTC**
+自然完成 **26/26 门、28 次 Go 调用 PASS**，lease 已 RELEASED。ordinary/race
+各 **8,231 named PASS / 7 个预期 oracle SKIP**；完整 pinned oracle **9,925 PASS /
+零 SKIP**，LIMIT oracle/race **394 PASS**。跨编译与外平台 test-c/nm 只证明编译/
+符号，未执行外国映像。本次仅叠加文档；新提交、bundle、精确恢复及对应 CI 仍 **PENDING**。
+显式普通 BINARY ASC UNIQUE 子集已纳入；严格 Linux Backup/WAL publisher 仍为
+**PARTIAL / NATIVE_NOT_RUN**，包括 UNIQUE 数据库的 native Backup；M10 未验收。
+输入有限结果、原失败、准确终态和真实代码缺口见[本批精确证据](evidence/storage-unique-checkpoint-20261012.md)。
+
+### 历史组合准备摘要（2026-10-12，完整运行前；原文保留）
+
+> 2026-10-12 当前组合状态：Storage metadata 修正树 `7389e7b7` 的三条回归
+> 已实际 PASS（14 根 / 92 named PASS），UNIQUE 树 `fd4e3471` 的十二条有限门
+> 已实际 PASS（31 根 / 223 named PASS / 零 SKIP）；两者均自然退出并释放 lease。
+> 本文所在新 Storage + UNIQUE 组合仍是 **SOURCE_ONLY / NOT_RUN**：完整 ordinary、
+> race、oracle、跨编译/依赖、发布/精确恢复/对应 CI 尚未运行。下文旧的
+> SOURCE_ONLY、PENDING、FAIL 与 NOT_RUN 均保留为各自身份的历史，不覆盖上述有限结果。
+> 原 V1 显示契约 FAIL 与 V2 metadata 真失败（8,126 PASS / 1 FAIL / 7 SKIP；
+> 后续 19 NOT_RUN）不改写。native Backup（包括 UNIQUE 数据库）、WAL publisher
+> 和物理资格仍 **NOT_RUN**；完整目标与 M10 未验收。详见[新检查点证据](evidence/storage-unique-checkpoint-20261012.md)。
+
 ## 2026-10-11 17:02 UTC 开发资格补记
 
 本次 Darwin 有界清单/诊断源码组合 `8a324a8cedeccc8ba46234924c8074890aefa1da`
@@ -394,3 +417,67 @@ ANN V4、受阻 41-target campaign 和未知链路没有被重发、换名、拆
 mixed-version/fault/中断 rekey harness 的项仍是实现缺口，Windows directory Sync
 也没有新增 namespace barrier。native WAL-tail publisher 与未发布 backup R1
 不属于 Windows 切片，不能改称只差机器或已经完成。
+
+
+## 十五 2026-10-11 新独占 WAL 尾部的源码许可边界
+
+本批是固定 `3ea6d3ab15f678fe48bee312921da60828845869` / tree
+`f6edabfba3e004a0e7874441b8c0a3e38cf099c6` 上重新实现的 29 路径源码候选，
+包含六份文档；不是 35 路径，也不是对旧 retained-directory 工作的恢复或移植。
+现有 Backup 候选只作为目录/唯一 mount 身份设计参考，没有构建依赖、整文件
+移植或原结果转移。现有 Windows 源码、人工门、factory 契约及历史文字保持。
+
+本次明确区分新机制源码、独立审阅、无描述符模型、编译、物理资格：只进行
+Python 标准库的文件复制、文本编辑与身份核对，未执行 Go、parser、compiler、
+gofmt、测试、native、oracle、项目脚本或任何旧流程。新源包含 nil-default
+公开策略、真实延迟发布 caller、有界 composite 和保留目录 Linux 实现；该
+实现尚未独立审阅/执行，不再把本候选描述成只有孤立的字节 recipe。
+
+公开/driver 物理 harness 仍为 IMPLEMENTATION_MISSING，真实恢复、尾部、
+namespace、故障、崩溃、强杀和中断发布仍为 BLOCKED / NOT_RUN。ANN V4、
+41-target campaign 与未知中断链路的禁止重发、改名、拆分或迁移边界不变。
+没有因为找不到精确源码拒绝记录而推定运行许可；本节也不授权未来执行。
+旧段落“publisher 缺源码”保留原时点，新候选不会反向修改旧 PASS/FAIL。
+
+
+## 2026-10-11 恢复后的 WAL 源码组合许可与证据边界
+
+本批只在已审 Backup/RO/IPK 源码上有界组合先前明确批准的新 cbb WAL 实现和
+四路径手工 overlay。当前源码与历史补记完整保留；新身份不能继承旧 PASS。
+使用新的候选目录，仅静态复制/文本编辑/哈希，不执行任何输入内脚本、Go、
+parser、compiler、guard、test、recorder、native、oracle、远端或 Library。
+
+WAL publisher 的受检原 WAL 单次替换与 Backup no-replace 发布分别保持；
+两个 whole-file pins 只在完整 body 独立审阅后更新，不能用新哈希掩盖语义变化。
+有限公开 manual harness 源码已实现但未编译/native NOT_RUN；原写作事故的
+两次失败 system-go 调用和不确定性独立保留，不改写为零调用或 PASS。
+9ca 普通四旧断言 FAIL 是另一个具体执行身份，本次未运行，不替它掩盖失败。
+ANN V4、41-target campaign、未知中断/物理链仍禁重发、改名、拆分或迁移；
+新源码就绪不是未来执行授权，也不是 physical durability 或 M10 验收。
+
+
+## Explicit ordinary UNIQUE index source work (2026-10-11)
+
+Historical author-stage record, retained verbatim below. Its NOT_RUN statements
+apply to 2026-10-11 source preparation; current finite and combined evidence is
+separately recorded at the top of this document.
+
+The next SQL slice is an independent source-only copy of published f1897466,
+base tree 0f29261ca50576373069dd8ad23a2bd3377a743c. It implements only ordinary
+explicit named-column BINARY ASC CREATE UNIQUE INDEX and authors bounded parser,
+descriptor-free logical models and healthy native/driver/oracle SQL test sources.
+No Go, gofmt, compiler, test, race, oracle, project runner or native qualification
+was executed for this candidate. The [finite proposal](unique-index.md) is not
+execution authorization, and no old PASS is inherited by the new source tree.
+
+Two stale source assertions formerly rejecting CREATE UNIQUE INDEX i ON t(x)
+now reject the still-unsupported partial form with WHERE x>0. The ordinary form
+has new positive native/parser/official test sources. This aligns expected source
+behavior with the requested capability; all historical FAIL/HOLD/NOT_RUN records
+and exact old source trees stay unchanged.
+
+No pager, VFS, journal/recovery, backup/publisher, ANN algorithm or driver
+production change is included. Physical fault/crash/recovery/tamper/namespace
+work, actual held ANN V4, the 41-target fuzz campaign and unknown interrupted
+chains remain untouched. Source review, proposed ordinary validation, storage
+candidate integration and production/durability/security acceptance stay separate.

@@ -5,11 +5,10 @@ import (
 	"github.com/ms-xiaosnow/gosqlite/internal/wal"
 )
 
-// This is a real native capability gap, not an unrun acceptance test. Current
-// vfs.ReplaceWAL uses path-based publication and does not retain a directory
-// owner through candidate creation, replacement and publication sync. Until a
-// publisher enforces the contract in docs/decisions/0017-wal-tail-prefix.md,
-// every exclusive tail remains rejected before any mutation or SHM removal.
+// Nil/default and unsupported profiles refuse tails before mutation. The
+// explicit Linux capability is invoked only after prospective paired-byte
+// admission; the intact-WAL normalizer is not an alternative tail publisher.
+// Source presence is not native qualification: see the current-baseline ADR.
 var errWALTailPublicationUnavailable = errors.New("exclusive WAL tail requires retained-directory committed-prefix publication capability")
 
 // The predicate only classifies scanner evidence. It does not grant file,

@@ -166,15 +166,26 @@ func main() {
 			return err
 		}
 		var findings []string
+		// All Go sources are checked for copied manual entries/import consumers;
+		// only the four exact files receive the additional frozen-source policy.
+		manual, err := inspectBackupManualSource(path, raw)
+		if err != nil { return err }
+		findings = append(findings, manual...)
 		// Keep the existing restricted-reference policy and its exact manual
 		// exclusions separate from startup isolation, which ignores build tags.
 		if strings.HasSuffix(path, "_test.go") {
-			findings, err = inspectSource(path, raw)
+			ordinary, inspectErr := inspectSource(path, raw)
+			if inspectErr != nil { return inspectErr }
+			findings = append(findings, ordinary...)
+		}
+		if oracleCurrentGoPath(path) {
+			// WAL opt-in 守卫没有 manual-tag 排除；惰性模型例外固定完整
+			// 源码身份，文件名本身不授予调用 native 入口的权限。
+			publication, err := inspectWALPublicationSource(path, raw)
 			if err != nil {
 				return err
 			}
-		}
-		if oracleCurrentGoPath(path) {
+			findings = append(findings, publication...)
 			startup, err := inspectOracleSource(path, raw)
 			if err != nil {
 				return err
@@ -200,8 +211,20 @@ func main() {
 		fmt.Fprintln(os.Stderr, finding)
 		failed = true
 	}
+	manualContracts, manualErr := inspectBackupManualContracts(".")
+	if manualErr != nil { fmt.Fprintln(os.Stderr, manualErr); failed = true }
+	for _, finding := range manualContracts { fmt.Fprintln(os.Stderr, finding); failed = true }
+	publicationContracts, err := inspectWALPublicationContracts(".")
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		failed = true
+	}
+	for _, finding := range publicationContracts {
+		fmt.Fprintln(os.Stderr, finding)
+		failed = true
+	}
 	if failed {
 		os.Exit(1)
 	}
-	fmt.Println("Ordinary test and oracle startup source-reference guards PASS; behavioral review is still required.")
+	fmt.Println("Ordinary test, WAL publication, oracle startup and exact Backup manual source-reference guards PASS; behavioral review is still required.")
 }

@@ -101,3 +101,26 @@ preparation are integrated; session/extension/constant-query warming and complet
 stale-schema reprepare remain outside the supported cache profile. The current [compatibility matrix](compatibility.md) and
 [acceptance work](acceptance-status.md) are authoritative; earlier architecture
 text is preserved in history/before-acceptance-audit-architecture.md.
+
+
+## 2026-10-11 独占 WAL 尾部显式发布：新源码增量
+
+本节仅说明新候选 `wal-publication-optin-work-v1` 的源码机制；独立审阅、
+模型、编译与原生验收均未发生，不继承上文历史资格。公开配置为
+`Options.WALTailPublication *WALTailPublicationOptions`；nil 保留原来的尾部
+拒绝，非 nil 经过纯验证和值快照后只进入 Linux 可写明文 WALExclusive。
+没有 DSN、CLI、环境变量或初始化自动启用，也不与共享 WAL、加密、只读、
+rollback recovery 或 powersafe overwrite 组合。
+
+实际调用链：公开 OpenContext → 显式 OpenSessionTailPublicationAdmitted →
+私有 openSessionAdmitted → 仅扫描的 openWALLocked → 私有已提交视图验证与
+有界 recipe → 已安装到 plainRetirement.temporary 的 WALPublication →
+保留目录/候选 → 候选 Sync → 一次同目录现有 WAL 替换 → 内存所有权交换 →
+锚定 SHM 处理 → 一次目录 Sync → 旧 WAL、目录依次退休 → 安装干净快照。
+原主文件的同一 EXCLUSIVE 锁贯穿全过程；默认入口调用私有构造器时开关为 false。
+
+原 registry 布局和 nested → temporary → WAL → main 退休顺序不变。替换前
+composite 持有候选再目录；已知替换后持有旧 WAL 再目录，根持有新 WAL。
+未知 close 为保留所有保护者的终态责任，不裸重试；当前失败 unwind 不重复 close。
+详见[当前 ADR](decisions/0017-wal-tail-prefix.md)；公开及 driver 的物理 harness
+仍为 IMPLEMENTATION_MISSING，真实恢复和持久性仍为 NOT_RUN。

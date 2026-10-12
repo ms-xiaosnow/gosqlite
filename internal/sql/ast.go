@@ -80,6 +80,7 @@ type CreateIndex struct {
 	Base
 	Name, Table string
 	IfNotExists bool
+	Unique      bool
 	Columns     []string
 	Desc        []bool
 	// Method and Options are project extension grammar, never stored as SQL schema.

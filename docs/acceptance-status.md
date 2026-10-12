@@ -1,5 +1,49 @@
 # 当前实现与验收矩阵
 
+## 2026-10-12 Storage + UNIQUE：冻结组合完整 26 门 PASS
+
+冻结运行树 `4008bd9442ffd21e1e993d4f1c72dbeed3c910f3`（3,238 文件）于 **00:49:41 UTC**
+自然完成 **26/26 门、28 次 Go 调用 PASS**，lease 已 RELEASED。ordinary/race
+各 **8,231 named PASS / 7 个预期 oracle SKIP**；完整 pinned oracle **9,925 PASS /
+零 SKIP**，LIMIT oracle/race **394 PASS**。跨编译与外平台 test-c/nm 只证明编译/
+符号，未执行外国映像。本次仅叠加文档；新提交、bundle、精确恢复及对应 CI 仍 **PENDING**。
+显式普通 BINARY ASC UNIQUE 子集已纳入；严格 Linux Backup/WAL publisher 仍为
+**PARTIAL / NATIVE_NOT_RUN**，包括 UNIQUE 数据库的 native Backup；M10 未验收。
+输入有限结果、原失败、准确终态和真实代码缺口见[本批精确证据](evidence/storage-unique-checkpoint-20261012.md)。
+
+### 历史组合准备摘要（2026-10-12，完整运行前；原文保留）
+
+> 2026-10-12 当前组合状态：Storage metadata 修正树 `7389e7b7` 的三条回归
+> 已实际 PASS（14 根 / 92 named PASS），UNIQUE 树 `fd4e3471` 的十二条有限门
+> 已实际 PASS（31 根 / 223 named PASS / 零 SKIP）；两者均自然退出并释放 lease。
+> 本文所在新 Storage + UNIQUE 组合仍是 **SOURCE_ONLY / NOT_RUN**：完整 ordinary、
+> race、oracle、跨编译/依赖、发布/精确恢复/对应 CI 尚未运行。下文旧的
+> SOURCE_ONLY、PENDING、FAIL 与 NOT_RUN 均保留为各自身份的历史，不覆盖上述有限结果。
+> 原 V1 显示契约 FAIL 与 V2 metadata 真失败（8,126 PASS / 1 FAIL / 7 SKIP；
+> 后续 19 NOT_RUN）不改写。native Backup（包括 UNIQUE 数据库）、WAL publisher
+> 和物理资格仍 **NOT_RUN**；完整目标与 M10 未验收。详见[新检查点证据](evidence/storage-unique-checkpoint-20261012.md)。
+
+## 2026-10-11 Storage 验收分层补记
+
+- 已发布 f189（tree `0f29261ca50576373069dd8ad23a2bd3377a743c`）：精确 Library
+  恢复 26 门 PASS；CI 38179686483 ordinary/oracle SUCCESS，均只绑定 f189。
+- Backup 输入 `ec9f30d26d71085791197cd8e25abed558ad236d`：有限 36 命令、44 根 /
+  2,278 named PASS；WAL 输入 `3f772f7e18e59e3061b72ab8b37ee1953e55ddab`：有限
+  5 命令、35 根 / 100 named PASS。两组终态归档已完整 Library 读回。
+- 冻结组合 `2602cc60e8c82e3c7f900eb44439e4217cb0b8c3`：V2 前六门 PASS，
+  ordinary 实际 8,126 PASS / 1 FAIL / 7 预期 SKIP，后续 19 门 NOT_RUN。唯一
+  metadata 所有权源码根失败；修正后新树/完整复验 **PENDING**。V1 guard exit 0 /
+  recorder FAIL_TEST_VALIDATION / 后续 25 NOT_RUN 单列保留；两次失败原因不同。
+- 文档叠加后完整树/新提交身份、精确恢复、Storage CI：**NOT_RUN**，待另行
+  固定与实测。手动 native Backup、WAL-tail publisher、外平台原生资格：
+  **NOT_RUN / NOT_QUALIFIED**；完整物理故障/恢复设施：**IMPLEMENTATION_MISSING**。
+- 完整普通套件包含现有健康 native 文件/WAL/正确密钥路径；源码模型、普通门、
+  仅编译/符号、物理资格和发布审查各自记录，不能互代。M3/M8/M10 与原始 goal
+  仍未完整验收，不能称为只剩手工测试。
+
+[精确终态来源、合同与缺口](evidence/storage-checkpoint-20261011.md)给出当前边界。
+以下所有历史日期、FAIL/UNKNOWN 与原阶段 NOT_RUN 原样保留，不转移资格。
+
 ## 2026-10-11 RO-WAL / IPK 组合：当前执行证据与终态边界
 
 本次实际运行冻结树为 `cace45621c10259231a2e764cfbefdcdbe312ccf`，
@@ -241,17 +285,17 @@ API、预算、诊断兼容边界与精确 source/model 命令见
 
 ## 一、必须实现：仍有真实代码缺口
 
-| 原规范条款 | main 已有能力 | 剩余代码 / 状态 |
+| 原规范条款 | 已有能力（本批源码增量另列） | 剩余代码 / 状态 |
 |---|---|---|
-| G1、§3、§4.1、M3 | 有界多段解析及 internal 恢复所有权；新增默认关闭的 Linux 可写明文 Open/Connector 恢复源码、准确 path 的退休 proof 和一次 fresh no-create probe，源码/模型独立 PASS | `PARTIAL / experimental`：更多 journal 形式、默认开启策略、其他原生平台与 native exclusive WAL 尾部安全发布仍未完成；四场景 public manual harness 已实现并独立 source/compiler-only PASS；driver Connector 物理 harness 与更广覆盖仍缺，实际恢复/开启选项的真实 Open/Connect 均 BLOCKED / NOT_RUN |
+| G1、§3、§4.1、M3 | 有界多段解析及 internal 恢复所有权；新增默认关闭的 Linux 可写明文 Open/Connector 恢复源码、准确 path 的退休 proof 和一次 fresh no-create probe，源码/模型独立 PASS | `PARTIAL / experimental`：更多 journal 形式、默认开启策略、其他原生平台仍未完成；本批显式 Linux exclusive WAL-tail publisher 已有受检发布源码/有限模型证据，native 发布 NOT_RUN，不能当作恢复验收；四场景 public manual harness 已实现并独立 source/compiler-only PASS；driver Connector 物理 harness 与更广覆盖仍缺，实际恢复/开启选项的真实 Open/Connect 均 BLOCKED / NOT_RUN |
 | G1、§4.2、§11.1/11.3 | 索引范围、有限 JOIN/GROUP BY/HAVING、连接计数和 cached preparation 的限定普通门通过 | `已知差异`：支持查询的 planner 错误/排序/阶段一致性仍待修正。V4c 树 `552286a…` 有独立有限 PASS，但没有和 main 新 grouped/counter 组合；不能替代 main 结果。新 LIMIT 转换/ErrMismatch 三文件修正独立限定PASS，组合完整普通18阶段PASS；不覆盖其余绑定/执行阶段缺口 |
-| §4.2、§8.1、§12.2 | correct-key 加密 backup/rekey CLI、native DB/Tx/CLI Check V2 已合入 | `未实现/未合入`：main 明文 backup 命令仍明确 unsupported；Linux rollback V2 候选终审未完成，WAL/非 Linux backup 仍有缺口；Linux 活动 SHM 真只读 WAL 与 CLI 已实现并有本树普通/live-writer 证据，冷 WAL/其他 OS 仍 unsupported。native VACUUM 未实现 |
+| §4.2、§8.1、§12.2 | correct-key 加密 backup/rekey CLI、native DB/Tx/CLI Check V2 已合入 | `PARTIAL / NATIVE_NOT_RUN`：本批未发布源码已有严格 Linux/ext-family rollback DB/Tx/CLI Backup 与 no-replace 协议；模型/源码有限门通过，但 native Backup（含 UNIQUE 数据库）未运行，WAL/只读 WAL/非 Linux/更广 FS backup 仍有代码缺口；Linux 活动 SHM 真只读 WAL 与 CLI 已实现并有本树普通/live-writer 证据，冷 WAL/其他 OS 仍 unsupported。native VACUUM 未实现 |
 | G1、§3.6、§12.2 | query/check/inspect CLI 均使用 OpenContext；DB.Inspect 和 inspect --extensions 在单快照呈现持久 method/version/config/generation，默认 JSON 保持 | `PARTIAL`：本次实测只涵盖 Linux plaintext rollback、grams/custom metadata；加密 inspect CLI 的密钥/profile 路由及其余已选 CLI 目标仍有实现缺口；Linux 活动 SHM 真只读 WAL 路由本次已补齐，真实只读媒体/非特权身份、冷 WAL 与其他 OS 未取得资格。持久 metadata 不证明索引可用或正确，中途 I/O 取消未动态验证 |
 | §12.1、§14 | 四项 CLI/示例资源修正与五例目录终结/输出错误修正已完成，各自取得限定独立审阅与普通证据 | `限定修正 PASS，完整验收未完成`：sparse 状态、readonly 显式只读、write/query 关闭错误及五例目录终结已有证据。实际失败进程/原生关闭失败/真实失败目录保留未执行；WAL 原 t.TempDir 清理和清除进程密钥不允许推断失败现场完整或可解密 |
 | §9.2(2/5) | caller-dataset 范数、完整精确距离与 Top-K v2 已合入；高维 v1 失败保留，v2 有有理数参考验证 | `PARTIAL`：ANN caller-dataset recall 及真实 PG/Neon 验证单列；精确距离不能替代 ANN |
 | §5.2、§7.2、§11.3 | NFC 组合语料、真实 grams build/空间/P50/P95 工具和普通事务 V4 已合入 | `FAIL/待集成/部署HOLD分列`：ANN 报告 V3 三类实质准入缺陷未修，V4 链路禁重试。性能报告 V3 限定源码审阅通过但未合入；自动性能 CI 部署另受操作许可限制。没有可采信测量不得宣称完整基准通过 |
 | §8、§11.3、§12.3 | Linux/Darwin/Windows 有受支持 backend 源码，只有 Linux 普通运行证据 | `PARTIAL`：main Windows shared rekey 及 Darwin 名称配置受限；修正版在未发布 `a314028…` 组合。Darwin 部分由下述当前补记接续：受限 Unicode sibling/诊断修正已获限定源码审阅，尚未发布；固定源码的 Linux/amd64 精确 20 项模型/AST normal/race PASS；额外编译门/原生验证仍 NOT_RUN，真实目录 Unicode-sibling harness 为 IMPLEMENTATION_MISSING。更广 Unicode root 支持未实现，但不能虚构为规范要求任意无限名字。保留目录 VFS 未冻结/整合 |
-| G1、§4.2 | 明确的 phased SQL/格式矩阵 | UNIQUE/CHECK/FK、CTE/UPSERT/view/trigger/window/JSON/FTS5/ATTACH 等和 UTF-16/WITHOUT ROWID/autovacuum 未实现；保留分期状态，优先现有支持域正确性 |
+| G1、§4.2 | 明确的 phased SQL/格式矩阵 | 本批普通显式命名列 BINARY ASC CREATE UNIQUE INDEX 已纳入源码，输入十二门 223 named PASS；冻结组合完整 26 门 PASS，ordinary/race 各 8,231 PASS / 7 预期 SKIP，完整 pinned oracle 9,925 PASS / 零 SKIP，见 [限定范围](unique-index.md)；表/列 UNIQUE 自动索引、CHECK/FK、CTE/UPSERT/view/trigger/window/JSON/FTS5/ATTACH 等和 UTF-16/WITHOUT ROWID/autovacuum 仍未实现；不继承基点 PASS |
 | §11.1、M3/M8/M10 | 有限手工 replay/namespace 测试源已存在 | 完整故障点、断电、短写/Sync、ENOSPC、错位/torn write、checkpoint/rekey 中断的 harness 仍有源码缺口；不能全部称为已有命令只待运行 |
 | §11.3、§12.3、M10 | 来源、许可、威胁模型、格式说明和示例已有 | 稳定 API、完整格式升级/回滚矩阵、独立数据安全/密码学/法律审查与稳定版判断均未闭合 |
 

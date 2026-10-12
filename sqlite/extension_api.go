@@ -178,6 +178,9 @@ func (t *Tx) checkWriteOwnership(ctx context.Context, c *writeCatalog) error {
 	return nil
 }
 func (t *Tx) createSQLMethodIndex(ctx context.Context, c *writeCatalog, s *sqlast.CreateIndex) error {
+	if s.Unique {
+		return fmt.Errorf("%w: UNIQUE extension indexes", ErrUnsupported)
+	}
 	if fold(s.Method) == "ivfflat" {
 		return t.createSQLIVFIndex(ctx, c, s)
 	}

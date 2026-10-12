@@ -1,5 +1,35 @@
 # gosqlite 中文手工验收操作手册
 
+> 2026-10-12 当前组合状态：Storage metadata 修正树 `7389e7b7` 的三条回归
+> 已实际 PASS（14 根 / 92 named PASS），UNIQUE 树 `fd4e3471` 的十二条有限门
+> 已实际 PASS（31 根 / 223 named PASS / 零 SKIP）；两者均自然退出并释放 lease。
+> 本文所在新 Storage + UNIQUE 组合仍是 **SOURCE_ONLY / NOT_RUN**：完整 ordinary、
+> race、oracle、跨编译/依赖、发布/精确恢复/对应 CI 尚未运行。下文旧的
+> SOURCE_ONLY、PENDING、FAIL 与 NOT_RUN 均保留为各自身份的历史，不覆盖上述有限结果。
+> 原 V1 显示契约 FAIL 与 V2 metadata 真失败（8,126 PASS / 1 FAIL / 7 SKIP；
+> 后续 19 NOT_RUN）不改写。native Backup（包括 UNIQUE 数据库）、WAL publisher
+> 和物理资格仍 **NOT_RUN**；完整目标与 M10 未验收。详见[新检查点证据](evidence/storage-unique-checkpoint-20261012.md)。
+
+## 2026-10-11 Storage 手册入口与当前结果
+
+严格明文 Backup 和 Linux 显式独占 WAL-tail publisher 已有组合源码；对应
+[Backup 六入口规程](testing/plaintext-backup-manual.md)与
+[WAL 公开四场景规程](testing/wal-tail-publication-manual.md)均已有有限 harness，
+实际 native 运行及存储资格仍 **NOT_RUN**。完整物理故障/崩溃/恢复设施仍
+**IMPLEMENTATION_MISSING**，更广平台/FS/WAL Backup 与恢复能力仍有工程缺口。
+
+已发布 f189 的 Library 精确恢复 26 门和 CI 38179686483 已闭合；Backup 输入
+ec9f30d2 的 36 条与 WAL 输入 3f772f7e 的 5 条有限命令已 PASS。冻结 Storage
+组合树 `2602cc60e8c82e3c7f900eb44439e4217cb0b8c3` 的完整普通 26 门 V2 已在
+ordinary 门 **FAIL**，后续 19 门 NOT_RUN；修正后新树/完整复验 **PENDING**，
+文档叠加后的新提交、恢复与 CI 仍 **NOT_RUN**。原生 publisher
+手工门与物理限制没有因此放开。完整 ordinary 本来就包含健康 native 文件/WAL/
+正确密钥维护；不得将其称为纯模型，也不得将其结果称为全平台/耐久性合格。
+
+本次只补说明，所有既有命令、参数、隔离、留证和清理步骤原样保留。以下旧日期、
+基点、未合入说明与历史失败仅指原时点；当前身份、V1 记录器失败与 V2 源码断言失败
+见[Storage 证据补记](evidence/storage-checkpoint-20261011.md)。
+
 ## 2026-10-11 17:02 UTC 开发资格补记
 
 本次 Darwin 有界清单/诊断源码组合 `8a324a8cedeccc8ba46234924c8074890aefa1da`

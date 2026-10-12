@@ -13,6 +13,7 @@ import (
 type writeIndex struct {
 	name    string
 	root    uint32
+	unique  bool
 	columns []int
 }
 type writeTable struct {
@@ -169,7 +170,7 @@ func writableTable(def *sqlast.CreateTable, root uint32) (*writeTable, error) {
 	return &writeTable{table: tab}, nil
 }
 func writableIndex(def *sqlast.CreateIndex, tab *writeTable, root uint32) (writeIndex, error) {
-	idx := writeIndex{name: def.Name, root: root}
+	idx := writeIndex{name: def.Name, root: root, unique: def.Unique}
 	if def.Method != "" {
 		return idx, fmt.Errorf("%w: extension syntax in sqlite_schema", ErrUnsupported)
 	}
@@ -183,6 +184,9 @@ func writableIndex(def *sqlast.CreateIndex, tab *writeTable, root uint32) (write
 		column, ok := tab.index[fold(name)]
 		if !ok {
 			return idx, fmt.Errorf("no such column: %s", name)
+		}
+		if def.Unique && sqlast.IsVectorDeclaration(tab.columns[column].Type) {
+			return idx, fmt.Errorf("%w: UNIQUE indexes on typed vector columns", ErrUnsupported)
 		}
 		idx.columns = append(idx.columns, column)
 	}
@@ -266,7 +270,11 @@ func (t *Tx) createIndex(ctx context.Context, c *writeCatalog, def *sqlast.Creat
 		if err != nil {
 			return err
 		}
-		if err = btree.InsertIndex(ctx, t.storage, root, btree.KeyInfo{Columns: len(idx.columns)}, idx.key(rowid, values)); err != nil {
+		key := idx.key(rowid, values)
+		if err = probeUniqueIndex(ctx, t.reader, idx, key, 0, false, btree.RangeLimits{}); err != nil {
+			return err
+		}
+		if err = btree.InsertIndex(ctx, t.storage, root, btree.KeyInfo{Columns: len(idx.columns)}, key); err != nil {
 			return err
 		}
 	}

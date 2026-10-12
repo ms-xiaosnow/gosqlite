@@ -13,59 +13,37 @@ import (
 	"github.com/ms-xiaosnow/gosqlite/internal/vfs"
 )
 
-func (s *Session) openWALLocked(ctx context.Context) error {
+// Scanning may stage exact tail provenance, but never mutates or publishes it.
+// The caller must validate physical/logical headers and extents before acquiring
+// any publication capability. Legacy callers reject the very same tail.
+func (s *Session) openWALLocked(ctx context.Context, tailPublication bool) (*pendingWALTail, error) {
 	st, absent, err := s.probePathLocked(s.path + "-wal")
-	if absent {
-		return nil
-	}
-	if err != nil {
-		return err
-	}
-	if !st.Mode().IsRegular() {
-		return fmt.Errorf("%w: WAL must be a regular file", ErrUnsupported)
-	}
+	if absent { return nil, nil }
+	if err != nil { return nil, err }
+	if !st.Mode().IsRegular() { return nil, fmt.Errorf("%w: WAL must be a regular file", ErrUnsupported) }
 	if s.cleanup != nil {
-		if err = s.cleanup.reserveWAL(); err != nil {
-			return err
-		}
+		if err = s.cleanup.reserveWAL(); err != nil { return nil, err }
 	}
 	f, err := openWALFile(s.path+"-wal", os.O_RDWR, true)
-	if s.cleanup != nil {
-		s.cleanup.acquiredWAL(f)
-	}
-	if err != nil {
-		return err
-	}
+	if s.cleanup != nil { s.cleanup.acquiredWAL(f) }
+	if err != nil { return nil, err }
 	s.walFile = f
 	s.walInfo, err = statNativeFile(f)
-	if err != nil {
-		return err
-	}
-	if !vfs.SameFile(st, s.walInfo) {
-		return ErrChanged
-	}
-	if err = validateWritableFile(s.walFile); err != nil {
-		return err
-	}
-	if s.walInfo.Size() == 0 {
-		return nil
-	}
+	if err != nil { return nil, err }
+	if !vfs.SameFile(st, s.walInfo) { return nil, ErrChanged }
+	if err = validateWritableFile(s.walFile); err != nil { return nil, err }
+	if s.walInfo.Size() == 0 { return nil, nil }
 	prefix, err := wal.ScanPrefix(ctx, nativeReaderAt{f}, s.walInfo.Size(), wal.Limits{})
 	if err != nil {
-		// Typed scanner evidence is necessary but not sufficient: the existing
-		// path-based intact-WAL normalizer is not a retained-directory tail
-		// publisher. Do not silently treat pre/post pathname checks as that
-		// capability, or truncate/append to the old authoritative WAL.
 		if exclusiveWALPrefixAllowed(prefix, err) {
-			return errors.Join(ErrUnsupported, errWALTailPublicationUnavailable, err)
+			if tailPublication { return &pendingWALTail{prefix: prefix, scanError: err}, nil }
+			return nil, errors.Join(ErrUnsupported, errWALTailPublicationUnavailable, err)
 		}
-		if errors.Is(err, wal.ErrLimit) {
-			return fmt.Errorf("%w: %w", ErrLimit, err)
-		}
-		return fmt.Errorf("%w: WAL validation: %w", ErrUnsupported, err)
+		if errors.Is(err, wal.ErrLimit) { return nil, fmt.Errorf("%w: %w", ErrLimit, err) }
+		return nil, fmt.Errorf("%w: WAL validation: %w", ErrUnsupported, err)
 	}
 	s.snapshot = prefix.Snapshot()
-	return nil
+	return nil, nil
 }
 
 func (s *Session) checkWALStableLocked() error {

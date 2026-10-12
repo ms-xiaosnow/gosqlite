@@ -278,7 +278,7 @@ func TestNativeUnsupportedWritesPreserveValidDatabase(t *testing.T) {
 		}
 	}
 	execute(t, fresh, "CREATE TABLE t(x)")
-	for _, s := range []string{"CREATE UNIQUE INDEX i ON t(x)", "CREATE INDEX i ON t(x DESC)", "CREATE INDEX i ON t(x COLLATE NOCASE)", "CREATE INDEX i ON t(x) WHERE x>0", "CREATE INDEX i ON t(x+1)"} {
+	for _, s := range []string{"CREATE UNIQUE INDEX i ON t(x) WHERE x>0", "CREATE INDEX i ON t(x DESC)", "CREATE INDEX i ON t(x COLLATE NOCASE)", "CREATE INDEX i ON t(x) WHERE x>0", "CREATE INDEX i ON t(x+1)"} {
 		if _, err := fresh.Exec(context.Background(), s); err == nil {
 			t.Fatal(s)
 		}

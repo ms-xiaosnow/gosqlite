@@ -269,7 +269,20 @@ func (d *DB) checkSnapshot(ctx context.Context, source btree.PageReader, o Check
 			return CheckResult{}, err
 		}
 		for _, idx := range tab.indexes {
+			var previous []any
 			err = btree.ScanIndex(ctx, r, idx.root, btree.KeyInfo{Columns: len(idx.columns)}, func(key []any) error {
+				if idx.unique {
+					prefix := key[:len(idx.columns)]
+					duplicate, err := equalUniquePrefixes(previous, prefix)
+					if err != nil {
+						return err
+					}
+					if duplicate {
+						return fmt.Errorf("%w: duplicate UNIQUE index prefix in %q", ErrCorrupt, idx.name)
+					}
+					// ScanIndex returns owned keys. Retain only the preceding prefix.
+					previous = prefix
+				}
 				id := key[len(idx.columns)].(int64) // IndexCursor validates arity and rowid storage class.
 				raw, found, err := btree.SeekTable(ctx, r, tab.root, id)
 				if err != nil {

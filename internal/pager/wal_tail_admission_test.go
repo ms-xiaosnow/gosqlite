@@ -50,6 +50,16 @@ func TestWALTailAdmissionMemoryUsesExactProvenance(t *testing.T) {
 			t.Fatal("partial suffix admitted", e)
 		}
 	}
+	invalid := append([]byte(nil), full...)
+	invalid[len(invalid)-1] ^= 1
+	oldSalt := append([]byte(nil), full...)
+	oldSalt[wal.HeaderSize+wal.FrameHeaderSize+512+8] ^= 1
+	for _, b := range [][]byte{invalid, oldSalt} {
+		p, e := wal.ScanPrefix(context.Background(), bytes.NewReader(b), int64(len(b)), wal.Limits{})
+		if exclusiveWALPrefixAllowed(p, e) { t.Fatal("invalid/old-salt tail admitted", e) }
+	}
+	limited, limitErr := wal.ScanPrefix(context.Background(), bytes.NewReader(full), int64(len(full)), wal.Limits{MaxWALBytes: int64(len(full)-1)})
+	if !errors.Is(limitErr, wal.ErrLimit) || exclusiveWALPrefixAllowed(limited, limitErr) { t.Fatal("quota relabelled as tail", limitErr) }
 	if exclusiveWALPrefixAllowed(wal.CommittedPrefix{}, scanErr) || sharedWALPrefixAllowed(wal.CommittedPrefix{}, nil) {
 		t.Fatal("fabricated prefix admitted")
 	}
@@ -76,7 +86,7 @@ func TestWALTailAdmissionSourceRemainsBeforeMutation(t *testing.T) {
 		}
 		if call, ok := n.(*ast.CallExpr); ok {
 			if sel, ok := call.Fun.(*ast.SelectorExpr); ok {
-				for _, mutation := range []string{"WriteAt", "WriteCandidate", "Truncate", "Remove", "Rename", "ReplaceWAL", "CreateWALCandidate", "normalizeAppendWALLocked"} {
+				for _, mutation := range []string{"WriteAt", "WriteCandidate", "Truncate", "Remove", "Rename", "ReplaceWAL", "CreateWALCandidate", "normalizeAppendWALLocked", "NewWALPublication", "Acquire", "CreateCandidate", "publishWALTailLocked"} {
 					if sel.Sel.Name == mutation {
 						t.Fatal("exclusive tail admission gained mutation without capability", mutation)
 					}
@@ -85,9 +95,33 @@ func TestWALTailAdmissionSourceRemainsBeforeMutation(t *testing.T) {
 		}
 		return true
 	})
-	if !found {
-		t.Fatal("missing explicit native publication capability gate")
+	if !found { t.Fatal("missing explicit nil-default publication refusal") }
+	staged := false
+	ast.Inspect(open, func(n ast.Node) bool {
+		if literal, ok := n.(*ast.CompositeLit); ok {
+			if id, ok := literal.Type.(*ast.Ident); ok && id.Name == "pendingWALTail" { staged = true }
+		}
+		return true
+	})
+	if !staged { t.Fatal("tail provenance is not staged privately") }
+	constructor, err := parser.ParseFile(token.NewFileSet(), "session.go", nil, 0)
+	if err != nil { t.Fatal(err) }
+	var validate, publish, legacySHM token.Pos
+	for _, d := range constructor.Decls {
+		fn, ok := d.(*ast.FuncDecl)
+		if !ok || fn.Name.Name != "openSessionAdmitted" { continue }
+		ast.Inspect(fn.Body, func(n ast.Node) bool {
+			call, ok := n.(*ast.CallExpr)
+			if !ok { return true }
+			if id, ok := call.Fun.(*ast.Ident); ok && id.Name == "prepareWALTailView" { validate = call.Pos() }
+			if sel, ok := call.Fun.(*ast.SelectorExpr); ok {
+				if sel.Sel.Name == "publishWALTailLocked" { publish = call.Pos() }
+				if sel.Sel.Name == "removeStaleSHMLocked" { legacySHM = call.Pos() }
+			}
+			return true
+		})
 	}
+	if validate == 0 || publish <= validate || legacySHM <= publish { t.Fatal("prospective admission/publication ordering changed") }
 	f, err = parser.ParseFile(token.NewFileSet(), "shared_index.go", nil, 0)
 	if err != nil {
 		t.Fatal(err)

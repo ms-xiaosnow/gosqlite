@@ -67,6 +67,10 @@ func NewConnector(dsn string, opts sqlite.Options) (*Connector, error) {
 		copy := *opts.RollbackRecovery
 		opts.RollbackRecovery = &copy
 	}
+	if opts.WALTailPublication != nil {
+		copy := *opts.WALTailPublication
+		opts.WALTailPublication = &copy
+	}
 	if opts.Encryption != nil {
 		cfg := *opts.Encryption
 		opts.Encryption = &cfg

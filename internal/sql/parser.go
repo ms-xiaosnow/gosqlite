@@ -352,8 +352,9 @@ func (p *parser) createStmt() (Statement, error) {
 	if p.take("TABLE") {
 		return p.createTable()
 	}
+	unique := p.take("UNIQUE")
 	if p.take("INDEX") {
-		return p.createIndex()
+		return p.createIndex(unique)
 	}
 	return nil, p.unsupported("CREATE " + p.peek().Text)
 }
@@ -493,8 +494,8 @@ func (p *parser) defaultExpr() (Expr, error) {
 	})
 	return e, err
 }
-func (p *parser) createIndex() (*CreateIndex, error) {
-	s := &CreateIndex{}
+func (p *parser) createIndex(unique bool) (*CreateIndex, error) {
+	s := &CreateIndex{Unique: unique}
 	var err error
 	s.IfNotExists, err = p.ifNotExists()
 	if err != nil {
@@ -545,6 +546,9 @@ func (p *parser) createIndex() (*CreateIndex, error) {
 		return nil, err
 	}
 	if p.take("USING") {
+		if s.Unique {
+			return nil, p.unsupported("UNIQUE extension indexes")
+		}
 		s.Method, err = p.name()
 		if err != nil {
 			return nil, err

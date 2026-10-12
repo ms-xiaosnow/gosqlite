@@ -227,7 +227,7 @@ func secondaryReadIndex(ctx context.Context, reader btree.PageReader, t *table, 
 			continue
 		}
 		def, ok := stmt.(*sqlast.CreateIndex)
-		if !ok || def.Method != "" || len(def.Columns) == 0 {
+		if !ok || def.Unique || def.Method != "" || len(def.Columns) == 0 {
 			continue
 		}
 		if fold(def.Name) != fold(entry.Name) || fold(def.Table) != fold(t.name) || entry.RootPage < 2 || entry.RootPage == t.root {

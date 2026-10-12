@@ -1,5 +1,28 @@
 # Ordinary B-tree SELECT access
 
+## 2026-10-12 Storage + UNIQUE：冻结组合完整 26 门 PASS
+
+冻结运行树 `4008bd9442ffd21e1e993d4f1c72dbeed3c910f3`（3,238 文件）于 **00:49:41 UTC**
+自然完成 **26/26 门、28 次 Go 调用 PASS**，lease 已 RELEASED。ordinary/race
+各 **8,231 named PASS / 7 个预期 oracle SKIP**；完整 pinned oracle **9,925 PASS /
+零 SKIP**，LIMIT oracle/race **394 PASS**。跨编译与外平台 test-c/nm 只证明编译/
+符号，未执行外国映像。本次仅叠加文档；新提交、bundle、精确恢复及对应 CI 仍 **PENDING**。
+显式普通 BINARY ASC UNIQUE 子集已纳入；严格 Linux Backup/WAL publisher 仍为
+**PARTIAL / NATIVE_NOT_RUN**，包括 UNIQUE 数据库的 native Backup；M10 未验收。
+输入有限结果、原失败、准确终态和真实代码缺口见[本批精确证据](evidence/storage-unique-checkpoint-20261012.md)。
+
+### 历史组合准备摘要（2026-10-12，完整运行前；原文保留）
+
+> 2026-10-12 当前组合状态：Storage metadata 修正树 `7389e7b7` 的三条回归
+> 已实际 PASS（14 根 / 92 named PASS），UNIQUE 树 `fd4e3471` 的十二条有限门
+> 已实际 PASS（31 根 / 223 named PASS / 零 SKIP）；两者均自然退出并释放 lease。
+> 本文所在新 Storage + UNIQUE 组合仍是 **SOURCE_ONLY / NOT_RUN**：完整 ordinary、
+> race、oracle、跨编译/依赖、发布/精确恢复/对应 CI 尚未运行。下文旧的
+> SOURCE_ONLY、PENDING、FAIL 与 NOT_RUN 均保留为各自身份的历史，不覆盖上述有限结果。
+> 原 V1 显示契约 FAIL 与 V2 metadata 真失败（8,126 PASS / 1 FAIL / 7 SKIP；
+> 后续 19 NOT_RUN）不改写。native Backup（包括 UNIQUE 数据库）、WAL publisher
+> 和物理资格仍 **NOT_RUN**；完整目标与 M10 未验收。详见[新检查点证据](evidence/storage-unique-checkpoint-20261012.md)。
+
 The first ordinary-index planner uses the existing native SQLite secondary
 B-trees; it does not build a transient replacement index. It supports direct
 rowid/INTEGER PRIMARY KEY equality and leading equality prefixes of supported
@@ -113,3 +136,19 @@ The separate [SQL rowid interval guide](sql-rowid-ranges.md) adds native bounded
 rowid traversal and narrowly proven forward/reverse ORDER BY elimination. The
 secondary equality-prefix path described above still sorts rowid candidates and
 does not claim order satisfaction or secondary-index inequality support.
+
+
+## Source-only explicit UNIQUE constraint increment (2026-10-11)
+
+Historical author-stage record, retained verbatim below. Its NOT_RUN statements
+apply to 2026-10-11 source preparation; current finite and combined evidence is
+separately recorded at the top of this document.
+
+The [explicit UNIQUE candidate](unique-index.md) adds constraint enforcement with
+an equal-inclusive complete-field prefix seek using `NewBoundedIndexCursor`.
+It does not add UNIQUE indexes to either ordinary SELECT planner admission set:
+both equality-prefix and leading-inequality selectors explicitly skip Unique.
+Reads continue to use the prior eligible nonunique index or source scan. Native
+rowid/IPK positioning, NOT INDEXED, grams/ANN precedence and diagnostics are
+unchanged. The new source/model/healthy SQL sources are all NOT_RUN; the ordinary
+historical evidence above is not evidence for this constraint increment.

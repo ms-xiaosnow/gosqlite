@@ -151,6 +151,9 @@ type Options struct {
 	// EXCLUSIVE database lock for the connection lifetime and allows one active
 	// query or transaction lease. It requires writable access even for reads.
 	WALExclusive bool
+	// WALTailPublication 显式选择实验性 Linux 明文独占 WAL 尾部发布。
+	// Nil 保持既有拒绝；非 nil 不代表物理恢复或持久性已经验收。
+	WALTailPublication *WALTailPublicationOptions
 	// WALShared requests native shared-memory WAL coordination. Independent
 	// connections may retain read snapshots while one writer commits. Combined
 	// with ReadOnly, only Linux live initialized SHM attachment is supported.
@@ -232,6 +235,10 @@ func OpenContext(ctx context.Context, path string, opts Options) (result *DB, re
 	}
 	var err error
 	opts, err = snapshotRollbackRecovery(opts)
+	if err != nil {
+		return nil, wrap("open", err)
+	}
+	opts, err = snapshotWALTailPublication(opts)
 	if err != nil {
 		return nil, wrap("open", err)
 	}
@@ -324,6 +331,8 @@ func OpenContext(ctx context.Context, path string, opts Options) (result *DB, re
 			session, err = pager.OpenReadOnlySharedSessionAdmitted(ctx, path, d.pagerOptions(), closeAdmission)
 		} else if opts.WALShared {
 			session, err = pager.OpenSharedSessionAdmitted(ctx, path, d.pagerOptions(), closeAdmission)
+		} else if opts.WALTailPublication != nil {
+			session, err = pager.OpenSessionTailPublicationAdmitted(ctx, path, d.pagerOptions(), plainAdmission)
 		} else {
 			session, err = pager.OpenSessionAdmitted(ctx, path, d.pagerOptions(), plainAdmission)
 		}

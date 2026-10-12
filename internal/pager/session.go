@@ -1,13 +1,12 @@
 package pager
 
 import (
-	"bytes"
 	"context"
-	"encoding/binary"
 	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sync"
 
 	"github.com/ms-xiaosnow/gosqlite/internal/wal"
@@ -47,7 +46,19 @@ func OpenSession(ctx context.Context, path string, opts Options) (*Session, erro
 
 // OpenSessionAdmitted consumes a pre-canonical public admission exactly once.
 // Nil requests the direct constructor's own pre-acquisition reservation.
-func OpenSessionAdmitted(ctx context.Context, path string, opts Options, admission *ExclusiveOpenAdmission) (result *Session, retErr error) {
+func OpenSessionAdmitted(ctx context.Context, path string, opts Options, admission *ExclusiveOpenAdmission) (*Session, error) {
+	return openSessionAdmitted(ctx, path, opts, admission, false)
+}
+
+// OpenSessionTailPublicationAdmitted is the explicit, experimental tail route.
+// It does not expand the shared, encrypted, read-only or rollback constructors.
+// Native physical qualification remains separate from this source capability.
+func OpenSessionTailPublicationAdmitted(ctx context.Context, path string, opts Options, admission *ExclusiveOpenAdmission) (*Session, error) {
+	if runtime.GOOS != "linux" { return nil, ErrUnsupported }
+	return openSessionAdmitted(ctx, path, opts, admission, true)
+}
+
+func openSessionAdmitted(ctx context.Context, path string, opts Options, admission *ExclusiveOpenAdmission, tailPublication bool) (result *Session, retErr error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
@@ -105,8 +116,14 @@ func OpenSessionAdmitted(ctx context.Context, path string, opts Options, admissi
 	if err = s.checkJournalLocked(); err != nil {
 		return nil, err
 	}
-	if err = s.openWALLocked(ctx); err != nil {
-		return nil, err
+	pending, err := s.openWALLocked(ctx, tailPublication)
+	if err != nil { return nil, err }
+	if pending != nil {
+		// Neither the pending Snapshot nor its Header becomes live Session state.
+		validated, plan, err := prepareWALTailView(s.rawHeader, s.info.Size(), s.walInfo.Size(), nativeReaderAt{s.walFile}, pending, s.opts.SectorSize)
+		if err != nil { return nil, errors.Join(err, pending.scanError) }
+		if err = s.publishWALTailLocked(ctx, pending, validated, plan); err != nil { return nil, err }
+		return s, nil // SHM was handled only through the retained directory.
 	}
 	if s.info.Size() == 0 || (s.rawHeader[18] == 1 && s.rawHeader[19] == 1) {
 		if s.walInfo != nil && s.walInfo.Size() != 0 {
@@ -116,45 +133,8 @@ func OpenSessionAdmitted(ctx context.Context, path string, opts Options, admissi
 			return nil, err
 		}
 	}
-	if s.rawHeader[18] != 2 || s.rawHeader[19] != 2 {
-		return nil, fmt.Errorf("%w: exclusive WAL requires mode-2 database", ErrUnsupported)
-	}
-	pageOne := make([]byte, 100)
-	copy(pageOne, s.rawHeader[:])
-	if ref, ok := s.snapshot.Pages[1]; ok {
-		if _, err = readNativeAt(s.walFile, pageOne, ref.Offset); err != nil {
-			return nil, err
-		}
-	}
-	s.header, err = parseHeader(pageOne, s.info.Size(), true, s.snapshot.DBSize)
-	if err != nil {
-		return nil, err
-	}
-	if s.header.WriteVersion != 2 || s.header.ReadVersion != 2 {
-		return nil, fmt.Errorf("%w: WAL page one must remain mode 2", ErrCorrupt)
-	}
-	mainPageSize := uint32(binary.BigEndian.Uint16(s.rawHeader[16:18]))
-	if mainPageSize == 1 {
-		mainPageSize = 65536
-	}
-	if !bytes.Equal(s.rawHeader[:16], []byte("SQLite format 3\x00")) || mainPageSize != s.header.PageSize {
-		return nil, fmt.Errorf("%w: physical and logical database headers disagree", ErrCorrupt)
-	}
-	if s.walInfo != nil && s.walInfo.Size() > 0 && s.snapshot.Header.PageSize != s.header.PageSize {
-		return nil, fmt.Errorf("%w: WAL and database page sizes differ", ErrCorrupt)
-	}
-	if err = writableHeader(s.header); err != nil {
-		return nil, err
-	}
-	physical := uint32(s.info.Size() / int64(s.header.PageSize))
-	for n := uint64(physical) + 1; n <= uint64(s.header.PageCount); n++ {
-		if uint32(n) == lockPage(s.header.PageSize) {
-			continue
-		}
-		if _, ok := s.snapshot.Pages[uint32(n)]; !ok {
-			return nil, fmt.Errorf("%w: WAL has no image for appended page %d", ErrCorrupt, n)
-		}
-	}
+	s.header, err = validateWALView(s.rawHeader, s.info.Size(), s.snapshot, s.walInfo != nil && s.walInfo.Size() > 0, nativeReaderAt{s.walFile}, false)
+	if err != nil { return nil, err }
 	if err = ctx.Err(); err != nil {
 		return nil, err
 	}

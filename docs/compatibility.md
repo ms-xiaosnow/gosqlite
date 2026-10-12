@@ -1,5 +1,53 @@
 # Current compatibility matrix
 
+## 2026-10-12 Storage + UNIQUE：冻结组合完整 26 门 PASS
+
+冻结运行树 `4008bd9442ffd21e1e993d4f1c72dbeed3c910f3`（3,238 文件）于 **00:49:41 UTC**
+自然完成 **26/26 门、28 次 Go 调用 PASS**，lease 已 RELEASED。ordinary/race
+各 **8,231 named PASS / 7 个预期 oracle SKIP**；完整 pinned oracle **9,925 PASS /
+零 SKIP**，LIMIT oracle/race **394 PASS**。跨编译与外平台 test-c/nm 只证明编译/
+符号，未执行外国映像。本次仅叠加文档；新提交、bundle、精确恢复及对应 CI 仍 **PENDING**。
+显式普通 BINARY ASC UNIQUE 子集已纳入；严格 Linux Backup/WAL publisher 仍为
+**PARTIAL / NATIVE_NOT_RUN**，包括 UNIQUE 数据库的 native Backup；M10 未验收。
+输入有限结果、原失败、准确终态和真实代码缺口见[本批精确证据](evidence/storage-unique-checkpoint-20261012.md)。
+
+### 历史组合准备摘要（2026-10-12，完整运行前；原文保留）
+
+> 2026-10-12 当前组合状态：Storage metadata 修正树 `7389e7b7` 的三条回归
+> 已实际 PASS（14 根 / 92 named PASS），UNIQUE 树 `fd4e3471` 的十二条有限门
+> 已实际 PASS（31 根 / 223 named PASS / 零 SKIP）；两者均自然退出并释放 lease。
+> 本文所在新 Storage + UNIQUE 组合仍是 **SOURCE_ONLY / NOT_RUN**：完整 ordinary、
+> race、oracle、跨编译/依赖、发布/精确恢复/对应 CI 尚未运行。下文旧的
+> SOURCE_ONLY、PENDING、FAIL 与 NOT_RUN 均保留为各自身份的历史，不覆盖上述有限结果。
+> 原 V1 显示契约 FAIL 与 V2 metadata 真失败（8,126 PASS / 1 FAIL / 7 SKIP；
+> 后续 19 NOT_RUN）不改写。native Backup（包括 UNIQUE 数据库）、WAL publisher
+> 和物理资格仍 **NOT_RUN**；完整目标与 M10 未验收。详见[新检查点证据](evidence/storage-unique-checkpoint-20261012.md)。
+
+## 2026-10-11 Storage 当前支持边界补记
+
+冻结组合树 `2602cc60e8c82e3c7f900eb44439e4217cb0b8c3` 已含两个独立协议：
+[明文 Backup](plaintext-backup.md)只接纳受支持普通 rollback 快照，使用私有候选
+与 no-replace 发布；[独占 WAL 尾部发布](decisions/0017-wal-tail-prefix.md)只在
+显式 WALTailPublication 下处理合法已提交前缀后的完整未提交尾部，受检替换旧 WAL。
+两者都保留严格 Linux/ext-family、实际 unique mount-ID、Openat2、可信 ASCII
+命名空间、owner/Sync/退休合同；ext magic、权限位和普通测试不能证明设备耐久。
+
+Backup 的 native WAL/只读 WAL 源、非 Linux 与更广 FS 支持仍缺；WAL-tail 的
+只读/shared/encrypted/recovery/PSOW 组合及非 Linux 仍拒绝，nil 默认拒绝不变，
+没有新 DSN/CLI/env 启用。既有[Linux 真只读共享 WAL](plain-readonly-wal.md)保持
+独立，仅接纳活动且已初始化 SHM，不修复冷 WAL，也不替代尾部发布或 Backup。
+
+Backup ec9f30d2 的有限 36 命令和 WAL 3f772f7e 的有限 5 命令已 PASS；已发布
+f189 的精确恢复 26 门与 CI 已闭合。Storage 2602 的完整普通 26 门 V2 在 ordinary
+门 **FAIL**，后续 19 门 NOT_RUN；修正后新树/完整复验 **PENDING**，新发布/
+恢复/CI **NOT_RUN**，不能继承上述结果。有限公开手工
+harness 已有源码，native 资格 NOT_RUN；完整故障/恢复设施 IMPLEMENTATION_MISSING。
+完整 ordinary 含健康 native 文件/WAL/正确密钥路径，其范围也不等于物理资格。
+见[精确证据与未完成项](evidence/storage-checkpoint-20261011.md)。
+
+以下历史矩阵保留写作时点；旧“公开 harness 缺失”“真正只读 WAL 未实现”等表述
+须按对应功能、平台和当时身份解读，不能覆盖本补记的有限现状。
+
 ## 2026-10-11 RO-WAL / IPK 组合：当前执行证据与终态边界
 
 本次实际运行冻结树为 `cace45621c10259231a2e764cfbefdcdbe312ccf`，
@@ -141,18 +189,18 @@ Exact source, command, CI and restored-commit evidence remains in
 | Native Go production build | verified scoped | CGO_ENABLED=0 dependency/build checks; separate enabled race detector does not introduce a production C dependency |
 | SQLite format-3 rowid files | partial | Explicit header/varint/record/table/index/overflow/freelist encodings, schema root1, signed rowids, integer/REAL/NULL/TEXT/BLOB; ordinary CLI interoperability at 512/4096/65536-byte pages |
 | Unsupported file/schema forms | unsupported | UTF-16, WITHOUT ROWID, autovacuum and unlisted schema/format semantics fail closed; support is never inferred from the version number |
-| Table and index mutation | partial | Native page split/merge, table/index creation and maintained nonunique BINARY ASC indices; test-oracle integrity_check and the separately bounded native DB/Tx/CLI Check V2 provide distinct checks, neither implies universal SQLite feature support |
+| Table and index mutation | partial | Native page split/merge, table/index creation and maintained nonunique BINARY ASC indices; explicit ordinary named-column BINARY ASC UNIQUE enforcement and Check are implemented, with finite-input PASS and exact combined 26-gate ordinary/race/oracle qualification PASS; native Backup/publisher remain NOT_RUN (see unique-index.md); test-oracle integrity_check and the separately bounded native DB/Tx/CLI Check V2 provide distinct checks, neither implies universal SQLite feature support |
 | Rollback journal | partial | Standard DELETE-journal normal commit/rollback and sector assumptions; nil-default Open still refuses existing journals with ErrRecoveryRequired / CodeIOErr. Explicit RollbackRecovery opts into the bounded source-only profile below; existing zero-byte databases remain rejected |
-| Hot rollback recovery | partial experimental source/model | Open/OpenContext and configured Connector now have a nil-default, Linux writable-plaintext rollback opt-in, with retired-reader path proof and at most one recovery plus one fresh no-create probe. Independent descriptor-free model/source/compile checks PASS; real RecoverRollback, the production bridge and recovery-enabled real Open remain BLOCKED / NOT_RUN. The four-case public Open manual harness is implemented with independent source/compiler-only PASS; all physical cases remain NOT_RUN. Driver Connector physical coverage, default-on recovery, broader journals, native WAL-tail publication, other native platforms and full fault harnesses remain separate gaps |
+| Hot rollback recovery | partial experimental source/model | Open/OpenContext and configured Connector now have a nil-default, Linux writable-plaintext rollback opt-in, with retired-reader path proof and at most one recovery plus one fresh no-create probe. Independent descriptor-free model/source/compile checks PASS; real RecoverRollback, the production bridge and recovery-enabled real Open remain BLOCKED / NOT_RUN. The four-case public Open manual harness is implemented with independent source/compiler-only PASS; all physical cases remain NOT_RUN. Driver Connector physical recovery coverage, default-on recovery, broader journals, other native platforms and full fault harnesses remain separate gaps; the distinct opt-in Linux WAL-tail publisher now has source/model support but native publication is NOT_RUN |
 | Exclusive WAL | partial | Explicit writable WALExclusive, lifetime EXCLUSIVE lock, one active lease, ordinary append/read/checkpoint/close/interoperability; not shared concurrency |
 | Shared WAL | partial | Actual dual-header/hash/readmark SHM protocol, single writer/multiple independent snapshots, ordinary live official-reader/writer interoperability and reader-safe checkpoint/reset; one active lease per connection |
 | ReadOnly + Shared WAL | partial / scoped Linux ordinary + live-writer PASS | 显式加入活动已初始化 SHM；三个 O_RDONLY 句柄、只读 mmap、旧 mark 保护完整 header 快照、无 checkpoint。新树健康官方 live-writer 一根六子项实际 PASS；真实只读媒体/非特权身份未验证。冷/缺失/未初始化 sidecar 和其他 OS 不支持；不是通用 readonly WAL |
-| Ambiguous WAL tails | partial | Accepted ordinary committed/discarded/reset cases are bounded; incomplete/current-generation ambiguous tails fail closed; broader recovery handling remains code work |
+| Ambiguous WAL tails | partial / native publisher NOT_RUN | Accepted ordinary committed/discarded/reset cases remain bounded. Explicit Linux writable-plaintext WALExclusive + WALTailPublication has source support for validated committed-prefix publication after a complete uncommitted tail, with retained-directory checked replacement; nil-default, incomplete/invalid/old-salt tails and readonly/shared/encrypted/recovery/PSOW combinations still reject. Native publication and broader recovery remain unqualified; see [ADR0017](decisions/0017-wal-tail-prefix.md) |
 | Locking/native platforms | partial | Linux managed OFD locks; Darwin process-fcntl/deferred-close registry; Windows/amd64 LockFileEx, full file identity and managed mapping/metadata handles. Linux/amd64 ordinary runtime only; other target builds are not runtime evidence |
 | Managed cleanup ownership | partial | Bounded shared failed-open/successful-close, encrypted and plaintext Reader/Tx/exclusive minimal-owner registries/retry APIs are implemented, including pre-acquisition public metadata adoption. Native recovery now shares bounded ownership and explicit initial-absence provenance; shared-session initial-absence provenance and rollback Reader post-SHARED metadata timing are corrected with independent source/ordinary/race evidence. Native failure execution remains unqualified |
 | Busy/cancel/uncertain results | partial | Normal BUSY, stale shared promotion, cancellation and snapshot lifetime are exercised. Once physical publication begins it is not interrupted; ErrPoisoned/ErrCommitUncertain requires stopping use and preserving evidence |
 | Native full-profile integrity checking | partial | DB.Check/Tx.Check/CLI Check V2 validate one pinned snapshot, whole-page ownership, supported tables/ordinary indices and built-in extension semantics under explicit budgets. This is not unrestricted SQLite PRAGMA integrity_check or physical recovery qualification; see native-check.md |
-| Plaintext backup/native VACUUM | unsupported | Plaintext backup API/CLI and native VACUUM are not implemented on main. Unpublished Linux rollback backup candidates do not change this status; encrypted correct-key backup has a separate supported profile |
+| Plaintext backup/native VACUUM | partial source / native Backup NOT_RUN; VACUUM unsupported | This unpublished source implements DB.Backup, readonly Tx.Backup and CLI --out for strict Linux/ext-family ordinary rollback snapshots, with retained-dirfd private-candidate no-replace publication. Native Backup, including UNIQUE databases, remains NOT_RUN. WAL/readonly-WAL, non-Linux and broader filesystem support remain gaps; native VACUUM is unimplemented. Encrypted correct-key backup is a separate profile; see [Backup contract](plaintext-backup.md) |
 
 The journal-presence diagnostic text and private wrapping changed, including
 with nil policy. Default refusal, `errors.Is(err, ErrRecoveryRequired)` and
@@ -177,8 +225,8 @@ ADR0015](decisions/0015-native-darwin-windows-backends.md) and
 
 | Capability | Status | Implemented profile and open boundary |
 |---|---|---|
-| Basic DDL/DML | partial | Simple rowid CREATE TABLE, nonunique BINARY ASC CREATE INDEX, multirow INSERT, UPDATE/DELETE, transactional DDL, REINDEX for supported extension indices |
-| Constraints/schema | partial | INTEGER PRIMARY KEY rowid alias, NOT NULL and supported literal DEFAULT; noninteger PK metadata can be read but does not imply enforcement. UNIQUE/CHECK/FK/compound PK/generated columns/STRICT/general schema alterations remain unsupported |
+| Basic DDL/DML | partial | Simple rowid CREATE TABLE, nonunique BINARY ASC CREATE INDEX, plus bounded explicit ordinary named-column BINARY ASC CREATE UNIQUE INDEX (finite-input and exact combined 26-gate qualification PASS), multirow INSERT, UPDATE/DELETE, transactional DDL, REINDEX for supported extension indices |
+| Constraints/schema | partial | INTEGER PRIMARY KEY rowid alias, NOT NULL and supported literal DEFAULT; noninteger PK metadata can be read but does not imply enforcement. Explicit named-column BINARY ASC CREATE UNIQUE INDEX supports repeated NULL, immediate writes and Check; the independent 12-gate input has 223 named PASS, and the exact frozen combination has 26-gate PASS: ordinary/race each 8,231 named PASS / 7 expected SKIP and complete pinned oracle 9,925 PASS / zero SKIP. Table/column UNIQUE and autoindexes, typed-vector/extension UNIQUE, CHECK/FK/compound PK/generated columns/STRICT/general schema alterations remain unsupported; see unique-index.md |
 | Transaction control | partial | Native/driver and retained-connection BEGIN, COMMIT/END, ROLLBACK, SAVEPOINT, RELEASE, ROLLBACK TO; bounded statement/savepoint undo and read-own-writes. Connection changes()/total_changes()/last_insert_rowid() now have bounded native/driver state. General cursor relaxation remains code work |
 | SELECT and JOIN | partial | No FROM/single table and bounded named-table comma/INNER/CROSS/LEFT nested loops, aliases/qualified columns/stars, WHERE/ON, binds, ordering/NULL placement/LIMIT/OFFSET; one root snapshot/Tx lease. USING/NATURAL/RIGHT/FULL/derived/subquery relations remain unsupported |
 | Boolean and affinity semantics | partial | Context-sensitive scalar versus predicate/CASE branching, three-valued logic, bounded constant startup/substitution and declared-versus-absent comparison affinity; unquoted TRUE/FALSE identifier precedence and scoped SQLite direct LEFT-ON result-alias provenance are implemented. The current unpublished composition adds a bounded direct IPK equality/LIKE admission correction, including under NOT INDEXED; the exact combined tree now has normal and fixed original-SQL oracle evidence, separately recorded above. CAST/general-expression planning and LEFT-only WHERE pushdown ahead of an error-producing ON remain gaps, not full oracle parity |
@@ -282,3 +330,51 @@ NoCreate absence 四个拟议物理场景。独立 V3 的源码审阅、AST、�
 [中文步骤](public-rollback-manual-zh.md)只追加当前发布状态，原命令/断言保持；
 原 V3 手册字节另存证据。当前资格、准确候选与 namespace 组合身份见
 [验收补记](acceptance-status.md#2026-10-11-有限公开恢复-harness-源码与编译资格)。
+
+
+## 2026-10-11 新独占 WAL 尾部源码的分层状态
+
+本节对应从 `3ea6d3ab15f678fe48bee312921da60828845869` 新建的 29 路径候选；
+旧 Windows、startup、普通 WAL、恢复及 Backup 结果仍属于各自身份，原文不变。
+
+- 有限机制：实验性 SOURCE_ONLY，尚待独立审阅。只有明确设置非 nil
+  WALTailPublication、Linux 可写明文 WALExclusive、完整校验和有效的未提交
+  尾部，才可能进入新发布器。nil 尾部拒绝、干净 WAL、共享 WAL、现有门控不变。
+- 配置：纯验证、按值快照、driver 复制；不增加 DSN/CLI/env 参数。公开 Options
+  增加字段会使外部非键控结构字面量源码不兼容；建议使用键控字段。
+- 原生限定：ext-family magic 只是初始准入信号；还要求实际返回的唯一 mount ID、
+  device/inode、单链接、同一保留目录、受限 ASCII 非 sidecar 主文件名、Openat2
+  no-follow/beneath/no-xdev。缺能力返回 Unsupported，不选择较弱替代。
+- SHM：仅处理同一保留目录下已证明不存在或明确验证的旧普通单链接 SHM；
+  不读取映射内容。意外出现、身份变更、journal、别名或不支持形式拒绝。
+- 仍不支持：非 Linux 尾部发布、真正只读 WAL、共享/加密尾部恢复、旧盐、部分帧、
+  无效尾部、恶意名称重绑定防护、任意文件系统与物理持久性保证。
+- 新源码测试、guard、编译：NOT_RUN；公开/driver 物理 harness：
+  IMPLEMENTATION_MISSING；实际 native tail/namespace/fault/crash/kill/恢复：
+  BLOCKED / NOT_RUN。不能据此宣称 M3/M10 或生产安全完成。
+
+[协议与失败语义](decisions/0017-wal-tail-prefix.md)，
+[缺失物理 harness 的中文规约](testing/wal-tail-publication-manual.md)。
+
+
+## 2026-10-11 恢复后 Backup / RO / IPK / WAL 组合当前状态
+
+本节为当前组合状态；上节新 WAL 候选记录保留原时点，并不撤回此前已组合的
+只读共享 WAL、IPK 与严格 Backup 源码。当前从 Backup tree
+`66c1bc190f6e0d704d243decbdc377d0b2ce809e` 逐 hunk 合入已审 cbb WAL
+切片及 bf0187cf 手工源码 overlay；没有整树替换或运行结果继承。
+
+- 状态为 SOURCE_ONLY / NOT_RUN；历史 cbb 的 34 根 / 65 子项 / 99 named
+  模型 PASS 只属于原树。新组合的 parser、guard、编译与任何测试均未执行。
+- public Open/OpenContext/driver Connector 四场景 Linux 手工 harness 源码
+  已存在，故该有限入口不再是 IMPLEMENTATION_MISSING；仍未编译或运行，
+  原生和物理资格 NOT_RUN，完整故障/崩溃/恢复设施仍 IMPLEMENTATION_MISSING。
+- 分派顺序固定为只读共享 WAL、普通共享 WAL、显式 WALTailPublication、
+  nil-default 普通 exclusive。只读 ErrReadOnly、checkpoint 拒绝及选项值复制保留。
+- WAL 单次受检替换与 Backup 的 no-replace 发布是两个不同协议。两者的
+  Linux ext-family / 实际 unique mount-ID / Openat2 / 私有 ASCII 命名空间
+  与有序 owner 退休门均不放宽；没有 generic cleanup 重写。
+- WAL 新选项无 CLI/DSN/env 启用；非 Linux、RO/shared/encrypted/recovery/PSOW
+  组合拒绝，nil 仍保留尾部拒绝。Backup 对 WAL/RO-WAL 的拒绝保留。
+- ANN V4、41-target fuzz、未知中断及物理链限制保持；不作 M3/M8/M10、
+  安全/法律、稳定 API 或生产资格声明。后续验证必须另审精确组合及执行边界。

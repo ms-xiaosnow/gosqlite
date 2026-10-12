@@ -256,6 +256,9 @@ func (t *Tx) insert(ctx context.Context, c *writeCatalog, stmt *sqlast.Insert, p
 		if err != nil {
 			return result, err
 		}
+		if err = t.checkUniqueIndexes(ctx, tab, rowid, values, 0, false); err != nil {
+			return result, err
+		}
 		if err = btree.InsertTable(ctx, t.storage, tab.root, rowid, tab.physical(values)); err != nil {
 			return result, err
 		}
@@ -407,6 +410,9 @@ func (t *Tx) update(ctx context.Context, c *writeCatalog, stmt *sqlast.Update, p
 			} else if exists {
 				return result, fmt.Errorf("%w: duplicate rowid", ErrConstraint)
 			}
+		}
+		if err = t.checkUniqueIndexes(ctx, tab, newID, values, oldID, true); err != nil {
+			return result, err
 		}
 		if err = t.removeIndexes(ctx, tab, oldID, oldValues); err != nil {
 			return result, err

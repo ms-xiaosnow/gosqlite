@@ -42,9 +42,9 @@ func TestCLIMaintenanceMemoryArguments(t *testing.T) {
 		}
 	}
 	var out bytes.Buffer
-	err := run([]string{"backup", "untouched.db", "--out", "untouched.backup"}, &out)
-	if !errors.Is(err, sqlite.ErrUnsupported) || !strings.Contains(err.Error(), "plaintext backup is not implemented") || out.Len() != 0 {
-		t.Fatal("plaintext boundary is not explicit")
+	o, err := parseMaintenance("backup", []string{"untouched.db", "--out", "untouched.backup"})
+	if err != nil || o.source != "" || o.destination != "untouched.backup" {
+		t.Fatal("plaintext arguments did not select read-only backup", err)
 	}
 	if err := run([]string{"help"}, &out); err != nil || !strings.Contains(out.String(), "gosqlite backup") || !strings.Contains(out.String(), "gosqlite rekey") {
 		t.Fatal("maintenance commands missing from help")

@@ -1,5 +1,55 @@
 # Implementation and acceptance progress
 
+## 2026-10-12 Storage + UNIQUE：冻结组合完整 26 门 PASS
+
+冻结运行树 `4008bd9442ffd21e1e993d4f1c72dbeed3c910f3`（3,238 文件）于 **00:49:41 UTC**
+自然完成 **26/26 门、28 次 Go 调用 PASS**，lease 已 RELEASED。ordinary/race
+各 **8,231 named PASS / 7 个预期 oracle SKIP**；完整 pinned oracle **9,925 PASS /
+零 SKIP**，LIMIT oracle/race **394 PASS**。跨编译与外平台 test-c/nm 只证明编译/
+符号，未执行外国映像。本次仅叠加文档；新提交、bundle、精确恢复及对应 CI 仍 **PENDING**。
+显式普通 BINARY ASC UNIQUE 子集已纳入；严格 Linux Backup/WAL publisher 仍为
+**PARTIAL / NATIVE_NOT_RUN**，包括 UNIQUE 数据库的 native Backup；M10 未验收。
+输入有限结果、原失败、准确终态和真实代码缺口见[本批精确证据](evidence/storage-unique-checkpoint-20261012.md)。
+
+### 历史组合准备摘要（2026-10-12，完整运行前；原文保留）
+
+> 2026-10-12 当前组合状态：Storage metadata 修正树 `7389e7b7` 的三条回归
+> 已实际 PASS（14 根 / 92 named PASS），UNIQUE 树 `fd4e3471` 的十二条有限门
+> 已实际 PASS（31 根 / 223 named PASS / 零 SKIP）；两者均自然退出并释放 lease。
+> 本文所在新 Storage + UNIQUE 组合仍是 **SOURCE_ONLY / NOT_RUN**：完整 ordinary、
+> race、oracle、跨编译/依赖、发布/精确恢复/对应 CI 尚未运行。下文旧的
+> SOURCE_ONLY、PENDING、FAIL 与 NOT_RUN 均保留为各自身份的历史，不覆盖上述有限结果。
+> 原 V1 显示契约 FAIL 与 V2 metadata 真失败（8,126 PASS / 1 FAIL / 7 SKIP；
+> 后续 19 NOT_RUN）不改写。native Backup（包括 UNIQUE 数据库）、WAL publisher
+> 和物理资格仍 **NOT_RUN**；完整目标与 M10 未验收。详见[新检查点证据](evidence/storage-unique-checkpoint-20261012.md)。
+
+## 2026-10-11 Storage 检查点草稿：已完成输入与待补组合终态
+
+已发布 main 为 `f189746671aaf4962a699292a84110e2d43387e8`，tree
+`0f29261ca50576373069dd8ad23a2bd3377a743c`；精确 Library 恢复 26 门已于
+23:00:52 UTC 记录全部 PASS，CI 38179686483 的 ordinary/oracle 均 SUCCESS。
+这是 f189 的独立结果，不能转授给 Storage 候选。
+
+Backup 输入 ec9f30d2 的 36 条有限命令、44 根 / 2,278 named PASS 与 WAL 输入
+3f772f7e 的 5 条有限命令、35 根 / 100 named PASS 已保存并读回。冻结组合树
+`2602cc60e8c82e3c7f900eb44439e4217cb0b8c3`（3,229 文件）的完整普通 26 门
+V2 已在 ordinary 门真实 **FAIL**：8,126 PASS、1 FAIL、7 预期 SKIP，后续 19 门
+NOT_RUN；前面的 guard、四 quick 和 livewriter 六门 PASS。唯一失败根为
+TestMetadataOwnershipCallChainSource，报告两个新 Linux 文件直接调用 os.Stat
+绕过已有 platform-owned metadata helper。修正后新树/完整复验 **PENDING**。
+V1 是 guard 实际 exit 0、记录器旧文本期望导致
+FAIL_TEST_VALIDATION、后续 25 门 NOT_RUN；V2 保持同树同 26 门，仅修正记录器
+精确文本契约后重新运行；这次实际源码断言失败与 V1 记录器文案错误分别保留。
+
+完整 ordinary 包含健康 native 文件、锁、WAL、正确密钥加密维护及固定 seed；
+它不是纯内存测试，也没有准入新 native Backup/WAL publisher 或物理故障链。
+两个有限手工 harness 源码已存在，原生资格仍 NOT_RUN，完整物理设施仍
+IMPLEMENTATION_MISSING。更广 Backup 平台/FS/WAL 与恢复能力仍需实际工程工作。
+下一步对两个 metadata 调用点作保持语义的最小源码修正并独立审阅，再固定新的
+源码/文档身份，执行对应回归和新完整 26 门，随后另验新提交及其恢复/CI；这些
+未来结果均未预写 PASS。详见[Storage 精确证据与缺口](evidence/storage-checkpoint-20261011.md)。
+以下既有记录完整保留，所有“当前/最新/尚未”继续只指其各自写作时点。
+
 ## 2026-10-11 RO-WAL / IPK 组合：当前执行证据与终态边界
 
 本次实际运行冻结树为 `cace45621c10259231a2e764cfbefdcdbe312ccf`，
@@ -1766,3 +1816,174 @@ testscope / os/exec / C 输入，不能把 tooling 闭包当 shipping。全部�
 - 下一步：先独立审核精确源码/闭合选择/初始化依赖，再分别审阅编译、有限普通
   Linux、race 和官方互操作计划；不得打断既有队列、继承其他候选 PASS，或启动
   ANN V4、41 fuzz、未知中断、权限/namespace/物理故障工作流。
+
+
+### 明文 Backup：V2 源组合与显式手动资格入口（2026-10-11）
+- 状态：SOURCE_ONLY / IN_PROGRESS；尚未独立审查或执行新候选。
+- 在 67318ded 基线逐 hunk 重放 28 路径受审 V2；保留当前 WAL/LIMIT/startup/testoracle/既有 guard。
+- 六原名、10 叶、12 Backup、7 oracle 启动的源码覆盖保留，三文件增加 linux/manual_backup_publication（oracle 另加 oracle）；默认5/oracle6差异相对未发布 fc0b，而非当前 main 已有测试。
+- 新 internal/testkit/backupmanual：明确 root/profile/TMP/CWD、有界旁置来源 manifest、完整 case 输入、once-end owner、成功失败全部保留、自然退出后用户清理；新窄 testscope guard 与纯源码反变体。
+- 本次命令结果：仅静态文本/字节/mode 组合；Go/gofmt/parser/compiler/test/native/oracle 均 NOT_RUN。旧 V2 25 model + 9 AST 的 PASS 仅属于其旧冻结树。
+- 文档：docs/plaintext-backup.md、docs/testing/plaintext-backup-manual.md；只读 oracle factory 继续原 -noinit/五键 env/CWD 契约。
+- 限制：native WAL、readonly WAL、非 Linux 与更广文件系统仍不支持；完整物理故障/恢复/断电 harness IMPLEMENTATION_MISSING。没有 general Backup/G1/M3/M8/M10 完成声明。
+- 下一步：冻结源码/模式/import-init 及选择闭包，独立源码审查，再单独批准精确 guard/compile/符号检查；真实 FS native/oracle 继续 HOLD。
+
+### 2026-10-11：Backup 手动 manifest R-1 精确 schema 源码修复
+
+- 原 `4c308cbde95e40e32879522c009caf3549900e03` 的独立源码审查发现真实 schema 缺陷：Go typed JSON decoder 仍接受大小写别名；这是源码 finding，不是新运行 FAIL。原候选与报告保留。
+- 仅七个批准路径修复：移出无 tag 的纯内存 decoder/回归，所有嵌套对象及 env 精确大小写键集先于 typed decode，原始 digest 先于 decoder、decoder 先于其他 sidecar。保留继承 quota/错误检查、全部 native gating/owner/retention 和三文件六原名原断言。
+- 四个便携纯测试源码包含 1,983 个有限叶项；source guard 保留原 64 反变体，增加 10 个 R-1 顺序/纯度/未审源码约束反变体。新默认纯包没有 init 或包级可变状态；并未把 native helper 放入默认构建。
+- 状态：SOURCE_ONLY / 待独立审查；纯测试、guard、选择、compiler、符号、native/oracle 均 NOT_RUN。实际未来纯 parser 命令见 [手动专题](testing/plaintext-backup-manual.md#41-纯内存-schema-回归的独立未来命令)，仅 PROPOSED。完整物理 fault harness 仍 IMPLEMENTATION_MISSING，native WAL/readonly WAL/非 Linux 缺口不变。
+
+
+## 2026-10-11：恢复环境后的 RO/IPK 与严格 Backup 源码组合
+
+- 状态：**SOURCE_ONLY / IN_PROGRESS**。在固定 RO/IPK 输入 tree
+  `9ca02ee7fee55f0eb4abe83330b37b80d02aa4bd` 上，逐路径组合已审 Backup
+  tree `790deb6854ce66141cd8e602aa3641c4dda37404` 相对 Windows 基点
+  `f6edabfba3e004a0e7874441b8c0a3e38cf099c6` 的 36 路径切片。
+  另仅窄改 `docs/cli-encryption.md` 中过时的明文未实现说明，共 37 路径。
+- 唯一 Go 重叠是 `cmd/gosqlite/main.go` 的 help 行；保留新的只读 WAL
+  flags、解析与执行分支，仅加入 Backup help。本文保留当前历史并追加旧 Backup
+  记录；旧记录中的 SOURCE_ONLY、FAIL、PASS 各属原时间/树，不是当前运行结论。
+- 完整字节、普通文件/目录模式、独立 Git 格式 tree 哈希、逐 hunk 重叠与
+  read/import/init/选择闭包在源码树外单独记录。当前 common paths 的 POSIX
+  模式保留；Git 归档的 32 文件/2 目录规范化差异不是行为冲突或新增实现。
+- 本次仅 Python 标准库/静态文件操作；Go、gofmt、Go parser、compiler、测试、
+  oracle、native、recorder、项目脚本、Git/远端和 Library 均 **NOT_RUN**。
+  本次组合需新的独立源码审阅，再分别审查普通验证许可；不能继承旧 PASS。
+- 生产 Backup 仍限制 Linux ext-family magic、实际 unique mount-ID 字段、
+  Openat2/no-replace、可信私有命名空间及 ASCII 普通 rollback 家族；严格
+  owner/EXCLUSIVE、file/dir Sync 与先目录后主保护者退役契约不放宽。
+  WAL、只读 WAL、非 Linux、当前 tmpfs/overlay 及更广 FS 未获支持。
+- 六个原生测试仍同时受 build tag 与显式运行时资格门约束；原 fixture/断言
+  与失败保留不变，native/oracle **NOT_RUN**，完整物理故障 harness
+  **IMPLEMENTATION_MISSING**。ANN V4、41-target fuzz campaign、未知安全
+  中断/物理链仍保持限制，原执行会话 54102 仍为 **UNKNOWN**。环境恢复
+  不提供绕过限制的许可；没有 G1/M3/M8/M10 或生产可用声明。
+- 下一步：独立复核精确 37 路径与当前闭包，再决定是否单独批准限定普通
+  验证；新组合 tree 以外部 manifest 为准，不把输入 tree 当成最终身份。
+
+
+## 2026-10-11 独占 WAL 尾部 opt-in：29 路径源码候选
+
+- 状态：IN_PROGRESS / SOURCE_ONLY，独立源码审阅待完成；没有新提交或 CI。
+- 固定输入：main `3ea6d3ab15f678fe48bee312921da60828845869`，tree
+  `f6edabfba3e004a0e7874441b8c0a3e38cf099c6`，3,154 个原始源码文件。
+- 新身份：`wal-publication-optin-work-v1`；23 个 Go 文件按路径/SHA-256 排序后的
+  规范 JSON 指纹为 `a76a9aa124262b27139fc4049e1a501ca4c64a8e8aff2092bb05d47e6c906961`。完整含六文档的最终 tree、
+  29 路径 patch、全部 inventory 与逐 hunk 来源另存固定证据，不自写循环 tree hash。
+- 交付：nil-default 公共策略与 driver 值复制；私有扫描结果先验证物理/逻辑 page one、
+  页大小和已提交 extent，再获取候选；生产状态机与原 temporary slot 的 checked
+  exchange；Linux 实际 statx/Openat2/同目录替换/SHM/目录 Sync；模型与 AST 负例源码。
+- 成功曝光条件：候选 Sync、已知替换、内存所有权交接、锚定 SHM 和身份验证、
+  同目录 barrier，以及旧 WAL 后目录退休均成功。任意诊断失败均不返回成功 Open。
+- 本批执行结果：只有 Python 文件/文本/hash 操作；Go/parser/compiler/gofmt/test/
+  native/oracle/项目代码零执行。全部新模型与 guard 为 NOT_RUN，不能记 PASS。
+- 仍缺：public/driver 物理 harness 为 IMPLEMENTATION_MISSING；限定原生 profile、
+  跨进程连续 EXCLUSIVE、故障/崩溃/重启与物理持久性为 BLOCKED / NOT_RUN。
+  更广平台/尾部/只读 WAL/敌对 namespace 与完整 M3/M10 未完成。
+- 下一步：固定源码独立审查 owner、锁序、失败边、实际 import/init/caller/选择闭包。
+  之后即使获准模型或编译，也必须另记精确身份和有限结果；不解除原受限执行。
+  既有 Windows 事实、人工门、factory 契约、旧失败与旧链路限制全部保留。
+
+
+## 2026-10-11：恢复环境后的 Backup / RO / IPK 与 WAL 发布源码组合
+
+- 状态：SOURCE_ONLY / IN_PROGRESS；没有新提交、CI 或执行资格。固定输入为
+  Backup tree `66c1bc190f6e0d704d243decbdc377d0b2ce809e`、WAL cbb tree
+  `cbb2a4771aeea5028a2903cf9327bce0e2ae464d` 与四路径 manual overlay
+  （其单独覆盖 cbb 的 tree 为 `bf0187cf12e228f3e0b71831da8ad5ea4415b1be`）。
+- 仅合入原先明确批准且已审阅的 29 路径 WAL 切片及四路径 overlay；三份
+  当前文档完整保留后追加历史和本节。两个 Go 重叠只做有界组合：sqlite
+  Options/快照/分派，及 testscope 的双扫描器/双合同；无其他生产行为重写。
+- WAL/Backup 全文件 source pins 不作盲目更新：两个实际变更文件须先逐声明
+  完整映射与独立源码复核，余下 13 个 WAL 和六个 Backup pins 保持原值。
+  完整身份、精确 delta、hunk 来源、read/import/init/选择闭包在树外证据中固定。
+- 本次 Go、gofmt、Go parser、compiler、guard、test、native/oracle、recorder、
+  项目脚本、Git/远端、Library 均 NOT_RUN；只有静态文件、标准库文本和 hash。
+  历史 cbb 模型 34 根 / 65 子项 / 99 named PASS 不转移到此树。
+- 9ca RO/IPK 基线后续普通检查已由协调者报告自然 exit 1：四个旧 guard/断言
+  失败，生产缺陷尚未结论；其修复独立审阅。本候选未提前合入该未知 delta，
+  也不宣称 RO/IPK 或本候选普通 PASS。
+- 有限 public Open/OpenContext/Connector 四场景 manual 源码已实现；默认与
+  oracle-only 排除，Linux/manual 双标签、环境/独占 root/FS/kernel 资格门、
+  单次所有权和失败现场保留不变。manual 未编译，native NOT_RUN；完整
+  physical fault/crash/recovery 设施仍 IMPLEMENTATION_MISSING。旧写作事故
+  的两次失败 system-go dispatch 是历史实际事件，未被本次 NOT_RUN 覆盖。
+- Linux 严格命名空间/唯一 mount-ID/Openat2 门、完整 mode/page/extent
+  校验先于 publisher owner、nil-default、RO 拒绝及 Backup WAL 拒绝保持。
+  不重启 ANN V4、41-target fuzz、未知中断/物理链；原会话 54102 UNKNOWN。
+- 下一步：独立复核两文件完整 body 和精确合并，更新仅两个合法 pins 后重新
+  固定最终 tree；再单独决定限定纯内存/源码验证的执行范围。本批无 M3/M10
+  或整项目完成声明。
+
+本次追加状态：两个完整新文件的独立源码复核已同意精确 hash 刷新，
+`sqlite/sqlite.go` 和 `internal/testscope/main.go` 的新 pins 已分别更新；
+其余 13 个原 WAL pins、新 manual pin 以及六个 Backup pins 未变。
+这只表示两文件源码边界复核，不是 Go parser/guard/compiler/test 或原生资格。
+最终完整 tree 和逐 hunk/闭包核对以树外证据为准。
+
+
+## 2026-10-11：已发布 RO-WAL / IPK 检查点之上的 Backup / WAL-tail publication 文档组合
+
+- 当前候选是独立的 **SOURCE_ONLY / NOT_RUN** 身份，尚未发布；最终完整
+  tree 与文件清单由树外证据固定。基点是已发布提交
+  `f189746671aaf4962a699292a84110e2d43387e8`，tree
+  `0f29261ca50576373069dd8ad23a2bd3377a743c`。仅组合其十一份最终文档
+  更新与已审 storage 源码，重叠文档保留已发布正文及原 storage 追加段。
+- 本页和其他检查点文档中的完整 26 项、28 次 Go 调用及 ordinary/race/oracle
+  PASS 只绑定实际运行树 `cace45621c10259231a2e764cfbefdcdbe312ccf`。
+  其他 Backup / WAL 有限检查只属于各自冻结树；任何已有或随后完成的
+  输入树结果均不转移为此新组合的 PASS。旧失败和 UNKNOWN 记录保留。
+- 本候选的全部 Go、测试体、source pins、modules、scripts、CI 字节与模式
+  均保持已审输入；没有新增或削弱生产行为、断言、选择器、手工门或许可。
+  十一文档更新之外，本节仅明确新身份的证据边界。
+- 此新 tree 的 Go parser、guard、compiler、普通/race/oracle、native、
+  精确恢复与 hosted CI 全部 **NOT_RUN**。默认 / oracle 构建仍排除受限
+  手工 storage 源，不能从完整普通命令或旧 finite 模型结果推定 native 资格。
+- Backup 的 no-replace、Linux ext-family / 实际 unique mount-ID / Openat2、
+  私有 ASCII 命名空间、owner / barrier / 有序退休契约不放宽。WAL 尾部
+  单次受检替换保持独立协议，仅 WAL 候选包含该已审 opt-in 层。
+  既有只读 WAL / IPK 合同与历史限定结果完整保留。
+- ANN V4、41-target 持续 fuzz、未知中断链、实际物理 fault / tamper /
+  wrong-key / hot recovery / namespace interference、手工 native publisher
+  均未由本次组合执行或解除限制；完整故障 / 崩溃 / 恢复设施仍是独立缺口。
+  无 G1 / M3 / M8 / M10、稳定 API、安全、法律或生产可用声明。
+- 下一步仅为独立核对精确 tree、全部变更测试与依赖、普通和 CI 的可达范围；
+  执行必须另有当前 source / tool / module / command / recorder / resource
+  身份审查及明确许可。已有 Git 归档的 32 文件 / 2 目录 POSIX 模式差异
+  只是保留的历史来源差异，不是本次新平台、权限或 storage 资格。
+
+
+## 2026-10-11：显式普通 UNIQUE 索引源码切片
+
+Historical author-stage record, retained verbatim below. Its NOT_RUN statements
+apply to 2026-10-11 source preparation; current finite and combined evidence is
+separately recorded at the top of this document.
+
+- 状态：**IN_PROGRESS / SOURCE_ONLY / NOT_RUN**。基点发布提交
+  `f189746671aaf4962a699292a84110e2d43387e8`，tree
+  `0f29261ca50576373069dd8ad23a2bd3377a743c`；独立工作副本，原冻结源码/证据不变。
+- 交付：`CREATE UNIQUE INDEX [IF NOT EXISTS]` 的普通命名列 BINARY ASC
+  子集；持久 SQL catalog、build/INSERT/UPDATE 即时唯一性、NULL 豁免、精确
+  INTEGER/REAL 前缀比较、带布尔标志的旧 rowid 排除和 Check 相邻前缀校验。
+  INSERT 在写源行与更新 last_insert_rowid 前检查；已有 rowid/NOT NULL 顺序
+  保留，后行失败沿用 statement/savepoint 撤销与既有连接计数语义。
+- 架构：使用已有 `btree.NewBoundedIndexCursor` 的全索引字段等值闭区间；
+  不把 rowid 拼入查重边界，不建立全索引 map。配额/取消/损坏错误原样上抛。
+  既有事务独占写者与 Statement 边界复用，不修改 pager/VFS/恢复协议。
+- 代码：八个既有生产文件 `internal/sql/{ast,parser}.go`、
+  `sqlite/{write_schema,write_rows,check,plan_index,plan_secondary_range,extension_api}.go`
+  及 `sqlite/unique_index.go`。两个既有 negative-case 改为仍不支持的 UNIQUE
+  partial 形式；新增 parser/model/native/driver/oracle 测试源码。
+- 命令与结果：**没有执行 Go/gofmt/编译/测试/race/oracle 或项目脚本**。
+  仅静态读取、文本编辑、Python 标准库树/文件哈希和差异检查；无 Git/远程/
+  Library 操作。有限未来验证方案见 [UNIQUE 专题](unique-index.md)。
+- 限制：表/列 UNIQUE 与自动索引、typed-vector UNIQUE、USING 扩展 UNIQUE、
+  expression/partial/DESC/非 BINARY 索引仍 unsupported。两个 SELECT planner
+  明确跳过 Unique，未借 parser 扩大读计划；其余约束/SQL 缺口仍 PARTIAL。
+- 风险/证据：基点 PASS 不适用于候选；完整目标/M3/M8/M10 未验收。
+  历史失败与 held physical/ANN V4/41-target fuzz/未知中断链路保持。
+- 下一步：冻结精确源码与选择器，独立源审；之后另行审批有限正常/model/
+  driver/race/pinned-official SQL 门。没有把 source-only 完成记作通过。

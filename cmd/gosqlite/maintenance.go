@@ -13,7 +13,7 @@ import (
 	"github.com/ms-xiaosnow/gosqlite/sqlite"
 )
 
-const backupUsage = "usage: gosqlite backup <db> --out <new-archive> --key-provider <provider> [--out-key-provider <provider>] [--mode snapshot|wal|shared]"
+const backupUsage = "usage: gosqlite backup <db> --out <new-file> [--key-provider <provider> [--out-key-provider <provider>] [--mode snapshot|wal|shared]]"
 const rekeyUsage = "usage: gosqlite rekey <db> --key-provider <new-provider> --current-key-provider <provider> [--mode snapshot|wal|shared]"
 const providerHelp = "providers: env-hex:NAME, env-password:NAME, stdin-hex, stdin-password; credentials must never be arguments"
 
@@ -82,8 +82,8 @@ func parseMaintenance(command string, args []string) (maintenanceOptions, error)
 		if o.destination == "" {
 			return maintenanceOptions{}, errors.New(usage)
 		}
-		if key == "" {
-			return maintenanceOptions{}, fmt.Errorf("%w: backup currently requires an encrypted source and --key-provider; plaintext backup is not implemented", sqlite.ErrUnsupported)
+		if key == "" && (o.target != "" || seen["--mode"]) {
+			return maintenanceOptions{}, fmt.Errorf("%w: plaintext backup accepts only the source and --out; encryption flags require --key-provider", sqlite.ErrUnsupported)
 		}
 		o.source = key
 		// Omission deliberately reuses the same provider instance. In particular,
@@ -118,6 +118,10 @@ func runMaintenanceWithInput(ctx context.Context, command string, args []string,
 	if err != nil {
 		return err
 	}
+	if command == "backup" && o.source == "" {
+		result, err := executePlaintextBackup(ctx, o)
+		return emitMaintenanceResult(command, out, result, err)
+	}
 	source, err := newCLIKeyProvider(o.source, input)
 	if err != nil {
 		return err
@@ -135,6 +139,10 @@ func runMaintenanceWithInput(ctx context.Context, command string, args []string,
 		}
 	}
 	result, err := executeMaintenance(ctx, command, o, source, target)
+	return emitMaintenanceResult(command, out, result, err)
+}
+
+func emitMaintenanceResult(command string, out io.Writer, result maintenanceResult, err error) error {
 	if err != nil {
 		return maintenanceError(command, err)
 	}
@@ -154,6 +162,19 @@ type maintenanceResult struct {
 	PageSize       uint32 `json:"page_size"`
 	PageCount      uint32 `json:"page_count"`
 	RetainsHistory bool   `json:"retains_history"`
+}
+
+func executePlaintextBackup(ctx context.Context, o maintenanceOptions) (_ maintenanceResult, resultErr error) {
+	db, err := sqlite.OpenContext(ctx, o.path, sqlite.Options{ReadOnly: true, NoCreate: true})
+	if err != nil {
+		return maintenanceResult{}, err
+	}
+	defer func() { resultErr = errors.Join(resultErr, db.Close()) }()
+	info, err := db.Backup(ctx, o.destination)
+	if err != nil {
+		return maintenanceResult{}, err
+	}
+	return maintenanceResult{"ok", "backup", "sqlite3", "rollback", info.PageSize, info.PageCount, false}, nil
 }
 
 func executeMaintenance(ctx context.Context, command string, o maintenanceOptions, source, target *cliKeyProvider) (_ maintenanceResult, resultErr error) {
@@ -205,7 +226,7 @@ func maintenanceError(command string, err error) error {
 		{sqlite.ErrCommitUncertain, "publication state uncertain; do not retry automatically"},
 		{sqlite.ErrPoisoned, "storage ownership is poisoned; do not retry automatically"},
 		{sqlite.ErrRecoveryRequired, "storage requires recovery; no recovery was attempted"},
-		{sqlite.ErrUnsupported, "unsupported source, mode, platform or operation; see docs/cli-encryption.md"},
+		{sqlite.ErrUnsupported, "unsupported source, mode, platform or operation; see docs/plaintext-backup.md and docs/cli-encryption.md"},
 		{encryption.ErrKeyProvider, "credential provider unavailable or invalid"},
 		{encryption.ErrCredential, "credential provider unavailable or invalid"},
 		{sqlite.ErrAuthentication, "authentication failed"},

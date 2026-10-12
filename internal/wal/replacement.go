@@ -15,7 +15,8 @@ import (
 // sector. Old and new WALs therefore describe the same committed database.
 // Native locking, separate-inode identity, Sync, directory-anchored replace,
 // directory Sync and retained-resource retirement MUST be supplied by a pager.
-// No production native publisher currently supplies that complete capability.
+// The explicitly opted-in exclusive pager supplies that separate capability;
+// its source implementation is not evidence of native crash qualification.
 type PrefixReplacement struct {
 	prefix CommittedPrefix
 	end    int64
@@ -55,9 +56,9 @@ func (p PrefixReplacement) Size() int64 { return p.end }
 // WriteCandidate writes a fresh, empty, separate candidate supplied by the
 // caller. Source must remain immutable and must NOT alias destination. This
 // utility neither opens files nor truncates, syncs, replaces, closes or exposes
-// a live database. It is used only in memory models until a native retained-
-// directory publisher can enforce those preconditions. Success proves byte
-// construction only, never durable recovery. Caller retains both owners on any
+// a live database. The exclusive pager supplies those retained-directory
+// preconditions separately. Success proves byte construction only, never
+// durable recovery. Caller retains both owners on any
 // error; the complete read/write error graph is returned unchanged or joined.
 func (p PrefixReplacement) WriteCandidate(ctx context.Context, source io.ReaderAt, destination io.WriterAt) (Snapshot, error) {
 	if p.prefix.proof == nil || p.end < HeaderSize {

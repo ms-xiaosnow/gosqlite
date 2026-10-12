@@ -1,5 +1,28 @@
 # Native supported-profile integrity checking
 
+## 2026-10-12 Storage + UNIQUE：冻结组合完整 26 门 PASS
+
+冻结运行树 `4008bd9442ffd21e1e993d4f1c72dbeed3c910f3`（3,238 文件）于 **00:49:41 UTC**
+自然完成 **26/26 门、28 次 Go 调用 PASS**，lease 已 RELEASED。ordinary/race
+各 **8,231 named PASS / 7 个预期 oracle SKIP**；完整 pinned oracle **9,925 PASS /
+零 SKIP**，LIMIT oracle/race **394 PASS**。跨编译与外平台 test-c/nm 只证明编译/
+符号，未执行外国映像。本次仅叠加文档；新提交、bundle、精确恢复及对应 CI 仍 **PENDING**。
+显式普通 BINARY ASC UNIQUE 子集已纳入；严格 Linux Backup/WAL publisher 仍为
+**PARTIAL / NATIVE_NOT_RUN**，包括 UNIQUE 数据库的 native Backup；M10 未验收。
+输入有限结果、原失败、准确终态和真实代码缺口见[本批精确证据](evidence/storage-unique-checkpoint-20261012.md)。
+
+### 历史组合准备摘要（2026-10-12，完整运行前；原文保留）
+
+> 2026-10-12 当前组合状态：Storage metadata 修正树 `7389e7b7` 的三条回归
+> 已实际 PASS（14 根 / 92 named PASS），UNIQUE 树 `fd4e3471` 的十二条有限门
+> 已实际 PASS（31 根 / 223 named PASS / 零 SKIP）；两者均自然退出并释放 lease。
+> 本文所在新 Storage + UNIQUE 组合仍是 **SOURCE_ONLY / NOT_RUN**：完整 ordinary、
+> race、oracle、跨编译/依赖、发布/精确恢复/对应 CI 尚未运行。下文旧的
+> SOURCE_ONLY、PENDING、FAIL 与 NOT_RUN 均保留为各自身份的历史，不覆盖上述有限结果。
+> 原 V1 显示契约 FAIL 与 V2 metadata 真失败（8,126 PASS / 1 FAIL / 7 SKIP；
+> 后续 19 NOT_RUN）不改写。native Backup（包括 UNIQUE 数据库）、WAL publisher
+> 和物理资格仍 **NOT_RUN**；完整目标与 M10 未验收。详见[新检查点证据](evidence/storage-unique-checkpoint-20261012.md)。
+
 `DB.Check(ctx[, CheckOptions])`, `Tx.Check(ctx[, CheckOptions])` and
 `gosqlite check <db>` implement a native bounded integrity/index-consistency
 outcome for goal §12.2. Production checking never invokes an external SQL engine.
@@ -46,12 +69,14 @@ is about the checked snapshot; another connection may commit after it ends.
 
 Supported files have no reserved page bytes, schema format 4 (or an empty
 format-0 database), UTF-8, ordinary rowid tables with the engine's supported
-simple column types/defaults/NOT NULL/INTEGER PRIMARY KEY, and nonunique ascending
-BINARY ordinary indexes. Supported owned extensions are grams13 and the current
+simple column types/defaults/NOT NULL/INTEGER PRIMARY KEY, and ascending BINARY
+ordinary indexes, including the bounded explicit named-column UNIQUE profile
+described below. Supported owned extensions are grams13 and the current
 native dense/typed HNSW and IVFFlat configurations.
 
 Unsupported features fail instead of being reported as checked: WITHOUT ROWID,
-STRICT, autovacuum, UTF-16, schema formats 1–3, UNIQUE/autoindexes, other primary
+STRICT, autovacuum, UTF-16, schema formats 1–3, table/column UNIQUE constraints
+and implicit autoindexes, typed-vector/extension UNIQUE, other primary
 keys, arbitrary CHECK/foreign-key constraints, partial/expression/DESC/non-BINARY
 indexes, generated columns, arbitrary views/triggers, sqlite_* internal objects,
 unknown schema/extension formats or persisted custom method identities. Full
@@ -202,3 +227,27 @@ fixtures, invokes the actual CLI with bounded stdin-hex for encrypted checks,
 compares complete API/CLI counts and verifies all source-family bytes/names stay
 unchanged. Each connection and subprocess finishes normally before the private
 temporary directory is cleaned up. It prints only mode and non-secret counts.
+
+
+## Source-only explicit UNIQUE profile increment (2026-10-11)
+
+Historical author-stage record, retained verbatim below. Its NOT_RUN statements
+apply to 2026-10-11 source preparation; current finite and combined evidence is
+separately recorded at the top of this document.
+
+The [explicit UNIQUE candidate](unique-index.md) extends catalog admission to
+ordinary named-column BINARY ASC explicit unique indexes. For each admitted
+unique index, Check also compares adjacent indexed prefixes excluding rowids,
+using exact mixed INTEGER/REAL comparison and NULL exemption. Equal non-NULL
+prefixes are ErrCorrupt even if every complete key has a matching source row;
+SQL write conflicts are separately ErrConstraint / primary CodeConstraint (19).
+The scan retains one previous prefix under the existing check budgets and does
+not retain a whole-index set. CheckScope keeps its existing supported-profile-v1
+identifier; it is not a versioned claim that all SQLite UNIQUE forms are checked.
+
+This candidate is NOT_RUN. The earlier fail-closed paragraph describes the
+published baseline; candidate admission removes only explicit ordinary UNIQUE
+from that rejection list. Table/column UNIQUE and implicit autoindexes, typed
+vector or extension UNIQUE, DESC, partial, expression and non-BINARY indexes
+remain rejected. Descriptor-free logical fixtures are confined to PageReader
+memory; no malformed fixture is written to native storage or routed to VFS.

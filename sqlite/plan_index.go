@@ -383,10 +383,10 @@ func ordinaryReadIndex(ctx context.Context, reader btree.PageReader, t *table, c
 		examined++
 		stmt, err := sqlast.Parse(entry.SQL)
 		if err != nil {
-			continue // Includes autoindexes, unique, expression and collation forms.
+			continue // Includes autoindexes, expression and collation forms.
 		}
 		def, ok := stmt.(*sqlast.CreateIndex)
-		if !ok || def.Method != "" || len(def.Columns) == 0 {
+		if !ok || def.Unique || def.Method != "" || len(def.Columns) == 0 {
 			continue
 		}
 		if fold(def.Name) != fold(entry.Name) || fold(def.Table) != fold(t.name) || entry.RootPage < 2 || entry.RootPage == t.root {
