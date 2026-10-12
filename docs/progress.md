@@ -1,3 +1,101 @@
+# 只读验收 V3 检查点完整正常门终态
+
+## 2026 年 10 月 12 日 13 时 31 分 UTC 最新结果
+
+冻结运行候选 `readonly-acceptance-integration-source-v3`，tree
+`f8192e090acb9acedb07f811a66d043c1a9a24c2`（3,312 文件、817 Go 文件），
+于 **13:31:44 UTC 自然完成完整 26 门 / 28 次 Go 调用 PASS**。
+session `75199` 工具自然 exit 0、chunk `903c9f`，lease **RELEASED**；
+全部阶段的原始 stdout/stderr、自然返回、源码身份与资源收据均已静态核对。
+
+- ordinary / race 各 **9,735 named PASS / 7 SKIP**，合计 9,742 named；
+  各 1,519 Test、41 Fuzz、6 Examples，313 个固定种子 PASS。
+- 完整 pinned oracle **11,474 named PASS / 0 named SKIP**；
+  1,637 Test、41 Fuzz、6 Examples，313 个固定种子 PASS。
+- LIMIT oracle/race **394 named PASS / 2 根**；guard、四条 quick、live-writer
+  readonly oracle、vet、CGO0 build、模块核验及五目标生产编译均 PASS。
+- Darwin 双架构和 Windows 的 test-c/nm 六门均 PASS，生成的外国映像未执行。
+  whole 非测试闭包实测 **212 包 / 1,372 输入**，shipping library/CLI 实测
+  **164 包 / 1,261 输入**；shipping 未到达 testoracle/testscope/os/exec 等禁止依赖。
+- **6,651 个资源样本零违反**；所有 outer children 自然返回，没有强制终止或
+  仍活跃的被观察子进程。该结论不改写旧环境 session `54102` 的 **UNKNOWN**。
+
+本次包含实际 Linux 健康文件/WAL/正确密钥路径、纯模型、source/AST 检查和既有
+固定 seed，并非全部 descriptor-free 或“所有 native 均未执行”。真正 manual
+readonly-media A/B、升级/恢复、fault、WAL publication/elapsed 及外平台原生
+资格仍 **NOT_RUN / 未验收**；普通 PASS 不取得掉电/真实持久介质资格。
+
+首轮 full26 V1/session `48019` 在 V2 源上的 guard **FAIL** 与后续 25 门
+**NOT_RUN** 保留。V3 的两 guard 修正、56 条根内 inert 负断言和 quick `11576`
+两门 PASS 分别记账，不将旧失败回写。
+
+已发布基点仍为 main `b9f6e8e00036a3b264c8a7eb83d0c61539899782` / tree
+`c7e412092f6d6e2c8bf98c95e096e3c65b38dd93`，其 bundle、恢复 `80868` 的
+26 门 PASS 和 CI `38219105955` 两项 SUCCESS 已闭合。**本新检查点提交、
+新 Git bundle、精确恢复及对应新 CI 仍 PENDING**。文档叠加未改运行源，
+叠加后的完整树须另行固定，不能把它写成已经运行的 f8192e 树。
+
+独立 source-only donor `d87e78a7…` / `bfca0d83…` 与在独立源码推进的 A5
+退出/重启设施均未合入。已有 donor 的 Library 静态保存不转授本批或 native 资格。
+[终态收据、闭包、持久性边界和有限余缺](evidence/readonly-acceptance-checkpoint-20261012.md)
+给出准确依据。public readonly 仍为 Linux live initialized-SHM 子集；CHECK
+有界子集与 EOFUnproven decode-only/native finite-only 拒绝不变，M3/M8/M10 未完成。
+
+## 历史阶段快照与原文完整保留
+
+以下全文保留此前在途快照及更早历史。旧 PENDING、EXPECTED、SOURCE_ONLY、
+FAIL/HOLD/UNKNOWN 与“当前”均只指其各自时点，不能覆盖上面的完整正常门终态。
+
+# 只读验收 V3 检查点当前状态
+
+## 2026 年 10 月 12 日 13 时 04 分 UTC 阶段快照
+
+当前冻结运行候选为 `readonly-acceptance-integration-source-v3`，tree
+`f8192e090acb9acedb07f811a66d043c1a9a24c2`，3,312 文件、817 个 Go 文件。
+本节是文档叠加草稿；没有修改正在运行的候选。叠加后的完整文档树不是该冻结树，
+新树与新提交身份须另行固定，不能把本页的增加算成已经运行过的字节。
+
+- full26 session `75199`：**IN_PROGRESS / PENDING**，计划为 26 门、28 次 Go 调用。
+  本快照截至 `2026-10-12T13:04:23.042014+00:00`；guard、四条 quick、live-writer
+  readonly oracle、ordinary、vet 八门已有 `VALIDATED PASS`，CGO0 build 刚开始。
+- ordinary 是实际结果：**9,742 named = 9,735 PASS / 7 SKIP**，1,519 Test、
+  41 Fuzz、6 Examples，313 个固定种子 PASS；自然 exit 0，结果和源码身份复核通过。
+  race 的同一计数、完整 pinned oracle 的 **11,474 named** 仍是 **EXPECTED**，
+  不能写成实际终态；full26 也不能从八个已过阶段推定通过。
+- V3 的七个既有 readonly AST 根及完整 source guard 已在独立 quick session
+  `11576` 实际 PASS，12:47:51 UTC 自然完成。56 条新增 inert 负断言在既有根内，
+  没有新增 Test 根或命名子项；它们不构成 native 验收。
+- 首轮 full26 V1/session `48019` 在 V2 源树的 guard 真实 **FAIL**，后续 25 门
+  **NOT_RUN**。四条诊断来自两个遗漏 append 各被检查两次；V3 仅修两个 guard
+  文件及这些精确传播规则。旧失败、旧 pins/HOLD 和所有历史收据继续保留。
+- 已发布基点为 main `b9f6e8e00036a3b264c8a7eb83d0c61539899782` / tree
+  `c7e412092f6d6e2c8bf98c95e096e3c65b38dd93`，其 bundle、恢复 session `80868`
+  的 26 门 PASS（10:05:12 UTC）及 CI `38219105955` 两项 SUCCESS 已分别闭合。
+  这些事实只属于 b9；本新检查点提交、bundle、精确恢复及新 CI 均 **PENDING**。
+
+未发布 V3 源码及原 FAIL/quick 两门 PASS 的静态保存包已读回：Library ID
+`libfile_52f330fd86948191bbba9175dfdd64ea`。它不含活动 full26 证据，
+不是 Git bundle、精确恢复运行或新 CI；不能据此将上述 PENDING 改成 PASS。
+
+五组切片（Darwin/Windows backend、真实只读媒体、layout1→2 升级、rollback adapter、
+WAL elapsed）共 43 路径已进入该候选。真实 readonly-media A/B、升级/恢复、fault
+注入与 WAL publication 耗时测量，以及 Darwin/Windows 原生行为仍 **NOT_RUN**。
+public readonly-WAL 仍只接纳 Linux live、已初始化 SHM 的既定子集；底层 groundwork
+不开放其他平台。首个 rollback fault/recovery caller 与后续 SQL-ledger 增量均未纳入。
+
+[精确身份、实际与预期计数、保留失败及有限余缺](evidence/readonly-acceptance-checkpoint-20261012.md)
+是本节的详细依据。CHECK 已在 b9 且仍为有界 scalar profile；EOF-count 仍是
+EOFUnproven 的 decode-only，native finite-only 拒绝不变。A1–A8、六个已有协议
+profile 的有限设施缺口和外部资格分开保留，不能称为只剩人工执行或目标已完成。
+
+## 历史原文完整保留
+
+以下为本页此前的完整字节内容。旧“当前”、e092/main8bc、CHECK 尚未合入、V2
+SOURCE_ONLY、PENDING、FAIL/HOLD/UNKNOWN 与 NOT_RUN 均只绑定各自阶段和源码。
+它们没有被删除或改写，也不覆盖上面的 V3 阶段快照。
+
+> Combined readonly acceptance V2: SOURCE_ONLY; the reviewed media owner-field correction and exact independently reviewed three-main-pin migration are applied in this fresh candidate. No combined validation or physical acceptance. See [source-only integration status](readonly-acceptance-integration-source-20261012.md). Historical isolated evidence below is not a combined PASS.
+
 # Implementation and acceptance progress
 
 ## CHECK / EOF 检查点：完整正常门已通过（2026-10-12 07:22 UTC）
@@ -2158,3 +2256,17 @@ separately recorded at the top of this document.
   另行决定有限源码检查资格。无 Git/远端/Library/CI 变更；不得执行或转移
   受阻 recovery、ANN V4、41-target campaign、未知中断链。无 M3/M8/M10
   或整体目标/生产可用声明。
+
+
+## 2026-10-12：plain rollback 有限 fault adapter 首片源码候选
+
+在 check-eof-checkpoint-source-v1 的隔离副本加入 plain rollback Commit 14 个实际 I/O site 的 typed bridge、默认直通/manual 双门单 Tx 单次范围、descriptor-free 收据及 false-PASS 测试源码、真实 writeFullAt 内存 fake 测试与窄 source guard。详见 [精确范围与 A1–A8 缺口](testing/rollback-fault-adapter-zh.md)。
+
+状态 SOURCE_IMPLEMENTED_PENDING_INDEPENDENT_REVIEW / VALIDATION_NOT_RUN；旧 WAL guard 的 main.go whole-file pin 原值保持 HOLD，未机械更新。本片没有 native caller/fixture/controller/恢复 verifier，不能运行完整物理 harness，也不能给 physical PASS；WAL 与 encryption 均 NOT_BOUND。仅源码读取/复制/文本编辑/哈希；Go/gofmt/AST runner/测试/编译/native/恢复/Git/网络/CI/发布均 NOT_RUN。原受限链和 ANN V4、41-target fuzz、UNKNOWN 中断状态不变，M3/M8/M10 与原始 goal 未验收。
+
+
+## 2026-10-12：rollback fault adapter V2 / RF-01 源码窄修
+
+在冻结 V1 的隔离副本中只修泛用收据的身份留存：非法 Identity 在保存前拒绝，保留无字符串的专用 rejection marker、ProblemIdentity、收到 ordinal 与实际槽位；合法身份用固定有界 buffer 复制后冻结，事件仅借用此份冻结身份。新增超长 payload / sticky / marker 伪造等纯反例源码，并同步新合同 template/pin。详见 [RF-01 说明](testing/rollback-fault-adapter-zh.md)。
+
+状态 SOURCE_RF01_CORRECTION_PENDING_INDEPENDENT_DELTA_REVIEW / VALIDATION_NOT_RUN。V1 及其独立审阅原样保留；Commit、default/manual、main 和旧 guards/pins 全部字节不变，旧 main pin HOLD 不释放。只有源码文本/哈希工作；所有 Go/formatter/AST runner/测试/编译/native/恢复/Git/网络/CI/发布 NOT_RUN，全部原始物理/受限链状态不变。

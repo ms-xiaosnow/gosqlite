@@ -495,18 +495,33 @@ func nativeAttachDMS(f *File) error {
 	if node == nil || node.role != SHM {
 		return ErrLock
 	}
+	observation := windowsDMSLocalAttached
 	if node.attached == 0 {
 		err := winAcquire(f, winDMS, true)
 		if err == nil {
-			// The Windows handshake resets to zero. There is intentionally no
-			// fallback header erasure after an arbitrary truncation failure.
-			if err = f.raw.Truncate(0); err != nil {
-				return winPoison(f, err)
-			}
-			if err = winRelease(f, winDMS); err != nil {
-				return err
-			}
-		} else if !errors.Is(err, ErrBusy) {
+			observation = windowsDMSProbeAcquired
+		} else if errors.Is(err, ErrPoisoned) || !errors.Is(err, ErrBusy) {
+			return err
+		} else {
+			observation = windowsDMSProbeContended
+		}
+	}
+	initialize, err := readonlyWindowsDMSDecision(f.writable, observation)
+	if err != nil {
+		if observation == windowsDMSProbeAcquired {
+			// Refusal still owns the successful exclusive probe. A failed
+			// release retains its exact ledger entry and poison cause.
+			return errors.Join(err, winRelease(f, winDMS))
+		}
+		return err
+	}
+	if initialize {
+		// Only a writable acquired probe can initialize. There is no
+		// fallback header erasure after an arbitrary truncation failure.
+		if err = f.raw.Truncate(0); err != nil {
+			return winPoison(f, err)
+		}
+		if err = winRelease(f, winDMS); err != nil {
 			return err
 		}
 	}
@@ -671,14 +686,20 @@ func nativeMap(f *File, off int64, n int) (nativeMapping, []byte, error) {
 	if off < 0 || n <= 0 || g == 0 || off%g != 0 {
 		return empty, nil, ErrUnsupported
 	}
+	protection := uint32(windows.PAGE_READONLY)
+	access := uint32(windows.FILE_MAP_READ)
+	if f.writable {
+		protection = windows.PAGE_READWRITE
+		access |= windows.FILE_MAP_WRITE
+	}
 	// Zero maximum size means current backing size, so CreateFileMapping
 	// cannot extend storage merely to satisfy allocation-granularity rounding.
-	h, err := windows.CreateFileMapping(windows.Handle(f.raw.Fd()), nil, windows.PAGE_READWRITE, 0, 0, nil)
+	h, err := windows.CreateFileMapping(windows.Handle(f.raw.Fd()), nil, protection, 0, 0, nil)
 	if err != nil {
 		return empty, nil, err
 	}
 	m := nativeMapping{mappingRetirement: mappingRetirement{handle: uintptr(h), length: n}, owner: f}
-	base, err := windows.MapViewOfFile(h, windows.FILE_MAP_READ|windows.FILE_MAP_WRITE, uint32(uint64(off)>>32), uint32(off), uintptr(n))
+	base, err := windows.MapViewOfFile(h, access, uint32(uint64(off)>>32), uint32(off), uintptr(n))
 	if err != nil {
 		if closeErr := nativeUnmap(&m); closeErr != nil {
 			f.native.retained = append(f.native.retained, m)

@@ -124,3 +124,21 @@ V2 原有 `t.TempDir` 正常测试不承诺错误现场留存；新增 live-writ
 DMS 与合法 SHM 是合作协议的信任前提，不是认证，也不抵御恶意 peer、
 同名替换或任意外部 mmap 截断竞争；每次读取不重算整个 WAL checksum chain。
 M3 crash/durability、其他原生平台、安全审查和 M10 仍未验收。
+
+
+## 2026-10-12：prepared-media 手工 harness 源码候选（未运行）
+
+现有 Linux live-initialized-SHM 路线新增独立 gated 的 prepared-media 手工测试源码：
+`sqlite/readonly_wal_manual_linux_test.go`。它只消费另外准备的健康三文件家族、已经静止并持有 DMS/readmark 的 keeper，以及显式 status-only 回执 pipe。
+共享纯模型和全仓 sourceguard 只处理内存决策/源码；默认选择不执行原生入口。
+
+本次状态为 **HARNESS_SOURCE_IMPLEMENTED / SOURCE_ONLY / REVIEW_HOLD**；
+A（nonprivileged-denied-v1）和 B（readonly-mount-v1）均 **NOT_RUN**。
+新的完整源码 pins 与旧 main.go pin 依赖独立审阅；本轮没有 Go/gofmt/测试/编译/原生执行。
+这不改写上文历史缺口审计，不扩大已有 public 支持，也不把已写源码当成介质、持久性、冷 WAL/缺 SHM 或 M3/M8/M10 的验收。
+
+完整输入 schema、同线程双 case、实际 credential/mount/Faccessat2 观察、checked-once ownership、
+证据/自然退出条件和分离授权见 [中文 prepared-media 手册](testing/readonly-wal-prepared-media-manual-zh.md)。
+
+2026-10-12 v2 修正候选另补：第一次 fresh keeper 回执前仅做 metadata admission；每个 case 有独立固定 30 秒、立即注册取消的 API context；self-proc 读取要求 retained FD 的 procfs provenance；控制/source/evidence 三目录两两非嵌套，并核对控制 pathname/FD 与 mount-root backing provenance。源码守卫新增对应的语义反例，包括实际 terminal owner index、Query 立即 capture 和旧守卫 findings/error 传播。
+v1 保持不变；这些修正仍只是 **SOURCE_ONLY / REVIEW_HOLD**，native A/B 与 Go/gofmt/编译/测试仍 **NOT_RUN**，全部相关 pin 未放行。

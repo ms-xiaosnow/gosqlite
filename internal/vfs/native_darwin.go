@@ -418,22 +418,27 @@ func nativeAttachDMS(f *File) error {
 	if err != nil {
 		return err
 	}
-	initial := false
+	peer := darwinDMSUnknown
 	switch kind {
 	case unix.F_UNLCK:
+		peer = darwinDMSUnheld
+	case unix.F_RDLCK:
+		peer = darwinDMSShared
+	case unix.F_WRLCK:
+		peer = darwinDMSExclusive
+	}
+	initial, err := readonlyDarwinDMSDecision(f.writable, peer)
+	if err != nil {
+		return err
+	}
+	if initial {
 		if err = darwinAcquire(d, darwinDMS, darwinWrite); err != nil {
 			// A lost initialization race is BUSY; do not fall through to read.
 			return err
 		}
-		initial = true
 		if err = d.raw.Truncate(3); err != nil {
 			return darwinPoison(d, err)
 		}
-	case unix.F_RDLCK:
-	case unix.F_WRLCK:
-		return ErrBusy
-	default:
-		return ErrUnsupported
 	}
 	err = darwinAcquire(d, darwinDMS, darwinRead)
 	if err != nil && initial {
@@ -539,7 +544,11 @@ type nativeMapping struct{ view []byte }
 
 func nativeMapGranularity() int64 { return int64(os.Getpagesize()) }
 func nativeMap(f *File, off int64, n int) (nativeMapping, []byte, error) {
-	b, err := unix.Mmap(int(f.raw.Fd()), off, n, unix.PROT_READ|unix.PROT_WRITE, unix.MAP_SHARED)
+	protection := unix.PROT_READ
+	if f.writable {
+		protection |= unix.PROT_WRITE
+	}
+	b, err := unix.Mmap(int(f.raw.Fd()), off, n, protection, unix.MAP_SHARED)
 	return nativeMapping{view: b}, b, err
 }
 func nativeUnmap(m *nativeMapping) error {

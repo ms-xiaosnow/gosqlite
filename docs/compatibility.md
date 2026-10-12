@@ -1,3 +1,5 @@
+> Combined readonly acceptance V2: SOURCE_ONLY; the reviewed media owner-field correction and exact independently reviewed three-main-pin migration are applied in this fresh candidate. No combined validation or physical acceptance. See [source-only integration status](readonly-acceptance-integration-source-20261012.md). Historical isolated evidence below is not a combined PASS.
+
 # Current compatibility matrix
 
 ## CHECK / EOF 检查点：完整正常门已通过（2026-10-12 07:22 UTC）
@@ -461,3 +463,17 @@ NoCreate absence 四个拟议物理场景。独立 V3 的源码审阅、AST、�
   组合拒绝，nil 仍保留尾部拒绝。Backup 对 WAL/RO-WAL 的拒绝保留。
 - ANN V4、41-target fuzz、未知中断及物理链限制保持；不作 M3/M8/M10、
   安全/法律、稳定 API 或生产资格声明。后续验证必须另审精确组合及执行边界。
+
+
+## 2026-10-12：plain rollback 有限 fault adapter 首片源码候选
+
+在 check-eof-checkpoint-source-v1 的隔离副本加入 plain rollback Commit 14 个实际 I/O site 的 typed bridge、默认直通/manual 双门单 Tx 单次范围、descriptor-free 收据及 false-PASS 测试源码、真实 writeFullAt 内存 fake 测试与窄 source guard。详见 [精确范围与 A1–A8 缺口](testing/rollback-fault-adapter-zh.md)。
+
+状态 SOURCE_IMPLEMENTED_PENDING_INDEPENDENT_REVIEW / VALIDATION_NOT_RUN；旧 WAL guard 的 main.go whole-file pin 原值保持 HOLD，未机械更新。本片没有 native caller/fixture/controller/恢复 verifier，不能运行完整物理 harness，也不能给 physical PASS；WAL 与 encryption 均 NOT_BOUND。仅源码读取/复制/文本编辑/哈希；Go/gofmt/AST runner/测试/编译/native/恢复/Git/网络/CI/发布均 NOT_RUN。原受限链和 ANN V4、41-target fuzz、UNKNOWN 中断状态不变，M3/M8/M10 与原始 goal 未验收。
+
+
+## 2026-10-12：rollback fault adapter V2 / RF-01 源码窄修
+
+在冻结 V1 的隔离副本中只修泛用收据的身份留存：非法 Identity 在保存前拒绝，保留无字符串的专用 rejection marker、ProblemIdentity、收到 ordinal 与实际槽位；合法身份用固定有界 buffer 复制后冻结，事件仅借用此份冻结身份。新增超长 payload / sticky / marker 伪造等纯反例源码，并同步新合同 template/pin。详见 [RF-01 说明](testing/rollback-fault-adapter-zh.md)。
+
+状态 SOURCE_RF01_CORRECTION_PENDING_INDEPENDENT_DELTA_REVIEW / VALIDATION_NOT_RUN。V1 及其独立审阅原样保留；Commit、default/manual、main 和旧 guards/pins 全部字节不变，旧 main pin HOLD 不释放。只有源码文本/哈希工作；所有 Go/formatter/AST runner/测试/编译/native/恢复/Git/网络/CI/发布 NOT_RUN，全部原始物理/受限链状态不变。

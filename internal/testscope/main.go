@@ -166,16 +166,37 @@ func main() {
 			return err
 		}
 		var findings []string
+		formatUpgrade, formatErr := inspectFormatUpgradeSource(path, raw)
+		if formatErr != nil {
+			return formatErr
+		}
+		findings = append(findings, formatUpgrade...)
 		// All Go sources are checked for copied manual entries/import consumers;
 		// only the four exact files receive the additional frozen-source policy.
 		manual, err := inspectBackupManualSource(path, raw)
-		if err != nil { return err }
+		if err != nil {
+			return err
+		}
 		findings = append(findings, manual...)
+		// The rollback adapter boundary ignores build-tag exclusions and has
+		// no native caller exemption. Older guards remain independent.
+		rollbackFault, err := inspectRollbackFaultSource(path, raw)
+		if err != nil {
+			return err
+		}
+		findings = append(findings, rollbackFault...)
+		readonlyManual, err := inspectReadOnlyWALManualSource(path, raw)
+		if err != nil {
+			return err
+		}
+		findings = append(findings, readonlyManual...)
 		// Keep the existing restricted-reference policy and its exact manual
 		// exclusions separate from startup isolation, which ignores build tags.
 		if strings.HasSuffix(path, "_test.go") {
 			ordinary, inspectErr := inspectSource(path, raw)
-			if inspectErr != nil { return inspectErr }
+			if inspectErr != nil {
+				return inspectErr
+			}
 			findings = append(findings, ordinary...)
 		}
 		if oracleCurrentGoPath(path) {
@@ -212,8 +233,23 @@ func main() {
 		failed = true
 	}
 	manualContracts, manualErr := inspectBackupManualContracts(".")
-	if manualErr != nil { fmt.Fprintln(os.Stderr, manualErr); failed = true }
-	for _, finding := range manualContracts { fmt.Fprintln(os.Stderr, finding); failed = true }
+	if manualErr != nil {
+		fmt.Fprintln(os.Stderr, manualErr)
+		failed = true
+	}
+	for _, finding := range manualContracts {
+		fmt.Fprintln(os.Stderr, finding)
+		failed = true
+	}
+	rollbackFaultContracts, rollbackFaultErr := inspectRollbackFaultContracts(".")
+	if rollbackFaultErr != nil {
+		fmt.Fprintln(os.Stderr, rollbackFaultErr)
+		failed = true
+	}
+	for _, finding := range rollbackFaultContracts {
+		fmt.Fprintln(os.Stderr, finding)
+		failed = true
+	}
 	publicationContracts, err := inspectWALPublicationContracts(".")
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
@@ -231,6 +267,24 @@ func main() {
 		failed = true
 	}
 	for _, finding := range darwinManual {
+		fmt.Fprintln(os.Stderr, finding)
+		failed = true
+	}
+	formatContracts, formatErr := inspectFormatUpgradeContracts(".")
+	if formatErr != nil {
+		fmt.Fprintln(os.Stderr, formatErr)
+		failed = true
+	}
+	for _, finding := range formatContracts {
+		fmt.Fprintln(os.Stderr, finding)
+		failed = true
+	}
+	readonlyContracts, err := inspectReadOnlyWALManualContracts(".")
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		failed = true
+	}
+	for _, finding := range readonlyContracts {
 		fmt.Fprintln(os.Stderr, finding)
 		failed = true
 	}

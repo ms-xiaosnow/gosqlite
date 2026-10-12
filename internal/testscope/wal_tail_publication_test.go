@@ -68,7 +68,7 @@ func TestWALPublicationGuardSafeControls(t *testing.T) {
 }
 
 func TestWALPublicationGuardPureFilesRejectNativeAliasesAndVariables(t *testing.T) {
-	for _, path := range []string{"sqlite/wal_tail_publication_test.go", "driver/wal_tail_publication_test.go"} {
+	for _, path := range []string{"sqlite/wal_tail_publication_test.go", "driver/wal_tail_publication_test.go", walPublicationElapsedPath} {
 		for _, source := range []string{
 			`package sqlite; func f(){options:=Options{}; Open("fixture",options)}`,
 			`package sqlite; var run=OpenContext`,
@@ -139,7 +139,8 @@ func TestWALPublicationGuardFixedSourceAndWiring(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if findings := inspectWALPublicationFrozenSource(path, raw); len(findings) != 0 {
+		findings := inspectWALPublicationFrozenSource(path, raw)
+		if len(findings) != 0 {
 			t.Fatal(findings)
 		}
 		changed := append(append([]byte(nil), raw...), []byte("\n// unreviewed change\n")...)
@@ -244,27 +245,44 @@ func TestWALPublicationGuardRejectsControlFlowAndFactoryDrift(t *testing.T) {
 	}
 }
 
-
 // Source-only checks. These never import the harness or execute its root.
 func TestWALPublicationGuardManualSourceIsExactAndDoubleGated(t *testing.T) {
 	raw, err := os.ReadFile(filepath.Join("..", "..", filepath.FromSlash(walPublicationManualPath)))
-	if err != nil { t.Fatal(err) }
-	if findings, err := inspectWALPublicationSource(walPublicationManualPath, raw); err != nil || len(findings) != 0 { t.Fatal(findings, err) }
+	if err != nil {
+		t.Fatal(err)
+	}
+	findings, err := inspectWALPublicationSource(walPublicationManualPath, raw)
+	if err != nil || len(findings) != 0 {
+		t.Fatal("exact pinned manual source rejected", findings, err)
+	}
 	text := string(raw)
 	first := strings.SplitN(text, "\n", 2)[0]
-	if first != walPublicationManualTag { t.Fatal("exact manual Linux constraint missing") }
+	if first != walPublicationManualTag {
+		t.Fatal("exact manual Linux constraint missing")
+	}
 	expression, err := constraint.Parse(first)
-	if err != nil { t.Fatal(err) }
-	for _, selection := range []struct { linux, oracle, manual, want bool }{
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, selection := range []struct{ linux, oracle, manual, want bool }{
 		{true, false, false, false}, {true, true, false, false},
 		{false, false, false, false}, {false, true, false, false},
 		{true, false, true, true}, {false, false, true, false},
 	} {
 		got := expression.Eval(func(tag string) bool {
-			switch tag { case "linux": return selection.linux; case "oracle": return selection.oracle; case "manual_wal_publication": return selection.manual }
+			switch tag {
+			case "linux":
+				return selection.linux
+			case "oracle":
+				return selection.oracle
+			case "manual_wal_publication":
+				return selection.manual
+			}
 			return false
 		})
-		if got != selection.want { t.Fatalf("manual default/oracle/platform source selection: %+v got=%v", selection, got) }
+		if got != selection.want {
+			t.Fatalf("manual default/oracle/platform source selection: %+v got=%v", selection, got)
+		}
 	}
 	for _, required := range []string{
 		"func TestManualPublicWALTailPublication(t *testing.T) {\n\tif os.Getenv(\"GOSQLITE_MANUAL_WAL_PUBLICATION\") != \"independently_authorized\" {",
@@ -274,27 +292,128 @@ func TestWALPublicationGuardManualSourceIsExactAndDoubleGated(t *testing.T) {
 		"sqlite.Open(", "sqlite.OpenContext(", "connector.Connect(",
 		"wal.TailUncommitted", "wal.TailClean", "sqlite.PendingPlaintextCleanups()",
 	} {
-		if !strings.Contains(text, required) { t.Fatal("manual source prerequisite missing", required) }
+		if !strings.Contains(text, required) {
+			t.Fatal("manual source prerequisite missing", required)
+		}
 	}
 	for _, forbidden := range []string{"func init(", "func TestMain(", "t.Parallel(", "t.TempDir(", "os.Remove(", "os.RemoveAll(", "os/exec", "testoracle", "RetryPlaintextCleanup(", "NewWALPublication(", "OpenSessionTailPublicationAdmitted("} {
-		if strings.Contains(text, forbidden) { t.Fatal("unexpected manual activation/effect", forbidden) }
+		if strings.Contains(text, forbidden) {
+			t.Fatal("unexpected manual activation/effect", forbidden)
+		}
 	}
-	if strings.Count(text, "func Test") != 1 { t.Fatal("manual source must retain one finite root") }
+	if strings.Count(text, "func Test") != 1 {
+		t.Fatal("manual source must retain one finite root")
+	}
 	for _, changed := range []string{
 		strings.Replace(text, walPublicationManualTag, "//go:build linux", 1),
 		strings.Replace(text, walPublicationManualTag, "//go:build manual_wal_publication || linux", 1),
 		strings.Replace(text, "independently_authorized", "automatic", 1),
-		text+"\nfunc init() {}\n",
-		text+"\n// unreviewed manual change\n",
+		text + "\nfunc init() {}\n",
+		text + "\n// unreviewed manual change\n",
 	} {
 		findings, err := inspectWALPublicationSource(walPublicationManualPath, []byte(changed))
-		if err != nil || !strings.Contains(strings.Join(findings, "\n"), "fixed-source boundary changed") { t.Fatal("manual mutation escaped", findings, err) }
+		if err != nil || !strings.Contains(strings.Join(findings, "\n"), "fixed-source boundary changed") {
+			t.Fatal("manual mutation escaped", findings, err)
+		}
 	}
 	for _, path := range []string{"sqlite/other_manual_linux_test.go", "driver/wal_tail_publication_manual_linux_test.go"} {
 		findings, err := inspectWALPublicationSource(path, raw)
-		if err != nil || len(findings) == 0 { t.Fatal("manual file relocation escaped exact path", findings, err) }
+		if err != nil || len(findings) == 0 {
+			t.Fatal("manual file relocation escaped exact path", findings, err)
+		}
 	}
 	// A manual build constraint never creates an exception in another file.
-	bad := []byte(walPublicationManualTag+"\n\npackage x\nfunc f(){ opts.WALTailPublication = cfg }\n")
-	if findings, err := inspectWALPublicationSource("fixture_test.go", bad); err != nil || len(findings) == 0 { t.Fatal("tag-only manual exemption", findings, err) }
+	bad := []byte(walPublicationManualTag + "\n\npackage x\nfunc f(){ opts.WALTailPublication = cfg }\n")
+	if findings, err := inspectWALPublicationSource("fixture_test.go", bad); err != nil || len(findings) == 0 {
+		t.Fatal("tag-only manual exemption", findings, err)
+	}
+}
+
+// Exact active pins supplement the inert shape and double-gated manual boundary.
+// These source checks do not execute the native root or authorize native use.
+func TestWALPublicationGuardElapsedSourceIsInertAndPinned(t *testing.T) {
+	if walPublicationFrozenSources[walPublicationManualPath] != "79cd3adaf4e946fcb93cbcf66f844d5cdc6596d1dffbfe2a9aac3e101dcfd59d" ||
+		walPublicationFrozenSources[walPublicationElapsedPath] != "22874ed59d4ba7549aad1670573cde98d5079a24811e51c5201c6efa5c9506c5" {
+		t.Fatal("reviewed elapsed active pin inventory changed")
+	}
+	for _, path := range []string{walPublicationManualPath, walPublicationElapsedPath} {
+		raw, err := os.ReadFile(filepath.Join("..", "..", filepath.FromSlash(path)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if oracleSourceDigest(raw) != walPublicationFrozenSources[path] {
+			t.Fatal("reviewed elapsed byte inventory drift", path)
+		}
+		findings, err := inspectWALPublicationSource(path, raw)
+		if err != nil || len(findings) != 0 {
+			t.Fatal("exact pinned elapsed source rejected", path, findings, err)
+		}
+		changed := append(append([]byte(nil), raw...), []byte("\n// unreviewed elapsed change\n")...)
+		findings, err = inspectWALPublicationSource(path, changed)
+		joined := strings.Join(findings, "\n")
+		if err != nil || !strings.Contains(joined, "fixed-source boundary changed") {
+			t.Fatal("modified elapsed source escaped active pin", path, findings, err)
+		}
+		if path == walPublicationManualPath && !strings.Contains(joined, "opt-in field outside exact public policy") {
+			t.Fatal("modified manual source retained activation exception", findings)
+		}
+	}
+	raw, err := os.ReadFile(filepath.Join("..", "..", filepath.FromSlash(walPublicationElapsedPath)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, changed := range []string{
+		strings.Replace(string(raw), "import \"testing\"", "import (\"testing\"; \"os\")", 1),
+		strings.Replace(string(raw), "import \"testing\"", "import (\"testing\"; \"time\")", 1),
+		strings.Replace(string(raw), "import \"testing\"", "import (\"testing\"; s \"github.com/ms-xiaosnow/gosqlite/sqlite\")", 1),
+		string(raw) + "\nvar clock = helper()\n",
+		string(raw) + "\nfunc init() {}\n",
+		string(raw) + "\nfunc TestMain(m *testing.M) {}\n",
+		string(raw) + "\nfunc TestExtra(t *testing.T) {}\n",
+		strings.Replace(string(raw), "TestWALPublicationElapsedMemoryQualifiedSample", "TestRenamed", 1),
+	} {
+		findings, err := inspectWALPublicationSource(walPublicationElapsedPath, []byte(changed))
+		joined := strings.Join(findings, "\n")
+		if err != nil || !strings.Contains(joined, "fixed-source boundary changed") || !strings.Contains(joined, "WAL elapsed source shape:") {
+			t.Fatal("pure scalar source mutation escaped", findings, err)
+		}
+	}
+}
+
+func TestWALPublicationGuardElapsedRejectsTimingAndQualificationDrift(t *testing.T) {
+	raw, err := os.ReadFile(filepath.Join("..", "..", filepath.FromSlash(walPublicationManualPath)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	text := string(raw)
+	for _, change := range []struct{ from, to string }{
+		{"func TestManualPublicWALTailPublication(t *testing.T) {\n\tif os.Getenv", "func TestManualPublicWALTailPublication(t *testing.T) {\n\tprepareFixture()\n\tif os.Getenv"},
+		{"db, err = sqlite.Open(f.path, opts)\n\t\telapsed := time.Since(start)", "db, err = sqlite.Open(f.path, opts)\n\t\ts.query(t, db, conn, nil)\n\t\telapsed := time.Since(start)"},
+		{"conn, err = connector.Connect(ctx)\n\t\telapsed := time.Since(start)", "connector, err = gosqldriver.NewConnector(f.path, opts)\n\t\telapsed := time.Since(start)"},
+		{"s.retire(t, 3)\n\t\ts.checkPending(t)", "s.finishElapsed(t, invocationStart)\n\t\ts.retire(t, 3)\n\t\ts.checkPending(t)"},
+		{"flag.Lookup(\"test.v\").Value.String() != \"true\" ||", "flag.Lookup(\"test.v\").Value.String() == \"true\" ||"},
+		{"a.Qualified, a.Samples = false, 0", "a.Qualified, a.Samples = true, 1"},
+		{"s.elapsed.FailureLatched = s.elapsed.FailureLatched || t.Failed() || s.blocked", "s.elapsed.FailureLatched = false"},
+		{"{\"nil-default-preserves-input\", \"\"},", "{\"skipped-control\", \"\"},"},
+	} {
+		if strings.Count(text, change.from) != 1 {
+			t.Fatal("stale elapsed source mutation", change.from)
+		}
+		changed := []byte(strings.Replace(text, change.from, change.to, 1))
+		findings, err := inspectWALPublicationSource(walPublicationManualPath, changed)
+		joined := strings.Join(findings, "\n")
+		if err != nil || !strings.Contains(joined, "fixed-source boundary changed") || !strings.Contains(joined, "WAL elapsed source shape:") {
+			t.Fatal("timing/qualification drift escaped", findings, err)
+		}
+	}
+	for _, suffix := range []string{
+		"\nfunc TestExtra(t *testing.T) {}\n",
+		"\nvar hidden = NewWALPublication\n",
+		"\nvar alias = OpenSessionTailPublicationAdmitted\n",
+	} {
+		findings, err := inspectWALPublicationSource(walPublicationManualPath, []byte(text+suffix))
+		if err != nil || !strings.Contains(strings.Join(findings, "\n"), "fixed-source boundary changed") {
+			t.Fatal("extra root/private factory escaped", findings, err)
+		}
+	}
 }

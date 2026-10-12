@@ -1,4 +1,136 @@
+# 2026 年 10 月 12 日完整正常门终态说明
+
+本手册对应的冻结候选 tree `f8192e090acb9acedb07f811a66d043c1a9a24c2`
+已于 13:31:44 UTC 自然完成完整普通 26 门 / 28 次 Go 调用 PASS，session
+`75199` exit 0，lease RELEASED；[准确终态与验收边界](../evidence/readonly-acceptance-checkpoint-20261012.md)
+同时列明普通/race/oracle、source/AST、闭包和 foreign compile 的不同范围。
+
+这包含真实 Linux 健康文件/WAL 路径，不能统称全部 native 未执行；但本手册的
+真正 manual/物理场景仍 **NOT_RUN**。被审选择和闭包只资格已核验的初始化，
+单一 selector 不隔离 init，也不能为未知初始化或其他环境担保。新提交/bundle/
+精确恢复/新 CI 仍 PENDING。本说明没有更改下方任何命令、tag/env 门或授权要求。
+
+## 历史前置说明和完整原手册
+
+以下在途 PENDING、SOURCE_ONLY/HOLD 与旧 pin 状态保留原时点含义；
+最新普通门终态以上文及检查点为准，旧原文与命令逐字保留。
+
+# 2026 年 10 月 12 日只读验收 V3 检查点说明
+
+本手册所述源码已纳入冻结候选 tree
+`f8192e090acb9acedb07f811a66d043c1a9a24c2`。对应 source/纯模型/编译有限证据、
+已核验的 ordinary 阶段与仍在执行的 full26 必须分开阅读：
+[当前检查点与准确证据边界](../evidence/readonly-acceptance-checkpoint-20261012.md)。
+本稿快照的完整 26 门、race、完整 oracle、新提交/恢复/CI 均未闭合。
+
+真实 publication 与 elapsed 样本均 **NATIVE_NOT_RUN**。计时合同是总公开调用 entry-to-return 延迟，含扫描、锁、发布和 constructor 退休；不是 recovery-only/fsync-only，也没有 cold-cache 或 P95 结果。
+
+下列原文逐字保留，包括作者阶段 SOURCE_ONLY/HOLD、旧 pin 状态和既有命令模板。
+这些是历史记录；新状态以上述检查点为准。这里没有生成新命令，任何 tag、环境变量、
+模板、编译产物或本说明均不构成 native/物理执行授权。
+
+## 历史手册原文完整保留
+
 # Linux 独占 WAL 尾部发布：四场景公开入口手工验收
+
+## 2026-10-12 elapsed 六路径候选：SOURCE_ONLY / HOLD
+
+本次仅补齐现有唯一手工入口的有限耗时采集和纯值准入合同。没有运行 Go、gofmt、
+parser/AST runner、编译、源码 guard、纯值测试、手工测试或任何 physical/native 场景。
+所有真实物理场景仍 **NOT_RUN**。旧 active manual pin 保留，新 manual/pure 全文件 SHA
+仅列于 proposed 表，guard 明确 **HOLD**；必须先独立完整源码审阅，再决定新的纯模型/
+编译范围。旧树 PASS、本文模板与 proposed hash 均不授予执行许可。
+
+### 采集范围和计时定义
+
+- 原 tag/env 双门不变，env 仍为测试第一条语句。保留唯一根和四个原场景，精确 selector、
+  count=1、timeout=0，并在原 flag gate 要求 -test.v=true 以保留日志；不增加独立 runner、benchmark root、自动重复、进程或 controller。
+- 在 options、context 和 NewConnector 纯配置准备完成后，紧邻实际公开调用放置
+  time.Now → Open / OpenContext / Connector.Connect → time.Since。返回后的第一条
+  语句就是 time.Since，登记 owner、JSON、查询、普通写、Close、重开均在计时外。
+- publication 字段为 public_open_with_tail_publication_elapsed_ns，int64 纳秒；
+  timing_boundary 固定为
+  public_call_entry_to_return_including_scan_lock_publication_and_constructor_retirement。
+  它包含策略、canonicalization/admission、锁、扫描、候选写/Sync/替换和 constructor
+  内退休，是总公开调用延迟。没有内部阶段 hook，不能写成 scan/publish/fsync/recovery-only
+  耗时，也不能减去普通 reopen 来推导这些值。
+- 三个 nil-policy 对照只记 refusal_attempt_elapsed_ns，始终 qualified=false、n=0。
+  正常 INSERT 和 nil-policy reopen 仍是原功能断言，不增加恢复耗时样本。
+- 每个入口每 invocation 恰好一个 publication 样本，各自 n=1。不将三个入口合并为 n=3
+  分位数，不提供 P95 或性能回归结论。未来任何人工重复需另批新 root/日志，固定全部身份。
+- case_end_to_end_elapsed_ns 从该 case 开始、fixture 准备前，到原断言和 rows/DB/Conn/
+  observation owners 一次退休、保留输入复核完成；目录仍由 root 退休。
+  invocation_end_to_end_elapsed_ns 从 env gate 后至完整四场景、root 退休和内存判定完成，
+  不含最终 JSON/日志输出。这两个值也不能当作纯恢复延迟。UTC 仅关联，duration 来自同进程
+  time.Now/time.Since 单调差，不能用 UTC 字符串相减替代。
+- fixture 已写入、Sync 并读取核验，OS cache 为 warm/unspecified，无 eviction，绝不声称 cold。
+
+### 有界身份和输入来源
+
+qualification JSON 新增 elapsed_metadata。只填以下外部声明字段：
+source_manifest_sha256_declared、binary_sha256_declared、qualification_evidence_sha256_declared、
+build_flags_declared、hardware_declared、cpu_declared。三个 SHA 为小写 64-hex；hardware/CPU
+为非空可打印 ASCII、每项最多 256 bytes；flags 必须是
+CGO_ENABLED=0 GOFLAGS=-buildvcs=false tags=manual_wal_publication。
+源码 manifest 和实际 binary 必须由外层独立测量并保存原件；声明不是被测程序自认证。
+profile 的完整 SHA、实际 Go/OS/architecture/ext 类型、既有 sector 声明和固定 cache 标签
+由 harness 填入报告；原 qualification.input.json 全字节保留。
+
+工具链固定 Go 1.27.2。manifest 须明确来源 commit/tree、逐路径/长度/SHA 和被审阅的六路径
+候选；外层保留实际编译 argv、go env 和二进制 SHA，将声明逐项核对，缺一不认证结果。
+硬件/CPU/storage/fsync 资格仍须独立证据，标签或定时器不能证明断电持久性。
+
+每个 attempt 同时保存固定 fixture ID、input-sha256.json 的 dataset digest、main/WAL/
+expected/ledger SHA、页/frame/字节数、little-endian、table rowid/IPK 范围。
+seed=not_applicable_deterministic_fixture_v1；input_provenance=
+synthetic_encoded_committed_prefix，pre_crash_commit_ack=not_present。
+合成 commit-marker 不能冒充崩溃前真实 Commit acknowledgement，也不是业务 crash artifact；
+当前 ledger 不证明 secondary/extension indexes、ANN 或 grams 一致性。
+
+### Raw attempt、最终准入与完整日志
+
+每次公开调用返回后输出一行 WAL_ELAPSED_ATTEMPT JSON，始终未准入。它保留实际调用/
+返回/handle/error/elapsed；nil error 本身不代表成功。错误摘要最多 1024 bytes，若截断即
+不能准入，原错误仍由既有诊断日志保留。raw 行最多 16 KiB，不新增结果文件 writer。
+未执行槽位在最终报告明确 NOT_RUN，attempted=false，零值不能当作零耗时成功。
+
+唯一 WAL_ELAPSED_REPORT JSON 位于 root cleanup：原 checkPending、retire(3) 和最后一次
+pending 检查完成之后。它要求恰好六个唯一 attempt、完整四场景、全部原 bytes/inode/scan/
+ledger/普通写/重开/保留输入断言，以及 Rows→DB/Conn→observation fd→目录的所有一次 Close
+成功，无 pending token、Close diagnostic 或 sticky failure。任意失败/未知/不完整一律不给
+任何 publication qualified=true。第二次 nil Close 不能擦掉第一次错误，阻断后的新资源和
+诊断读文件仍禁止。原 held fd 生命周期和所有保留材料不变。
+
+序列化先作完整有界检查；最终报告最多 128 KiB。成功形态只称
+QUALIFIED_CANDIDATE_EXTERNAL_TERMINAL_REQUIRED，并明确 external terminal required。
+最终 JSON 不单独证明完整输出，更不证明进程自然结束。只有外层同时取得自然 exit=0、
+完整 stdout/stderr、唯一最终报告、顶层+恰好四子项 PASS、恰好六行 raw attempts、三个
+publication 各 qualified=true/n=1、三个对照 n=0、无 FAIL/SKIP/UNKNOWN/截断、完整原件
+和来源/二进制/硬件绑定，才可接纳一次测量。缺最终报告、半截 JSON、挂起或非自然退出
+一律 UNKNOWN；不从局部 JSON 抽出“成功”时间。所有失败材料同样保留，不覆盖或复用。
+
+### 纯值六根和下一验证边界
+
+sqlite/wal_tail_elapsed_contract_test.go 仅 testing import、scalar/struct/slice 数据和纯 reducer，
+无 clock、sqlite/native/os、fixture、Open/Close callback。六根名称为：
+
+1. TestWALPublicationElapsedMemoryQualifiedSample
+2. TestWALPublicationElapsedMemoryRejectsUnexecutedOrPartial
+3. TestWALPublicationElapsedMemoryRejectsFailureAndUnknown
+4. TestWALPublicationElapsedMemoryRequiresRetirement
+5. TestWALPublicationElapsedMemoryKeepsEntrancesSeparate
+6. TestWALPublicationElapsedMemoryRejectsInvalidTiming
+
+这些根尚未运行。即使以后纯值测试通过，也只验证所给证据的准入，真实 Now/Since 邻接和
+调用覆盖依赖源码审阅，实际延迟和物理资格依赖另行授权的现有手工入口。
+独立 crash acknowledgement、interrupted/restart recovery controller/fixture/receipt，以及
+其它明确支持 recovery profiles 的计时合同仍是独立 CODE_GAP/未验收；本切片不能声称
+全部 WAL recovery、§11.3 或 M3/M10 已完成。benchmarks 索引见
+[有限 WAL tail-publication elapsed](../../benchmarks/wal-tail-publication/README.md)。
+
+以下历史状态按原身份保留。手工模板仍全部 NOT_RUN；新增 metadata 使旧 qualification
+JSON 单独不再足够。准备时先完成隔离，再在独立授权范围完成第 4 节编译及 binary hash，
+然后才运行第 3 节 profile 生成模板（它现在要求外部提供 metadata）。本顺序不授权执行。
 
 > 2026-10-12 当前组合状态：Storage metadata 修正树 `7389e7b7` 的三条回归
 > 已实际 PASS（14 根 / 92 named PASS），UNIQUE 树 `fd4e3471` 的十二条有限门
@@ -25,7 +157,7 @@ PASS、35 根 / 100 named PASS。这里的 source/model 结果没有执行本页
 
 以下原日期、SOURCE_ONLY/NOT_RUN、旧 34 根 / 99 PASS 与 heredoc 事故叙述原样
 保留为历史记录；新的 35 根 / 100 PASS 只属于上面精确输入树。本文全部命令、
-环境门、资格前置、失败保留和清理步骤未修改、未执行。详情见
+环境门、资格前置、失败保留和清理步骤仍保留且未执行；elapsed metadata 补充见本页开头。详情见
 [Storage 证据补记](../evidence/storage-checkpoint-20261011.md)。
 
 ### 历史首次准备说明（原文保留）
@@ -102,7 +234,7 @@ parser、编译、源码守卫或任何物理场景的验证结果。下述手�
 
 双门为 `manual_wal_publication && linux` build constraint，加测试函数第一条语句的
 `GOSQLITE_MANUAL_WAL_PUBLICATION=independently_authorized`。无环境门直接 FAIL，
-不以 SKIP 冒充完成。运行还必须使用精确顶层选择器、count=1、timeout=0，禁止子项筛选、
+不以 SKIP 冒充完成。运行还必须使用精确顶层选择器、count=1、timeout=0、verbose=true，禁止子项筛选、
 重复 CPU 组、benchmark 和 shuffle。CI/default/oracle 不应选择此文件。
 `internal/testscope` 仅对精确文件路径 + 完整 SHA256 允许 public option 引用；
 旧 production pins、惰性模型例外和所有私有/native factory 检查保持不变。
@@ -162,6 +294,13 @@ go mod verify > "$EVIDENCE/modules.txt"
 ```sh
 test -s "$EVIDENCE/storage-qualification.txt"
 export GOSQLITE_PROFILE_ARCH="$(go env GOARCH)"
+# 先由外层完成源 manifest、实际编译/binary hash 和硬件核验，不让 harness 自认证。
+: "${GOSQLITE_ELAPSED_SOURCE_MANIFEST_SHA256:?set externally verified source manifest SHA256}"
+: "${GOSQLITE_ELAPSED_BINARY_SHA256:?set actual reviewed test binary SHA256}"
+: "${GOSQLITE_ELAPSED_HARDWARE:?set bounded verified hardware description}"
+: "${GOSQLITE_ELAPSED_CPU:?set bounded verified CPU description}"
+export GOSQLITE_ELAPSED_SOURCE_MANIFEST_SHA256 GOSQLITE_ELAPSED_BINARY_SHA256
+export GOSQLITE_ELAPSED_HARDWARE GOSQLITE_ELAPSED_CPU
 python3 - "$FIXTURES" "$PROFILE" "$EVIDENCE/storage-qualification.txt" <<'PY'
 import hashlib, json, os, pathlib, sys
 root, output, evidence = map(pathlib.Path, sys.argv[1:])
@@ -186,7 +325,14 @@ profile = dict(version=1, root=str(root), kernel_release=os.uname().release,
     architecture=os.environ['GOSQLITE_PROFILE_ARCH'], uid=os.geteuid(),
     mountinfo_line=mountline, sector_bytes=4096,
     storage_evidence=f'{evidence.name} sha256={hashlib.sha256(raw).hexdigest()}',
-    qualification='independently_verified_durable_private_ext_storage')
+    qualification='independently_verified_durable_private_ext_storage',
+    elapsed_metadata=dict(
+        source_manifest_sha256_declared=os.environ['GOSQLITE_ELAPSED_SOURCE_MANIFEST_SHA256'],
+        binary_sha256_declared=os.environ['GOSQLITE_ELAPSED_BINARY_SHA256'],
+        qualification_evidence_sha256_declared=hashlib.sha256(raw).hexdigest(),
+        build_flags_declared='CGO_ENABLED=0 GOFLAGS=-buildvcs=false tags=manual_wal_publication',
+        hardware_declared=os.environ['GOSQLITE_ELAPSED_HARDWARE'],
+        cpu_declared=os.environ['GOSQLITE_ELAPSED_CPU']))
 with output.open('x') as f:
     json.dump(profile, f, indent=2)
     f.write('\n')
@@ -227,6 +373,7 @@ go test -c -p=1 -vet=off -tags manual_wal_publication \
 go tool nm "$EVIDENCE/wal-public-manual.test" > "$EVIDENCE/symbols.txt"
 grep -F 'sqlite_test.TestManualPublicWALTailPublication' "$EVIDENCE/symbols.txt"
 sha256sum sqlite/wal_tail_publication_manual_linux_test.go \
+  sqlite/wal_tail_elapsed_contract_test.go \
   internal/testscope/wal_tail_publication.go internal/testscope/wal_tail_publication_test.go \
   go.mod go.sum "$EVIDENCE/wal-public-manual.test" > "$EVIDENCE/source-binary-sha256.txt"
 ```

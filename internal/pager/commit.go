@@ -17,7 +17,7 @@ import (
 )
 
 // writeFullAt treats short writes as errors, even if the OS reports no error.
-func writeFullAt(f *vfs.File, b []byte, off int64) error {
+func writeFullAt(f io.WriterAt, b []byte, off int64) error {
 	n, err := f.WriteAt(b, off)
 	if err != nil {
 		return err
@@ -184,7 +184,7 @@ func (t *Tx) Commit(ctx context.Context) (retErr error) {
 			return preflight(err, false)
 		}
 	}
-	jf, err := openJournal(jpath, os.O_WRONLY|os.O_CREATE|os.O_EXCL)
+	jf, err := rollbackCreate(t, rbJCreate, jpath, os.O_WRONLY|os.O_CREATE|os.O_EXCL)
 	if cleanup != nil {
 		cleanup.acquiredTemporary(jf)
 	}
@@ -205,45 +205,45 @@ func (t *Tx) Commit(ctx context.Context) (retErr error) {
 			cause = errors.Join(cause, jf.Close())
 		}
 		if !databaseTouched {
-			if e := os.Remove(jpath); e != nil {
+			if e := rollbackUnlink(t, rbCleanupUnlink, jpath); e != nil {
 				return t.poison(errors.Join(cause, e), true)
 			}
-			if e := syncDirectory(t.path); e != nil {
+			if e := rollbackDirectorySync(t, rbCleanupDirSync, t.path); e != nil {
 				return t.poison(errors.Join(cause, e), true)
 			}
 		}
 		return t.poison(cause, databaseTouched)
 	}
-	if err = writeFullAt(jf, invalid, 0); err != nil {
+	if err = rollbackWrite(t, rbJInvalid, jf, invalid, 0); err != nil {
 		return fail(err)
 	}
 	offset := int64(h.SectorSize)
 	page := make([]byte, h.PageSize)
 	for _, n := range originals {
-		if _, err = t.file.ReadAt(page, int64(n-1)*int64(h.PageSize)); err != nil {
+		if _, err = rollbackRead(t, rbDBOriginalRead, t.file, page, int64(n-1)*int64(h.PageSize)); err != nil {
 			return fail(err)
 		}
 		record, e := journal.EncodeRecord(h, n, page)
 		if e != nil {
 			return fail(e)
 		}
-		if err = writeFullAt(jf, record, offset); err != nil {
+		if err = rollbackWrite(t, rbJRecord, jf, record, offset); err != nil {
 			return fail(err)
 		}
 		offset += int64(len(record))
 	}
-	if err = jf.Sync(); err != nil {
+	if err = rollbackFileSync(t, rbJBodySync, jf); err != nil {
 		return fail(err)
 	}
 	// Publish only the first 12 bytes after the body is durable. All remaining
 	// header fields were included in the first journal Sync.
-	if err = writeFullAt(jf, valid[:12], 0); err != nil {
+	if err = rollbackWrite(t, rbJValidHeader, jf, valid[:12], 0); err != nil {
 		return fail(err)
 	}
-	if err = jf.Sync(); err != nil {
+	if err = rollbackFileSync(t, rbJHeaderSync, jf); err != nil {
 		return fail(err)
 	}
-	if err = syncDirectory(t.path); err != nil {
+	if err = rollbackDirectorySync(t, rbPublishDirSync, t.path); err != nil {
 		return fail(err)
 	}
 	for _, n := range dirty {
@@ -252,13 +252,13 @@ func (t *Tx) Commit(ctx context.Context) (retErr error) {
 			data = p1
 		}
 		databaseTouched = true
-		if err = writeFullAt(t.file, data, int64(n-1)*int64(t.header.PageSize)); err != nil {
+		if err = rollbackWrite(t, rbDBPage, t.file, data, int64(n-1)*int64(t.header.PageSize)); err != nil {
 			return fail(err)
 		}
 	}
 	// Extent only grows here. Freelist pages are retained; no unrelated physical
 	// trailing pages are ever truncated.
-	if err = t.file.Sync(); err != nil {
+	if err = rollbackFileSync(t, rbDBSync, t.file); err != nil {
 		return fail(err)
 	}
 	if cleanup != nil {
@@ -272,10 +272,10 @@ func (t *Tx) Commit(ctx context.Context) (retErr error) {
 		}
 		return t.poison(err, true)
 	}
-	if err = os.Remove(jpath); err != nil {
+	if err = rollbackUnlink(t, rbJUnlink, jpath); err != nil {
 		return t.poison(err, true)
 	}
-	if err = syncDirectory(t.path); err != nil {
+	if err = rollbackDirectorySync(t, rbFinalDirSync, t.path); err != nil {
 		return t.poison(errors.Join(ErrCommitUncertain, err), false)
 	}
 	t.header = finalHeader

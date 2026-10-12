@@ -13,6 +13,7 @@ import (
 
 const walPublicationSQLiteImport = "github.com/ms-xiaosnow/gosqlite/sqlite"
 const walPublicationManualPath = "sqlite/wal_tail_publication_manual_linux_test.go"
+const walPublicationElapsedPath = "sqlite/wal_tail_elapsed_contract_test.go"
 const walPublicationManualTag = "//go:build manual_wal_publication && linux"
 
 // 此守卫独立于旧 recovery/namespace manual 排除规则；任何 build tag 都
@@ -20,15 +21,15 @@ const walPublicationManualTag = "//go:build manual_wal_publication && linux"
 // 防线，不是类型检查或完整跨文件调用图证明；反射、外部 helper、init/import
 // 闭包及新的执行选择仍须按固定源码独立审阅。
 var walPublicationDeclarations = map[string]string{
-	"WALTailPublicationOptions": "sqlite/wal_tail_publication.go",
-	"validateWALTailPublication": "sqlite/wal_tail_publication.go",
-	"snapshotWALTailPublication": "sqlite/wal_tail_publication.go",
+	"WALTailPublicationOptions":          "sqlite/wal_tail_publication.go",
+	"validateWALTailPublication":         "sqlite/wal_tail_publication.go",
+	"snapshotWALTailPublication":         "sqlite/wal_tail_publication.go",
 	"OpenSessionTailPublicationAdmitted": "internal/pager/session.go",
-	"openSessionAdmitted": "internal/pager/session.go",
-	"publishWALTailLocked": "internal/pager/wal_tail_publication.go",
-	"reserveWALPublication": "internal/pager/plain_wal_publication.go",
-	"NewWALPublication": "internal/vfs/wal_publication.go",
-	"newWALPublicationWithOps": "internal/vfs/wal_publication.go",
+	"openSessionAdmitted":                "internal/pager/session.go",
+	"publishWALTailLocked":               "internal/pager/wal_tail_publication.go",
+	"reserveWALPublication":              "internal/pager/plain_wal_publication.go",
+	"NewWALPublication":                  "internal/vfs/wal_publication.go",
+	"newWALPublicationWithOps":           "internal/vfs/wal_publication.go",
 }
 
 // 精确的真实 caller；函数值、别名、包装调用和新增 helper 不在白名单内。
@@ -45,9 +46,9 @@ var walPublicationCalls = map[string]map[string][]string{
 		},
 	},
 	"internal/pager/session.go": {
-		"OpenSessionAdmitted": {"openSessionAdmitted(ctx, path, opts, admission, false)"},
+		"OpenSessionAdmitted":                {"openSessionAdmitted(ctx, path, opts, admission, false)"},
 		"OpenSessionTailPublicationAdmitted": {"openSessionAdmitted(ctx, path, opts, admission, true)"},
-		"openSessionAdmitted": {"s.publishWALTailLocked(ctx, pending, validated, plan)"},
+		"openSessionAdmitted":                {"s.publishWALTailLocked(ctx, pending, validated, plan)"},
 	},
 	"internal/pager/wal_tail_publication.go": {
 		"publishWALTailLocked": {"s.cleanup.reserveWALPublication(s.file, s.walFile, s.info, s.walInfo)"},
@@ -70,32 +71,33 @@ var walPublicationCalls = map[string]map[string][]string{
 // inert VFS ops 的旧例外不变；新的 manual 文件不是惰性模型或执行许可。
 // 路径本身从不形成豁免。更新哈希前必须审阅整个文件及依赖闭包。
 var walPublicationFrozenSources = map[string]string{
-	walPublicationManualPath: "2ee5023f1f844966e90f45d8e2220632895f25bd839cb53b27afe399e310ddd9",
+	walPublicationManualPath:                     "79cd3adaf4e946fcb93cbcf66f844d5cdc6596d1dffbfe2a9aac3e101dcfd59d",
+	walPublicationElapsedPath:                    "22874ed59d4ba7549aad1670573cde98d5079a24811e51c5201c6efa5c9506c5",
 	"internal/vfs/wal_publication_model_test.go": "7381288113bc424421bf8dade2f3a4e75bfd3b46f3201b3468762341a54ad9e7",
-	"internal/testscope/main.go": "7d69b4ab2525461715b5587efe4295edc219fec19f2abae0ad8f560d8c5201d2",
-	"sqlite/wal_tail_publication.go": "a2e699dd0de40fadba140adc644fc41954516c425afc45fc509400c8342d001f",
-	"sqlite/wal_tail_publication_test.go": "b4344960fc0be27f33f71c54717f41fa88b2574bf0c0fcdf7ee3289e58c351d8",
-	"driver/wal_tail_publication_test.go": "b64ea77b48bff5c6592f5bb1fcac69d98c616821b3c1bced02cc5dcc70b58418",
+	"internal/testscope/main.go":                 "dd0d43330c5ad020b4ab2e5649f32f963aa4909316be64ae32c01d9f3c4371aa",
+	"sqlite/wal_tail_publication.go":             "a2e699dd0de40fadba140adc644fc41954516c425afc45fc509400c8342d001f",
+	"sqlite/wal_tail_publication_test.go":        "b4344960fc0be27f33f71c54717f41fa88b2574bf0c0fcdf7ee3289e58c351d8",
+	"driver/wal_tail_publication_test.go":        "b64ea77b48bff5c6592f5bb1fcac69d98c616821b3c1bced02cc5dcc70b58418",
 }
 
 // 完整生产边界固定启用条件、控制流与无 I/O factory 约束；词法 caller
 // 白名单不能证明这些性质。此表只由完整合同检查读取，惰性片段检查仍可
 // 使用独立的正反例。任何边界字节变化都必须先重新独立审阅。
 var walPublicationProductionBoundaries = map[string]string{
-	"sqlite/sqlite.go": "0e34c8d0e8a4bf537cb464d544e4dedde50ab04b19e1fbcb426fcca1931ecc6e",
-	"driver/driver.go": "5f6df17c06316ac5090b935c0c6cd48cb730e00885e43cc87ce26d8b6efde03d",
-	"internal/pager/session.go": "ed07757c219ecc243f090a05ae96535005d1519d8ddbb370389000119f874b5a",
-	"internal/pager/wal.go": "48128a32116dbec6f5412ebc78ce72a9c740e3ff10153f635f1b1285463a9104",
-	"internal/pager/wal_tail_publication.go": "46b91e2245e6266aed09e7cbfcf29e607905fff7f3cf71a31865a1eb5f18d396",
-	"internal/pager/plain_wal_publication.go": "1d60fd981d20267b9ab2e878c92bd700901bf787d66ec6e1ac70da5b2dc520d7",
-	"internal/vfs/wal_publication.go": "0c2233c987ea64813d646416f9af2c70f43cb89bc26ab28af5fc26d267ab627b",
-	"internal/vfs/wal_publication_linux.go": "65a19e4d43eea50cd439957acd2492e5935d69710a41b71cb77d30a4060dfb10",
-	"internal/vfs/wal_publication_other.go": "b18743a46b3a129e743bd5515800fc1444279fbec2a37ff822fd6476a149bd29",
+	"sqlite/sqlite.go":                          "0e34c8d0e8a4bf537cb464d544e4dedde50ab04b19e1fbcb426fcca1931ecc6e",
+	"driver/driver.go":                          "5f6df17c06316ac5090b935c0c6cd48cb730e00885e43cc87ce26d8b6efde03d",
+	"internal/pager/session.go":                 "ed07757c219ecc243f090a05ae96535005d1519d8ddbb370389000119f874b5a",
+	"internal/pager/wal.go":                     "48128a32116dbec6f5412ebc78ce72a9c740e3ff10153f635f1b1285463a9104",
+	"internal/pager/wal_tail_publication.go":    "46b91e2245e6266aed09e7cbfcf29e607905fff7f3cf71a31865a1eb5f18d396",
+	"internal/pager/plain_wal_publication.go":   "1d60fd981d20267b9ab2e878c92bd700901bf787d66ec6e1ac70da5b2dc520d7",
+	"internal/vfs/wal_publication.go":           "0c2233c987ea64813d646416f9af2c70f43cb89bc26ab28af5fc26d267ab627b",
+	"internal/vfs/wal_publication_linux.go":     "65a19e4d43eea50cd439957acd2492e5935d69710a41b71cb77d30a4060dfb10",
+	"internal/vfs/wal_publication_other.go":     "b18743a46b3a129e743bd5515800fc1444279fbec2a37ff822fd6476a149bd29",
 	"internal/vfs/wal_publication_namespace.go": "cc9ad0c3e0b9b58faa3bd2ad38f8438cf5c3b73f643dc55396e769bf2e9b576a",
 }
 
 func walPublicationPureSource(path string) bool {
-	return path == "sqlite/wal_tail_publication_test.go" || path == "driver/wal_tail_publication_test.go"
+	return path == walPublicationElapsedPath || path == "sqlite/wal_tail_publication_test.go" || path == "driver/wal_tail_publication_test.go"
 }
 
 func walPublicationSourceText(set *token.FileSet, raw []byte, n ast.Node) string {
@@ -337,6 +339,7 @@ func inspectWALPublicationSource(path string, raw []byte) ([]string, error) {
 		}
 	}
 	findings = append(findings, inspectWALPublicationFrozenSource(path, raw)...)
+	findings = append(findings, inspectWALPublicationElapsedShape(path, raw, file, set)...)
 	// Manual admission is a full-source identity, never a tag/path exemption.
 	// Only public option references are admitted below; all native/private
 	// factories, aliases and the existing pure-source restrictions still run.
@@ -383,7 +386,9 @@ func inspectWALPublicationSource(path string, raw []byte) ([]string, error) {
 		if !protected {
 			return true
 		}
-		if manual && id.Name == "WALTailPublicationOptions" { return true }
+		if manual && id.Name == "WALTailPublicationOptions" {
+			return true
+		}
 		if pure && (id.Name == "WALTailPublicationOptions" || id.Name == "validateWALTailPublication" || id.Name == "snapshotWALTailPublication") {
 			return true
 		}
@@ -447,4 +452,125 @@ func inspectWALPublicationContracts(root string) ([]string, error) {
 		findings = append(findings, inspectWALPublicationProductionSource(path, raw)...)
 	}
 	return findings, nil
+}
+
+var walPublicationElapsedPureTests = map[string]bool{
+	"TestWALPublicationElapsedMemoryQualifiedSample":            true,
+	"TestWALPublicationElapsedMemoryRejectsUnexecutedOrPartial": true,
+	"TestWALPublicationElapsedMemoryRejectsFailureAndUnknown":   true,
+	"TestWALPublicationElapsedMemoryRequiresRetirement":         true,
+	"TestWALPublicationElapsedMemoryKeepsEntrancesSeparate":     true,
+	"TestWALPublicationElapsedMemoryRejectsInvalidTiming":       true,
+}
+
+// Shape checks supplement full-byte pins; they neither execute the input nor
+// claim to prove a complete call graph. Full dependency/initialization review
+// remains mandatory before any pin release or finite source/model execution.
+func inspectWALPublicationElapsedShape(path string, raw []byte, file *ast.File, set *token.FileSet) []string {
+	if path != walPublicationElapsedPath && path != walPublicationManualPath {
+		return nil
+	}
+	var findings []string
+	reject := func(reason string) { findings = append(findings, path+": WAL elapsed source shape: "+reason) }
+	text := string(raw)
+	if path == walPublicationElapsedPath {
+		if file.Name.Name != "sqlite_test" {
+			reject("pure scalar file must use sqlite_test")
+		}
+		if strings.Contains(text, "//go:build") {
+			reject("pure scalar file cannot add selection tags")
+		}
+		for _, imp := range file.Imports {
+			value, err := strconv.Unquote(imp.Path.Value)
+			if err != nil || value != "testing" || imp.Name != nil {
+				reject("pure scalar imports must be exactly unaliased testing")
+			}
+		}
+		if len(file.Imports) != 1 {
+			reject("pure scalar import inventory changed")
+		}
+		seen := map[string]bool{}
+		for _, decl := range file.Decls {
+			if gen, ok := decl.(*ast.GenDecl); ok && gen.Tok == token.VAR {
+				reject("pure scalar package variable initialization forbidden")
+			}
+			if fn, ok := decl.(*ast.FuncDecl); ok {
+				name := fn.Name.Name
+				if name == "init" || name == "TestMain" {
+					reject("pure scalar activation root forbidden")
+				}
+				if strings.HasPrefix(name, "Test") {
+					if !walPublicationElapsedPureTests[name] || seen[name] {
+						reject("pure scalar test root outside exact six")
+					}
+					seen[name] = true
+				}
+			}
+		}
+		if len(seen) != len(walPublicationElapsedPureTests) {
+			reject("pure scalar six-root inventory incomplete")
+		}
+		return findings
+	}
+	for _, required := range []string{
+		"func TestManualPublicWALTailPublication(t *testing.T) {\n\tif os.Getenv(\"GOSQLITE_MANUAL_WAL_PUBLICATION\") != \"independently_authorized\" {",
+		"{\"nil-default-preserves-input\", \"\"},",
+		"{\"open-publishes-writes-reopens\", \"Open\"},",
+		"{\"open-context-publishes-writes-reopens\", \"OpenContext\"},",
+		"{\"connector-publishes-writes-reopens\", \"Connector\"},",
+		"s.retire(t, 3)\n\t\ts.checkPending(t)\n\t\tif s.blocked {\n\t\t\tt.Errorf(\"UNKNOWN ownership: retained references and all artifacts; no cleanup retry\")\n\t\t}\n\t\ts.finishElapsed(t, invocationStart)",
+		"flag.Lookup(\"test.v\").Value.String() != \"true\" ||",
+		"s.finishElapsed(t, invocationStart)",
+		"a.Qualified, a.Samples = false, 0",
+		"s.elapsed.FailureLatched = s.elapsed.FailureLatched || t.Failed() || s.blocked",
+	} {
+		if strings.Count(text, required) != 1 {
+			reject("environment/case/retirement/fail-closed boundary changed")
+		}
+	}
+	if strings.Count(text, "func Test") != 1 {
+		reject("manual source must retain exactly one root")
+	}
+	for _, decl := range file.Decls {
+		fn, ok := decl.(*ast.FuncDecl)
+		if !ok || fn.Body == nil {
+			continue
+		}
+		if fn.Name.Name != "publish" && fn.Name.Name != "refuse" {
+			continue
+		}
+		matched := map[string]int{}
+		ast.Inspect(fn.Body, func(n ast.Node) bool {
+			var statements []ast.Stmt
+			switch block := n.(type) {
+			case *ast.BlockStmt:
+				statements = block.List
+			case *ast.CaseClause:
+				statements = block.Body
+			default:
+				return true
+			}
+			for i := 0; i+2 < len(statements); i++ {
+				normalized := func(node ast.Node) string { return walPublicationSourceText(set, raw, node) }
+				if normalized(statements[i]) != "start := time.Now()" || normalized(statements[i+2]) != "elapsed := time.Since(start)" {
+					continue
+				}
+				call := normalized(statements[i+1])
+				for _, expected := range []string{"db, err = sqlite.Open(f.path, opts)", "db, err = sqlite.OpenContext(ctx, f.path, opts)", "conn, err = connector.Connect(ctx)", "conn, connectErr := connector.Connect(ctx)"} {
+					if call == expected {
+						matched[call]++
+					}
+				}
+			}
+			return true
+		})
+		connector := "conn, err = connector.Connect(ctx)"
+		if fn.Name.Name == "refuse" {
+			connector = "conn, connectErr := connector.Connect(ctx)"
+		}
+		if len(matched) != 3 || matched["db, err = sqlite.Open(f.path, opts)"] != 1 || matched["db, err = sqlite.OpenContext(ctx, f.path, opts)"] != 1 || matched[connector] != 1 {
+			reject("Now/public-call/Since adjacency changed")
+		}
+	}
+	return findings
 }
