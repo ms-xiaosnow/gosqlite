@@ -696,3 +696,8 @@ IMPLEMENTATION_MISSING，也不提升任何恢复/持久性/安全/M3/M8/M10 资
 本候选没有新 Go、编译、symbol、普通/race/oracle、native、Git、Library 或 CI
 结果，必须与既有 8bc 以及其他候选分开。ANN V4、41-target campaign、未知
 中断/物理链保持原限制，不因本补记被执行、重启或改道。
+
+
+## 2026-10-12：第四格与同码恢复
+
+新增 index-prefix-64-error，受测源树 bf7fcb34 的六项影响范围已实际 PASS；整体未验收，物理手工仍 NOT_RUN。额度暂停后原目录不可见，已从持久基包和七文件 delta 恢复相同全部文件。13980 原始日志未上传、当前不可恢复，不能假装已有原始日志；不重复已通过测试。详见 [第四格记录](evidence/20261012-prefix-error/README.zh.md) 与 [恢复和缺失说明](evidence/20261012-prefix-error/recovery-interruption.zh.md)。

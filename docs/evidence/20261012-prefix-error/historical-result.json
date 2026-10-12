@@ -1,0 +1,49 @@
+{
+  "provenance": "Historical successful tool outputs and reports retained in the task conversation; not reconstructed raw logs",
+  "tested_tree": "bf7fcb34e27885d09ae7f2fde3ec23c1315b2a5f",
+  "base_commit": "50b85ed048f56eee698a62d745b66d2e4b3773b9",
+  "session_id": 13980,
+  "tool_terminal_chunk": "9bc8e2",
+  "natural_exit_code": 0,
+  "completed_utc": "2026-10-12T18:52:07.642959+00:00",
+  "gates": {
+    "format": "PASS_ONCE_REUSED",
+    "normal": {
+      "roots": 113,
+      "subtests": 1433,
+      "named_pass": 1546,
+      "fail": 0,
+      "skip": 0
+    },
+    "race": {
+      "roots": 113,
+      "subtests": 1433,
+      "named_pass": 1546,
+      "fail": 0,
+      "skip": 0
+    },
+    "sourceguard": "PASS",
+    "manual_compile": "PASS_COMPILE_ONLY",
+    "nm": {
+      "required": 454,
+      "absent": 18,
+      "status": "PASS"
+    }
+  },
+  "original_completion_sha256": "abfe44cce4caa9976e10e55ffd7d109be8abf1573cca9aabcbd41abb559f079f",
+  "original_commands_json_sha256": "dfd4eaa640a909fff7fad1ff0f7d3ddacd1b79bf4fd374806eec5fc05a7822ae",
+  "original_recorder_sha256": "4dbc9841ea9e71dea36f442bb3a9d20707e28e8ffc48d529ca89b27d30cfedef",
+  "raw_archive": {
+    "name": "gosqlite-prefix-error-bf7fcb34-validation-13980-v1.zip",
+    "bytes": 9480119,
+    "members": 58,
+    "sha256": "d60c9330774eae43bed9b576c51304c44d22f02d6f19ec2fd53a54b5aa3999d5",
+    "library_file_id": null,
+    "status": "LOCAL_BUILT_ONLY_NOT_UPLOADED_NOT_RECOVERED"
+  },
+  "exact_original_argv_event_streams": "NOT_RECOVERED; no synthetic replacement",
+  "manual_native_execution": "NOT_RUN",
+  "same_source_restore": "ALL_3344_FILE_BYTES_HASHES_GIT_MODES_MATCH",
+  "full_suite_rerun_on_restore": false,
+  "overall_acceptance": "NOT_QUALIFIED"
+}

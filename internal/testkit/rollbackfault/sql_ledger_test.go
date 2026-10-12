@@ -144,7 +144,7 @@ func sqlMustReject(t *testing.T, observation SQLObservation) {
 }
 
 func TestSQLLedgerThreeFrozenScenariosRemainObservationOnly(t *testing.T) {
-	for _, which := range []SQLCase{SQLControl, SQLIndexPrefix64, SQLDBSyncBefore} {
+	for _, which := range []SQLCase{SQLControl, SQLIndexPrefix64, SQLDBSyncBefore, SQLIndexPrefix64Error} {
 		plan, receipt, evidence := sqlEvidenceFixture(t, which)
 		observation := ObserveSQLLedger(plan, receipt, evidence)
 		if !observation.EvidenceConsistent || !observation.ScenarioObserved || observation.Problem != SQLProblemNone || observation.Adapter.Outcome != AdapterObserved {
@@ -186,7 +186,10 @@ func TestSQLLedgerLiteralExpectationsAndQueriesAreDetached(t *testing.T) {
 }
 
 func TestSQLLedgerPlansFreezeThreePageSelectorsAndLimits(t *testing.T) {
-	for _, which := range []SQLCase{SQLControl, SQLIndexPrefix64, SQLDBSyncBefore} {
+	if SQLCaseUnknown != 0 || SQLControl != 1 || SQLIndexPrefix64 != 2 || SQLDBSyncBefore != 3 || SQLIndexPrefix64Error != 4 {
+		t.Fatal("existing SQL case values changed")
+	}
+	for _, which := range []SQLCase{SQLControl, SQLIndexPrefix64, SQLDBSyncBefore, SQLIndexPrefix64Error} {
 		plan, _, _ := sqlEvidenceFixture(t, which)
 		spec := plan.Spec()
 		if spec.OriginalPages != 3 || spec.DirtyPages != 3 || spec.PageSize != 4096 || spec.SectorSize != 4096 || spec.MainOwner != 11 || spec.JournalOwner != 12 || spec.DirectoryOwner != 13 || spec.CleanupOwner != 14 {
@@ -208,6 +211,10 @@ func TestSQLLedgerPlansFreezeThreePageSelectorsAndLimits(t *testing.T) {
 		case SQLIndexPrefix64:
 			if spec.CallCount != 15 || spec.Action != PrefixShortWrite || spec.Prefix != 64 || spec.PrefixError || spec.ExpectedCommit != CommitRecoveryRequired || spec.Target != spec.Calls[14] {
 				t.Fatal("index prefix selector differs")
+			}
+		case SQLIndexPrefix64Error:
+			if spec.CallCount != 15 || spec.Action != PrefixShortWrite || spec.Prefix != 64 || !spec.PrefixError || spec.ExpectedCommit != CommitRecoveryRequired || spec.Target != spec.Calls[14] {
+				t.Fatal("index prefix error selector differs")
 			}
 		case SQLDBSyncBefore:
 			if spec.CallCount != 16 || spec.Action != FailBefore || spec.ExpectedCommit != CommitRecoveryRequired || spec.Target != spec.Calls[15] {
@@ -270,7 +277,7 @@ func TestSQLLedgerRejectsOtherwiseAdmittedNonFrozenFaultPlans(t *testing.T) {
 }
 
 func TestSQLLedgerRejectsLogicalMixturesAndEqualCountWrongMembers(t *testing.T) {
-	for _, which := range []SQLCase{SQLControl, SQLIndexPrefix64, SQLDBSyncBefore} {
+	for _, which := range []SQLCase{SQLControl, SQLIndexPrefix64, SQLDBSyncBefore, SQLIndexPrefix64Error} {
 		for _, name := range []string{"wrong-ledger", "oldrows-newindex", "newrows-oldindex", "equal-count-wrong-member", "equal-count-wrong-value", "index-scan-both-wrong", "wrong-id-type", "wrong-key-type", "wrong-value-type", "same-count-duplicate-id", "unreported-tail", "row-reordered", "empty-green-hidden-member", "before-not-old"} {
 			plan, receipt, evidence := sqlEvidenceFixture(t, which)
 			old := sqlSnapshot(evidence.Identity, 102, 8, SQLOld)
@@ -546,7 +553,7 @@ func TestSQLLedgerRequiresCheckHashesAndExactRecoveryEvidence(t *testing.T) {
 }
 
 func TestSQLLedgerRetainsOriginalsAndRejectsAliasedOrMixedReplayArtifacts(t *testing.T) {
-	for _, which := range []SQLCase{SQLControl, SQLIndexPrefix64, SQLDBSyncBefore} {
+	for _, which := range []SQLCase{SQLControl, SQLIndexPrefix64, SQLDBSyncBefore, SQLIndexPrefix64Error} {
 		for _, name := range []string{"wrong-role", "absent-baseline", "absent-trial", "absent-replay", "changed-baseline", "changed-trial", "changed-post-copy", "replay-aliases-trial", "post-aliases-trial", "changed-inode", "changed-device", "zero-device", "zero-inode", "zero-hash", "wrong-size", "wrong-label", "same-post-and-baseline", "wrong-replay-input", "wrong-replay-output", "same-old-and-new-hash"} {
 			plan, receipt, evidence := sqlEvidenceFixture(t, which)
 			switch name {
@@ -698,7 +705,7 @@ func TestSQLLedgerBindsSourceToolBinaryManifestTrialAndScopeEverywhere(t *testin
 }
 
 func TestSQLLedgerRevalidatesReceiptRatherThanTrustingAnObservation(t *testing.T) {
-	for _, which := range []SQLCase{SQLControl, SQLIndexPrefix64, SQLDBSyncBefore} {
+	for _, which := range []SQLCase{SQLControl, SQLIndexPrefix64, SQLDBSyncBefore, SQLIndexPrefix64Error} {
 		plan, _, evidence := sqlEvidenceFixture(t, which)
 		events := fixtureEvents(plan.Spec())
 		for end := 0; end < len(events); end++ {
@@ -761,5 +768,150 @@ func TestSQLLedgerRevalidatesReceiptRatherThanTrustingAnObservation(t *testing.T
 			otherPlan, _, _ = sqlEvidenceFixture(t, SQLDBSyncBefore)
 		}
 		sqlMustReject(t, ObserveSQLLedger(plan, sqlReceipt(t, otherPlan, fixtureEvents(otherPlan.Spec())), evidence))
+	}
+}
+
+// The legacy Three-named root remains stable; this separate positive freezes
+// the two return modes independently instead of inferring one from the other.
+func TestSQLLedgerPrefixErrorFreezesNativeAndAdapterReturns(t *testing.T) {
+	for _, which := range []SQLCase{SQLIndexPrefix64, SQLIndexPrefix64Error} {
+		plan, receipt, evidence := sqlEvidenceFixture(t, which)
+		spec := plan.Spec()
+		if spec.Target != (Call{Point: DBPage, Occurrence: 3, Role: Database, Owner: 11, Offset: 8192, Length: 4096}) || spec.CallCount != 15 || spec.Prefix != 64 || spec.PrefixError != (which == SQLIndexPrefix64Error) {
+			t.Fatal("prefix cases no longer share the one exact write point")
+		}
+		events, count := receipt.Events()
+		if count != 35 {
+			t.Fatalf("prefix trace count: %d", count)
+		}
+		want := Result{Executed: true, NativeN: 64, ReturnedN: 64, NormalizedError: ShortWrite, Effect: EffectPrefix}
+		cause := ShortWrite
+		if which == SQLIndexPrefix64Error {
+			want.ReturnedError, want.NormalizedError, cause = Injected, Injected, Injected
+		}
+		if events[29].Kind != Intent || events[29].Call != spec.Target || events[30].Kind != Returned || events[30].Call != spec.Target || events[30].Action != PrefixShortWrite || events[30].Result != want {
+			t.Fatal("native (64,nil), adapter return, or normalization changed")
+		}
+		commit := events[31].Commit
+		if events[31].Kind != CommitReturned || commit.Class != CommitRecoveryRequired || commit.Error != Underlying || commit.ErrorToken == 0 || commit.TargetError != cause || commit.TargetErrorToken != 0 || commit.Logical != LogicalClosed {
+			t.Fatal("public error provenance differs from target return")
+		}
+		if evidence.Lifecycle.PublicShortWrite != (which == SQLIndexPrefix64) || evidence.After.Queries[SQLAllRows].Rows != sqlLiteralRows(SQLOld) {
+			t.Fatal("prefix mode confused public cause or complete OLD replay")
+		}
+		observed := ObserveSQLLedger(plan, receipt, evidence)
+		if !observed.ScenarioObserved || observed.Problem != SQLProblemNone || observed.PhysicalValidated() || observed.Pass() {
+			t.Fatalf("prefix mode refused or claimed physical acceptance: %+v", observed)
+		}
+	}
+}
+
+func TestSQLLedgerPrefixErrorRejectsPlanAndReceiptConfusion(t *testing.T) {
+	for _, name := range []string{"old-plan", "prefix-bit-dropped", "wrong-prefix", "wrong-offset", "wrong-length", "wrong-occurrence", "case-only-relabel", "native-injected", "native-error-masked", "native-error-preserved", "shortwrite-normalized", "nil-adapter-error", "native-count", "public-nil", "commit-target-shortwrite", "commit-target-token", "missing-target", "duplicate-target"} {
+		plan, _, evidence := sqlEvidenceFixture(t, SQLIndexPrefix64Error)
+		events := fixtureEvents(plan.Spec())
+		switch name {
+		case "old-plan":
+			plan, _, _ = sqlEvidenceFixture(t, SQLIndexPrefix64)
+			events = fixtureEvents(plan.Spec())
+		case "prefix-bit-dropped":
+			plan.spec.PrefixError = false
+		case "wrong-prefix":
+			plan.spec.Prefix = 65
+		case "wrong-offset":
+			plan.spec.Target.Offset = 4096
+		case "wrong-length":
+			plan.spec.Target.Length = 4095
+		case "wrong-occurrence":
+			plan.spec.Target.Occurrence = 2
+		case "case-only-relabel":
+			oldPlan, _, _ := sqlEvidenceFixture(t, SQLIndexPrefix64)
+			events = fixtureEvents(oldPlan.Spec())
+		case "native-injected":
+			events[30].Result.NativeError = Injected
+		case "native-error-masked":
+			events[30].Result.NativeError, events[30].Result.NativeErrorToken = Underlying, 41
+			events[30].Result.Effect = EffectUnknown
+		case "native-error-preserved":
+			events[30].Result.NativeError, events[30].Result.NativeErrorToken = Underlying, 41
+			events[30].Result.ReturnedError, events[30].Result.ReturnedErrorToken = Underlying, 41
+			events[30].Result.NormalizedError, events[30].Result.NormalizedErrorToken = Underlying, 41
+			events[30].Result.Effect = EffectUnknown
+			events[31].Commit.TargetError, events[31].Commit.TargetErrorToken = Underlying, 41
+		case "shortwrite-normalized":
+			events[30].Result.NormalizedError = ShortWrite
+			events[31].Commit.TargetError = ShortWrite
+		case "nil-adapter-error":
+			events[30].Result.ReturnedError = None
+		case "native-count":
+			events[30].Result.NativeN = 63
+		case "public-nil":
+			events[31].Commit.Error, events[31].Commit.ErrorToken = None, 0
+		case "commit-target-shortwrite":
+			events[31].Commit.TargetError = ShortWrite
+		case "commit-target-token":
+			events[31].Commit.TargetErrorToken = 41
+		case "missing-target":
+			events = append(events[:29], events[31:]...)
+			renumber(events, plan.Spec().Identity)
+		case "duplicate-target":
+			duplicate := []Event{events[29], events[30]}
+			events = append(events[:31], append(duplicate, events[31:]...)...)
+			renumber(events, plan.Spec().Identity)
+		}
+		t.Run(name, func(t *testing.T) {
+			receipt := sqlReceipt(t, plan, events)
+			if name == "native-error-preserved" && receipt.Seal().Problem != ProblemUnderlyingFailure {
+				t.Fatal("preserved real native error must refuse the selected injected plan")
+			}
+			if name == "native-error-masked" && receipt.Seal().Problem != ProblemErrorMasked {
+				t.Fatal("injection must never overwrite an actual native error")
+			}
+			sqlMustReject(t, ObserveSQLLedger(plan, receipt, evidence))
+		})
+	}
+}
+
+func TestSQLLedgerPrefixErrorRequiresCompleteOldReplayAndOwners(t *testing.T) {
+	for _, name := range []string{"public-shortwrite", "missing-code", "missing-recovery-cause", "reconstructed-public-error", "new-ledger", "old-rows-new-index", "missing-index", "missing-eof", "missing-err", "missing-check", "missing-owner", "live-owner", "replay-original", "wrong-recovery-extent", "missing-recovery", "original-journal-changed", "physical-claim"} {
+		plan, receipt, evidence := sqlEvidenceFixture(t, SQLIndexPrefix64Error)
+		switch name {
+		case "public-shortwrite":
+			evidence.Lifecycle.PublicShortWrite = true
+		case "missing-code":
+			evidence.Lifecycle.PublicCodeIOErr = false
+		case "missing-recovery-cause":
+			evidence.Lifecycle.PublicRecoveryRequired = false
+		case "reconstructed-public-error":
+			evidence.Lifecycle.CommitCapturedUnchanged = false
+		case "new-ledger":
+			evidence.After = sqlSnapshot(evidence.Identity, 102, 8, SQLNew)
+		case "old-rows-new-index":
+			newState := sqlSnapshot(evidence.Identity, 102, 8, SQLNew)
+			evidence.After.Queries[SQLBlueIndex] = newState.Queries[SQLBlueIndex]
+		case "missing-index":
+			evidence.After.Queries[SQLBlueIndex] = SQLQueryEvidence{}
+		case "missing-eof":
+			evidence.After.Queries[SQLAllRows].EOF = false
+		case "missing-err":
+			evidence.After.Queries[SQLAllRows].ErrCalled = false
+		case "missing-check":
+			evidence.After.Check.Calls = 0
+		case "missing-owner":
+			evidence.After.Owner = 0
+		case "live-owner":
+			evidence.After.OwnerState = OwnerLive
+		case "replay-original":
+			evidence.Artifacts[SQLReplayArtifact].Before.Inode = evidence.Artifacts[SQLTrialArtifact].Before.Inode
+		case "wrong-recovery-extent":
+			evidence.Recovery.Limits.MaxDatabaseBytes = 16384
+		case "missing-recovery":
+			evidence.Recovery.Calls = 0
+		case "original-journal-changed":
+			evidence.Artifacts[SQLOriginalJournalArtifact].After.SHA256[0]++
+		case "physical-claim":
+			evidence.PhysicalClaim = true
+		}
+		t.Run(name, func(t *testing.T) { sqlMustReject(t, ObserveSQLLedger(plan, receipt, evidence)) })
 	}
 }

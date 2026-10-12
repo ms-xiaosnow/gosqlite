@@ -315,8 +315,10 @@ func manualRollbackSQLAdmit(c *manualRollbackSQLConfig) error {
 		c.caseID = rollbackfault.SQLIndexPrefix64
 	case "db-sync-before":
 		c.caseID = rollbackfault.SQLDBSyncBefore
+	case "index-prefix-64-error":
+		c.caseID = rollbackfault.SQLIndexPrefix64Error
 	default:
-		return fmt.Errorf("exactly one of three fixed cases required")
+		return fmt.Errorf("exactly one of four fixed cases required")
 	}
 	manifest, _, err := manualRollbackSQLRead(&c.ledger, c.binding.SourceManifestPath, 4<<20)
 	if err != nil {
@@ -591,6 +593,11 @@ func manualRollbackSQLAbandon(tx *Tx, cause error) error {
 }
 
 func manualRollbackSQLCommit(c *manualRollbackSQLConfig, ctx context.Context, path string, plan rollbackfault.Plan) (pager.ManualRollbackSQLReport, error) {
+	spec := plan.Spec()
+	frozen, problem := rollbackfault.SQLPlan(spec.Identity, c.caseID)
+	if problem != rollbackfault.NoProblem || frozen.Spec() != spec {
+		return pager.ManualRollbackSQLReport{}, fmt.Errorf("public Commit case/plan mismatch")
+	}
 	if !manualRollbackSQLRegistryEmpty() {
 		return pager.ManualRollbackSQLReport{}, fmt.Errorf("preexisting owner obligations")
 	}
@@ -627,7 +634,7 @@ func manualRollbackSQLCommit(c *manualRollbackSQLConfig, ctx context.Context, pa
 	if report.CommitError != commitErr || report.Problem != nil || report.Observation.Outcome != rollbackfault.AdapterObserved || report.Observation.TargetHits != 1 || report.Observation.Pass() || report.Observation.PhysicalValidated() || !tx.done || db.tx != nil || tx.activeRows != 0 {
 		return report, fmt.Errorf("INCOMPLETE: public Commit/adapter closure: %v; %v", commitErr, report.Problem)
 	}
-	if plan.Spec().Action == rollbackfault.Pass {
+	if c.caseID == rollbackfault.SQLControl {
 		if commitErr != nil {
 			return report, fmt.Errorf("control public Commit: %w", commitErr)
 		}
@@ -636,8 +643,13 @@ func manualRollbackSQLCommit(c *manualRollbackSQLConfig, ctx context.Context, pa
 		if !errors.As(commitErr, &publicError) || publicError.Code != CodeIOErr || !errors.Is(commitErr, ErrRecoveryRequired) || errors.Is(commitErr, pager.ErrPlaintextCleanupPending) || errors.Is(commitErr, pager.ErrCommitUncertain) {
 			return report, fmt.Errorf("unqualified public Commit error: %v", commitErr)
 		}
-		if plan.Spec().Action == rollbackfault.PrefixShortWrite && !errors.Is(commitErr, io.ErrShortWrite) {
+		if c.caseID == rollbackfault.SQLIndexPrefix64 && !errors.Is(commitErr, io.ErrShortWrite) {
 			return report, fmt.Errorf("original short-write cause lost")
+		}
+		// Finish has checked errors.Is against the actual private target error.
+		// Native (64, nil) becomes adapter (64, injected), never ErrShortWrite.
+		if c.caseID == rollbackfault.SQLIndexPrefix64Error && errors.Is(commitErr, io.ErrShortWrite) {
+			return report, fmt.Errorf("injected prefix error confused with nil-error short write")
 		}
 	}
 	if err := pager.DisarmManualRollbackSQLFault(scope); err != nil {
@@ -965,7 +977,7 @@ func TestManualRollbackFaultSQLLedger(t *testing.T) {
 	if err != nil || len(post) != 12288 || !os.SameFile(trialInfo, postInfo) {
 		t.Fatalf("post-Commit extent/identity: %v", err)
 	}
-	if c.caseID == rollbackfault.SQLIndexPrefix64 && !bytes.Equal(post[8192+64:], baseline[8192+64:]) {
+	if (c.caseID == rollbackfault.SQLIndexPrefix64 || c.caseID == rollbackfault.SQLIndexPrefix64Error) && !bytes.Equal(post[8192+64:], baseline[8192+64:]) {
 		t.Fatal("index short write changed bytes beyond the frozen 64-byte prefix")
 	}
 	if err := c.retain("trial.db", trialInfo, 12288); err != nil {

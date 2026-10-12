@@ -1,0 +1,18 @@
+{
+  "base_commit": "50b85ed048f56eee698a62d745b66d2e4b3773b9",
+  "restored_candidate_tree": "bf7fcb34e27885d09ae7f2fde3ec23c1315b2a5f",
+  "files": 3344,
+  "all_bytes_hashes_git_modes": "EXACT_MATCH",
+  "seven_payload_files": [
+    "docs/testing/rollback-fault-sql-manual-zh.md",
+    "internal/pager/rollback_fault_sql_manual_linux.go",
+    "internal/testkit/rollbackfault/sql_ledger.go",
+    "internal/testkit/rollbackfault/sql_ledger_test.go",
+    "internal/testscope/rollback_fault_sql.go",
+    "internal/testscope/rollback_fault_sql_test.go",
+    "sqlite/rollback_fault_sql_manual_linux_test.go"
+  ],
+  "tests": "NOT_RERUN",
+  "old_runtime_raw_archive": "NOT_UPLOADED_NOT_RECOVERED",
+  "posix_metadata": "Git checkout modes; no claim of complete original POSIX metadata equality"
+}

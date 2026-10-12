@@ -21,6 +21,7 @@ const (
 	SQLControl
 	SQLIndexPrefix64
 	SQLDBSyncBefore
+	SQLIndexPrefix64Error
 )
 
 type SQLState uint8
@@ -334,6 +335,9 @@ func SQLPlan(identity Identity, which SQLCase) (Plan, Problem) {
 	case SQLDBSyncBefore:
 		spec.Target, spec.Action = spec.Calls[15], FailBefore
 		spec.ExpectedCommit, spec.CallCount = CommitRecoveryRequired, 16
+	case SQLIndexPrefix64Error:
+		spec.Action, spec.Prefix, spec.PrefixError = PrefixShortWrite, 64, true
+		spec.ExpectedCommit, spec.CallCount = CommitRecoveryRequired, 15
 	default:
 		return Plan{}, ProblemTarget
 	}

@@ -1,0 +1,359 @@
+{
+  "schema": "gosqlite-ci-completion-evidence-v1",
+  "recorded_at_utc": "2026-10-12T18:52:06Z",
+  "scope": "Static preservation of completed hosted CI for exact published source; no new execution or acceptance claim.",
+  "source": {
+    "repository": "ms-xiaosnow/gosqlite",
+    "commit": "50b85ed048f56eee698a62d745b66d2e4b3773b9",
+    "tree": "d3bf2388ec66f91b1f081ee4177a07ab601bb8de",
+    "parent": "7503531d2e3d9336bb5943ccd4c836c804d5ce03",
+    "workflow_path": ".github/workflows/check.yml",
+    "fixed_source_files": {
+      ".github/workflows/check.yml": {
+        "git_mode": "100644",
+        "git_object": "8c848cc567765c2308cf569328bfdd73db922e31",
+        "sha256": "58dee6239ef272454efb7f45a220de5c7a75839f6449002a4ed176f858304f64",
+        "bytes": 929
+      },
+      "scripts/check.sh": {
+        "git_mode": "100755",
+        "git_object": "635b42b443e4de2cf63745bdde5c272a5d74ca39",
+        "sha256": "55851844f35325b38fbd368558af4e229d5bfe7c42928685e57dd799274b8f18",
+        "bytes": 365
+      },
+      "scripts/test-oracle.sh": {
+        "git_mode": "100755",
+        "git_object": "64a583228454ba36bd24d54ee8e4e810a6fcd187",
+        "sha256": "b8e3e443a3fbe17b96526cfdb22b6a297dedf0eac2d9c3063cd7f9da05a64f79",
+        "bytes": 2769
+      }
+    }
+  },
+  "run": {
+    "id": 38291398196,
+    "name": "ordinary-checks",
+    "head_branch": "main",
+    "head_sha": "50b85ed048f56eee698a62d745b66d2e4b3773b9",
+    "run_number": 53,
+    "run_attempt": 1,
+    "event": "push",
+    "status": "completed",
+    "conclusion": "success",
+    "created_at": "2026-10-12T18:30:42Z",
+    "run_started_at": "2026-10-12T18:30:42Z",
+    "updated_at": "2026-10-12T18:48:26Z",
+    "html_url": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38291398196"
+  },
+  "jobs": [
+    {
+      "id": 114952102281,
+      "name": "ordinary",
+      "run_id": 38291398196,
+      "head_sha": "50b85ed048f56eee698a62d745b66d2e4b3773b9",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-12T18:30:44Z",
+      "completed_at": "2026-10-12T18:48:25Z",
+      "html_url": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38291398196/job/114952102281",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "steps": [
+        {
+          "number": 1,
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-12T18:30:45Z",
+          "completed_at": "2026-10-12T18:30:46Z"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-12T18:30:46Z",
+          "completed_at": "2026-10-12T18:30:47Z"
+        },
+        {
+          "number": 3,
+          "name": "Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-12T18:30:47Z",
+          "completed_at": "2026-10-12T18:30:57Z"
+        },
+        {
+          "number": 4,
+          "name": "Run ./scripts/check.sh",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-12T18:30:57Z",
+          "completed_at": "2026-10-12T18:48:21Z"
+        },
+        {
+          "number": 7,
+          "name": "Post Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-12T18:48:21Z",
+          "completed_at": "2026-10-12T18:48:22Z"
+        },
+        {
+          "number": 8,
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-12T18:48:22Z",
+          "completed_at": "2026-10-12T18:48:22Z"
+        },
+        {
+          "number": 9,
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-12T18:48:22Z",
+          "completed_at": "2026-10-12T18:48:22Z"
+        }
+      ]
+    },
+    {
+      "id": 114952102583,
+      "name": "oracle",
+      "run_id": 38291398196,
+      "head_sha": "50b85ed048f56eee698a62d745b66d2e4b3773b9",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-12T18:30:45Z",
+      "completed_at": "2026-10-12T18:38:20Z",
+      "html_url": "https://github.com/ms-xiaosnow/gosqlite/actions/runs/38291398196/job/114952102583",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "steps": [
+        {
+          "number": 1,
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-12T18:30:45Z",
+          "completed_at": "2026-10-12T18:30:47Z"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-12T18:30:47Z",
+          "completed_at": "2026-10-12T18:30:49Z"
+        },
+        {
+          "number": 3,
+          "name": "Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-12T18:30:49Z",
+          "completed_at": "2026-10-12T18:31:05Z"
+        },
+        {
+          "number": 4,
+          "name": "Build and verify pinned official SQLite oracle",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-12T18:31:05Z",
+          "completed_at": "2026-10-12T18:31:59Z"
+        },
+        {
+          "number": 5,
+          "name": "Run complete guarded ordinary oracle suite",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-12T18:31:59Z",
+          "completed_at": "2026-10-12T18:38:16Z"
+        },
+        {
+          "number": 9,
+          "name": "Post Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-12T18:38:16Z",
+          "completed_at": "2026-10-12T18:38:16Z"
+        },
+        {
+          "number": 10,
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-12T18:38:16Z",
+          "completed_at": "2026-10-12T18:38:16Z"
+        },
+        {
+          "number": 11,
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-12T18:38:16Z",
+          "completed_at": "2026-10-12T18:38:16Z"
+        }
+      ]
+    }
+  ],
+  "toolchain_observed_in_logs": {
+    "go_version": "go1.27.2",
+    "platform": "linux/amd64",
+    "os": "Ubuntu 24.04.5 LTS",
+    "runner_image": "ubuntu-24.04",
+    "runner_image_version": "20261004.327.1",
+    "setup_go_env": {
+      "CGO_ENABLED": "1",
+      "GOTOOLCHAIN": "auto"
+    },
+    "script_environment_note": "setup-go emits its pre-script environment; fixed check.sh and test-oracle.sh then export CGO_ENABLED=0 and GOTOOLCHAIN=local. The race command alone sets CGO_ENABLED=1. This is hosted CI, not the local env-i test environment."
+  },
+  "oracle_observed_in_log": {
+    "version": "3.54.0",
+    "source_id": "2026-10-09 15:46:58 be8d059e9a49089ab2dce5ed26dd87aaf598fdc5fbe0b107c0dd758464bcd5e3",
+    "source_archive_sha3_256": "a5c29342ca185abcda332448fbb27c536661245be27e20199b46c49099b0e15e",
+    "generated_sqlite3_c_sha3_256": "8efd453d08a7cfc4c79de5923153036cdc4dcaa254d4f1e617be6a2a98828f9e",
+    "identity_checks": "OK",
+    "go_test_command_from_fixed_script": "go test -count=1 -timeout=30m -tags oracle ./..."
+  },
+  "ordinary_command_from_fixed_script": [
+    "go run ./internal/testscope",
+    "go test ./...",
+    "go vet ./...",
+    "go build -trimpath ./...",
+    "CGO_ENABLED=1 go test -race ./..."
+  ],
+  "interpretation": {
+    "hosted_ci": "Fresh hosted executions on commit 50b85ed; success belongs to this exact commit/tree.",
+    "prior_local_results": "Historical local coverage/reuse map at fixed tree 51f63a56c22ab6396d5b542a1f0655a82dad4cd5 remains a separate record; no retroactive complete local ordinary/oracle rerun claim.",
+    "ordinary_named_test_count": "Not inferred from non-JSON package-summary logs.",
+    "future_prefix_candidate": "Not covered by this prior commit CI.",
+    "physical_fault_recovery_process_exit": "NOT_RUN_BY_THIS_CI",
+    "manual_target_execution": "NOT_RUN",
+    "original_goal": "NOT_QUALIFIED",
+    "M3_M8_M10": "NOT_COMPLETED",
+    "historical_PENDING": "Retained at original snapshot dates; this completion record adds later bounded facts."
+  },
+  "source_bundle_restore": {
+    "library_file_id": "libfile_adb84b2572c8819191c764a1c6ece114",
+    "file_id": "file_000000008aa081fba452f1b62ae3b271",
+    "library_version": 0,
+    "bundle_bytes": 7048672,
+    "bundle_sha256": "6ecc790b8d849721d5e015b79d8811e07be74032cb62de5b339348d8d45cc39b",
+    "owned_readback_bytes_identical": true,
+    "commit": "50b85ed048f56eee698a62d745b66d2e4b3773b9",
+    "tree": "d3bf2388ec66f91b1f081ee4177a07ab601bb8de",
+    "bundle_verify": "PASS",
+    "git_fsck_full_strict": "PASS",
+    "tracked_file_count": 3344,
+    "all_tracked_bytes_equal": true,
+    "all_tracked_git_modes_and_objects_equal": true,
+    "posix_permission_difference_count": 32,
+    "go_tests": "NOT_RUN_PER_USER_REUSE_INSTRUCTION",
+    "project_native_execution": "NOT_RUN"
+  },
+  "source_bundle_restore_note": "3344 tracked byte/object/Git-mode matches; 32 POSIX permission differences remain explicitly distinct from Git mode. No restoration Go/native test was run.",
+  "seven_gate2054_archive": {
+    "library_file_id": "libfile_4de99a5600a88191b13cc18de3e92e0b",
+    "file_id": "file_000000009da881faab90c28c6d085557",
+    "file_name": "gosqlite-seven-gate2054-51f63a56-COMPILE_NM_ONLY-MANUAL_NOT_RUN-20261012-v1.zip",
+    "version": 0,
+    "bytes": 12659890,
+    "sha256": "a4626541bd3caed007be777026430fde60ca0c58f730b7d362d30cd9c2df40cd",
+    "members": 138,
+    "files": 132,
+    "readback_verified": true,
+    "all_member_paths_modes_bytes_sha256_crc_verified": true,
+    "source_tree": "51f63a56c22ab6396d5b542a1f0655a82dad4cd5",
+    "seven_gate_status": "PASS_COMPILE_STATIC_IDENTITY_READONLY_NM_ONLY",
+    "manual_target_execution": "NOT_RUN",
+    "original_goal": "NOT_QUALIFIED"
+  },
+  "raw_logs": {
+    "ci-ordinary-job.log": {
+      "bytes": 25066,
+      "sha256": "2d7108dfe397a8264b89c28e0ac030ec9863999ff9df93090c1abb2a118cda4e",
+      "line_count": 312,
+      "provenance": "Exact supplied GitHub-decoded job-log bytes; includes original UTF-8 BOM, ANSI sequences, timestamps, and masking."
+    },
+    "ci-oracle-job.log": {
+      "bytes": 21798,
+      "sha256": "146dff2e63342933f3dc410411911fdad0ade7a1a241f2c52019255450000861",
+      "line_count": 277,
+      "provenance": "Exact supplied GitHub-decoded job-log bytes; includes original UTF-8 BOM, ANSI sequences, timestamps, and masking."
+    }
+  },
+  "credential_review": {
+    "ci-ordinary-job.log": {
+      "pattern_counts": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_access": 0,
+        "bearer": 0,
+        "basic_authorization_unmasked": 0,
+        "credential_url": 0,
+        "jwt": 0,
+        "slack_token": 0,
+        "openai_style_key": 0,
+        "signed_url_query": 0
+      },
+      "credential_context_review": "Only GitHub-masked token values and AUTHORIZATION basic ***; no actual credential observed.",
+      "github_masking_preserved": true,
+      "additional_redaction": false
+    },
+    "ci-oracle-job.log": {
+      "pattern_counts": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_access": 0,
+        "bearer": 0,
+        "basic_authorization_unmasked": 0,
+        "credential_url": 0,
+        "jwt": 0,
+        "slack_token": 0,
+        "openai_style_key": 0,
+        "signed_url_query": 0
+      },
+      "credential_context_review": "Only GitHub-masked token values and AUTHORIZATION basic ***; no actual credential observed.",
+      "github_masking_preserved": true,
+      "additional_redaction": false
+    }
+  },
+  "local_input_receipt_fingerprints": {
+    "ci-run-terminal.json": {
+      "bytes": 26515,
+      "sha256": "2aa44e9a7a2afc974aa2311842389c48718639eb289a967333f42288e87366c3"
+    },
+    "ci-jobs-terminal.json": {
+      "bytes": 10055,
+      "sha256": "0315ed0d95cc97d96a6ac1407d58a5b2cbd1af13e76c56ad97ae06010452530f"
+    },
+    "ci-oracle-job.log": {
+      "bytes": 21798,
+      "sha256": "146dff2e63342933f3dc410411911fdad0ade7a1a241f2c52019255450000861"
+    },
+    "ci-ordinary-job.log": {
+      "bytes": 25066,
+      "sha256": "2d7108dfe397a8264b89c28e0ac030ec9863999ff9df93090c1abb2a118cda4e"
+    },
+    "BUNDLE-LIBRARY-RESTORE-PROOF.json": {
+      "bytes": 7180,
+      "sha256": "f235dbca5a2082a20b5f4891583cbc7235709b576c637ffc48281d75a258d108"
+    },
+    "BUNDLE-RESTORE-TRACKED-BYTE-MANIFEST.json": {
+      "bytes": 1366714,
+      "sha256": "1c3755507519b9c3aa7d4bd165472faa25412f89b988f95a8e9f7c61b1c3f259"
+    }
+  },
+  "privacy": "Original API wrappers remain local; archive metadata omits actor/author/committer personal names, emails and unrelated account URLs. Raw job logs retained exactly after credential review.",
+  "preservation_actions": {
+    "go_calls": 0,
+    "tests": 0,
+    "git_commands": 0,
+    "github_writes": 0,
+    "candidate_edits": 0,
+    "scope": "Only new compact evidence files and owned Library archive/readback."
+  }
+}

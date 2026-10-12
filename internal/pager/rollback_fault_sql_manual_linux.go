@@ -72,6 +72,9 @@ func ArmManualRollbackSQLFault(tx *Tx, plan rollbackfault.Plan) (*manualRollback
 		caseID = rollbackfault.SQLControl
 	case rollbackfault.PrefixShortWrite:
 		caseID = rollbackfault.SQLIndexPrefix64
+		if spec.PrefixError {
+			caseID = rollbackfault.SQLIndexPrefix64Error
+		}
 	case rollbackfault.FailBefore:
 		caseID = rollbackfault.SQLDBSyncBefore
 	default:

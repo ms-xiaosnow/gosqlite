@@ -2285,3 +2285,8 @@ separately recorded at the top of this document.
 在冻结 V1 的隔离副本中只修泛用收据的身份留存：非法 Identity 在保存前拒绝，保留无字符串的专用 rejection marker、ProblemIdentity、收到 ordinal 与实际槽位；合法身份用固定有界 buffer 复制后冻结，事件仅借用此份冻结身份。新增超长 payload / sticky / marker 伪造等纯反例源码，并同步新合同 template/pin。详见 [RF-01 说明](testing/rollback-fault-adapter-zh.md)。
 
 状态 SOURCE_RF01_CORRECTION_PENDING_INDEPENDENT_DELTA_REVIEW / VALIDATION_NOT_RUN。V1 及其独立审阅原样保留；Commit、default/manual、main 和旧 guards/pins 全部字节不变，旧 main pin HOLD 不释放。只有源码文本/哈希工作；所有 Go/formatter/AST runner/测试/编译/native/恢复/Git/网络/CI/发布 NOT_RUN，全部原始物理/受限链状态不变。
+
+
+## 2026-10-12：第四格与同码恢复
+
+新增 index-prefix-64-error，受测源树 bf7fcb34 的六项影响范围已实际 PASS；整体未验收，物理手工仍 NOT_RUN。额度暂停后原目录不可见，已从持久基包和七文件 delta 恢复相同全部文件。13980 原始日志未上传、当前不可恢复，不能假装已有原始日志；不重复已通过测试。详见 [第四格记录](evidence/20261012-prefix-error/README.zh.md) 与 [恢复和缺失说明](evidence/20261012-prefix-error/recovery-interruption.zh.md)。
