@@ -20,6 +20,7 @@ type writeIndex struct {
 type writeTable struct {
 	*table
 	indexes    []writeIndex
+	checks     []compiledCheck
 	extensions []*extensionIndex
 }
 type writeCatalog struct {
@@ -45,6 +46,7 @@ func (t *Tx) validateCatalog(ctx context.Context) (*writeCatalog, error) {
 
 // buildWriteCatalog validates declarations only. It never reads row pages.
 func buildWriteCatalog(ctx context.Context, entries []btree.SchemaEntry, extensions *extensionCatalog) (*writeCatalog, error) {
+	ctx, _ = withCheckBudget(ctx, 0)
 	c := &writeCatalog{tables: map[string]*writeTable{}, names: map[string]string{}, extensions: extensions}
 	roots := map[uint32]bool{1: true}
 	for _, e := range entries {
@@ -94,7 +96,7 @@ func buildWriteCatalog(ctx context.Context, entries []btree.SchemaEntry, extensi
 		if !ok || fold(def.Name) != fold(e.Name) || fold(e.TableName) != fold(e.Name) {
 			return nil, fmt.Errorf("%w: table schema mismatch", ErrCorrupt)
 		}
-		tab, err := writableTable(def, e.RootPage)
+		tab, err := writableTableContext(ctx, def, e.RootPage)
 		if err != nil {
 			return nil, err
 		}
@@ -156,11 +158,34 @@ func buildWriteCatalog(ctx context.Context, entries []btree.SchemaEntry, extensi
 	return c, nil
 }
 func writableTable(def *sqlast.CreateTable, root uint32) (*writeTable, error) {
-	tab := &table{name: def.Name, root: root, columns: def.Columns, index: map[string]int{}, ipk: -1}
+	return writableTableContext(context.Background(), def, root)
+}
+func writableTableContext(ctx context.Context, def *sqlast.CreateTable, root uint32) (*writeTable, error) {
+	columns := def.Columns
+	var checkOwner *checkBudget
+	if len(def.CheckConstraints) != 0 {
+		var err error
+		ctx, checkOwner, err = preflightCheckDescriptor(ctx, def)
+		if err != nil {
+			return nil, err
+		}
+		// Preserve the admitted bounded type/name spellings if a caller later
+		// changes its manually assembled descriptor slice.
+		columns = append([]sqlast.ColumnDef(nil), def.Columns...)
+	}
+	tab := &table{name: def.Name, root: root, columns: columns, index: map[string]int{}, ipk: -1}
 	if len(def.Columns) == 0 {
 		return nil, fmt.Errorf("empty table definition")
 	}
-	for i, col := range def.Columns {
+	for i, col := range columns {
+		if checkOwner != nil {
+			if err := ctx.Err(); err != nil {
+				return nil, err
+			}
+			if err := checkOwner.Step(1); err != nil {
+				return nil, err
+			}
+		}
 		if _, exists := tab.index[fold(col.Name)]; exists {
 			return nil, fmt.Errorf("duplicate column name")
 		}
@@ -177,7 +202,11 @@ func writableTable(def *sqlast.CreateTable, root uint32) (*writeTable, error) {
 			}
 			// Parenthesized constant arithmetic is accepted at CREATE time; columns
 			// missing after an external ALTER require literal defaults on read.
-			value, err := sqlast.Eval(col.Default, &sqlast.EvalContext{})
+			ec := &sqlast.EvalContext{}
+			if checkOwner != nil {
+				ec.Context = sqlast.WithEvalBudget(ctx, checkOwner)
+			}
+			value, err := sqlast.Eval(col.Default, ec)
 			if err != nil {
 				return nil, err
 			}
@@ -190,9 +219,17 @@ func writableTable(def *sqlast.CreateTable, root uint32) (*writeTable, error) {
 			_, half := sqlast.HalfDimensions(col.Type)
 			_, sparse := sqlast.SparseDimensions(col.Type)
 			if (!half && !sparse) || root == 0 {
+				if checkOwner != nil {
+					if err := sqlast.PreflightValueContext(ec.Context, "CHECK default affinity", value); err != nil {
+						return nil, err
+					}
+				}
 				if _, err := storedColumnValue(value, col.Type); err != nil {
 					return nil, err
 				}
+			}
+			if checkOwner != nil {
+				checkOwner.scratch = 0 // The checked default value is discarded.
 			}
 		}
 	}
@@ -202,6 +239,10 @@ func writableTable(def *sqlast.CreateTable, root uint32) (*writeTable, error) {
 		return nil, err
 	}
 	writable.indexes = indexes
+	writable.checks, err = compileCheckConstraints(ctx, def, writable)
+	if err != nil {
+		return nil, err
+	}
 	return writable, nil
 }
 func writableIndex(def *sqlast.CreateIndex, tab *writeTable, root uint32) (writeIndex, error) {
@@ -246,7 +287,7 @@ func (t *Tx) createTable(ctx context.Context, c *writeCatalog, def *sqlast.Creat
 		}
 		return fmt.Errorf("object already exists: %s", def.Name)
 	}
-	tab, err := writableTable(def, 0)
+	tab, err := writableTableContext(ctx, def, 0)
 	if err != nil {
 		return err
 	}

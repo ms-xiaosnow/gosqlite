@@ -1,5 +1,35 @@
 # 文件格式与当前兼容边界
 
+## CHECK / EOF 检查点：完整正常门已通过（2026-10-12 07:22 UTC）
+
+冻结运行树 `e06f35a022536a8ebd157731ee9a860521e70eb0` 于 **07:22:18 UTC**
+自然完成 **26 门 / 28 次 Go 调用 PASS**，session 80563 exit 0，lease RELEASED。
+ordinary/race 各 **8,948 named PASS / 7 个明确 SKIP**，完整 pinned oracle
+**10,687 PASS / 0 named SKIP**。本副本只增加状态文档，运行源码与该冻结树一致；
+本副本的新提交、bundle、精确恢复运行及对应 CI 均 **PENDING**。
+
+CHECK 仅资格[已记录的有界 scalar 子集](check-constraints.md#精确-partial-profile)。
+EOF-count 仍仅为 decode-only、EOFUnproven；native owner 在写入/Sync 前继续
+finite-only fail-closed，未开放 EOF 恢复。外平台只有编译/符号检查，原生手工、
+物理持久性/恢复、安全及 M3/M8/M10 未验收。后续 Darwin/Windows backend 和
+真实只读媒体 harness 未纳入；其 source-only/HOLD 不被本次 PASS 覆盖。
+
+已发布基点 `e092f0d4623cb243eec6053a4b3db7eef598542f` 的 bundle、精确恢复
+26 门及 CI 38209370406 两项 SUCCESS 已另行闭合，只资格该基点。
+[本检查点中文报告、精确收据与未完成项](evidence/check-eof-checkpoint-20261012.md)。
+
+从下一节起保留各阶段原文；旧“当前”、SOURCE_ONLY、NOT_RUN、PENDING 与
+FAIL/HOLD/UNKNOWN 均只指原时点和原树，不能覆盖本节的新执行记录，也不会被回写。
+
+## 组合状态说明（2026-10-12）
+
+本文件的源码合同已合入 CHECK / EOF-count 新组合；组合所有执行仍 NOT_RUN；V1 的旧 sqlite.go
+source pin HOLD 已在本 V2 按独立完整源审作唯一 hash 窄修，guard 尚未运行。CHECK 与 EOF 的输入有限结果只绑定各自原树；下面原源码阶段
+NOT_RUN 与待审阅叙述保留历史含义。格式化和单片源码审阅已另有记录，不能代替组合
+默认闭包复审、运行、恢复/CI 或物理验收。见[当前组合状态](check-eof-integration-20261012.md)。
+
+以下保留各输入与检查点原时点记录；其中“当前”、未合入、NOT_RUN、PENDING 和 PASS 均只绑定原树，不覆盖上面的本组合状态。
+
 M2 reads and writes the tested rowid-table and BINARY ASC secondary-index subset of SQLite format 3, according to the [official specification](https://www.sqlite.org/fileformat2.html), with tested subsets recorded in compatibility.md. Future extension data must occupy legal transactional SQLite structures. Unknown feature bits, container versions, encodings, and index versions must be rejected instead of guessed.
 
 当前加密存储是独立的 authenticated root/base/segment 容器，不与明文 SQLite 或
@@ -26,7 +56,7 @@ WAL uses SQLite's32-byte header and24-byte frame header plus a complete page. St
 
 The committed overlay selects the newest page image through the last complete commit marker, with logical extent from that marker and strict bounded scanning. Invalid, incomplete, uncommitted and salt-mismatching tails are classified and refused; this does not implement SQLite's full recovery policy. Checkpoint retains synced WAL images for every extant main-file sector neighbor before overwriting pages. Header mode2 remains after normal checkpoint/close, even when the WAL is removed.
 
-Rollback replay plans support a bounded sequence of published finite-count segments with identical page/sector/original-extent geometry, globally unique original pages and per-segment nonce-seeded sparse checksums. The first header remains authoritative; cumulative limits and exact input consumption are required. Complete missing-original coverage is checked if the current extent is shorter. See [the memory-only supported/unsupported matrix](rollback-replay-memory.md). Physical replay is deliberately isolated and unqualified. See ADR0004 and the source-only manual harness. 历史上单独的 layout-1 snapshot 检查点没有加密 WAL；当前已实现独立的
+Rollback replay 当前源码支持有界 published finite-count 多段，以及第一且唯一 published `0xffffffff` 头后的精确 EOF-count 解码。两者沿用首头 page/sector/original-extent 几何、全局唯一页号、每段 nonce sparse checksum、配额与完整输入消费；EOF 余量必须被 `pageSize+8` 整除，raw Header 不归一化，`len(Pages)` 为有效计数。`CountEvidence` 的 `ReplayCountUnknown = 0`、`ReplayCountFiniteHeaders`、`ReplayCountEOFUnproven` 分别表示未知、有限头计数和 EOF 推导但完整性未证明。完整尾记录截断可能仍合法，checksum 不提供认证、durability 或 writer 来源证明；ValidateExtent 只验证缺失 original 页覆盖。native default/opt-in 仍 finite-only：同一新 plan 的 post-parse admission 必须先于 extent/restored-header/Sync/写入拒绝 sentinel、unknown 与矛盾 metadata。writer 仍 finite-only，later sentinel、legacy page-size-zero、super/master 不支持。此增量 **SOURCE_ONLY / NOT_RUN**，不继承旧树运行结果；详见[内存支持矩阵](rollback-replay-memory.md)与[原生拒绝合同](rollback-recovery-open.md)。Physical replay is deliberately isolated and unqualified. See ADR0004 and the source-only manual harness. 历史上单独的 layout-1 snapshot 检查点没有加密 WAL；当前已实现独立的
 layout-2 / layout-3 认证 WAL，见下方 M8 小节。它不复用这里的原生 SQLite
 WAL 字节或 SHM 协议。
 

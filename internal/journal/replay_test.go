@@ -88,7 +88,6 @@ func TestReplayRejectsAmbiguousInputInMemory(t *testing.T) {
 		{"beyond-original", func(b []byte) []byte { binary.BigEndian.PutUint32(b[512:], 4); return b }, ErrFormat},
 		{"checksum", func(b []byte) []byte { b[512+4+312] ^= 1; return b }, ErrFormat},
 		{"duplicate", func(b []byte) []byte { binary.BigEndian.PutUint32(b[512+520:], 1); return b }, ErrReplayUnsupported},
-		{"no-sync", func(b []byte) []byte { binary.BigEndian.PutUint32(b[8:], 0xffffffff); return b }, ErrReplayUnsupported},
 		{"legacy-page-size", func(b []byte) []byte { binary.BigEndian.PutUint32(b[24:], 0); return b }, ErrReplayUnsupported},
 		{"odd-page-size", func(b []byte) []byte { binary.BigEndian.PutUint32(b[24:], 513); return b }, ErrFormat},
 		{"small-page-size", func(b []byte) []byte { binary.BigEndian.PutUint32(b[24:], 256); return b }, ErrFormat},
@@ -130,6 +129,28 @@ func TestReplayRejectsAmbiguousInputInMemory(t *testing.T) {
 			}
 		})
 	}
+	// Preserve the exact historical "no-sync" negative fixture bytes. Only
+	// the former unsupported expectation changes: these bytes now decode
+	// with unproven EOF count, without permission for native recovery.
+	t.Run("no-sync-decode-only", func(t *testing.T) {
+		data := append([]byte(nil), base...)
+		binary.BigEndian.PutUint32(data[8:], 0xffffffff)
+		plan, err := ParseReplay(data, ReplayLimits{})
+		wantHeader := h
+		wantHeader.Records = 0xffffffff
+		if err != nil || plan == nil {
+			t.Fatalf("historical sentinel bytes: plan=%v err=%v", plan, err)
+		}
+		if plan.Header != wantHeader || plan.CountEvidence != ReplayCountEOFUnproven || plan.DatabaseBytes != 1536 || len(plan.Pages) != 2 {
+			t.Fatalf("decode-only raw header/count/extent: %+v", plan)
+		}
+		for i, number := range []uint32{1, 3} {
+			offset := 512 + i*520 + 4
+			if plan.Pages[i].Number != number || !bytes.Equal(plan.Pages[i].Data, base[offset:offset+512]) {
+				t.Fatal("historical original image changed")
+			}
+		}
+	})
 	lock := h
 	lock.OriginalPages = 0x40000000/h.PageSize + 1
 	lock.Records = 1
@@ -224,11 +245,42 @@ func FuzzReplayPlanBytesOnly(f *testing.F) {
 			}
 			return
 		}
-		if int(plan.Header.Records) > len(plan.Pages) || len(plan.Pages) > 1024 || plan.DatabaseBytes != int64(plan.Header.OriginalPages)*int64(plan.Header.PageSize) {
+		checkReplayCountEvidence(t, data, plan)
+		if len(plan.Pages) > 1024 || plan.DatabaseBytes != int64(plan.Header.OriginalPages)*int64(plan.Header.PageSize) {
 			t.Fatal("invalid successful plan")
 		}
 		if err := plan.ValidateExtent(plan.DatabaseBytes); err != nil {
 			t.Fatal(err)
 		}
 	})
+}
+
+// checkReplayCountEvidence keeps the fuzz laws tied to the supplied raw header.
+// EOF-derived success must account for the entire first sector and exact whole
+// records. Finite success keeps the first-count <= cumulative-count invariant.
+func checkReplayCountEvidence(t *testing.T, data []byte, plan *ReplayPlan) {
+	t.Helper()
+	if plan == nil || len(data) < 28 || !bytes.Equal(data[:8], []byte{0xd9, 0xd5, 0x05, 0xf9, 0x20, 0xa1, 0x63, 0xd7}) {
+		t.Fatal("successful plan lacks first published header at zero")
+	}
+	raw := Header{
+		Records: binary.BigEndian.Uint32(data[8:]), Nonce: binary.BigEndian.Uint32(data[12:]),
+		OriginalPages: binary.BigEndian.Uint32(data[16:]), SectorSize: binary.BigEndian.Uint32(data[20:]),
+		PageSize: binary.BigEndian.Uint32(data[24:]),
+	}
+	if plan.Header != raw {
+		t.Fatal("parser normalized the raw first header")
+	}
+	if raw.Records == 0xffffffff {
+		sector, record := uint64(raw.SectorSize), uint64(raw.PageSize)+8
+		if plan.CountEvidence != ReplayCountEOFUnproven || sector > uint64(len(data)) {
+			t.Fatal("EOF count lacks unproven evidence or complete sector")
+		}
+		remaining := uint64(len(data)) - sector
+		if remaining%record != 0 || uint64(len(plan.Pages)) != remaining/record {
+			t.Fatal("EOF count is not exact whole-record extent")
+		}
+	} else if plan.CountEvidence != ReplayCountFiniteHeaders || uint64(raw.Records) > uint64(len(plan.Pages)) {
+		t.Fatal("finite first count or evidence differs")
+	}
 }

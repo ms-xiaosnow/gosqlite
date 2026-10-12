@@ -1,5 +1,49 @@
 # Native supported-profile integrity checking
 
+## CHECK / EOF 检查点：完整正常门已通过（2026-10-12 07:22 UTC）
+
+冻结运行树 `e06f35a022536a8ebd157731ee9a860521e70eb0` 于 **07:22:18 UTC**
+自然完成 **26 门 / 28 次 Go 调用 PASS**，session 80563 exit 0，lease RELEASED。
+ordinary/race 各 **8,948 named PASS / 7 个明确 SKIP**，完整 pinned oracle
+**10,687 PASS / 0 named SKIP**。本副本只增加状态文档，运行源码与该冻结树一致；
+本副本的新提交、bundle、精确恢复运行及对应 CI 均 **PENDING**。
+
+CHECK 仅资格[已记录的有界 scalar 子集](check-constraints.md#精确-partial-profile)。
+EOF-count 仍仅为 decode-only、EOFUnproven；native owner 在写入/Sync 前继续
+finite-only fail-closed，未开放 EOF 恢复。外平台只有编译/符号检查，原生手工、
+物理持久性/恢复、安全及 M3/M8/M10 未验收。后续 Darwin/Windows backend 和
+真实只读媒体 harness 未纳入；其 source-only/HOLD 不被本次 PASS 覆盖。
+
+已发布基点 `e092f0d4623cb243eec6053a4b3db7eef598542f` 的 bundle、精确恢复
+26 门及 CI 38209370406 两项 SUCCESS 已另行闭合，只资格该基点。
+[本检查点中文报告、精确收据与未完成项](evidence/check-eof-checkpoint-20261012.md)。
+
+从下一节起保留各阶段原文；旧“当前”、SOURCE_ONLY、NOT_RUN、PENDING 与
+FAIL/HOLD/UNKNOWN 均只指原时点和原树，不能覆盖本节的新执行记录，也不会被回写。
+
+## 当前 CHECK / EOF-count 源码组合（2026-10-12）
+
+本副本在已发布检查点 `e092f0d4623cb243eec6053a4b3db7eef598542f` / tree
+`d8ff20a26b4aee9fe3281a426e41230b18c727cd` 上，仅合入已审阅的有界 scalar CHECK
+与 decode-only EOF-count 增量。组合仍为 **SOURCE_ONLY / ALL_COMBINED_EXECUTION_NOT_RUN**；
+前驱 V1 的 sqlite.go pin HOLD 原样保留；本 V2 已按独立完整文件 ownership/consumer
+复审，仅更新 WAL publisher guard 的该一个 hash，未运行 guard。没有运行本组合的 Go、formatter、compiler、guard、tests、
+race、oracle、native、restore 或 CI；输入有限 PASS 不转授本组合。
+
+CHECK 原 tree9c3b 的三普通门已取得 18 根 / 28 named PASS，有限 oracle 为 3 根 / 7 named
+PASS。EOF 原 tree1f599764 的四普通门终态记录为 38 Test 根加 2 个固定种子 Fuzz 根、
+485 named PASS；只资格其具名内存/源码范围，不是物理恢复。已发布基点的精确恢复运行
+与对应 CI 仍待独立闭合；本源码组合尚未发布。准确身份、原始收据及下一步见
+[本组合范围与证据边界](check-eof-integration-20261012.md)。
+
+CHECK 仅支持普通 rowid 表的有界、无显式函数 scalar profile：保留折叠前 source
+准入、NULL-pass、UPDATE 赋值依赖、NOT NULL → CHECK → UNIQUE/storage 顺序及原
+storage.Statement undo。DB.Check 只在 primary scan 每行评估一次；配额仍是累计 work
+2^24、metadata 16 MiB 并受 MaxSortBytes 约束、2,000 声明和 8,192 原始节点；一般
+函数、FK、STRICT、WITHOUT ROWID 与更广 SQL 不因此开放。详见[CHECK 合同](check-constraints.md)。
+
+以下保留各输入与检查点原时点记录；其中“当前”、未合入、NOT_RUN、PENDING 和 PASS 均只绑定原树，不覆盖上面的本组合状态。
+
 ## 当前自动 UNIQUE 组合入口（2026-10-12）
 
 本文件下方自动 UNIQUE V1/V2 与 Storage 基点段落保留各自身份的历史；最新组合见[当前源码与证据](current-status-20261012.md)。本次在已审阅 LEFT/inspect/Darwin/Connector v4 上并入 automatic UNIQUE 原基线增量，并接入独立复审通过的 c382 空结果表头观察器窄修；未加入 CHECK。前序 d79 组合及旧 sqlite.go pin HOLD 原样冻结，本后继仅按独立完整 ownership 复审更新该一个 pin。组合 **SOURCE_ONLY / NOT_RUN**；原 automatic UNIQUE 六门 oracle FAIL 保留，修后原 gate11 运行资格仍待其独立终态，输入成功不转授组合。
@@ -64,7 +108,7 @@ ordinary tables, indexes, overflow and every extension check. The checker:
 4. Reads every table record. INTEGER PRIMARY KEY decoded storage values must be logical NULL and
    resolve to the signed rowid; short records use supported literal defaults.
    Declared NOT NULL constraints and strict VECTOR/HALFVEC/BIT/SPARSEVEC
-   interpretations are checked. Ordinary SQLite affinity remains dynamic typing.
+   interpretations are checked. The new source-only CHECK composition additionally evaluates each admitted scalar declaration once per primary row (not per index); NULL passes. Ordinary SQLite affinity remains dynamic typing.
 5. Reconciles ordinary indexes in both directions. Every table row must have its
    expected complete BINARY ASC key plus rowid. Every index entry must resolve to
    a source row and all indexed values must compare equal under SQLite storage
@@ -86,13 +130,16 @@ Supported files have no reserved page bytes, schema format 4 (or an empty
 format-0 database), UTF-8, ordinary rowid tables with the engine's supported
 simple column types/defaults/NOT NULL/INTEGER PRIMARY KEY, and ascending BINARY
 ordinary indexes, including the bounded explicit named-column UNIQUE profile
-described below. Supported owned extensions are grams13 and the current
+described below. Admitted ordinary column/table automatic UNIQUE and the narrow
+function-free scalar CHECK profile are also represented in the current source
+composition; its runtime qualification is separately pending. Supported owned extensions are grams13 and the current
 native dense/typed HNSW and IVFFlat configurations.
 
 Unsupported features fail instead of being reported as checked: WITHOUT ROWID,
-STRICT, autovacuum, UTF-16, schema formats 1–3, table/column UNIQUE constraints
-and implicit autoindexes, typed-vector/extension UNIQUE, other primary
-keys, arbitrary CHECK/foreign-key constraints, partial/expression/DESC/non-BINARY
+STRICT, autovacuum, UTF-16, schema formats 1–3, UNIQUE constraints/autoindexes
+outside the admitted profile, typed-vector/extension UNIQUE, other primary
+keys, CHECK expressions outside the admitted function-free scalar profile,
+foreign-key constraints, partial/expression/DESC/non-BINARY
 indexes, generated columns, arbitrary views/triggers, sqlite_* internal objects,
 unknown schema/extension formats or persisted custom method identities. Full
 checks use a fresh built-in-only registry and never invoke application-provided

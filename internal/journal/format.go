@@ -12,8 +12,9 @@ import (
 var ErrFormat = errors.New("invalid SQLite rollback journal")
 var magic = [8]byte{0xd9, 0xd5, 0x05, 0xf9, 0x20, 0xa1, 0x63, 0xd7}
 
-// Header is one rollback-journal segment header. Only finite record counts
-// are emitted. The no-sync sentinel and super-journals are not supported.
+// Header is one rollback-journal segment header. This encoding/record API
+// accepts only finite counts; super-journals are unsupported. ParseReplay
+// separately decodes a bounded first-only EOF count without native authority.
 type Header struct {
 	Records       uint32
 	Nonce         uint32

@@ -15,6 +15,8 @@ const MaxTokens = 32768
 const MaxColumns = 2000
 const MaxUniqueConstraints = 2000
 const MaxUniqueTerms = 8192
+const MaxCheckConstraints = 2000
+const MaxCheckNodes = 8192
 const MaxFunctionArgs = 1000
 const maxExpressionDepth = 128
 
@@ -25,6 +27,9 @@ type parser struct {
 	named              map[string]int
 	bindings           map[int]Parameter
 	heights            map[Expr]int
+	checkMode          bool
+	checkNodes         int
+	constraintNamed    bool
 }
 
 func Parse(text string) (Statement, error) {
@@ -378,17 +383,27 @@ func (p *parser) createTable() (*CreateTable, error) {
 	pk := false
 	tableConstraints := false
 	uniqueTerms := 0
+	checkTerms := 0
 	for {
-		if p.is("UNIQUE") || p.is("CONSTRAINT") {
+		if p.is("UNIQUE") || p.is("CHECK") || p.is("CONSTRAINT") {
 			if len(s.Columns) == 0 {
 				return nil, p.unsupported("table constraint requires columns")
 			}
 			tableConstraints = true
-			u, err := p.tableUniqueConstraint()
+			name, err := p.constraintName()
 			if err != nil {
 				return nil, err
 			}
-			if err = p.appendUniqueConstraint(s, u, &uniqueTerms); err != nil {
+			if p.is("CHECK") {
+				err = p.appendCheckConstraint(s, name, &checkTerms)
+			} else {
+				var u UniqueConstraint
+				u, err = p.tableUniqueConstraint(name)
+				if err == nil {
+					err = p.appendUniqueConstraint(s, u, &uniqueTerms)
+				}
+			}
+			if err != nil {
 				return nil, err
 			}
 			if !p.take(",") {
@@ -438,23 +453,24 @@ func (p *parser) createTable() (*CreateTable, error) {
 				c.Type = typeName + "(" + strconv.Itoa(n) + ")"
 			}
 		}
-		if p.peek().Kind == Identifier && !p.is("PRIMARY") && !p.is("NOT") && !p.is("DEFAULT") && !p.is("UNIQUE") && !p.is("CONSTRAINT") && !p.is("COLLATE") {
+		if p.peek().Kind == Identifier && !p.is("PRIMARY") && !p.is("NOT") && !p.is("DEFAULT") && !p.is("UNIQUE") && !p.is("CHECK") && !p.is("CONSTRAINT") && !p.is("COLLATE") {
 			return nil, p.unsupported("column type or constraint " + p.peek().Text)
 		}
 		for !p.is(",") && !p.is(")") && p.peek().Kind != EOF {
 			switch {
-			case p.is("UNIQUE") || p.is("CONSTRAINT"):
-				u := UniqueConstraint{Columns: []string{c.Name}}
-				if p.take("CONSTRAINT") {
-					u.Name, err = p.name()
-					if err != nil {
-						return nil, err
-					}
+			case p.is("UNIQUE") || p.is("CHECK") || p.is("CONSTRAINT"):
+				name, err := p.constraintName()
+				if err != nil {
+					return nil, err
 				}
-				if !p.take("UNIQUE") {
-					return nil, p.unsupported("only named UNIQUE constraints")
+				if p.is("CHECK") {
+					err = p.appendCheckConstraint(s, name, &checkTerms)
+				} else if p.take("UNIQUE") {
+					err = p.appendUniqueConstraint(s, UniqueConstraint{Name: name, Columns: []string{c.Name}}, &uniqueTerms)
+				} else {
+					return nil, p.unsupported("only named UNIQUE or CHECK constraints")
 				}
-				if err = p.appendUniqueConstraint(s, u, &uniqueTerms); err != nil {
+				if err != nil {
 					return nil, err
 				}
 			case p.take("COLLATE"):
@@ -520,19 +536,19 @@ func (p *parser) binaryConstraintCollation() error {
 	}
 	return nil
 }
-func (p *parser) tableUniqueConstraint() (UniqueConstraint, error) {
-	u := UniqueConstraint{}
-	var err error
-	if p.take("CONSTRAINT") {
-		u.Name, err = p.name()
-		if err != nil {
-			return u, err
-		}
+func (p *parser) constraintName() (string, error) {
+	p.constraintNamed = p.take("CONSTRAINT")
+	if p.constraintNamed {
+		return p.name()
 	}
+	return "", nil
+}
+func (p *parser) tableUniqueConstraint(name string) (UniqueConstraint, error) {
+	u := UniqueConstraint{Name: name}
 	if !p.take("UNIQUE") {
 		return u, p.unsupported("only table UNIQUE constraints")
 	}
-	if err = p.need("("); err != nil {
+	if err := p.need("("); err != nil {
 		return u, err
 	}
 	for {
@@ -850,6 +866,9 @@ func (p *parser) expression(min int) (Expr, error) {
 		}
 		left = &Literal{Value: v, hexLiteral: strings.HasPrefix(FoldName(t.Text), "0x"), truthLiteral: integerTruthLiteral(v, t.Text)}
 	case t.Kind == Bind:
+		if p.checkMode {
+			return nil, p.unsupported("parameters in CHECK")
+		}
 		n, err := p.parameter(t.Text)
 		if err != nil {
 			return nil, err
@@ -888,6 +907,9 @@ func (p *parser) expression(min int) (Expr, error) {
 			return nil, p.unsupported("expression " + t.Text)
 		}
 		if p.take("(") {
+			if p.checkMode {
+				return nil, p.unsupported("explicit function calls in CHECK")
+			}
 			name := FoldName(t.Text)
 			switch name {
 			case "group_concat", "string_agg":
@@ -918,6 +940,11 @@ func (p *parser) expression(min int) (Expr, error) {
 			}
 			left = call
 		} else if p.take(".") {
+			// CHECK must not lose an explicitly empty qualifier when the
+			// ordinary Column representation uses empty for no qualifier.
+			if p.checkMode && t.Text == "" {
+				return nil, p.unsupported("empty table qualifier in CHECK")
+			}
 			if p.take("*") {
 				left = &Star{Table: t.Text}
 			} else {
@@ -959,6 +986,9 @@ func (p *parser) expression(min int) (Expr, error) {
 		if prec == 0 || prec < min {
 			break
 		}
+		if p.checkMode && isVectorOperator(op) {
+			return nil, p.unsupported("vector operators in CHECK")
+		}
 		p.next()
 		if neg {
 			p.next()
@@ -987,7 +1017,7 @@ func (p *parser) expression(min int) (Expr, error) {
 			if err = p.checkExpr(left); err != nil {
 				return nil, err
 			}
-			if len(in.Values) == 0 && !containsCall(in.Expr) {
+			if !p.checkMode && len(in.Values) == 0 && !containsCall(in.Expr) {
 				// SQLite folds a function-free empty IN before name binding,
 				// so even an unresolved column disappears. Function-bearing
 				// operands still need validation, but are not evaluated.
@@ -1018,7 +1048,7 @@ func (p *parser) expression(min int) (Expr, error) {
 			if op == "NOTNULL" {
 				name = "IS NOT"
 			}
-			left = parseNullCheck(&Binary{Op: name, Left: left, Right: &Literal{}})
+			left = p.parseNullCheck(&Binary{Op: name, Left: left, Right: &Literal{}})
 			if err = p.checkExpr(left); err != nil {
 				return nil, err
 			}
@@ -1041,12 +1071,12 @@ func (p *parser) expression(min int) (Expr, error) {
 			}
 			left = x
 		} else {
-			left = parseNullCheck(&Binary{Op: op, Left: left, Right: right})
+			left = p.parseNullCheck(&Binary{Op: op, Left: left, Right: right})
 		}
 		if err = p.checkExpr(left); err != nil {
 			return nil, err
 		}
-		if op == "AND" {
+		if op == "AND" && !p.checkMode {
 			x := left.(*Binary)
 			lt, lk := literalTruth(x.Left)
 			rt, rk := literalTruth(x.Right)
@@ -1139,6 +1169,12 @@ func numberLiteral(raw string) (any, error) {
 func (p *parser) checkExpr(e Expr) error {
 	if p.heights == nil {
 		p.heights = map[Expr]int{}
+	}
+	if p.checkMode && p.heights[e] == 0 {
+		p.checkNodes++
+		if p.checkNodes > MaxCheckNodes {
+			return p.unsupported("CHECK source node budget")
+		}
 	}
 	d := 1
 	child := func(c Expr) {

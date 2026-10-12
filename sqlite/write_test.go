@@ -272,7 +272,7 @@ func TestNativeUnsupportedWritesPreserveValidDatabase(t *testing.T) {
 		t.Fatal("unsupported schema was changed")
 	}
 	fresh, _ := writable(t, sqlite.Options{})
-	for _, s := range []string{"CREATE TABLE n(id INT PRIMARY KEY)", "CREATE TABLE n(id INTEGER PRIMARY KEY AUTOINCREMENT)", "CREATE TABLE n(x TEXT UNIQUE ON CONFLICT IGNORE)", "CREATE TABLE n(x INT CHECK(x>0))", "CREATE TABLE n(x REFERENCES other(x))", "CREATE TABLE n(x) STRICT", "CREATE TABLE n(x) WITHOUT ROWID", "CREATE TABLE n(x GENERATED ALWAYS AS (2))"} {
+	for _, s := range []string{"CREATE TABLE n(id INT PRIMARY KEY)", "CREATE TABLE n(id INTEGER PRIMARY KEY AUTOINCREMENT)", "CREATE TABLE n(x TEXT UNIQUE ON CONFLICT IGNORE)", "CREATE TABLE n(x INT CHECK(abs(x)>0))", "CREATE TABLE n(x REFERENCES other(x))", "CREATE TABLE n(x) STRICT", "CREATE TABLE n(x) WITHOUT ROWID", "CREATE TABLE n(x GENERATED ALWAYS AS (2))"} {
 		if _, err := fresh.Exec(context.Background(), s); !errors.Is(err, sqlite.ErrUnsupported) {
 			t.Fatal(s, err)
 		}

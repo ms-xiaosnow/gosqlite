@@ -343,6 +343,7 @@ func (t *Tx) execStatementLocked(ctx context.Context, stmt sqlast.Statement, par
 		return t.cachedPreparationFailureLocked(ctx, stmt, err)
 	}
 	ctx = sqlast.WithConnectionState(ctx, &t.db.counters)
+	ctx, _ = withCheckBudget(ctx, t.db.opts.MaxSortBytes)
 	var result mutationOutcome
 	beforeStatementSchema := t.reader.Header().SchemaCookie
 	err := t.storage.Statement(ctx, func() error {

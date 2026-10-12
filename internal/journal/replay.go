@@ -43,35 +43,54 @@ type PageImage struct {
 	Data   []byte
 }
 
-// ReplayPlan is a fully validated journal from the supported finite-count
-// subset. Header is the first segment's unmodified header: Header.Records is
-// not the cumulative page count. Pages contains all segments' unique images in
-// journal order. Its pages must be restored, its database truncated to
-// DatabaseBytes, and that database synced before the journal may be removed.
-// Parsing and extent validation perform no I/O. Neither operation establishes
-// that an on-disk journal is actually hot.
+// ReplayCountEvidence records how the supplied bytes describe record counts.
+// It is not authentication, proof of durability, or native replay authority.
+type ReplayCountEvidence uint8
+
+const (
+	// ReplayCountUnknown is deliberately the zero value and is not admitted
+	// by native recovery. Future evidence values must also fail closed.
+	ReplayCountUnknown ReplayCountEvidence = iota
+	// ReplayCountFiniteHeaders means every published segment supplies a count.
+	ReplayCountFiniteHeaders
+	// ReplayCountEOFUnproven means the first raw count is 0xffffffff and the
+	// effective count comes from supplied EOF. Whole-record truncation cannot
+	// be detected from the remaining bytes, including a header-only prefix.
+	ReplayCountEOFUnproven
+)
+
+// ReplayPlan is a structurally validated journal from the supported subset.
+// Header is the first segment's unmodified header, including a raw 0xffffffff
+// count; len(Pages) is the effective cumulative count. Pages contains unique,
+// owned images in journal order. DatabaseBytes is the original extent.
+// CountEvidence distinguishes finite published counts from an EOF-derived,
+// completeness-unproven count. Neither value authenticates the journal.
+// Parsing and extent validation perform no I/O and establish neither that an
+// on-disk journal is hot nor that it is eligible for native recovery. Native
+// recovery must reject EOF-derived plans before any replay/publication work.
 type ReplayPlan struct {
 	Header        Header
 	Pages         []PageImage
 	DatabaseBytes int64
+	CountEvidence ReplayCountEvidence
 }
 
-// ParseReplay validates the entire journal before producing an owned plan.
-// It is deliberately stricter than SQLite's stop-at-invalid-record playback:
-// partial headers, checksum failures, duplicate pages (within or across
-// segments), and ambiguous trailing bytes never yield a partially usable plan.
-// Every segment must have published magic and a finite count, and repeat the
-// first header's page size, sector size, and original extent. Only the first
-// header controls geometry/extent in SQLite; disagreement is outside this
-// conservative subset. Each segment's own nonce checks its records.
+// ParseReplay validates the entire supplied journal before producing an owned
+// plan. It is deliberately stricter than SQLite's stop-at-invalid-record
+// playback: partial headers/records, checksum failures, duplicate pages (within
+// or across segments), and ambiguous tails never yield a partially usable plan.
+// Finite-count segments repeat the first header's page size, sector size and
+// original extent, and use their own nonce. Later headers start at the next
+// sector boundary at or after the preceding segment's exact end; the last
+// segment must end at input EOF. Padding alone is not a later segment.
 //
-// Headers after the first start at the next sector boundary at or after the
-// preceding segment's exact end. The last segment must end at the input end;
-// padding without another complete published segment is not accepted. Published
-// zero-count segments are allowed; unpublished counts are never inferred from
-// remaining bytes. Super/master-journals, no-sync counts and legacy unspecified
-// page sizes remain unsupported. No page or header is found by scanning for
-// magic in padding or page data.
+// A first published raw count of 0xffffffff instead describes exactly one
+// header followed solely by whole records to supplied EOF. Its effective count
+// is bounded before record allocation, and CountEvidence is EOFUnproven. This
+// cannot detect truncation at a whole-record boundary. The sentinel does not
+// establish no-sync, memory-journal or safe-append writer provenance. No later
+// sentinel, unpublished inferred count, super/master-journal, or legacy zero
+// page size is supported. No header is found by scanning padding or page data.
 //
 // Sector sizes 32..65536 follow SQLite 3.54 src/pager.c readJournalHdr(). The
 // existing writer's Header.Validate intentionally has a narrower minimum of
@@ -96,15 +115,15 @@ func ParseReplay(data []byte, limits ReplayLimits) (*ReplayPlan, error) {
 		OriginalPages: binary.BigEndian.Uint32(data[16:]), SectorSize: binary.BigEndian.Uint32(data[20:]),
 		PageSize: binary.BigEndian.Uint32(data[24:]),
 	}
-	if h.Records == 0xffffffff || h.PageSize == 0 {
-		return nil, fmt.Errorf("%w: no-sync count or legacy page size", ErrReplayUnsupported)
+	if h.PageSize == 0 {
+		return nil, fmt.Errorf("%w: legacy page size", ErrReplayUnsupported)
 	}
 	if h.PageSize < 512 || h.PageSize > 65536 || h.PageSize&(h.PageSize-1) != 0 ||
 		h.SectorSize < 32 || h.SectorSize > 65536 || h.SectorSize&(h.SectorSize-1) != 0 ||
 		h.OriginalPages > 0xfffffffe {
 		return nil, fmt.Errorf("%w: header geometry", ErrFormat)
 	}
-	if h.Records > limits.MaxRecords {
+	if h.Records != 0xffffffff && h.Records > limits.MaxRecords {
 		return nil, fmt.Errorf("%w: record count", ErrReplayLimit)
 	}
 	extent := uint64(h.OriginalPages) * uint64(h.PageSize)
@@ -116,7 +135,28 @@ func ParseReplay(data []byte, limits ReplayLimits) (*ReplayPlan, error) {
 	// full sector of bounded input and advance the cursor.
 	size, sector := uint64(len(data)), uint64(h.SectorSize)
 	recordBytes := uint64(h.PageSize) + 8
-	plan := &ReplayPlan{Header: h, DatabaseBytes: int64(extent), Pages: make([]PageImage, 0)}
+	countEvidence := ReplayCountFiniteHeaders
+	firstCount := uint64(h.Records)
+	if h.Records == 0xffffffff {
+		// Prove the complete sector before subtraction. Unlike SQLite's
+		// floor division, reject every partial record at supplied EOF.
+		if sector > size {
+			return nil, fmt.Errorf("%w: truncated header sector", ErrFormat)
+		}
+		remaining := size - sector
+		if remaining%recordBytes != 0 {
+			return nil, fmt.Errorf("%w: partial EOF-count record", ErrFormat)
+		}
+		firstCount = remaining / recordBytes
+		if firstCount > uint64(limits.MaxRecords) {
+			return nil, fmt.Errorf("%w: EOF-derived record count", ErrReplayLimit)
+		}
+		if firstCount > uint64(h.OriginalPages) {
+			return nil, fmt.Errorf("%w: more records than original pages", ErrFormat)
+		}
+		countEvidence = ReplayCountEOFUnproven
+	}
+	plan := &ReplayPlan{Header: h, DatabaseBytes: int64(extent), Pages: make([]PageImage, 0), CountEvidence: countEvidence}
 	seen := make(map[uint32]struct{})
 	var total uint64
 	for headerOffset := uint64(0); ; {
@@ -125,26 +165,32 @@ func ParseReplay(data []byte, limits ReplayLimits) (*ReplayPlan, error) {
 			OriginalPages: binary.BigEndian.Uint32(data[headerOffset+16:]), SectorSize: binary.BigEndian.Uint32(data[headerOffset+20:]),
 			PageSize: binary.BigEndian.Uint32(data[headerOffset+24:]),
 		}
+		segmentRecords := uint64(segment.Records)
 		if segment.Records == 0xffffffff {
-			return nil, fmt.Errorf("%w: no-sync count", ErrReplayUnsupported)
+			if headerOffset != 0 {
+				return nil, fmt.Errorf("%w: later EOF-count header", ErrReplayUnsupported)
+			}
+			// The derived body ends exactly at EOF, so this path can never
+			// enter the subsequent-header alignment logic.
+			segmentRecords = firstCount
 		}
 		if segment.OriginalPages != h.OriginalPages || segment.SectorSize != h.SectorSize || segment.PageSize != h.PageSize {
 			return nil, fmt.Errorf("%w: segment geometry differs from first header", ErrReplayUnsupported)
 		}
 		// Subtract before adding to keep cumulative counts bounded even when
 		// individual advertised uint32 counts would wrap a uint32 sum.
-		if uint64(segment.Records) > uint64(limits.MaxRecords)-total {
+		if segmentRecords > uint64(limits.MaxRecords)-total {
 			return nil, fmt.Errorf("%w: cumulative record count", ErrReplayLimit)
 		}
-		total += uint64(segment.Records)
+		total += segmentRecords
 		// A uint32 count times (at most) 65544 fits uint64. Check remaining
 		// input before adding offsets or allocating record metadata/images.
-		bodyBytes := uint64(segment.Records) * recordBytes
+		bodyBytes := segmentRecords * recordBytes
 		if sector > size-headerOffset || bodyBytes > size-headerOffset-sector {
 			return nil, fmt.Errorf("%w: truncated header sector or records", ErrFormat)
 		}
 		end := headerOffset + sector + bodyBytes
-		if segment.Records > h.OriginalPages {
+		if segmentRecords > uint64(h.OriginalPages) {
 			return nil, fmt.Errorf("%w: more records than original pages", ErrFormat)
 		}
 		for offset := headerOffset + sector; offset < end; offset += recordBytes {

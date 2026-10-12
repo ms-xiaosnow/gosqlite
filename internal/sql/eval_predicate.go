@@ -78,6 +78,15 @@ func EvalPredicate(e Expr, ctx *EvalContext) (bool, error) {
 	return !reject, err
 }
 
+// EvalCheck uses SQLite CHECK branch semantics: NULL and nonzero pass.
+// All source admission and binding must have completed before this call.
+func EvalCheck(e Expr, ctx *EvalContext) (bool, error) {
+	if ctx == nil {
+		ctx = &EvalContext{}
+	}
+	return evalJump(e, ctx, true, true)
+}
+
 func evalJump(e Expr, ctx *EvalContext, want, jumpNull bool) (bool, error) {
 	if ctx.Context != nil {
 		if err := ctx.Context.Err(); err != nil {

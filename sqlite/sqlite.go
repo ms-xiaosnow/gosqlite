@@ -170,6 +170,7 @@ type Options struct {
 	// value of this option. This is not a crash-safety guarantee.
 	KeepWALOnClose bool
 	// MaxSortBytes bounds retained ORDER BY rows and UPDATE/DELETE rowid lists.
+	// It also bounds private CHECK metadata plus scalar expression scratch.
 	// Zero selects 64 MiB. Sorting never spills plaintext to disk.
 	MaxSortBytes int64
 	// MaxTransactionPages bounds the pager's dirty-page transaction overlay.

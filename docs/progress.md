@@ -1,5 +1,45 @@
 # Implementation and acceptance progress
 
+## CHECK / EOF 检查点：完整正常门已通过（2026-10-12 07:22 UTC）
+
+冻结运行树 `e06f35a022536a8ebd157731ee9a860521e70eb0` 于 **07:22:18 UTC**
+自然完成 **26 门 / 28 次 Go 调用 PASS**，session 80563 exit 0，lease RELEASED。
+ordinary/race 各 **8,948 named PASS / 7 个明确 SKIP**，完整 pinned oracle
+**10,687 PASS / 0 named SKIP**。本副本只增加状态文档，运行源码与该冻结树一致；
+本副本的新提交、bundle、精确恢复运行及对应 CI 均 **PENDING**。
+
+CHECK 仅资格[已记录的有界 scalar 子集](check-constraints.md#精确-partial-profile)。
+EOF-count 仍仅为 decode-only、EOFUnproven；native owner 在写入/Sync 前继续
+finite-only fail-closed，未开放 EOF 恢复。外平台只有编译/符号检查，原生手工、
+物理持久性/恢复、安全及 M3/M8/M10 未验收。后续 Darwin/Windows backend 和
+真实只读媒体 harness 未纳入；其 source-only/HOLD 不被本次 PASS 覆盖。
+
+已发布基点 `e092f0d4623cb243eec6053a4b3db7eef598542f` 的 bundle、精确恢复
+26 门及 CI 38209370406 两项 SUCCESS 已另行闭合，只资格该基点。
+[本检查点中文报告、精确收据与未完成项](evidence/check-eof-checkpoint-20261012.md)。
+
+从下一节起保留各阶段原文；旧“当前”、SOURCE_ONLY、NOT_RUN、PENDING 与
+FAIL/HOLD/UNKNOWN 均只指原时点和原树，不能覆盖本节的新执行记录，也不会被回写。
+
+## 当前 CHECK / EOF-count 源码组合（2026-10-12）
+
+本副本在已发布检查点 `e092f0d4623cb243eec6053a4b3db7eef598542f` / tree
+`d8ff20a26b4aee9fe3281a426e41230b18c727cd` 上，仅合入已审阅的有界 scalar CHECK
+与 decode-only EOF-count 增量。组合仍为 **SOURCE_ONLY / ALL_COMBINED_EXECUTION_NOT_RUN**；
+前驱 V1 的 sqlite.go pin HOLD 原样保留；本 V2 已按独立完整文件 ownership/consumer
+复审，仅更新 WAL publisher guard 的该一个 hash，未运行 guard。没有运行本组合的 Go、formatter、compiler、guard、tests、
+race、oracle、native、restore 或 CI；输入有限 PASS 不转授本组合。
+
+CHECK 原 tree9c3b 的三普通门已取得 18 根 / 28 named PASS，有限 oracle 为 3 根 / 7 named
+PASS。EOF 原 tree1f599764 的四普通门终态记录为 38 Test 根加 2 个固定种子 Fuzz 根、
+485 named PASS；只资格其具名内存/源码范围，不是物理恢复。已发布基点的精确恢复运行
+与对应 CI 仍待独立闭合；本源码组合尚未发布。准确身份、原始收据及下一步见
+[本组合范围与证据边界](check-eof-integration-20261012.md)。
+
+下一步：固定唯一 pin 后继身份 → 独立后继读回与完整默认闭包复审 → 另行批准精确后继的组合正常门；源码作者不启动执行。恢复/CI 与物理资格分层记录。
+
+以下保留各输入与检查点原时点记录；其中“当前”、未合入、NOT_RUN、PENDING 和 PASS 均只绑定原树，不覆盖上面的本组合状态。
+
 ## 当前五切片组合状态（2026-10-12）
 
 当前冻结运行树为 `59ce26879c4301babc7648fbddc5cc66c4097263`（3,267 文件、783 个 Go 文件），包含 LEFT/Rows、encrypted inspect、Darwin inventory manual、Connector rollback manual 和 automatic UNIQUE（含 c382 空结果表头 helper 修复）；**不包含 CHECK**。该树于 **2026-10-12 05:21:06 UTC 自然完成完整 26 门 / 28 次 Go 调用 PASS**，lease 已 RELEASED。ordinary/race 各 **8,569 named PASS / 7 个固定预期 SKIP**，完整 pinned oracle **10,301 PASS / 0 SKIP**，LIMIT oracle/race **394 PASS**。新检查点提交、Git bundle、精确恢复及对应 CI 均 **PENDING**；已验证的未发布源包不代替这些步骤。

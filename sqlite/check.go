@@ -172,6 +172,7 @@ func (r *checkReader) ReadPage(ctx context.Context, n uint32) ([]byte, error) {
 }
 
 func (d *DB) checkSnapshot(ctx context.Context, source btree.PageReader, o CheckOptions) (CheckResult, error) {
+	ctx, _ = withCheckBudget(ctx, d.opts.MaxSortBytes)
 	h := source.Header()
 	if h.PageSize < 512 || h.PageSize > 65536 || h.PageSize&(h.PageSize-1) != 0 || h.PageCount == 0 {
 		return CheckResult{}, fmt.Errorf("%w: check snapshot geometry", ErrCorrupt)
@@ -248,6 +249,10 @@ func (d *DB) checkSnapshot(ctx context.Context, source btree.PageReader, o Check
 		err = btree.Scan(ctx, r, tab.root, func(id int64, raw []any) error {
 			values, err := checkTableValues(tab, id, raw)
 			if err != nil {
+				return err
+			}
+			// Enforce once in the primary table scan, never in reverse index seeks.
+			if err = tab.evaluateChecks(ctx, tab.checks, id, values, ErrCorrupt); err != nil {
 				return err
 			}
 			if err = checkShadowOwner(tab.name, raw, byID); err != nil {

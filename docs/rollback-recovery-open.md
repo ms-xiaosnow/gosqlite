@@ -1,5 +1,58 @@
 # Opt-in rollback recovery during Open
 
+## CHECK / EOF 检查点：完整正常门已通过（2026-10-12 07:22 UTC）
+
+冻结运行树 `e06f35a022536a8ebd157731ee9a860521e70eb0` 于 **07:22:18 UTC**
+自然完成 **26 门 / 28 次 Go 调用 PASS**，session 80563 exit 0，lease RELEASED。
+ordinary/race 各 **8,948 named PASS / 7 个明确 SKIP**，完整 pinned oracle
+**10,687 PASS / 0 named SKIP**。本副本只增加状态文档，运行源码与该冻结树一致；
+本副本的新提交、bundle、精确恢复运行及对应 CI 均 **PENDING**。
+
+CHECK 仅资格[已记录的有界 scalar 子集](check-constraints.md#精确-partial-profile)。
+EOF-count 仍仅为 decode-only、EOFUnproven；native owner 在写入/Sync 前继续
+finite-only fail-closed，未开放 EOF 恢复。外平台只有编译/符号检查，原生手工、
+物理持久性/恢复、安全及 M3/M8/M10 未验收。后续 Darwin/Windows backend 和
+真实只读媒体 harness 未纳入；其 source-only/HOLD 不被本次 PASS 覆盖。
+
+已发布基点 `e092f0d4623cb243eec6053a4b3db7eef598542f` 的 bundle、精确恢复
+26 门及 CI 38209370406 两项 SUCCESS 已另行闭合，只资格该基点。
+[本检查点中文报告、精确收据与未完成项](evidence/check-eof-checkpoint-20261012.md)。
+
+从下一节起保留各阶段原文；旧“当前”、SOURCE_ONLY、NOT_RUN、PENDING 与
+FAIL/HOLD/UNKNOWN 均只指原时点和原树，不能覆盖本节的新执行记录，也不会被回写。
+
+## 组合状态说明（2026-10-12）
+
+本文件的源码合同已合入 CHECK / EOF-count 新组合；组合所有执行仍 NOT_RUN；V1 的旧 sqlite.go
+source pin HOLD 已在本 V2 按独立完整源审作唯一 hash 窄修，guard 尚未运行。CHECK 与 EOF 的输入有限结果只绑定各自原树；下面原源码阶段
+NOT_RUN 与待审阅叙述保留历史含义。格式化和单片源码审阅已另有记录，不能代替组合
+默认闭包复审、运行、恢复/CI 或物理验收。见[当前组合状态](check-eof-integration-20261012.md)。
+
+以下保留各输入与检查点原时点记录；其中“当前”、未合入、NOT_RUN、PENDING 和 PASS 均只绑定原树，不覆盖上面的本组合状态。
+
+## 当前 EOF-count 解码与 native 准入（2026-10-12，SOURCE_ONLY / NOT_RUN）
+
+`ParseReplay` 新增第一且唯一 published `0xffffffff` 头的 bounded EOF-count
+解码；raw Header 保留 sentinel，有效 count 为 `len(Pages)`，且剩余字节必须
+恰为完整记录。新增 `CountEvidence` 明确区分 `ReplayCountUnknown = 0`、
+`ReplayCountFiniteHeaders` 和 `ReplayCountEOFUnproven`。EOFUnproven 不能证明
+没有完整记录尾部截断；checksum、完整 main extent 或 safe-append 声称都
+不能证明事务完整、writer 来源、认证或 durability。详见[内存合同](rollback-replay-memory.md)。
+
+原生恢复仍严格 finite-only。nil-default Open/Connector 在 journal-presence
+处拒绝且不解析；opt-in 的 RecoverRollback 对同一新 plan 在 ParseReplay
+成功后立即调用一次纯 `admitRecoveryPlan`，再进入 ValidateExtent / restored
+header 检查。nil、unknown/未来枚举、EOFUnproven，以及 finite 标签配 raw
+`0xffffffff` 的矛盾 plan 必须先于 Sync、写入、truncate、unlink/发布拒绝，
+通过现有 recoveryPlanError 保留 ErrRecoveryRequired/ErrUnsupported cause。
+门不产生 native authority，有限 plan 的原锁/身份/extent/header 条件仍必需。
+
+writer 仍仅写 finite counts；later sentinel、legacy page-size-zero 和
+super/master journals 不支持。此处只新增源码合同与必须拒绝门；Go、gofmt、
+compiler、source guard、tests、oracle、native 全部 NOT_RUN。下面原 P0、
+namespace、harness 与 PASS/FAIL/HOLD/UNKNOWN 记录保留各自旧树身份，不能
+转授此新切片；没有新增物理测试命令或手工执行许可。
+
 Current follow-on: the four-case public Open manual harness now exists with
 independent source/AST/selection/compile/symbol PASS; every physical case remains
 BLOCKED / NOT_RUN. Earlier implementation-missing and pending statements below
@@ -107,8 +160,8 @@ authenticate file identity or malicious content.
 
 Cold/empty journals, ambiguous empty main files, unpublished/truncated headers,
 checksum errors, duplicate pages, incomplete extents and ambiguous trailing bytes
-remain preserved errors. Super/master-journal trailers, no-sync 0xffffffff
-record counts, unspecified legacy page size, mismatched segment geometry,
+remain preserved errors. Super/master-journal trailers, native replay of EOF-count
+0xffffffff plans, unspecified legacy page size, mismatched segment geometry,
 reserved-byte pages and unsupported restored database headers remain unsupported.
 An original zero-page extent can produce a recovered empty database; the fresh
 ordinary probe then refuses that empty file, without silently creating a new one.
@@ -117,7 +170,7 @@ This is a possible recovery-success/open-error result, not a lost recovery error
 Any WAL or SHM sidecar blocks rollback recovery, including empty sidecars. No
 WAL tail is truncated, reset or reclassified by this option. Darwin/Windows
 recovery, default-on recovery, cold-journal deletion, super/master-journal
-transactions, sentinel-count interpretation and broader tail handling remain
+transactions, native sentinel-count replay and broader tail handling remain
 separate implementation/policy work. Adversarial namespace replacement is
 outside the current cooperative path guarantees.
 

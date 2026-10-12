@@ -350,7 +350,8 @@ func FuzzReplaySegmentsBytesOnly(f *testing.F) {
 		if err != nil || !reflect.DeepEqual(plan, other) {
 			t.Fatal("non-deterministic plan")
 		}
-		if plan.Header.Records > uint32(len(plan.Pages)) || len(plan.Pages) > 64 || plan.DatabaseBytes != int64(plan.Header.OriginalPages)*int64(plan.Header.PageSize) {
+		checkReplayCountEvidence(t, data, plan)
+		if len(plan.Pages) > 64 || plan.DatabaseBytes != int64(plan.Header.OriginalPages)*int64(plan.Header.PageSize) {
 			t.Fatal("invalid first header, cumulative count or extent")
 		}
 		var retained uint64

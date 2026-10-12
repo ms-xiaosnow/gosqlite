@@ -69,6 +69,8 @@ type CreateTable struct {
 	Columns     []ColumnDef
 	// UniqueConstraints retains declaration order, including duplicate clauses.
 	UniqueConstraints []UniqueConstraint
+	// CheckConstraints preserves every declaration in source order.
+	CheckConstraints []CheckConstraint
 }
 
 func (*CreateTable) statement() {}
@@ -78,6 +80,17 @@ func (*CreateTable) statement() {}
 type UniqueConstraint struct {
 	Name    string
 	Columns []string
+}
+
+// CheckConstraint retains the unfurled source tree for admission. Execution
+// compiles a separate immutable tree only after every source reference is bound.
+// Text is a substring of Base.SQL, not a separately copied schema string.
+type CheckConstraint struct {
+	Named      bool
+	Name       string
+	Text       string
+	Start, End int
+	Expr       Expr
 }
 
 type ColumnDef struct {

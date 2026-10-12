@@ -256,6 +256,9 @@ func (t *Tx) insert(ctx context.Context, c *writeCatalog, stmt *sqlast.Insert, p
 		if err != nil {
 			return result, err
 		}
+		if err = tab.evaluateChecks(ctx, tab.checks, rowid, values, ErrConstraint); err != nil {
+			return result, err
+		}
 		if err = t.checkUniqueIndexes(ctx, tab, rowid, values, 0, false); err != nil {
 			return result, err
 		}
@@ -356,6 +359,10 @@ func (t *Tx) update(ctx context.Context, c *writeCatalog, stmt *sqlast.Update, p
 	if err != nil {
 		return result, err
 	}
+	checks, err := tab.selectChecks(ctx, targets)
+	if err != nil {
+		return result, err
+	}
 	result.started = true
 	if err := t.storage.PromoteWrite(ctx); err != nil {
 		return result, err
@@ -402,6 +409,9 @@ func (t *Tx) update(ctx context.Context, c *writeCatalog, stmt *sqlast.Update, p
 		}
 		values, err = tab.constrain(newID, values)
 		if err != nil {
+			return result, err
+		}
+		if err = tab.evaluateChecks(ctx, checks, newID, values, ErrConstraint); err != nil {
 			return result, err
 		}
 		if newID != oldID {

@@ -1,5 +1,28 @@
 # gosqlite 中文手工验收操作手册
 
+## CHECK / EOF 检查点：完整正常门已通过（2026-10-12 07:22 UTC）
+
+冻结运行树 `e06f35a022536a8ebd157731ee9a860521e70eb0` 于 **07:22:18 UTC**
+自然完成 **26 门 / 28 次 Go 调用 PASS**，session 80563 exit 0，lease RELEASED。
+ordinary/race 各 **8,948 named PASS / 7 个明确 SKIP**，完整 pinned oracle
+**10,687 PASS / 0 named SKIP**。本副本只增加状态文档，运行源码与该冻结树一致；
+本副本的新提交、bundle、精确恢复运行及对应 CI 均 **PENDING**。
+
+CHECK 仅资格[已记录的有界 scalar 子集](check-constraints.md#精确-partial-profile)。
+EOF-count 仍仅为 decode-only、EOFUnproven；native owner 在写入/Sync 前继续
+finite-only fail-closed，未开放 EOF 恢复。外平台只有编译/符号检查，原生手工、
+物理持久性/恢复、安全及 M3/M8/M10 未验收。后续 Darwin/Windows backend 和
+真实只读媒体 harness 未纳入；其 source-only/HOLD 不被本次 PASS 覆盖。
+
+已发布基点 `e092f0d4623cb243eec6053a4b3db7eef598542f` 的 bundle、精确恢复
+26 门及 CI 38209370406 两项 SUCCESS 已另行闭合，只资格该基点。
+[本检查点中文报告、精确收据与未完成项](evidence/check-eof-checkpoint-20261012.md)。
+
+从下一节起保留各阶段原文；旧“当前”、SOURCE_ONLY、NOT_RUN、PENDING 与
+FAIL/HOLD/UNKNOWN 均只指原时点和原树，不能覆盖本节的新执行记录，也不会被回写。
+
+本次未执行下方手工命令，也未改变任何命令块、参数、tag/env 双门或人工验收范围。
+
 ## 当前状态入口（2026-10-12）
 
 本文件旧段落保留各自写作时点的源码、FAIL/HOLD/UNKNOWN 与 NOT_RUN；其中“当前”“缺失”“待合入”或 PENDING 不能覆盖[当前源码/证据矩阵](current-status-20261012.md)。已保存 main8bc 的发布、精确恢复与 CI 已闭合；本次 LEFT/inspect/Darwin/Connector/automatic UNIQUE 组合仅 SOURCE_ONLY；前序 Rows pin 已修正，新增 sqlite.go 的 WAL-tail 完整源 pin 经独立完整 ownership 复审在本后继窄修，automatic UNIQUE 原 oracle FAIL 及 d79 HOLD 保留，已接入独立审阅的空结果表头修复，组合运行仍全部 NOT_RUN。输入切片的有限成功不转授本组合，原生手工/物理门不变。

@@ -82,7 +82,7 @@ var walPublicationFrozenSources = map[string]string{
 // 白名单不能证明这些性质。此表只由完整合同检查读取，惰性片段检查仍可
 // 使用独立的正反例。任何边界字节变化都必须先重新独立审阅。
 var walPublicationProductionBoundaries = map[string]string{
-	"sqlite/sqlite.go": "0ea98f4f06300a819107dd2229dee9a2964142e4542bb2e582488749e056bf03",
+	"sqlite/sqlite.go": "0e34c8d0e8a4bf537cb464d544e4dedde50ab04b19e1fbcb426fcca1931ecc6e",
 	"driver/driver.go": "5f6df17c06316ac5090b935c0c6cd48cb730e00885e43cc87ce26d8b6efde03d",
 	"internal/pager/session.go": "ed07757c219ecc243f090a05ae96535005d1519d8ddbb370389000119f874b5a",
 	"internal/pager/wal.go": "48128a32116dbec6f5412ebc78ce72a9c740e3ff10153f635f1b1285463a9104",

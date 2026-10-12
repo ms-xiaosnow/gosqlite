@@ -36,7 +36,7 @@ type RecoveryResult struct {
 // adversarial namespace replacement is outside this operation's guarantees.
 //
 // Sequence: SHARED; query RESERVED; inspect hot candidate; PENDING→EXCLUSIVE
-// (never RESERVED); recheck; validate the complete bounded replay plan and
+// (never RESERVED); recheck; admit only finite-count bounded replay plans and
 // restored header; sync journal and directory; restore pages; truncate; sync
 // database; close/unlink journal; sync directory; close/unlock database.
 // All error paths before unlink preserve the journal. After unlink, a sync or
@@ -173,6 +173,9 @@ func RecoverRollback(ctx context.Context, path string, opts RecoveryOptions) (re
 	}
 	plan, err := journal.ParseReplay(data, limits)
 	if err != nil {
+		return result, recoveryPlanError(err)
+	}
+	if err = admitRecoveryPlan(plan); err != nil {
 		return result, recoveryPlanError(err)
 	}
 	if err = plan.ValidateExtent(info.Size()); err != nil {
