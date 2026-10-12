@@ -14,6 +14,8 @@ import (
 	"strings"
 )
 
+// Exact SQL and single-page recovery exceptions, plus the narrow scalar Signal
+// forwarding, require independent full-function and whole-main source review.
 func inspectSource(path string, raw []byte) ([]string, error) {
 	first := strings.SplitN(string(raw), "\n", 2)[0]
 	// Exact approved constraints only: a prefix could hide "manual_namespace || linux".
@@ -90,13 +92,16 @@ func inspectSource(path string, raw []byte) ([]string, error) {
 	report := func(pos token.Pos, name string) {
 		findings = append(findings, fmt.Sprintf("%s: restricted reference %s requires separate manual source and review", set.Position(pos), name))
 	}
+	parents := oracleParents(file)
 	ast.Inspect(file, func(n ast.Node) bool {
 		// Includes function values and opt-in field keys, not only direct calls.
 		// Recovery-enabled public opens are source/model-only in ordinary suites.
 		if id, ok := n.(*ast.Ident); ok {
 			switch id.Name {
 			case "RecoverRollback", "recoverRollbackOpen", "RollbackRecovery":
-				report(id.Pos(), id.Name)
+				if !rollbackFaultSQLRecoveryReference(path, id, parents, set, raw) && !rollbackFaultRecoveryAllowedRecover(path, id, parents, set, raw) {
+					report(id.Pos(), id.Name)
+				}
 			}
 		}
 		if literal, ok := n.(*ast.CompositeLit); ok && len(literal.Elts) != 0 {
@@ -135,7 +140,8 @@ func inspectSource(path string, raw []byte) ([]string, error) {
 		case "Kill", "Signal", "Truncate", "Chmod", "RecoverRollback", "Rename", "rename":
 			prohibited = true
 		}
-		if prohibited {
+		if prohibited && !rollbackFaultSQLRecoveryReference(path, sel.Sel, parents, set, raw) &&
+			!(path == "internal/testkit/rollbackrestart/contract_test.go" && sel.Sel.Name == "Signal" && restartGuardSignalField(path, sel, parents, set, raw, file)) {
 			report(sel.Pos(), sel.Sel.Name)
 		}
 		return true
@@ -185,6 +191,21 @@ func main() {
 			return err
 		}
 		findings = append(findings, rollbackFault...)
+		rollbackSQL, rollbackSQLErr := inspectRollbackFaultSQLSource(path, raw)
+		if rollbackSQLErr != nil {
+			return rollbackSQLErr
+		}
+		findings = append(findings, rollbackSQL...)
+		restart, restartErr := inspectRollbackRestartSource(path, raw)
+		if restartErr != nil {
+			return restartErr
+		}
+		findings = append(findings, restart...)
+		recovery, err := inspectRollbackFaultRecoverySource(path, raw)
+		if err != nil {
+			return err
+		}
+		findings = append(findings, recovery...)
 		readonlyManual, err := inspectReadOnlyWALManualSource(path, raw)
 		if err != nil {
 			return err
@@ -247,6 +268,33 @@ func main() {
 		failed = true
 	}
 	for _, finding := range rollbackFaultContracts {
+		fmt.Fprintln(os.Stderr, finding)
+		failed = true
+	}
+	rollbackSQLContracts, rollbackSQLContractErr := inspectRollbackFaultSQLContracts(".")
+	if rollbackSQLContractErr != nil {
+		fmt.Fprintln(os.Stderr, rollbackSQLContractErr)
+		failed = true
+	}
+	for _, finding := range rollbackSQLContracts {
+		fmt.Fprintln(os.Stderr, finding)
+		failed = true
+	}
+	restartContracts, restartContractErr := inspectRollbackRestartContracts(".")
+	if restartContractErr != nil {
+		fmt.Fprintln(os.Stderr, restartContractErr)
+		failed = true
+	}
+	for _, finding := range restartContracts {
+		fmt.Fprintln(os.Stderr, finding)
+		failed = true
+	}
+	rollbackRecoveryContracts, rollbackRecoveryErr := inspectRollbackFaultRecoveryContracts(".")
+	if rollbackRecoveryErr != nil {
+		fmt.Fprintln(os.Stderr, rollbackRecoveryErr)
+		failed = true
+	}
+	for _, finding := range rollbackRecoveryContracts {
 		fmt.Fprintln(os.Stderr, finding)
 		failed = true
 	}

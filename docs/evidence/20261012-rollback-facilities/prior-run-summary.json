@@ -1,0 +1,830 @@
+{
+  "source_tree": "0ef6d751edb19f55cf3cd46314a2d1f6bd597c6e",
+  "session_id": 78992,
+  "status": "FAIL",
+  "natural_exit_code": 1,
+  "ordinary_named_counts": {
+    "pass": 10925,
+    "fail": 1,
+    "skip": 7
+  },
+  "ordinary_named_total": 10933,
+  "all_named_run_terminal_pairs_exact_once": true,
+  "ordinary_raw_log": {
+    "archive_index": "archives.json",
+    "archive_library_file_id": "libfile_b0911b5fc444819189ce4fda5a1d7060",
+    "member_suffix": "recovery-three-facility-full-normal-verification-v1/02_ordinary.stdout",
+    "bytes": 11231991,
+    "sha256": "f7f9e80f23cc736abefdb6fb309a90f0c108a7ab6a2a72d942ef63f4ec1eed45"
+  },
+  "sole_failure_excerpt": {
+    "file": "sole-failed-test-events.jsonl",
+    "sha256": "d2c94b946ed8ed6fe0392cfc7c7b37aeba45aa47ae042d3a1401e1208e36f94a",
+    "original_line_numbers": [
+      27429,
+      27430,
+      27431,
+      27432,
+      27433
+    ],
+    "scope": "All exact original JSON events naming the sole failed test; no other ordinary output copied."
+  },
+  "package_counts": {
+    "benchmarks/grams": {
+      "pass": 4
+    },
+    "benchmarks/transactions": {
+      "pass": 30
+    },
+    "cmd/gosqlite": {
+      "pass": 169
+    },
+    "driver": {
+      "pass": 136
+    },
+    "encryption": {
+      "pass": 45
+    },
+    "examples/ann": {
+      "pass": 1
+    },
+    "examples/bit-rerank": {
+      "pass": 1
+    },
+    "examples/encrypted-shared": {
+      "pass": 1
+    },
+    "examples/encrypted-wal": {
+      "pass": 1
+    },
+    "examples/half-rerank": {
+      "pass": 1
+    },
+    "examples/internal/fixturecleanup": {
+      "pass": 14
+    },
+    "examples/ivfflat": {
+      "pass": 1
+    },
+    "examples/migrate-pgembedding": {
+      "pass": 1
+    },
+    "examples/migration-full-table": {
+      "pass": 1
+    },
+    "examples/readonly": {
+      "pass": 21
+    },
+    "examples/sparse-exact": {
+      "pass": 8
+    },
+    "examples/typed-ann-rerank": {
+      "pass": 1
+    },
+    "examples/vector": {
+      "pass": 1
+    },
+    "examples/write": {
+      "pass": 11
+    },
+    "extension/grams13": {
+      "pass": 169
+    },
+    "extension/registry": {
+      "pass": 8
+    },
+    "extension/similarity": {
+      "pass": 40
+    },
+    "extension/vector": {
+      "pass": 483
+    },
+    "extension/vector/ann": {
+      "pass": 80
+    },
+    "internal/btree": {
+      "pass": 135
+    },
+    "internal/darwinfile": {
+      "pass": 12
+    },
+    "internal/encstore": {
+      "pass": 494
+    },
+    "internal/journal": {
+      "pass": 387
+    },
+    "internal/pager": {
+      "pass": 384
+    },
+    "internal/record": {
+      "pass": 41
+    },
+    "internal/sql": {
+      "pass": 268
+    },
+    "internal/testkit/backupmanual": {
+      "pass": 1987
+    },
+    "internal/testkit/formatupgrade": {
+      "pass": 66
+    },
+    "internal/testkit/rollbackfault": {
+      "pass": 492
+    },
+    "internal/testkit/rollbackrestart": {
+      "pass": 157
+    },
+    "internal/testoracle": {
+      "pass": 58
+    },
+    "internal/testscope": {
+      "pass": 958
+    },
+    "internal/vfs": {
+      "pass": 796,
+      "fail": 1
+    },
+    "internal/wal": {
+      "pass": 596
+    },
+    "internal/walindex": {
+      "pass": 29
+    },
+    "migration/postgres": {
+      "pass": 333
+    },
+    "sqlite": {
+      "pass": 2504,
+      "skip": 7
+    }
+  },
+  "package_terminal_events": {
+    "benchmarks/ann": {
+      "action": "skip",
+      "line": 3,
+      "time": "2026-10-12T17:26:12.802258081Z"
+    },
+    "benchmarks/grams": {
+      "action": "pass",
+      "line": 23,
+      "time": "2026-10-12T17:26:29.347424029Z"
+    },
+    "benchmarks/transactions": {
+      "action": "pass",
+      "line": 147,
+      "time": "2026-10-12T17:26:30.121418528Z"
+    },
+    "cmd/gosqlite": {
+      "action": "pass",
+      "line": 831,
+      "time": "2026-10-12T17:26:31.971302935Z"
+    },
+    "driver": {
+      "action": "pass",
+      "line": 1379,
+      "time": "2026-10-12T17:26:36.912954186Z"
+    },
+    "encryption": {
+      "action": "pass",
+      "line": 1563,
+      "time": "2026-10-12T17:26:38.257510876Z"
+    },
+    "examples/ann": {
+      "action": "pass",
+      "line": 1571,
+      "time": "2026-10-12T17:26:38.88263977Z"
+    },
+    "examples/bit-rerank": {
+      "action": "pass",
+      "line": 1579,
+      "time": "2026-10-12T17:26:39.201022561Z"
+    },
+    "examples/encrypted": {
+      "action": "skip",
+      "line": 1582,
+      "time": "2026-10-12T17:26:39.297237744Z"
+    },
+    "examples/encrypted-cli": {
+      "action": "skip",
+      "line": 1585,
+      "time": "2026-10-12T17:26:39.365437173Z"
+    },
+    "examples/encrypted-shared": {
+      "action": "pass",
+      "line": 1593,
+      "time": "2026-10-12T17:26:39.657206155Z"
+    },
+    "examples/encrypted-wal": {
+      "action": "pass",
+      "line": 1601,
+      "time": "2026-10-12T17:26:39.951142546Z"
+    },
+    "examples/grams": {
+      "action": "skip",
+      "line": 1604,
+      "time": "2026-10-12T17:26:40.014052567Z"
+    },
+    "examples/half-rerank": {
+      "action": "pass",
+      "line": 1612,
+      "time": "2026-10-12T17:26:40.305545534Z"
+    },
+    "examples/internal/fixturecleanup": {
+      "action": "pass",
+      "line": 1672,
+      "time": "2026-10-12T17:26:40.535016266Z"
+    },
+    "examples/ivfflat": {
+      "action": "pass",
+      "line": 1680,
+      "time": "2026-10-12T17:26:40.979329061Z"
+    },
+    "examples/migrate-pgembedding": {
+      "action": "pass",
+      "line": 1688,
+      "time": "2026-10-12T17:26:41.274956301Z"
+    },
+    "examples/migration-full-table": {
+      "action": "pass",
+      "line": 1696,
+      "time": "2026-10-12T17:26:41.504038581Z"
+    },
+    "examples/migration-transition": {
+      "action": "skip",
+      "line": 1699,
+      "time": "2026-10-12T17:26:41.555521414Z"
+    },
+    "examples/native-check": {
+      "action": "skip",
+      "line": 1702,
+      "time": "2026-10-12T17:26:41.620170306Z"
+    },
+    "examples/pgembedding-import": {
+      "action": "skip",
+      "line": 1705,
+      "time": "2026-10-12T17:26:41.694249723Z"
+    },
+    "examples/readonly": {
+      "action": "pass",
+      "line": 1794,
+      "time": "2026-10-12T17:26:42.046342Z"
+    },
+    "examples/similarity": {
+      "action": "skip",
+      "line": 1797,
+      "time": "2026-10-12T17:26:42.105270603Z"
+    },
+    "examples/sparse-exact": {
+      "action": "pass",
+      "line": 1833,
+      "time": "2026-10-12T17:26:42.426086566Z"
+    },
+    "examples/typed-ann-rerank": {
+      "action": "pass",
+      "line": 1841,
+      "time": "2026-10-12T17:26:43.009525064Z"
+    },
+    "examples/vector": {
+      "action": "pass",
+      "line": 1849,
+      "time": "2026-10-12T17:26:43.318258158Z"
+    },
+    "examples/wal": {
+      "action": "skip",
+      "line": 1852,
+      "time": "2026-10-12T17:26:43.36687575Z"
+    },
+    "examples/write": {
+      "action": "pass",
+      "line": 1900,
+      "time": "2026-10-12T17:26:43.689296669Z"
+    },
+    "extension/grams13": {
+      "action": "pass",
+      "line": 2580,
+      "time": "2026-10-12T17:26:44.570309506Z"
+    },
+    "extension/registry": {
+      "action": "pass",
+      "line": 2616,
+      "time": "2026-10-12T17:26:45.248607031Z"
+    },
+    "extension/similarity": {
+      "action": "pass",
+      "line": 2780,
+      "time": "2026-10-12T17:26:46.774264861Z"
+    },
+    "extension/vector": {
+      "action": "pass",
+      "line": 4728,
+      "time": "2026-10-12T17:26:47.859978802Z"
+    },
+    "extension/vector/ann": {
+      "action": "pass",
+      "line": 5073,
+      "time": "2026-10-12T17:26:54.004385538Z"
+    },
+    "internal/btree": {
+      "action": "pass",
+      "line": 5617,
+      "time": "2026-10-12T17:27:05.404052828Z"
+    },
+    "internal/buildinfo": {
+      "action": "skip",
+      "line": 5620,
+      "time": "2026-10-12T17:27:05.40459127Z"
+    },
+    "internal/darwinfile": {
+      "action": "pass",
+      "line": 5672,
+      "time": "2026-10-12T17:27:05.711256688Z"
+    },
+    "internal/encstore": {
+      "action": "pass",
+      "line": 7652,
+      "time": "2026-10-12T17:27:07.132401158Z"
+    },
+    "internal/journal": {
+      "action": "pass",
+      "line": 9204,
+      "time": "2026-10-12T17:27:07.776930159Z"
+    },
+    "internal/pager": {
+      "action": "pass",
+      "line": 10744,
+      "time": "2026-10-12T17:27:09.234487631Z"
+    },
+    "internal/record": {
+      "action": "pass",
+      "line": 10912,
+      "time": "2026-10-12T17:27:09.475849997Z"
+    },
+    "internal/sql": {
+      "action": "pass",
+      "line": 11988,
+      "time": "2026-10-12T17:27:11.008780716Z"
+    },
+    "internal/testkit/backupmanual": {
+      "action": "pass",
+      "line": 19940,
+      "time": "2026-10-12T17:27:11.817085333Z"
+    },
+    "internal/testkit/fileview": {
+      "action": "skip",
+      "line": 19943,
+      "time": "2026-10-12T17:27:11.817685966Z"
+    },
+    "internal/testkit/formatupgrade": {
+      "action": "pass",
+      "line": 20211,
+      "time": "2026-10-12T17:27:12.193219136Z"
+    },
+    "internal/testkit/rollbackfault": {
+      "action": "pass",
+      "line": 22183,
+      "time": "2026-10-12T17:27:13.311410208Z"
+    },
+    "internal/testkit/rollbackrestart": {
+      "action": "pass",
+      "line": 22815,
+      "time": "2026-10-12T17:27:14.054918882Z"
+    },
+    "internal/testoracle": {
+      "action": "pass",
+      "line": 23051,
+      "time": "2026-10-12T17:27:14.281877686Z"
+    },
+    "internal/testscope": {
+      "action": "pass",
+      "line": 26887,
+      "time": "2026-10-12T17:27:33.747002639Z"
+    },
+    "internal/vfs": {
+      "action": "fail",
+      "line": 30080,
+      "time": "2026-10-12T17:27:37.06309313Z"
+    },
+    "internal/wal": {
+      "action": "pass",
+      "line": 32469,
+      "time": "2026-10-12T17:27:42.553134851Z"
+    },
+    "internal/walindex": {
+      "action": "pass",
+      "line": 32589,
+      "time": "2026-10-12T17:27:43.10123434Z"
+    },
+    "migration/postgres": {
+      "action": "pass",
+      "line": 33927,
+      "time": "2026-10-12T17:27:54.192116184Z"
+    },
+    "sqlite": {
+      "action": "pass",
+      "line": 44075,
+      "time": "2026-10-12T17:29:27.976211416Z"
+    }
+  },
+  "stages": [
+    {
+      "stage": "01_guard",
+      "status": "PASS",
+      "new_launch": true,
+      "result_pin": {
+        "path": "recovery-three-facility-full-normal-verification-v1/01_guard.result.json",
+        "bytes": 1052,
+        "sha256": "398a4a3df4263809c53d6773f69cc27d4dd35b6501567008ddd30b06ff6d7c51"
+      },
+      "exit_code": 0,
+      "start_utc": "2026-10-12T17:24:55.869009+00:00",
+      "end_utc": "2026-10-12T17:25:02.795753+00:00",
+      "identity_status": "PASS",
+      "resource_failure_ever_latched": false,
+      "stdout": {
+        "bytes": 138,
+        "sha256": "ba0cb4aff7a9c991c087485ff3499bf86b9b57f990c78b979c1f08ffc42a3505",
+        "git_blob": "f395108ba451da2480127f5445618ee4347daf3d",
+        "git_mode": "100644",
+        "posix_mode": "0o644"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "git_mode": "100644",
+        "posix_mode": "0o644"
+      }
+    },
+    {
+      "stage": "00a_repaired_cli",
+      "status": "PASS",
+      "new_launch": true,
+      "result_pin": {
+        "path": "recovery-three-facility-full-normal-verification-v1/00a_repaired_cli.result.json",
+        "bytes": 1722,
+        "sha256": "ab0529edb0380acadcfb5051c58ef0a996a1e0693a5ba7762d9dedb5ffe03396"
+      },
+      "exit_code": 0,
+      "start_utc": "2026-10-12T17:25:09.917848+00:00",
+      "end_utc": "2026-10-12T17:25:18.831376+00:00",
+      "identity_status": "PASS",
+      "resource_failure_ever_latched": false,
+      "stdout": {
+        "bytes": 24969,
+        "sha256": "aba81ea0bc333bef4cede94c8db244b31b1c4dcb9628dee699d43b1d70ceed97",
+        "git_blob": "7a567e15b11edb00184e82974fc10ddb116a8eb9",
+        "git_mode": "100644",
+        "posix_mode": "0o644"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "git_mode": "100644",
+        "posix_mode": "0o644"
+      },
+      "named_counts": {
+        "pass": 26
+      }
+    },
+    {
+      "stage": "00b_repaired_pager",
+      "status": "PASS",
+      "new_launch": true,
+      "result_pin": {
+        "path": "recovery-three-facility-full-normal-verification-v1/00b_repaired_pager.result.json",
+        "bytes": 1727,
+        "sha256": "1f8dd63eb8ec287f57a1b4b7e5cb6db9ff23b14635f67fb9114bf3a51f979cfe"
+      },
+      "exit_code": 0,
+      "start_utc": "2026-10-12T17:25:25.615848+00:00",
+      "end_utc": "2026-10-12T17:25:28.142629+00:00",
+      "identity_status": "PASS",
+      "resource_failure_ever_latched": false,
+      "stdout": {
+        "bytes": 31932,
+        "sha256": "35fd87827e0c599f35038de59b8cbd90f486cc8e711444917d1a422444a46143",
+        "git_blob": "f423d7e65a40713fb5822a254cb268be40925a13",
+        "git_mode": "100644",
+        "posix_mode": "0o644"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "git_mode": "100644",
+        "posix_mode": "0o644"
+      },
+      "named_counts": {
+        "pass": 31
+      }
+    },
+    {
+      "stage": "00c_repaired_range",
+      "status": "PASS",
+      "new_launch": true,
+      "result_pin": {
+        "path": "recovery-three-facility-full-normal-verification-v1/00c_repaired_range.result.json",
+        "bytes": 1724,
+        "sha256": "c4555e90b63599e6dab84902818ad65c3b4f8d4606d6337d4e6d9d5eb33f07fa"
+      },
+      "exit_code": 0,
+      "start_utc": "2026-10-12T17:25:35.175179+00:00",
+      "end_utc": "2026-10-12T17:25:41.757223+00:00",
+      "identity_status": "PASS",
+      "resource_failure_ever_latched": false,
+      "stdout": {
+        "bytes": 9473,
+        "sha256": "9c3daf3d8c46d1f5aeccb7069b4669a8a8eab4be22c35e23d0a6217845674df0",
+        "git_blob": "637ec7561a61d0d7d41db61e4efb2d0f0d1e6bb9",
+        "git_mode": "100644",
+        "posix_mode": "0o644"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "git_mode": "100644",
+        "posix_mode": "0o644"
+      },
+      "named_counts": {
+        "pass": 3
+      }
+    },
+    {
+      "stage": "00d_repaired_ipk_oracle",
+      "status": "PASS",
+      "new_launch": true,
+      "result_pin": {
+        "path": "recovery-three-facility-full-normal-verification-v1/00d_repaired_ipk_oracle.result.json",
+        "bytes": 1736,
+        "sha256": "54ebc5a53d62c11a351a54c860bdc43f06564b4ffcaf1d169330743486dcdacd"
+      },
+      "exit_code": 0,
+      "start_utc": "2026-10-12T17:25:48.497538+00:00",
+      "end_utc": "2026-10-12T17:25:54.941003+00:00",
+      "identity_status": "PASS",
+      "resource_failure_ever_latched": false,
+      "stdout": {
+        "bytes": 845636,
+        "sha256": "c7fc59969eca7d9fe9a2e31fb7eecf7e1c18f9481812439e9229662eeee4ba2d",
+        "git_blob": "54fb88359b257d46ea11db22f2dfda54bb4f4b31",
+        "git_mode": "100644",
+        "posix_mode": "0o644"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "git_mode": "100644",
+        "posix_mode": "0o644"
+      },
+      "named_counts": {
+        "pass": 9
+      }
+    },
+    {
+      "stage": "01a_livewriter_readonly_oracle",
+      "status": "PASS",
+      "new_launch": true,
+      "result_pin": {
+        "path": "recovery-three-facility-full-normal-verification-v1/01a_livewriter_readonly_oracle.result.json",
+        "bytes": 1749,
+        "sha256": "0c597869f6d2a5f634784e4e8692b379a8db3c3cd81517952c06fec1cc2e3c5e"
+      },
+      "exit_code": 0,
+      "start_utc": "2026-10-12T17:26:02.541783+00:00",
+      "end_utc": "2026-10-12T17:26:04.023467+00:00",
+      "identity_status": "PASS",
+      "resource_failure_ever_latched": false,
+      "stdout": {
+        "bytes": 9246,
+        "sha256": "726b21f8b60e82499ca828df9106eef3572750dd8010310f08bce7db8144c753",
+        "git_blob": "3e1907ed176dcab87ddfed5d3883c6b5f789ae43",
+        "git_mode": "100644",
+        "posix_mode": "0o644"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "git_mode": "100644",
+        "posix_mode": "0o644"
+      },
+      "named_counts": {
+        "pass": 7
+      }
+    },
+    {
+      "stage": "02_ordinary",
+      "status": "FAIL_TEST_VALIDATION",
+      "new_launch": true,
+      "result_pin": {
+        "path": "recovery-three-facility-full-normal-verification-v1/02_ordinary.result.json",
+        "bytes": 1407,
+        "sha256": "15694127e1dc23a839c37f17bb0618c2ff93267806031c259364531b859a55a7"
+      },
+      "exit_code": 1,
+      "start_utc": "2026-10-12T17:26:11.506290+00:00",
+      "end_utc": "2026-10-12T17:29:28.011817+00:00",
+      "identity_status": "PASS",
+      "resource_failure_ever_latched": false,
+      "stdout": {
+        "bytes": 11231991,
+        "sha256": "f7f9e80f23cc736abefdb6fb309a90f0c108a7ab6a2a72d942ef63f4ec1eed45",
+        "git_blob": "7645d2e6b1f299f8b25577a2423ac70995e6e7c3",
+        "git_mode": "100644",
+        "posix_mode": "0o644"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "git_mode": "100644",
+        "posix_mode": "0o644"
+      },
+      "named_counts": {
+        "pass": 10925,
+        "fail": 1,
+        "skip": 7
+      }
+    },
+    {
+      "stage": "03_vet",
+      "status": "NOT_RUN",
+      "new_launch": false
+    },
+    {
+      "stage": "04_build_nocgo",
+      "status": "NOT_RUN",
+      "new_launch": false
+    },
+    {
+      "stage": "05_race",
+      "status": "NOT_RUN",
+      "new_launch": false
+    },
+    {
+      "stage": "06_compile_linux_amd64",
+      "status": "NOT_RUN",
+      "new_launch": false
+    },
+    {
+      "stage": "07_compile_linux_arm64",
+      "status": "NOT_RUN",
+      "new_launch": false
+    },
+    {
+      "stage": "08_compile_darwin_amd64",
+      "status": "NOT_RUN",
+      "new_launch": false
+    },
+    {
+      "stage": "09_compile_darwin_arm64",
+      "status": "NOT_RUN",
+      "new_launch": false
+    },
+    {
+      "stage": "10_compile_windows_amd64",
+      "status": "NOT_RUN",
+      "new_launch": false
+    },
+    {
+      "stage": "11_modules_verify",
+      "status": "NOT_RUN",
+      "new_launch": false
+    },
+    {
+      "stage": "12_whole_module_nontest_closure",
+      "status": "NOT_RUN",
+      "new_launch": false
+    },
+    {
+      "stage": "13_shipping_cli_library_closure",
+      "status": "NOT_RUN",
+      "new_launch": false
+    },
+    {
+      "stage": "14_complete_pinned_oracle_script",
+      "status": "NOT_RUN",
+      "new_launch": false
+    },
+    {
+      "stage": "15_limit_phase_conversion_oracle_race",
+      "status": "NOT_RUN",
+      "new_launch": false
+    },
+    {
+      "stage": "16_compile_darwin_amd64_encstore_tests_only",
+      "status": "NOT_RUN",
+      "new_launch": false
+    },
+    {
+      "stage": "17_inspect_darwin_amd64_encstore_symbols",
+      "status": "NOT_RUN",
+      "new_launch": false
+    },
+    {
+      "stage": "18_compile_darwin_arm64_encstore_tests_only",
+      "status": "NOT_RUN",
+      "new_launch": false
+    },
+    {
+      "stage": "19_inspect_darwin_arm64_encstore_symbols",
+      "status": "NOT_RUN",
+      "new_launch": false
+    },
+    {
+      "stage": "20_compile_windows_amd64_encstore_tests_only",
+      "status": "NOT_RUN",
+      "new_launch": false
+    },
+    {
+      "stage": "21_inspect_windows_amd64_encstore_symbols",
+      "status": "NOT_RUN",
+      "new_launch": false
+    }
+  ],
+  "terminal_receipt": {
+    "session_id": 78992,
+    "exit_code": 1,
+    "natural_completion": true,
+    "forced_termination": false,
+    "tool": "write_stdin",
+    "tool_response": {
+      "chunk_id": "7446c4",
+      "wall_time_seconds": 4.143e-05,
+      "exit_code": 1,
+      "original_token_count": 0,
+      "output": ""
+    },
+    "utc": "2026-10-12T17:30:45.120874+00:00"
+  },
+  "lease": {
+    "utc": "2026-10-12T17:29:36.969399+00:00",
+    "status": "RELEASED",
+    "terminal": "FAIL_TEST_OR_IDENTITY",
+    "stage": "02_ordinary",
+    "child_owned": false,
+    "forced_termination_or_retry": false,
+    "latched_conditions": {}
+  },
+  "earlier_failure_history": [
+    {
+      "session": 43377,
+      "result": "FAIL",
+      "scope": "recovery guard finite run",
+      "evidence_reference": "recovery-guard-failure-archive-proof-v1"
+    },
+    {
+      "session": 65480,
+      "tree": "3ff9d6d155908f6542389505169f3148bff6a062",
+      "result": "FAIL",
+      "scope": "07_all_guard_67_roots; separate SQL319/A5 157 named PASS retained",
+      "evidence_reference": "shared-sql-restart-finite-verification-v1/STOP.json",
+      "evidence_pin": {
+        "path": "shared-sql-restart-finite-verification-v1/STOP.json",
+        "bytes": 96810,
+        "sha256": "212d9b9eacfcc1ec24062416b16a966fbcf8ef571104aa829454ca43b1f84c7c"
+      }
+    },
+    {
+      "session": 88359,
+      "tree": "c86801a00f1a6e739c451a041674b9b0a1b8839b",
+      "result": "FAIL",
+      "scope": "07_all_guard_revised_roots",
+      "evidence_reference": "restart-guard-continuation-verification-v1/STOP.json",
+      "evidence_pin": {
+        "path": "restart-guard-continuation-verification-v1/STOP.json",
+        "bytes": 5288,
+        "sha256": "19366ad67ab205d3c5fdaef5cab4100f4e7b3310d378ac3e36fe093b572b6c2e"
+      }
+    },
+    {
+      "session": 89823,
+      "tree": "26fec15e271f79bdf742aaf698a8462dcc371b5d",
+      "result": "FAIL",
+      "scope": "08_all_source_guard; separate 826 named guard PASS retained",
+      "evidence_reference": "restart-signal-guard-continuation-verification-v1/STOP.json",
+      "evidence_pin": {
+        "path": "restart-signal-guard-continuation-verification-v1/STOP.json",
+        "bytes": 151756,
+        "sha256": "51e489ef978e439f30498e3ca1e1f1dd57c3fa9552dd9cb2797e7caba6b672bd"
+      }
+    },
+    {
+      "session": 48019,
+      "result": "FAIL",
+      "scope": "earlier readonly guard; following25 NOT_RUN",
+      "evidence_reference": "../readonly-acceptance-checkpoint-20261012.md"
+    },
+    {
+      "session": 54102,
+      "result": "UNKNOWN",
+      "scope": "old executor; no relabel or reconstruction"
+    }
+  ],
+  "manual_fault_restart_recovery": "NOT_RUN",
+  "relabeled_as_success": false
+}

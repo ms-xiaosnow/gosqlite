@@ -1,0 +1,5 @@
+{"Time":"2026-10-12T17:27:35.99168604Z","Action":"run","Package":"github.com/ms-xiaosnow/gosqlite/internal/vfs","Test":"TestMetadataOwnershipCallChainSource"}
+{"Time":"2026-10-12T17:27:35.99168858Z","Action":"output","Package":"github.com/ms-xiaosnow/gosqlite/internal/vfs","Test":"TestMetadataOwnershipCallChainSource","Output":"=== RUN   TestMetadataOwnershipCallChainSource\n","OutputType":"frame"}
+{"Time":"2026-10-12T17:27:36.0273847Z","Action":"output","Package":"github.com/ms-xiaosnow/gosqlite/internal/vfs","Test":"TestMetadataOwnershipCallChainSource","Output":"    metadata_source_test.go:66: ../pager/rollback_restart_manual_linux.go:85:131: bypasses platform-owned metadata: os.SameFile\n","OutputType":"error"}
+{"Time":"2026-10-12T17:27:36.110071642Z","Action":"output","Package":"github.com/ms-xiaosnow/gosqlite/internal/vfs","Test":"TestMetadataOwnershipCallChainSource","Output":"--- FAIL: TestMetadataOwnershipCallChainSource (0.12s)\n","OutputType":"frame"}
+{"Time":"2026-10-12T17:27:36.110252401Z","Action":"fail","Package":"github.com/ms-xiaosnow/gosqlite/internal/vfs","Test":"TestMetadataOwnershipCallChainSource","Elapsed":0.12}

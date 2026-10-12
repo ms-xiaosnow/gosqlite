@@ -1,3 +1,23 @@
+# 三设施检查点当前验证结果
+
+受测修正树`51f63a56c22ab6396d5b542a1f0655a82dad4cd5`已取得实际
+race **10928 PASS／7 SKIP**，以及source guard、metadata根、testscope、vet、build结果。
+44909在race自然process0后按缩减验证范围暂停，记录器exit2；不是测试FAIL，也不是22门PASS。
+后续2054的四平台支持包编译、whole依赖清单、双manual-tag compile／nm共7项自然PASS。
+
+ordinary为明确组合覆盖：新metadata1＋testscope960＋复用9967 PASS／7 SKIP。
+oracle采用main750未变部分、当前guard／source根和原78992模型的组件复用，未新跑完整脚本。
+旧0ef／78992的真实FAIL、补充v1启动前KeyError以及全部历史FAIL／UNKNOWN均保留。
+
+[私有仓库有界工程证据](evidence/20261012-rollback-facilities/README.zh.md)提供精确命令、
+原始失败、工具/source身份及复用映射。新提交、bundle、必要恢复smoke与CI仍PENDING。
+manual映像未执行，真实fault／recovery／process-exit NOT_RUN，M3/M8/M10未完成。
+[有限余缺与M9最低范围](testing/remaining-goal-boundary-20261012-zh.md)不按百分比或工时推算。
+
+## 历史原文
+
+以下冻结源原文逐字保留；旧FAIL/HOLD/UNKNOWN不回写，v1至v3草稿另存。
+
 # 只读验收 V3 检查点完整正常门终态
 
 ## 2026 年 10 月 12 日 13 时 31 分 UTC 最新结果

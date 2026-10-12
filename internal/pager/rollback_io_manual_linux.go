@@ -196,6 +196,12 @@ func rollbackFaultPoint(point rollbackIOPoint) (rollbackfault.Point, int) {
 // Called under the original Tx mutex. Its private mutex is released before
 // every original operation; registry admission is never held during I/O.
 func rollbackFaultBefore(t *Tx, point rollbackIOPoint, f *vfs.File, path string, off int64, length int) rollbackFaultTicket {
+	ticket := rollbackFaultBeforeCore(t, point, f, path, off, length)
+	rollbackRestartBefore(ticket)
+	return ticket
+}
+
+func rollbackFaultBeforeCore(t *Tx, point rollbackIOPoint, f *vfs.File, path string, off int64, length int) rollbackFaultTicket {
 	s := rollbackFaultFor(t)
 	if s == nil {
 		return rollbackFaultTicket{action: rollbackfault.Pass}
@@ -254,6 +260,11 @@ func (s *rollbackFaultScope) diagnostic(err error) uint64 {
 }
 
 func rollbackFaultAfter(ticket rollbackFaultTicket, executed bool, nativeN int, nativeErr error, returnedN int, returnedErr error, normalizedErr error, effect rollbackfault.SideEffect) {
+	rollbackFaultAfterCore(ticket, executed, nativeN, nativeErr, returnedN, returnedErr, normalizedErr, effect)
+	rollbackRestartAfter(ticket)
+}
+
+func rollbackFaultAfterCore(ticket rollbackFaultTicket, executed bool, nativeN int, nativeErr error, returnedN int, returnedErr error, normalizedErr error, effect rollbackfault.SideEffect) {
 	s := ticket.scope
 	if s == nil {
 		return

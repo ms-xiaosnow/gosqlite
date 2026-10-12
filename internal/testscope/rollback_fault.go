@@ -33,7 +33,7 @@ var rollbackFaultPins = map[string]string{
 	rollbackFaultCommit:       "9ae36612afac5cfae48bd972e6162c94722bcf7355ea462b4e15289b5188aa32",
 	rollbackFaultPoints:       "e9f4349eac27fe2f2ee6726edeb3cd26e3f5e851e75ae342f2f3a7995f038905",
 	rollbackFaultDefault:      "f1d45680aa93940d9d181f01ecc40f5e88c258970c940a28b4f19df712182bd1",
-	rollbackFaultManual:       "7b918b0cebc53e228884a1c264600283e79b209562fe3f4d889e64e19114599b",
+	rollbackFaultManual:       "4f26bfec0de7b3c22f056ec374a4c453691f5cd2a5ee5e62116f2f8c66b5e498",
 	rollbackFaultWriterTest:   "a7695da7b49488be37a98b239b1b31d59bc406455d0b3300709081fd96ae49c4",
 	rollbackFaultContract:     "dc7ec44ec7be3f444f4e7501c84d6875a1a0e9b4d46e06e5586b2e5d225828ed",
 	rollbackFaultContractTest: "8c43b22c2fbfdc6d4aef423abd44956196a2b15e223a8f56ef00065c8d77c362",
@@ -86,7 +86,7 @@ func rollbackFaultBridge(name string) bool {
 
 func rollbackFaultManualPrivate(name string) bool {
 	switch name {
-	case "rollbackFaultRegistry", "rollbackFaultScope", "rollbackFaultTicket", "rollbackFaultReport", "rollbackFaultWriter", "rollbackFaultFor", "rollbackFaultPoint", "rollbackFaultBefore", "rollbackFaultAfter", "errRollbackFaultGate", "errRollbackFaultScope", "errRollbackFaultInjected":
+	case "rollbackFaultRegistry", "rollbackFaultScope", "rollbackFaultTicket", "rollbackFaultReport", "rollbackFaultWriter", "rollbackFaultFor", "rollbackFaultPoint", "rollbackFaultBefore", "rollbackFaultAfter", "rollbackFaultBeforeCore", "rollbackFaultAfterCore", "errRollbackFaultGate", "errRollbackFaultScope", "errRollbackFaultInjected":
 		return true
 	}
 	return false
@@ -145,19 +145,19 @@ func inspectRollbackFaultSource(path string, raw []byte) ([]string, error) {
 	_, owned := rollbackFaultPins[path]
 	adapter := path == rollbackFaultDefault || path == rollbackFaultManual
 	pure := path == rollbackFaultContract || path == rollbackFaultContractTest || path == rollbackFaultWriterTest
-	if strings.HasPrefix(path, "internal/testkit/rollbackfault/") && !owned {
+	if strings.HasPrefix(path, "internal/testkit/rollbackfault/") && !owned && !rollbackFaultSQLOwned(path) && path != rollbackFaultRecoveryReceipt && path != rollbackFaultRecoveryReceiptTest {
 		report("unreviewed contract-package source")
 	}
 	if strings.HasPrefix(path, "internal/pager/rollback_io_") && !owned {
 		report("unreviewed adapter source or native caller")
 	}
 	first := strings.SplitN(string(raw), "\n", 2)[0]
-	if strings.Contains(first, "manual_fault_rollback") && !adapter {
+	if strings.Contains(first, "manual_fault_rollback") && !adapter && !rollbackFaultSQLManual(path) && !restartGuardManual(path) && !rollbackFaultRecoveryNativePinned(path, raw) {
 		report("manual tag outside exact two-file selection")
 	}
 	for _, group := range file.Comments {
 		for _, comment := range group.List {
-			if (strings.HasPrefix(comment.Text, "//go:build") || strings.HasPrefix(comment.Text, "// +build")) && strings.Contains(comment.Text, "manual_fault_rollback") && !adapter {
+			if (strings.HasPrefix(comment.Text, "//go:build") || strings.HasPrefix(comment.Text, "// +build")) && strings.Contains(comment.Text, "manual_fault_rollback") && !adapter && !rollbackFaultSQLManual(path) && !restartGuardManual(path) && !rollbackFaultRecoveryNativePinned(path, raw) {
 				report("manual tag outside exact two-file selection")
 			}
 		}
@@ -195,7 +195,7 @@ func inspectRollbackFaultSource(path string, raw []byte) ([]string, error) {
 			name = imp.Name.Name
 		}
 		imports[name] = value
-		if value == rollbackFaultImport && (path != rollbackFaultManual || imp.Name != nil) {
+		if value == rollbackFaultImport && ((path != rollbackFaultManual && path != rollbackFaultSQLBridge && path != rollbackFaultSQLNative) || imp.Name != nil) && !restartGuardFaultImport(path, imp) && !(imp.Name == nil && rollbackFaultRecoveryNativePinned(path, raw)) {
 			report("contract production consumer must be the exact unaliased manual file")
 		}
 		if owned && imp.Name != nil {
@@ -227,11 +227,11 @@ func inspectRollbackFaultSource(path string, raw []byte) ([]string, error) {
 		if id, ok := node.(*ast.Ident); ok {
 			if id.Name == "armRollbackFault" || id.Name == "finishRollbackFault" || id.Name == "disarmRollbackFault" {
 				fn, declaration := parents[id].(*ast.FuncDecl)
-				if !declaration || fn.Name != id || path != rollbackFaultManual || fn.Recv != nil {
+				if (!declaration || fn.Name != id || path != rollbackFaultManual || fn.Recv != nil) && !rollbackFaultSQLOldEntry(path, id, parents, set, raw) && !restartGuardOldReference(path, id, parents, set, raw) && !(rollbackFaultRecoveryNativePinned(path, raw) && rollbackFaultRecoveryScopeCall(path, id, parents, set, raw)) {
 					report("scope entry has no approved caller, alias, function value or copied declaration")
 				}
 			}
-			if rollbackFaultManualPrivate(id.Name) && path != rollbackFaultManual {
+			if rollbackFaultManualPrivate(id.Name) && path != rollbackFaultManual && !rollbackFaultSQLOldPrivate(path, id, parents, set, raw) && !restartGuardOldPrivate(path, id, parents, set, raw) && !(rollbackFaultRecoveryNativePinned(path, raw) && rollbackFaultRecoveryPrivateReference(path, id.Name)) {
 				report("manual-private reference outside exact source")
 			}
 			if id.Name == "rollbackIOPoint" && path != rollbackFaultPoints && path != rollbackFaultDefault && path != rollbackFaultManual {
@@ -266,7 +266,7 @@ func inspectRollbackFaultSource(path string, raw []byte) ([]string, error) {
 				for _, arg := range call.Args {
 					if literal, ok := arg.(*ast.BasicLit); ok && literal.Kind == token.STRING {
 						value, e := strconv.Unquote(literal.Value)
-						if e == nil && value == "GOSQLITE_MANUAL_FAULT_ROLLBACK" {
+						if e == nil && value == "GOSQLITE_MANUAL_FAULT_ROLLBACK" && !rollbackFaultSQLManual(path) && !restartGuardManual(path) && !rollbackFaultRecoveryNativePinned(path, raw) {
 							report("manual environment consumer outside exact armer source")
 						}
 					}
@@ -1167,6 +1167,12 @@ func rollbackFaultPoint(point rollbackIOPoint) (rollbackfault.Point, int) {
 // Called under the original Tx mutex. Its private mutex is released before
 // every original operation; registry admission is never held during I/O.
 func rollbackFaultBefore(t *Tx, point rollbackIOPoint, f *vfs.File, path string, off int64, length int) rollbackFaultTicket {
+	ticket := rollbackFaultBeforeCore(t, point, f, path, off, length)
+	rollbackRestartBefore(ticket)
+	return ticket
+}
+
+func rollbackFaultBeforeCore(t *Tx, point rollbackIOPoint, f *vfs.File, path string, off int64, length int) rollbackFaultTicket {
 	s := rollbackFaultFor(t)
 	if s == nil {
 		return rollbackFaultTicket{action: rollbackfault.Pass}
@@ -1225,6 +1231,11 @@ func (s *rollbackFaultScope) diagnostic(err error) uint64 {
 }
 
 func rollbackFaultAfter(ticket rollbackFaultTicket, executed bool, nativeN int, nativeErr error, returnedN int, returnedErr error, normalizedErr error, effect rollbackfault.SideEffect) {
+	rollbackFaultAfterCore(ticket, executed, nativeN, nativeErr, returnedN, returnedErr, normalizedErr, effect)
+	rollbackRestartAfter(ticket)
+}
+
+func rollbackFaultAfterCore(ticket rollbackFaultTicket, executed bool, nativeN int, nativeErr error, returnedN int, returnedErr error, normalizedErr error, effect rollbackfault.SideEffect) {
 	s := ticket.scope
 	if s == nil {
 		return

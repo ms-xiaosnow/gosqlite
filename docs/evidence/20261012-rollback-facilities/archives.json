@@ -1,0 +1,107 @@
+{
+  "purpose": "Large source trees/raw logs/binaries remain private Library objects. These IDs and SHA256 are recovery references, not public links or Git publication receipts.",
+  "archives": [
+    {
+      "scope": "old0ef exact source and historical17:25 pending checkpoint",
+      "library_file_id": "libfile_920e52d469b481918d0007d078f915f4",
+      "file_name": "gosqlite-three-facility-integrated-source-checkpoint-0ef6d751-v1.zip",
+      "sha256": "42d76105b1fe62042b513f257d8170c1896f9590f39eaeccaed80d55e500251d",
+      "bytes": 15394460,
+      "source_tree": "0ef6d751edb19f55cf3cd46314a2d1f6bd597c6e",
+      "status_at_creation": "PENDING_NOT_PASS historical; later78992FAIL is recorded separately"
+    },
+    {
+      "scope": "complete old78992 failed verification evidence",
+      "library_file_id": "libfile_b0911b5fc444819189ce4fda5a1d7060",
+      "file_name": "gosqlite-three-facility-full26-failure-0ef6d751-v1.zip",
+      "sha256": "7743daee52f9fbed0750795fa7f47f0f7b8636a9cbad6e11c285e5226610e957",
+      "bytes": 8172745,
+      "source_tree": "0ef6d751edb19f55cf3cd46314a2d1f6bd597c6e",
+      "session": 78992,
+      "terminal": "FAIL",
+      "whole_and_all_member_readback": "VERIFIED",
+      "readback_proof_pin": {
+        "path": "three-facility-full26-failure-checkpoint-v1/library-readback-proof.json",
+        "bytes": 2212,
+        "sha256": "d325de5cc740bb7e870fb06c583255161707c897e7a951d494cb2bc4c0506d07"
+      }
+    },
+    {
+      "scope": "fixed51f63 source delta requiring exact0ef base",
+      "status": "VERIFIED_PRIVATE_LIBRARY_DELTA_UNPUBLISHED",
+      "library_file_id": "libfile_38edf39bf6a48191a171cd56aabdb669",
+      "file_name": "recovery-three-facility-metadata-owner-source-delta-v2-UNPUBLISHED.zip",
+      "sha256": "72ea3e6c666aa6a1e10cc53313c28fffe16010ca5dae1b14da854dfa31ff7e13",
+      "bytes": 610823,
+      "source_tree": "51f63a56c22ab6396d5b542a1f0655a82dad4cd5",
+      "requires_base_library_file_id": "libfile_920e52d469b481918d0007d078f915f4",
+      "requires_base_sha256": "42d76105b1fe62042b513f257d8170c1896f9590f39eaeccaed80d55e500251d",
+      "reconstructed_source_files": 3334,
+      "source_payload_files": 3,
+      "unchanged_base_files": 3331,
+      "whole_file_and_all_entries_verified": true,
+      "verification_pin": {
+        "path": "recovery-three-facility-metadata-owner-source-delta-v2-static-20261012/owned-library-readback-verification.json",
+        "bytes": 4959,
+        "sha256": "aef1f7546cafe237696105c74f617180acc458720f6818f1980ca7c3c9b18997"
+      },
+      "historical_validation_snapshot": {
+        "basis": "Status recorded when the archive was prepared; historical static snapshot, not a result claim.",
+        "session_id": "44909",
+        "status": "IN_PROGRESS"
+      },
+      "note": "This delta alone is not full source. Base plus delta statically reconstructs51f63. Archive snapshot44909 IN_PROGRESS remains unchanged by future terminal results; not a runtime PASS or GitHub save."
+    },
+    {
+      "scope": "shared11ade finite seven-command predecessor",
+      "library_file_id": "libfile_cb349e3aff048191a31dc59e269fb7e5",
+      "sha256": "2537e2f609fa24350b197d871374a4cc15ebc75dae96129033c8a82cdab402e7",
+      "source_tree": "11ade9b1d33f7b317cdd613eed32cce886b6c1e1"
+    },
+    {
+      "scope": "prior89823 guard826PASS plus whole-source FAIL",
+      "library_file_id": "libfile_a10e406013f48191ac4cd3c7f77fe626",
+      "sha256": "df19ee32ce3cb730529d12f1797cadf5c09de6dd7c1e5475b066793e3e2f00c8",
+      "terminal": "FAIL"
+    },
+    {
+      "scope": "44909 authorization-pause terminal with racePASS",
+      "status": "VERIFIED_PRIVATE_LIBRARY_ARCHIVE",
+      "library_file_id": "libfile_f80ece1f1de881918ac883902a143da3",
+      "sha256": "0e3dc606682cafad0adbdc189861e2b1bd2b8cfcc47b40cb970b44b43a83d0bf",
+      "source_tree": "51f63a56c22ab6396d5b542a1f0655a82dad4cd5",
+      "terminal": "STOP_AUTHORIZATION_PAUSE",
+      "test_status": "PASS",
+      "tool_exit_code": 2,
+      "file_name": "gosqlite-metadata-delta-runtime-44909-AUTHORIZED-PAUSE-v1.zip",
+      "bytes": 9424625,
+      "whole_file_and_all_entries_verified": true
+    },
+    {
+      "scope": "2054 seven-command supplementPASS plus v1 pre-Go admission failure",
+      "status": "PENDING_LIBRARY_ARCHIVE",
+      "library_file_id": null,
+      "sha256": null,
+      "source_tree": "51f63a56c22ab6396d5b542a1f0655a82dad4cd5",
+      "session": 2054,
+      "terminal": "PASS",
+      "tool_exit_code": 0
+    },
+    {
+      "scope": "main750 source bundle used by unchanged-component reuse",
+      "library_file_id": "libfile_6fa94497ad888191ba517e8d6405285f",
+      "sha256": "05d643be6344e7c3540d748071ef47dda160f27db17d1d182c1a0b16ca788ad9",
+      "source_tree": "bd7cf6175bf7cb3b37f11804c9a5e181c3397d1e"
+    },
+    {
+      "scope": "main750 restored53330 full26 evidence used only for unchanged components",
+      "library_file_id": "libfile_0ad4df1dafb881919faf9c1c87067893",
+      "sha256": "9f1142ea14d17b2ad52844637152230f32da617ec33a42a136daea934331455e",
+      "source_tree": "bd7cf6175bf7cb3b37f11804c9a5e181c3397d1e",
+      "session": 53330,
+      "terminal": "PASS_ON_750_ONLY"
+    }
+  ],
+  "private_repository_publication": "The containing Git commit supplies the publication identity; its own SHA is not embedded recursively.",
+  "large_artifacts_copied_into_git_overlay": false
+}

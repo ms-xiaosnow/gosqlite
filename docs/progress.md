@@ -1,3 +1,18 @@
+# 三设施检查点进度
+
+51f63的新相关验证已取得：44909前五门PASS及race10928 PASS／7 SKIP，race自然返回后
+按范围缩减行政暂停；2054七项支持包／依赖清单／manual compile与nm自然PASS。
+普通和oracle覆盖以[逐项复用审计](evidence/20261012-rollback-facilities/reuse-map.json)分开记账，
+未新跑完整ordinary／oracle／full26，也不将旧失败改成成功。
+
+[工程证据目录](evidence/20261012-rollback-facilities/README.zh.md)已备入私有仓库，发布链仍PENDING。
+manual物理仍NOT_RUN；下一SQL non-nil第四格尚未实现。
+[剩余工作](testing/remaining-goal-boundary-20261012-zh.md)为六组代码和受阻ANN问题，M9最低范围不新增在线PG要求。
+
+## 历史原文
+
+以下冻结源旧进度原文完整保留；先前草稿不重复嵌套。
+
 # 只读验收 V3 检查点完整正常门终态
 
 ## 2026 年 10 月 12 日 13 时 31 分 UTC 最新结果

@@ -1,0 +1,647 @@
+{
+  "old_tree": "0ef6d751edb19f55cf3cd46314a2d1f6bd597c6e",
+  "new_tree": "51f63a56c22ab6396d5b542a1f0655a82dad4cd5",
+  "old_session": 78992,
+  "status": "SEPARATE_HISTORICAL_EVIDENCE_NOT_NEW_EXECUTION",
+  "input_pin": {
+    "path": "recovery-three-facility-metadata-delta-verification-v2/REUSED-EVIDENCE.json",
+    "bytes": 1544588,
+    "sha256": "286ed0a26bee44c5f4d5e5b2a744193e162ae90f8e3b64bb8e55298775dea159"
+  },
+  "old_raw_stdout_sha256": "f7f9e80f23cc736abefdb6fb309a90f0c108a7ab6a2a72d942ef63f4ec1eed45",
+  "reused_quick_stages": [
+    "00a_repaired_cli",
+    "00b_repaired_pager",
+    "00c_repaired_range",
+    "00d_repaired_ipk_oracle",
+    "01a_livewriter_readonly_oracle"
+  ],
+  "reused_ordinary_named": 9974,
+  "reused_ordinary_counts": {
+    "pass": 9967,
+    "skip": 7
+  },
+  "exact_named_selection_rule": {
+    "source": "Each ordinary JSON terminal event having a Test field and action pass/fail/skip in old02_ordinary.stdout",
+    "exclude_entire_package": "github.com/ms-xiaosnow/gosqlite/internal/testscope",
+    "exclude_exact_test": {
+      "package": "github.com/ms-xiaosnow/gosqlite/internal/vfs",
+      "test": "TestMetadataOwnershipCallChainSource"
+    },
+    "remaining_events": "All other9974 terminal events, exact one run/terminal each; require9967 pass/7 skip/no fail. No name inferred from new source.",
+    "canonical_set_encoding": "JSON UTF-8 array of {action,package,test} with project import prefix removed, sorted by(package,test,action), ensure_ascii=false, separators comma and colon, no trailing newline.",
+    "canonical_set_sha256": "e34c4398733258f2a0717dab93b3c8e1f1e6a59bd8884d1fa87ba0ec56487611"
+  },
+  "package_counts": {
+    "benchmarks/grams": {
+      "pass": 4
+    },
+    "benchmarks/transactions": {
+      "pass": 30
+    },
+    "cmd/gosqlite": {
+      "pass": 169
+    },
+    "driver": {
+      "pass": 136
+    },
+    "encryption": {
+      "pass": 45
+    },
+    "examples/ann": {
+      "pass": 1
+    },
+    "examples/bit-rerank": {
+      "pass": 1
+    },
+    "examples/encrypted-shared": {
+      "pass": 1
+    },
+    "examples/encrypted-wal": {
+      "pass": 1
+    },
+    "examples/half-rerank": {
+      "pass": 1
+    },
+    "examples/internal/fixturecleanup": {
+      "pass": 14
+    },
+    "examples/ivfflat": {
+      "pass": 1
+    },
+    "examples/migrate-pgembedding": {
+      "pass": 1
+    },
+    "examples/migration-full-table": {
+      "pass": 1
+    },
+    "examples/readonly": {
+      "pass": 21
+    },
+    "examples/sparse-exact": {
+      "pass": 8
+    },
+    "examples/typed-ann-rerank": {
+      "pass": 1
+    },
+    "examples/vector": {
+      "pass": 1
+    },
+    "examples/write": {
+      "pass": 11
+    },
+    "extension/grams13": {
+      "pass": 169
+    },
+    "extension/registry": {
+      "pass": 8
+    },
+    "extension/similarity": {
+      "pass": 40
+    },
+    "extension/vector": {
+      "pass": 483
+    },
+    "extension/vector/ann": {
+      "pass": 80
+    },
+    "internal/btree": {
+      "pass": 135
+    },
+    "internal/darwinfile": {
+      "pass": 12
+    },
+    "internal/encstore": {
+      "pass": 494
+    },
+    "internal/journal": {
+      "pass": 387
+    },
+    "internal/pager": {
+      "pass": 384
+    },
+    "internal/record": {
+      "pass": 41
+    },
+    "internal/sql": {
+      "pass": 268
+    },
+    "internal/testkit/backupmanual": {
+      "pass": 1987
+    },
+    "internal/testkit/formatupgrade": {
+      "pass": 66
+    },
+    "internal/testkit/rollbackfault": {
+      "pass": 492
+    },
+    "internal/testkit/rollbackrestart": {
+      "pass": 157
+    },
+    "internal/testoracle": {
+      "pass": 58
+    },
+    "internal/vfs": {
+      "pass": 796
+    },
+    "internal/wal": {
+      "pass": 596
+    },
+    "internal/walindex": {
+      "pass": 29
+    },
+    "migration/postgres": {
+      "pass": 333
+    },
+    "sqlite": {
+      "pass": 2504,
+      "skip": 7
+    }
+  },
+  "replaced_old_evidence": {
+    "internal/testscope": 958,
+    "internal/vfs/TestMetadataOwnershipCallChainSource": 1
+  },
+  "replacement_expected_not_actual": {
+    "failed_vfs_root_names": 1,
+    "testscope_roots": 72,
+    "testscope_names": 960,
+    "new_children": 2,
+    "composite_ordinary_named": 10935,
+    "composite_pass": 10928,
+    "composite_skip": 7
+  },
+  "dependency_mapping": [
+    {
+      "changed_path": "internal/pager/rollback_restart_manual_linux.go",
+      "normal_selection": "Excluded by linux AND manual_fault_rollback AND manual_restart_rollback gate in all normal/default/oracle profiles",
+      "affected_evidence": [
+        "internal/vfs/TestMetadataOwnershipCallChainSource",
+        "internal/testscope whole package and source scanner"
+      ],
+      "shipping_runtime": "unchanged; wrapper source unchanged; no whole ordinary rerun justified by this delta"
+    },
+    {
+      "changed_path": "internal/testscope/rollback_restart.go",
+      "affected_evidence": [
+        "entire internal/testscope suite",
+        "whole source scanner"
+      ],
+      "reason": "Changed guard code/pinned declaration inspected during tests and scanner execution; old958 names replaced, not reused"
+    },
+    {
+      "changed_path": "internal/testscope/rollback_restart_test.go",
+      "affected_evidence": [
+        "entire internal/testscope suite"
+      ],
+      "reason": "Two new existing-table counterexamples; expected named960, root72"
+    }
+  ],
+  "reuse_preconditions": {
+    "all_other_files_byte_mode_identical": 3331,
+    "all_roots_and_source_selections_unchanged": true,
+    "default_and_oracle_production_unchanged_except_source_guard": true,
+    "independent_source_review": "See SOURCE-CLOSURE-ADMISSION-BASIS.json",
+    "shipping_packages": 164,
+    "three_tag_bridge_excluded_in_all_normal_profiles": true,
+    "tool_module_identity": "/workspace/scratch/5e06a74e5f65/restart-20261011T2040/recovery-three-facility-metadata-delta-verification-v2/FRESH-INPUT-IDENTITY.json",
+    "whole_module_packages": 213
+  },
+  "fresh_tool_and_module_identity": {
+    "path": "recovery-three-facility-metadata-delta-verification-v2/FRESH-INPUT-IDENTITY.json",
+    "bytes": 1202,
+    "sha256": "5abfe2bce3bb921eb615a8a93998dea02c5214d89bad43146281c7e2014c29cd"
+  },
+  "source_closure_review": {
+    "path": "recovery-three-facility-metadata-delta-verification-v2/scope/SOURCE-CLOSURE-ADMISSION-BASIS.json",
+    "bytes": 1224,
+    "sha256": "7c01601ea95a4d199f11adfb02469f79e6eefdeac89bb38db1bc0feb9e349885"
+  },
+  "whole_module_packages_unchanged": 213,
+  "shipping_packages_unchanged": 164,
+  "old_guard_reexecuted": true,
+  "new_recorder_does_not_seed_old_results": true,
+  "old_full_ordinary_stays_FAIL": true,
+  "bundle_restore_plan": "Git/object/file-byte verification plus necessary smoke; no mechanical full-ordinary/full26 restoration rerun. Expand only for actual changed dependencies or a justified necessary node. CI actual result remains separate.",
+  "post_race_scope_change": {
+    "audit_pin": {
+      "path": "pending-gate-reuse-audit-v1.json",
+      "bytes": 19220,
+      "sha256": "5c06e836907eaf90d7eed089159315debf16756233e72d4524620a0f8f438a52"
+    },
+    "assessment_scope": "Old750 compared with current51f63, unlike the earlier0ef-to51f63 ordinary reuse.",
+    "per_gate": [
+      {
+        "stage": "03_vet",
+        "assessment": "NEW_NEEDED",
+        "reason": "Changed whole-module support production/test closure; already satisfied by current 03 PASS."
+      },
+      {
+        "stage": "04_build_nocgo",
+        "assessment": "NEW_NEEDED",
+        "reason": "Changed whole-module support production closure; already satisfied by current 04 PASS."
+      },
+      {
+        "stage": "05_race",
+        "assessment": "NEW_NEEDED",
+        "reason": "Changed default support test closure; current race must finish naturally. This audit does not change it."
+      },
+      {
+        "stage": "06_compile_linux_amd64",
+        "assessment": "REUSE",
+        "reason": "Current 04 PASS has exactly identical argv, environment and cwd; duplicate need not be rerun.",
+        "donor_source_tree": "51f63a56c22ab6396d5b542a1f0655a82dad4cd5",
+        "donor_stage": "04_build_nocgo",
+        "donor_result_pin": {
+          "path": "recovery-three-facility-metadata-delta-verification-v2/04_build_nocgo.result.json",
+          "bytes": 1059,
+          "sha256": "1eaa78ef4a84e612ecab55fde33ef1b7a4a809fa46d827380023381ff50f67d7"
+        },
+        "donor_exit_code": 0,
+        "donor_stdout_identity": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        },
+        "donor_stderr_identity": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        }
+      },
+      {
+        "stage": "07_compile_linux_arm64",
+        "assessment": "NEW_NEEDED",
+        "reason": "Only three changed selected production support packages need target compilation; reuse 750 unchanged remainder."
+      },
+      {
+        "stage": "08_compile_darwin_amd64",
+        "assessment": "NEW_NEEDED",
+        "reason": "Only three changed selected production support packages need target compilation; reuse 750 unchanged remainder."
+      },
+      {
+        "stage": "09_compile_darwin_arm64",
+        "assessment": "NEW_NEEDED",
+        "reason": "Only three changed selected production support packages need target compilation; reuse 750 unchanged remainder."
+      },
+      {
+        "stage": "10_compile_windows_amd64",
+        "assessment": "NEW_NEEDED",
+        "reason": "Only three changed selected production support packages need target compilation; reuse 750 unchanged remainder."
+      },
+      {
+        "stage": "11_modules_verify",
+        "assessment": "REUSE",
+        "reason": "go.mod/go.sum byte-identical to 750; module/tool identity freshly verified in current E. Prior 750 module verify PASS remains applicable.",
+        "donor_source_tree": "bd7cf6175bf7cb3b37f11804c9a5e181c3397d1e",
+        "donor_stage": "11_modules_verify",
+        "donor_result_pin": {
+          "path": "readonly-acceptance-checkpoint-restored-normal-verification-v1/11_modules_verify.result.json",
+          "bytes": 1063,
+          "sha256": "507b5e1fe27d9f7dcb02798097643ffd8d1417e6dda3ec283a54c870c0eb2717"
+        },
+        "donor_exit_code": 0,
+        "donor_stdout_identity": {
+          "bytes": 21,
+          "sha256": "b4537ed75f533f993f371954de47e42a793b8e5b0587577de7e27fb3e50696bd",
+          "git_blob": "f893de6834c1db0d439c2e9faed96a7b20a8e97f",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        },
+        "donor_stderr_identity": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        }
+      },
+      {
+        "stage": "12_whole_module_nontest_closure",
+        "assessment": "NEW_NEEDED",
+        "reason": "Actual old closure has 212 packages; candidate expected 213 adds internal/testkit/rollbackrestart. Three support-package selected inputs change. Need current list receipt if gate requires an observed whole-module inventory."
+      },
+      {
+        "stage": "13_shipping_cli_library_closure",
+        "assessment": "REUSE",
+        "reason": "164 names unchanged; independently reread all 286 old project input records against candidate: all SHA256 match. No changed selected shipping dependency. Known fresh tool/module pins cover remaining inputs.",
+        "donor_source_tree": "bd7cf6175bf7cb3b37f11804c9a5e181c3397d1e",
+        "donor_stage": "13_shipping_cli_library_closure",
+        "donor_result_pin": {
+          "path": "readonly-acceptance-checkpoint-restored-normal-verification-v1/13_shipping_cli_library_closure.result.json",
+          "bytes": 2053,
+          "sha256": "765d59729b7d52cb2b8c0abf121c027b9294d7ab587fd9b0bc0b2881b2c30d0d"
+        },
+        "donor_exit_code": 0,
+        "donor_stdout_identity": {
+          "bytes": 396511,
+          "sha256": "a65d3c75dbddf9d80828c22ce1f41a38de4a75c94a638d57a87da851c225f80c",
+          "git_blob": "9f5530315d73546827318c4233c3c568db028abd",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        },
+        "donor_stderr_identity": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        }
+      },
+      {
+        "stage": "14_complete_pinned_oracle_script",
+        "assessment": "REUSE",
+        "reason": "Composite only: unchanged 750 oracle-specific results + current changed-package ordinary results + current guard and metadata-source test. This is NOT a fresh candidate complete-script PASS; preserve provenance. See oracle_basis.",
+        "donor_source_tree": "bd7cf6175bf7cb3b37f11804c9a5e181c3397d1e",
+        "donor_stage": "14_complete_pinned_oracle_script",
+        "donor_result_pin": {
+          "path": "readonly-acceptance-checkpoint-restored-normal-verification-v1/14_complete_pinned_oracle_script.result.json",
+          "bytes": 1830,
+          "sha256": "4d1d03e9a83daa1bfd3cd6f467cb33ce7fcfd3000b94660beff0db926894ffdf"
+        },
+        "donor_exit_code": 0,
+        "donor_stdout_identity": {
+          "bytes": 3377572,
+          "sha256": "2ff685ff172c2510a18ac569f90bec06472ffd2d442e7c909eca34117a0635f5",
+          "git_blob": "1557807fc769ed7a7d4aa658f053a8a8c2114358",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        },
+        "donor_stderr_identity": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        },
+        "interpretation": "Only unchanged components reused; prior whole-script PASS is not relabelled to51f63. See exact composite below."
+      },
+      {
+        "stage": "15_limit_phase_conversion_oracle_race",
+        "assessment": "REUSE",
+        "reason": "Entire sqlite oracle test compilation/dependency closure has zero main-to-current changed files (362 project Go inputs). Old 750 exact LIMIT oracle race PASS applies with verified pinned tools/oracle.",
+        "donor_source_tree": "bd7cf6175bf7cb3b37f11804c9a5e181c3397d1e",
+        "donor_stage": "15_limit_phase_conversion_oracle_race",
+        "donor_result_pin": {
+          "path": "readonly-acceptance-checkpoint-restored-normal-verification-v1/15_limit_phase_conversion_oracle_race.result.json",
+          "bytes": 1771,
+          "sha256": "8c672a9c3105312e9a32f9d44c421cf6f1e0bfa784fa79c7ee26705b7abfef36"
+        },
+        "donor_exit_code": 0,
+        "donor_stdout_identity": {
+          "bytes": 374795,
+          "sha256": "1e8273cf608a8803d1f0d1eb957d9fe4bc8b3082e9f466441cc425a25aec2b43",
+          "git_blob": "8ed0c29ce6f9d4cd53cd6a57c245ab06a841b748",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        },
+        "donor_stderr_identity": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        }
+      },
+      {
+        "stage": "16_compile_darwin_amd64_encstore_tests_only",
+        "assessment": "REUSE",
+        "reason": "71-file project test/dependency closure has zero changed files and same selection. Reuse old compile receipt/binary identity; no image execution.",
+        "donor_source_tree": "bd7cf6175bf7cb3b37f11804c9a5e181c3397d1e",
+        "donor_stage": "16_compile_darwin_amd64_encstore_tests_only",
+        "donor_result_pin": {
+          "path": "readonly-acceptance-checkpoint-restored-normal-verification-v1/16_compile_darwin_amd64_encstore_tests_only.result.json",
+          "bytes": 1586,
+          "sha256": "1be4dee48c66b3bbd02b6aea020f525eb9af653fe9673decb876875a641c8e29"
+        },
+        "donor_exit_code": 0,
+        "donor_stdout_identity": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        },
+        "donor_stderr_identity": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        }
+      },
+      {
+        "stage": "17_inspect_darwin_amd64_encstore_symbols",
+        "assessment": "REUSE",
+        "reason": "Reuse old nm receipt bound to freshly rehashed old binary a76b06fddd3822eb1ca50a8eb892fb89af307c9642a15b54b804246dc7c2a61b. Do not claim inspection of a newly built candidate binary.",
+        "donor_source_tree": "bd7cf6175bf7cb3b37f11804c9a5e181c3397d1e",
+        "donor_stage": "17_inspect_darwin_amd64_encstore_symbols",
+        "donor_result_pin": {
+          "path": "readonly-acceptance-checkpoint-restored-normal-verification-v1/17_inspect_darwin_amd64_encstore_symbols.result.json",
+          "bytes": 1954,
+          "sha256": "ea852d6f89dda2ab99bb2afdd245b0d71276be191d8a1e21eb3bd9fe2ca5050c"
+        },
+        "donor_exit_code": 0,
+        "donor_stdout_identity": {
+          "bytes": 366192,
+          "sha256": "a0dbf4f537fc5fb01461aebf0c9a7f7b3072079b5eca37f10307cf2a2039c955",
+          "git_blob": "e733b3a9db81d8621064da68ec9edf1bd5bc1178",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        },
+        "donor_stderr_identity": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        }
+      },
+      {
+        "stage": "18_compile_darwin_arm64_encstore_tests_only",
+        "assessment": "REUSE",
+        "reason": "71-file project test/dependency closure has zero changed files and same selection. Reuse old compile receipt/binary identity; no image execution.",
+        "donor_source_tree": "bd7cf6175bf7cb3b37f11804c9a5e181c3397d1e",
+        "donor_stage": "18_compile_darwin_arm64_encstore_tests_only",
+        "donor_result_pin": {
+          "path": "readonly-acceptance-checkpoint-restored-normal-verification-v1/18_compile_darwin_arm64_encstore_tests_only.result.json",
+          "bytes": 1586,
+          "sha256": "aafed1a0378f4682c830b81158a509ed220ee0cb94b1f2b8450c3a98d8105ae3"
+        },
+        "donor_exit_code": 0,
+        "donor_stdout_identity": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        },
+        "donor_stderr_identity": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        }
+      },
+      {
+        "stage": "19_inspect_darwin_arm64_encstore_symbols",
+        "assessment": "REUSE",
+        "reason": "Reuse old nm receipt bound to freshly rehashed old binary 4be8a809e14fd1069f106126c24adadb1f11ae12475cc82bc7fc3d165da93633.",
+        "donor_source_tree": "bd7cf6175bf7cb3b37f11804c9a5e181c3397d1e",
+        "donor_stage": "19_inspect_darwin_arm64_encstore_symbols",
+        "donor_result_pin": {
+          "path": "readonly-acceptance-checkpoint-restored-normal-verification-v1/19_inspect_darwin_arm64_encstore_symbols.result.json",
+          "bytes": 1953,
+          "sha256": "914f643b486a659f1ebae9cb38d962afa86f1a6056a6462fde35fa0791f537e6"
+        },
+        "donor_exit_code": 0,
+        "donor_stdout_identity": {
+          "bytes": 355842,
+          "sha256": "adf247bcb96742d0ffe635e59723ce52cc78f5d10f7b20a1cc79df7048eaca13",
+          "git_blob": "1bd28c8411ad589a5fe2103583afb6336f929768",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        },
+        "donor_stderr_identity": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        }
+      },
+      {
+        "stage": "20_compile_windows_amd64_encstore_tests_only",
+        "assessment": "REUSE",
+        "reason": "49-file project test/dependency closure has zero changed files and same selection. Reuse old compile receipt/binary identity; no image execution.",
+        "donor_source_tree": "bd7cf6175bf7cb3b37f11804c9a5e181c3397d1e",
+        "donor_stage": "20_compile_windows_amd64_encstore_tests_only",
+        "donor_result_pin": {
+          "path": "readonly-acceptance-checkpoint-restored-normal-verification-v1/20_compile_windows_amd64_encstore_tests_only.result.json",
+          "bytes": 1571,
+          "sha256": "e0fef63a59668633c964002475a78ca3df7bbbd7958a6f54a73822fcdfc0bc04"
+        },
+        "donor_exit_code": 0,
+        "donor_stdout_identity": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        },
+        "donor_stderr_identity": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        }
+      },
+      {
+        "stage": "21_inspect_windows_amd64_encstore_symbols",
+        "assessment": "REUSE",
+        "reason": "Reuse old nm receipt bound to freshly rehashed old binary 73e7b1f3013e53896bd3ea518fee9559672f23bc21d9c226583c631cc82ec7e6.",
+        "donor_source_tree": "bd7cf6175bf7cb3b37f11804c9a5e181c3397d1e",
+        "donor_stage": "21_inspect_windows_amd64_encstore_symbols",
+        "donor_result_pin": {
+          "path": "readonly-acceptance-checkpoint-restored-normal-verification-v1/21_inspect_windows_amd64_encstore_symbols.result.json",
+          "bytes": 1937,
+          "sha256": "ea9c3b8d4a94e36a46dfd925c6af4afdb8c1935dbda98d414eab686839450069"
+        },
+        "donor_exit_code": 0,
+        "donor_stdout_identity": {
+          "bytes": 385713,
+          "sha256": "a5ba5b87e568c29c13848b9e1c0e053efb65b2ff839358b3fab2505420a86f10",
+          "git_blob": "baeea968f7be9c5e0642225dbd0954b74f103d8f",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        },
+        "donor_stderr_identity": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        }
+      }
+    ],
+    "oracle_component_basis": {
+      "changed_selected_packages": [
+        "internal/testscope",
+        "internal/testkit/rollbackfault",
+        "internal/testkit/rollbackrestart"
+      ],
+      "default_oracle_selected_file_symmetric_difference_each": [],
+      "changed_selected_project_test_closure_sizes": {
+        "internal/testscope": 28,
+        "internal/testkit/rollbackfault": 6,
+        "internal/testkit/rollbackrestart": 5
+      },
+      "only_live_environment_read": "internal/testscope/main.go:152 os.Getenv(\"GOFLAGS\"), tested only for substring manual_; false for both ordinary guard and oracle script environments.",
+      "no_live_SQLITE_ORACLE_read_or_init_or_TestMain_in_changed_packages": true,
+      "notes_on_scan": "Read source with comments/string/rune/raw literals masked; checked os imports have no aliases. Numerous environment references are inert frozen-source strings and mutation examples.",
+      "oracle_variant_packages_with_zero_changed_selected_dependencies": [
+        "internal/btree",
+        "internal/pager",
+        "internal/sql",
+        "internal/testkit",
+        "sqlite"
+      ],
+      "script_byte_identical_to_750_sha256": "b8e3e443a3fbe17b96526cfdb22b6a297dedf0eac2d9c3063cd7f9da05a64f79",
+      "fresh_replacements": [
+        "current 01_guard PASS",
+        "current 00b_metadata_testscope PASS (960 named results)",
+        "current 00a_metadata_vfs PASS (1 named root)"
+      ],
+      "model_results_reused_from_78992": [
+        {
+          "package": "internal/testkit/rollbackfault",
+          "action": "pass",
+          "count": 492
+        },
+        {
+          "package": "internal/testkit/rollbackrestart",
+          "action": "pass",
+          "count": 157
+        }
+      ],
+      "model_v1_v2_byte_identity": "Only v1-to-v2 changed files are excluded manual bridge plus rollback_restart guard implementation/test; model files unchanged.",
+      "current_normal_evidence_can_replace_source_reading_metadata_test": "VFS default/oracle selection identical; its changed input is the excluded manual bridge source that current targeted source test passed.",
+      "composite_caveat": "No old whole-script receipt is relabelled as new candidate execution. Root may accept logically equivalent component coverage, or require literal script execution as a separate policy choice."
+    },
+    "closure_correction": "Old observed 750 whole-module closure already includes go/printer, go/doc/comment and text/tabwriter. Set difference to current expected 213 is exactly new project package internal/testkit/rollbackrestart, not an added go/printer package.",
+    "scope_result": "Four targeted support-package builds, current whole dependency inventory, changed dual-manual-tag Linux test-c/nm are supplied by separate2054 seven-command PASS. Original16 unstarted commands remainNOT_RUN in44909; reused evidence is not inserted as new execution."
+  },
+  "ordinary_composed_observed": {
+    "new_vfs_pass": 1,
+    "new_testscope_pass": 960,
+    "reused_pass": 9967,
+    "reused_skip": 7,
+    "composed_pass": 10928,
+    "composed_skip": 7,
+    "composed_named": 10935,
+    "fresh_full_ordinary_run": false,
+    "old78992_stays_FAIL": true
+  },
+  "oracle_composed_observed": {
+    "status": "COMPONENT_COVERAGE_BY_EXACT_REUSE_AUDIT",
+    "unchanged_source": "main750 restored53330 pinned oracle evidence, only unchanged oracle-specific/default components",
+    "current_testscope_pass": 960,
+    "current_metadata_root_pass": 1,
+    "current_sourceguard": "PASS",
+    "models_from_78992": {
+      "rollbackfault": 492,
+      "rollbackrestart": 157
+    },
+    "default_oracle_selection_symmetric_difference": [],
+    "environment_equivalence": "Changed packages have no liveSQLITE_ORACLE reads/init/TestMain; the only liveGOFLAGS check tests manual_ and is false in both supplied environments.",
+    "fresh_current_complete_oracle_script": "NOT_RUN",
+    "fresh_oracle_named_total": null,
+    "prior_oracle_script_and_its_receipt_not_relabelled": true
+  }
+}

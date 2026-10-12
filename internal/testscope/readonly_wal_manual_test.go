@@ -607,7 +607,7 @@ func readOnlyWALManualPreviousPolicyPropagationMutations(t *testing.T) {
 	}
 }
 
-// Four combined hooks, fourteen inert counterexamples each. Keep the old
+// Eight combined/SQL/restart hooks, fourteen inert counterexamples each. Keep the old
 // propagation rows above unchanged and add no Test root or named child.
 func readOnlyWALManualCombinedPolicyPropagationMutations(t *testing.T) {
 	raw := readOnlyWALManualFixture(t, "internal/testscope/main.go")
@@ -663,6 +663,72 @@ func readOnlyWALManualCombinedPolicyPropagationMutations(t *testing.T) {
 			moveBefore:  `contracts, err := inspectOracleContracts(".")`,
 			state:       "failed",
 		},
+		{
+			assignment:  `rollbackSQL, rollbackSQLErr := inspectRollbackFaultSQLSource(path, raw)`,
+			helper:      "inspectRollbackFaultSQLSource",
+			result:      `findings = append(findings, rollbackSQL...)`,
+			resultName:  "rollbackSQL",
+			errorBlock:  "if rollbackSQLErr != nil {\n\t\t\treturn rollbackSQLErr\n\t\t}",
+			errorName:   "rollbackSQLErr",
+			errorReport: `return rollbackSQLErr`,
+			moveBefore:  `for _, f := range findings {`,
+			state:       "findings",
+		},
+		{
+			assignment:  `rollbackSQLContracts, rollbackSQLContractErr := inspectRollbackFaultSQLContracts(".")`,
+			helper:      "inspectRollbackFaultSQLContracts",
+			result:      "for _, finding := range rollbackSQLContracts {\n\t\tfmt.Fprintln(os.Stderr, finding)\n\t\tfailed = true\n\t}",
+			resultName:  "rollbackSQLContracts",
+			errorBlock:  "if rollbackSQLContractErr != nil {\n\t\tfmt.Fprintln(os.Stderr, rollbackSQLContractErr)\n\t\tfailed = true\n\t}",
+			errorName:   "rollbackSQLContractErr",
+			errorReport: `fmt.Fprintln(os.Stderr, rollbackSQLContractErr)`,
+			moveBefore:  `contracts, err := inspectOracleContracts(".")`,
+			state:       "failed",
+		},
+		{
+			assignment:  `restart, restartErr := inspectRollbackRestartSource(path, raw)`,
+			helper:      "inspectRollbackRestartSource",
+			result:      `findings = append(findings, restart...)`,
+			resultName:  "restart",
+			errorBlock:  "if restartErr != nil {\n\t\t\treturn restartErr\n\t\t}",
+			errorName:   "restartErr",
+			errorReport: `return restartErr`,
+			moveBefore:  `for _, f := range findings {`,
+			state:       "findings",
+		},
+		{
+			assignment:  `restartContracts, restartContractErr := inspectRollbackRestartContracts(".")`,
+			helper:      "inspectRollbackRestartContracts",
+			result:      "for _, finding := range restartContracts {\n\t\tfmt.Fprintln(os.Stderr, finding)\n\t\tfailed = true\n\t}",
+			resultName:  "restartContracts",
+			errorBlock:  "if restartContractErr != nil {\n\t\tfmt.Fprintln(os.Stderr, restartContractErr)\n\t\tfailed = true\n\t}",
+			errorName:   "restartContractErr",
+			errorReport: `fmt.Fprintln(os.Stderr, restartContractErr)`,
+			moveBefore:  `contracts, err := inspectOracleContracts(".")`,
+			state:       "failed",
+		},
+		{
+			assignment:  `recovery, err := inspectRollbackFaultRecoverySource(path, raw)`,
+			helper:      "inspectRollbackFaultRecoverySource",
+			result:      `findings = append(findings, recovery...)`,
+			resultName:  "recovery",
+			errorBlock:  "if err != nil {\n\t\t\treturn err\n\t\t}",
+			errorName:   "err",
+			errorReport: `return err`,
+			moveBefore:  `for _, f := range findings {`,
+			state:       "findings",
+		},
+		{
+			assignment:  `rollbackRecoveryContracts, rollbackRecoveryErr := inspectRollbackFaultRecoveryContracts(".")`,
+			helper:      "inspectRollbackFaultRecoveryContracts",
+			result:      "for _, finding := range rollbackRecoveryContracts {\n\t\tfmt.Fprintln(os.Stderr, finding)\n\t\tfailed = true\n\t}",
+			resultName:  "rollbackRecoveryContracts",
+			errorBlock:  "if rollbackRecoveryErr != nil {\n\t\tfmt.Fprintln(os.Stderr, rollbackRecoveryErr)\n\t\tfailed = true\n\t}",
+			errorName:   "rollbackRecoveryErr",
+			errorReport: `fmt.Fprintln(os.Stderr, rollbackRecoveryErr)`,
+			moveBefore:  `contracts, err := inspectOracleContracts(".")`,
+			state:       "failed",
+		},
 	}
 	checked := 0
 	for _, policy := range cases {
@@ -704,7 +770,7 @@ func readOnlyWALManualCombinedPolicyPropagationMutations(t *testing.T) {
 		readOnlyWALManualReject(t, "internal/testscope/main.go", moved, diagnostic)
 		checked++
 	}
-	if len(cases) != 4 || checked != 56 {
+	if len(cases) != 10 || checked != 140 {
 		t.Fatal("combined wiring counterexample inventory", len(cases), checked)
 	}
 }

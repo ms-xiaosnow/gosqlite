@@ -234,7 +234,7 @@ func inspectOracleSource(path string, raw []byte) ([]string, error) {
 					report(sel.Pos(), "unreviewed os/exec error-type reference")
 				}
 			default:
-				if oracleApprovedNativeCall(path, sel, parents, set, raw) {
+				if oracleApprovedNativeCall(path, sel, parents, set, raw) || restartGuardProcessReference(path, sel, parents, set, raw) {
 					nativeCount++
 				} else {
 					report(sel.Pos(), "os/exec reference "+sel.Sel.Name+" must use testoracle.ForTest")
@@ -284,10 +284,10 @@ func inspectOracleSource(path string, raw []byte) ([]string, error) {
 // source change requires reviewing the complete changed file and this policy.
 // Independent source review and compiler/test authorization are still separate.
 var oracleFrozenSources = map[string]string{
-	oracleSpecTestPath: "0835caffc85c48e2e12ae357a4be4b417900e74122172aa5fe5d161bd4b83988",
-	oracleSpecPath: "581490ee249b7d41a3f339a945084fd00105e71aeb15996b1e58b7d7ac4de76d",
-	oracleAdapterPath: "5099e1df87ea477f7c2b84291634265cc95338dc03abb40a6da3237f2f10f87b",
-	"examples/native-check/main.go": "273d5779d688090bfb7fe0f7a857892ae5ef9765f1f3eafb5bf1ae783dadfabc",
+	oracleSpecTestPath:               "0835caffc85c48e2e12ae357a4be4b417900e74122172aa5fe5d161bd4b83988",
+	oracleSpecPath:                   "581490ee249b7d41a3f339a945084fd00105e71aeb15996b1e58b7d7ac4de76d",
+	oracleAdapterPath:                "5099e1df87ea477f7c2b84291634265cc95338dc03abb40a6da3237f2f10f87b",
+	"examples/native-check/main.go":  "273d5779d688090bfb7fe0f7a857892ae5ef9765f1f3eafb5bf1ae783dadfabc",
 	"examples/encrypted-cli/main.go": "5b7bd2e0edd15ee0ea956c74a085be635e1d121500e92eae36a48d86c491004b",
 }
 

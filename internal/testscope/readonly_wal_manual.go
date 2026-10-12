@@ -27,7 +27,10 @@ const readOnlyWALManualEntry = "TestManualReadOnlyWALPreparedMedia"
 // HOLD: source authoring does not authorize self-review or source pin release.
 const readOnlyWALManualNativeSHA256 = "c92b6c7ff45313443cdf4abb492adbe77c082ea398d7fc3316b5aa1e8ac5dad8"
 const readOnlyWALManualPureSHA256 = "f012016c3662d802c4878531bc78bf963b14144eb6c48c966b1a086ca5c07f73"
-const readOnlyWALManualPriorOrdinarySHA256 = "97232e2fbcdd1ba5f05e836137304217ba844d61f333332249239d75572e621a"
+
+// The complete inspectSource body, including the narrow SQL recovery exception,
+// was independently reviewed; this fixed pin still rejects unreviewed changes.
+const readOnlyWALManualPriorOrdinarySHA256 = "98341345e43f39b39dbc78eaf49a916a0701f3d7f2f383d4949b9a3ed439d199"
 
 func readOnlyWALManualCompact(node ast.Node) string {
 	var out bytes.Buffer
@@ -1264,6 +1267,18 @@ func readOnlyWALManualPreviousWiring(mainBody, walkBody *ast.BlockStmt) []string
 	if rollbackFault < 0 {
 		report("rollback fault source")
 	}
+	rollbackSQL := readOnlyWALManualSequence(walkBody, `rollbackSQL, rollbackSQLErr := inspectRollbackFaultSQLSource(path,raw)`, `if rollbackSQLErr != nil { return rollbackSQLErr }`, `findings = append(findings,rollbackSQL...)`)
+	if rollbackSQL < 0 {
+		report("rollback SQL source")
+	}
+	restart := readOnlyWALManualSequence(walkBody, `restart, restartErr := inspectRollbackRestartSource(path,raw)`, `if restartErr != nil { return restartErr }`, `findings = append(findings,restart...)`)
+	if restart < 0 {
+		report("rollback restart source")
+	}
+	recovery := readOnlyWALManualSequence(walkBody, `recovery, err := inspectRollbackFaultRecoverySource(path,raw)`, `if err != nil { return err }`, `findings = append(findings,recovery...)`)
+	if recovery < 0 {
+		report("rollback fault recovery source")
+	}
 	ordinary, oracle := -1, -1
 	if walkBody != nil {
 		for i, statement := range walkBody.List {
@@ -1289,7 +1304,7 @@ func readOnlyWALManualPreviousWiring(mainBody, walkBody *ast.BlockStmt) []string
 	}
 	backup := readOnlyWALManualSequence(walkBody, `manual, err := inspectBackupManualSource(path,raw)`, `if err != nil { return err }`, `findings = append(findings,manual...)`)
 	readonly := readOnlyWALManualSequence(walkBody, `readonlyManual, err := inspectReadOnlyWALManualSource(path,raw)`, `if err != nil { return err }`, `findings = append(findings,readonlyManual...)`)
-	if formatUpgrade < 0 || backup <= formatUpgrade || rollbackFault <= backup || readonly <= rollbackFault || ordinary <= readonly || oracle <= ordinary {
+	if formatUpgrade < 0 || backup <= formatUpgrade || rollbackFault <= backup || rollbackSQL <= rollbackFault || restart <= rollbackSQL || recovery <= restart || readonly <= recovery || ordinary <= readonly || oracle <= ordinary {
 		report("earlier source filter order")
 	}
 	last, first := -1, -1
@@ -1297,6 +1312,9 @@ func readOnlyWALManualPreviousWiring(mainBody, walkBody *ast.BlockStmt) []string
 		{"inspectOracleContracts", "contracts", "err"},
 		{"inspectBackupManualContracts", "manualContracts", "manualErr"},
 		{"inspectRollbackFaultContracts", "rollbackFaultContracts", "rollbackFaultErr"},
+		{"inspectRollbackFaultSQLContracts", "rollbackSQLContracts", "rollbackSQLContractErr"},
+		{"inspectRollbackRestartContracts", "restartContracts", "restartContractErr"},
+		{"inspectRollbackFaultRecoveryContracts", "rollbackRecoveryContracts", "rollbackRecoveryErr"},
 		{"inspectWALPublicationContracts", "publicationContracts", "err"},
 		{"inspectDarwinInventoryManualContract", "darwinManual", "err"},
 		{"inspectFormatUpgradeContracts", "formatContracts", "formatErr"},
@@ -1338,11 +1356,14 @@ func readOnlyWALManualPreviousWiring(mainBody, walkBody *ast.BlockStmt) []string
 	// A correctly placed append/error block is insufficient if later code
 	// silently resets its accumulator. Preserve the actual result state too.
 	initializations := 0
-	// Only the two exact new triplets above extend the old append inventory.
+	// Only the exact combined, SQL, restart and recovery triplets extend the append inventory.
 	// Matching append text alone never grants a helper or placement exemption.
 	allowedAppends := map[string]int{
 		"findings=append(findings,formatUpgrade...)":  0,
 		"findings=append(findings,rollbackFault...)":  0,
+		"findings=append(findings,rollbackSQL...)":    0,
+		"findings=append(findings,restart...)":        0,
+		"findings=append(findings,recovery...)":       0,
 		"findings=append(findings,manual...)":         0,
 		"findings=append(findings,readonlyManual...)": 0,
 		"findings=append(findings,ordinary...)":       0,
@@ -1509,7 +1530,7 @@ func inspectReadOnlyWALManualWiring(raw []byte) []string {
 	if perFile < 0 || ordinaryFilter < 0 || oracleFilter < 0 || perFile > ordinaryFilter || perFile > oracleFilter {
 		findings = append(findings, "readonly WAL manual traversal must precede platform/test filters")
 	}
-	for _, call := range []string{"inspectFormatUpgradeSource(path,raw)", "inspectBackupManualSource(path,raw)", "inspectRollbackFaultSource(path,raw)", "inspectSource(path,raw)", "inspectWALPublicationSource(path,raw)", "inspectOracleSource(path,raw)", `inspectOracleContracts(".")`, `inspectBackupManualContracts(".")`, `inspectRollbackFaultContracts(".")`, `inspectWALPublicationContracts(".")`, `inspectDarwinInventoryManualContract(".")`, `inspectFormatUpgradeContracts(".")`} {
+	for _, call := range []string{"inspectFormatUpgradeSource(path,raw)", "inspectBackupManualSource(path,raw)", "inspectRollbackFaultSource(path,raw)", "inspectRollbackFaultSQLSource(path,raw)", "inspectRollbackRestartSource(path,raw)", "inspectRollbackFaultRecoverySource(path,raw)", "inspectSource(path,raw)", "inspectWALPublicationSource(path,raw)", "inspectOracleSource(path,raw)", `inspectOracleContracts(".")`, `inspectBackupManualContracts(".")`, `inspectRollbackFaultContracts(".")`, `inspectRollbackFaultSQLContracts(".")`, `inspectRollbackRestartContracts(".")`, `inspectRollbackFaultRecoveryContracts(".")`, `inspectWALPublicationContracts(".")`, `inspectDarwinInventoryManualContract(".")`, `inspectFormatUpgradeContracts(".")`} {
 		if strings.Count(body, call) != 1 {
 			findings = append(findings, "readonly WAL manual previous guard wiring weakened")
 		}

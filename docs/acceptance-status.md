@@ -1,3 +1,21 @@
+# 三设施检查点验收矩阵
+
+| 项目 | 实际结果与来源 | 边界 |
+|---|---|---|
+| 旧0ef／78992 | ordinary10925 PASS／1 FAIL／7 SKIP；整轮FAIL | 历史不回写 |
+| 修正51f63／44909 | 前五门PASS；race10928 PASS／7 SKIP，process0 | 行政pause后记录器exit2，原16门未启动，不是22门PASS |
+| 普通组合覆盖 | 新1＋960名，复用9967 PASS／7 SKIP | 没有完整ordinary重跑 |
+| oracle组件覆盖 | main750未变部分＋当前guard／960＋1＋78992模型492／157 | 没有当前完整oracle脚本实跑；来源分列 |
+| 补充v1 | 准入KeyError，Go启动0 | 记录器适配问题，不是项目测试FAIL |
+| 补充2054 | 四平台支持包build、213包／1378输入清单、manual compile／nm共7PASS | 仅编译／只读nm，映像未执行 |
+| 发布与外部资格 | [有界证据](evidence/20261012-rollback-facilities/README.zh.md)已准备 | 新提交／bundle／恢复smoke／CI PENDING；manual NOT_RUN，M3/M8/M10未完成 |
+
+[原目标有限余缺与M9校正](testing/remaining-goal-boundary-20261012-zh.md)。包含本页的commit由Git历史给出，不为内嵌自身SHA另建提交。
+
+## 历史原文
+
+以下冻结源原验收矩阵完整保留；FAIL/HOLD/UNKNOWN不改写。
+
 # 只读验收 V3 检查点完整正常门终态
 
 ## 2026 年 10 月 12 日 13 时 31 分 UTC 最新结果

@@ -1,0 +1,671 @@
+{
+  "source_tree": "51f63a56c22ab6396d5b542a1f0655a82dad4cd5",
+  "previous_published_main": "7503531d2e3d9336bb5943ccd4c836c804d5ce03",
+  "status": "BOUNDED_NEW_RESULTS_COMPLETE_WITH_SEPARATE_REUSE_PUBLICATION_PENDING",
+  "no_fresh_full26_or_full22_success_claim": true,
+  "ordinary_composed": {
+    "new_vfs_pass": 1,
+    "new_testscope_pass": 960,
+    "reused_pass": 9967,
+    "reused_skip": 7,
+    "composed_pass": 10928,
+    "composed_skip": 7,
+    "composed_named": 10935,
+    "fresh_full_ordinary_run": false,
+    "old78992_stays_FAIL": true
+  },
+  "oracle_composed": {
+    "status": "COMPONENT_COVERAGE_BY_EXACT_REUSE_AUDIT",
+    "unchanged_source": "main750 restored53330 pinned oracle evidence, only unchanged oracle-specific/default components",
+    "current_testscope_pass": 960,
+    "current_metadata_root_pass": 1,
+    "current_sourceguard": "PASS",
+    "models_from_78992": {
+      "rollbackfault": 492,
+      "rollbackrestart": 157
+    },
+    "default_oracle_selection_symmetric_difference": [],
+    "environment_equivalence": "Changed packages have no liveSQLITE_ORACLE reads/init/TestMain; the only liveGOFLAGS check tests manual_ and is false in both supplied environments.",
+    "fresh_current_complete_oracle_script": "NOT_RUN",
+    "fresh_oracle_named_total": null,
+    "prior_oracle_script_and_its_receipt_not_relabelled": true
+  },
+  "run44909": {
+    "original_planned_commands": 22,
+    "terminal_status": "STOP_AUTHORIZATION_PAUSE",
+    "tool_exit_code": 2,
+    "tool_terminal_pin": {
+      "path": "metadata-delta-44909-tool-terminal.json",
+      "bytes": 534,
+      "sha256": "df98aad8811fad5cc9f4702a021941523b60a877f3f84a51cd7cc7d8195c4040"
+    },
+    "natural_completion": true,
+    "lease": "RELEASED",
+    "lease_pin": {
+      "path": "recovery-three-facility-metadata-delta-verification-v2/COMPILER-LEASE-RELEASE.json",
+      "bytes": 1166,
+      "sha256": "c109ce4948eeeda87714d64753b0aa7e19a1d04e924fd5d93d18bfe80a1a1cae"
+    },
+    "first_five_stages": [
+      {
+        "stage": "00a_metadata_vfs",
+        "status": "PASS",
+        "test_status": "PASS",
+        "exit_code": 0,
+        "natural_wait_returned": true,
+        "end_utc": "2026-10-12T17:50:15.827870+00:00",
+        "stdout": {
+          "bytes": 1422,
+          "sha256": "501597ca1c62e29090c365abd9026b3d42275475eaf6c92031333de039100820",
+          "git_blob": "2e4a7f6874e03d4e7219d2218527386992e630eb",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        },
+        "stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        },
+        "result_pin": {
+          "path": "recovery-three-facility-metadata-delta-verification-v2/00a_metadata_vfs.result.json",
+          "bytes": 1719,
+          "sha256": "b786feb2e94647a0158b137399dd60b7596f89bc35437e335b83024d39c21cf1"
+        },
+        "summary": {
+          "stage": "00a_metadata_vfs",
+          "tree": "51f63a56c22ab6396d5b542a1f0655a82dad4cd5",
+          "fresh_uncached": true,
+          "exact_RUN_terminal_pairing": true,
+          "fixed_seed_passes": 0,
+          "missing_extra_duplicate_malformed_cached_zero_match_failure": false,
+          "test_subtest_terminals": {
+            "pass": 1
+          },
+          "top_level_terminals": {
+            "pass": 1
+          },
+          "top_level_kinds": {
+            "Test": 1
+          },
+          "package_terminals": {
+            "pass": 1
+          }
+        }
+      },
+      {
+        "stage": "00b_metadata_testscope",
+        "status": "PASS",
+        "test_status": "PASS",
+        "exit_code": 0,
+        "natural_wait_returned": true,
+        "end_utc": "2026-10-12T17:50:44.549864+00:00",
+        "stdout": {
+          "bytes": 1047582,
+          "sha256": "36a2e8dc4c7e3f424bea82523ee30df716ca570b7bc4bef9d25550bbdae89ba7",
+          "git_blob": "78346664b82c5e5c5dfb28fa915a321805a754cb",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        },
+        "stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        },
+        "result_pin": {
+          "path": "recovery-three-facility-metadata-delta-verification-v2/00b_metadata_testscope.result.json",
+          "bytes": 1743,
+          "sha256": "7fa358c333d5c331472c81dd6dc142b649267dcd9d81882ca8c8bd0a7f0d424e"
+        },
+        "summary": {
+          "stage": "00b_metadata_testscope",
+          "tree": "51f63a56c22ab6396d5b542a1f0655a82dad4cd5",
+          "fresh_uncached": true,
+          "exact_RUN_terminal_pairing": true,
+          "fixed_seed_passes": 0,
+          "missing_extra_duplicate_malformed_cached_zero_match_failure": false,
+          "test_subtest_terminals": {
+            "pass": 960
+          },
+          "top_level_terminals": {
+            "pass": 72
+          },
+          "top_level_kinds": {
+            "Test": 72
+          },
+          "package_terminals": {
+            "pass": 1
+          }
+        }
+      },
+      {
+        "stage": "01_guard",
+        "status": "PASS",
+        "test_status": "PASS",
+        "exit_code": 0,
+        "natural_wait_returned": true,
+        "end_utc": "2026-10-12T17:50:57.302752+00:00",
+        "stdout": {
+          "bytes": 138,
+          "sha256": "ba0cb4aff7a9c991c087485ff3499bf86b9b57f990c78b979c1f08ffc42a3505",
+          "git_blob": "f395108ba451da2480127f5445618ee4347daf3d",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        },
+        "stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        },
+        "result_pin": {
+          "path": "recovery-three-facility-metadata-delta-verification-v2/01_guard.result.json",
+          "bytes": 1054,
+          "sha256": "cbee512d0d52fe9af2a44e35940e811d1eabff5ee7f1add80805174aff3061a0"
+        },
+        "summary": {}
+      },
+      {
+        "stage": "03_vet",
+        "status": "PASS",
+        "test_status": "PASS",
+        "exit_code": 0,
+        "natural_wait_returned": true,
+        "end_utc": "2026-10-12T17:51:27.416369+00:00",
+        "stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        },
+        "stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        },
+        "result_pin": {
+          "path": "recovery-three-facility-metadata-delta-verification-v2/03_vet.result.json",
+          "bytes": 1051,
+          "sha256": "ca884637147179607aa9407819da47eb1678d4c278442a3b64bd13b37efbfcba"
+        },
+        "summary": {}
+      },
+      {
+        "stage": "04_build_nocgo",
+        "status": "PASS",
+        "test_status": "PASS",
+        "exit_code": 0,
+        "natural_wait_returned": true,
+        "end_utc": "2026-10-12T17:52:11.762996+00:00",
+        "stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        },
+        "stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        },
+        "result_pin": {
+          "path": "recovery-three-facility-metadata-delta-verification-v2/04_build_nocgo.result.json",
+          "bytes": 1059,
+          "sha256": "1eaa78ef4a84e612ecab55fde33ef1b7a4a809fa46d827380023381ff50f67d7"
+        },
+        "summary": {}
+      }
+    ],
+    "race": {
+      "stage": "05_race",
+      "status": "STOP_AUTHORIZATION_PAUSE",
+      "test_status": "PASS",
+      "exit_code": 0,
+      "natural_wait_returned": true,
+      "end_utc": "2026-10-12T18:09:05.017840+00:00",
+      "stdout": {
+        "bytes": 11237908,
+        "sha256": "8d45b4edffef31778b2355831afee49698424969e4ee34acba31618db7a6ec30",
+        "git_blob": "bea03876a9b0f2ace1536e5fa7682b26ad422673",
+        "git_mode": "100644",
+        "posix_mode": "0o644"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "git_mode": "100644",
+        "posix_mode": "0o644"
+      },
+      "result_pin": {
+        "path": "recovery-three-facility-metadata-delta-verification-v2/05_race.result.json",
+        "bytes": 2711,
+        "sha256": "fae066c21f960d2b4d17a1badd230f94210b0d36848974371269b422f530c572"
+      },
+      "summary": {
+        "stage": "05_race",
+        "tree": "51f63a56c22ab6396d5b542a1f0655a82dad4cd5",
+        "fresh_uncached": true,
+        "exact_RUN_terminal_pairing": true,
+        "fixed_seed_passes": 313,
+        "missing_extra_duplicate_malformed_cached_zero_match_failure": false,
+        "test_subtest_terminals": {
+          "pass": 10928,
+          "skip": 7
+        },
+        "top_level_terminals": {
+          "pass": 1621,
+          "skip": 1
+        },
+        "top_level_kinds": {
+          "Test": 1575,
+          "Fuzz": 41,
+          "Example": 6
+        },
+        "package_terminals": {
+          "skip": 11,
+          "pass": 42
+        }
+      },
+      "named_counts": {
+        "pass": 10928,
+        "skip": 7
+      },
+      "named_total": 10935,
+      "raw_sha256": "8d45b4edffef31778b2355831afee49698424969e4ee34acba31618db7a6ec30",
+      "all_named_run_terminal_pairs_exact_once": true,
+      "elapsed_seconds": 1005.4090273729962,
+      "fixed_seed_passes": 313,
+      "sole_latch": "pause",
+      "pause_after_current_utc": "2026-10-12T18:02:50.610644+00:00",
+      "interpretation": "TestPASS/process0; recorderSTOP_AUTHORIZATION_PAUSE/tool2 after natural drain. Not a test failure."
+    },
+    "unstarted_original_stages": [
+      "06_compile_linux_amd64",
+      "07_compile_linux_arm64",
+      "08_compile_darwin_amd64",
+      "09_compile_darwin_arm64",
+      "10_compile_windows_amd64",
+      "11_modules_verify",
+      "12_whole_module_nontest_closure",
+      "13_shipping_cli_library_closure",
+      "14_complete_pinned_oracle_script",
+      "15_limit_phase_conversion_oracle_race",
+      "16_compile_darwin_amd64_encstore_tests_only",
+      "17_inspect_darwin_amd64_encstore_symbols",
+      "18_compile_darwin_arm64_encstore_tests_only",
+      "19_inspect_darwin_arm64_encstore_symbols",
+      "20_compile_windows_amd64_encstore_tests_only",
+      "21_inspect_windows_amd64_encstore_symbols"
+    ],
+    "raw_command_statuses_pin": {
+      "path": "recovery-three-facility-metadata-delta-verification-v2/command-statuses.json",
+      "bytes": 3562,
+      "sha256": "01f83ff3957ca95e522cfa83e9b7725527cb7ca9c1ee94e0d48f7300ccc593d3"
+    },
+    "scope_change_audit_pin": {
+      "path": "pending-gate-reuse-audit-v1.json",
+      "bytes": 19220,
+      "sha256": "5c06e836907eaf90d7eed089159315debf16756233e72d4524620a0f8f438a52"
+    }
+  },
+  "supplement_v1_pre_go_failure": {
+    "status": "FAIL_OBSERVER_LATCHED",
+    "stage": "admission",
+    "tool_exit_code": 1,
+    "error": "'all_bytes_modes_metadata_match'",
+    "Go_commands_started": 0,
+    "results": [],
+    "source_changed": false,
+    "receipt_pin": {
+      "path": "manual-compile-supplement-admission-failure-20261012T1809.json",
+      "bytes": 1504,
+      "sha256": "7cb24c835ca8688b31d7061e17696630a34f766cb7b611fd61134fcc4b6f4fe2"
+    },
+    "technical_diagnosis": "The record adapter looked up a nonexistent summary key. v2 compares the supplied full identity object. No projectGo/test/native image started and no source was changed."
+  },
+  "supplement_v2_2054": {
+    "status": "APPROVED_SUPPORT_BUILD_MANUAL_COMPILE_SUPPLEMENT_PASS",
+    "session": 2054,
+    "outer_commands": 7,
+    "go_invocations": 7,
+    "tool_exit_code": 0,
+    "natural_completion": true,
+    "completion_utc": "2026-10-12T18:14:09.548470+00:00",
+    "lease": "RELEASED",
+    "tool_terminal_pin": {
+      "path": "manual-compile-supplement-2054-tool-terminal.json",
+      "bytes": 527,
+      "sha256": "b5b9997580ec4c3c9fe9a6c51ad9ff1eeb6e509c036b42a86056f52698ce89d6"
+    },
+    "completion_pin": {
+      "path": "recovery-three-facility-manual-compile-verification-v2/completion.json",
+      "bytes": 57833,
+      "sha256": "fc4d45660766990efc5a9c34186392d1b31cf4afb85e2ca43b7e1091ed3ec691"
+    },
+    "lease_pin": {
+      "path": "recovery-three-facility-manual-compile-verification-v2/COMPILER-LEASE-RELEASE.json",
+      "bytes": 286,
+      "sha256": "bc65508f602a01232fd48d973628ec1a81e76974f2b810bfbd0428d3845ec627"
+    },
+    "results": [
+      {
+        "stage": "07_compile_linux_arm64_support_only",
+        "status": "PASS",
+        "test_status": null,
+        "exit_code": 0,
+        "natural_wait_returned": true,
+        "end_utc": "2026-10-12T18:13:17.028766+00:00",
+        "stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        },
+        "stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        },
+        "result_pin": {
+          "path": "recovery-three-facility-manual-compile-verification-v2/07_compile_linux_arm64_support_only.result.json",
+          "bytes": 1165,
+          "sha256": "c660e9d91ecb7e5ac79d7908095e2f5d9e948d07b0fddaa33d503ba764356564"
+        },
+        "summary": {
+          "build_only": true,
+          "target_executed": false,
+          "packages": [
+            "./internal/testscope",
+            "./internal/testkit/rollbackfault",
+            "./internal/testkit/rollbackrestart"
+          ],
+          "target": {
+            "GOOS": "linux",
+            "GOARCH": "arm64",
+            "CGO_ENABLED": "0"
+          }
+        }
+      },
+      {
+        "stage": "08_compile_darwin_amd64_support_only",
+        "status": "PASS",
+        "test_status": null,
+        "exit_code": 0,
+        "natural_wait_returned": true,
+        "end_utc": "2026-10-12T18:13:31.860052+00:00",
+        "stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        },
+        "stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        },
+        "result_pin": {
+          "path": "recovery-three-facility-manual-compile-verification-v2/08_compile_darwin_amd64_support_only.result.json",
+          "bytes": 1169,
+          "sha256": "f46b3341cfeaa8f659f169a3740a619226df91ebb8d123418d2203041c3767d0"
+        },
+        "summary": {
+          "build_only": true,
+          "target_executed": false,
+          "packages": [
+            "./internal/testscope",
+            "./internal/testkit/rollbackfault",
+            "./internal/testkit/rollbackrestart"
+          ],
+          "target": {
+            "GOOS": "darwin",
+            "GOARCH": "amd64",
+            "CGO_ENABLED": "0"
+          }
+        }
+      },
+      {
+        "stage": "09_compile_darwin_arm64_support_only",
+        "status": "PASS",
+        "test_status": null,
+        "exit_code": 0,
+        "natural_wait_returned": true,
+        "end_utc": "2026-10-12T18:13:45.135778+00:00",
+        "stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        },
+        "stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        },
+        "result_pin": {
+          "path": "recovery-three-facility-manual-compile-verification-v2/09_compile_darwin_arm64_support_only.result.json",
+          "bytes": 1170,
+          "sha256": "0f423971690cb494b759e6482968d17ad4fb12166c079ac579565e05ceca3f16"
+        },
+        "summary": {
+          "build_only": true,
+          "target_executed": false,
+          "packages": [
+            "./internal/testscope",
+            "./internal/testkit/rollbackfault",
+            "./internal/testkit/rollbackrestart"
+          ],
+          "target": {
+            "GOOS": "darwin",
+            "GOARCH": "arm64",
+            "CGO_ENABLED": "0"
+          }
+        }
+      },
+      {
+        "stage": "10_compile_windows_amd64_support_only",
+        "status": "PASS",
+        "test_status": null,
+        "exit_code": 0,
+        "natural_wait_returned": true,
+        "end_utc": "2026-10-12T18:13:59.048481+00:00",
+        "stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        },
+        "stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        },
+        "result_pin": {
+          "path": "recovery-three-facility-manual-compile-verification-v2/10_compile_windows_amd64_support_only.result.json",
+          "bytes": 1172,
+          "sha256": "5342b4392070ff41f8ce9afab5c4b03cb1612548cc729b2f9757b0978242e243"
+        },
+        "summary": {
+          "build_only": true,
+          "target_executed": false,
+          "packages": [
+            "./internal/testscope",
+            "./internal/testkit/rollbackfault",
+            "./internal/testkit/rollbackrestart"
+          ],
+          "target": {
+            "GOOS": "windows",
+            "GOARCH": "amd64",
+            "CGO_ENABLED": "0"
+          }
+        }
+      },
+      {
+        "stage": "12_whole_module_nontest_closure",
+        "status": "PASS",
+        "test_status": null,
+        "exit_code": 0,
+        "natural_wait_returned": true,
+        "end_utc": "2026-10-12T18:13:59.623199+00:00",
+        "stdout": {
+          "bytes": 588872,
+          "sha256": "9454f924aa79a338567b0ef721647df51211267e7da2cdbf2b03fc000e96ad6c",
+          "git_blob": "c95570218847598934526b1ae5b898fa997867b8",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        },
+        "stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        },
+        "result_pin": {
+          "path": "recovery-three-facility-manual-compile-verification-v2/12_whole_module_nontest_closure.result.json",
+          "bytes": 2061,
+          "sha256": "29b411ba0216e32ae21f008e6693f0cb9cd835187c358ff1eb10511dae9f2ee8"
+        },
+        "summary": {
+          "stage": "12_whole_module_nontest_closure",
+          "tree": "51f63a56c22ab6396d5b542a1f0655a82dad4cd5",
+          "scope": "whole-module non-test closure",
+          "package_count": 213,
+          "total_input_records": 1378,
+          "unique_input_paths": 1378,
+          "all_actual_inputs_freshly_hashed_before_advancing": true,
+          "all_native_C_family_and_Syso_empty": true,
+          "shipping_forbidden_dependencies_absent": null
+        }
+      },
+      {
+        "stage": "11_restart_sqlite_compile_only",
+        "status": "PASS",
+        "test_status": null,
+        "exit_code": 0,
+        "natural_wait_returned": true,
+        "end_utc": "2026-10-12T18:14:07.419339+00:00",
+        "stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        },
+        "stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        },
+        "result_pin": {
+          "path": "recovery-three-facility-manual-compile-verification-v2/11_restart_sqlite_compile_only.result.json",
+          "bytes": 1379,
+          "sha256": "d27e609309fe49d48ef174c0da387232301adbe31721e68ab3aabda67df84d9a"
+        },
+        "summary": {
+          "path": "/workspace/scratch/5e06a74e5f65/restart-20261011T2040/recovery-three-facility-manual-compile-verification-v2/sqlite-restart-linux.test",
+          "format": "ELF64",
+          "machine": 62,
+          "executed": false,
+          "nm_executed": false,
+          "private_symbol_presence_asserted": false,
+          "bytes": 17180165,
+          "sha256": "03b465ee4ebf9595b1d863aa853d65476449883fe9469e95ee460e4019f5217b",
+          "git_blob": "db9d0cbc70a6dbaa84d6894f28ef4ae394fc92fb",
+          "git_mode": "100755",
+          "posix_mode": "0o755"
+        }
+      },
+      {
+        "stage": "12_restart_sqlite_readonly_symbols",
+        "status": "PASS",
+        "test_status": null,
+        "exit_code": 0,
+        "natural_wait_returned": true,
+        "end_utc": "2026-10-12T18:14:09.179695+00:00",
+        "stdout": {
+          "bytes": 675683,
+          "sha256": "d7e52051fc3f135b84711b543ae6e513c4acedcc61a064218adceb3b3e3dd3c3",
+          "git_blob": "3168280d50b3fcad2efaad985d3d03d69fc0bb21",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        },
+        "stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "git_mode": "100644",
+          "posix_mode": "0o644"
+        },
+        "result_pin": {
+          "path": "recovery-three-facility-manual-compile-verification-v2/12_restart_sqlite_readonly_symbols.result.json",
+          "bytes": 46001,
+          "sha256": "0950449a75e690713589e070fe91bf74619dec8450b436b9431f3696d4be0fb4"
+        },
+        "summary": {
+          "all_rows_parsed": 11995,
+          "spaced_symbol_rows": 169,
+          "no_missing_extra_duplicate": true,
+          "foreign_image_executed": false,
+          "official_nm_read_only": true,
+          "target_executed": false,
+          "manual_sql_ledger_exact_root_count": 1,
+          "manual_restart_exact_root_count": 3,
+          "registration_counts": {
+            "Test": 454
+          },
+          "binary": {
+            "path": "/workspace/scratch/5e06a74e5f65/restart-20261011T2040/recovery-three-facility-manual-compile-verification-v2/sqlite-restart-linux.test",
+            "format": "ELF64",
+            "machine": 62,
+            "executed": false,
+            "nm_executed": false,
+            "private_symbol_presence_asserted": false,
+            "bytes": 17180165,
+            "sha256": "03b465ee4ebf9595b1d863aa853d65476449883fe9469e95ee460e4019f5217b",
+            "git_blob": "db9d0cbc70a6dbaa84d6894f28ef4ae394fc92fb",
+            "git_mode": "100755",
+            "posix_mode": "0o755"
+          },
+          "required_roots_count": 454,
+          "forbidden_roots_count": 18
+        }
+      }
+    ],
+    "target_images_executed": false,
+    "physicalValidated": false
+  },
+  "new_source_archive": "VERIFIED_DELTA_REQUIRES_0EF_BASE",
+  "run44909_raw_terminal_archive": "PENDING_LIBRARY_ARCHIVE",
+  "supplement2054_raw_terminal_archive": "PENDING_LIBRARY_ARCHIVE",
+  "containing_checkpoint_commit": "Use containing Git history; never add a self-SHA commit.",
+  "non_document_source_binding": "On overlay application all non-doc bytes/modes must match51f63.",
+  "new_bundle_restore_smoke_and_ci": "PENDING",
+  "manual_native_fault_exit_recovery": "NOT_RUN",
+  "M10_and_original_goal": "NOT_QUALIFIED"
+}

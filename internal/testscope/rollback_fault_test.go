@@ -117,6 +117,12 @@ func TestRollbackFaultOutsideConsumersRejected(t *testing.T) {
 		{"contract dot import", "internal/pager/rogue.go", "package pager\nimport . \"" + rollbackFaultImport + "\"", "contract production consumer"},
 		{"copied contract file", "internal/testkit/rollbackfault/native.go", "package rollbackfault\nfunc openFixture() {}", "unreviewed contract-package source"},
 		{"native adapter fixture file", "internal/pager/rollback_io_native_test.go", "package pager\nfunc TestNativeFixture() {}", "unreviewed adapter source or native caller"},
+		{"recovery path wrong arm target", rollbackFaultRecoveryNative, "package pager\nfunc manualRollbackFaultCommit() { armRollbackFault(other, plan) }", "scope entry has no approved caller"},
+		{"recovery path scope wrapper", rollbackFaultRecoveryNative, "package pager\nfunc wrapper() { armRollbackFault(tx, plan) }", "scope entry has no approved caller"},
+		{"recovery path armer alias", rollbackFaultRecoveryNative, "package pager\nvar arm = armRollbackFault", "scope entry has no approved caller"},
+		{"recovery path private registry", rollbackFaultRecoveryNative, "package pager\nvar registry = rollbackFaultRegistry", "manual-private reference"},
+		{"recovery path copied bridge", rollbackFaultRecoveryNative, "package pager\nfunc rollbackWrite() {}", "bridge reference outside exact Commit"},
+		{"recovery path contract alias", rollbackFaultRecoveryNative, "package pager\nimport rf \"" + rollbackFaultImport + "\"", "contract production consumer"},
 		{"environment consumer", "internal/pager/rogue.go", "package pager\nimport \"os\"\nfunc arm() { os.Getenv(\"GOSQLITE_MANUAL_FAULT_ROLLBACK\") }", "manual environment consumer outside"},
 	}
 	for _, variant := range variants {
@@ -145,6 +151,7 @@ func TestRollbackFaultGuardWiringPreservesPriorPolicies(t *testing.T) {
 		"inspectSource(path, raw)", "inspectBackupManualSource(path, raw)", "inspectWALPublicationSource(path, raw)", "inspectOracleSource(path, raw)",
 		`inspectOracleContracts(".")`, `inspectBackupManualContracts(".")`, `inspectWALPublicationContracts(".")`, `inspectDarwinInventoryManualContract(".")`,
 		"inspectRollbackFaultSource(path, raw)", `inspectRollbackFaultContracts(".")`,
+		"inspectRollbackFaultRecoverySource(path, raw)", `inspectRollbackFaultRecoveryContracts(".")`,
 	} {
 		if strings.Count(string(raw), hook) != 1 {
 			t.Fatal("missing/duplicate guard hook", hook)
@@ -152,7 +159,7 @@ func TestRollbackFaultGuardWiringPreservesPriorPolicies(t *testing.T) {
 	}
 	// This exact literal is subject to independent whole-file source review.
 	// The map value alone cannot authorize a changed main.go.
-	const reviewedMainSHA256 = "dd0d43330c5ad020b4ab2e5649f32f963aa4909316be64ae32c01d9f3c4371aa"
+	const reviewedMainSHA256 = "e31c233fed8976fddff3236a8804f84d493e2567d6b6d85d11355de2ca0da52b"
 	if walPublicationFrozenSources["internal/testscope/main.go"] != reviewedMainSHA256 {
 		t.Fatal("main.go WAL pin differs from independently reviewed literal")
 	}
