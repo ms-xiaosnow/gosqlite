@@ -3,9 +3,9 @@
 This is the offline regression-tool slice of goal §11.3. It reads already
 collected, operator-supplied evidence for the fixed grams and rollback transaction
 profiles. It does not collect measurements, build or launch native programs,
-contact services, or install a performance CI job. There is no `run.py` in this
-slice. Native collection and actual performance-CI deployment remain on HOLD
-pending the separate execution permit. No real baseline or measured performance
+or contact measurement services. There is no `run.py` in this slice. A manual-only
+CI workflow can compare existing committed evidence offline. Native collection
+requires separate authorization. No real baseline or measured performance
 acceptance is supplied by this integration.
 
 The comparator and its tests use only Python's standard library. Python 3.11+
@@ -59,6 +59,56 @@ The JSON `status` and `reason` are the result. A successful fixture suite or CI
 badge is not a measured performance PASS. A caller must preserve nonzero exit
 codes rather than silently converting missing/unsupported/inconclusive evidence
 into acceptance.
+
+## Manual offline CI input
+
+[performance-evidence.yml](../../.github/workflows/performance-evidence.yml) has
+only a `workflow_dispatch` trigger. Its required `evidence_directory` input is a
+directory relative to the fixed `benchmarks/performance/evidence/` root in the
+same checked-out repository, for example `reviewed-run-001`. Commit the complete
+input set before dispatching the selected ref. There is no URL input, artifact
+download, native collector, scheduled run or performance run on push/PR. The
+job uses the existing ordinary `ubuntu-latest` target, its Python 3.11+ runtime,
+read-only contents permission and checkout with credentials not persisted.
+The existing benchmarks use synthetic datasets; no real business database or
+secret is required. Review reports and environment metadata before committing
+them to a shared or public repository. No real evidence set is supplied here,
+so an actual measurement comparison remains NOT_RUN until approved input exists.
+
+The selected directory must contain the original schema-2 `bundle.json`, all
+its referenced files, and this separate `origin.json` declaration:
+
+```json
+{"schema_version":1,"origin":"operator_supplied_measurement"}
+```
+
+The only other recognized origin is `synthetic_fixture`, which dispatch rejects
+as UNSUPPORTED (4). Unknown labels, extra fields and malformed declarations are
+INADMISSIBLE (3). The declaration is an untrusted operator assertion, not proof
+that measurements occurred: relabeling fixtures does not make them measurements.
+Existing manifest, host and measurement truth requirements still apply. No input
+records are rewritten, and the comparator schema/statistics are unchanged.
+
+[ci_input.py](ci_input.py) checks the entire selected static tree first: canonical
+relative ASCII directory components (letters, digits, dot, underscore, hyphen;
+no empty, dot or parent components), at most 16 components and 1024 characters,
+no symlinks in the fixed/input directory path or evidence tree, and only regular
+files and directories. Limits are 1024 total tree entries, 64 MiB per file,
+32 MiB per `.json` file, 256 MiB combined file bytes and 4096 bytes for origin.json.
+The comparator independently bounds every JSON document to 32 MiB regardless
+of filename. Missing inputs remain MISSING (4). Other admission errors are
+INADMISSIBLE (3). These are limits for stable, trusted filesystem inputs, not a
+hostile concurrent-mutation defense. Keep the checkout/evidence unchanged during
+comparison. This wrapper never executes retained binaries or command records.
+
+The comparator's complete decision JSON and all seven status/exit mappings above
+are preserved. The job prints JSON to its retained step log and exclusively
+creates `ordinary-performance-comparison.json` in trusted `RUNNER_TEMP`, outside
+the checkout. That temporary file is not a published artifact; job logs plus the
+committed source evidence are the retained record. An existing output file or an
+output-write failure fails the job before printing a verdict. No evidence file
+can be an output target. Inspect the JSON status/reason, not only the job badge.
+A synthetic unit-test PASS never establishes measured performance acceptance.
 
 ## Statistical contract
 
@@ -251,14 +301,24 @@ responsible for trustworthy stable files and the truth of operator records.
 ```sh
 PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover \
   -s benchmarks/performance -p test_compare_offline.py -v
+PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover \
+  -s benchmarks/performance -p test_ci_input.py -v
 ```
 
-`scripts/check.sh` adds exactly that fixture command after the existing source
-guard. Its other ordinary Go checks are unchanged. No workflow, native benchmark
-job or report collector is added. The test closure is standard-library Python,
-compare.py, validation.py and fixtures.json. It creates only synthetic temporary
-files; command arrays and synthetic "bin" bytes are never launched. No runner,
-subprocess, network, database or ANN implementation is imported.
+`scripts/check.sh` includes both pure test commands after the existing source
+guard. Its other ordinary Go checks are unchanged. The 17 new input tests use
+ci_input.py, compare.py, validation.py, the existing pure test_compare_offline.py
+fixture helper, fixtures.json and standard-library Python only. They check
+path/origin/size admission, all seven verdicts, exact exits and output isolation
+using temporary files, links and injected comparator results. One test also
+checks real-comparator PASS/REGRESSION wiring with complete synthetic bundles;
+its deliberately false origin declaration proves no measurement authenticity.
+Command arrays and synthetic "bin" bytes are never launched. No project native
+runner is imported and no subprocess, network, database or ANN operation is
+invoked. Standard-library test helpers may import system-operation wrappers;
+their presence is not a claim that the test closure invokes those operations.
+The dispatch job compares supplied evidence; ordinary CI tests only synthetic
+fixture logic.
 
 This imports 45 of the recovered 54 methods: MathTests (3),
 HistogramMomentTests (3), ComparisonTests (31), AdmissionRepairs (8). Their

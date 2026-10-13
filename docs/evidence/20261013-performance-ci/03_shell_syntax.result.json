@@ -1,0 +1,24 @@
+{
+  "name": "03_shell_syntax",
+  "argv": [
+    "/bin/sh",
+    "-n",
+    "scripts/check.sh"
+  ],
+  "env": {
+    "PATH": "/usr/bin:/bin",
+    "LC_ALL": "C.UTF-8",
+    "LANG": "C.UTF-8",
+    "TZ": "UTC",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "PYTHONHASHSEED": "0"
+  },
+  "start_utc": "2026-10-13T13:22:06.348585+00:00",
+  "end_utc": "2026-10-13T13:22:06.350499+00:00",
+  "exit_code": 0,
+  "status": "PASS",
+  "stdout_bytes": 0,
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_bytes": 0,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

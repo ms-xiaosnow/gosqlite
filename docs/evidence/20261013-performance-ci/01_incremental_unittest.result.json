@@ -1,0 +1,30 @@
+{
+  "name": "01_incremental_unittest",
+  "argv": [
+    "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3.12",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "benchmarks/performance",
+    "-p",
+    "test_ci_input.py",
+    "-v"
+  ],
+  "env": {
+    "PATH": "/usr/bin:/bin",
+    "LC_ALL": "C.UTF-8",
+    "LANG": "C.UTF-8",
+    "TZ": "UTC",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "PYTHONHASHSEED": "0"
+  },
+  "start_utc": "2026-10-13T13:22:05.519081+00:00",
+  "end_utc": "2026-10-13T13:22:06.297245+00:00",
+  "exit_code": 0,
+  "status": "PASS",
+  "stdout_bytes": 0,
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_bytes": 2369,
+  "stderr_sha256": "c1508775c0dbada26910e1fdc162341645dad5fb39e4674cb7337c9efda577c3"
+}

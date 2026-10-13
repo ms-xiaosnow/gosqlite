@@ -1,0 +1,22 @@
+test_accepts_nested_relative_directory (test_ci_input.CIInputTests.test_accepts_nested_relative_directory) ... ok
+test_all_seven_verdicts_and_exact_exit_codes_are_forwarded (test_ci_input.CIInputTests.test_all_seven_verdicts_and_exact_exit_codes_are_forwarded) ... ok
+test_cli_uses_trusted_temp_and_propagates_nonzero_without_subprocess (test_ci_input.CIInputTests.test_cli_uses_trusted_temp_and_propagates_nonzero_without_subprocess) ... ok
+test_file_json_total_and_entry_limits (test_ci_input.CIInputTests.test_file_json_total_and_entry_limits) ... ok
+test_full_synthetic_bundle_real_comparator_wiring (test_ci_input.CIInputTests.test_full_synthetic_bundle_real_comparator_wiring) ... ok
+test_io_error_is_inadmissible (test_ci_input.CIInputTests.test_io_error_is_inadmissible) ... ok
+test_missing_directory_origin_or_bundle_is_missing (test_ci_input.CIInputTests.test_missing_directory_origin_or_bundle_is_missing) ... ok
+test_missing_input_is_retained_and_exits_four (test_ci_input.CIInputTests.test_missing_input_is_retained_and_exits_four) ... ok
+test_nonregular_entry_is_rejected_without_opening_it (test_ci_input.CIInputTests.test_nonregular_entry_is_rejected_without_opening_it) ... ok
+test_origin_labels_are_exact_untrusted_declarations (test_ci_input.CIInputTests.test_origin_labels_are_exact_untrusted_declarations) ... ok
+test_origin_strict_json_and_bounded_read (test_ci_input.CIInputTests.test_origin_strict_json_and_bounded_read) ... ok
+test_output_cannot_overwrite_evidence_or_an_existing_file (test_ci_input.CIInputTests.test_output_cannot_overwrite_evidence_or_an_existing_file) ... ok
+test_real_comparator_handles_bundle_json_without_schema_changes (test_ci_input.CIInputTests.test_real_comparator_handles_bundle_json_without_schema_changes) ... ok
+test_rejects_absolute_traversal_and_shell_like_input (test_ci_input.CIInputTests.test_rejects_absolute_traversal_and_shell_like_input) ... ok
+test_required_files_cannot_be_directories (test_ci_input.CIInputTests.test_required_files_cannot_be_directories) ... ok
+test_symlink_directory_and_file_are_rejected (test_ci_input.CIInputTests.test_symlink_directory_and_file_are_rejected) ... ok
+test_symlink_in_fixed_root_is_rejected (test_ci_input.CIInputTests.test_symlink_in_fixed_root_is_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 17 tests in 0.544s
+
+OK

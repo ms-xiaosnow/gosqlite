@@ -1,0 +1,24 @@
+{
+  "name": "02_python_syntax",
+  "argv": [
+    "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3.12",
+    "-c",
+    "import ast;from pathlib import Path;files=['benchmarks/performance/ci_input.py','benchmarks/performance/test_ci_input.py'];[ast.parse(Path(p).read_text(),filename=p) for p in files];print('AST_PARSE_PASS',len(files))"
+  ],
+  "env": {
+    "PATH": "/usr/bin:/bin",
+    "LC_ALL": "C.UTF-8",
+    "LANG": "C.UTF-8",
+    "TZ": "UTC",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "PYTHONHASHSEED": "0"
+  },
+  "start_utc": "2026-10-13T13:22:06.297718+00:00",
+  "end_utc": "2026-10-13T13:22:06.347797+00:00",
+  "exit_code": 0,
+  "status": "PASS",
+  "stdout_bytes": 17,
+  "stdout_sha256": "c5131711ae46100fd89f49eaa5fef8e860955539f060d0a15e7ee899cd8ad606",
+  "stderr_bytes": 0,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

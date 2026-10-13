@@ -13,6 +13,14 @@
 
 - 2026-10-13补记：40e287的CI [38346611629](https://github.com/ms-xiaosnow/gosqlite/actions/runs/38346611629) 双SUCCESS。随后ANN离线修正六门于06:11:06 UTC完成，normal/race各467命名PASS；仅报告自洽，不提升手工或M10资格。[新证据](../evidence/20261013-ann-report-check/README.zh.md)。
 
+## 2026-10-13 有界收尾复核与离线性能 CI
+
+- 原目标 §11.3 的性能回归 CI 接线已补齐：只手动触发的 [offline-performance-evidence](../../.github/workflows/performance-evidence.yml) 读取同一提交下固定目录中的已审阅证据，调用既有比较器并保留七类状态／退出码。它不采集性能、启动数据库或获取外部数据。
+- 新入口独立源审通过，17 个纯 fixture 测试、Python AST 与 shell 语法检查 PASS；原 57 个比较器测试及未变 Go 代码的资格明确复用。[精确增量证据](../evidence/20261013-performance-ci/README.zh.md)。新的普通 CI 终态以该提交的 Actions 记录为准，不在提交前预填。
+- 有界复核未发现除此接线外可独立补完的新增必需代码项。原目标允许按兼容矩阵分阶段保留未支持 SQL；M9 的完整真实 snapshot／依赖／应用 SQL 可由操作者提供，不要求新增在线迁移执行器。
+- 原有 ANN 测量工具已实现固定数据、真实索引、recall@1/10/100 与建索引耗时；本次修复的 schema3 离线校验是额外报告合同，原工具输出不会冒充 schema3。更强格式的 native 采集集成不是原 goal 的新增义务。
+- 仍需操作者提供并执行下列手工／真实环境资格、受控测量输入、PG／Neon 复核与独立审查。没有真实证据包时，新的离线性能任务是 **NOT_RUN**；fixture PASS、来源声明及绿色普通 CI 都不能证明真实性能或整体 M10。
+
 ## 已闭合的有限六项
 
 | 项目／goal 条款 | 代码及适用证据 | 当前边界／中文步骤 |
@@ -30,7 +38,7 @@
 
 | 待办 | 真实原因与完成条件 | 当前处理 |
 |---|---|---|
-| ANN V3三项报告准入修正 | 已以离线reportcheck＋stdin CLI修复HNSW计数守恒、IVF全lists覆盖、同query-row exact／rescore距离一致；29根467命名normal/race各PASS，vet/build/源码guard/格式PASS。旧V3 FAIL保留。 | 三项代码与有限回归已闭合；真实报告来源、性能／recall与schema3 native采集未验收。旧聚合报告拒绝。见[可调用入口](../../benchmarks/ann/reportcheck/README.md)、[精确证据](../evidence/20261013-ann-report-check/README.zh.md)。 |
+| ANN V3三项报告准入修正 | 已以离线reportcheck＋stdin CLI修复HNSW计数守恒、IVF全lists覆盖、同query-row exact／rescore距离一致；29根467命名normal/race各PASS，vet/build/源码guard/格式PASS。旧V3 FAIL保留。 | 三项代码与有限回归已闭合；真实报告来源与性能／recall未验收；schema3 native采集未集成且不是原goal新增义务，旧聚合报告不冒充schema3。见[可调用入口](../../benchmarks/ann/reportcheck/README.md)、[精确证据](../evidence/20261013-ann-report-check/README.zh.md)。 |
 | ANN V4及未知整轮安全中断 | 已有整轮安全标记／中断事实，但不能确定精确触发操作和目标；未找到足以证明某个具体源码编辑曾被拒绝的记录。缺失精确记录既不等于从未拒绝，也不是恢复链路的授权。 | 保留UNKNOWN，原整链不重启；2026-10-13用户新请求下限定三项离线修正已完成，不能把旧全面暂停误称所有源码永久禁止。见[中断事实与历史失败](../interruption-20261010.md)、[逐项限制溯源](../restriction-provenance-20261011.md)。本页不提供这些链路的启动命令。 |
 | 41-target持续fuzz campaign | 旧41根／313个固定seed普通PASS不等于持续campaign；被中断活动没有可采信的新运行结果。 | 原状态保留，不重新发起，也不把固定seed结果升级为campaign PASS。 |
 
@@ -373,7 +381,7 @@ capture_rekey quiescent native_go test -mod=readonly -buildvcs=false -p=1 \
 | 外部待办 | 缺什么／由谁提供 | 完成时保留什么及边界 |
 |---|---|---|
 | 原生平台、FS、锁／Sync及真实持久介质 | 获准操作者提供目标OS／arch、支持的本地FS、设备／mount和真实持久性条件；需要物理故障或掉电时另核定范围和安全条件。 | 固定源码／binary／OS／卷／设备／缓存条件、实际原生结果和失败实物；普通CI、cross-build或本环境tmpfs不替代。参见[主手册](../manual-verification-zh.md)和各H/N组。 |
-| 受控性能基线、同机8–32配对测量及性能CI部署 | 需要受控机器、合格baseline、固定source／数据／seed／cache／page／Go／FS、预声明指标和阈值；性能CI的新runner、资源／费用／权限与部署由有权操作者另行决定。离线报告代码已在本次独立集成并通过57个纯fixture测试，仍没有真实性能测量或性能CI部署结果。 | 按[离线性能比较器合同](../../benchmarks/performance/README.md)预声明8–32个完整交错baseline／candidate invocation pairs，保存所有原始报告、失败／排除原因和配对统计；不足或INCONCLUSIVE不填PASS。普通CI仅执行离线fixture hook，不自动启动benchmark、性能runner或计费用量查询。ANN报告缺口仍单列，不通过性能流程绕开。 |
+| 受控性能基线、同机8–32配对测量及实际CI比较 | 操作者提供受控机器、合格baseline、固定source／数据／seed／cache／page／Go／FS、预声明指标和阈值，并按合同保存真实配对证据。离线CI接线及纯fixture检查已具备，真实输入尚未提供，实际比较NOT_RUN；不需要公开真实业务数据库或秘密。 | 按[比较器与手动CI合同](../../benchmarks/performance/README.md)预声明8–32个完整交错baseline／candidate invocation pairs，保存全部报告、失败／排除原因与统计。先审阅允许分享的数据／环境元数据，再提交到固定evidence目录，在Actions手动选择offline-performance-evidence并填写相对目录。七状态及非零退出原样保留；来源声明不认证真实性，不足或INCONCLUSIVE不填PASS。普通CI只运行fixture，不采集benchmark或查询计费；新机器／费用／权限另由有权操作者决定。 |
 | 长时间并发soak与受控冷热基准 | 获准操作者提供受控机器、资源预算、经审阅的观察窗口和已有runner输入。短时单元／有限事务测量不等于长期soak。 | 依[事务工具](../../benchmarks/transactions/README.md)、[grams工具](../../benchmarks/grams/README.md)、[ANN已有测量范围](../../benchmarks/ann/README.md)保存全时段ledger／invariant／owner、吞吐／延迟／资源及失败。冷缓存必须有真实条件证据；H12单次elapsed不是cold、P95或recovery-only。观察窗口结论另经审阅，不造无限矩阵。 |
 | M9真实PG／Neon迁移复核 | 获准数据库操作者从**同一真实quiescent snapshot**提供完整catalog、依赖definitions、应用SQL corpus、profiles和源／目标／扩展版本；审阅人工计划、业务切换和回滚，并提供获准可丢弃PG／Neon实例。 | 输入hash绑定的report／inventory／注释模板、逐项支持与阻断、人工依赖计划和实际迁移核验。不能只把coverage标为complete，也不能用样本collector或本次PG语法测试冒充真实迁移。见[迁移计划](../migration-transition.md)、[CLI](../migration-transition-cli.md)、[pg_embedding边界](../migration-pgembedding.md)。不新增在线collector／executor义务，不借迁移执行受阻ANN链。 |
 | 独立发布审查 | 独立安全／密码学／威胁模型、一致性、上游来源／依赖许可证以及API／文档审阅者对拟发布版本给出结论；需要法律专业判断时由相应有资质人员负责。 | 固定审查版本、范围、发现、修复复核和签结意见。自测和开发者自评不能替代外部结论；见[安全](../security.md)、[来源](../upstream.md)、[许可证清单](../../THIRD_PARTY_NOTICES.md)及[goal §11.3](../../goal.md)。 |

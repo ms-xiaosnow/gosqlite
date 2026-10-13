@@ -1,0 +1,86 @@
+{
+  "results": [
+    {
+      "name": "01_incremental_unittest",
+      "argv": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3.12",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "benchmarks/performance",
+        "-p",
+        "test_ci_input.py",
+        "-v"
+      ],
+      "env": {
+        "PATH": "/usr/bin:/bin",
+        "LC_ALL": "C.UTF-8",
+        "LANG": "C.UTF-8",
+        "TZ": "UTC",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHONHASHSEED": "0"
+      },
+      "start_utc": "2026-10-13T13:22:05.519081+00:00",
+      "end_utc": "2026-10-13T13:22:06.297245+00:00",
+      "exit_code": 0,
+      "status": "PASS",
+      "stdout_bytes": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 2369,
+      "stderr_sha256": "c1508775c0dbada26910e1fdc162341645dad5fb39e4674cb7337c9efda577c3"
+    },
+    {
+      "name": "02_python_syntax",
+      "argv": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3.12",
+        "-c",
+        "import ast;from pathlib import Path;files=['benchmarks/performance/ci_input.py','benchmarks/performance/test_ci_input.py'];[ast.parse(Path(p).read_text(),filename=p) for p in files];print('AST_PARSE_PASS',len(files))"
+      ],
+      "env": {
+        "PATH": "/usr/bin:/bin",
+        "LC_ALL": "C.UTF-8",
+        "LANG": "C.UTF-8",
+        "TZ": "UTC",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHONHASHSEED": "0"
+      },
+      "start_utc": "2026-10-13T13:22:06.297718+00:00",
+      "end_utc": "2026-10-13T13:22:06.347797+00:00",
+      "exit_code": 0,
+      "status": "PASS",
+      "stdout_bytes": 17,
+      "stdout_sha256": "c5131711ae46100fd89f49eaa5fef8e860955539f060d0a15e7ee899cd8ad606",
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "03_shell_syntax",
+      "argv": [
+        "/bin/sh",
+        "-n",
+        "scripts/check.sh"
+      ],
+      "env": {
+        "PATH": "/usr/bin:/bin",
+        "LC_ALL": "C.UTF-8",
+        "LANG": "C.UTF-8",
+        "TZ": "UTC",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHONHASHSEED": "0"
+      },
+      "start_utc": "2026-10-13T13:22:06.348585+00:00",
+      "end_utc": "2026-10-13T13:22:06.350499+00:00",
+      "exit_code": 0,
+      "status": "PASS",
+      "stdout_bytes": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "source_unchanged": true,
+  "prior_57_tests": "REUSED_UNCHANGED_DEPENDENCIES",
+  "native_measurement": "NOT_RUN",
+  "workflow_dispatch": "NOT_RUN"
+}

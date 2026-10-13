@@ -1,0 +1,23 @@
+name: offline-performance-evidence
+on:
+  workflow_dispatch:
+    inputs:
+      evidence_directory:
+        description: 'Committed directory relative to benchmarks/performance/evidence/; requires operator-supplied measurements'
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Compare existing ordinary performance evidence
+        env:
+          PERFORMANCE_EVIDENCE_DIRECTORY: ${{ inputs.evidence_directory }}
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: python3 benchmarks/performance/ci_input.py -- "$PERFORMANCE_EVIDENCE_DIRECTORY"

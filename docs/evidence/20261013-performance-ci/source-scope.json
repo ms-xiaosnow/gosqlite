@@ -1,0 +1,17 @@
+{
+  "base": "360809d8c6a89e3e65666e03b87b13d40e3a8c26",
+  "changed": {
+    ".github/workflows/performance-evidence.yml": "255179ebe4b0d5cf7855497fb6c154cb0040f70a47e7c27e94da681a35d664ab",
+    "benchmarks/performance/ci_input.py": "8a7370ccfed3a77b07cb05ebb96eb1f41e822e6ced2212ae7e5097f1f5bc6ce4",
+    "benchmarks/performance/test_ci_input.py": "7001c213841f41a6d5e275cb0e7fc8e34350da1391a3919f97810e9270b02770",
+    "benchmarks/performance/README.md": "d1c0c7a1d6d09f65933ae8ad54341c5148278832a2354566b086cb4667025661",
+    "scripts/check.sh": "555231239b6545f757a4c4cd3370f5e5d25c9b65cf8a9c975ac077d6ce1c65d9"
+  },
+  "unchanged_dependencies": {
+    "compare.py": "4db6059b6c99469ca84df3f4561ce3f58cc44d739c3a7a704287d413701093d5",
+    "validation.py": "fb7486b743969ec2ff4071e5e37409194f4e1c92686f1b82a1e03e8cdc33c434",
+    "test_compare_offline.py": "d5fb4631d1b8a567ec5ea3865396b3c06a5bc79fe761771482eb32b99ba20d0a",
+    "fixtures.json": "551f522de6528e4b516a5d7bb4a1af943cc27c6256de4e57a81c8ccf3d82d8f4"
+  },
+  "scope": "new 17 pure tests + source syntax only; no native or workflow dispatch"
+}

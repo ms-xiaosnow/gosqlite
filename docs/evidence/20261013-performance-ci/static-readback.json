@@ -1,0 +1,9 @@
+{
+  "status": "PASS_STATIC",
+  "relative_links": 71,
+  "blocked_historical_docs_unchanged": true,
+  "global_manifest_absent": true,
+  "unittest_methods": 17,
+  "unittest_skip_fail": 0,
+  "native_real_performance_dispatch": "NOT_RUN"
+}
