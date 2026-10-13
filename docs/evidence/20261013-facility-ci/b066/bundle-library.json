@@ -1,0 +1,21 @@
+{
+  "operation": "create_library_file",
+  "status": "succeeded",
+  "path": "/gosqlite-rekey-misplacement-b066060.bundle",
+  "file_id": "file_00000000b53881f8af0d77f753feccf2",
+  "library_file_id": "libfile_9bd8c01766e08191a349b3605a63c9ac",
+  "file_name": "gosqlite-rekey-misplacement-b066060.bundle",
+  "current_version_number": 0,
+  "restored_from_version_number": null,
+  "xattrs": [
+    {
+      "name": "user.library-file-version",
+      "value": "0"
+    }
+  ],
+  "directory_id": "libdir_1064175b1a0c8191a612be8a51e00075",
+  "mime_type": null,
+  "library_artifact_type": "other",
+  "file_size_bytes": 11107623,
+  "external_connectors_accessed": false
+}

@@ -1,0 +1,5 @@
+The bundle contains this ref:
+b06606020fdbb5b73dd0e9b000773f3f02c6979d refs/heads/main
+The bundle records a complete history.
+The bundle uses this hash algorithm: sha1
+/workspace/scratch/5e06a74e5f65/restart-20261012T2033/rekey-misplacement-publication/library-readback/gosqlite-rekey-misplacement-b066060.bundle is okay

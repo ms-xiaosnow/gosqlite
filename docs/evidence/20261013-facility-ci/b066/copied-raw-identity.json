@@ -1,0 +1,70 @@
+{
+  "bundle-restore-result.json": {
+    "bytes": 617,
+    "sha256": "94d2edc799f0d29df7dd7fa28057eaf84371407132b8ef8999568760433f782c"
+  },
+  "bundle-library.json": {
+    "bytes": 657,
+    "sha256": "8c954ff7d9300cc5028b83b0d378c55dd1dde1772d14d73cecc14682385bd93c"
+  },
+  "bundle-verify.txt": {
+    "bytes": 321,
+    "sha256": "d317eb224fbd8529a2d2187b39d820f940a7b4f92555d77608a1c28b6276fc7c"
+  },
+  "bundle-fsck.txt": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "archive-library.json": {
+    "bytes": 670,
+    "sha256": "9b30f6f401473347e249b4cd2ee742968a2f7dab0916e826e5d961cfe17852a4"
+  },
+  "archive-verification.json": {
+    "bytes": 293,
+    "sha256": "ff7491c11e26cd8dd5d5b3475de56d5fc65fe6211b90d7b2efa72a451ce745af"
+  },
+  "library-verification.json": {
+    "bytes": 427,
+    "sha256": "2fdbcb81a58331b7f825359ca8521f8be28fc33a7ba98d349749d46d3d3ddc86"
+  },
+  "terminal-metadata.json": {
+    "bytes": 25539,
+    "sha256": "3123e972441bd5942b9805d8eed0a5bb57cf596c79ce2b810bfd3832c0ac86e2"
+  },
+  "log-fetch-times.json": {
+    "bytes": 95,
+    "sha256": "7dc0bd76333c5144ae1e39ef2acb806cec7e2ae3ab179bc95126a04440a64c24"
+  },
+  "source-snapshot-manifest.json": {
+    "bytes": 1449,
+    "sha256": "9916892511557bcff6b355a7d62e0b22a392dbbacb1f50d232e0f452a697b08c"
+  },
+  "ci-evidence.json": {
+    "bytes": 13287,
+    "sha256": "c3a11b7f695ee1ab1851a2abd7a8f783ddc0b6dfb01bccd5331914ad0f18a95f"
+  },
+  "source-snapshot/.github/workflows/check.yml": {
+    "bytes": 929,
+    "sha256": "58dee6239ef272454efb7f45a220de5c7a75839f6449002a4ed176f858304f64"
+  },
+  "source-snapshot/scripts/check.sh": {
+    "bytes": 365,
+    "sha256": "55851844f35325b38fbd368558af4e229d5bfe7c42928685e57dd799274b8f18"
+  },
+  "source-snapshot/scripts/test-oracle.sh": {
+    "bytes": 2769,
+    "sha256": "b8e3e443a3fbe17b96526cfdb22b6a297dedf0eac2d9c3063cd7f9da05a64f79"
+  },
+  "source-snapshot/scripts/build-oracle.sh": {
+    "bytes": 4723,
+    "sha256": "0826180e18c7e67bd3ab35b0b534409578932adba13041b8e5b1e32fb43cca66"
+  },
+  "oracle-115051446927.decoded.log": {
+    "bytes": 22448,
+    "sha256": "1d6e2fc87a4cd53b3cae0a8584516d31653cf4b9d604096f07568aa8855fc531"
+  },
+  "ordinary-115051447164.decoded.log": {
+    "bytes": 25490,
+    "sha256": "24777dca1b736a3170d1763d4160865e08ae1ca661f7d2b24d3bab1f93e8245d"
+  }
+}

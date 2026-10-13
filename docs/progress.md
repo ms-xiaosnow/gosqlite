@@ -1,3 +1,11 @@
+# 当前阶段：有限设施代码与配置内完整普通 CI 已通过，整体未验收
+
+2026-10-13 00:09:27 UTC，最后代码提交 c5a8632908cc4747a5f581542a15a8532ef42ad9 的 CI38323357015 双任务SUCCESS；前批b06606020fdbb5b73dd0e9b000773f3f02c6979d的CI38321827127亦双SUCCESS。sourceguard、完整普通test/vet/build/race及官方SQLite3.54.0对照的原始日志、精确源码身份和两批bundle读回证明已保存。[完整终态证据](evidence/20261013-facility-ci/README.zh.md)。
+
+本次仅docs记录更新，代码/测试/模块/CI字节与c5相同，复用该精确代码结果，不本地重跑全套。锁定R1–R6有限设施已闭合；已知受阻ANN报告修正仍是实际代码/报告缺口，真实手工与外部资格未完成。[可操作剩余清单](testing/finite-acceptance-summary-20261012-zh.md)。整体未验收，M10未通过，不作最终交付或生产可用声明。
+
+## 以下为较早时点历史记录
+
 # 当前阶段：有限 R1–R6 设施代码及受影响验证闭合，整体未验收
 
 2026-10-12 23:30:52 UTC，最后R3/R4共用checkpoint/扩展索引设施完成有限验证：12纯值根、38AST共120命名、3健康默认根normal/race各9命名、额外1根metadata源码审计、sourceguard及manual compile/nm均PASS。三种源码选择复用未变闭包；原unused-import编译FAIL及两文件修复完整保留。[精确源码与验证证据](evidence/20261012-checkpoint-extensions/README.zh.md)。未重跑无关全套，物理十格仍NOT_RUN。

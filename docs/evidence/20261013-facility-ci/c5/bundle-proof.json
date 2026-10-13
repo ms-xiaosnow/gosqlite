@@ -1,0 +1,41 @@
+{
+  "library": {
+    "operation": "create_library_file",
+    "status": "succeeded",
+    "path": "/gosqlite-checkpoint-extensions-c5a8632.bundle",
+    "file_id": "file_0000000072fc81f5978925d946070c7c",
+    "library_file_id": "libfile_9f5d934f0c7881918aee2869cd749aae",
+    "file_name": "gosqlite-checkpoint-extensions-c5a8632.bundle",
+    "current_version_number": 0,
+    "restored_from_version_number": null,
+    "xattrs": [
+      {
+        "name": "user.library-file-version",
+        "value": "0"
+      }
+    ],
+    "directory_id": "libdir_1064175b1a0c8191a612be8a51e00075",
+    "mime_type": null,
+    "library_artifact_type": "other",
+    "file_size_bytes": 12734677,
+    "external_connectors_accessed": false
+  },
+  "restore": {
+    "commit": "c5a8632908cc4747a5f581542a15a8532ef42ad9",
+    "tree": "43569f28b1c8b2d23c913ac61be41622f143a45f",
+    "parent": "b06606020fdbb5b73dd0e9b000773f3f02c6979d",
+    "bundle_library_file_id": "libfile_9f5d934f0c7881918aee2869cd749aae",
+    "bundle_bytes": 12734677,
+    "bundle_sha256": "2817259ab2d87259204f901800d5d6b2c020cde04e1791573ee5e1b47d3f02f4",
+    "readback": "byte_exact_PASS",
+    "tracked_files": 3902,
+    "tracked_bytes": 61647557,
+    "all_git_paths_modes_and_blob_sha256_match": true,
+    "fsck_exit": 0,
+    "restore": "bare main; no second worktree or Go/tests",
+    "utc": "2026-10-12T23:42:58.162159+00:00"
+  },
+  "verify_output": "The bundle contains this ref:\nc5a8632908cc4747a5f581542a15a8532ef42ad9 refs/heads/main\nThe bundle records a complete history.\nThe bundle uses this hash algorithm: sha1\n/workspace/scratch/5e06a74e5f65/restart-20261012T2033/c5-ci-evidence/bundle-readback/gosqlite-checkpoint-extensions-c5a8632.bundle is okay\n",
+  "fsck_output": "",
+  "full_manifest_gzip": "bundle-tree-manifest.json.gz"
+}

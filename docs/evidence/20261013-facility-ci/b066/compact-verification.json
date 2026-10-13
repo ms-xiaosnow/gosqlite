@@ -1,0 +1,30 @@
+{
+  "commit": "b06606020fdbb5b73dd0e9b000773f3f02c6979d",
+  "run_id": 38321827127,
+  "conclusion": "success",
+  "archive_library_file_id": "libfile_688e8fb4e8e08191a31d4f3c476c918e",
+  "archive_sha256": "c8b2f43abeef00b64333237596f5fc26f462fba7dfc280b6a328fc419fba8e5b",
+  "copied_raw_files": 15,
+  "compressed_logs": [
+    {
+      "file": "oracle-115051446927.decoded.log.gz",
+      "bytes": 5968,
+      "sha256": "e0d1e84f355631def69d535836f06777d22dc65de74d9ac746738809a173b43e",
+      "decompressed_file": "oracle-115051446927.decoded.log",
+      "decompressed_bytes": 22448,
+      "decompressed_sha256": "1d6e2fc87a4cd53b3cae0a8584516d31653cf4b9d604096f07568aa8855fc531",
+      "exact_decompressed_match": true
+    },
+    {
+      "file": "ordinary-115051447164.decoded.log.gz",
+      "bytes": 5981,
+      "sha256": "faa785e251632203fe1806cef0603164e927fc2456164fb3cecad6393578b82c",
+      "decompressed_file": "ordinary-115051447164.decoded.log",
+      "decompressed_bytes": 25490,
+      "decompressed_sha256": "24777dca1b736a3170d1763d4160865e08ae1ca661f7d2b24d3bab1f93e8245d",
+      "exact_decompressed_match": true
+    }
+  ],
+  "source_worktree_modified": false,
+  "created_at": "2026-10-12T23:45:17.264496+00:00"
+}

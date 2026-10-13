@@ -1,0 +1,176 @@
+{
+  "method": "Common token, credential URL, signed URL pattern scanning and contextual review of credential-related log lines. Existing GitHub masking retained. Additional URL and unrelated-data review recorded in the full archive where applicable.",
+  "logs": [
+    {
+      "decoded_file": "oracle-115056281413.decoded.log",
+      "gzip_file": "oracle-115056281413.decoded.log.gz",
+      "decoded_byte_length": 22223,
+      "decoded_sha256": "5e7f14c3aaa4aa96f7058cd7f586c6d20cae69053f65fe539ac22301e937b394",
+      "gzip_byte_length": 5988,
+      "gzip_sha256": "7a9ab9f3e507c1d36a45004944064e611ad57f48c7203f766e847528866dd35d",
+      "review": {
+        "unexpected_secret_pattern_counts": {
+          "github_token": 0,
+          "aws_key": 0,
+          "private_key": 0,
+          "bearer_token": 0,
+          "basic_token": 0,
+          "credential_url": 0,
+          "jwt_like": 0,
+          "signed_url": 0
+        },
+        "credential_related_lines_reviewed": 12,
+        "review": [
+          {
+            "line": 22,
+            "classification": "GitHub permissions label"
+          },
+          {
+            "line": 26,
+            "classification": "GitHub source label; no secret value"
+          },
+          {
+            "line": 37,
+            "classification": "GitHub already-masked setting"
+          },
+          {
+            "line": 40,
+            "classification": "checkout option default"
+          },
+          {
+            "line": 85,
+            "classification": "git extraheader config key/query/removal; no credential value"
+          },
+          {
+            "line": 86,
+            "classification": "git extraheader config key/query/removal; no credential value"
+          },
+          {
+            "line": 89,
+            "classification": "GitHub already-masked setting"
+          },
+          {
+            "line": 112,
+            "classification": "GitHub already-masked setting"
+          },
+          {
+            "line": 273,
+            "classification": "git extraheader config key/query/removal; no credential value"
+          },
+          {
+            "line": 274,
+            "classification": "git extraheader config key/query/removal; no credential value"
+          },
+          {
+            "line": 275,
+            "classification": "git extraheader config key/query/removal; no credential value"
+          },
+          {
+            "line": 276,
+            "classification": "git extraheader config key/query/removal; no credential value"
+          }
+        ],
+        "existing_github_masked_lines": 3,
+        "additional_redactions": 0,
+        "url_inventory": [
+          "https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/",
+          "https://github.com/.extraheader",
+          "https://github.com/.extraheader'",
+          "https://github.com/actions/go-versions/releases/download/1.27.2-37875086547/go-1.27.2-linux-x64.tar.gz",
+          "https://github.com/actions/runner-images/blob/ubuntu24/20261004.327/images/ubuntu/Ubuntu2404-Readme.md",
+          "https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261004.327",
+          "https://github.com/ms-xiaosnow/gosqlite",
+          "https://proxy.golang.org,direct'"
+        ],
+        "unrelated_data_review": "All observed URLs identify the repository, official GitHub runner/setup-go artifacts or documentation, Go proxy, or Git configuration keys. Logs contain workflow setup, official toolchain/bootstrap, scope-guard/test output and cleanup; no unrelated-data finding.",
+        "limit": "Pattern and credential-keyword review; not a proof that no secret exists."
+      }
+    },
+    {
+      "decoded_file": "ordinary-115056281469.decoded.log",
+      "gzip_file": "ordinary-115056281469.decoded.log.gz",
+      "decoded_byte_length": 25710,
+      "decoded_sha256": "6e8beae9e992c61e68fe9a54d84be166ce5695f69cb597b9df36c172ccddb4ee",
+      "gzip_byte_length": 6110,
+      "gzip_sha256": "47d985eb129e66cb3731572637e8f758cbc2f8d073a34085228f9d5f6a1ef146",
+      "review": {
+        "unexpected_secret_pattern_counts": {
+          "github_token": 0,
+          "aws_key": 0,
+          "private_key": 0,
+          "bearer_token": 0,
+          "basic_token": 0,
+          "credential_url": 0,
+          "jwt_like": 0,
+          "signed_url": 0
+        },
+        "credential_related_lines_reviewed": 12,
+        "review": [
+          {
+            "line": 22,
+            "classification": "GitHub permissions label"
+          },
+          {
+            "line": 26,
+            "classification": "GitHub source label; no secret value"
+          },
+          {
+            "line": 37,
+            "classification": "GitHub already-masked setting"
+          },
+          {
+            "line": 40,
+            "classification": "checkout option default"
+          },
+          {
+            "line": 85,
+            "classification": "git extraheader config key/query/removal; no credential value"
+          },
+          {
+            "line": 86,
+            "classification": "git extraheader config key/query/removal; no credential value"
+          },
+          {
+            "line": 89,
+            "classification": "GitHub already-masked setting"
+          },
+          {
+            "line": 112,
+            "classification": "GitHub already-masked setting"
+          },
+          {
+            "line": 310,
+            "classification": "git extraheader config key/query/removal; no credential value"
+          },
+          {
+            "line": 311,
+            "classification": "git extraheader config key/query/removal; no credential value"
+          },
+          {
+            "line": 312,
+            "classification": "git extraheader config key/query/removal; no credential value"
+          },
+          {
+            "line": 313,
+            "classification": "git extraheader config key/query/removal; no credential value"
+          }
+        ],
+        "existing_github_masked_lines": 3,
+        "additional_redactions": 0,
+        "url_inventory": [
+          "https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/",
+          "https://github.com/.extraheader",
+          "https://github.com/.extraheader'",
+          "https://github.com/actions/go-versions/releases/download/1.27.2-37875086547/go-1.27.2-linux-x64.tar.gz",
+          "https://github.com/actions/runner-images/blob/ubuntu24/20261004.327/images/ubuntu/Ubuntu2404-Readme.md",
+          "https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261004.327",
+          "https://github.com/ms-xiaosnow/gosqlite",
+          "https://proxy.golang.org,direct'"
+        ],
+        "unrelated_data_review": "All observed URLs identify the repository, official GitHub runner/setup-go artifacts or documentation, Go proxy, or Git configuration keys. Logs contain workflow setup, official toolchain/bootstrap, scope-guard/test output and cleanup; no unrelated-data finding.",
+        "limit": "Pattern and credential-keyword review; not a proof that no secret exists."
+      }
+    }
+  ],
+  "limitation": "Not an absolute proof that no secret exists."
+}
