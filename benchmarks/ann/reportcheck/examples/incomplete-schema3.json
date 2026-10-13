@@ -1,0 +1,11 @@
+{
+  "schema_version": 3,
+  "harness_revision": "ordinary-ann-v3",
+  "benchmark": "native-ann",
+  "workload_version": "gaussian-heldout-gsv-v1",
+  "measurement_version": "paired-exact-ann-reopened-v3",
+  "status": "incomplete",
+  "errors": ["Synthetic documentation skeleton: required raw evidence is absent."],
+  "samples": [],
+  "notes": ["NOT A MEASUREMENT. This intentionally incomplete input must be INVALID."]
+}

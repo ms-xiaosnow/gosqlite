@@ -1,0 +1,55 @@
+--- v3/benchmarks/ann/validate.go
++++ overlay/benchmarks/ann/validate.go
+@@ -69,6 +69,20 @@
+ 	if hit != o.Hits {
+ 		return errors.New("incorrect intersection count")
+ 	}
++	// Paired calls use the same query, snapshot, original dense source vector,
++	// and vector.L2.Distance implementation. ANN approximation selects rows;
++	// it does not approximate these final exact-rescore distances. intersection
++	// already checked finite values and unique RowIDs. Numeric equality also
++	// treats +0 and -0 as equal; there is no independent rounding tolerance.
++	exactDistances := make(map[int64]float64, len(o.Exact.Hits))
++	for _, h := range o.Exact.Hits {
++		exactDistances[h.RowID] = h.Distance
++	}
++	for _, h := range o.ANN.Hits {
++		if d, ok := exactDistances[h.RowID]; ok && h.Distance != d {
++			return errors.New("same-row exact/rescore distance mismatch")
++		}
++	}
+ 	if !validStats(o.Exact.Stats) || !validStats(o.ANN.Stats) {
+ 		return errors.New("negative or unrecognized counter")
+ 	}
+@@ -141,7 +155,16 @@
+ 			}
+ 			ef = min(q.MaxEFSearch, max(ef+1, ef*2))
+ 		}
+-		if p.ANNEffectiveEF != ef || p.ANNEffectiveProbes != 0 || s.ANNNodeReads < s.BaseRowFetches || s.ANNVisited < 1 || s.ANNVisited > int64(alg.MaxVisited)*s.ANNIterations || s.ANNDistanceEvaluations < 1 || s.ANNDistanceEvaluations > int64(alg.MaxDistanceEvaluations)*s.ANNIterations || s.ANNEdgeReads > s.ANNNodeReads*int64(2*alg.M*32) || s.ANNCentroidScores != 0 || s.ANNCentroidReads != 0 || s.ANNListsOpened != 0 || s.ANNMemberKeysRead != 0 {
++		// Each successful traversal caches one read per visited node. Each
++		// deduplicated source recheck adds one further node read. Across widening
++		// iterations visits are cumulative; source rechecks remain deduplicated.
++		// Every rechecked candidate was visited and every visit was scored.
++		// Nonnegativity and quotas were checked above. Guarded subtraction
++		// avoids adding untrusted signed counters (and thus avoids overflow).
++		if s.ANNNodeReads < s.BaseRowFetches || s.ANNNodeReads-s.BaseRowFetches != s.ANNVisited || s.ANNVisited < s.ANNExactRescores || s.ANNDistanceEvaluations < s.ANNVisited {
++			return errors.New("HNSW traversal/read/rescore conservation mismatch")
++		}
++		if p.ANNEffectiveEF != ef || p.ANNEffectiveProbes != 0 || s.ANNVisited < 1 || s.ANNVisited > int64(alg.MaxVisited)*s.ANNIterations || s.ANNDistanceEvaluations < 1 || s.ANNDistanceEvaluations > int64(alg.MaxDistanceEvaluations)*s.ANNIterations || s.ANNEdgeReads > s.ANNNodeReads*int64(2*alg.M*32) || s.ANNCentroidScores != 0 || s.ANNCentroidReads != 0 || s.ANNListsOpened != 0 || s.ANNMemberKeysRead != 0 {
+ 			return errors.New("HNSW policy/counter mismatch")
+ 		}
+ 	} else {
+@@ -154,6 +177,13 @@
+ 		}
+ 		if p.ANNEffectiveEF != 0 || p.ANNEffectiveProbes != probes || s.ANNListsOpened != int64(probes) || s.ANNCentroidReads != int64(c.Lists) || s.ANNCentroidScores != int64(c.Lists) || s.ANNVisited != int64(c.Lists) || s.ANNMemberKeysRead != s.BaseRowFetches || s.ANNNodeReads != 0 || s.ANNEdgeReads != 0 || s.ANNDistanceEvaluations != 0 {
+ 			return errors.New("IVF training/probe/counter mismatch")
++		}
++		// The immutable, unfiltered NOT NULL fixture has one membership per
++		// source row. Widening opens each list once and consumes its full range.
++		// Opening every list must therefore cover exactly Config.Rows members;
++		// the checks above already equate members, fetches, and exact rescores.
++		if s.ANNListsOpened == int64(c.Lists) && s.ANNMemberKeysRead != int64(c.Rows) {
++			return errors.New("IVF all-lists/source coverage mismatch")
+ 		}
+ 	}
+ 	return nil

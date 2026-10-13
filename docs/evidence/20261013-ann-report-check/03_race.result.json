@@ -1,0 +1,59 @@
+{
+  "name": "03_race",
+  "start_utc": "2026-10-13T06:10:27.063617+00:00",
+  "end_utc": "2026-10-13T06:10:45.092819+00:00",
+  "exit_code": 0,
+  "resource_breach_latched": false,
+  "stdout_sha256": "aada4929faebabf7e15d573658936c0a04d9a1be9ab735072dc72d52313b16ce",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "tests": {
+    "benchmarks/ann/reportcheck": {
+      "roots": [
+        "TestANNAdmissionCartesian",
+        "TestANNAlgorithmDefaults",
+        "TestANNAllCanonicalAlgorithmFields",
+        "TestANNCheckedArithmetic",
+        "TestANNCompleteProducerWireRoundTrip",
+        "TestANNDatasetCompatibility",
+        "TestANNHistoricalSchema2PreservedRejected",
+        "TestANNIVFListsNoIdentityCollision",
+        "TestANNIndependentCartesianBudgets",
+        "TestANNMaterialPlansAndCounters",
+        "TestANNPercentilesAndRawMath",
+        "TestANNPortablePathAndInvalidUTF8Controls",
+        "TestANNQueryBudgetAndProtocolIdentities",
+        "TestANNRehashedConfigurationCannotBypassMaterialValidation",
+        "TestANNResultHitControls",
+        "TestANNStrictReportControls",
+        "TestANNStrictWireShapeTypes",
+        "TestANNThreeFixHNSWBoundaryControls",
+        "TestANNThreeFixHNSWRejectsBrokenConservation",
+        "TestANNThreeFixIVFAllListsCoverage",
+        "TestANNThreeFixSameRowDistance",
+        "TestANNThreeFixUnchangedFixtureControls",
+        "TestANNUTCParsingRejectsNumericOffsets"
+      ],
+      "root_count": 23,
+      "named_pass": 461,
+      "child_pass": 438,
+      "fail": 0,
+      "skip": 0
+    },
+    "cmd/ann-report-check": {
+      "roots": [
+        "TestANNReportCheckBoundedRead",
+        "TestANNReportCheckIOFailures",
+        "TestANNReportCheckInvalidStdin",
+        "TestANNReportCheckSyntheticStdinRoundTrip",
+        "TestANNReportCheckUsageDoesNotRead",
+        "TestANNReportCheckValidResultIsNotPerformanceAcceptance"
+      ],
+      "root_count": 6,
+      "named_pass": 6,
+      "child_pass": 0,
+      "fail": 0,
+      "skip": 0
+    }
+  },
+  "status": "PASS"
+}

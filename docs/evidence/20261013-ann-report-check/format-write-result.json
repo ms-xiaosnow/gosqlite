@@ -1,0 +1,22 @@
+{
+  "utc": "2026-10-13T06:10:19.941313+00:00",
+  "argv": [
+    "/workspace/scratch/5e06a74e5f65/restart-20261012T2033/toolchains/go1.27.2/bin/gofmt",
+    "-w",
+    "benchmarks/ann/reportcheck/config.go",
+    "benchmarks/ann/reportcheck/config_test.go",
+    "benchmarks/ann/reportcheck/fixture.go",
+    "benchmarks/ann/reportcheck/regression_test.go",
+    "benchmarks/ann/reportcheck/report.go",
+    "benchmarks/ann/reportcheck/report_test.go",
+    "benchmarks/ann/reportcheck/validate.go",
+    "benchmarks/ann/reportcheck/wire.go",
+    "benchmarks/ann/reportcheck/wire_test.go",
+    "cmd/ann-report-check/main.go",
+    "cmd/ann-report-check/main_test.go"
+  ],
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": "",
+  "changed": []
+}

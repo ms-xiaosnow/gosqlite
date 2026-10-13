@@ -1,0 +1,168 @@
+{
+  "utc": "2026-10-13T06:11:06.160754+00:00",
+  "status": "PASS",
+  "commands": [
+    {
+      "name": "01_format",
+      "start_utc": "2026-10-13T06:10:20.511235+00:00",
+      "end_utc": "2026-10-13T06:10:22.512374+00:00",
+      "exit_code": 0,
+      "resource_breach_latched": false,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "PASS"
+    },
+    {
+      "name": "02_normal",
+      "start_utc": "2026-10-13T06:10:22.786250+00:00",
+      "end_utc": "2026-10-13T06:10:26.790391+00:00",
+      "exit_code": 0,
+      "resource_breach_latched": false,
+      "stdout_sha256": "004cda48d9745b8f1e2f968418619daa295a1ff1d81a18607f777c92991d2ce8",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tests": {
+        "benchmarks/ann/reportcheck": {
+          "roots": [
+            "TestANNAdmissionCartesian",
+            "TestANNAlgorithmDefaults",
+            "TestANNAllCanonicalAlgorithmFields",
+            "TestANNCheckedArithmetic",
+            "TestANNCompleteProducerWireRoundTrip",
+            "TestANNDatasetCompatibility",
+            "TestANNHistoricalSchema2PreservedRejected",
+            "TestANNIVFListsNoIdentityCollision",
+            "TestANNIndependentCartesianBudgets",
+            "TestANNMaterialPlansAndCounters",
+            "TestANNPercentilesAndRawMath",
+            "TestANNPortablePathAndInvalidUTF8Controls",
+            "TestANNQueryBudgetAndProtocolIdentities",
+            "TestANNRehashedConfigurationCannotBypassMaterialValidation",
+            "TestANNResultHitControls",
+            "TestANNStrictReportControls",
+            "TestANNStrictWireShapeTypes",
+            "TestANNThreeFixHNSWBoundaryControls",
+            "TestANNThreeFixHNSWRejectsBrokenConservation",
+            "TestANNThreeFixIVFAllListsCoverage",
+            "TestANNThreeFixSameRowDistance",
+            "TestANNThreeFixUnchangedFixtureControls",
+            "TestANNUTCParsingRejectsNumericOffsets"
+          ],
+          "root_count": 23,
+          "named_pass": 461,
+          "child_pass": 438,
+          "fail": 0,
+          "skip": 0
+        },
+        "cmd/ann-report-check": {
+          "roots": [
+            "TestANNReportCheckBoundedRead",
+            "TestANNReportCheckIOFailures",
+            "TestANNReportCheckInvalidStdin",
+            "TestANNReportCheckSyntheticStdinRoundTrip",
+            "TestANNReportCheckUsageDoesNotRead",
+            "TestANNReportCheckValidResultIsNotPerformanceAcceptance"
+          ],
+          "root_count": 6,
+          "named_pass": 6,
+          "child_pass": 0,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "status": "PASS"
+    },
+    {
+      "name": "03_race",
+      "start_utc": "2026-10-13T06:10:27.063617+00:00",
+      "end_utc": "2026-10-13T06:10:45.092819+00:00",
+      "exit_code": 0,
+      "resource_breach_latched": false,
+      "stdout_sha256": "aada4929faebabf7e15d573658936c0a04d9a1be9ab735072dc72d52313b16ce",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tests": {
+        "benchmarks/ann/reportcheck": {
+          "roots": [
+            "TestANNAdmissionCartesian",
+            "TestANNAlgorithmDefaults",
+            "TestANNAllCanonicalAlgorithmFields",
+            "TestANNCheckedArithmetic",
+            "TestANNCompleteProducerWireRoundTrip",
+            "TestANNDatasetCompatibility",
+            "TestANNHistoricalSchema2PreservedRejected",
+            "TestANNIVFListsNoIdentityCollision",
+            "TestANNIndependentCartesianBudgets",
+            "TestANNMaterialPlansAndCounters",
+            "TestANNPercentilesAndRawMath",
+            "TestANNPortablePathAndInvalidUTF8Controls",
+            "TestANNQueryBudgetAndProtocolIdentities",
+            "TestANNRehashedConfigurationCannotBypassMaterialValidation",
+            "TestANNResultHitControls",
+            "TestANNStrictReportControls",
+            "TestANNStrictWireShapeTypes",
+            "TestANNThreeFixHNSWBoundaryControls",
+            "TestANNThreeFixHNSWRejectsBrokenConservation",
+            "TestANNThreeFixIVFAllListsCoverage",
+            "TestANNThreeFixSameRowDistance",
+            "TestANNThreeFixUnchangedFixtureControls",
+            "TestANNUTCParsingRejectsNumericOffsets"
+          ],
+          "root_count": 23,
+          "named_pass": 461,
+          "child_pass": 438,
+          "fail": 0,
+          "skip": 0
+        },
+        "cmd/ann-report-check": {
+          "roots": [
+            "TestANNReportCheckBoundedRead",
+            "TestANNReportCheckIOFailures",
+            "TestANNReportCheckInvalidStdin",
+            "TestANNReportCheckSyntheticStdinRoundTrip",
+            "TestANNReportCheckUsageDoesNotRead",
+            "TestANNReportCheckValidResultIsNotPerformanceAcceptance"
+          ],
+          "root_count": 6,
+          "named_pass": 6,
+          "child_pass": 0,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "status": "PASS"
+    },
+    {
+      "name": "04_vet",
+      "start_utc": "2026-10-13T06:10:45.359674+00:00",
+      "end_utc": "2026-10-13T06:10:51.362065+00:00",
+      "exit_code": 0,
+      "resource_breach_latched": false,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "PASS"
+    },
+    {
+      "name": "05_build",
+      "start_utc": "2026-10-13T06:10:51.639744+00:00",
+      "end_utc": "2026-10-13T06:10:53.641204+00:00",
+      "exit_code": 0,
+      "resource_breach_latched": false,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "PASS"
+    },
+    {
+      "name": "06_sourceguard",
+      "start_utc": "2026-10-13T06:10:53.907367+00:00",
+      "end_utc": "2026-10-13T06:11:06.017941+00:00",
+      "exit_code": 0,
+      "resource_breach_latched": false,
+      "stdout_sha256": "ba0cb4aff7a9c991c087485ff3499bf86b9b57f990c78b979c1f08ffc42a3505",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "PASS"
+    }
+  ],
+  "source_unchanged": true,
+  "native_manual_oracle_campaign": "NOT_RUN",
+  "unrelated_tests": "NOT_RERUN; exact 40e prior evidence preserved",
+  "lease": "RELEASED_ON_RETURN"
+}

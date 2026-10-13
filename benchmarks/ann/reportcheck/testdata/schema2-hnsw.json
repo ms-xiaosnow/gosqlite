@@ -1,0 +1,3010 @@
+{
+  "schema_version": 2,
+  "harness_revision": "ordinary-ann-v2",
+  "benchmark": "native-ann",
+  "workload_version": "gaussian-heldout-gsv-v1",
+  "measurement_version": "paired-exact-ann-reopened-v2",
+  "workload_sha256": "e42b0e616e9c34f01487edcf6a143b1068dad04226af55b2570f227613d29199",
+  "dataset_sha256": "c932e3255bbfdf81c1129161172aa2cc99306afed60c08a5b945a47dc51dba8c",
+  "query_sha256": "989a14de6bf164fcdabc22e5533079f1aa3337829c89c47235f1239c73b682aa",
+  "dataset_and_queries_gsv_sha256": "7982ca2bfb56c73ef0df37d7de995a4970c76c08b72ead696269b644573101f1",
+  "config": {
+    "rows": 256,
+    "dimensions": 4,
+    "queries": 2,
+    "dataset_seed": 20261010,
+    "method": "hnsw",
+    "lists": 100,
+    "probes": 1,
+    "max_probes": 0,
+    "source_id": "edc36744555658dd60f748edf3c858a198f6264e",
+    "hardware_id": "cloud-ann-review-20261010",
+    "max_duration_ns": 600000000000,
+    "max_memory_bytes": 268435456,
+    "max_data_bytes": 134217728,
+    "max_admission_component_work": 1000000000
+  },
+  "algorithm": {
+    "method": "hnsw",
+    "version": 1,
+    "dimensions": 4,
+    "metric": "l2",
+    "opclass": "vector_l2_ops",
+    "seed": 2611923443488327891,
+    "m": 16,
+    "ef_construction": 64,
+    "max_nodes": 100000,
+    "max_tombstones": 25000,
+    "max_visited": 4096,
+    "max_distance_evaluations": 1000000,
+    "max_memory_bytes": 33554432
+  },
+  "admission": {
+    "vector_components": 1032,
+    "estimated_memory_bytes": 50873472,
+    "estimated_data_bytes": 1720320,
+    "build_component_work": 262144,
+    "query_component_work": 294912,
+    "total_component_work": 557056
+  },
+  "status": "passed",
+  "errors": [],
+  "started_utc": "2026-10-10T22:02:20.557004796Z",
+  "finished_utc": "2026-10-10T22:02:29.201710657Z",
+  "elapsed_seconds": 8.644707854,
+  "go_version": "go1.27.2",
+  "goos": "linux",
+  "goarch": "amd64",
+  "logical_cpus": 9,
+  "gomaxprocs": 9,
+  "build_settings": {
+    "-buildmode": "exe",
+    "-compiler": "gc",
+    "-trimpath": "true",
+    "CGO_ENABLED": "0",
+    "GOAMD64": "v1",
+    "GOARCH": "amd64",
+    "GOOS": "linux",
+    "main_path": "github.com/ms-xiaosnow/gosqlite",
+    "main_sum": "",
+    "main_version": "(devel)"
+  },
+  "hardware": {
+    "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+    "cpu_affinity": "0-8",
+    "mem_total": "10230316 kB",
+    "cgroup_memory_max": "unavailable",
+    "cgroup_cpu_max": "unavailable",
+    "observation_notes": [
+      "/sys/fs/cgroup/memory.max: unavailable",
+      "/sys/fs/cgroup/cpu.max: unavailable"
+    ]
+  },
+  "hardware_sha256": "32675fc58e805975f859c68e13691820e0c12d6bdf51fa4bba061db1bad229cb",
+  "page_size": 4096,
+  "cache_condition": "warm OS cache; unmeasured warmup; exact/ANN timing order alternates per query; no cache flush",
+  "limits": {
+    "disk": "Cartesian estimate plus boundary directory-byte observations; not an OS quota",
+    "duration": "boundary-only; native calls and retirement are not preempted",
+    "error_graph_nodes": 128,
+    "memory": "Cartesian estimate plus sampled process Go heap; not a hard RSS limit",
+    "native_ann_query": {
+      "MaxNodeReads": 100000,
+      "MaxCentroidReads": 32768,
+      "MaxMemberKeysRead": 1048576,
+      "MaxDistanceEvaluations": 1000000,
+      "MaxIterations": 16,
+      "MaxBytes": 33554432
+    },
+    "native_db": {
+      "Encryption": null,
+      "IndexMethods": null,
+      "ReadOnly": false,
+      "NoCreate": false,
+      "WALExclusive": false,
+      "WALShared": false,
+      "WALPowersafeOverwrite": false,
+      "KeepWALOnClose": false,
+      "MaxSortBytes": 67108864,
+      "MaxTransactionPages": 4096,
+      "MaxTransactionUndoBytes": 0,
+      "PageSize": 4096,
+      "SectorSize": 4096
+    },
+    "native_vector_query": {
+      "MaxCandidates": 100000,
+      "MaxResults": 10000,
+      "MaxComponents": 134217728
+    }
+  },
+  "timing_semantics": {
+    "cache": "OS cache neither flushed nor isolated; warmup performed after ordinary close/reopen",
+    "elapsed_seconds": "entry through normal resource finalization, including data generation, checks and reopen; report serialization excluded",
+    "index_build_ms": "Begin, native index construction and successful Commit; checks/reopen excluded",
+    "insert_ms": "Begin, all inserts, boundary checks and successful Commit; table creation excluded",
+    "percentiles": "sorted observed index floor((N-1)*p); no interpolation",
+    "query_ms": "single native Tx.VectorSearch call only; Begin, Rollback, correctness checks, timing storage and boundary guards excluded",
+    "query_order": "K ascending 1/10/100; query ordinal ascending; exact first on even zero-based ordinal; one shared read transaction per pair",
+    "warmup": "one exact and one ANN call per K in separate explicit read transactions; not timed"
+  },
+  "retained_data_directory": "/workspace/scratch/5e06a74e5f65/durable-restart/ann-harness-freeze-v1/../ann-harness-evidence-v1/raw/gosqlite-ordinary-ann-2565416649",
+  "retained_report_path": "/workspace/scratch/5e06a74e5f65/durable-restart/ann-harness-evidence-v1/raw/gosqlite-ordinary-ann-2565416649/report.json",
+  "insert_ms": 18.273621,
+  "index_build_ms": 4961.329681,
+  "database_bytes": 217088,
+  "before_index_bytes": 24576,
+  "index_bytes_delta": 192512,
+  "max_observed_data_bytes": 217088,
+  "max_observed_heap_bytes": 4897096,
+  "reopen_verified": true,
+  "reopened_dataset_sha256": "c932e3255bbfdf81c1129161172aa2cc99306afed60c08a5b945a47dc51dba8c",
+  "final_model_verified": true,
+  "samples": [
+    {
+      "k": 1,
+      "queries": 2,
+      "recall": 1,
+      "exact_p50_ms": 0.424821,
+      "exact_p95_ms": 0.424821,
+      "ann_p50_ms": 28.186109,
+      "ann_p95_ms": 28.186109,
+      "mean_exact_base_rows": 256,
+      "mean_ann_base_rows": 40,
+      "mean_ann_node_reads": 203.5,
+      "mean_ann_distance_evaluations": 194.5,
+      "mean_centroid_scores": 0,
+      "mean_lists_opened": 0,
+      "mean_member_keys_read": 0,
+      "mean_total_distance_evaluations": 234.5,
+      "min_effective_probes": 0,
+      "max_effective_probes": 0,
+      "fallback_queries": 0,
+      "native_ann_queries": 2,
+      "observations": [
+        {
+          "completed": true,
+          "stage": "complete",
+          "query_ordinal": 0,
+          "exact_first": true,
+          "exact_ms": 0.424821,
+          "ann_ms": 28.186109,
+          "intersection_count": 1,
+          "exact": {
+            "Hits": [
+              {
+                "RowID": 177,
+                "Distance": 0.5092418346411723
+              }
+            ],
+            "Plan": {
+              "ANNOpclass": "",
+              "ANNGeneration": 0,
+              "ANNLists": 0,
+              "ANNTrainingState": "",
+              "ANNEFSearch": 0,
+              "ANNMaxEFSearch": 0,
+              "ANNEffectiveEF": 0,
+              "ANNProbes": 0,
+              "ANNMaxProbes": 0,
+              "ANNEffectiveProbes": 0,
+              "ANNStopReason": "",
+              "ANNFallback": "",
+              "VectorMetric": "",
+              "VectorBitMetric": "",
+              "VectorRepresentation": "",
+              "VectorColumn": "",
+              "VectorDimensions": 0,
+              "VectorTopK": 0,
+              "VectorExact": false,
+              "VectorRanking": "",
+              "Access": "SCAN",
+              "Table": "items",
+              "Indexes": null,
+              "Method": "exact_vector",
+              "MethodVersion": 1,
+              "Fields": [
+                "embedding"
+              ],
+              "Namespace": "",
+              "GramLengths": null,
+              "EstimatedCandidates": -1,
+              "Recheck": false,
+              "Reason": "exact full scan; WHERE before distance",
+              "Field": "embedding",
+              "Metric": "l2",
+              "Dimensions": 4,
+              "Limit": 1,
+              "Exact": true
+            },
+            "Stats": {
+              "IndexKeysRead": 0,
+              "IndexPageReads": 0,
+              "RowIDSeeks": 0,
+              "ANNStateReads": 0,
+              "ANNNodeReads": 0,
+              "ANNEdgeReads": 0,
+              "ANNVisited": 0,
+              "ANNDistanceEvaluations": 0,
+              "ANNIdentityLookups": 0,
+              "ANNCentroidScores": 0,
+              "ANNCentroidReads": 0,
+              "ANNListsOpened": 0,
+              "ANNMemberKeysRead": 0,
+              "ANNIterations": 0,
+              "ANNExactRescores": 0,
+              "ANNPeakBytes": 0,
+              "VectorRankedRows": 0,
+              "VectorFilteredRows": 0,
+              "VectorNullRows": 0,
+              "VectorRankComponents": 0,
+              "VectorRankNonzeros": 0,
+              "VectorRankPackedBytes": 0,
+              "FrequencyLookups": 0,
+              "PostingKeysRead": 0,
+              "Candidates": 0,
+              "BaseRowFetches": 256,
+              "ReturnedRows": 1,
+              "FilteredRows": 0,
+              "ScoredRows": 256,
+              "NullRows": 0,
+              "ScoredComponents": 1028
+            }
+          },
+          "ann": {
+            "Hits": [
+              {
+                "RowID": 177,
+                "Distance": 0.5092418346411723
+              }
+            ],
+            "Plan": {
+              "ANNOpclass": "vector_l2_ops",
+              "ANNGeneration": 1,
+              "ANNLists": 0,
+              "ANNTrainingState": "",
+              "ANNEFSearch": 40,
+              "ANNMaxEFSearch": 1000,
+              "ANNEffectiveEF": 40,
+              "ANNProbes": 0,
+              "ANNMaxProbes": 0,
+              "ANNEffectiveProbes": 0,
+              "ANNStopReason": "eligible_limit_satisfied",
+              "ANNFallback": "",
+              "VectorMetric": "",
+              "VectorBitMetric": "",
+              "VectorRepresentation": "",
+              "VectorColumn": "",
+              "VectorDimensions": 0,
+              "VectorTopK": 0,
+              "VectorExact": false,
+              "VectorRanking": "ann_exact_rescore",
+              "Access": "SEARCH",
+              "Table": "items",
+              "Indexes": [
+                "items_hnsw"
+              ],
+              "Method": "hnsw",
+              "MethodVersion": 1,
+              "Fields": [
+                "embedding"
+              ],
+              "Namespace": "",
+              "GramLengths": null,
+              "EstimatedCandidates": -1,
+              "Recheck": true,
+              "Reason": "lazy HNSW traversal with original WHERE and exact base-row rescoring",
+              "Field": "embedding",
+              "Metric": "l2",
+              "Dimensions": 4,
+              "Limit": 1,
+              "Exact": false
+            },
+            "Stats": {
+              "IndexKeysRead": 0,
+              "IndexPageReads": 0,
+              "RowIDSeeks": 0,
+              "ANNStateReads": 1,
+              "ANNNodeReads": 210,
+              "ANNEdgeReads": 1124,
+              "ANNVisited": 170,
+              "ANNDistanceEvaluations": 208,
+              "ANNIdentityLookups": 40,
+              "ANNCentroidScores": 0,
+              "ANNCentroidReads": 0,
+              "ANNListsOpened": 0,
+              "ANNMemberKeysRead": 0,
+              "ANNIterations": 1,
+              "ANNExactRescores": 40,
+              "ANNPeakBytes": 198280,
+              "VectorRankedRows": 0,
+              "VectorFilteredRows": 0,
+              "VectorNullRows": 0,
+              "VectorRankComponents": 0,
+              "VectorRankNonzeros": 0,
+              "VectorRankPackedBytes": 0,
+              "FrequencyLookups": 0,
+              "PostingKeysRead": 0,
+              "Candidates": 40,
+              "BaseRowFetches": 40,
+              "ReturnedRows": 1,
+              "FilteredRows": 0,
+              "ScoredRows": 40,
+              "NullRows": 0,
+              "ScoredComponents": 164
+            }
+          }
+        },
+        {
+          "completed": true,
+          "stage": "complete",
+          "query_ordinal": 1,
+          "exact_first": false,
+          "exact_ms": 0.495497,
+          "ann_ms": 31.611492,
+          "intersection_count": 1,
+          "exact": {
+            "Hits": [
+              {
+                "RowID": 30,
+                "Distance": 1.3105888673964583
+              }
+            ],
+            "Plan": {
+              "ANNOpclass": "",
+              "ANNGeneration": 0,
+              "ANNLists": 0,
+              "ANNTrainingState": "",
+              "ANNEFSearch": 0,
+              "ANNMaxEFSearch": 0,
+              "ANNEffectiveEF": 0,
+              "ANNProbes": 0,
+              "ANNMaxProbes": 0,
+              "ANNEffectiveProbes": 0,
+              "ANNStopReason": "",
+              "ANNFallback": "",
+              "VectorMetric": "",
+              "VectorBitMetric": "",
+              "VectorRepresentation": "",
+              "VectorColumn": "",
+              "VectorDimensions": 0,
+              "VectorTopK": 0,
+              "VectorExact": false,
+              "VectorRanking": "",
+              "Access": "SCAN",
+              "Table": "items",
+              "Indexes": null,
+              "Method": "exact_vector",
+              "MethodVersion": 1,
+              "Fields": [
+                "embedding"
+              ],
+              "Namespace": "",
+              "GramLengths": null,
+              "EstimatedCandidates": -1,
+              "Recheck": false,
+              "Reason": "exact full scan; WHERE before distance",
+              "Field": "embedding",
+              "Metric": "l2",
+              "Dimensions": 4,
+              "Limit": 1,
+              "Exact": true
+            },
+            "Stats": {
+              "IndexKeysRead": 0,
+              "IndexPageReads": 0,
+              "RowIDSeeks": 0,
+              "ANNStateReads": 0,
+              "ANNNodeReads": 0,
+              "ANNEdgeReads": 0,
+              "ANNVisited": 0,
+              "ANNDistanceEvaluations": 0,
+              "ANNIdentityLookups": 0,
+              "ANNCentroidScores": 0,
+              "ANNCentroidReads": 0,
+              "ANNListsOpened": 0,
+              "ANNMemberKeysRead": 0,
+              "ANNIterations": 0,
+              "ANNExactRescores": 0,
+              "ANNPeakBytes": 0,
+              "VectorRankedRows": 0,
+              "VectorFilteredRows": 0,
+              "VectorNullRows": 0,
+              "VectorRankComponents": 0,
+              "VectorRankNonzeros": 0,
+              "VectorRankPackedBytes": 0,
+              "FrequencyLookups": 0,
+              "PostingKeysRead": 0,
+              "Candidates": 0,
+              "BaseRowFetches": 256,
+              "ReturnedRows": 1,
+              "FilteredRows": 0,
+              "ScoredRows": 256,
+              "NullRows": 0,
+              "ScoredComponents": 1028
+            }
+          },
+          "ann": {
+            "Hits": [
+              {
+                "RowID": 30,
+                "Distance": 1.3105888673964583
+              }
+            ],
+            "Plan": {
+              "ANNOpclass": "vector_l2_ops",
+              "ANNGeneration": 1,
+              "ANNLists": 0,
+              "ANNTrainingState": "",
+              "ANNEFSearch": 40,
+              "ANNMaxEFSearch": 1000,
+              "ANNEffectiveEF": 40,
+              "ANNProbes": 0,
+              "ANNMaxProbes": 0,
+              "ANNEffectiveProbes": 0,
+              "ANNStopReason": "eligible_limit_satisfied",
+              "ANNFallback": "",
+              "VectorMetric": "",
+              "VectorBitMetric": "",
+              "VectorRepresentation": "",
+              "VectorColumn": "",
+              "VectorDimensions": 0,
+              "VectorTopK": 0,
+              "VectorExact": false,
+              "VectorRanking": "ann_exact_rescore",
+              "Access": "SEARCH",
+              "Table": "items",
+              "Indexes": [
+                "items_hnsw"
+              ],
+              "Method": "hnsw",
+              "MethodVersion": 1,
+              "Fields": [
+                "embedding"
+              ],
+              "Namespace": "",
+              "GramLengths": null,
+              "EstimatedCandidates": -1,
+              "Recheck": true,
+              "Reason": "lazy HNSW traversal with original WHERE and exact base-row rescoring",
+              "Field": "embedding",
+              "Metric": "l2",
+              "Dimensions": 4,
+              "Limit": 1,
+              "Exact": false
+            },
+            "Stats": {
+              "IndexKeysRead": 0,
+              "IndexPageReads": 0,
+              "RowIDSeeks": 0,
+              "ANNStateReads": 1,
+              "ANNNodeReads": 197,
+              "ANNEdgeReads": 1084,
+              "ANNVisited": 157,
+              "ANNDistanceEvaluations": 181,
+              "ANNIdentityLookups": 40,
+              "ANNCentroidScores": 0,
+              "ANNCentroidReads": 0,
+              "ANNListsOpened": 0,
+              "ANNMemberKeysRead": 0,
+              "ANNIterations": 1,
+              "ANNExactRescores": 40,
+              "ANNPeakBytes": 183176,
+              "VectorRankedRows": 0,
+              "VectorFilteredRows": 0,
+              "VectorNullRows": 0,
+              "VectorRankComponents": 0,
+              "VectorRankNonzeros": 0,
+              "VectorRankPackedBytes": 0,
+              "FrequencyLookups": 0,
+              "PostingKeysRead": 0,
+              "Candidates": 40,
+              "BaseRowFetches": 40,
+              "ReturnedRows": 1,
+              "FilteredRows": 0,
+              "ScoredRows": 40,
+              "NullRows": 0,
+              "ScoredComponents": 164
+            }
+          }
+        }
+      ]
+    },
+    {
+      "k": 10,
+      "queries": 2,
+      "recall": 1,
+      "exact_p50_ms": 0.27836,
+      "exact_p95_ms": 0.27836,
+      "ann_p50_ms": 27.26568,
+      "ann_p95_ms": 27.26568,
+      "mean_exact_base_rows": 256,
+      "mean_ann_base_rows": 40,
+      "mean_ann_node_reads": 203.5,
+      "mean_ann_distance_evaluations": 194.5,
+      "mean_centroid_scores": 0,
+      "mean_lists_opened": 0,
+      "mean_member_keys_read": 0,
+      "mean_total_distance_evaluations": 234.5,
+      "min_effective_probes": 0,
+      "max_effective_probes": 0,
+      "fallback_queries": 0,
+      "native_ann_queries": 2,
+      "observations": [
+        {
+          "completed": true,
+          "stage": "complete",
+          "query_ordinal": 0,
+          "exact_first": true,
+          "exact_ms": 0.316628,
+          "ann_ms": 27.26568,
+          "intersection_count": 10,
+          "exact": {
+            "Hits": [
+              {
+                "RowID": 177,
+                "Distance": 0.5092418346411723
+              },
+              {
+                "RowID": 233,
+                "Distance": 0.7110013313180935
+              },
+              {
+                "RowID": 138,
+                "Distance": 0.8596682199499882
+              },
+              {
+                "RowID": 36,
+                "Distance": 0.9904762733322984
+              },
+              {
+                "RowID": 28,
+                "Distance": 1.0860862466121632
+              },
+              {
+                "RowID": 9,
+                "Distance": 1.091741813784471
+              },
+              {
+                "RowID": 99,
+                "Distance": 1.1173708721436113
+              },
+              {
+                "RowID": 203,
+                "Distance": 1.1242843005354517
+              },
+              {
+                "RowID": 45,
+                "Distance": 1.1320432201564894
+              },
+              {
+                "RowID": 229,
+                "Distance": 1.1631157845496733
+              }
+            ],
+            "Plan": {
+              "ANNOpclass": "",
+              "ANNGeneration": 0,
+              "ANNLists": 0,
+              "ANNTrainingState": "",
+              "ANNEFSearch": 0,
+              "ANNMaxEFSearch": 0,
+              "ANNEffectiveEF": 0,
+              "ANNProbes": 0,
+              "ANNMaxProbes": 0,
+              "ANNEffectiveProbes": 0,
+              "ANNStopReason": "",
+              "ANNFallback": "",
+              "VectorMetric": "",
+              "VectorBitMetric": "",
+              "VectorRepresentation": "",
+              "VectorColumn": "",
+              "VectorDimensions": 0,
+              "VectorTopK": 0,
+              "VectorExact": false,
+              "VectorRanking": "",
+              "Access": "SCAN",
+              "Table": "items",
+              "Indexes": null,
+              "Method": "exact_vector",
+              "MethodVersion": 1,
+              "Fields": [
+                "embedding"
+              ],
+              "Namespace": "",
+              "GramLengths": null,
+              "EstimatedCandidates": -1,
+              "Recheck": false,
+              "Reason": "exact full scan; WHERE before distance",
+              "Field": "embedding",
+              "Metric": "l2",
+              "Dimensions": 4,
+              "Limit": 10,
+              "Exact": true
+            },
+            "Stats": {
+              "IndexKeysRead": 0,
+              "IndexPageReads": 0,
+              "RowIDSeeks": 0,
+              "ANNStateReads": 0,
+              "ANNNodeReads": 0,
+              "ANNEdgeReads": 0,
+              "ANNVisited": 0,
+              "ANNDistanceEvaluations": 0,
+              "ANNIdentityLookups": 0,
+              "ANNCentroidScores": 0,
+              "ANNCentroidReads": 0,
+              "ANNListsOpened": 0,
+              "ANNMemberKeysRead": 0,
+              "ANNIterations": 0,
+              "ANNExactRescores": 0,
+              "ANNPeakBytes": 0,
+              "VectorRankedRows": 0,
+              "VectorFilteredRows": 0,
+              "VectorNullRows": 0,
+              "VectorRankComponents": 0,
+              "VectorRankNonzeros": 0,
+              "VectorRankPackedBytes": 0,
+              "FrequencyLookups": 0,
+              "PostingKeysRead": 0,
+              "Candidates": 0,
+              "BaseRowFetches": 256,
+              "ReturnedRows": 10,
+              "FilteredRows": 0,
+              "ScoredRows": 256,
+              "NullRows": 0,
+              "ScoredComponents": 1028
+            }
+          },
+          "ann": {
+            "Hits": [
+              {
+                "RowID": 177,
+                "Distance": 0.5092418346411723
+              },
+              {
+                "RowID": 233,
+                "Distance": 0.7110013313180935
+              },
+              {
+                "RowID": 138,
+                "Distance": 0.8596682199499882
+              },
+              {
+                "RowID": 36,
+                "Distance": 0.9904762733322984
+              },
+              {
+                "RowID": 28,
+                "Distance": 1.0860862466121632
+              },
+              {
+                "RowID": 9,
+                "Distance": 1.091741813784471
+              },
+              {
+                "RowID": 99,
+                "Distance": 1.1173708721436113
+              },
+              {
+                "RowID": 203,
+                "Distance": 1.1242843005354517
+              },
+              {
+                "RowID": 45,
+                "Distance": 1.1320432201564894
+              },
+              {
+                "RowID": 229,
+                "Distance": 1.1631157845496733
+              }
+            ],
+            "Plan": {
+              "ANNOpclass": "vector_l2_ops",
+              "ANNGeneration": 1,
+              "ANNLists": 0,
+              "ANNTrainingState": "",
+              "ANNEFSearch": 40,
+              "ANNMaxEFSearch": 1000,
+              "ANNEffectiveEF": 40,
+              "ANNProbes": 0,
+              "ANNMaxProbes": 0,
+              "ANNEffectiveProbes": 0,
+              "ANNStopReason": "eligible_limit_satisfied",
+              "ANNFallback": "",
+              "VectorMetric": "",
+              "VectorBitMetric": "",
+              "VectorRepresentation": "",
+              "VectorColumn": "",
+              "VectorDimensions": 0,
+              "VectorTopK": 0,
+              "VectorExact": false,
+              "VectorRanking": "ann_exact_rescore",
+              "Access": "SEARCH",
+              "Table": "items",
+              "Indexes": [
+                "items_hnsw"
+              ],
+              "Method": "hnsw",
+              "MethodVersion": 1,
+              "Fields": [
+                "embedding"
+              ],
+              "Namespace": "",
+              "GramLengths": null,
+              "EstimatedCandidates": -1,
+              "Recheck": true,
+              "Reason": "lazy HNSW traversal with original WHERE and exact base-row rescoring",
+              "Field": "embedding",
+              "Metric": "l2",
+              "Dimensions": 4,
+              "Limit": 10,
+              "Exact": false
+            },
+            "Stats": {
+              "IndexKeysRead": 0,
+              "IndexPageReads": 0,
+              "RowIDSeeks": 0,
+              "ANNStateReads": 1,
+              "ANNNodeReads": 210,
+              "ANNEdgeReads": 1124,
+              "ANNVisited": 170,
+              "ANNDistanceEvaluations": 208,
+              "ANNIdentityLookups": 40,
+              "ANNCentroidScores": 0,
+              "ANNCentroidReads": 0,
+              "ANNListsOpened": 0,
+              "ANNMemberKeysRead": 0,
+              "ANNIterations": 1,
+              "ANNExactRescores": 40,
+              "ANNPeakBytes": 199432,
+              "VectorRankedRows": 0,
+              "VectorFilteredRows": 0,
+              "VectorNullRows": 0,
+              "VectorRankComponents": 0,
+              "VectorRankNonzeros": 0,
+              "VectorRankPackedBytes": 0,
+              "FrequencyLookups": 0,
+              "PostingKeysRead": 0,
+              "Candidates": 40,
+              "BaseRowFetches": 40,
+              "ReturnedRows": 10,
+              "FilteredRows": 0,
+              "ScoredRows": 40,
+              "NullRows": 0,
+              "ScoredComponents": 164
+            }
+          }
+        },
+        {
+          "completed": true,
+          "stage": "complete",
+          "query_ordinal": 1,
+          "exact_first": false,
+          "exact_ms": 0.27836,
+          "ann_ms": 27.432331,
+          "intersection_count": 10,
+          "exact": {
+            "Hits": [
+              {
+                "RowID": 30,
+                "Distance": 1.3105888673964583
+              },
+              {
+                "RowID": 124,
+                "Distance": 1.566107450280183
+              },
+              {
+                "RowID": 180,
+                "Distance": 1.606839307618335
+              },
+              {
+                "RowID": 22,
+                "Distance": 1.731780275171804
+              },
+              {
+                "RowID": 215,
+                "Distance": 1.9323590436861986
+              },
+              {
+                "RowID": 21,
+                "Distance": 2.1155357417839147
+              },
+              {
+                "RowID": 16,
+                "Distance": 2.146787004109418
+              },
+              {
+                "RowID": 235,
+                "Distance": 2.316904751886263
+              },
+              {
+                "RowID": 256,
+                "Distance": 2.3315350521083418
+              },
+              {
+                "RowID": 49,
+                "Distance": 2.3388487105341453
+              }
+            ],
+            "Plan": {
+              "ANNOpclass": "",
+              "ANNGeneration": 0,
+              "ANNLists": 0,
+              "ANNTrainingState": "",
+              "ANNEFSearch": 0,
+              "ANNMaxEFSearch": 0,
+              "ANNEffectiveEF": 0,
+              "ANNProbes": 0,
+              "ANNMaxProbes": 0,
+              "ANNEffectiveProbes": 0,
+              "ANNStopReason": "",
+              "ANNFallback": "",
+              "VectorMetric": "",
+              "VectorBitMetric": "",
+              "VectorRepresentation": "",
+              "VectorColumn": "",
+              "VectorDimensions": 0,
+              "VectorTopK": 0,
+              "VectorExact": false,
+              "VectorRanking": "",
+              "Access": "SCAN",
+              "Table": "items",
+              "Indexes": null,
+              "Method": "exact_vector",
+              "MethodVersion": 1,
+              "Fields": [
+                "embedding"
+              ],
+              "Namespace": "",
+              "GramLengths": null,
+              "EstimatedCandidates": -1,
+              "Recheck": false,
+              "Reason": "exact full scan; WHERE before distance",
+              "Field": "embedding",
+              "Metric": "l2",
+              "Dimensions": 4,
+              "Limit": 10,
+              "Exact": true
+            },
+            "Stats": {
+              "IndexKeysRead": 0,
+              "IndexPageReads": 0,
+              "RowIDSeeks": 0,
+              "ANNStateReads": 0,
+              "ANNNodeReads": 0,
+              "ANNEdgeReads": 0,
+              "ANNVisited": 0,
+              "ANNDistanceEvaluations": 0,
+              "ANNIdentityLookups": 0,
+              "ANNCentroidScores": 0,
+              "ANNCentroidReads": 0,
+              "ANNListsOpened": 0,
+              "ANNMemberKeysRead": 0,
+              "ANNIterations": 0,
+              "ANNExactRescores": 0,
+              "ANNPeakBytes": 0,
+              "VectorRankedRows": 0,
+              "VectorFilteredRows": 0,
+              "VectorNullRows": 0,
+              "VectorRankComponents": 0,
+              "VectorRankNonzeros": 0,
+              "VectorRankPackedBytes": 0,
+              "FrequencyLookups": 0,
+              "PostingKeysRead": 0,
+              "Candidates": 0,
+              "BaseRowFetches": 256,
+              "ReturnedRows": 10,
+              "FilteredRows": 0,
+              "ScoredRows": 256,
+              "NullRows": 0,
+              "ScoredComponents": 1028
+            }
+          },
+          "ann": {
+            "Hits": [
+              {
+                "RowID": 30,
+                "Distance": 1.3105888673964583
+              },
+              {
+                "RowID": 124,
+                "Distance": 1.566107450280183
+              },
+              {
+                "RowID": 180,
+                "Distance": 1.606839307618335
+              },
+              {
+                "RowID": 22,
+                "Distance": 1.731780275171804
+              },
+              {
+                "RowID": 215,
+                "Distance": 1.9323590436861986
+              },
+              {
+                "RowID": 21,
+                "Distance": 2.1155357417839147
+              },
+              {
+                "RowID": 16,
+                "Distance": 2.146787004109418
+              },
+              {
+                "RowID": 235,
+                "Distance": 2.316904751886263
+              },
+              {
+                "RowID": 256,
+                "Distance": 2.3315350521083418
+              },
+              {
+                "RowID": 49,
+                "Distance": 2.3388487105341453
+              }
+            ],
+            "Plan": {
+              "ANNOpclass": "vector_l2_ops",
+              "ANNGeneration": 1,
+              "ANNLists": 0,
+              "ANNTrainingState": "",
+              "ANNEFSearch": 40,
+              "ANNMaxEFSearch": 1000,
+              "ANNEffectiveEF": 40,
+              "ANNProbes": 0,
+              "ANNMaxProbes": 0,
+              "ANNEffectiveProbes": 0,
+              "ANNStopReason": "eligible_limit_satisfied",
+              "ANNFallback": "",
+              "VectorMetric": "",
+              "VectorBitMetric": "",
+              "VectorRepresentation": "",
+              "VectorColumn": "",
+              "VectorDimensions": 0,
+              "VectorTopK": 0,
+              "VectorExact": false,
+              "VectorRanking": "ann_exact_rescore",
+              "Access": "SEARCH",
+              "Table": "items",
+              "Indexes": [
+                "items_hnsw"
+              ],
+              "Method": "hnsw",
+              "MethodVersion": 1,
+              "Fields": [
+                "embedding"
+              ],
+              "Namespace": "",
+              "GramLengths": null,
+              "EstimatedCandidates": -1,
+              "Recheck": true,
+              "Reason": "lazy HNSW traversal with original WHERE and exact base-row rescoring",
+              "Field": "embedding",
+              "Metric": "l2",
+              "Dimensions": 4,
+              "Limit": 10,
+              "Exact": false
+            },
+            "Stats": {
+              "IndexKeysRead": 0,
+              "IndexPageReads": 0,
+              "RowIDSeeks": 0,
+              "ANNStateReads": 1,
+              "ANNNodeReads": 197,
+              "ANNEdgeReads": 1084,
+              "ANNVisited": 157,
+              "ANNDistanceEvaluations": 181,
+              "ANNIdentityLookups": 40,
+              "ANNCentroidScores": 0,
+              "ANNCentroidReads": 0,
+              "ANNListsOpened": 0,
+              "ANNMemberKeysRead": 0,
+              "ANNIterations": 1,
+              "ANNExactRescores": 40,
+              "ANNPeakBytes": 184328,
+              "VectorRankedRows": 0,
+              "VectorFilteredRows": 0,
+              "VectorNullRows": 0,
+              "VectorRankComponents": 0,
+              "VectorRankNonzeros": 0,
+              "VectorRankPackedBytes": 0,
+              "FrequencyLookups": 0,
+              "PostingKeysRead": 0,
+              "Candidates": 40,
+              "BaseRowFetches": 40,
+              "ReturnedRows": 10,
+              "FilteredRows": 0,
+              "ScoredRows": 40,
+              "NullRows": 0,
+              "ScoredComponents": 164
+            }
+          }
+        }
+      ]
+    },
+    {
+      "k": 100,
+      "queries": 2,
+      "recall": 1,
+      "exact_p50_ms": 0.356678,
+      "exact_p95_ms": 0.356678,
+      "ann_p50_ms": 44.632009,
+      "ann_p95_ms": 44.632009,
+      "mean_exact_base_rows": 256,
+      "mean_ann_base_rows": 100,
+      "mean_ann_node_reads": 325,
+      "mean_ann_distance_evaluations": 262,
+      "mean_centroid_scores": 0,
+      "mean_lists_opened": 0,
+      "mean_member_keys_read": 0,
+      "mean_total_distance_evaluations": 362,
+      "min_effective_probes": 0,
+      "max_effective_probes": 0,
+      "fallback_queries": 0,
+      "native_ann_queries": 2,
+      "observations": [
+        {
+          "completed": true,
+          "stage": "complete",
+          "query_ordinal": 0,
+          "exact_first": true,
+          "exact_ms": 0.356678,
+          "ann_ms": 50.573928,
+          "intersection_count": 100,
+          "exact": {
+            "Hits": [
+              {
+                "RowID": 177,
+                "Distance": 0.5092418346411723
+              },
+              {
+                "RowID": 233,
+                "Distance": 0.7110013313180935
+              },
+              {
+                "RowID": 138,
+                "Distance": 0.8596682199499882
+              },
+              {
+                "RowID": 36,
+                "Distance": 0.9904762733322984
+              },
+              {
+                "RowID": 28,
+                "Distance": 1.0860862466121632
+              },
+              {
+                "RowID": 9,
+                "Distance": 1.091741813784471
+              },
+              {
+                "RowID": 99,
+                "Distance": 1.1173708721436113
+              },
+              {
+                "RowID": 203,
+                "Distance": 1.1242843005354517
+              },
+              {
+                "RowID": 45,
+                "Distance": 1.1320432201564894
+              },
+              {
+                "RowID": 229,
+                "Distance": 1.1631157845496733
+              },
+              {
+                "RowID": 10,
+                "Distance": 1.2707273741697283
+              },
+              {
+                "RowID": 70,
+                "Distance": 1.3197069797992977
+              },
+              {
+                "RowID": 69,
+                "Distance": 1.3298200933880373
+              },
+              {
+                "RowID": 185,
+                "Distance": 1.3419429246646641
+              },
+              {
+                "RowID": 108,
+                "Distance": 1.3663481725184996
+              },
+              {
+                "RowID": 62,
+                "Distance": 1.4322472980686616
+              },
+              {
+                "RowID": 64,
+                "Distance": 1.4622989189515518
+              },
+              {
+                "RowID": 5,
+                "Distance": 1.4723171459703566
+              },
+              {
+                "RowID": 155,
+                "Distance": 1.475526000336944
+              },
+              {
+                "RowID": 128,
+                "Distance": 1.479967553900385
+              },
+              {
+                "RowID": 238,
+                "Distance": 1.48576163117156
+              },
+              {
+                "RowID": 40,
+                "Distance": 1.4904916212536818
+              },
+              {
+                "RowID": 135,
+                "Distance": 1.4947379703809065
+              },
+              {
+                "RowID": 38,
+                "Distance": 1.5032322356063519
+              },
+              {
+                "RowID": 25,
+                "Distance": 1.5275372026364076
+              },
+              {
+                "RowID": 174,
+                "Distance": 1.535627068612252
+              },
+              {
+                "RowID": 14,
+                "Distance": 1.5390697996900111
+              },
+              {
+                "RowID": 55,
+                "Distance": 1.5396731586705072
+              },
+              {
+                "RowID": 246,
+                "Distance": 1.5424342862519498
+              },
+              {
+                "RowID": 250,
+                "Distance": 1.5464186929028338
+              },
+              {
+                "RowID": 183,
+                "Distance": 1.5769042092664767
+              },
+              {
+                "RowID": 27,
+                "Distance": 1.5930670589322573
+              },
+              {
+                "RowID": 1,
+                "Distance": 1.6081929118357567
+              },
+              {
+                "RowID": 179,
+                "Distance": 1.6427273765734487
+              },
+              {
+                "RowID": 151,
+                "Distance": 1.647547006631279
+              },
+              {
+                "RowID": 113,
+                "Distance": 1.6490808289045666
+              },
+              {
+                "RowID": 141,
+                "Distance": 1.6516525431684697
+              },
+              {
+                "RowID": 19,
+                "Distance": 1.6517030322560786
+              },
+              {
+                "RowID": 214,
+                "Distance": 1.6546184205386716
+              },
+              {
+                "RowID": 216,
+                "Distance": 1.6604690853159414
+              },
+              {
+                "RowID": 49,
+                "Distance": 1.6645578539289978
+              },
+              {
+                "RowID": 115,
+                "Distance": 1.6817255366300512
+              },
+              {
+                "RowID": 12,
+                "Distance": 1.6925554532088456
+              },
+              {
+                "RowID": 4,
+                "Distance": 1.7081071793296225
+              },
+              {
+                "RowID": 237,
+                "Distance": 1.7177514692005202
+              },
+              {
+                "RowID": 220,
+                "Distance": 1.7309830830462059
+              },
+              {
+                "RowID": 119,
+                "Distance": 1.7372759663689135
+              },
+              {
+                "RowID": 97,
+                "Distance": 1.7407912325722334
+              },
+              {
+                "RowID": 146,
+                "Distance": 1.76850486568514
+              },
+              {
+                "RowID": 251,
+                "Distance": 1.7747135021732234
+              },
+              {
+                "RowID": 249,
+                "Distance": 1.781655595608984
+              },
+              {
+                "RowID": 227,
+                "Distance": 1.7896176353180837
+              },
+              {
+                "RowID": 168,
+                "Distance": 1.792866189600504
+              },
+              {
+                "RowID": 178,
+                "Distance": 1.7950520965162182
+              },
+              {
+                "RowID": 207,
+                "Distance": 1.8017893832835221
+              },
+              {
+                "RowID": 132,
+                "Distance": 1.8129055632438287
+              },
+              {
+                "RowID": 34,
+                "Distance": 1.8259172737054359
+              },
+              {
+                "RowID": 73,
+                "Distance": 1.8425483103901454
+              },
+              {
+                "RowID": 231,
+                "Distance": 1.8474897790597553
+              },
+              {
+                "RowID": 29,
+                "Distance": 1.879527829471685
+              },
+              {
+                "RowID": 118,
+                "Distance": 1.8797249304022643
+              },
+              {
+                "RowID": 7,
+                "Distance": 1.8812778083326565
+              },
+              {
+                "RowID": 211,
+                "Distance": 1.8921309400456316
+              },
+              {
+                "RowID": 41,
+                "Distance": 1.8949478847968324
+              },
+              {
+                "RowID": 91,
+                "Distance": 1.906050677145279
+              },
+              {
+                "RowID": 76,
+                "Distance": 1.9098387895883024
+              },
+              {
+                "RowID": 169,
+                "Distance": 1.9179662583892538
+              },
+              {
+                "RowID": 134,
+                "Distance": 1.9346393180060677
+              },
+              {
+                "RowID": 101,
+                "Distance": 1.964928528650438
+              },
+              {
+                "RowID": 194,
+                "Distance": 1.9706081131539406
+              },
+              {
+                "RowID": 67,
+                "Distance": 1.972918744160369
+              },
+              {
+                "RowID": 93,
+                "Distance": 1.9949470276130714
+              },
+              {
+                "RowID": 235,
+                "Distance": 2.001781600631834
+              },
+              {
+                "RowID": 192,
+                "Distance": 2.018030866828116
+              },
+              {
+                "RowID": 23,
+                "Distance": 2.0287330597112945
+              },
+              {
+                "RowID": 145,
+                "Distance": 2.029839485950646
+              },
+              {
+                "RowID": 188,
+                "Distance": 2.03670401239921
+              },
+              {
+                "RowID": 90,
+                "Distance": 2.0367704101720236
+              },
+              {
+                "RowID": 243,
+                "Distance": 2.0702814576400312
+              },
+              {
+                "RowID": 131,
+                "Distance": 2.083725249014883
+              },
+              {
+                "RowID": 88,
+                "Distance": 2.091594356178576
+              },
+              {
+                "RowID": 35,
+                "Distance": 2.092934139278772
+              },
+              {
+                "RowID": 92,
+                "Distance": 2.1026604224155365
+              },
+              {
+                "RowID": 79,
+                "Distance": 2.10691079960478
+              },
+              {
+                "RowID": 147,
+                "Distance": 2.1102264267216135
+              },
+              {
+                "RowID": 39,
+                "Distance": 2.1194624554246513
+              },
+              {
+                "RowID": 221,
+                "Distance": 2.150201584661804
+              },
+              {
+                "RowID": 83,
+                "Distance": 2.161871664941007
+              },
+              {
+                "RowID": 165,
+                "Distance": 2.1766385265283272
+              },
+              {
+                "RowID": 26,
+                "Distance": 2.178061024835352
+              },
+              {
+                "RowID": 21,
+                "Distance": 2.1860965595656325
+              },
+              {
+                "RowID": 33,
+                "Distance": 2.211300136766346
+              },
+              {
+                "RowID": 59,
+                "Distance": 2.21275783605745
+              },
+              {
+                "RowID": 111,
+                "Distance": 2.227884942507077
+              },
+              {
+                "RowID": 105,
+                "Distance": 2.229287870606088
+              },
+              {
+                "RowID": 248,
+                "Distance": 2.241020041831397
+              },
+              {
+                "RowID": 54,
+                "Distance": 2.2531795869058504
+              },
+              {
+                "RowID": 102,
+                "Distance": 2.260905046842326
+              },
+              {
+                "RowID": 117,
+                "Distance": 2.267412430494602
+              },
+              {
+                "RowID": 143,
+                "Distance": 2.2706353599898637
+              }
+            ],
+            "Plan": {
+              "ANNOpclass": "",
+              "ANNGeneration": 0,
+              "ANNLists": 0,
+              "ANNTrainingState": "",
+              "ANNEFSearch": 0,
+              "ANNMaxEFSearch": 0,
+              "ANNEffectiveEF": 0,
+              "ANNProbes": 0,
+              "ANNMaxProbes": 0,
+              "ANNEffectiveProbes": 0,
+              "ANNStopReason": "",
+              "ANNFallback": "",
+              "VectorMetric": "",
+              "VectorBitMetric": "",
+              "VectorRepresentation": "",
+              "VectorColumn": "",
+              "VectorDimensions": 0,
+              "VectorTopK": 0,
+              "VectorExact": false,
+              "VectorRanking": "",
+              "Access": "SCAN",
+              "Table": "items",
+              "Indexes": null,
+              "Method": "exact_vector",
+              "MethodVersion": 1,
+              "Fields": [
+                "embedding"
+              ],
+              "Namespace": "",
+              "GramLengths": null,
+              "EstimatedCandidates": -1,
+              "Recheck": false,
+              "Reason": "exact full scan; WHERE before distance",
+              "Field": "embedding",
+              "Metric": "l2",
+              "Dimensions": 4,
+              "Limit": 100,
+              "Exact": true
+            },
+            "Stats": {
+              "IndexKeysRead": 0,
+              "IndexPageReads": 0,
+              "RowIDSeeks": 0,
+              "ANNStateReads": 0,
+              "ANNNodeReads": 0,
+              "ANNEdgeReads": 0,
+              "ANNVisited": 0,
+              "ANNDistanceEvaluations": 0,
+              "ANNIdentityLookups": 0,
+              "ANNCentroidScores": 0,
+              "ANNCentroidReads": 0,
+              "ANNListsOpened": 0,
+              "ANNMemberKeysRead": 0,
+              "ANNIterations": 0,
+              "ANNExactRescores": 0,
+              "ANNPeakBytes": 0,
+              "VectorRankedRows": 0,
+              "VectorFilteredRows": 0,
+              "VectorNullRows": 0,
+              "VectorRankComponents": 0,
+              "VectorRankNonzeros": 0,
+              "VectorRankPackedBytes": 0,
+              "FrequencyLookups": 0,
+              "PostingKeysRead": 0,
+              "Candidates": 0,
+              "BaseRowFetches": 256,
+              "ReturnedRows": 100,
+              "FilteredRows": 0,
+              "ScoredRows": 256,
+              "NullRows": 0,
+              "ScoredComponents": 1028
+            }
+          },
+          "ann": {
+            "Hits": [
+              {
+                "RowID": 177,
+                "Distance": 0.5092418346411723
+              },
+              {
+                "RowID": 233,
+                "Distance": 0.7110013313180935
+              },
+              {
+                "RowID": 138,
+                "Distance": 0.8596682199499882
+              },
+              {
+                "RowID": 36,
+                "Distance": 0.9904762733322984
+              },
+              {
+                "RowID": 28,
+                "Distance": 1.0860862466121632
+              },
+              {
+                "RowID": 9,
+                "Distance": 1.091741813784471
+              },
+              {
+                "RowID": 99,
+                "Distance": 1.1173708721436113
+              },
+              {
+                "RowID": 203,
+                "Distance": 1.1242843005354517
+              },
+              {
+                "RowID": 45,
+                "Distance": 1.1320432201564894
+              },
+              {
+                "RowID": 229,
+                "Distance": 1.1631157845496733
+              },
+              {
+                "RowID": 10,
+                "Distance": 1.2707273741697283
+              },
+              {
+                "RowID": 70,
+                "Distance": 1.3197069797992977
+              },
+              {
+                "RowID": 69,
+                "Distance": 1.3298200933880373
+              },
+              {
+                "RowID": 185,
+                "Distance": 1.3419429246646641
+              },
+              {
+                "RowID": 108,
+                "Distance": 1.3663481725184996
+              },
+              {
+                "RowID": 62,
+                "Distance": 1.4322472980686616
+              },
+              {
+                "RowID": 64,
+                "Distance": 1.4622989189515518
+              },
+              {
+                "RowID": 5,
+                "Distance": 1.4723171459703566
+              },
+              {
+                "RowID": 155,
+                "Distance": 1.475526000336944
+              },
+              {
+                "RowID": 128,
+                "Distance": 1.479967553900385
+              },
+              {
+                "RowID": 238,
+                "Distance": 1.48576163117156
+              },
+              {
+                "RowID": 40,
+                "Distance": 1.4904916212536818
+              },
+              {
+                "RowID": 135,
+                "Distance": 1.4947379703809065
+              },
+              {
+                "RowID": 38,
+                "Distance": 1.5032322356063519
+              },
+              {
+                "RowID": 25,
+                "Distance": 1.5275372026364076
+              },
+              {
+                "RowID": 174,
+                "Distance": 1.535627068612252
+              },
+              {
+                "RowID": 14,
+                "Distance": 1.5390697996900111
+              },
+              {
+                "RowID": 55,
+                "Distance": 1.5396731586705072
+              },
+              {
+                "RowID": 246,
+                "Distance": 1.5424342862519498
+              },
+              {
+                "RowID": 250,
+                "Distance": 1.5464186929028338
+              },
+              {
+                "RowID": 183,
+                "Distance": 1.5769042092664767
+              },
+              {
+                "RowID": 27,
+                "Distance": 1.5930670589322573
+              },
+              {
+                "RowID": 1,
+                "Distance": 1.6081929118357567
+              },
+              {
+                "RowID": 179,
+                "Distance": 1.6427273765734487
+              },
+              {
+                "RowID": 151,
+                "Distance": 1.647547006631279
+              },
+              {
+                "RowID": 113,
+                "Distance": 1.6490808289045666
+              },
+              {
+                "RowID": 141,
+                "Distance": 1.6516525431684697
+              },
+              {
+                "RowID": 19,
+                "Distance": 1.6517030322560786
+              },
+              {
+                "RowID": 214,
+                "Distance": 1.6546184205386716
+              },
+              {
+                "RowID": 216,
+                "Distance": 1.6604690853159414
+              },
+              {
+                "RowID": 49,
+                "Distance": 1.6645578539289978
+              },
+              {
+                "RowID": 115,
+                "Distance": 1.6817255366300512
+              },
+              {
+                "RowID": 12,
+                "Distance": 1.6925554532088456
+              },
+              {
+                "RowID": 4,
+                "Distance": 1.7081071793296225
+              },
+              {
+                "RowID": 237,
+                "Distance": 1.7177514692005202
+              },
+              {
+                "RowID": 220,
+                "Distance": 1.7309830830462059
+              },
+              {
+                "RowID": 119,
+                "Distance": 1.7372759663689135
+              },
+              {
+                "RowID": 97,
+                "Distance": 1.7407912325722334
+              },
+              {
+                "RowID": 146,
+                "Distance": 1.76850486568514
+              },
+              {
+                "RowID": 251,
+                "Distance": 1.7747135021732234
+              },
+              {
+                "RowID": 249,
+                "Distance": 1.781655595608984
+              },
+              {
+                "RowID": 227,
+                "Distance": 1.7896176353180837
+              },
+              {
+                "RowID": 168,
+                "Distance": 1.792866189600504
+              },
+              {
+                "RowID": 178,
+                "Distance": 1.7950520965162182
+              },
+              {
+                "RowID": 207,
+                "Distance": 1.8017893832835221
+              },
+              {
+                "RowID": 132,
+                "Distance": 1.8129055632438287
+              },
+              {
+                "RowID": 34,
+                "Distance": 1.8259172737054359
+              },
+              {
+                "RowID": 73,
+                "Distance": 1.8425483103901454
+              },
+              {
+                "RowID": 231,
+                "Distance": 1.8474897790597553
+              },
+              {
+                "RowID": 29,
+                "Distance": 1.879527829471685
+              },
+              {
+                "RowID": 118,
+                "Distance": 1.8797249304022643
+              },
+              {
+                "RowID": 7,
+                "Distance": 1.8812778083326565
+              },
+              {
+                "RowID": 211,
+                "Distance": 1.8921309400456316
+              },
+              {
+                "RowID": 41,
+                "Distance": 1.8949478847968324
+              },
+              {
+                "RowID": 91,
+                "Distance": 1.906050677145279
+              },
+              {
+                "RowID": 76,
+                "Distance": 1.9098387895883024
+              },
+              {
+                "RowID": 169,
+                "Distance": 1.9179662583892538
+              },
+              {
+                "RowID": 134,
+                "Distance": 1.9346393180060677
+              },
+              {
+                "RowID": 101,
+                "Distance": 1.964928528650438
+              },
+              {
+                "RowID": 194,
+                "Distance": 1.9706081131539406
+              },
+              {
+                "RowID": 67,
+                "Distance": 1.972918744160369
+              },
+              {
+                "RowID": 93,
+                "Distance": 1.9949470276130714
+              },
+              {
+                "RowID": 235,
+                "Distance": 2.001781600631834
+              },
+              {
+                "RowID": 192,
+                "Distance": 2.018030866828116
+              },
+              {
+                "RowID": 23,
+                "Distance": 2.0287330597112945
+              },
+              {
+                "RowID": 145,
+                "Distance": 2.029839485950646
+              },
+              {
+                "RowID": 188,
+                "Distance": 2.03670401239921
+              },
+              {
+                "RowID": 90,
+                "Distance": 2.0367704101720236
+              },
+              {
+                "RowID": 243,
+                "Distance": 2.0702814576400312
+              },
+              {
+                "RowID": 131,
+                "Distance": 2.083725249014883
+              },
+              {
+                "RowID": 88,
+                "Distance": 2.091594356178576
+              },
+              {
+                "RowID": 35,
+                "Distance": 2.092934139278772
+              },
+              {
+                "RowID": 92,
+                "Distance": 2.1026604224155365
+              },
+              {
+                "RowID": 79,
+                "Distance": 2.10691079960478
+              },
+              {
+                "RowID": 147,
+                "Distance": 2.1102264267216135
+              },
+              {
+                "RowID": 39,
+                "Distance": 2.1194624554246513
+              },
+              {
+                "RowID": 221,
+                "Distance": 2.150201584661804
+              },
+              {
+                "RowID": 83,
+                "Distance": 2.161871664941007
+              },
+              {
+                "RowID": 165,
+                "Distance": 2.1766385265283272
+              },
+              {
+                "RowID": 26,
+                "Distance": 2.178061024835352
+              },
+              {
+                "RowID": 21,
+                "Distance": 2.1860965595656325
+              },
+              {
+                "RowID": 33,
+                "Distance": 2.211300136766346
+              },
+              {
+                "RowID": 59,
+                "Distance": 2.21275783605745
+              },
+              {
+                "RowID": 111,
+                "Distance": 2.227884942507077
+              },
+              {
+                "RowID": 105,
+                "Distance": 2.229287870606088
+              },
+              {
+                "RowID": 248,
+                "Distance": 2.241020041831397
+              },
+              {
+                "RowID": 54,
+                "Distance": 2.2531795869058504
+              },
+              {
+                "RowID": 102,
+                "Distance": 2.260905046842326
+              },
+              {
+                "RowID": 117,
+                "Distance": 2.267412430494602
+              },
+              {
+                "RowID": 143,
+                "Distance": 2.2706353599898637
+              }
+            ],
+            "Plan": {
+              "ANNOpclass": "vector_l2_ops",
+              "ANNGeneration": 1,
+              "ANNLists": 0,
+              "ANNTrainingState": "",
+              "ANNEFSearch": 40,
+              "ANNMaxEFSearch": 1000,
+              "ANNEffectiveEF": 100,
+              "ANNProbes": 0,
+              "ANNMaxProbes": 0,
+              "ANNEffectiveProbes": 0,
+              "ANNStopReason": "eligible_limit_satisfied",
+              "ANNFallback": "",
+              "VectorMetric": "",
+              "VectorBitMetric": "",
+              "VectorRepresentation": "",
+              "VectorColumn": "",
+              "VectorDimensions": 0,
+              "VectorTopK": 0,
+              "VectorExact": false,
+              "VectorRanking": "ann_exact_rescore",
+              "Access": "SEARCH",
+              "Table": "items",
+              "Indexes": [
+                "items_hnsw"
+              ],
+              "Method": "hnsw",
+              "MethodVersion": 1,
+              "Fields": [
+                "embedding"
+              ],
+              "Namespace": "",
+              "GramLengths": null,
+              "EstimatedCandidates": -1,
+              "Recheck": true,
+              "Reason": "lazy HNSW traversal with original WHERE and exact base-row rescoring",
+              "Field": "embedding",
+              "Metric": "l2",
+              "Dimensions": 4,
+              "Limit": 100,
+              "Exact": false
+            },
+            "Stats": {
+              "IndexKeysRead": 0,
+              "IndexPageReads": 0,
+              "RowIDSeeks": 0,
+              "ANNStateReads": 1,
+              "ANNNodeReads": 337,
+              "ANNEdgeReads": 2781,
+              "ANNVisited": 237,
+              "ANNDistanceEvaluations": 282,
+              "ANNIdentityLookups": 100,
+              "ANNCentroidScores": 0,
+              "ANNCentroidReads": 0,
+              "ANNListsOpened": 0,
+              "ANNMemberKeysRead": 0,
+              "ANNIterations": 1,
+              "ANNExactRescores": 100,
+              "ANNPeakBytes": 286664,
+              "VectorRankedRows": 0,
+              "VectorFilteredRows": 0,
+              "VectorNullRows": 0,
+              "VectorRankComponents": 0,
+              "VectorRankNonzeros": 0,
+              "VectorRankPackedBytes": 0,
+              "FrequencyLookups": 0,
+              "PostingKeysRead": 0,
+              "Candidates": 100,
+              "BaseRowFetches": 100,
+              "ReturnedRows": 100,
+              "FilteredRows": 0,
+              "ScoredRows": 100,
+              "NullRows": 0,
+              "ScoredComponents": 404
+            }
+          }
+        },
+        {
+          "completed": true,
+          "stage": "complete",
+          "query_ordinal": 1,
+          "exact_first": false,
+          "exact_ms": 0.519814,
+          "ann_ms": 44.632009,
+          "intersection_count": 100,
+          "exact": {
+            "Hits": [
+              {
+                "RowID": 30,
+                "Distance": 1.3105888673964583
+              },
+              {
+                "RowID": 124,
+                "Distance": 1.566107450280183
+              },
+              {
+                "RowID": 180,
+                "Distance": 1.606839307618335
+              },
+              {
+                "RowID": 22,
+                "Distance": 1.731780275171804
+              },
+              {
+                "RowID": 215,
+                "Distance": 1.9323590436861986
+              },
+              {
+                "RowID": 21,
+                "Distance": 2.1155357417839147
+              },
+              {
+                "RowID": 16,
+                "Distance": 2.146787004109418
+              },
+              {
+                "RowID": 235,
+                "Distance": 2.316904751886263
+              },
+              {
+                "RowID": 256,
+                "Distance": 2.3315350521083418
+              },
+              {
+                "RowID": 49,
+                "Distance": 2.3388487105341453
+              },
+              {
+                "RowID": 54,
+                "Distance": 2.3646281228149895
+              },
+              {
+                "RowID": 114,
+                "Distance": 2.399535160025585
+              },
+              {
+                "RowID": 211,
+                "Distance": 2.447031183641647
+              },
+              {
+                "RowID": 117,
+                "Distance": 2.497866242268526
+              },
+              {
+                "RowID": 213,
+                "Distance": 2.5591173517335086
+              },
+              {
+                "RowID": 143,
+                "Distance": 2.5738155197405366
+              },
+              {
+                "RowID": 74,
+                "Distance": 2.577514671673547
+              },
+              {
+                "RowID": 18,
+                "Distance": 2.5807178359610425
+              },
+              {
+                "RowID": 8,
+                "Distance": 2.6221382590465585
+              },
+              {
+                "RowID": 179,
+                "Distance": 2.656148692105753
+              },
+              {
+                "RowID": 232,
+                "Distance": 2.6709899524296232
+              },
+              {
+                "RowID": 44,
+                "Distance": 2.685139657473485
+              },
+              {
+                "RowID": 59,
+                "Distance": 2.6974123584868797
+              },
+              {
+                "RowID": 27,
+                "Distance": 2.721628723467902
+              },
+              {
+                "RowID": 194,
+                "Distance": 2.7397359231136127
+              },
+              {
+                "RowID": 23,
+                "Distance": 2.748678924181588
+              },
+              {
+                "RowID": 42,
+                "Distance": 2.7699994016534077
+              },
+              {
+                "RowID": 4,
+                "Distance": 2.8054986426160573
+              },
+              {
+                "RowID": 61,
+                "Distance": 2.8462136900726995
+              },
+              {
+                "RowID": 43,
+                "Distance": 2.860748775225786
+              },
+              {
+                "RowID": 32,
+                "Distance": 2.8657264305982126
+              },
+              {
+                "RowID": 150,
+                "Distance": 2.879457798038108
+              },
+              {
+                "RowID": 20,
+                "Distance": 2.894772160685376
+              },
+              {
+                "RowID": 93,
+                "Distance": 2.9077814089569474
+              },
+              {
+                "RowID": 86,
+                "Distance": 2.9094253262937997
+              },
+              {
+                "RowID": 181,
+                "Distance": 2.9162459511413976
+              },
+              {
+                "RowID": 97,
+                "Distance": 2.918357771062917
+              },
+              {
+                "RowID": 87,
+                "Distance": 2.925573471022595
+              },
+              {
+                "RowID": 136,
+                "Distance": 2.9320989559051434
+              },
+              {
+                "RowID": 120,
+                "Distance": 2.9440178612662784
+              },
+              {
+                "RowID": 250,
+                "Distance": 2.982662045165624
+              },
+              {
+                "RowID": 28,
+                "Distance": 2.9828839116443153
+              },
+              {
+                "RowID": 5,
+                "Distance": 3.0076550946888787
+              },
+              {
+                "RowID": 201,
+                "Distance": 3.0237639297149568
+              },
+              {
+                "RowID": 184,
+                "Distance": 3.0432368841865447
+              },
+              {
+                "RowID": 39,
+                "Distance": 3.0452635368529095
+              },
+              {
+                "RowID": 94,
+                "Distance": 3.059167809862844
+              },
+              {
+                "RowID": 105,
+                "Distance": 3.061600807721151
+              },
+              {
+                "RowID": 104,
+                "Distance": 3.096899248754126
+              },
+              {
+                "RowID": 55,
+                "Distance": 3.141453289769202
+              },
+              {
+                "RowID": 67,
+                "Distance": 3.1415422471028567
+              },
+              {
+                "RowID": 119,
+                "Distance": 3.163974460493606
+              },
+              {
+                "RowID": 102,
+                "Distance": 3.1644951720408008
+              },
+              {
+                "RowID": 195,
+                "Distance": 3.166744177951349
+              },
+              {
+                "RowID": 70,
+                "Distance": 3.1681253694863516
+              },
+              {
+                "RowID": 34,
+                "Distance": 3.1742567386099227
+              },
+              {
+                "RowID": 90,
+                "Distance": 3.187503924937616
+              },
+              {
+                "RowID": 38,
+                "Distance": 3.194999560365626
+              },
+              {
+                "RowID": 146,
+                "Distance": 3.2084949013595283
+              },
+              {
+                "RowID": 224,
+                "Distance": 3.2185561223556056
+              },
+              {
+                "RowID": 41,
+                "Distance": 3.224436902033776
+              },
+              {
+                "RowID": 159,
+                "Distance": 3.234251971899749
+              },
+              {
+                "RowID": 172,
+                "Distance": 3.2431645690505704
+              },
+              {
+                "RowID": 205,
+                "Distance": 3.2487105155266796
+              },
+              {
+                "RowID": 35,
+                "Distance": 3.2521614689523015
+              },
+              {
+                "RowID": 210,
+                "Distance": 3.2526097880941123
+              },
+              {
+                "RowID": 92,
+                "Distance": 3.2543813157905332
+              },
+              {
+                "RowID": 101,
+                "Distance": 3.261999297342342
+              },
+              {
+                "RowID": 25,
+                "Distance": 3.2859048362702827
+              },
+              {
+                "RowID": 187,
+                "Distance": 3.286780821363134
+              },
+              {
+                "RowID": 1,
+                "Distance": 3.288790238438705
+              },
+              {
+                "RowID": 178,
+                "Distance": 3.2892875734462383
+              },
+              {
+                "RowID": 96,
+                "Distance": 3.289661186387
+              },
+              {
+                "RowID": 255,
+                "Distance": 3.321648029098118
+              },
+              {
+                "RowID": 251,
+                "Distance": 3.322739522555843
+              },
+              {
+                "RowID": 113,
+                "Distance": 3.342392876825097
+              },
+              {
+                "RowID": 144,
+                "Distance": 3.3495442333900303
+              },
+              {
+                "RowID": 24,
+                "Distance": 3.366853111605903
+              },
+              {
+                "RowID": 79,
+                "Distance": 3.3757224014844525
+              },
+              {
+                "RowID": 40,
+                "Distance": 3.3852846791976536
+              },
+              {
+                "RowID": 145,
+                "Distance": 3.389432241067118
+              },
+              {
+                "RowID": 231,
+                "Distance": 3.4035877713440437
+              },
+              {
+                "RowID": 151,
+                "Distance": 3.4046400630256652
+              },
+              {
+                "RowID": 246,
+                "Distance": 3.417273444271952
+              },
+              {
+                "RowID": 135,
+                "Distance": 3.4234177051341046
+              },
+              {
+                "RowID": 36,
+                "Distance": 3.4255290636234954
+              },
+              {
+                "RowID": 165,
+                "Distance": 3.4267199967291675
+              },
+              {
+                "RowID": 127,
+                "Distance": 3.4295963944779477
+              },
+              {
+                "RowID": 168,
+                "Distance": 3.4341302102509528
+              },
+              {
+                "RowID": 185,
+                "Distance": 3.4580386486639654
+              },
+              {
+                "RowID": 19,
+                "Distance": 3.5060237224974204
+              },
+              {
+                "RowID": 131,
+                "Distance": 3.5111966872167155
+              },
+              {
+                "RowID": 122,
+                "Distance": 3.515822430257482
+              },
+              {
+                "RowID": 66,
+                "Distance": 3.6009598001034475
+              },
+              {
+                "RowID": 175,
+                "Distance": 3.6070673438786205
+              },
+              {
+                "RowID": 216,
+                "Distance": 3.607555123563459
+              },
+              {
+                "RowID": 190,
+                "Distance": 3.611746221771721
+              },
+              {
+                "RowID": 237,
+                "Distance": 3.6183487129985648
+              },
+              {
+                "RowID": 248,
+                "Distance": 3.626522947694526
+              },
+              {
+                "RowID": 177,
+                "Distance": 3.6292000790047227
+              }
+            ],
+            "Plan": {
+              "ANNOpclass": "",
+              "ANNGeneration": 0,
+              "ANNLists": 0,
+              "ANNTrainingState": "",
+              "ANNEFSearch": 0,
+              "ANNMaxEFSearch": 0,
+              "ANNEffectiveEF": 0,
+              "ANNProbes": 0,
+              "ANNMaxProbes": 0,
+              "ANNEffectiveProbes": 0,
+              "ANNStopReason": "",
+              "ANNFallback": "",
+              "VectorMetric": "",
+              "VectorBitMetric": "",
+              "VectorRepresentation": "",
+              "VectorColumn": "",
+              "VectorDimensions": 0,
+              "VectorTopK": 0,
+              "VectorExact": false,
+              "VectorRanking": "",
+              "Access": "SCAN",
+              "Table": "items",
+              "Indexes": null,
+              "Method": "exact_vector",
+              "MethodVersion": 1,
+              "Fields": [
+                "embedding"
+              ],
+              "Namespace": "",
+              "GramLengths": null,
+              "EstimatedCandidates": -1,
+              "Recheck": false,
+              "Reason": "exact full scan; WHERE before distance",
+              "Field": "embedding",
+              "Metric": "l2",
+              "Dimensions": 4,
+              "Limit": 100,
+              "Exact": true
+            },
+            "Stats": {
+              "IndexKeysRead": 0,
+              "IndexPageReads": 0,
+              "RowIDSeeks": 0,
+              "ANNStateReads": 0,
+              "ANNNodeReads": 0,
+              "ANNEdgeReads": 0,
+              "ANNVisited": 0,
+              "ANNDistanceEvaluations": 0,
+              "ANNIdentityLookups": 0,
+              "ANNCentroidScores": 0,
+              "ANNCentroidReads": 0,
+              "ANNListsOpened": 0,
+              "ANNMemberKeysRead": 0,
+              "ANNIterations": 0,
+              "ANNExactRescores": 0,
+              "ANNPeakBytes": 0,
+              "VectorRankedRows": 0,
+              "VectorFilteredRows": 0,
+              "VectorNullRows": 0,
+              "VectorRankComponents": 0,
+              "VectorRankNonzeros": 0,
+              "VectorRankPackedBytes": 0,
+              "FrequencyLookups": 0,
+              "PostingKeysRead": 0,
+              "Candidates": 0,
+              "BaseRowFetches": 256,
+              "ReturnedRows": 100,
+              "FilteredRows": 0,
+              "ScoredRows": 256,
+              "NullRows": 0,
+              "ScoredComponents": 1028
+            }
+          },
+          "ann": {
+            "Hits": [
+              {
+                "RowID": 30,
+                "Distance": 1.3105888673964583
+              },
+              {
+                "RowID": 124,
+                "Distance": 1.566107450280183
+              },
+              {
+                "RowID": 180,
+                "Distance": 1.606839307618335
+              },
+              {
+                "RowID": 22,
+                "Distance": 1.731780275171804
+              },
+              {
+                "RowID": 215,
+                "Distance": 1.9323590436861986
+              },
+              {
+                "RowID": 21,
+                "Distance": 2.1155357417839147
+              },
+              {
+                "RowID": 16,
+                "Distance": 2.146787004109418
+              },
+              {
+                "RowID": 235,
+                "Distance": 2.316904751886263
+              },
+              {
+                "RowID": 256,
+                "Distance": 2.3315350521083418
+              },
+              {
+                "RowID": 49,
+                "Distance": 2.3388487105341453
+              },
+              {
+                "RowID": 54,
+                "Distance": 2.3646281228149895
+              },
+              {
+                "RowID": 114,
+                "Distance": 2.399535160025585
+              },
+              {
+                "RowID": 211,
+                "Distance": 2.447031183641647
+              },
+              {
+                "RowID": 117,
+                "Distance": 2.497866242268526
+              },
+              {
+                "RowID": 213,
+                "Distance": 2.5591173517335086
+              },
+              {
+                "RowID": 143,
+                "Distance": 2.5738155197405366
+              },
+              {
+                "RowID": 74,
+                "Distance": 2.577514671673547
+              },
+              {
+                "RowID": 18,
+                "Distance": 2.5807178359610425
+              },
+              {
+                "RowID": 8,
+                "Distance": 2.6221382590465585
+              },
+              {
+                "RowID": 179,
+                "Distance": 2.656148692105753
+              },
+              {
+                "RowID": 232,
+                "Distance": 2.6709899524296232
+              },
+              {
+                "RowID": 44,
+                "Distance": 2.685139657473485
+              },
+              {
+                "RowID": 59,
+                "Distance": 2.6974123584868797
+              },
+              {
+                "RowID": 27,
+                "Distance": 2.721628723467902
+              },
+              {
+                "RowID": 194,
+                "Distance": 2.7397359231136127
+              },
+              {
+                "RowID": 23,
+                "Distance": 2.748678924181588
+              },
+              {
+                "RowID": 42,
+                "Distance": 2.7699994016534077
+              },
+              {
+                "RowID": 4,
+                "Distance": 2.8054986426160573
+              },
+              {
+                "RowID": 61,
+                "Distance": 2.8462136900726995
+              },
+              {
+                "RowID": 43,
+                "Distance": 2.860748775225786
+              },
+              {
+                "RowID": 32,
+                "Distance": 2.8657264305982126
+              },
+              {
+                "RowID": 150,
+                "Distance": 2.879457798038108
+              },
+              {
+                "RowID": 20,
+                "Distance": 2.894772160685376
+              },
+              {
+                "RowID": 93,
+                "Distance": 2.9077814089569474
+              },
+              {
+                "RowID": 86,
+                "Distance": 2.9094253262937997
+              },
+              {
+                "RowID": 181,
+                "Distance": 2.9162459511413976
+              },
+              {
+                "RowID": 97,
+                "Distance": 2.918357771062917
+              },
+              {
+                "RowID": 87,
+                "Distance": 2.925573471022595
+              },
+              {
+                "RowID": 136,
+                "Distance": 2.9320989559051434
+              },
+              {
+                "RowID": 120,
+                "Distance": 2.9440178612662784
+              },
+              {
+                "RowID": 250,
+                "Distance": 2.982662045165624
+              },
+              {
+                "RowID": 28,
+                "Distance": 2.9828839116443153
+              },
+              {
+                "RowID": 5,
+                "Distance": 3.0076550946888787
+              },
+              {
+                "RowID": 201,
+                "Distance": 3.0237639297149568
+              },
+              {
+                "RowID": 184,
+                "Distance": 3.0432368841865447
+              },
+              {
+                "RowID": 39,
+                "Distance": 3.0452635368529095
+              },
+              {
+                "RowID": 94,
+                "Distance": 3.059167809862844
+              },
+              {
+                "RowID": 105,
+                "Distance": 3.061600807721151
+              },
+              {
+                "RowID": 104,
+                "Distance": 3.096899248754126
+              },
+              {
+                "RowID": 55,
+                "Distance": 3.141453289769202
+              },
+              {
+                "RowID": 67,
+                "Distance": 3.1415422471028567
+              },
+              {
+                "RowID": 119,
+                "Distance": 3.163974460493606
+              },
+              {
+                "RowID": 102,
+                "Distance": 3.1644951720408008
+              },
+              {
+                "RowID": 195,
+                "Distance": 3.166744177951349
+              },
+              {
+                "RowID": 70,
+                "Distance": 3.1681253694863516
+              },
+              {
+                "RowID": 34,
+                "Distance": 3.1742567386099227
+              },
+              {
+                "RowID": 90,
+                "Distance": 3.187503924937616
+              },
+              {
+                "RowID": 38,
+                "Distance": 3.194999560365626
+              },
+              {
+                "RowID": 146,
+                "Distance": 3.2084949013595283
+              },
+              {
+                "RowID": 224,
+                "Distance": 3.2185561223556056
+              },
+              {
+                "RowID": 41,
+                "Distance": 3.224436902033776
+              },
+              {
+                "RowID": 159,
+                "Distance": 3.234251971899749
+              },
+              {
+                "RowID": 172,
+                "Distance": 3.2431645690505704
+              },
+              {
+                "RowID": 205,
+                "Distance": 3.2487105155266796
+              },
+              {
+                "RowID": 35,
+                "Distance": 3.2521614689523015
+              },
+              {
+                "RowID": 210,
+                "Distance": 3.2526097880941123
+              },
+              {
+                "RowID": 92,
+                "Distance": 3.2543813157905332
+              },
+              {
+                "RowID": 101,
+                "Distance": 3.261999297342342
+              },
+              {
+                "RowID": 25,
+                "Distance": 3.2859048362702827
+              },
+              {
+                "RowID": 187,
+                "Distance": 3.286780821363134
+              },
+              {
+                "RowID": 1,
+                "Distance": 3.288790238438705
+              },
+              {
+                "RowID": 178,
+                "Distance": 3.2892875734462383
+              },
+              {
+                "RowID": 96,
+                "Distance": 3.289661186387
+              },
+              {
+                "RowID": 255,
+                "Distance": 3.321648029098118
+              },
+              {
+                "RowID": 251,
+                "Distance": 3.322739522555843
+              },
+              {
+                "RowID": 113,
+                "Distance": 3.342392876825097
+              },
+              {
+                "RowID": 144,
+                "Distance": 3.3495442333900303
+              },
+              {
+                "RowID": 24,
+                "Distance": 3.366853111605903
+              },
+              {
+                "RowID": 79,
+                "Distance": 3.3757224014844525
+              },
+              {
+                "RowID": 40,
+                "Distance": 3.3852846791976536
+              },
+              {
+                "RowID": 145,
+                "Distance": 3.389432241067118
+              },
+              {
+                "RowID": 231,
+                "Distance": 3.4035877713440437
+              },
+              {
+                "RowID": 151,
+                "Distance": 3.4046400630256652
+              },
+              {
+                "RowID": 246,
+                "Distance": 3.417273444271952
+              },
+              {
+                "RowID": 135,
+                "Distance": 3.4234177051341046
+              },
+              {
+                "RowID": 36,
+                "Distance": 3.4255290636234954
+              },
+              {
+                "RowID": 165,
+                "Distance": 3.4267199967291675
+              },
+              {
+                "RowID": 127,
+                "Distance": 3.4295963944779477
+              },
+              {
+                "RowID": 168,
+                "Distance": 3.4341302102509528
+              },
+              {
+                "RowID": 185,
+                "Distance": 3.4580386486639654
+              },
+              {
+                "RowID": 19,
+                "Distance": 3.5060237224974204
+              },
+              {
+                "RowID": 131,
+                "Distance": 3.5111966872167155
+              },
+              {
+                "RowID": 122,
+                "Distance": 3.515822430257482
+              },
+              {
+                "RowID": 66,
+                "Distance": 3.6009598001034475
+              },
+              {
+                "RowID": 175,
+                "Distance": 3.6070673438786205
+              },
+              {
+                "RowID": 216,
+                "Distance": 3.607555123563459
+              },
+              {
+                "RowID": 190,
+                "Distance": 3.611746221771721
+              },
+              {
+                "RowID": 237,
+                "Distance": 3.6183487129985648
+              },
+              {
+                "RowID": 248,
+                "Distance": 3.626522947694526
+              },
+              {
+                "RowID": 177,
+                "Distance": 3.6292000790047227
+              }
+            ],
+            "Plan": {
+              "ANNOpclass": "vector_l2_ops",
+              "ANNGeneration": 1,
+              "ANNLists": 0,
+              "ANNTrainingState": "",
+              "ANNEFSearch": 40,
+              "ANNMaxEFSearch": 1000,
+              "ANNEffectiveEF": 100,
+              "ANNProbes": 0,
+              "ANNMaxProbes": 0,
+              "ANNEffectiveProbes": 0,
+              "ANNStopReason": "eligible_limit_satisfied",
+              "ANNFallback": "",
+              "VectorMetric": "",
+              "VectorBitMetric": "",
+              "VectorRepresentation": "",
+              "VectorColumn": "",
+              "VectorDimensions": 0,
+              "VectorTopK": 0,
+              "VectorExact": false,
+              "VectorRanking": "ann_exact_rescore",
+              "Access": "SEARCH",
+              "Table": "items",
+              "Indexes": [
+                "items_hnsw"
+              ],
+              "Method": "hnsw",
+              "MethodVersion": 1,
+              "Fields": [
+                "embedding"
+              ],
+              "Namespace": "",
+              "GramLengths": null,
+              "EstimatedCandidates": -1,
+              "Recheck": true,
+              "Reason": "lazy HNSW traversal with original WHERE and exact base-row rescoring",
+              "Field": "embedding",
+              "Metric": "l2",
+              "Dimensions": 4,
+              "Limit": 100,
+              "Exact": false
+            },
+            "Stats": {
+              "IndexKeysRead": 0,
+              "IndexPageReads": 0,
+              "RowIDSeeks": 0,
+              "ANNStateReads": 1,
+              "ANNNodeReads": 313,
+              "ANNEdgeReads": 2637,
+              "ANNVisited": 213,
+              "ANNDistanceEvaluations": 242,
+              "ANNIdentityLookups": 100,
+              "ANNCentroidScores": 0,
+              "ANNCentroidReads": 0,
+              "ANNListsOpened": 0,
+              "ANNMemberKeysRead": 0,
+              "ANNIterations": 1,
+              "ANNExactRescores": 100,
+              "ANNPeakBytes": 259488,
+              "VectorRankedRows": 0,
+              "VectorFilteredRows": 0,
+              "VectorNullRows": 0,
+              "VectorRankComponents": 0,
+              "VectorRankNonzeros": 0,
+              "VectorRankPackedBytes": 0,
+              "FrequencyLookups": 0,
+              "PostingKeysRead": 0,
+              "Candidates": 100,
+              "BaseRowFetches": 100,
+              "ReturnedRows": 100,
+              "FilteredRows": 0,
+              "ScoredRows": 100,
+              "NullRows": 0,
+              "ScoredComponents": 404
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "ownership": {
+    "DB": {
+      "acquired": 2,
+      "retired": 2,
+      "unverified": 0
+    },
+    "Rows": {
+      "acquired": 1,
+      "retired": 1,
+      "unverified": 0
+    },
+    "Tx": {
+      "acquired": 18,
+      "retired": 18,
+      "unverified": 0
+    }
+  },
+  "close_failures": 0,
+  "unverified_close_handles": 0,
+  "unverified_retirement": false,
+  "shutdown": "normal_retirement_verified",
+  "notes": [
+    "Synthetic independent standard-normal float32 vectors; held-out queries follow rows on the same pinned Go math/rand stream. GSV hashes exclude metadata exactly as historical ANN reports.",
+    "Source ID is an operator-supplied exact frozen tree/manifest digest; verify it against the executed build outside this process. Build settings are observed independently.",
+    "Hardware ID is an operator-supplied controlled host label; observed CPU, affinity and memory/container limits are separately hashed. Shared hardware timings are descriptive, without confidence intervals or speedup claims.",
+    "Persistent native index is built, checked, normally closed, reopened without creation, and its data and index are verified before timed queries. No all-graph memory preload.",
+    "Ordinary plaintext DELETE-journal workload only. No concurrent workload, crash, interruption of publication, recovery, corruption, injected failure or durability acceptance test.",
+    "Boundary guards and native algorithm/pager quotas bound admitted work but do not provide a hard wall-clock, RSS or disk guarantee. Every raw database and report is retained; no automatic deletion.",
+    "All publicly acquired DB/Tx/Rows are tracked; every failure preserves its original joined diagnostic. Any uncertain retirement permanently forbids passed status. Internal engine resources are covered only by their public joined errors.",
+    "Recall is overlap with exact top-K including deterministic rowid tie order. HNSW default recall@10 \u003e= 0.95 is an evaluation target, not a pass guarantee. Native paths and exact fallbacks are counted separately."
+  ]
+}

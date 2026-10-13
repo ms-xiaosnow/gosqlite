@@ -11,6 +11,8 @@
 - docs-only提交 `fd069d7a30b2e0ca8bdff67ca54c926aa118fc51` 的既有CI [38339706432](https://github.com/ms-xiaosnow/gosqlite/actions/runs/38339706432) 已完整SUCCESS：ordinary于03:30:31 UTC、oracle于03:09:22 UTC完成。它与c5的生产／测试／模块／工作流代码相同；**该CI不覆盖本批新增的PG／性能源码。** [本批精确证据](../evidence/20261013-goal-closeout/README.zh.md)。
 - 本次另外补齐两项有限编码／测试：goal所列PG风格向量索引DDL的精确语法适配，以及离线性能报告准入／比较器与普通CI离线单元hook。PG聚焦normal为8个纯解析根100命名PASS＋2个健康根4命名PASS，race合计104命名PASS，均零FAIL／SKIP，sourceguard PASS；性能57个纯fixture测试于03:37:08 UTC PASS、零FAIL／SKIP，检查脚本语法PASS。本批聚焦证据绑定精确文件清单；随后自动CI须按最终提交的实际终态核对，本页不提前声称新CI通过。这两项也不是“整个goal最后且全部完成”的证明。离线fixture通过不等于真实性能测量或性能CI部署。[源码、精确命令和结果](../evidence/20261013-goal-closeout/README.zh.md)。
 
+- 2026-10-13补记：40e287的CI [38346611629](https://github.com/ms-xiaosnow/gosqlite/actions/runs/38346611629) 双SUCCESS。随后ANN离线修正六门于06:11:06 UTC完成，normal/race各467命名PASS；仅报告自洽，不提升手工或M10资格。[新证据](../evidence/20261013-ann-report-check/README.zh.md)。
+
 ## 已闭合的有限六项
 
 | 项目／goal 条款 | 代码及适用证据 | 当前边界／中文步骤 |
@@ -28,8 +30,8 @@
 
 | 待办 | 真实原因与完成条件 | 当前处理 |
 |---|---|---|
-| ANN V3报告修正 | HNSW工作计数、IVF全lists覆盖与成员守恒、同一query-row的exact／rescore距离相容性准入仍有真实代码／报告缺口。须有精确修正源码、独立审阅和可信固定数据报告，不能只重跑旧报告。 | FAIL／修正未证闭合。现有普通测试PASS不证明报告正确，也不能从报告缺陷推断生产ANN算法已坏。见[有限余缺](remaining-goal-boundary-20261012-zh.md)、[历史验收记录](../acceptance-status.md)。 |
-| ANN V4及未知整轮安全中断 | 已有整轮安全标记／中断事实，但不能确定精确触发操作和目标；未找到足以证明某个具体源码编辑曾被拒绝的记录。缺失精确记录既不等于从未拒绝，也不是恢复链路的授权。 | 保留UNKNOWN和该链路禁重试；不换名、拆小、转CI或换环境执行。见[中断事实与历史失败](../interruption-20261010.md)、[逐项限制溯源](../restriction-provenance-20261011.md)。本页不提供这些链路的启动命令。 |
+| ANN V3三项报告准入修正 | 已以离线reportcheck＋stdin CLI修复HNSW计数守恒、IVF全lists覆盖、同query-row exact／rescore距离一致；29根467命名normal/race各PASS，vet/build/源码guard/格式PASS。旧V3 FAIL保留。 | 三项代码与有限回归已闭合；真实报告来源、性能／recall与schema3 native采集未验收。旧聚合报告拒绝。见[可调用入口](../../benchmarks/ann/reportcheck/README.md)、[精确证据](../evidence/20261013-ann-report-check/README.zh.md)。 |
+| ANN V4及未知整轮安全中断 | 已有整轮安全标记／中断事实，但不能确定精确触发操作和目标；未找到足以证明某个具体源码编辑曾被拒绝的记录。缺失精确记录既不等于从未拒绝，也不是恢复链路的授权。 | 保留UNKNOWN，原整链不重启；2026-10-13用户新请求下限定三项离线修正已完成，不能把旧全面暂停误称所有源码永久禁止。见[中断事实与历史失败](../interruption-20261010.md)、[逐项限制溯源](../restriction-provenance-20261011.md)。本页不提供这些链路的启动命令。 |
 | 41-target持续fuzz campaign | 旧41根／313个固定seed普通PASS不等于持续campaign；被中断活动没有可采信的新运行结果。 | 原状态保留，不重新发起，也不把固定seed结果升级为campaign PASS。 |
 
 下列手工组有现成入口和规程，但**不是全部因为平台安全限制而未跑**。H01–H09及H12涉及已记录的物理恢复／故障／退出／磁盘负面限制，N01/N02涉及namespace限制；H10/H11/H13和N03/N04主要缺真实支持环境、介质、keeper或目标OS。每组的精确原因在表中单列。组内control计入既有完整合同，不能据此声称每个健康control曾单独被拒绝。

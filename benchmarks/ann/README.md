@@ -49,3 +49,10 @@ observations, not isolated controlled comparisons or a default95% recall claim.
 Full JSON is in docs/evidence/m7-ivf-benchmark-probes{1,10,50}.json. The original
 probes1 JSON has a legacy descriptive graph note; its actual IVF method/counters
 and measurements are preserved unchanged and explained in docs/ann.md.
+
+## Offline schema3 report checker
+
+[Reusable reportcheck and stdin command](reportcheck/README.md) check supplied
+raw schema3 self-consistency. The native command above emits an aggregate format
+that is rejected here. VALID never grants performance acceptance. The native
+measurement producer has not been changed or executed by this addition.

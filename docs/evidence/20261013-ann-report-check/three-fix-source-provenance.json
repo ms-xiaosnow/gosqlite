@@ -1,0 +1,274 @@
+{
+  "format": "ann-report-three-fix-source-overlay-v1",
+  "date_utc": "2026-10-13",
+  "status": {
+    "source_change": "prepared",
+    "runtime_validation": "NOT_RUN",
+    "gofmt": "NOT_RUN",
+    "main_integration": "NOT_DONE",
+    "native_measurement": "NOT_RUN",
+    "old_probe_execution": "NOT_RUN"
+  },
+  "scope": "Three validateObservation defects only, plus new pure-fixture regression source and static review/proposal. No whole-tree integration.",
+  "reference_manifest": {
+    "path": "../ann-source-reference-20261013/selected-source-manifest.json",
+    "sha256": "00961acdc8b96568445bc1959c26a866660e01f0d11985c80797ec3a4ed3a36b"
+  },
+  "reference_archive": {
+    "filename": "gosqlite-held-sources-static-20261011.tar.gz",
+    "sha256": "62426f18782f2f39d25b95e9a98448649163399015da5f64d1c66da571811423"
+  },
+  "base_v3_tree_label": "b13158709a57ce175437bb48a0d66104b5eff68d",
+  "base_v3_files": [
+    {
+      "version": "v3",
+      "path": "benchmarks/ann/README.md",
+      "mode": "100644",
+      "sha256": "6d7c44983604b3698198f6ded9d1c17e2e6125e310214f1d37a41d2cd6c8b135",
+      "git_blob": "0e674ef07e8a3256fe72777cc8fee079c0d088c8",
+      "bytes": 13405
+    },
+    {
+      "version": "v3",
+      "path": "benchmarks/ann/boundary_test.go",
+      "mode": "100644",
+      "sha256": "efd188ea80cb357d41ce32b215c0fe451753edf9b07d1dc875030053edc43d96",
+      "git_blob": "ac76871a7e0fb94d4a16ee00a5d7cb0add997c47",
+      "bytes": 633
+    },
+    {
+      "version": "v3",
+      "path": "benchmarks/ann/config.go",
+      "mode": "100644",
+      "sha256": "0cac9521aef9449292235b810f7cd3cafcf7c3cbe0a23f97f77a7b5da2963c5a",
+      "git_blob": "0675464cd44fb3e9b0588cc7e3592f626d9f0252",
+      "bytes": 6531
+    },
+    {
+      "version": "v3",
+      "path": "benchmarks/ann/config_test.go",
+      "mode": "100644",
+      "sha256": "ecade713558cb55cee30bf586f1107647faf24637286e14d1cf7e9ed32782acc",
+      "git_blob": "c8cc769554fe80f5d42a4bd307ae54e436abedfe",
+      "bytes": 4517
+    },
+    {
+      "version": "v3",
+      "path": "benchmarks/ann/main.go",
+      "mode": "100644",
+      "sha256": "9f7da17c32fc5ef459108feee273a48d68fad4f319813c2b81af3a064bde1c17",
+      "git_blob": "fd7be1723c75c04adcb1ddbce5bbb31b1bd31983",
+      "bytes": 3802
+    },
+    {
+      "version": "v3",
+      "path": "benchmarks/ann/ownership.go",
+      "mode": "100644",
+      "sha256": "831d9deee810cefe4ce1101299128c127645b04c48a0688efaae0b574a961b96",
+      "git_blob": "a41439fb57e75b6d10e7a3a9a32a4bf1b35a2037",
+      "bytes": 5796
+    },
+    {
+      "version": "v3",
+      "path": "benchmarks/ann/ownership_test.go",
+      "mode": "100644",
+      "sha256": "a9dc16fd9f833632b1d94559de2b88b74a984d89cdf03428b35d6842c2fd917c",
+      "git_blob": "d56e89e4f269e8c5e326e211d91b36d5763761c2",
+      "bytes": 5948
+    },
+    {
+      "version": "v3",
+      "path": "benchmarks/ann/report.go",
+      "mode": "100644",
+      "sha256": "1f13da8ba24ed49d9b045a42c9576fd1696b07eac69d92f9b072ca4ed9ec22c8",
+      "git_blob": "f7d59a05e16d61c6b7490adaf5c6d671ec1ab01b",
+      "bytes": 13333
+    },
+    {
+      "version": "v3",
+      "path": "benchmarks/ann/report_test.go",
+      "mode": "100644",
+      "sha256": "553080f6df7d5b592ceef249c9f3e33b8b94314e6f4374b01fdca7bf88fe150e",
+      "git_blob": "f97a23e8d986814faf7e181fac43bca85c6de628",
+      "bytes": 9413
+    },
+    {
+      "version": "v3",
+      "path": "benchmarks/ann/testdata/schema2-hnsw.json",
+      "mode": "100644",
+      "sha256": "14f6fb98d01d05b650f08e54273278c9297c3db214c79f48a14875fd748009da",
+      "git_blob": "dac8b156adaaf2f83fc5b809be827c26d061bfa4",
+      "bytes": 90643
+    },
+    {
+      "version": "v3",
+      "path": "benchmarks/ann/testdata/schema2-ivf.json",
+      "mode": "100644",
+      "sha256": "dbc2e1ab35341ca372c62df6f46d2b65adf2299fb955d8eaf961f99885c7f045",
+      "git_blob": "cd8ee03ff362fdce0323cef92ca1978883544c6c",
+      "bytes": 90713
+    },
+    {
+      "version": "v3",
+      "path": "benchmarks/ann/validate.go",
+      "mode": "100644",
+      "sha256": "d1b391aba8503d3f8c0e91e85de0d8d50432e31ca88bd800aa6eda0a9a207417",
+      "git_blob": "7887afaaa4171843e08846d57daecc9044580be7",
+      "bytes": 15184
+    },
+    {
+      "version": "v3",
+      "path": "benchmarks/ann/wire.go",
+      "mode": "100644",
+      "sha256": "da429a5c4fa6b40c53fd9a827cebe9ef249a5444db370a4f0d001b7a661145e1",
+      "git_blob": "022c64687c72fb1b52aa9e778b0060145de8c474",
+      "bytes": 10699
+    },
+    {
+      "version": "v3",
+      "path": "benchmarks/ann/wire_test.go",
+      "mode": "100644",
+      "sha256": "cbaf25ef2075cb01d02cc1befb31d9d985215dc86c0ff1bfc59d100984ecb141",
+      "git_blob": "cefb3a579fa7037cdb85a3baa92bd9d593c366fc",
+      "bytes": 9895
+    },
+    {
+      "version": "v3",
+      "path": "benchmarks/ann/workload.go",
+      "mode": "100644",
+      "sha256": "2e4d7d8f2fcef6299600a73f647b8ac3fb5e24cfc284a6a905d135cdca85c959",
+      "git_blob": "10d296ae261dbf6f289d9695692d829c6de885a3",
+      "bytes": 14367
+    }
+  ],
+  "reference_v4_tree_label": "3f36a1130ea62df0b6688d6ebd793ecf8bb4442b",
+  "historical_probe": {
+    "version": "v4",
+    "path": "benchmarks/ann/review_probe_test.go",
+    "mode": "100644",
+    "sha256": "c2a812b94eef0044f28ed72288e019003dc6be7f02770e6fdd4b6446ffe9d58e",
+    "git_blob": "16fb7170e49a86c81edbc9c23bfde572a62f5f4e",
+    "bytes": 2087
+  },
+  "historical_status": "V3 FAIL/HOLD; V4 unrepaired copy plus old regression probe, expected normal/race FAIL. Original review and full run logs not independently recovered; no new baseline/probe run.",
+  "current_engine_revision_label_supplied_by_parent": "40e287 (not re-read with Git)",
+  "current_engine_read_only_evidence": [
+    {
+      "path": "sqlite/ann_query.go",
+      "sha256": "32bff2ae27ac7de29ac4a7163ba34cb0d0d9a40728c7a072841ce1f22b5ed370",
+      "bytes": 19070
+    },
+    {
+      "path": "sqlite/ivf_query.go",
+      "sha256": "3d9557b4c9de5e843a1fc179bd747ed45bc3a8f0a268345b13bea466f2f4792e",
+      "bytes": 9569
+    },
+    {
+      "path": "sqlite/vector_search.go",
+      "sha256": "712204d03c2ca455041c8f0949e2bc954d7f9440abebddbef063e100be7c40fe",
+      "bytes": 12477
+    },
+    {
+      "path": "sqlite/plan_grams.go",
+      "sha256": "d9605ef5df8596c3a386be9809a715ca608e948bc42804d84c7d42958b1c0b90",
+      "bytes": 20382
+    },
+    {
+      "path": "sqlite/ann_typed.go",
+      "sha256": "78cfa7cac3361767beb9069db7c642daaf3a05a7c870c69e5e2f1a0a4f52fcf1",
+      "bytes": 10139
+    },
+    {
+      "path": "extension/vector/ann/typed_hnsw.go",
+      "sha256": "65245202394d7a7b831275655912ceae274ab72fb3ae20a807159216da58c29c",
+      "bytes": 14077
+    },
+    {
+      "path": "extension/vector/ann/hnsw.go",
+      "sha256": "e0e15e7e48a1e05213944ab678f18f6a7c0bd73afd5471ac1050d72b95712b44",
+      "bytes": 15274
+    },
+    {
+      "path": "extension/vector/ann/typed_config.go",
+      "sha256": "f57eaaea114efe089671686b40b72e2f512c45beb1ab5258f7411aab496e70f6",
+      "bytes": 8172
+    },
+    {
+      "path": "extension/vector/ann/config.go",
+      "sha256": "572752773fce0e7366341e1205f9ee0a6c50e5aa44b6381ab5cc8aceedbb991b",
+      "bytes": 7908
+    },
+    {
+      "path": "extension/vector/search.go",
+      "sha256": "b271383c47c6a41cac3a180033ee491722eaca182fc58c8daf3529d51c99fcfc",
+      "bytes": 8055
+    },
+    {
+      "path": "extension/vector/metric.go",
+      "sha256": "a107b567e3fef15c4b597154e07516a7d906044640c68b3509eeb1dfadeb9b55",
+      "bytes": 3958
+    },
+    {
+      "path": "benchmarks/ann/main.go",
+      "sha256": "9e04043b880125819326f0e6a4f1bc97b8ad18371e18a687c53b6f19bd69aafa",
+      "bytes": 11193
+    },
+    {
+      "path": "benchmarks/ann/README.md",
+      "sha256": "616963fb0187b9adaa22555946314b65fd405d2b562978b2998122e86bb98e1e",
+      "bytes": 3120
+    },
+    {
+      "path": "docs/interruption-20261010.md",
+      "sha256": "0c124fe4881e8a70e46a50f12beae01acdb6ee96801b865e45d4773da51802ef",
+      "bytes": 14226
+    },
+    {
+      "path": "docs/restriction-provenance-20261011.md",
+      "sha256": "4b308c3dab3ccd44c9ace0b659aa011109f0ed5463f9046bcd06cff005f7a6cf",
+      "bytes": 51667
+    }
+  ],
+  "base_reference_reverification": "All 31 selected V3/V4 files matched supplied SHA-256 and byte size during static manifest preparation.",
+  "production_changes": [
+    {
+      "base_lines": "69-71 insertion",
+      "overlay_lines": "72-85",
+      "subject": "same-RowID numeric exact/rescore distance equality"
+    },
+    {
+      "base_lines": "144 replacement",
+      "overlay_lines": "158-167",
+      "subject": "guarded HNSW read/visited/rescore/distance conservation"
+    },
+    {
+      "base_lines": "158-159 insertion",
+      "overlay_lines": "181-187",
+      "subject": "IVF all-lists membership count equals Config.Rows"
+    }
+  ],
+  "static_scope_check": "Text before validateObservation and from validateProvenance onward is byte-identical to V3; unified diff has three hunks.",
+  "artifacts": [
+    {
+      "path": "REVIEW.md",
+      "sha256": "c2f81b9f12761708cd7d5a2bd48163fd1c9f9190d100bae064ad76bb051ad7b3",
+      "bytes": 14045
+    },
+    {
+      "path": "benchmarks/ann/regression_test.go",
+      "sha256": "1aebc0556726543096c489364899d913715ae295e64cdfdb7da44088f0fc62cd",
+      "bytes": 9066
+    },
+    {
+      "path": "benchmarks/ann/validate.go",
+      "sha256": "6716cf502e8502eb8dfc70a9ad802d431de5acb2372463f19cb717db08625497",
+      "bytes": 16964
+    },
+    {
+      "path": "validate.patch",
+      "sha256": "5e482e37555eb19a16fc98410672a459339938ad003e654045b26bc9db66a023",
+      "bytes": 3589
+    }
+  ],
+  "execution_proposal": "See REVIEW.md; future independent source/import/initializer/toolchain closure and authorization required. No command was run."
+}

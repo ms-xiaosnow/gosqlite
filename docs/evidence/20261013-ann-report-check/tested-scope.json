@@ -1,0 +1,61 @@
+{
+  "base": "40e287dc50f8c282f2003ca16475af5eb73a9400",
+  "status": "REVIEWED_PURE_LINUX_AMD64",
+  "source_sha256": {
+    "benchmarks/ann/reportcheck/README.md": "51082d55fc8420cae1aeca65a2c8e7765f8c83bd64d0c84ce2350c3a36e6782b",
+    "benchmarks/ann/reportcheck/REVIEW.md": "b370dd0b74ad52482e9aec09cca3eaa78ba58975e0cb1417f90de0b63722132e",
+    "benchmarks/ann/reportcheck/TEST-SELECTORS.txt": "b0e413ba90e2c3457086ee2880a42b8d238d908b80045bb444a8f61415f86d22",
+    "benchmarks/ann/reportcheck/config.go": "194f0c389754fabbfc181db7c2d3bf6bd07aaa97a71998211aa225c0bea37c2f",
+    "benchmarks/ann/reportcheck/config_test.go": "c44bf6ba96791ea9eb21b8b878379f42d519a570ba318b637001d48f2907089b",
+    "benchmarks/ann/reportcheck/examples/incomplete-schema3.json": "fd3df6ddd9d03f80e0018bc3605328f0347591cf4ddf302c2a72ee3f7386d8ae",
+    "benchmarks/ann/reportcheck/fixture.go": "c950ae133b5b96d65433e64edfc7cd799619e1d4d7432c4686279ee7a7842f30",
+    "benchmarks/ann/reportcheck/regression_test.go": "a90b12172354ca383bbe48d46bb4e0782e488c6fb40942ddd32e92658deb8fcc",
+    "benchmarks/ann/reportcheck/report.go": "caf0e51c12c9c799e917a709d381ff59f99198fb2fde75fbad0c0aa0f8d0400b",
+    "benchmarks/ann/reportcheck/report_test.go": "988c4c98a51e40e36bf1d986a16a7ae2bc57dbeb4513a852771ce0813f47649a",
+    "benchmarks/ann/reportcheck/testdata/schema2-hnsw.json": "14f6fb98d01d05b650f08e54273278c9297c3db214c79f48a14875fd748009da",
+    "benchmarks/ann/reportcheck/testdata/schema2-ivf.json": "dbc2e1ab35341ca372c62df6f46d2b65adf2299fb955d8eaf961f99885c7f045",
+    "benchmarks/ann/reportcheck/validate.go": "dceae19649c3a3667416c6d39570ba6919cc744e7a92e1dc7dfc2d82fb239a70",
+    "benchmarks/ann/reportcheck/wire.go": "dd650150eadb5830ecd74bf7628170690171648d86ba0bad19096e670699c6ff",
+    "benchmarks/ann/reportcheck/wire_test.go": "f9b8c917c9870c5d287a31af796ba0e23d1fef3cd78b41b5bec56868fefc2e61",
+    "cmd/ann-report-check/main.go": "57152a9d6eb10a347b82bdf089e25776fc25e83c9446811d18f2ce4028708d8c",
+    "cmd/ann-report-check/main_test.go": "d0ca6f21d98b93396ff8dd8bc2a0e43311505ff9d2609f3f76af73cc12a52d3e",
+    "cmd/ann-report-check/testdata/README.md": "7253c6f962a9a5ba0e5003f7c86d5bceb16d7eb1061ac0b2777f28df69b07075",
+    "cmd/ann-report-check/testdata/synthetic-schema3-hnsw.json": "d567c3bc01e42f4fb6de83dcc0de4ae50293f38e42f6638587234c3cb5dd6f41"
+  },
+  "test_roots": {
+    "benchmarks/ann/reportcheck": [
+      "TestANNAdmissionCartesian",
+      "TestANNAlgorithmDefaults",
+      "TestANNAllCanonicalAlgorithmFields",
+      "TestANNCheckedArithmetic",
+      "TestANNCompleteProducerWireRoundTrip",
+      "TestANNDatasetCompatibility",
+      "TestANNHistoricalSchema2PreservedRejected",
+      "TestANNIVFListsNoIdentityCollision",
+      "TestANNIndependentCartesianBudgets",
+      "TestANNMaterialPlansAndCounters",
+      "TestANNPercentilesAndRawMath",
+      "TestANNPortablePathAndInvalidUTF8Controls",
+      "TestANNQueryBudgetAndProtocolIdentities",
+      "TestANNRehashedConfigurationCannotBypassMaterialValidation",
+      "TestANNResultHitControls",
+      "TestANNStrictReportControls",
+      "TestANNStrictWireShapeTypes",
+      "TestANNThreeFixHNSWBoundaryControls",
+      "TestANNThreeFixHNSWRejectsBrokenConservation",
+      "TestANNThreeFixIVFAllListsCoverage",
+      "TestANNThreeFixSameRowDistance",
+      "TestANNThreeFixUnchangedFixtureControls",
+      "TestANNUTCParsingRejectsNumericOffsets"
+    ],
+    "cmd/ann-report-check": [
+      "TestANNReportCheckBoundedRead",
+      "TestANNReportCheckIOFailures",
+      "TestANNReportCheckInvalidStdin",
+      "TestANNReportCheckSyntheticStdinRoundTrip",
+      "TestANNReportCheckUsageDoesNotRead",
+      "TestANNReportCheckValidResultIsNotPerformanceAcceptance"
+    ]
+  },
+  "review": "Final independent source review 2026-10-13T06:09 UTC, 23+6 roots, no unresolved blocker; gofmt-only after same source."
+}
