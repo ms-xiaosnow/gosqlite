@@ -95,9 +95,40 @@ SELECT id,embedding <-> '[1,2,3]' AS distance
 REINDEX items_ivf;
 ```
 
-This is project SQL grammar, not PostgreSQL's CREATE INDEX grammar. Native probe
-and ef controls are not SQL SET/PRAGMA variables. SQL uses IVF's default one
-initial probe and a compensation ceiling equal to the list count.
+The project spelling above remains supported unchanged. A narrow directly
+executable PG-style spelling also maps to the same extension-index AST and
+creation path through native `DB.Exec`, `Tx.Exec` and the `database/sql` driver:
+
+```sql
+CREATE INDEX items_embedding_hnsw ON items USING hnsw
+  (embedding vector_cosine_ops) WITH (m=16, ef_construction=64);
+CREATE INDEX items_embedding_ivf ON items USING ivfflat
+  (embedding vector_l2_ops) WITH (lists=100);
+```
+
+This spelling accepts one named dense-vector column and a required supported
+`vector_*_ops` class from the method/metric matrix below. Optional `WITH` accepts
+only `m` and `ef_construction` for HNSW or `lists` for IVFFlat, as signed decimal
+integer literals; omitted options use existing defaults, and existing creation
+admission rejects invalid bounds, method/type mismatches and incompatible
+settings. The existing lexer permits numeric separators. Unquoted builtin method,
+opclass and option names fold ASCII case; quoted builtin names must match their
+canonical lowercase spelling. Table, index and column identifiers keep the
+existing SQLite quoting and name-resolution rules. `IF NOT EXISTS` keeps the
+existing extension-catalog behavior.
+
+No UNIQUE, expressions, multicolumn keys, schema-qualified names, partial indexes,
+extra opclass/metric options or other PostgreSQL clauses are added. Local-only
+resource controls continue to use the project spelling. Neither spelling is
+stored as extension SQL in `sqlite_schema`: owned SQLite tables/indexes and the
+canonical extension catalog remain unchanged. This is a syntax addition, not
+PostgreSQL catalog/storage compatibility, a new ANN algorithm, a benchmark or
+physical crash/recovery qualification. A 100-list IVF index still needs at least
+100 trainable rows; the goal's two-row example creates an untrained index with
+the existing explained exact fallback.
+
+Native probe and ef controls are not SQL SET/PRAGMA variables. SQL uses IVF's
+default one initial probe and a compensation ceiling equal to the list count.
 
 Selection is first matching usable catalog index in creation order, with no
 recall/cost comparison or retry of later matches after selection. An earlier

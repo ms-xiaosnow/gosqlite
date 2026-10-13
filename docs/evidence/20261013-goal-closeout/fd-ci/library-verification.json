@@ -1,0 +1,16 @@
+{
+  "library_file_id": "libfile_97fcfdb2a7108191b2ca962a71e5f81b",
+  "file_id": "file_000000002be081f5a443f7391b883fa9",
+  "file_name": "gosqlite-fd069d7-docs-ci-38339706432-success.zip",
+  "version": 0,
+  "bytes": 534451,
+  "sha256": "5bdf014e9d44014199155fbcd42cc262a8543694239e89754d5e591e294c46ee",
+  "readback": "exact_library_and_file_ID",
+  "byte_exact": true,
+  "members": 30,
+  "zip_crc": "PASS",
+  "all_members_byte_match": "PASS",
+  "all_SHA256SUMS_members": "PASS",
+  "terminal_run_identity_and_job_success": "PASS",
+  "bundle_manifest_gzip_decode": "PASS"
+}

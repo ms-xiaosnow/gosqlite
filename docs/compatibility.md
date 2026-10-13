@@ -1,6 +1,50 @@
+# Current compatibility matrix
+
+## 当前状态（2026-10-13 03:37 UTC）
+
+本轮提交前已核验的发布基点为 `fd069d7a30b2e0ca8bdff67ca54c926aa118fc51`；CI `38339706432`
+的 oracle 于 **03:09:22 UTC**、ordinary 于 **03:30:31 UTC** 均为 **SUCCESS**。
+这些结果只绑定该精确提交。新增 PG 风格 ANN DDL、离线性能比较器的有限结果绑定
+本轮证据清单内精确文件；发布及对应 CI 按新提交另行核验，不能继承 fd069 的全套 CI 资格。
+
+- goal §7.3 的两条精确 PG 风格 `CREATE INDEX ... ON ... USING hnsw/ivfflat ...`
+  示例已接入既有 ANN 引擎。四个源码/测试路径的有限验证：8 个 parser 根共 100 named，
+  加 2 个健康数据库根共 4 named，normal/race **各 104 PASS / 0 SKIP**；source guard **PASS**。
+  范围仅为单 dense 列、已声明方法/opclass/options，不代表 PostgreSQL 方言全面兼容。
+- goal §11.3 的离线性能比较器六路径已完成独立源码审阅 **CLEAR**，57 个纯离线 fixture
+  于 **03:37:08 UTC PASS**。仅在既有 `scripts/check.sh` 接入 unittest；没有新增 runner
+  或性能 CI job，没有实际固定基线或实测性能验收。见[离线比较器合同](../benchmarks/performance/README.md)。
+- R1–R6 的六个有限设施项已闭合；这不是整个 goal 的完成证明。本次有界通读原目标后
+  补齐上述两个可操作缺口及当前文档口径，不把 goal §4.2 的分阶段 SQL 能力或在线、
+  依赖完整的 PG collector 自动扩成这批新义务，也不声称所有编码或全部 SQLite 兼容已完成。
+- 仍有 ANN 报告的 HNSW 计数、IVF 全 lists membership、同 query-row rescore 三项未闭合；
+  整轮安全中断的 UNKNOWN 与 ANN V4、41-target 持续 campaign 的既有阻塞保留。
+  物理手工、真实 OS/FS、真实 PG/Neon 输入、受控性能/长时 soak 和独立安全/许可结论分别待取得。
+  手工总表固定为 **17 组：13 个核心组、82 个核心场景，另 4 个原生平台组**，全部手工仍 **NOT_RUN**。
+
+[本轮精确证据](evidence/20261013-goal-closeout/README.zh.md)与[有限剩余及权威手工总表](testing/finite-acceptance-summary-20261012-zh.md)区分源码、有限测试、
+精确提交 CI 和物理资格。**整体未验收，M3/M8/M10 未取得总体验收；不作最终交付或生产可用声明。**
+以下历史段落中的“当前”、PENDING、HOLD、FAIL、UNKNOWN 与 NOT_RUN 均绑定原时点/原树，
+原始失败与未运行事实保留，不是本轮状态，也不被新 PASS 回写。
+
+## 当前有界能力校正（不扩大已声明 profile）
+
+| Capability | Current status | Supported boundary |
+|---|---|---|
+| Ordinary UNIQUE / CHECK | partial, implemented | Explicit named-column UNIQUE and ordinary rowid column/table BINARY ASC UNIQUE with canonical owned NULL-SQL autoindexes; scalar CHECK only in its documented bounded profile. See [automatic UNIQUE](automatic-unique.md) and [CHECK](check-constraints.md#精确-partial-profile). Partial/expression/DESC/non-BINARY or typed-vector/extension UNIQUE, FK, STRICT and broader CHECK remain unsupported. |
+| IPK / LEFT planner | partial, implemented | Bounded direct INTEGER PRIMARY KEY equality/LIKE admission, including NOT INDEXED, and the documented single-root LEFT prefilter exist. Wider expression pushdown and general planner parity remain unsupported. The historical “unpublished” labels below are not current publication claims. |
+| Rollback recovery | partial, physical NOT_RUN | Nil-default Open/Connector still refuses existing journals. Explicit finite-count Linux plaintext RollbackRecovery, public/Connector callers and finite manual facilities exist. EOFUnproven and unsupported journals remain refused. Source/model/compile evidence is not physical recovery qualification. |
+| Plaintext Backup | partial, native success NOT_RUN | The strict Linux/ext-family rollback DB/readonly-Tx/CLI implementation is present in the published baseline; it is no longer an unpublished source proposal. Real native publication remains unqualified. WAL/readonly-WAL sources, other OS/filesystems and VACUUM are not added. See [contract](plaintext-backup.md). |
+| Darwin inventory / Windows shared rekey | partial, native NOT_RUN | Bounded Unicode sibling inventory and its manual harness, plus guarded Windows shared rekey and source-authority recheck, are implemented with finite source/model/compiler checks. Darwin ASCII roots and local APFS/HFS admission, and Windows strict local-NTFS boundaries, remain; general Unicode roots and real native qualification are not claimed. |
+| PG-style dense ANN DDL | partial, focused normal/race PASS | Goal §7.3 exact HNSW/IVFFlat examples execute through existing ANN AST/storage. Single dense column; HNSW L2/IP/cosine/L1 with m/ef_construction; IVFFlat L2/IP/cosine with lists. No arbitrary PG syntax, new ANN algorithm or broader opclass/options admission. |
+| Ordinary performance comparator | offline tooling only | Independently reviewed six-path slice; 57 pure fixtures PASS. Existing check.sh unittest hook only; no new measurement runner/performance CI job, fixed real baseline or actual performance acceptance. |
+| Remaining SQL / PG migration | phased / partial | Unimplemented SQL remains explicitly unsupported under goal §4.2. Existing bounded offline PG/Neon conversion and review-only templates do not imply live migration or an online dependency-complete collector. These are not automatic additions to the fixed R1–R6 facility list. |
+
+## 历史记录（以下矩阵保留原树断言，不代表当前缺失项）
+
 > Combined readonly acceptance V2: SOURCE_ONLY; the reviewed media owner-field correction and exact independently reviewed three-main-pin migration are applied in this fresh candidate. No combined validation or physical acceptance. See [source-only integration status](readonly-acceptance-integration-source-20261012.md). Historical isolated evidence below is not a combined PASS.
 
-# Current compatibility matrix
+# Historical compatibility checkpoints and matrices
 
 ## CHECK / EOF 检查点：完整正常门已通过（2026-10-12 07:22 UTC）
 

@@ -1,3 +1,28 @@
+# 原目标有限代码闭合清单：当前索引（2026-10-13 03:37 UTC）
+
+R1–R6 六个有限设施项已闭合，固定范围不增加可选功能；这不是整个 goal 的完成证明。
+本轮有界通读原目标确认的两个可操作差额已补入当前源码：goal §7.3 的精确 PG 风格
+HNSW/IVFFlat DDL（normal/race 各 104 named PASS / 0 SKIP、source guard PASS），以及
+§11.3 的离线性能比较器（独立源码审阅 CLEAR、57 纯 fixture PASS）。比较器只在既有
+check.sh 加入 unittest，不新增 runner/性能 CI job，不提供真实固定基线或实测性能验收。
+两项不扩大 R1–R6；分阶段 SQL 和在线/依赖完整 PG collector 不自动成为新清单义务。
+
+本轮提交前已核验发布基点 `fd069d7a30b2e0ca8bdff67ca54c926aa118fc51` 的 CI `38339706432`
+双 SUCCESS（oracle 03:09:22 UTC；ordinary 03:30:31 UTC）。上述新增源码的有限结果绑定
+本轮证据清单内精确文件；发布及 CI 按新提交另行核验，不能转授 fd069 的资格。
+见[本轮精确证据](../evidence/20261013-goal-closeout/README.zh.md)。
+
+仍保留 ANN 报告三项代码/准入差额与整轮安全中断 UNKNOWN、ANN V4/41-target 持续
+campaign 既有阻塞；不通过换入口或更多普通 PASS 消除。手工权威总表为 **17 组：
+13 核心组、82 核心场景，另 4 原生平台组**，全部手工 **NOT_RUN**。真实 OS/FS、
+PG/Neon 输入、受控性能/soak、独立安全/许可结论分别待取得。参见[有限剩余及手工总表](finite-acceptance-summary-20261012-zh.md)。
+整体/M10 未验收，不能声称“所有编码完成，只剩运行命令”。
+
+## 历史更新与原审计（以下事实绑定原时点）
+
+旧 FAIL/HOLD/PENDING/UNKNOWN/NOT_RUN 不回写；下表“未写/下一文件/真正剩余”等
+词保留当时审计含义，当前六项结论及实际手工资格以上述索引和权威总表为准。
+
 > 2026-10-13：最后代码提交c5的配置内完整普通CI已双SUCCESS，详见[终态证据](../evidence/20261013-facility-ci/README.zh.md)。源码未再更改，本次文档记录复用c5结果。有限六项闭合不等于整体/M10通过。
 
 > 2026-10-12 23:30:52 UTC：**有限R1–R6代码和受影响验证已闭合，整体未验收。** [当前六项准确证据和三类剩余](finite-acceptance-summary-20261012-zh.md)。受阻ANN报告修正仍是代码/报告缺口，真实物理和外部资格未通过。以下原审计表所有“未写/没有PASS/下一文件”单元格均为历史时点；当前状态以此更新和链接六项表为准。没有新加义务，也不以六项勾选折算整个项目完成率。
@@ -8,7 +33,7 @@
 
 > 最新结果：A8六格源片的八项有限验证已于21:47:51 UTC通过，原FAIL与修正完整保留；见[精确证据](../evidence/20261012-root-auth/README.zh.md)。下方独立审计保留其取证时点，R1–R6是真正有限编码收口项；实际物理六格仍NOT_RUN。
 
-# 原目标有限代码闭合清单
+# 历史审计：原目标有限代码闭合清单（2026-10-12）
 
 审计日期：2026-10-12 UTC。范围：原目标中此前列为剩余工作的持久化、安全、迁移、恢复计时及发布资格；不是重开全 SQL／全 OS 功能审计。
 
@@ -50,7 +75,7 @@
 | [x] CODE_DONE：WAL 有界恢复／尾部发布耗时工具 | §11.3:396“WAL 恢复耗时” | `sqlite/wal_tail_publication_manual_linux_test.go:735–774`：紧邻三个 public entry 的 Now/Since；`wal_tail_elapsed_contract_test.go` 绑定 source/binary/hardware/Go/cache、main/WAL/ledger hash、bytes/pages/frames、owner，失败／refusal／普通 reopen 不计样本；`benchmarks/wal-tail-publication/README.md` 与既有手册。 | E1/E4 普通合同／guard/compile 已有；真实样本 NATIVE_NOT_RUN。 | CODE_DONE 仅为已支持 tail-publication 的总公开调用耗时合同，n=1、warm/unspecified。不能改称 recovery-only、cold-cache、P95；无需为每个 profile 新建计时器。真正测量／报告待外部资格。 |
 | [x] CODE_DONE：M9 最低离线输入／转换／模板链 | §9.2:339–345；M9:362 | `migration/postgres` 的 CatalogSnapshot/Inspect、AST 转换、CSV/NDJSON 批事务续传、quarantine/数据与距离验证；`transition_render.go:34–44` 保留完整 supplied catalog/definitions/SQL corpus 的 evidence-only inventory；`transition.go:304–319` 缺依赖计划 blocked/manual-plan；`transition_sql.go:18–24` 的 preflight。 | E1/E5；真实 PG/Neon、用户 catalog/应用SQL/profile、人工计划复核未完成。 | 提供完整真实输入、生成绑定报告、人工复核并取得获准真实验证；不强制新增在线采集器、pgx 或 server executor。 |
 
-## B. 真正剩余的 4 组／6 个有限代码子项
+## B. 历史审计当时剩余的 4 组／6 个有限代码子项（现已闭合）
 
 这些子项只计实际缺失的断言／caller，不把已有模型或普通路径归零。新文件名若尚未存在，明确标为“建议新增”；实现可以采用同样有界的等价组织。
 

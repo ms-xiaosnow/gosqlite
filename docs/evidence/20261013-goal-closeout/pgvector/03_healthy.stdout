@@ -1,0 +1,20 @@
+{"Time":"2026-10-13T03:27:10.956481433Z","Action":"start","Package":"github.com/ms-xiaosnow/gosqlite/sqlite"}
+{"Time":"2026-10-13T03:27:10.959290897Z","Action":"run","Package":"github.com/ms-xiaosnow/gosqlite/sqlite","Test":"TestPGVectorIndexHealthyEquivalenceAndReopen"}
+{"Time":"2026-10-13T03:27:10.959359903Z","Action":"output","Package":"github.com/ms-xiaosnow/gosqlite/sqlite","Test":"TestPGVectorIndexHealthyEquivalenceAndReopen","Output":"=== RUN   TestPGVectorIndexHealthyEquivalenceAndReopen\n","OutputType":"frame"}
+{"Time":"2026-10-13T03:27:10.959384615Z","Action":"run","Package":"github.com/ms-xiaosnow/gosqlite/sqlite","Test":"TestPGVectorIndexHealthyEquivalenceAndReopen/hnsw"}
+{"Time":"2026-10-13T03:27:10.959388015Z","Action":"output","Package":"github.com/ms-xiaosnow/gosqlite/sqlite","Test":"TestPGVectorIndexHealthyEquivalenceAndReopen/hnsw","Output":"=== RUN   TestPGVectorIndexHealthyEquivalenceAndReopen/hnsw\n","OutputType":"frame"}
+{"Time":"2026-10-13T03:27:14.534114886Z","Action":"output","Package":"github.com/ms-xiaosnow/gosqlite/sqlite","Test":"TestPGVectorIndexHealthyEquivalenceAndReopen/hnsw","Output":"--- PASS: TestPGVectorIndexHealthyEquivalenceAndReopen/hnsw (3.57s)\n","OutputType":"frame"}
+{"Time":"2026-10-13T03:27:14.534479301Z","Action":"pass","Package":"github.com/ms-xiaosnow/gosqlite/sqlite","Test":"TestPGVectorIndexHealthyEquivalenceAndReopen/hnsw","Elapsed":3.57}
+{"Time":"2026-10-13T03:27:14.534554792Z","Action":"run","Package":"github.com/ms-xiaosnow/gosqlite/sqlite","Test":"TestPGVectorIndexHealthyEquivalenceAndReopen/ivfflat"}
+{"Time":"2026-10-13T03:27:14.534559761Z","Action":"output","Package":"github.com/ms-xiaosnow/gosqlite/sqlite","Test":"TestPGVectorIndexHealthyEquivalenceAndReopen/ivfflat","Output":"=== RUN   TestPGVectorIndexHealthyEquivalenceAndReopen/ivfflat\n","OutputType":"frame"}
+{"Time":"2026-10-13T03:27:14.906407728Z","Action":"output","Package":"github.com/ms-xiaosnow/gosqlite/sqlite","Test":"TestPGVectorIndexHealthyEquivalenceAndReopen/ivfflat","Output":"--- PASS: TestPGVectorIndexHealthyEquivalenceAndReopen/ivfflat (0.37s)\n","OutputType":"frame"}
+{"Time":"2026-10-13T03:27:14.906466617Z","Action":"pass","Package":"github.com/ms-xiaosnow/gosqlite/sqlite","Test":"TestPGVectorIndexHealthyEquivalenceAndReopen/ivfflat","Elapsed":0.37}
+{"Time":"2026-10-13T03:27:14.906477213Z","Action":"output","Package":"github.com/ms-xiaosnow/gosqlite/sqlite","Test":"TestPGVectorIndexHealthyEquivalenceAndReopen","Output":"--- PASS: TestPGVectorIndexHealthyEquivalenceAndReopen (3.95s)\n","OutputType":"frame"}
+{"Time":"2026-10-13T03:27:14.906481462Z","Action":"pass","Package":"github.com/ms-xiaosnow/gosqlite/sqlite","Test":"TestPGVectorIndexHealthyEquivalenceAndReopen","Elapsed":3.95}
+{"Time":"2026-10-13T03:27:14.906490159Z","Action":"run","Package":"github.com/ms-xiaosnow/gosqlite/sqlite","Test":"TestPGVectorIndexExistingAdmissionAndTransaction"}
+{"Time":"2026-10-13T03:27:14.906494088Z","Action":"output","Package":"github.com/ms-xiaosnow/gosqlite/sqlite","Test":"TestPGVectorIndexExistingAdmissionAndTransaction","Output":"=== RUN   TestPGVectorIndexExistingAdmissionAndTransaction\n","OutputType":"frame"}
+{"Time":"2026-10-13T03:27:14.916382626Z","Action":"output","Package":"github.com/ms-xiaosnow/gosqlite/sqlite","Test":"TestPGVectorIndexExistingAdmissionAndTransaction","Output":"--- PASS: TestPGVectorIndexExistingAdmissionAndTransaction (0.01s)\n","OutputType":"frame"}
+{"Time":"2026-10-13T03:27:14.916425666Z","Action":"pass","Package":"github.com/ms-xiaosnow/gosqlite/sqlite","Test":"TestPGVectorIndexExistingAdmissionAndTransaction","Elapsed":0.01}
+{"Time":"2026-10-13T03:27:14.916435921Z","Action":"output","Package":"github.com/ms-xiaosnow/gosqlite/sqlite","Output":"PASS\n","OutputType":"frame"}
+{"Time":"2026-10-13T03:27:14.918442525Z","Action":"output","Package":"github.com/ms-xiaosnow/gosqlite/sqlite","Output":"ok  \tgithub.com/ms-xiaosnow/gosqlite/sqlite\t3.961s\n"}
+{"Time":"2026-10-13T03:27:14.918482765Z","Action":"pass","Package":"github.com/ms-xiaosnow/gosqlite/sqlite","Elapsed":3.9619999999999997}

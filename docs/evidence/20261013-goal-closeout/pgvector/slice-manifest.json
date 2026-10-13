@@ -1,0 +1,35 @@
+{
+  "base_commit": "fd069d7a30b2e0ca8bdff67ca54c926aa118fc51",
+  "base_tree_status": "clean at input and after source preparation",
+  "status": "SOURCE_ONLY; FORMATTED; COMPILER_AND_TESTS_NOT_RUN",
+  "original_parser_bytes_outside_additions_unchanged": true,
+  "files": [
+    {
+      "path": "internal/sql/parser.go",
+      "base_sha256": "f06b9521f9e946ca4141d1a55d46b1c47b9148b2fa0fb7b56c3e0532965f4be9",
+      "sha256": "96b223177799b6f4c0b42af3ff47a0422e1a4ac78e443a77329b9b10034bb016",
+      "bytes": 32287
+    },
+    {
+      "path": "internal/sql/pgvector_index_parse_test.go",
+      "base_sha256": null,
+      "sha256": "3ad2adbc3480dfbbcb2e6a63d2c95e5511ac209f4b41117200b72a33ae1fb512",
+      "bytes": 8092
+    },
+    {
+      "path": "sqlite/pgvector_index_test.go",
+      "base_sha256": null,
+      "sha256": "1c5c8a8e4978b213051fdacfa81e0bbe32fa544833e675b54e51d9186ae0bf04",
+      "bytes": 10088
+    },
+    {
+      "path": "docs/ann.md",
+      "base_sha256": "ed1b4df73a740ef00b213eb544babf90ca9c768f68a8fd030a2d7b460f1d1514",
+      "sha256": "af701a27b35d8a0f8844709e7a439f8063bb9fd3b1fe7d4466a3ea866c609cba",
+      "bytes": 23143
+    }
+  ],
+  "patch_sha256": "acd32c1b3e4f56e5d93ca811a4e14f714d9503d1723f7624f17d8f1f34a5c1e6",
+  "format_receipt_sha256": "aeb24f23f0f598a29e004fb23f3afafcb1ef2fec9306c745dc666f901cd823ae",
+  "review_notes_sha256": "2943e6ce54887ea93e78d5e34266ff2d6de7150b5f1777bffaaec8e4891c4982"
+}

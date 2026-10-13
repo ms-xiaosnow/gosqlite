@@ -1,0 +1,29 @@
+{
+  "name": "02_shell_syntax",
+  "start": "2026-10-13T03:37:08.898733+00:00",
+  "end": "2026-10-13T03:37:08.904753+00:00",
+  "exit": 0,
+  "resources_before": {
+    "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+      "bytes": 29498253312,
+      "inodes": 2060481
+    },
+    "/tmp": {
+      "bytes": 5225664512,
+      "inodes": 1275780
+    }
+  },
+  "resources_after": {
+    "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+      "bytes": 29498253312,
+      "inodes": 2060479
+    },
+    "/tmp": {
+      "bytes": 5225664512,
+      "inodes": 1275780
+    }
+  },
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "status": "PASS"
+}

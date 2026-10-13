@@ -1,0 +1,40 @@
+{
+  "name": "04_race",
+  "start_utc": "2026-10-13T03:27:16.947309+00:00",
+  "end_utc": "2026-10-13T03:27:46.962746+00:00",
+  "exit_code": 0,
+  "resource_breach_latched": false,
+  "stdout_sha256": "b7bb1762bc1c1a7caf3a98ac358f19b9d9830078ee709d9cec7c4fdff82ad658",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "tests": {
+    "internal/sql": {
+      "roots": [
+        "TestExtensionGrammar",
+        "TestIndexBinaryCollation",
+        "TestPGVectorIndexOriginalGrammarUnchanged",
+        "TestPGVectorIndexParseAccepted",
+        "TestPGVectorIndexParseRejectsUnsupported",
+        "TestUniqueIndexParseAccepted",
+        "TestUniqueIndexParsePreservesOrdinary",
+        "TestUniqueIndexParseRejectsUnsupported"
+      ],
+      "root_count": 8,
+      "named_pass": 100,
+      "child_pass": 92,
+      "fail": 0,
+      "skip": 0
+    },
+    "sqlite": {
+      "roots": [
+        "TestPGVectorIndexExistingAdmissionAndTransaction",
+        "TestPGVectorIndexHealthyEquivalenceAndReopen"
+      ],
+      "root_count": 2,
+      "named_pass": 4,
+      "child_pass": 2,
+      "fail": 0,
+      "skip": 0
+    }
+  },
+  "status": "PASS"
+}

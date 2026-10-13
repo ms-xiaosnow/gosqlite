@@ -1,0 +1,16 @@
+{
+  "utc": "2026-10-13T03:27:04.691687+00:00",
+  "qualified": true,
+  "paths": {
+    "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+      "available_bytes": 29545922560,
+      "available_inodes": 2060587,
+      "minimum_bytes": 2147483648
+    },
+    "/tmp": {
+      "available_bytes": 5225664512,
+      "available_inodes": 1275780,
+      "minimum_bytes": 1073741824
+    }
+  }
+}

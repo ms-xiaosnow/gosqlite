@@ -1,0 +1,29 @@
+{
+  "name": "02_parser",
+  "start_utc": "2026-10-13T03:27:02.443907+00:00",
+  "end_utc": "2026-10-13T03:27:04.445100+00:00",
+  "exit_code": 0,
+  "resource_breach_latched": false,
+  "stdout_sha256": "dfc21eb082998d62b94fa0e26177ac798d815944c018df3932a3b271bd3bac12",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "tests": {
+    "internal/sql": {
+      "roots": [
+        "TestExtensionGrammar",
+        "TestIndexBinaryCollation",
+        "TestPGVectorIndexOriginalGrammarUnchanged",
+        "TestPGVectorIndexParseAccepted",
+        "TestPGVectorIndexParseRejectsUnsupported",
+        "TestUniqueIndexParseAccepted",
+        "TestUniqueIndexParsePreservesOrdinary",
+        "TestUniqueIndexParseRejectsUnsupported"
+      ],
+      "root_count": 8,
+      "named_pass": 100,
+      "child_pass": 92,
+      "fail": 0,
+      "skip": 0
+    }
+  },
+  "status": "PASS"
+}

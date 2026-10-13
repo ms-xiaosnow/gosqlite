@@ -1,6 +1,26 @@
 # gosqlite
 
-## CHECK / EOF 检查点：完整正常门已通过（2026-10-12 07:22 UTC）
+## 当前开发范围与证据（2026-10-13 03:37 UTC）
+
+本轮提交前已核验的发布基点 `fd069d7a30b2e0ca8bdff67ca54c926aa118fc51`，CI `38339706432`
+已双项 SUCCESS（oracle 03:09:22 UTC；ordinary 03:30:31 UTC）。新增 PG 风格 ANN DDL
+和离线性能比较器的有限结果绑定本轮证据清单的精确文件；发布及 CI 按新提交另行核验，
+不能借用 fd069 的全套资格。
+PG DDL 有限 normal/race 各 **104 PASS / 0 SKIP**、source guard PASS；离线比较器独立
+源码审阅 CLEAR，**57 个纯 fixture PASS**。这不是 ANN 性能修正、实测固定基线或新增性能 CI job。
+
+当前已实现有界 automatic UNIQUE、scalar CHECK、显式 opt-in rollback 恢复、严格 Linux
+plaintext Backup、受限 Darwin Unicode sibling inventory 和 Windows shared rekey；均以
+各自合同与资格边界为限。R1–R6 设施闭合不等于整个 goal 完成；ANN 报告三项缺口、
+UNKNOWN 中断链、物理手工及外部资格仍未闭合。17 组手工（13 核心组的 82 场景及
+4 原生平台组）均 NOT_RUN。分阶段 SQL 和 PG 迁移边界不变，整体/M10 未验收。
+见[当前状态](docs/current-status-20261012.md)、[本轮证据](docs/evidence/20261013-goal-closeout/README.zh.md)
+与[有限剩余及手工总表](docs/testing/finite-acceptance-summary-20261012-zh.md)。
+
+以下检查点保留原时点记录；旧“当前”、PENDING、HOLD、FAIL、UNKNOWN 和 NOT_RUN
+只绑定原树，不是本轮现状，也不会被新结果改写。
+
+## 历史检查点：CHECK / EOF 完整正常门通过（2026-10-12 07:22 UTC）
 
 冻结运行树 `e06f35a022536a8ebd157731ee9a860521e70eb0` 于 **07:22:18 UTC**
 自然完成 **26 门 / 28 次 Go 调用 PASS**，session 80563 exit 0，lease RELEASED。
@@ -21,7 +41,7 @@ finite-only fail-closed，未开放 EOF 恢复。外平台只有编译/符号检
 从下一节起保留各阶段原文；旧“当前”、SOURCE_ONLY、NOT_RUN、PENDING 与
 FAIL/HOLD/UNKNOWN 均只指原时点和原树，不能覆盖本节的新执行记录，也不会被回写。
 
-## 当前 CHECK / EOF-count 源码组合（2026-10-12）
+## 历史源码组合：CHECK / EOF-count（2026-10-12）
 
 本副本在已发布检查点 `e092f0d4623cb243eec6053a4b3db7eef598542f` / tree
 `d8ff20a26b4aee9fe3281a426e41230b18c727cd` 上，仅合入已审阅的有界 scalar CHECK
@@ -38,7 +58,7 @@ PASS。EOF 原 tree1f599764 的四普通门终态记录为 38 Test 根加 2 个�
 
 以下保留各输入与检查点原时点记录；其中“当前”、未合入、NOT_RUN、PENDING 和 PASS 均只绑定原树，不覆盖上面的本组合状态。
 
-## 2026-10-12 五切片组合检查点完整正常门通过
+## 历史检查点：2026-10-12 五切片组合完整正常门通过
 
 冻结树 `59ce26879c4301babc7648fbddc5cc66c4097263`（3,267 文件、783 个 Go 文件）
 包含 LEFT/Rows、加密 inspect、Darwin inventory 手工入口、Connector rollback 手工入口和
@@ -80,7 +100,7 @@ race 5,758 PASS / 7 SKIP、完整 pinned oracle 7,431 PASS / 零 SKIP。
 非特权身份、持久性、安全、M3/M10 与完整目标仍未验收，见
 [准确边界](docs/plain-readonly-wal.md)。本段更新不继承下列旧检查点资格。
 
-Current source update (2026-10-11): this unpublished Windows shared-rekey
+Historical source update (2026-10-11): this then-unpublished Windows shared-rekey
 composition adds guarded lifecycle admission/conversion and a post-conversion
 same-source-key authority check. Native Windows execution remains **NOT_RUN**.
 The exact source identity, separate Linux results, completed seventeen-gate code qualification,
@@ -88,6 +108,8 @@ and published-main boundary are in [the protocol record](docs/windows-shared-rek
 
 
 Historical test-scope statements are corrected in [the namespace-test audit](docs/test-scope-audit.md); the affected tests are now excluded from ordinary workflows.
+
+## Current capability overview
 
 A native Go database kernel targeting tested subsets of SQLite 3.54.0 files and SQL. Current development: persistent HNSW/IVFFlat, exact typed-vector KNN and same-snapshot hybrid ranking, plus experimental authenticated snapshot, dirty-page WAL and concurrent encrypted sessions, ordinary B-tree equality, leading inequalities and bounded rowid-range planning, nested savepoints, scoped INNER/CROSS/LEFT JOINs and bounded global aggregates, CASE/CAST/BETWEEN/IN, context-sensitive predicate evaluation, affinity-correct comparisons and explicit NULL ordering, BIT/HALFVEC/SPARSEVEC exact search, extended vector primitives, and bounded pg_embedding catalog inspection, typed offline SQL conversion and resumable CSV/NDJSON import. It is not production-ready. No CGO, SQLite subprocess, C ABI, or remote SQL engine is used in production.
 
@@ -150,7 +172,7 @@ func read(ctx context.Context) error {
 
 上述片段要求已有 `docs` 表；`examples/readonly` 使用已有 `samples` 表，并通过 `driver.NewConnector` 显式设置 `ReadOnly:true, NoCreate:true`，即使传入 `mode=rw/rwc` 也不会放宽只读限制。该可执行示例传递上下文、检查输出错误，且在诊断和退出前依次释放 Rows 与 DB，保留迭代和关闭错误。 For writes, use a normal path or mode=rwc DSN, or mode=rw to require an existing file. Native sqlite.Options{} is writable/create; ReadOnly and NoCreate are explicit alternatives. See examples/write for prepared inserts and transactions. Native transactions can retry BUSY Commit after readers close; database/sql transactions cannot be reused after Commit, so the adapter rolls back on an error. Close Rows promptly to release their snapshot locks.
 
-CREATE TABLE, nonunique BINARY ASC CREATE INDEX, explicit ordinary named-column BINARY ASC CREATE UNIQUE INDEX, INSERT, UPDATE, DELETE and retained-connection SQL/native/driver transactions with nested savepoints are implemented for the documented subset. The [bounded UNIQUE profile](docs/unique-index.md) enforces immediate non-NULL uniqueness and Check consistency; table/column UNIQUE constraints, implicit autoindexes, partial/expression/DESC/non-BINARY indexes and conflict policies/UPSERT remain unsupported. Ordinary SELECT planners still skip UNIQUE indexes. Ordinary secondary indices are maintained on disk. Registered grams13 posting indices accelerate supported LIKE and configured MATCH predicates. Eligible rowid equality/inequality and ordinary leading equality-prefix/leading-field inequality predicates use real source/index seeks; proven rowid ordering can stream without sorting, while unsupported shapes scan. See [ordinary index planning](docs/ordinary-index.md). Unsupported schema objects/constraints reject writes to the database rather than being ignored. Existing journals require recovery and are refused. Existing zero-byte files are conservatively rejected. Normal successful commit tests do not qualify crash durability; use only disposable data.
+CREATE TABLE, nonunique BINARY ASC CREATE INDEX, explicit ordinary named-column BINARY ASC CREATE UNIQUE INDEX, INSERT, UPDATE, DELETE and retained-connection SQL/native/driver transactions with nested savepoints are implemented for the documented subset. The [bounded explicit UNIQUE profile](docs/unique-index.md) and [ordinary rowid column/table UNIQUE profile](docs/automatic-unique.md) enforce immediate non-NULL uniqueness and Check consistency, including canonical, constraint-owned NULL-SQL autoindexes for BINARY ASC ordinary keys. [Bounded scalar CHECK](docs/check-constraints.md#精确-partial-profile) is also implemented. Typed-vector/extension UNIQUE, partial/expression/DESC/non-BINARY indexes, conflict policies/UPSERT and CHECK expressions outside the documented subset remain unsupported. Ordinary SELECT planners still skip UNIQUE indexes. Ordinary secondary indices are maintained on disk. Registered grams13 posting indices accelerate supported LIKE and configured MATCH predicates. Eligible rowid equality/inequality and ordinary leading equality-prefix/leading-field inequality predicates use real source/index seeks; proven rowid ordering can stream without sorting, while unsupported shapes scan. See [ordinary index planning](docs/ordinary-index.md). Unsupported schema objects/constraints reject writes to the database rather than being ignored. With the default nil recovery policy, existing journals are refused with ErrRecoveryRequired. Explicit [RollbackRecovery](docs/rollback-recovery-open.md) enables only the bounded finite-count Linux plaintext rollback profile; actual physical recovery remains unqualified. Existing zero-byte files are conservatively rejected. Normal successful commit tests do not qualify crash durability; use only disposable data.
 
 If home is read-only, set GOCACHE and GOPATH to writable directories. The Unicode tokenizer uses pinned pure-Go golang.org/x/text; go.sum records verified module checksums and third_party/ retains its license. Official SQLite is a separately built test oracle only:
 
@@ -160,7 +182,7 @@ SQLITE_ORACLE=/absolute/path/to/verified/sqlite3 ./scripts/test-oracle.sh
 
 See [progress](docs/progress.md), [compatibility](docs/compatibility.md), [architecture](docs/architecture.md), [sources](docs/upstream.md), and [manual verification](docs/manual-verification.md). The unchanged [original goal](goal.md) remains the contract. [Restart protocol](docs/restart.md) and checkpoint records preserve durable development history.
 
-Qualified crash recovery, Darwin Unicode inventory, broader SQL and online/dependency-complete pg_embedding transition work remain unfinished implementation work. Windows shared rekey is implemented in this unpublished source composition; native Windows and failure/durability qualification remain open. Full SQLite/PostgreSQL semantics, SEE file compatibility and production security are not claimed.
+Qualified physical crash recovery remains open. The bounded [Darwin Unicode sibling inventory](docs/darwin-unicode-inventory.md) and [Windows shared rekey](docs/windows-shared-rekey.md) are implemented with finite source/model checks; native platform and failure/durability qualification remain NOT_RUN. Broader SQL follows the phased goal §4.2 matrix; the bounded offline pg_embedding tooling does not imply an online, dependency-complete PG transition. Full SQLite/PostgreSQL semantics, SEE file compatibility and production security are not claimed.
 
 
 ## Explicit exclusive WAL
@@ -172,7 +194,7 @@ CGO_ENABLED=0 go run ./examples/wal disposable-wal.db
 CGO_ENABLED=0 go run ./cmd/gosqlite query --wal-exclusive disposable-wal.db 'SELECT id,text FROM notes'
 ```
 
-Native DB.Checkpoint(ctx) performs an explicit normal checkpoint. Default Close checkpoints; KeepWALOnClose retains successful committed frames after normal close. An exclusive WAL connection requires writable access even for SELECT. The default rollback-only ReadOnly entry still refuses mode2; the new explicit Linux live-index readonly subset is described separately above. Unsupported WAL tails and existing journals fail closed. Hot rollback-recovery code is isolated and source-only; no crash/fault durability gate has passed. See ADR0004 and manual-verification.md.
+Native DB.Checkpoint(ctx) performs an explicit normal checkpoint. Default Close checkpoints; KeepWALOnClose retains successful committed frames after normal close. An exclusive WAL connection requires writable access even for SELECT. The default rollback-only ReadOnly entry still refuses mode2; the new explicit Linux live-index readonly subset is described separately above. Unsupported WAL tails and default-policy existing journals fail closed. Explicit opt-in rollback recovery has bounded implementation and source/model/compiler evidence; no physical crash/fault durability gate has passed. See ADR0004 and manual-verification.md.
 
 ## Explicit shared WAL
 
@@ -220,6 +242,16 @@ CGO_ENABLED=0 go run ./benchmarks/ann -rows 2048 -dims 12 -queries 48 -seed 2026
 ```
 
 Native VectorSearch defaults exact; Mode:sqlite.VectorModeApproximate opts into a matching persistent HNSW index. Eligible SQL distance ORDER BY/LIMIT can automatically choose approximate HNSW once installed; use NOT INDEXED for exact SQL. Plans expose method, approximate recall, graph work, source rescoring, widening and fallback. Transactional insert/update/tombstone/delete/reindex, old grams-file upgrade and ordinary official SQLite interop are tested. The first persistent benchmark met recall@10=1.0 on its fixed dataset but was slower than exact scan; see [ANN behavior and measured limits](docs/ann.md). IVFFlat now supplies deterministic training and real bounded centroid/list access; the small-data benchmark reports its recall/latency tradeoff without a speedup claim.
+
+The PG-style index declarations in [goal §7.3](goal.md#73-pgvector-兼容-sql-面限定范围)
+now execute through the existing extension-index path, rather than requiring an
+external PostgreSQL engine. This additional spelling accepts one dense column;
+HNSW supports vector_l2_ops/vector_ip_ops/vector_cosine_ops/vector_l1_ops with
+m and ef_construction, and IVFFlat supports the first three opclasses with lists.
+Existing construction limits, metric/type admission and exact fallback still apply.
+Partial/expression/multicolumn/UNIQUE indexes, CONCURRENTLY, schema-qualified PG
+names and unlisted options are not added. The original local syntax remains supported.
+See [focused source and execution evidence](docs/evidence/20261013-goal-closeout/README.zh.md).
 
 ## IVFFlat and encrypted snapshots (experimental)
 
@@ -307,9 +339,9 @@ legacy layouts are never silently upgraded. Run examples/encrypted-shared only
 with disposable data. A Windows/amd64 encrypted backend now implements legacy
 and shared-session paths under its strict local-NTFS policy, with native runtime
 unverified. Darwin encrypted modes0/1/2 now use a shared plain/encrypted inode
-coordinator, with strict ASCII inventory limits. Windows shared rekey now uses
+coordinator, with strict ASCII root-name limits and a bounded Unicode sibling-inventory proof. Windows shared rekey now uses
 guarded conversion with a post-conversion source-authority check; native execution
-remains NOT_RUN. Darwin Unicode inventory remains required implementation work. Retained-history collection,
+remains NOT_RUN. The [Darwin inventory implementation and manual harness](docs/darwin-unicode-inventory.md) exist; general Unicode root names remain unsupported and native inventory qualification is NOT_RUN. Retained-history collection,
 external freshness guarantees and independent security acceptance remain open.
 
 ## Sparse exact vectors
@@ -452,3 +484,12 @@ ordinary/live-writer evidence; it does not qualify either new publisher.
 are available with independently reviewed bounded contracts. Whole-database
 checking verifies persisted built-in semantics, not runtime custom-registry
 provenance. A two-hour workload is predeclared, not yet executed or accepted.
+
+## Offline performance evidence comparison
+
+The [ordinary-performance comparator](benchmarks/performance/README.md) checks
+operator-supplied, identity-bound grams and rollback transaction reports. Its 57
+pure fixture checks are included in the existing ordinary check script. It does
+not collect measurements, install a performance CI job, qualify an actual fixed
+baseline, or repair the separately blocked ANN reports. Controlled measurements,
+long-duration soak and release acceptance remain open.

@@ -1,0 +1,122 @@
+{
+  "utc": "2026-10-13T03:27:57.401270+00:00",
+  "status": "PASS",
+  "commands": [
+    {
+      "name": "01_format",
+      "start_utc": "2026-10-13T03:27:00.179053+00:00",
+      "end_utc": "2026-10-13T03:27:02.180180+00:00",
+      "exit_code": 0,
+      "resource_breach_latched": false,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "PASS"
+    },
+    {
+      "name": "02_parser",
+      "start_utc": "2026-10-13T03:27:02.443907+00:00",
+      "end_utc": "2026-10-13T03:27:04.445100+00:00",
+      "exit_code": 0,
+      "resource_breach_latched": false,
+      "stdout_sha256": "dfc21eb082998d62b94fa0e26177ac798d815944c018df3932a3b271bd3bac12",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tests": {
+        "internal/sql": {
+          "roots": [
+            "TestExtensionGrammar",
+            "TestIndexBinaryCollation",
+            "TestPGVectorIndexOriginalGrammarUnchanged",
+            "TestPGVectorIndexParseAccepted",
+            "TestPGVectorIndexParseRejectsUnsupported",
+            "TestUniqueIndexParseAccepted",
+            "TestUniqueIndexParsePreservesOrdinary",
+            "TestUniqueIndexParseRejectsUnsupported"
+          ],
+          "root_count": 8,
+          "named_pass": 100,
+          "child_pass": 92,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "status": "PASS"
+    },
+    {
+      "name": "03_healthy",
+      "start_utc": "2026-10-13T03:27:04.691940+00:00",
+      "end_utc": "2026-10-13T03:27:16.696529+00:00",
+      "exit_code": 0,
+      "resource_breach_latched": false,
+      "stdout_sha256": "539981a78e8c07d357244f19a28c0820fa5fa68cd2013929229d71dcd20c9c01",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tests": {
+        "sqlite": {
+          "roots": [
+            "TestPGVectorIndexExistingAdmissionAndTransaction",
+            "TestPGVectorIndexHealthyEquivalenceAndReopen"
+          ],
+          "root_count": 2,
+          "named_pass": 4,
+          "child_pass": 2,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "status": "PASS"
+    },
+    {
+      "name": "04_race",
+      "start_utc": "2026-10-13T03:27:16.947309+00:00",
+      "end_utc": "2026-10-13T03:27:46.962746+00:00",
+      "exit_code": 0,
+      "resource_breach_latched": false,
+      "stdout_sha256": "b7bb1762bc1c1a7caf3a98ac358f19b9d9830078ee709d9cec7c4fdff82ad658",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tests": {
+        "internal/sql": {
+          "roots": [
+            "TestExtensionGrammar",
+            "TestIndexBinaryCollation",
+            "TestPGVectorIndexOriginalGrammarUnchanged",
+            "TestPGVectorIndexParseAccepted",
+            "TestPGVectorIndexParseRejectsUnsupported",
+            "TestUniqueIndexParseAccepted",
+            "TestUniqueIndexParsePreservesOrdinary",
+            "TestUniqueIndexParseRejectsUnsupported"
+          ],
+          "root_count": 8,
+          "named_pass": 100,
+          "child_pass": 92,
+          "fail": 0,
+          "skip": 0
+        },
+        "sqlite": {
+          "roots": [
+            "TestPGVectorIndexExistingAdmissionAndTransaction",
+            "TestPGVectorIndexHealthyEquivalenceAndReopen"
+          ],
+          "root_count": 2,
+          "named_pass": 4,
+          "child_pass": 2,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "status": "PASS"
+    },
+    {
+      "name": "05_sourceguard",
+      "start_utc": "2026-10-13T03:27:47.271393+00:00",
+      "end_utc": "2026-10-13T03:27:57.273982+00:00",
+      "exit_code": 0,
+      "resource_breach_latched": false,
+      "stdout_sha256": "ba0cb4aff7a9c991c087485ff3499bf86b9b57f990c78b979c1f08ffc42a3505",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "PASS"
+    }
+  ],
+  "source_unchanged": true,
+  "manual_oracle_campaign": "NOT_RUN",
+  "unrelated_tests": "NOT_RERUN; prior c5/fd evidence applicability preserved",
+  "lease": "RELEASED_ON_RETURN"
+}

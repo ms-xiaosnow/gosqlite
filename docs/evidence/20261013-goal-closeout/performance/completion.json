@@ -1,0 +1,68 @@
+{
+  "utc": "2026-10-13T03:37:08.906155+00:00",
+  "status": "PASS",
+  "results": [
+    {
+      "name": "01_fixtures",
+      "start": "2026-10-13T03:36:59.612911+00:00",
+      "end": "2026-10-13T03:37:08.896324+00:00",
+      "exit": 0,
+      "resources_before": {
+        "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+          "bytes": 29498400768,
+          "inodes": 2060484
+        },
+        "/tmp": {
+          "bytes": 5225664512,
+          "inodes": 1275780
+        }
+      },
+      "resources_after": {
+        "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+          "bytes": 29498257408,
+          "inodes": 2060482
+        },
+        "/tmp": {
+          "bytes": 5225664512,
+          "inodes": 1275780
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "904c2c6452cbd538d9535ca1f0290d534e4eb92b8f345af2f8de3f3087ffd8ad",
+      "status": "PASS"
+    },
+    {
+      "name": "02_shell_syntax",
+      "start": "2026-10-13T03:37:08.898733+00:00",
+      "end": "2026-10-13T03:37:08.904753+00:00",
+      "exit": 0,
+      "resources_before": {
+        "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+          "bytes": 29498253312,
+          "inodes": 2060481
+        },
+        "/tmp": {
+          "bytes": 5225664512,
+          "inodes": 1275780
+        }
+      },
+      "resources_after": {
+        "/workspace/scratch/5e06a74e5f65/restart-20261012T2033": {
+          "bytes": 29498253312,
+          "inodes": 2060479
+        },
+        "/tmp": {
+          "bytes": 5225664512,
+          "inodes": 1275780
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "PASS"
+    }
+  ],
+  "methods": 57,
+  "source_unchanged": true,
+  "real_baseline_measurements": "NOT_RUN/EXTERNAL_INPUT_REQUIRED",
+  "performance_regression_CI": "NOT_DEPLOYED; ordinary CI executes synthetic comparator unittest only"
+}

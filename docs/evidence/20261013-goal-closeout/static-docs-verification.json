@@ -1,0 +1,134 @@
+{
+  "scope": "Static links and shell syntax only. No fenced command executed; SQL/Go fenced examples excluded.",
+  "reason": "Final manual prose completed after initial static scan; publication precondition STOP before staging/upload preserved. Recheck only static documents, no project tests.",
+  "documents": [
+    {
+      "path": "docs/testing/finite-acceptance-summary-20261012-zh.md",
+      "sha256": "7f1d7657b4b82bf4e113271a645128a952407b4bc5a1db1016b07a3fc97df67c",
+      "relative_links": 59,
+      "checked_blocks": [
+        {
+          "index": 1,
+          "language": "sh",
+          "syntax": "PASS",
+          "execution": "NOT_RUN"
+        },
+        {
+          "index": 2,
+          "language": "sh",
+          "syntax": "PASS",
+          "execution": "NOT_RUN"
+        },
+        {
+          "index": 3,
+          "language": "sh",
+          "syntax": "PASS",
+          "execution": "NOT_RUN"
+        },
+        {
+          "index": 5,
+          "language": "sh",
+          "syntax": "PASS",
+          "execution": "NOT_RUN"
+        },
+        {
+          "index": 6,
+          "language": "bash",
+          "syntax": "PASS",
+          "execution": "NOT_RUN"
+        },
+        {
+          "index": 7,
+          "language": "sh",
+          "syntax": "PASS",
+          "execution": "NOT_RUN"
+        },
+        {
+          "index": 8,
+          "language": "sh",
+          "syntax": "PASS",
+          "execution": "NOT_RUN"
+        },
+        {
+          "index": 9,
+          "language": "sh",
+          "syntax": "PASS",
+          "execution": "NOT_RUN"
+        },
+        {
+          "index": 10,
+          "language": "sh",
+          "syntax": "PASS",
+          "execution": "NOT_RUN"
+        },
+        {
+          "index": 11,
+          "language": "sh",
+          "syntax": "PASS",
+          "execution": "NOT_RUN"
+        },
+        {
+          "index": 12,
+          "language": "bash",
+          "syntax": "PASS",
+          "execution": "NOT_RUN"
+        },
+        {
+          "index": 13,
+          "language": "bash",
+          "syntax": "PASS",
+          "execution": "NOT_RUN"
+        }
+      ]
+    },
+    {
+      "path": "benchmarks/performance/README.md",
+      "sha256": "b6a6041153b81a560f3b99fe3c03758fa19715a244888986b70e75e50e7665b6",
+      "relative_links": 4,
+      "checked_blocks": [
+        {
+          "index": 1,
+          "language": "sh",
+          "syntax": "PASS",
+          "execution": "NOT_RUN"
+        },
+        {
+          "index": 2,
+          "language": "sh",
+          "syntax": "PASS",
+          "execution": "NOT_RUN"
+        },
+        {
+          "index": 3,
+          "language": "sh",
+          "syntax": "PASS",
+          "execution": "NOT_RUN"
+        },
+        {
+          "index": 4,
+          "language": "sh",
+          "syntax": "PASS",
+          "execution": "NOT_RUN"
+        }
+      ]
+    },
+    {
+      "path": "docs/ann.md",
+      "sha256": "af701a27b35d8a0f8844709e7a439f8063bb9fd3b1fe7d4466a3ea866c609cba",
+      "relative_links": 11,
+      "checked_blocks": []
+    },
+    {
+      "path": "docs/evidence/20261013-goal-closeout/README.zh.md",
+      "sha256": "15ef958e4147818a68ce84385b29d851ad61c3b096ab24b7b9ac816db29737ae",
+      "relative_links": 7,
+      "checked_blocks": []
+    },
+    {
+      "path": "docs/evidence/20261013-goal-closeout/REVIEW-AND-REUSE.zh.md",
+      "sha256": "952473a55f3d1f031393b2e70c54ac254b9c81ec5969c687aea4c1a4cee8c94b",
+      "relative_links": 0,
+      "checked_blocks": []
+    }
+  ]
+}

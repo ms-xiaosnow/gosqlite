@@ -1,0 +1,56 @@
+{
+  "base": "fd069d7a30b2e0ca8bdff67ca54c926aa118fc51",
+  "files": [
+    {
+      "path": "internal/sql/parser.go",
+      "sha256": "96b223177799b6f4c0b42af3ff47a0422e1a4ac78e443a77329b9b10034bb016",
+      "bytes": 32287
+    },
+    {
+      "path": "internal/sql/pgvector_index_parse_test.go",
+      "sha256": "3ad2adbc3480dfbbcb2e6a63d2c95e5511ac209f4b41117200b72a33ae1fb512",
+      "bytes": 8092
+    },
+    {
+      "path": "sqlite/pgvector_index_test.go",
+      "sha256": "1c5c8a8e4978b213051fdacfa81e0bbe32fa544833e675b54e51d9186ae0bf04",
+      "bytes": 10088
+    },
+    {
+      "path": "docs/ann.md",
+      "sha256": "af701a27b35d8a0f8844709e7a439f8063bb9fd3b1fe7d4466a3ea866c609cba",
+      "bytes": 23143
+    },
+    {
+      "path": "benchmarks/performance/compare.py",
+      "sha256": "4db6059b6c99469ca84df3f4561ce3f58cc44d739c3a7a704287d413701093d5",
+      "bytes": 23401
+    },
+    {
+      "path": "benchmarks/performance/validation.py",
+      "sha256": "fb7486b743969ec2ff4071e5e37409194f4e1c92686f1b82a1e03e8cdc33c434",
+      "bytes": 28483
+    },
+    {
+      "path": "benchmarks/performance/fixtures.json",
+      "sha256": "551f522de6528e4b516a5d7bb4a1af943cc27c6256de4e57a81c8ccf3d82d8f4",
+      "bytes": 104230
+    },
+    {
+      "path": "benchmarks/performance/test_compare_offline.py",
+      "sha256": "d5fb4631d1b8a567ec5ea3865396b3c06a5bc79fe761771482eb32b99ba20d0a",
+      "bytes": 41228
+    },
+    {
+      "path": "benchmarks/performance/README.md",
+      "sha256": "b6a6041153b81a560f3b99fe3c03758fa19715a244888986b70e75e50e7665b6",
+      "bytes": 18310
+    },
+    {
+      "path": "scripts/check.sh",
+      "sha256": "9d4f72d68f51aaf73f37cdae48a881f0b6de23fadc782bce1025b2ae94be7e34",
+      "bytes": 476
+    }
+  ],
+  "claim": "Incremental evidence binds exact modified executable/test files; final Git tree identity recorded by publication. No current-commit CI PASS claim here."
+}

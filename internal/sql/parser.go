@@ -630,6 +630,9 @@ func (p *parser) createIndex(unique bool) (*CreateIndex, error) {
 	if err != nil {
 		return nil, err
 	}
+	if p.take("USING") {
+		return p.pgVectorIndex(s)
+	}
 	if err = p.need("("); err != nil {
 		return nil, err
 	}
@@ -710,6 +713,108 @@ func (p *parser) createIndex(unique bool) (*CreateIndex, error) {
 		}
 	}
 	return s, nil
+}
+
+// pgVectorIndex accepts only the dense ANN CREATE INDEX spelling from goal 7.3.
+// It lowers to the existing extension AST; storage, metric/type admission and
+// construction bounds remain owned by the existing HNSW/IVFFlat creation path.
+func (p *parser) pgVectorIndex(s *CreateIndex) (*CreateIndex, error) {
+	if s.Unique {
+		return nil, p.unsupported("UNIQUE extension indexes")
+	}
+	method, err := p.pgVectorIndexName()
+	if err != nil {
+		return nil, err
+	}
+	s.Method = method
+	if s.Method != "hnsw" && s.Method != "ivfflat" {
+		return nil, p.unsupported("PG vector index method " + method)
+	}
+	if err = p.need("("); err != nil {
+		return nil, err
+	}
+	column, err := p.name()
+	if err != nil {
+		return nil, err
+	}
+	opclass, err := p.pgVectorIndexName()
+	if err != nil {
+		return nil, err
+	}
+	switch opclass {
+	case "vector_l2_ops", "vector_ip_ops", "vector_cosine_ops":
+	case "vector_l1_ops":
+		if s.Method != "hnsw" {
+			return nil, p.unsupported("IVFFlat L1 operator class")
+		}
+	default:
+		return nil, p.unsupported("PG vector operator class " + opclass)
+	}
+	if err = p.need(")"); err != nil {
+		return nil, err
+	}
+	s.Columns = []string{column}
+	s.Desc = []bool{false}
+	s.Options = map[string]any{"opclass": opclass}
+	if !p.take("WITH") {
+		return s, nil
+	}
+	if err = p.need("("); err != nil {
+		return nil, err
+	}
+	for {
+		name, err := p.pgVectorIndexName()
+		if err != nil {
+			return nil, err
+		}
+		if _, exists := s.Options[name]; exists {
+			return nil, p.syntax("duplicate index option " + name)
+		}
+		if !((s.Method == "hnsw" && (name == "m" || name == "ef_construction")) ||
+			(s.Method == "ivfflat" && name == "lists")) {
+			return nil, p.unsupported("PG vector index option " + name)
+		}
+		if err = p.need("="); err != nil {
+			return nil, err
+		}
+		// Consume one signed decimal integer token, never an SQL expression.
+		// Zero, negative and out-of-range construction settings are rejected by
+		// existing config admission, just as in the original local grammar.
+		sign := ""
+		if p.take("-") {
+			sign = "-"
+		} else {
+			p.take("+")
+		}
+		token := p.peek()
+		if token.Kind != Number {
+			return nil, p.syntax("index option must be a decimal integer")
+		}
+		value, err := strconv.ParseInt(sign+strings.ReplaceAll(token.Text, "_", ""), 10, 64)
+		if err != nil {
+			return nil, p.syntax("index option must be a signed 64-bit decimal integer")
+		}
+		p.next()
+		s.Options[name] = value
+		if !p.take(",") {
+			break
+		}
+	}
+	if err = p.need(")"); err != nil {
+		return nil, err
+	}
+	return s, nil
+}
+
+// Builtin names in this spelling fold only when unquoted. Table, index and
+// column names retain the existing SQLite identifier contract.
+func (p *parser) pgVectorIndexName() (string, error) {
+	quoted := p.peek().Quoted
+	name, err := p.name()
+	if !quoted {
+		name = FoldName(name)
+	}
+	return name, err
 }
 
 func extensionOptionLiteral(e Expr) bool {

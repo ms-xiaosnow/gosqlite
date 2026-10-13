@@ -1,0 +1,49 @@
+{
+  "base": "fd069d7a30b2e0ca8bdff67ca54c926aa118fc51",
+  "source_review": "CLEAR; read-only independent review; no prior test claim",
+  "readme_only_followup": "qualify output-write failure before stdout",
+  "files": [
+    {
+      "path": "benchmarks/performance/compare.py",
+      "base_sha256": null,
+      "sha256": "4db6059b6c99469ca84df3f4561ce3f58cc44d739c3a7a704287d413701093d5",
+      "bytes": 23401,
+      "integrated_sha256": "4db6059b6c99469ca84df3f4561ce3f58cc44d739c3a7a704287d413701093d5"
+    },
+    {
+      "path": "benchmarks/performance/validation.py",
+      "base_sha256": null,
+      "sha256": "fb7486b743969ec2ff4071e5e37409194f4e1c92686f1b82a1e03e8cdc33c434",
+      "bytes": 28483,
+      "integrated_sha256": "fb7486b743969ec2ff4071e5e37409194f4e1c92686f1b82a1e03e8cdc33c434"
+    },
+    {
+      "path": "benchmarks/performance/fixtures.json",
+      "base_sha256": null,
+      "sha256": "551f522de6528e4b516a5d7bb4a1af943cc27c6256de4e57a81c8ccf3d82d8f4",
+      "bytes": 104230,
+      "integrated_sha256": "551f522de6528e4b516a5d7bb4a1af943cc27c6256de4e57a81c8ccf3d82d8f4"
+    },
+    {
+      "path": "benchmarks/performance/test_compare_offline.py",
+      "base_sha256": null,
+      "sha256": "d5fb4631d1b8a567ec5ea3865396b3c06a5bc79fe761771482eb32b99ba20d0a",
+      "bytes": 41228,
+      "integrated_sha256": "d5fb4631d1b8a567ec5ea3865396b3c06a5bc79fe761771482eb32b99ba20d0a"
+    },
+    {
+      "path": "benchmarks/performance/README.md",
+      "base_sha256": null,
+      "sha256": "75629282f1aba34c4bae674f373d085683ffc95f4caaf2a406bca5543b978493",
+      "bytes": 18195,
+      "integrated_sha256": "b6a6041153b81a560f3b99fe3c03758fa19715a244888986b70e75e50e7665b6"
+    },
+    {
+      "path": "scripts/check.sh",
+      "base_sha256": "55851844f35325b38fbd368558af4e229d5bfe7c42928685e57dd799274b8f18",
+      "sha256": "9d4f72d68f51aaf73f37cdae48a881f0b6de23fadc782bce1025b2ae94be7e34",
+      "bytes": 476,
+      "integrated_sha256": "9d4f72d68f51aaf73f37cdae48a881f0b6de23fadc782bce1025b2ae94be7e34"
+    }
+  ]
+}

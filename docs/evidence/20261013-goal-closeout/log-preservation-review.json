@@ -1,0 +1,749 @@
+{
+  "scope": "This project fixed tool/source/command/results and synthetic data; no unrelated user inputs. Existing fd GitHub log masks retained, full prior review in fd-ci/ci-evidence.json. Pattern scan is not an absolute secret proof.",
+  "files": [
+    {
+      "path": "README.zh.md",
+      "sha256": "15ef958e4147818a68ce84385b29d851ad61c3b096ab24b7b9ac816db29737ae",
+      "bytes": 1564,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "source-slice.json",
+      "sha256": "b0dce05e435087dee2c9e5106b83dd123b67653e45f2fc6f5695a9e1ad7fd8c1",
+      "bytes": 1900,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "REVIEW-AND-REUSE.zh.md",
+      "sha256": "952473a55f3d1f031393b2e70c54ac254b9c81ec5969c687aea4c1a4cee8c94b",
+      "bytes": 3442,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "performance/01_fixtures.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "performance/SHA256SUMS",
+      "sha256": "723d7fbbbffeb38073f2177751da152b2545982e51273d813ec651240ed30b36",
+      "bytes": 933,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "performance/01_fixtures.stderr",
+      "sha256": "904c2c6452cbd538d9535ca1f0290d534e4eb92b8f345af2f8de3f3087ffd8ad",
+      "bytes": 7749,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "performance/completion.json",
+      "sha256": "9c4bea13c455b6aa05bebe32fe8b0c1170e6482cf6d5aaa3fc24a8269473c83a",
+      "bytes": 2081,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "performance/recorder.py",
+      "sha256": "071ab4d7bed91922e0a0cb6396b230f6215cc52b2ab13efbf844b014c3d6ca72",
+      "bytes": 2966,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "performance/01_fixtures.result.json",
+      "sha256": "3e0f778511f86e66f84b75bac035081ce3b34f5a1f38f818dec09c76110ed9b4",
+      "bytes": 770,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "performance/start.json",
+      "sha256": "57bb0b266d0714ca9bcd13183c06e9f0c1fb8cfb9dec84fa22aadc663672adf4",
+      "bytes": 4936,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "performance/source.json",
+      "sha256": "d561e52db4f44fe78e5939cb739c812664684324fec1624e93cf830622bf9764",
+      "bytes": 646,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "performance/slice-manifest.json",
+      "sha256": "0bdf167e30b0b86a525a2e13a8b2c26364865bcc879381cc498ecfbb5a71bdab",
+      "bytes": 2033,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "performance/02_shell_syntax.result.json",
+      "sha256": "ff5b0327e7a57e944feb38394dc8daf4218e43baccc8c2f2eb4c7191bd1ec4db",
+      "bytes": 774,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "performance/02_shell_syntax.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "performance/02_shell_syntax.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "fd-ci/README.zh.md",
+      "sha256": "44023981e685be1ab2a5458f7ef5632a8a2b16a4b9bf59a822b40f2ce10f1ec6",
+      "bytes": 1114,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "fd-ci/SHA256SUMS",
+      "sha256": "3fc299d1097714cce035712fcdd128a0a37a4db4b49ee23f30003e131fa21876",
+      "bytes": 1337,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "fd-ci/bundle-restore-result.json",
+      "sha256": "7b63b2c84ce2368221f2637f935843517e7fb4d3fce9fd695e1502c2c5d0c6e1",
+      "bytes": 617,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "fd-ci/ordinary-115107700538.decoded.log.gz",
+      "sha256": "46c0fca16305550fb48dfa472c998331a966bb75c7bccc41fe566f1664c0ced8",
+      "bytes": 6079,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "fd-ci/terminal-metadata.json.gz",
+      "sha256": "cab315ea49bb93287bb31cc17ebef57070b4c541cae873d3b417114dd7be2918",
+      "bytes": 3298,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "fd-ci/library-verification.json",
+      "sha256": "0b1f85c6dbf413c914197ceb4f4dab15f64d2c7276fb700a7d2e9602d3b81ce5",
+      "bytes": 571,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "fd-ci/source-snapshot-manifest.json",
+      "sha256": "aa7c5e4ebe9d941cb5469f59aea77569ea6c2afe435a3354bfd5f52e65af1d2c",
+      "bytes": 1581,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "fd-ci/scope-proof.json",
+      "sha256": "8f7a1082119c16048c65aa9da649d0f660661853bbbdbea966c801f8a8308a5f",
+      "bytes": 3495,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "fd-ci/ci-evidence.json",
+      "sha256": "4b9ba6ba02e54935a61cc8433e278c8ffe25af582ee553810b9dd9db51d5b9de",
+      "bytes": 15511,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "fd-ci/bundle-tree-manifest.json.gz",
+      "sha256": "b086c6fc2ad7345faf972a4a8bc43bc4161911b2292b35bc56db7f60b6395b54",
+      "bytes": 269056,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "fd-ci/oracle-115107700756.decoded.log.gz",
+      "sha256": "ee8f53696c2a366fd29ebd56ebbd2241f9ad534ba1955ff32d741716ab49ef3b",
+      "bytes": 5865,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "pgvector/05_sourceguard.resources.jsonl",
+      "sha256": "344a69dd549c80e9811644545d1cd0000d26a36dcf0c469583a572b11f0e291c",
+      "bytes": 1932,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "pgvector/01_format.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "pgvector/SHA256SUMS",
+      "sha256": "d373f06fa928f916e6b2596ae3c52a469594d45c2ceef3dbbc3ad5cf035cc760",
+      "bytes": 2737,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "pgvector/01_format.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "pgvector/03_healthy.resources.jsonl",
+      "sha256": "16bde48bce686f17151cb24361deaa91ac265d4eabdad84fac9f50fa48144d33",
+      "bytes": 2254,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "pgvector/02_parser.result.json",
+      "sha256": "1413f19fe34c8c30820f5bace06b544d35a0280f1519a6df51c23969e653a881",
+      "bytes": 904,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "pgvector/01_format.resources-before.json",
+      "sha256": "b85dbb709a44776737ffef9b1e8a6b78c95e643d2531485bb601979e23251400",
+      "bytes": 390,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "pgvector/01_format.result.json",
+      "sha256": "9a1449b9c30a7d4ee71f41b0d1c8474fb9a4b5152522876b2612accdb45dc129",
+      "bytes": 374,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "pgvector/02_parser.resources.jsonl",
+      "sha256": "03685299a1ea867b056597aebcc18d59f3cce486e97db84f6382663d25c95755",
+      "bytes": 644,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "pgvector/04_race.result.json",
+      "sha256": "f00975858b730a1fa2cca093b69041407951820f56bd7fa8fdc08d85d97658db",
+      "bytes": 1168,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "pgvector/02_parser.stdout.gz",
+      "sha256": "148ded8d0428742eee500c7c5e950bd714b25ebfee5d2a250bcdeb338277ebac",
+      "bytes": 5762,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "pgvector/05_sourceguard.result.json",
+      "sha256": "7c7f3ae4a0cfd6bdf8a61cace0f7389c07299b1be589263f4347f7fbd1ea075c",
+      "bytes": 379,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "pgvector/04_race.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "pgvector/04_race.stdout.gz",
+      "sha256": "cb2599ec933c65ccdbcc607bb8a6cbd547512b310a24049c0cdba7502a7aa329",
+      "bytes": 6412,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "pgvector/commands.json",
+      "sha256": "ecfbc734ebc5b5da83bace0ebc81836769664e6606bd9fcc87e1e511cc0cf233",
+      "bytes": 9467,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "pgvector/02_parser.resources-before.json",
+      "sha256": "a7879bec3da6471c92038f6658610e92ebdc8074a7e344470cc02b46fc51eda2",
+      "bytes": 390,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "pgvector/03_healthy.resources-before.json",
+      "sha256": "7a7f4f0109b310558da0e994637cdd8f336b0518bf5ffcd71ab53cdf79bc7b1a",
+      "bytes": 390,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "pgvector/completion.json",
+      "sha256": "933e127c326fa05bf9b45cbb3277a8d3c1810ed10799e3be5c774ca303e4ecde",
+      "bytes": 4204,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "pgvector/03_healthy.stdout",
+      "sha256": "539981a78e8c07d357244f19a28c0820fa5fa68cd2013929229d71dcd20c9c01",
+      "bytes": 4101,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "pgvector/recorder.py",
+      "sha256": "afb26f6f389ec1b9e2fc63b65dca25a3b1fb3273c883aa01c7a3c8251927d121",
+      "bytes": 6419,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "pgvector/04_race.resources-before.json",
+      "sha256": "ee0643c11e3c15e29e60f451432e3423ed6c310e56520ed2fb8e88acff8e47d0",
+      "bytes": 390,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "pgvector/03_healthy.result.json",
+      "sha256": "86c3bbb529bf41ccb0a66a6fcb81c3908acb4f372b40e4372232a3563ddf6b9c",
+      "bytes": 658,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "pgvector/02_parser.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "pgvector/start.json",
+      "sha256": "cc249c3e6da534a578c64986010ce8c7327aa9f7d9ec8266ddb6672f1c852068",
+      "bytes": 560,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "pgvector/slice-manifest.json",
+      "sha256": "2f96e99134821fe1c710df2ae7c7c5124c3857ce95904d81bb25e379075911f7",
+      "bytes": 1429,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "pgvector/05_sourceguard.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "pgvector/05_sourceguard.stdout",
+      "sha256": "ba0cb4aff7a9c991c087485ff3499bf86b9b57f990c78b979c1f08ffc42a3505",
+      "bytes": 138,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "pgvector/05_sourceguard.resources-before.json",
+      "sha256": "0d49d8e20badb0131e25f2939fcba9bf4724a39e08a41dff8cfaf2c0b4234346",
+      "bytes": 390,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "pgvector/03_healthy.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "pgvector/04_race.resources.jsonl",
+      "sha256": "1875e1331aa792a3fac5604119ba17cd9f573ae185e3be56f2dc31914ae11719",
+      "bytes": 5152,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "pgvector/01_format.resources.jsonl",
+      "sha256": "db3f9bd9b09aaf4d8947f81e92e04d33d28b082724585820718d583364b1421b",
+      "bytes": 644,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "pgvector/source-before.json.gz",
+      "sha256": "6d94e334d4723fde86e639c4ddea7dd77689097e771fa08fdd17a4733e0beb29",
+      "bytes": 162995,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "fd-ci/source-snapshot/scripts/test-oracle.sh",
+      "sha256": "b8e3e443a3fbe17b96526cfdb22b6a297dedf0eac2d9c3063cd7f9da05a64f79",
+      "bytes": 2769,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "fd-ci/source-snapshot/scripts/build-oracle.sh",
+      "sha256": "0826180e18c7e67bd3ab35b0b534409578932adba13041b8e5b1e32fb43cca66",
+      "bytes": 4723,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "fd-ci/source-snapshot/scripts/check.sh",
+      "sha256": "55851844f35325b38fbd368558af4e229d5bfe7c42928685e57dd799274b8f18",
+      "bytes": 365,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    },
+    {
+      "path": "fd-ci/source-snapshot/.github/workflows/check.yml",
+      "sha256": "58dee6239ef272454efb7f45a220de5c7a75839f6449002a4ed176f858304f64",
+      "bytes": 929,
+      "credential_pattern_hits": {
+        "github_token": 0,
+        "private_key": 0,
+        "aws_key": 0,
+        "signed_url": 0,
+        "credential_url": 0
+      }
+    }
+  ]
+}

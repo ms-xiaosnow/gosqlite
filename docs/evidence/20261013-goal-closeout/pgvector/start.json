@@ -1,0 +1,9 @@
+{
+  "utc": "2026-10-13T03:27:00.010521+00:00",
+  "recorder_sha256": "afb26f6f389ec1b9e2fc63b65dca25a3b1fb3273c883aa01c7a3c8251927d121",
+  "base": "fd069d7a30b2e0ca8bdff67ca54c926aa118fc51",
+  "scope": "8 pure parser roots + 2 healthy database roots normal/race, sourceguard; no manual/oracle/campaign",
+  "tool_go_sha256": "548d3c32f83fa81152f543eb1526be7884cfe0526eb5e9ce29d3eca14786e7e0",
+  "tool_gofmt_sha256": "5583dbb3339147fee7cdb067eb3cd4a50015b48c27084377f49d93833aa4ad77",
+  "process_scope": "single coordinated Go lease; no global namespace claim"
+}

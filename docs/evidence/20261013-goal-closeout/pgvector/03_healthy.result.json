@@ -1,0 +1,23 @@
+{
+  "name": "03_healthy",
+  "start_utc": "2026-10-13T03:27:04.691940+00:00",
+  "end_utc": "2026-10-13T03:27:16.696529+00:00",
+  "exit_code": 0,
+  "resource_breach_latched": false,
+  "stdout_sha256": "539981a78e8c07d357244f19a28c0820fa5fa68cd2013929229d71dcd20c9c01",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "tests": {
+    "sqlite": {
+      "roots": [
+        "TestPGVectorIndexExistingAdmissionAndTransaction",
+        "TestPGVectorIndexHealthyEquivalenceAndReopen"
+      ],
+      "root_count": 2,
+      "named_pass": 4,
+      "child_pass": 2,
+      "fail": 0,
+      "skip": 0
+    }
+  },
+  "status": "PASS"
+}
